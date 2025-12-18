@@ -1,0 +1,18 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define WINDOW_NAME "Chess"
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+
+#define PIECES_PER_PLAYER 16
+
+#define BOARD_SIZE 8
+#define CELL_PX_SIZE (WINDOW_HEIGHT / (BOARD_SIZE + 2))
+#define BOARD_PX_SIZE (BOARD_SIZE * CELL_PX_SIZE)
+
+#define BOARD_OFFSET CELL_PX_SIZE
+
+#define NB_MAX_MOVE 250
+
+#endif
