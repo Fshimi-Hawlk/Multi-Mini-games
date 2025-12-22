@@ -20,9 +20,7 @@
 
 #include "raylib.h"
 #include "raymath.h"
-
-#define NOB_STRIP_PREFIX
-#include "nob.h"
+#include "rlgl.h"
 
 #pragma endregion ThirdPartyIncludes
 

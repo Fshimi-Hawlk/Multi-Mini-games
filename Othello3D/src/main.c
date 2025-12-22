@@ -1,3 +1,4 @@
+#include "raylib.h"
 #include "setups/game.h"
 #include "core/animation/animation.h"
 #include "core/app/cameraController.h"
@@ -52,13 +53,6 @@ int main(void) {
 
     font = GetFontDefault();
 
-    int a = 34;
-    int b = 35; 
-    // XOR b ^ b = 0
-    a ^= b; // a = a ^ b
-    b ^= a; // b = b ^ (a ^ b) = a ^ b ^ b = a
-    a ^= b; // a = (a ^ b) ^ a = b ^ a ^ a = b 
-
     Board_t board = {{0}};
 
     s64Vector2_St lastMove = {-1, -1};
@@ -78,13 +72,23 @@ int main(void) {
         ClearBackground(RAYWHITE);
 
         BeginMode3D(camera);
+
+        DrawSphere(sunPos, 50.0f, YELLOW);
+
+        BeginShaderMode(lightingShader);
+        
         draw3DBoard(board, lastMove, flippedPieces, flippedCount);
+
+        EndShaderMode();
         EndMode3D();
         
         drawUI();
 
         EndDrawing();
     }
+
+    UnloadModel(pieceModel);
+    UnloadModel(boardModel);
 
     CloseWindow();
     return 0;

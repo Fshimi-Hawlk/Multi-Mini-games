@@ -41,3 +41,22 @@ u64_t animCount = 0;
 bool animationsPlaying = false;
 
 s64Vector2_St hoveredCell = {-1,-1};
+
+Model pieceModel = {0};
+Model boardModel = {0};
+Model ringModel = {0};
+
+Shader lightingShader = {0};
+Vector3 sunPos = {-500.0f, 600.0f, -500.0f};
+int lightCount = 0;
+
+int locViewPos = 0;
+int locShininess = 0;
+int locAmbient = 0;
+int locSpecular = 0;
+
+int locLightsEnabled[MAX_LIGHTS] = {0};
+int locLightsType[MAX_LIGHTS] = {0};
+int locLightsPos[MAX_LIGHTS] = {0};
+int locLightsTarget[MAX_LIGHTS] = {0};
+int locLightsColor[MAX_LIGHTS] = {0};

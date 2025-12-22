@@ -14,4 +14,7 @@
 
 #define CAMERA_SENSITIVITY 0.15f
 
+#define MAX_LIGHTS 4
+#define LIGHT_DIRECTIONAL 0
+
 #endif // CONFIG_H

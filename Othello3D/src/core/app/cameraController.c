@@ -50,7 +50,7 @@ s64Vector2_St updateCamera(void) {
     }
 
     // Free camera movement and look
-    if (!isTopDownView || !cursorVisible) {
+    if (!isTopDownView && !cursorVisible) {
         Vector2 mouseDelta = GetMouseDelta();
 
         // Update yaw and pitch
@@ -132,11 +132,11 @@ s64Vector2_St updateCamera(void) {
         }
     }
 
-    log_debug("Camera pos: (%.3f, %.3f, %.3f) | Camera target (%.3f, %.3f, %.3f) | yaw: %.3f pitch: %.3f", 
-        camera.position.x, camera.position.y, camera.position.z,
-        camera.target.x, camera.target.y, camera.target.z,
-        cameraYaw * RAD2DEG, cameraPitch * RAD2DEG
-    );
+    // log_debug("Camera pos: (%.3f, %.3f, %.3f) | Camera target (%.3f, %.3f, %.3f) | yaw: %.3f pitch: %.3f", 
+    //     camera.position.x, camera.position.y, camera.position.z,
+    //     camera.target.x, camera.target.y, camera.target.z,
+    //     cameraYaw * RAD2DEG, cameraPitch * RAD2DEG
+    // );
 
     s64Vector2_St hoveredPos = {-1, -1};
     if (cursorVisible && isPlayerTurn) {  // assume isPlayerTurn global
