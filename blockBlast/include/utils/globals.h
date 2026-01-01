@@ -1,21 +1,19 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "utils/common.h"
+#include "common.h"
+#include "userTypes.h"
 
 extern Rectangle windowRect;
 extern Font      appFont;
 extern Color     appBackgroundColor;
 extern Font      fonts[MAX_FONT_COUNT];
 
-extern Camera3D camera;
+extern const f32Vector2 defaultPositions[3];
 
-extern bool     cursorVisible;
+extern const color32 cellColors[_cellColorCount];
 
-extern float    cameraYaw;
-extern float    cameraPitch;
-
-extern const float MOVE_SPEED;
-extern const float RUN_MULTIPLIER;
+extern const PrefabData_St prefabs[];
+extern const u32 prefabCount;
 
 #endif // UTILS_GLOBALS_H

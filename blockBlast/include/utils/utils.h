@@ -1,15 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "types.h"
-
-#pragma region Defines
+#include "common.h"
 
 #define INVALID_PTR (void *) -1
-
-#pragma endregion Defines
-
-#pragma region Macros
 
 #define dcall log_debug("called")
 
@@ -20,11 +14,7 @@
 
 #define clamp(v, min, max) min(max((min), (v)), (max))
 
-
-#pragma endregion Macros
-
-#pragma region Prototypes
-
-#pragma endregion Prototypes
+u64 randint(u64 min, u64 max);
+f64 randfloat(void); // range 0..=1
 
 #endif // UTILS_H

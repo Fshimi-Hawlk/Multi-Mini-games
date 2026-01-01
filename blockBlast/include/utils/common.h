@@ -10,14 +10,21 @@
 #include <ctype.h>
 #include <time.h>
 #include <math.h>
+#include <assert.h>
 
 
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
 
-#include "logger.h"
+typedef Vector2 f32Vector2;
+#define f32Vector2_def
+
+typedef Color ColorRGBA_St;
+typedef ColorRGBA_St color32;
+
 #include "baseTypes.h"
+#include "logger.h"
 #include "configs.h"
 
 #endif // COMMON_H

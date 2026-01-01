@@ -1,6 +1,6 @@
+#include "utils/globals.h"
 #include "setups/app.h"
 #include "setups/game.h"
-#include "utils/globals.h"
 
 s64 initFonts(void) {
     u64 fontSize = 8;
