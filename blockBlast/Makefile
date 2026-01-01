@@ -3,13 +3,12 @@
 BASE_CFLAGS := \
 	-Wno-newline-eof \
 	-Iinclude \
-	-Iinclude/logger \
-	-I../thirdparty/raylib/raylib-5.5_linux_amd64/include \
-	-I../thirdparty/nob/include
+	-I../thirdparty \
+	-I../firstparty \
 
 # Linker base
 BASE_LDFLAGS := \
-	-L../thirdparty/raylib/raylib-5.5_linux_amd64/lib \
+	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
 	-l:libraylib.a \
 	-lm
 
