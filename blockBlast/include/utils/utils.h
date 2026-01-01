@@ -14,6 +14,20 @@
 
 #define clamp(v, min, max) min(max((min), (v)), (max))
 
+#define vec2Add(v1, v2, T) (T) { .x = (v1).x + (v2).x, .y = (v1).y + (v2).y }
+#define vec2Sub(v1, v2, T) (T) { .x = (v1).x - (v2).x, .y = (v1).y - (v2).y }
+#define vec2Mul(v1, v2, T) (T) { .x = (v1).x * (v2).x, .y = (v1).y * (v2).y }
+#define vec2Div(v1, v2, T) (T) { .x = (v1).x / (v2).x, .y = (v1).y / (v2).y }
+
+#define vec2AddVal(v, val, T) (T) { .x = (v).x + (val), .y = (v).y + (val) }
+#define vec2Scale(v, scalar, T) (T) { .x = (v).x * (scalar), .y = (v).y * (scalar) }
+
+#define vec2Fmt(vec2) (vec2).x, (vec2).y
+#define vec2Str "%.2f, %.2f"
+
+#define nl putchar('\n');
+#define boolStr(v) (v) ? "true" : "false"
+
 u64 randint(u64 min, u64 max);
 f64 randfloat(void); // range 0..=1
 

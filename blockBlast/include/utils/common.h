@@ -13,6 +13,8 @@
 #include <assert.h>
 
 
+#include "logger.h"
+
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
@@ -24,7 +26,6 @@ typedef Color ColorRGBA_St;
 typedef ColorRGBA_St color32;
 
 #include "baseTypes.h"
-#include "logger.h"
 #include "configs.h"
 
 #endif // COMMON_H

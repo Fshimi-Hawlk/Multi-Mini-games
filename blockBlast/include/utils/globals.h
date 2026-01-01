@@ -1,7 +1,6 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "common.h"
 #include "userTypes.h"
 
 extern Rectangle windowRect;
@@ -11,9 +10,9 @@ extern Font      fonts[MAX_FONT_COUNT];
 
 extern const f32Vector2 defaultPositions[3];
 
-extern const color32 cellColors[_cellColorCount];
+extern const color32 blockColors[_blockColorCount];
 
-extern const PrefabData_St prefabs[];
+extern const Prefab_St prefabs[];
 extern const u32 prefabCount;
 
 #endif // UTILS_GLOBALS_H

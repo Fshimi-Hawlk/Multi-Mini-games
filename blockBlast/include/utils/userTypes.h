@@ -4,32 +4,46 @@
 #include "common.h"
 
 typedef enum {
-    CELL_COLOR_RED,
-    CELL_COLOR_ORANGE,
-    CELL_COLOR_YELLOW,
-    CELL_COLOR_GREEN,
-    CELL_COLOR_CYAN,
-    CELL_COLOR_BLUE,
-    CELL_COLOR_PURPLE,
-    CELL_COLOR_PINK,
-    _cellColorCount
-} CellColor_Et;
+    BLOCK_COLOR_RED,
+    BLOCK_COLOR_ORANGE,
+    BLOCK_COLOR_YELLOW,
+    BLOCK_COLOR_GREEN,
+    BLOCK_COLOR_CYAN,
+    BLOCK_COLOR_BLUE,
+    BLOCK_COLOR_PURPLE,
+    BLOCK_COLOR_PINK,
+    _blockColorCount
+} BlockColor_Et;
+
+enum {
+    PREFAB_1x1,
+    PREFAB_1x2,
+    PREFAB_1x3,
+    PREFAB_L3,
+    PREFAB_1x4,
+    PREFAB_2x2,
+    PREFAB_T,
+    PREFAB_L4,
+    PREFAB_Z,
+    PREFAB_1x5,
+    PREFAB_PLUS,
+    PREFAB_L5,
+    PREFAB_1x6,
+    PREFAB_2x3,
+    PREFAB_3x3,
+    _prefabNameCount
+};
 
 typedef struct {
-    u8 cellCount;
-    u8 DOC; // Distinct Orientation Count
-    bool8 canMirror;
-    s8Vector2 relPos[MAX_BLOCK_PER_SHAPE];
-} PrefabData_St;
-
-typedef struct {
-    CellColor_Et colorIndex;
+    BlockColor_Et colorIndex;
     u8 hitsLeft;
-} Cell_St;
+} Block_St;
 
 typedef struct {
-    Cell_St cells[MAX_BLOCK_PER_SHAPE];
-    const PrefabData_St* prefabData; // reference to the prefabs array
+    u8 blockCount;
+    s8 orientations;
+    bool8 canMirror;
+    u8Vector2 offsets[MAX_BLOCK_PER_SHAPE];
     u8 width, height; // bounding box (for quick collision checks)
 } Prefab_St;
 
@@ -37,13 +51,26 @@ typedef struct {
     const Prefab_St* prefab;
     f32Vector2 pos;
     bool8 placed;
+    BlockColor_Et colorIndex;
 } ActivePrefab_St;
 
 typedef ActivePrefab_St PrefabSlots_t[3];
 
 typedef struct {
-    Cell_St cells[BOARD_HEIGHT][BOARD_WIDTH];  // row-major: cells[y][x]
+    Block_St blocks[BOARD_HEIGHT][BOARD_WIDTH];  // row-major: blocks[y][x]
 } Board_St;
 
+typedef struct {
+    Board_St board;
+    PrefabSlots_t slots;
+    u64 score;
+    bool8 gameOver;
+    // For saves: serialize this (e.g., via fwrite).
+} GameState_St;
+
+// typedef struct {
+//     s8 board[UINT8_MAX];
+//     u8 columnCount, rowCount;
+// } Map_St;
 
 #endif // USER_TYPES_H
