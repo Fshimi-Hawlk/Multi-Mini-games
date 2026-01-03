@@ -15,6 +15,9 @@
 
 #include "logger.h"
 
+#define NOB_STRIP_PREFIX
+#include "nob.h"
+
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"

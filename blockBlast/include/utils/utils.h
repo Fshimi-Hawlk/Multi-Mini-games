@@ -12,6 +12,12 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define max(a, b) ((a) > (b) ? (a) : (b))
 
+#define KiB(n) ((u64) (n) << 10)
+#define MiB(n) ((u64) (n) << 20)
+#define GiB(n) ((u64) (n) << 30)
+
+#define alignUpPow2(n, p) (((u64) (n) + (u64) (p) - 1) & (~((u64) (p) - 1)))
+
 #define clamp(v, min, max) min(max((min), (v)), (max))
 
 #define vec2Add(v1, v2, T) (T) { .x = (v1).x + (v2).x, .y = (v1).y + (v2).y }
@@ -23,7 +29,9 @@
 #define vec2Scale(v, scalar, T) (T) { .x = (v).x * (scalar), .y = (v).y * (scalar) }
 
 #define vec2Fmt(vec2) (vec2).x, (vec2).y
-#define vec2Str "%.2f, %.2f"
+#define vec2fStr "%.2f, %.2f"
+#define vec2siStr "%d, %d"
+#define vec2uiStr "%u, %u"
 
 #define nl putchar('\n');
 #define boolStr(v) (v) ? "true" : "false"

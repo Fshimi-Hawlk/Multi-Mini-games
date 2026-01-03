@@ -48,23 +48,39 @@ typedef struct {
 } Prefab_St;
 
 typedef struct {
+    Prefab_St *items;
+    u64 count;
+    u64 capacity;
+} Prefab_DA_St;
+
+typedef struct {
     const Prefab_St* prefab;
-    f32Vector2 pos;
+    f32Vector2 center;
     bool8 placed;
     BlockColor_Et colorIndex;
+    bool8 dragging;
 } ActivePrefab_St;
 
 typedef ActivePrefab_St PrefabSlots_t[3];
 
 typedef struct {
     Block_St blocks[BOARD_HEIGHT][BOARD_WIDTH];  // row-major: blocks[y][x]
+    f32Vector2 pos;
+    u8 width, height; // top-left corner
 } Board_St;
+
+typedef enum {
+    SCENE_STATE_GAME,
+    SCENE_STATE_ALL_PREFABS,
+    _sceneStateCount
+} SceneState_Et;
 
 typedef struct {
     Board_St board;
     PrefabSlots_t slots;
     u64 score;
     bool8 gameOver;
+    SceneState_Et sceneState;
     // For saves: serialize this (e.g., via fwrite).
 } GameState_St;
 

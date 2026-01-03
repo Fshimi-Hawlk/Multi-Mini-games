@@ -4,18 +4,27 @@
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[MAX_FONT_COUNT] = {0};
 
+Prefab_DA_St prefabsBag = {0};
+ActivePrefab_St *shapeBag = NULL;
+
+GameState_St game = {0};
+GameState_St algoGame = {0};
+
+f32Vector2 mouseDeltaFromShapeCenter = {0};
+bool8 dragging = false;
+
 const f32Vector2 defaultPositions[3] = {
-    {.x = WINDOW_WIDTH * 20 / 100.0f, .y = WINDOW_HEIGHT * 75 / 100.0f},
-    {.x = WINDOW_WIDTH * 50 / 100.0f, .y = WINDOW_HEIGHT * 75 / 100.0f},
-    {.x = WINDOW_WIDTH * 80 / 100.0f, .y = WINDOW_HEIGHT * 75 / 100.0f},
+    {.x = WINDOW_WIDTH * 17.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
+    {.x = WINDOW_WIDTH * 50 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
+    {.x = WINDOW_WIDTH * 82.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
 };
 
 const color32 blockColors[_blockColorCount] = {
-    { .r = 254, .g =  40, .b =  44, .a = 225 }, // Red
-    { .r = 232, .g = 116, .b =  33, .a = 225 }, // Orange
+    { .r = 254, .g =  40, .b =  44, .a = 255 }, // Red
+    { .r = 232, .g = 116, .b =  33, .a = 255 }, // Orange
     { .r = 242, .g = 187, .b =  58, .a = 255 }, // Yellow
     { .r =  58, .g = 175, .b =  68, .a = 255 }, // Green
-    { .r =  46, .g = 215, .b = 255, .a = 225 }, // Skyblue
+    { .r =  46, .g = 215, .b = 255, .a = 255 }, // Skyblue
     { .r =  74, .g =  99, .b = 226, .a = 255 }, // Blue
     { .r = 135, .g =  91, .b = 206, .a = 255 }, // Purple
     { .r = 255, .b = 109, .g = 194, .a = 255 }, // Pink

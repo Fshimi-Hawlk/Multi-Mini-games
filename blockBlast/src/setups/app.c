@@ -35,5 +35,7 @@ s64 initApp(void) {
 }
 
 void freeApp(void) {
+    free(shapeBag);
+
     CloseWindow();
 }

@@ -5,8 +5,16 @@
 
 extern Rectangle windowRect;
 extern Font      appFont;
-extern Color     appBackgroundColor;
 extern Font      fonts[MAX_FONT_COUNT];
+
+extern Prefab_DA_St prefabsBag;
+extern ActivePrefab_St *shapeBag;
+
+extern GameState_St game;
+extern GameState_St algoGame;
+
+extern f32Vector2 mouseDeltaFromShapeCenter;
+extern bool8 dragging;
 
 extern const f32Vector2 defaultPositions[3];
 
