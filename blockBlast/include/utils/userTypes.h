@@ -74,6 +74,8 @@ typedef struct {
     Block_St blocks[BOARD_HEIGHT][BOARD_WIDTH];  // row-major: blocks[y][x]
     f32Vector2 pos;
     u8 width, height; // top-left corner
+    bool8 *rowsToClear;
+    bool8 *columnsToClear;
 } Board_St;
 
 typedef enum {

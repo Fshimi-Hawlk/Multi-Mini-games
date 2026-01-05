@@ -2,6 +2,7 @@
 #include "ui/board.h"
 #include "ui/shape.h"
 #include "utils/globals.h"
+#include "utils/utils.h"
 
 void drawUI(const GameState_St* const game) {
     switch (game->sceneState) {

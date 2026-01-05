@@ -242,9 +242,12 @@ void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
         shape->dragging = false;
         dragging = false;
 
-
         if (isShapePlaceable(shape)) {
             placeShape(shape, board);
+            if (checkBoardForClearing(board)) {
+                clearBoard(board);
+            }
+            shape->placed = true;
         }
     }
 }
