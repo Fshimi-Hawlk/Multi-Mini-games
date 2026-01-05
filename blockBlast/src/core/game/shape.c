@@ -1,10 +1,6 @@
 #include "core/game/shape.h"
 #include "core/game/board.h"
-
-#include "utils/baseTypes.h"
-#include "utils/common.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 #include "utils/utils.h"
 
 bool8 haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
@@ -109,7 +105,7 @@ f32Vector2 getIthBlockPosition(const ActivePrefab_St shape, const u8 i) {
 }
 
 s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape) {
-    f32Vector2 shapeBoardPos = Vector2Subtract(getShapeTopLeftCorner(shape), game.board.pos);
+    f32Vector2 shapeBoardPos = Vector2Subtract(Vector2AddValue(getShapeTopLeftCorner(shape), BLOCK_PX_SIZE / 2.0f), game.board.pos);
     return vec2Scale(shapeBoardPos, 1.0f/BLOCK_PX_SIZE, s8Vector2);
 }
 
@@ -175,8 +171,6 @@ void placeShape(const ActivePrefab_St* const shape, Board_St* const board) {
         board->blocks[blockPos.y][blockPos.x].hitsLeft = 1;
         board->blocks[blockPos.y][blockPos.x].colorIndex = shape->colorIndex;
     }
-
-    shape->placed = true;
 }
 
 void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
