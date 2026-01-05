@@ -6,7 +6,9 @@
 int main(void) {
     initApp();
 
-    log_info("%u", prefabsBag.count);
+    // game.sceneState = SCENE_STATE_ALL_PREFABS;
+
+    // log_info("%u", prefabsBag.count);
 
     while (!WindowShouldClose()) {
         bool8 allPlaced = true;
