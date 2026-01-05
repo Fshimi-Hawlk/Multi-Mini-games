@@ -18,6 +18,15 @@
 
 #define alignUpPow2(n, p) (((u64) (n) + (u64) (p) - 1) & (~((u64) (p) - 1)))
 
+/*
+Xor proprety: 
+V(x), x ^ x = 0
+
+a ^= b; // a ^ b
+b ^= a; // b ^ (a ^ b) = b ^ b ^ a = 0 ^ a = a
+a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b
+*/
+#define swap(a, b) do { a ^= b; b ^= a; a ^= b} while (0)
 #define clamp(v, min, max) min(max((min), (v)), (max))
 
 #define vec2Add(v1, v2, T) (T) { .x = (v1).x + (v2).x, .y = (v1).y + (v2).y }
@@ -35,6 +44,23 @@
 
 #define nl putchar('\n');
 #define boolStr(v) (v) ? "true" : "false"
+
+// from nob.h
+#ifdef _WIN32
+#    define LINE_END "\r\n"
+#else
+#    define LINE_END "\n"
+#endif
+
+#define UNUSED(value) (void)(value)
+#define TODO(message) do { fprintf(stderr, "%s:%d: TODO: %s\n", __FILE__, __LINE__, message); abort(); } while(0)
+#define UNREACHABLE(message) do { fprintf(stderr, "%s:%d: UNREACHABLE: %s\n", __FILE__, __LINE__, message); abort(); } while(0)
+
+#define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
+#define ARRAY_GET(array, index) \
+    (assert((size_t)index < ARRAY_LEN(array)), array[(size_t)index])
+
+#define return_defer(value) do { result = (value); goto defer; } while(0)
 
 u64 randint(u64 min, u64 max);
 f64 randfloat(void); // range 0..=1

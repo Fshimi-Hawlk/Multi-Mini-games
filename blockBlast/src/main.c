@@ -38,6 +38,5 @@ int main(void) {
 #define LOGGER_IMPLEMENTATION
 #include "logger.h"
 
-#define NOB_IMPLEMENTATION
-#define NOB_STRIP_PREFIX
-#include "nob.h"
+#define CONTEXT_ARENA_IMPLEMENTATION
+#include "contextArena.h"

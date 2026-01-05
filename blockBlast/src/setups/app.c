@@ -36,7 +36,8 @@ s64 initApp(void) {
 }
 
 void freeApp(void) {
-    free(shapeBag);
+    arena_free(&globalArena);
+    arena_free(&tempArena);
 
     CloseWindow();
 }

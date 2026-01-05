@@ -12,11 +12,15 @@
 #include <math.h>
 #include <assert.h>
 
-
 #include "logger.h"
+#include "contextArena.h"
 
-#define NOB_STRIP_PREFIX
-#include "nob.h"
+#define REALLOC context_realloc
+#define FREE
+
+#include "nob/dynamicArray.h"
+#include "nob/stringBuilder.h"
+#include "stringView.h"
 
 #include "raylib.h"
 #include "raymath.h"
