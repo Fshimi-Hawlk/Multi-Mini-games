@@ -7,6 +7,8 @@ extern const char *PIECES_NAMES[7];
 
 extern const char *PIECES_COLORS_NAMES[2];
 
+extern const PieceName_et ORDER_NAME[8];
+
 extern const char *WHITE_IMAGES_PATHS[7];
 extern const char *BLACK_IMAGES_PATHS[7];
 
@@ -52,5 +54,11 @@ extern Texture2D piecesTextures[PIECES_PER_PLAYER * 2];
 
 extern Texture2D dotTexture;
 extern Texture2D circleTexture;
+
+extern int xPromotion;
+extern int yPromotion;
+
+extern int xPrint;
+extern int yPrint;
 
 #endif

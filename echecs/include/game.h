@@ -5,7 +5,7 @@
 
 int initPlayers(void);
 
-Player_st* initPlayer(const char* ImagesPaths[], ColorPiece_et color, int mainLineY, int pawnLineY);
+Player_st* initPlayer(ColorPiece_et color, int mainLineY, int pawnLineY);
 
 int initTextures(void);
 void freeTextures(void);
@@ -20,6 +20,6 @@ void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves);
 
 void freePlayer(Player_st* player);
 
-void freeGame(Board_t board);
+void freeGame(void);
 
 #endif

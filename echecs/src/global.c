@@ -14,6 +14,17 @@ const char *PIECES_COLORS_NAMES[] = {
     "Black"
 };
 
+const PieceName_et ORDER_NAME[] = {
+    PIECE_NAME_ROOK,
+    PIECE_NAME_PONEY,
+    PIECE_NAME_BISHOP,
+    PIECE_NAME_QUEEN,
+    PIECE_NAME_KING,
+    PIECE_NAME_BISHOP,
+    PIECE_NAME_PONEY,
+    PIECE_NAME_ROOK
+};
+
 const char *WHITE_IMAGES_PATHS[] = {NULL,
     "assets/images/pieces/pawn_w.bmp",
     "assets/images/pieces/poney_w.bmp",
@@ -32,8 +43,8 @@ const char *BLACK_IMAGES_PATHS[] = {NULL,
     "assets/images/pieces/king_b.bmp",
 };
 
-const Texture2D WHITE_PIECE_TEXTURES[7] = {0};
-const Texture2D BLACK_PIECE_TEXTURES[7] = {0};
+Texture2D white_piece_textures[7] = {0};
+Texture2D black_piece_textures[7] = {0};
 
 const char *DOT_IMAGE_PATH = "assets/images/UI/dot.bmp";
 const char *CIRCLE_IMAGE_PATH = "assets/images/UI/circle.bmp";
@@ -56,8 +67,8 @@ int winner = -1;
 
 int playerTurn = 0; 
 
-int nbMoves = 0;
 char movesPlayed[NB_MAX_MOVE][7];
+int nbMoves = 0;
 char *moveMade = NULL;
 bool saveMove = false;
 
@@ -74,3 +85,9 @@ Texture2D piecesTextures[PIECES_PER_PLAYER * 2];
 
 Texture2D dotTexture;
 Texture2D circleTexture;
+
+int xPromotion = BOARD_PX_SIZE + CELL_PX_SIZE;
+int yPromotion = 120;
+
+int xPrint = BOARD_PX_SIZE;
+int yPrint = 50;

@@ -2,16 +2,19 @@
 #include "global.h"
 #include "error.h"
 #include "event.h"
+#include "algo.h"
+#include "utils.h"
+#include "rendering.h"
 
 int initPlayers(void) {
-    blackPlayer = initPlayer(BLACK_IMAGES_PATHS, COLOR_PIECE_BLACK, 0, 1);
+    blackPlayer = initPlayer(COLOR_PIECE_BLACK, 0, 1);
     if (!blackPlayer) {
         error("initPlayer");
 
         return 1;
     }
 
-    whitePlayer = initPlayer(WHITE_IMAGES_PATHS, COLOR_PIECE_WHITE, 7, 6);
+    whitePlayer = initPlayer(COLOR_PIECE_WHITE, 7, 6);
     if (!whitePlayer) {
         error("initPlayer");
 
@@ -23,7 +26,7 @@ int initPlayers(void) {
     return 0;
 }
 
-Player_st* initPlayer(const char* ImagesPaths[], ColorPiece_et color, int mainLineY, int pawnLineY) {
+Player_st* initPlayer(ColorPiece_et color, int mainLineY, int pawnLineY) {
     Player_st* player = calloc(1, sizeof(Player_st));
     if (!player) {
         error("Couldn't allocate memory");
@@ -49,7 +52,7 @@ Player_st* initPlayer(const char* ImagesPaths[], ColorPiece_et color, int mainLi
     }
 
     for (int i = 0; i < PIECES_PER_PLAYER / 2; i++) {
-        player->pieces[i]->name = PIECES_NAMES[i];
+        player->pieces[i]->name = ORDER_NAME[i];
         player->pieces[i]->color = color;
         player->pieces[i]->pos.x = i;
         player->pieces[i]->pos.y = mainLineY;
@@ -138,6 +141,10 @@ int initBoard(Board_t board) {
 int initGame(Board_t board) {
     int returnCode;
 
+    SetTraceLogLevel(LOG_WARNING);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Echecs");
+    SetTargetFPS(60);
+
     moveMade = calloc(7, sizeof(char));
     if (!moveMade) {
         error("Couldn't allocate memory");
@@ -169,7 +176,7 @@ void resetGame() {
 
 void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves) {    
     if (nbMoves > 0 && predifinedMoves) {
-        faitpredifinedMoves(board, predifinedMoves, nbMoves);
+        applyPredifinedMoves(board, predifinedMoves, nbMoves);
     }
 
     while (running) {
@@ -180,13 +187,13 @@ void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves) {
             saveMove = false;
         }
 
-        if (!finished && (patFinished = pat(board))) {
+        if (!finished && (patFinished = isStalemate(board))) {
             finished = true;
-            afficherCoupFait();
+            printMovesMade();
         }
-        else if (!finished && echecMat(board)) {
+        else if (!finished && isCheckmate(board)) {
             finished = true;
-            afficherCoupFait();
+            printMovesMade();
         }
 
         renderFrame(board);
@@ -209,9 +216,10 @@ void freePlayer(Player_st* player) {
     player = NULL;
 }
 
-void freeGame(Board_t board) {
+void freeGame(void) {
     freeTextures();
 
     freePlayer(blackPlayer);
     freePlayer(whitePlayer);
+    CloseWindow();
 }

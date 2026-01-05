@@ -1,8 +1,11 @@
 #include "event.h"
 #include "global.h"
+#include "algo.h"
+#include "utils.h"
+#include "board.h"
 
 void handleEvents(Board_t board) {
-    Vector2 mousePos = GetMousePosition();
+    IVec2_st mousePos;
 
     if (WindowShouldClose()) {
         running = false;
@@ -13,20 +16,19 @@ void handleEvents(Board_t board) {
         if (finished || moveSimulationRendering) {
             return;
         }
-
+        
         if (waitingForPromotion) {
             promotionChoice(board);
             return;
         }
+        
+        mousePos = getBoardPosition();
 
-        if (isOOB(mousePos)) {
+        if (isOOB(mousePos.y, mousePos.x)) {
             return;
         }
 
-        int mouseX = mousePos.x;
-        int mouseY = mousePos.y;
-
-        if (board[mouseY][mouseX] && (board[mouseY][mouseX]->color == playerTurn)) {
+        if (board[mousePos.y][mousePos.x] && (board[mousePos.y][mousePos.x]->color == playerTurn)) {
             selectPiece(board, mousePos);
         }
         else if (selectionnedPiece) {

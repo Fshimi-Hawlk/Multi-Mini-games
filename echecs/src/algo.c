@@ -1,5 +1,8 @@
 #include "algo.h"
 #include "global.h"
+#include "utils.h"
+#include "rendering.h"
+#include "event.h"
 #include "error.h"
 
 void selectPiece(Board_t board, IVec2_st targetPos) {
@@ -7,8 +10,8 @@ void selectPiece(Board_t board, IVec2_st targetPos) {
     updatePossibleMoves(board);
 } 
 
-bool movement(Board_t board, IVec2_st boardPos) {
-    IVec2_st posTourDep, posTourArr;
+bool movement(Board_t board, Piece_st* selectionnedPiece, IVec2_st boardPos) {
+    IVec2_st posPIECE_NAME_ROOKDep, posPIECE_NAME_ROOKArr;
     Piece_st* tempPiece = NULL;
 
     IVec2_st posDeb;
@@ -22,38 +25,38 @@ bool movement(Board_t board, IVec2_st boardPos) {
 
         if (selectionnedPiece->name == PIECE_NAME_KING && ((selectionnedPiece->pos.x == 4 && selectionnedPiece->pos.y == 0 && ((boardPos.x == 2 && boardPos.y == 0) || (boardPos.x == 6 && boardPos.y == 0))) || ((selectionnedPiece->pos.x == 4 && selectionnedPiece->pos.y == 7) && ((boardPos.x == 2 && boardPos.y == 7) || (boardPos.x == 6 && boardPos.y == 7))))) {
             if (boardPos.x == 2 && boardPos.y == 0) {
-                posTourDep.x = 0;
-                posTourDep.y = 0;
-                posTourArr.x = 3;
-                posTourArr.y = 0;
+                posPIECE_NAME_ROOKDep.x = 0;
+                posPIECE_NAME_ROOKDep.y = 0;
+                posPIECE_NAME_ROOKArr.x = 3;
+                posPIECE_NAME_ROOKArr.y = 0;
             }
             else if (boardPos.x == 6 && boardPos.y == 0) {
-                posTourDep.x = 7;
-                posTourDep.y = 0;
-                posTourArr.x = 5;
-                posTourArr.y = 0;
+                posPIECE_NAME_ROOKDep.x = 7;
+                posPIECE_NAME_ROOKDep.y = 0;
+                posPIECE_NAME_ROOKArr.x = 5;
+                posPIECE_NAME_ROOKArr.y = 0;
             }
             else if (boardPos.x == 2 && boardPos.y == 7) {
-                posTourDep.x = 0;
-                posTourDep.y = 7;
-                posTourArr.x = 3;
-                posTourArr.y = 7;
+                posPIECE_NAME_ROOKDep.x = 0;
+                posPIECE_NAME_ROOKDep.y = 7;
+                posPIECE_NAME_ROOKArr.x = 3;
+                posPIECE_NAME_ROOKArr.y = 7;
             }
             else if (boardPos.x == 6 && boardPos.y == 7) {
-                posTourDep.x = 7;
-                posTourDep.y = 7;
-                posTourArr.x = 5;
-                posTourArr.y = 7;
+                posPIECE_NAME_ROOKDep.x = 7;
+                posPIECE_NAME_ROOKDep.y = 7;
+                posPIECE_NAME_ROOKArr.x = 5;
+                posPIECE_NAME_ROOKArr.y = 7;
             }
 
-            tempPiece = board[posTourDep.y][posTourDep.x];
+            tempPiece = board[posPIECE_NAME_ROOKDep.y][posPIECE_NAME_ROOKDep.x];
 
-            board[posTourDep.y][posTourDep.x] = NULL;
+            board[posPIECE_NAME_ROOKDep.y][posPIECE_NAME_ROOKDep.x] = NULL;
             
-            tempPiece->pos.x = posTourArr.x;
-            tempPiece->pos.y = posTourArr.y;
+            tempPiece->pos.x = posPIECE_NAME_ROOKArr.x;
+            tempPiece->pos.y = posPIECE_NAME_ROOKArr.y;
 
-            board[posTourArr.y][posTourArr.x] = tempPiece;
+            board[posPIECE_NAME_ROOKArr.y][posPIECE_NAME_ROOKArr.x] = tempPiece;
         }
 
         board[selectionnedPiece->pos.y][selectionnedPiece->pos.x] = NULL;  
@@ -101,31 +104,25 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
     if (!dx && !dy)
         return false;
 
-    // Ne peut pas manger une pièce de même color
     if (board[row][col] && (selectionnedPiece->color == board[row][col]->color))
         return false;
 
     switch (selectionnedPiece->name) {
         case PIECE_NAME_PAWN:
-            // PIECE_NAME_PAWNs blancs avancent vers le haut, noirs vers le bas
             direction = selectionnedPiece->color == COLOR_PIECE_WHITE ? -1 : 1;
 
-            // Avancer d'une case
-            if ((dx == 0) && (dy == direction) && !board[row][col]) // ou !dx && dy == direction && !board[row][col]->name parce que VIDE => 0
+            if ((dx == 0) && (dy == direction) && !board[row][col])
                 return true;
 
-            // Avancer de deux cases au départ
             if ((dx == 0) && (dy == 2 * direction) && (selectionnedPiece->pos.y == (direction == -1 ? 6 : 1)) && !board[row][col] && !board[row - direction][col])
                 return true;
 
-            // Capture en diagonale
             if ((abs(dx) == 1) && (dy == direction) && board[row][col])
                 return true;
 
             break;
 
-        case TOUR:
-            // Se déplace en rowne dKINGte (horizontal ou vertical)
+        case PIECE_NAME_ROOK:
             if ((dx == 0) || (dy == 0)) {
                 stepX = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
                 stepY = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
@@ -147,15 +144,14 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
 
             break;
 
-        case PONEY:
-            // Déplacement en L : (±2, ±1) ou (±1, ±2)
+        case PIECE_NAME_PONEY:
             if (((abs(dx) == 2) && (abs(dy) == 1)) || ((abs(dx) == 1) && (abs(dy) == 2))) {
                 return true;
             }
 
             break;
 
-        case FOU:
+        case PIECE_NAME_BISHOP:
             if (abs(dx) == abs(dy)) {
                 stepX = (dx > 0) ? 1 : -1;
                 stepY = (dy > 0) ? 1 : -1;
@@ -175,7 +171,7 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
 
             break;
 
-        case REINE:
+        case PIECE_NAME_QUEEN:
             if ((dx == 0) || (dy == 0) || (abs(dx) == abs(dy))) {
                 stepX = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
                 stepY = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
@@ -198,27 +194,22 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
 
             break;
 
-        case KING:
-            // Se déplace d'une case dans n'importe quelle direction
+        case PIECE_NAME_KING:
             if ((abs(dx) <= 1) && (abs(dy) <= 1)) {
                 return true;
             }
 
-            // petit rock noir
-            if (board[0][4] && board[0][7] && !board[0][4]->canRock && !board[0][7]->canRock && col == 6 && row == 0 && !board[0][5] && !board[0][6] && !caseMenacee(board, COLOR_PIECE_WHITE, 4, 0) && !caseMenacee(board, COLOR_PIECE_WHITE, 5, 0) && !caseMenacee(board, COLOR_PIECE_WHITE, 6, 0)) {
+            if (board[0][4] && board[0][7] && !board[0][4]->canRock && !board[0][7]->canRock && col == 6 && row == 0 && !board[0][5] && !board[0][6] && !isSquareThreatened(board, COLOR_PIECE_WHITE, 4, 0) && !isSquareThreatened(board, COLOR_PIECE_WHITE, 5, 0) && !isSquareThreatened(board, COLOR_PIECE_WHITE, 6, 0)) {
                 return true;
             }
-            // grand rock noir
-            if (board[0][4] && board[0][0] && !board[0][4]->canRock && !board[0][0]->canRock && col == 2 && row == 0 && !board[0][1] && !board[0][2] && !board[0][3] && !caseMenacee(board, COLOR_PIECE_WHITE, 4, 0) && !caseMenacee(board, COLOR_PIECE_WHITE, 2, 0) && !caseMenacee(board, COLOR_PIECE_WHITE, 3, 0)) {
+            if (board[0][4] && board[0][0] && !board[0][4]->canRock && !board[0][0]->canRock && col == 2 && row == 0 && !board[0][1] && !board[0][2] && !board[0][3] && !isSquareThreatened(board, COLOR_PIECE_WHITE, 4, 0) && !isSquareThreatened(board, COLOR_PIECE_WHITE, 2, 0) && !isSquareThreatened(board, COLOR_PIECE_WHITE, 3, 0)) {
                 return true;
             }
 
-            // petit rock blanc
-            if (board[7][4] && board[7][7] && !board[7][4]->canRock && !board[7][7]->canRock && col == 6 && row == 7 && !board[7][5] && !board[7][6] && !caseMenacee(board, NOIRE, 4, 7) && !caseMenacee(board, NOIRE, 5, 7) && !caseMenacee(board, NOIRE, 6, 7)) {
+            if (board[7][4] && board[7][7] && !board[7][4]->canRock && !board[7][7]->canRock && col == 6 && row == 7 && !board[7][5] && !board[7][6] && !isSquareThreatened(board, COLOR_PIECE_BLACK, 4, 7) && !isSquareThreatened(board, COLOR_PIECE_BLACK, 5, 7) && !isSquareThreatened(board, COLOR_PIECE_BLACK, 6, 7)) {
                 return true;
             }
-            // grand rock blanc
-            if (board[7][4] && board[7][0] && !board[7][4]->canRock && !board[7][0]->canRock && col == 2 && row == 7 && !board[7][1] && !board[7][2] && !board[7][3] && !caseMenacee(board, NOIRE, 4, 7) && !caseMenacee(board, NOIRE, 2, 7) && !caseMenacee(board, NOIRE, 3, 7)) {
+            if (board[7][4] && board[7][0] && !board[7][4]->canRock && !board[7][0]->canRock && col == 2 && row == 7 && !board[7][1] && !board[7][2] && !board[7][3] && !isSquareThreatened(board, COLOR_PIECE_BLACK, 4, 7) && !isSquareThreatened(board, COLOR_PIECE_BLACK, 2, 7) && !isSquareThreatened(board, COLOR_PIECE_BLACK, 3, 7)) {
                 return true;
             }
             break;
@@ -230,18 +221,23 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
     return false;
 }
 
-bool estEnEchec(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int targetLine, int joueur) {
-    Player_st* targetPlayer = joueur ? blackPlayer : whitePlayer; // target player est le joueur qui fait le coup
-    Player_st* adversaryPlayer = joueur ? whitePlayer : blackPlayer; // adversaryPlayer est le joueur avec qui on va tester pour savoir si il met en echec le targetPlayer
+bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int targetLine, int player) {
+    Player_st* targetPlayer = player ? blackPlayer : whitePlayer;
+    Player_st* adversaryPlayer = player ? whitePlayer : blackPlayer;
 
-    Piece_st* targetKing = targetPlayer->pieces[4];
+    if (isOOB(targetColumn, targetLine)) return false;
+
+    Piece_st* targetKing = targetPlayer->pieces[PIECE_ORDER_KING];
+
+    if (!targetKing || targetKing->isTaken) {
+        return false;
+    }
 
     Piece_st* adversaryPieceSave = NULL;
     int selectedPieceSaveX, selectedPieceSaveY;
 
     bool res = 0;
 
-    // Sauvegarde manuelle de la case ciblée et par extension, et s'il en y a, les données de la pièce ci-trouvant
     if (board[targetLine][targetColumn]) {
         adversaryPieceSave = board[targetLine][targetColumn];
         adversaryPieceSave->isTaken = true;
@@ -250,28 +246,22 @@ bool estEnEchec(Board_t board, Piece_st* selectionnedPiece, int targetColumn, in
     selectedPieceSaveX = selectionnedPiece->pos.x;
     selectedPieceSaveY = selectionnedPiece->pos.y;
 
-    // Vide la case de la pièce sélectionnée
     board[selectionnedPiece->pos.y][selectionnedPiece->pos.x] = NULL;
 
-    // Déplacement (temporaire) de la pièce sélectionnée
-    board[targetLine][targetColumn]    = selectionnedPiece;
+    board[targetLine][targetColumn] = selectionnedPiece;
     board[targetLine][targetColumn]->pos.x = targetColumn;
     board[targetLine][targetColumn]->pos.y = targetLine;
 
-    // Vérifier si une pièce adverse peut attaquer le KING
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (adversaryPlayer->pieces[i]->isTaken) 
+        if (!adversaryPlayer->pieces[i] && adversaryPlayer->pieces[i]->isTaken) 
             continue;
 
-        // Vérifier si la pièce adverse peut attaquer le KING
         if ((res = canBePlaced(board, adversaryPlayer->pieces[i], targetKing->pos.x, targetKing->pos.y))) {
-            // Le KING est en échec
             break; 
         }
     }
 
-    // Annulation du mouvement
-    board[selectedPieceSaveY][selectedPieceSaveX]    = selectionnedPiece;  
+    board[selectedPieceSaveY][selectedPieceSaveX] = selectionnedPiece;  
     board[selectedPieceSaveY][selectedPieceSaveX]->pos.x = selectedPieceSaveX;  
     board[selectedPieceSaveY][selectedPieceSaveX]->pos.y = selectedPieceSaveY;  
     
@@ -286,14 +276,13 @@ bool estEnEchec(Board_t board, Piece_st* selectionnedPiece, int targetColumn, in
     return res;
 }
 
-bool echecMat(Board_t board) {
+bool isCheckmate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
 
-    if (!estEnEchec(board, tempJoueur->pieces[PIECE_ORDER_KING], tempJoueur->pieces[PIECE_ORDER_KING]->pos.x, tempJoueur->pieces[PIECE_ORDER_KING]->pos.y, playerTurn)) {
+    if (!isInCheck(board, tempJoueur->pieces[PIECE_ORDER_KING], tempJoueur->pieces[PIECE_ORDER_KING]->pos.x, tempJoueur->pieces[PIECE_ORDER_KING]->pos.y, playerTurn)) {
         return false;
     }
 
-    // vérifie si le joueur peut jouer un coup qui le sort de l'échec
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
         if (tempJoueur->pieces[i]->isTaken) {
             continue;
@@ -302,7 +291,7 @@ bool echecMat(Board_t board) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             for (int k = 0; k < BOARD_SIZE; k++) {
                 if (canBePlaced(board, tempJoueur->pieces[i], k, j))
-                    if (!estEnEchec(board, tempJoueur->pieces[i], k, j, playerTurn))
+                    if (!isInCheck(board, tempJoueur->pieces[i], k, j, playerTurn))
                         return false;
             }
         }
@@ -310,14 +299,13 @@ bool echecMat(Board_t board) {
     return true;
 }
 
-bool pat(Board_t board) {
+bool isStalemate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
     
-    if (estEnEchec(board, tempJoueur->pieces[PIECE_ORDER_KING], tempJoueur->pieces[PIECE_ORDER_KING]->pos.x, tempJoueur->pieces[PIECE_ORDER_KING]->pos.y, playerTurn)) {
+    if (isInCheck(board, tempJoueur->pieces[PIECE_ORDER_KING], tempJoueur->pieces[PIECE_ORDER_KING]->pos.x, tempJoueur->pieces[PIECE_ORDER_KING]->pos.y, playerTurn)) {
         return false;
     }
 
-    // vérifie si le joueur peut jouer un coup qui le sort de l'échec
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
         if (tempJoueur->pieces[i]->isTaken) {
             continue;
@@ -326,7 +314,7 @@ bool pat(Board_t board) {
         for (int j = 0; j < BOARD_SIZE; j++) {
             for (int k = 0; k < BOARD_SIZE; k++) {
                 if (canBePlaced(board, tempJoueur->pieces[i], k, j))
-                    if (!estEnEchec(board, tempJoueur->pieces[i], k, j, playerTurn))
+                    if (!isInCheck(board, tempJoueur->pieces[i], k, j, playerTurn))
                         return false;
             }
         }
@@ -334,12 +322,11 @@ bool pat(Board_t board) {
     return true;
 }
 
-bool caseMenacee(Board_t board, int joueurA, int xCase, int yCase) {
-    Player_st* joueurAdverse = !joueurA ? whitePlayer : blackPlayer;
+bool isSquareThreatened(Board_t board, int playerA, int xCase, int yCase) {
+    Player_st* playerAdverse = !playerA ? whitePlayer : blackPlayer;
 
-    // vérifie si le joueur peut jouer un coup qui le sort de l'échec
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (!joueurAdverse->pieces[i]->isTaken && joueurAdverse->pieces[i]->name != KING && canBePlaced(board, joueurAdverse->pieces[i], xCase, yCase)) {
+        if (!playerAdverse->pieces[i]->isTaken && playerAdverse->pieces[i]->name != PIECE_NAME_KING && canBePlaced(board, playerAdverse->pieces[i], xCase, yCase)) {
             return true;
         }
     }
@@ -358,23 +345,22 @@ void updatePossibleMoves(Board_t board) {
     }
 }
 
-void choixPromotion(SDL_Event event, Board_t board) {
-    int mouseX = event.button.x;
-    int mouseY = event.button.y;
+void promotionChoice(Board_t board) {
+    IVec2_st mousePos = GetMousePositionI();
 
-    if (mouseY < 120 || mouseY > 120 + TAILLE_CASE || mouseX < 680 || mouseX > 680 + TAILLE_CASE * 4) {
+    if (mousePos.y < yPromotion || mousePos.y > yPromotion + CELL_PX_SIZE || mousePos.x < xPromotion || mousePos.x > xPromotion + CELL_PX_SIZE * 4) {
         return;
     }
 
-    Piece_st* PIECE_NAME_PAWN;
+    Piece_st* piece;
     
     for (int i = 0; i < BOARD_SIZE; i++) {
         if (board[0][i] && board[0][i]->name == PIECE_NAME_PAWN) {
-            PIECE_NAME_PAWN = board[0][i];
+            piece = board[0][i];
             break;
         }
         if (board[7][i] && board[7][i]->name == PIECE_NAME_PAWN) {
-            PIECE_NAME_PAWN = board[7][i];
+            piece = board[7][i];
             break;
         }
         if (i == 7) {
@@ -382,29 +368,28 @@ void choixPromotion(SDL_Event event, Board_t board) {
         }
     }
 
-    const char *(*colorChemin) = (!playerTurn ? cheminsImagesNoir : cheminsImagesBlanc);
-    int promotionVers;
+    PieceName_et promotionVers;
 
     int names[PIECES_PER_PLAYER] = {0, 'p', 'P', 't', 'f', 'r', 'R'};
 
-    if (mouseX >= 680 && mouseX <= 680 + TAILLE_CASE) {
-        promotionVers = TOUR;
+    if (mousePos.x >= xPromotion && mousePos.x <= xPromotion + CELL_PX_SIZE) {
+        promotionVers = PIECE_NAME_ROOK;
 
     }
-    else if (mouseX >= 680 + TAILLE_CASE && mouseX <= 680 + TAILLE_CASE * 2) {
-        promotionVers = PONEY;
+    else if (mousePos.x >= xPromotion + CELL_PX_SIZE && mousePos.x <= xPromotion + CELL_PX_SIZE * 2) {
+        promotionVers = PIECE_NAME_PONEY;
 
     }
-    else if (mouseX >= 680 + TAILLE_CASE * 2 && mouseX <= 680 + TAILLE_CASE * 3) {
-        promotionVers = FOU;
+    else if (mousePos.x >= xPromotion + CELL_PX_SIZE * 2 && mousePos.x <= xPromotion + CELL_PX_SIZE * 3) {
+        promotionVers = PIECE_NAME_BISHOP;
 
     }
-    else if (mouseX >= 680 + TAILLE_CASE * 3 && mouseX <= 680 + TAILLE_CASE * 4) {
-        promotionVers = REINE;
+    else if (mousePos.x >= xPromotion + CELL_PX_SIZE * 3 && mousePos.x <= xPromotion + CELL_PX_SIZE * 4) {
+        promotionVers = PIECE_NAME_QUEEN;
     }
 
-    promotionDe(PIECE_NAME_PAWN, promotionVers, colorChemin);
-    attendPromotion = false;
+    piece->name = promotionVers;
+    waitingForPromotion = false;
 
     char *temp = calloc(7, sizeof(char));
 
@@ -417,26 +402,18 @@ void choixPromotion(SDL_Event event, Board_t board) {
     free(temp);
 }
 
-void promotionDe(Piece_st* PIECE_NAME_PAWN, namePiece_t promotionVers, const char **colorChemin) {
-    PIECE_NAME_PAWN->name = promotionVers;
-    PIECE_NAME_PAWN->texture = piecesTexture[(promotionVers + PIECE_NAME_PAWN->color * KING) - 1];
-}
-
-void faitCoupPredefinis(Board_t board, char *coupPredefinis[], int nCoup) {
-    event_t event;
+void applyPredifinedMoves(Board_t board, char *coupPredefinis[], int nCoup) {
     IVec2_st posSrc, posDest; 
-    Piece_st* pieceCible = NULL;
+    Piece_st* targetPiece = NULL;
 
-    namePiece_t promotionVers;
+    PieceName_et promotionVers;
 
     moveSimulationRendering = true;
 
     renderFrame(board);
 
     for (int i = 0; i < nCoup; i++) {
-        handleEvents(event, board);
-
-        SDL_Delay(1000);
+        WaitTime(0.5);
 
         playerTurn = !playerTurn;
 
@@ -446,43 +423,40 @@ void faitCoupPredefinis(Board_t board, char *coupPredefinis[], int nCoup) {
         posDest.x = coupPredefinis[i][2] - 'a';
         posDest.y = BOARD_SIZE - (coupPredefinis[i][3] - '1') - 1;
 
-        // debug("%s => (%d, %d)", coupPredefinis[i], posSrc.x, posSrc.y);
 
-        pieceCible = board[posSrc.y][posSrc.x];
+        targetPiece = board[posSrc.y][posSrc.x];
 
-        if (!pieceCible) {
+        if (!targetPiece) {
             error("%s:%d are wrong no piece here", coupPredefinis[i], i);
             return;
         }
 
-        
-        // mouvement de la 'pieceCible' à 'posDest' sur le 'board'
-        mouvement(board, pieceCible, posDest);
+        movement(board, targetPiece, posDest);
 
         if (strlen(coupPredefinis[i]) == 6) {
             switch (coupPredefinis[i][5]) {
                 case 't':
-                    promotionVers = TOUR;
+                    promotionVers = PIECE_NAME_ROOK;
                     break;
                 
                 case 'p':
-                    promotionVers = PONEY;
+                    promotionVers = PIECE_NAME_PONEY;
                     break;
                 
                 case 'f':
-                    promotionVers = FOU;
+                    promotionVers = PIECE_NAME_BISHOP;
                     break;
 
                 case 'r':
-                    promotionVers = REINE;
+                    promotionVers = PIECE_NAME_QUEEN;
                     break;
 
                 default:
                     break;
             }
 
-            promotionDe(pieceCible, promotionVers, i % 2 ? cheminsImagesNoir : cheminsImagesBlanc);
-            attendPromotion = false;
+            targetPiece->name = promotionVers;
+            waitingForPromotion = false;
         }
 
         renderFrame(board);

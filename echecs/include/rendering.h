@@ -3,7 +3,7 @@
 
 #include "types.h"
 
-void drawPieces(Board_t board);
+void drawPieces(void);
 void drawPiece(Piece_st* piece);
 
 void drawCell(int x, int y, Color c);

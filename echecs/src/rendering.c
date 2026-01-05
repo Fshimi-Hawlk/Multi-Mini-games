@@ -1,20 +1,34 @@
 #include "rendering.h"
 #include "global.h"
+#include "algo.h"
 
-void drawPieces(Board_t board) {
+void drawPieces(void) {
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        afficherPiece(blackPlayer->pieces[i]);
-        afficherPiece(whitePlayer->pieces[i]);
+        drawPiece(blackPlayer->pieces[i]);
+        drawPiece(whitePlayer->pieces[i]);
     }
 }
 
 void drawPiece(Piece_st* piece) {
-    float pieceX = BOARD_OFFSET + piece->pos.x * CELL_PX_SIZE;
-    float pieceY = BOARD_OFFSET + piece->pos.y * CELL_PX_SIZE;
-
     if (!piece->isTaken) {
         Texture2D pieceTexture = (piece->color == COLOR_PIECE_BLACK ? black_piece_textures : white_piece_textures)[piece->name];
-        DrawTexture(pieceTexture, pieceX, pieceY, WHITE);
+
+        Rectangle src = {
+            0, 0,
+            (float)pieceTexture.width,
+            (float)pieceTexture.height
+        };
+
+        Rectangle dst = {
+            BOARD_OFFSET + piece->pos.x * CELL_PX_SIZE,
+            BOARD_OFFSET + piece->pos.y * CELL_PX_SIZE,
+            CELL_PX_SIZE,
+            CELL_PX_SIZE
+        };
+
+        Vector2 origin = {0, 0};
+
+        DrawTexturePro(pieceTexture, src, dst, origin, 0.0f, WHITE);
     }
 }
 
@@ -36,7 +50,6 @@ void drawBorder(void) {
     int thickness = 3;
     int fontSize = 20;
 
-    // Rectangle extérieur du board
     Rectangle rect = {
         BOARD_OFFSET - thickness,
         BOARD_OFFSET - thickness,
@@ -44,7 +57,6 @@ void drawBorder(void) {
         BOARD_SIZE * CELL_PX_SIZE + thickness * 2
     };
 
-    // Dessiner un contour épais
     for (int i = 0; i < thickness; i++) {
         DrawRectangleLinesEx(rect, 1, BLACK);
         rect.x += 1;
@@ -53,7 +65,6 @@ void drawBorder(void) {
         rect.height -= 2;
     }
 
-    // Lignes 1–8 à gauche
     for (int i = 0; i < BOARD_SIZE; i++) {
         char line[2];
         sprintf(line, "%d", 8 - i);
@@ -74,7 +85,6 @@ void drawBorder(void) {
         );
     }
 
-    // Colonnes a–h en bas
     for (int i = 0; i < BOARD_SIZE; i++) {
         char col[2];
         sprintf(col, "%c", 'a' + i);
@@ -102,20 +112,31 @@ void drawPositionsPossibles(Board_t board) {
 
     for (int i = 0; i < nbPositionsPossibles; i++) {
         pos = positionsPossibles[i];
-
-        if (!estEnEchec(board, pos.x, pos.y)) {
+        
+        if (!isInCheck(board, selectionnedPiece, pos.x, pos.y, playerTurn)) {
             int x = BOARD_OFFSET + pos.x * CELL_PX_SIZE;
             int y = BOARD_OFFSET + pos.y * CELL_PX_SIZE;
-
+            
             pieceTemp = board[pos.y][pos.x];
 
-            if (pieceTemp) {
-                DrawTexture(circleTexture, x, y, WHITE);
-            } 
+            Texture2D* texture = pieceTemp ? &circleTexture : &dotTexture;
             
-            else {
-                DrawTexture(dotTexture, x, y, WHITE);
-            }
+            Rectangle src = {
+                0, 0,
+                (float)texture->width,
+                (float)texture->height
+            };
+
+            Rectangle dst = {
+                x,
+                y,
+                CELL_PX_SIZE,
+                CELL_PX_SIZE
+            };
+
+            Vector2 origin = {0, 0};
+
+            DrawTexturePro(*texture, src, dst, origin, 0.0f, WHITE);
         }
     }
 }
@@ -125,11 +146,27 @@ void printPromotion(void) {
     Texture2D *textures = (joueur->color == COLOR_PIECE_BLACK) ? black_piece_textures : white_piece_textures;
 
     for (int i = 0; i < 4; i++) {
-        int x = 680 + CELL_PX_SIZE * i ;
+        int x = xPromotion + CELL_PX_SIZE * i;
         int y = 120;
-
+        
         PieceName_et name = joueur->pieces[i]->name;
-        DrawTexture(textures[name], x, y, WHITE);
+
+        Rectangle src = {
+            0, 0,
+            (float)textures[name].width,
+            (float)textures[name].height
+        };
+
+        Rectangle dst = {
+            x,
+            y,
+            CELL_PX_SIZE,
+            CELL_PX_SIZE
+        };
+
+        Vector2 origin = {0, 0};
+
+        DrawTexturePro(textures[name], src, dst, origin, 0.0f, WHITE);
     }
 }
 
@@ -137,8 +174,8 @@ void renderFrame(Board_t board) {
     BeginDrawing();
     ClearBackground(RAYWHITE);
 
-    dessinerBordures();
-    dessinerDamier();
+    drawBorder();
+    drawCheckerboard();
 
     if (waitingForPromotion) {
         printPromotion();
@@ -154,10 +191,16 @@ void renderFrame(Board_t board) {
         drawPositionsPossibles(board);
     }
 
-    drawPieces(board);
+    drawPieces();
 
-    const char *text = finished ? (patFinished ? "Draw" : (playerTurn ? "White victory" : "Black victory")) : (!playerTurn && !waitingForPromotion ? "White to move" : "Black to move");
-    DrawText(text, 20, 20, 24, BLACK);
+    const char *text = finished 
+                     ? (patFinished ? "Draw" : (playerTurn ? "White victory" : "Black victory")) 
+                     : (!playerTurn && !waitingForPromotion ? "White to move" : "Black to move");
+
+
+    int fontSize = 25;
+    int xText = xPrint + MeasureText(text, fontSize) / 2;
+    DrawText(text, xText, yPrint, fontSize, BLACK);
 
     EndDrawing();
 }
