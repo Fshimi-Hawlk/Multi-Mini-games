@@ -9,18 +9,19 @@ int main(void) {
     log_info("%u", prefabsBag.count);
 
     while (!WindowShouldClose()) {
+        bool8 allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
             handleShape(&game.slots[i]);
+
+            allPlaced &= game.slots[i].placed;
+        }
+
+        if (allPlaced) {
+            shuffleSlots(&game);
         }
 
         if (IsKeyPressed(KEY_S)) {
-            for (u8 i = 0; i < 3; ++i) {
-                ActivePrefab_St* const shape = &game.slots[i];
-                shape->prefab = &prefabsBag.items[rand() % prefabsBag.count];
-                shape->center = defaultPositions[i];
-                shape->colorIndex = rand() % _blockColorCount;
-                shape->placed = false;
-            }
+            shuffleSlots(&game);
         }
 
         BeginDrawing(); {

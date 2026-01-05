@@ -18,7 +18,8 @@ s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape);
 
 void addPrefabAndVariants(Prefab_St prefab, Prefab_DA_St* const prefabsBag);
 void handleShape(ActivePrefab_St* const shape);
-void placeShape(ActivePrefab_St* const shape, Board_St* const board);
+void shuffleSlots(GameState_St* const game);
+void placeShape(const ActivePrefab_St* const shape, Board_St* const board);
 
 void rotatePrefab(Prefab_St* const prefab, u8 rotateBy);
 void mirrorPrefab(Prefab_St* const prefab);

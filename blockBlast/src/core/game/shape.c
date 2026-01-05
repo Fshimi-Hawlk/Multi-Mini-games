@@ -154,7 +154,17 @@ void handleShape(ActivePrefab_St* const shape) {
     }
 }
 
-void placeShape(ActivePrefab_St* const shape, Board_St* const board) {
+void shuffleSlots(GameState_St* const game) {
+    for (u8 i = 0; i < 3; ++i) {
+        ActivePrefab_St* const shape = &game->slots[i];
+        shape->prefab = &prefabsBag.items[rand() % prefabsBag.count];
+        shape->center = defaultPositions[i];
+        shape->colorIndex = rand() % _blockColorCount;
+        shape->placed = false;
+    }
+}
+
+void placeShape(const ActivePrefab_St* const shape, Board_St* const board) {
     s8Vector2 shapeBoardPos = mapShapeToBoardPos(shape);
 
     for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
