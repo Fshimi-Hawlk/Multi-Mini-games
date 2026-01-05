@@ -1,3 +1,4 @@
+#include "contextArena.h"
 #include "utils/globals.h"
 #include "setups/app.h"
 #include "setups/game.h"
