@@ -34,6 +34,13 @@ enum {
     _prefabNameCount
 };
 
+typedef enum {
+    GAME_PREFAB_VARIANT_DEFAULT,
+    GAME_PREFAB_VARIANT_COMPLETE,
+    GAME_PREFAB_VARIANT_EXTRA,
+    _gamePrefabVariantCount
+} GamePrefabVariant_Et;
+
 typedef struct {
     BlockColor_Et colorIndex;
     u8 hitsLeft;
@@ -81,6 +88,7 @@ typedef struct {
     u64 score;
     bool8 gameOver;
     SceneState_Et sceneState;
+    GamePrefabVariant_Et prefabVariant;
     // For saves: serialize this (e.g., via fwrite).
 } GameState_St;
 

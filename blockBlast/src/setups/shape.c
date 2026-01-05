@@ -2,9 +2,11 @@
 #include "core/game/shape.h"
 #include "setups/shape.h"
 
-
 void initPrefabsAndVariants(Prefab_DA_St* const prefabsBag) {
-    for (u32 i = 0; i < prefabCount; ++i) {
+    u8 initCount = game.prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
+                 ? _prefabNameCount : prefabCount;
+
+    for (u32 i = 0; i < initCount; ++i) {
         Prefab_St prefab = prefabs[i];
         
         if (prefab.orientations > -1) {
