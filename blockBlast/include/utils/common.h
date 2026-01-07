@@ -12,6 +12,7 @@
 #include <math.h>
 #include <assert.h>
 
+#include "rand.h"
 #include "logger.h"
 #include "contextArena.h"
 

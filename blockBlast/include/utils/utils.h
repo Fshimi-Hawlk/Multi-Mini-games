@@ -63,6 +63,7 @@ a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b
 #define return_defer(value) do { result = (value); goto defer; } while(0)
 
 u64 randint(u64 min, u64 max);
+u64 prng_randint(u64 min, u64 max);
 f64 randfloat(void); // range 0..=1
 
 #endif // UTILS_H

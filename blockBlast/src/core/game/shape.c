@@ -155,7 +155,7 @@ void shuffleSlots(GameState_St* const game) {
         ActivePrefab_St* const shape = &game->slots[i];
         shape->prefab = &prefabsBag.items[rand() % prefabsBag.count];
         shape->center = defaultPositions[i];
-        shape->colorIndex = rand() % _blockColorCount;
+        shape->colorIndex = prng_rand() % _blockColorCount;
         shape->placed = false;
     }
 }

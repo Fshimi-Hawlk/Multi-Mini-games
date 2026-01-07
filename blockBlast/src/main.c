@@ -1,7 +1,10 @@
 #include "utils/globals.h"
-#include "ui/game.h"
-#include "core/game/shape.h"
+
 #include "setups/app.h"
+
+#include "core/game/shape.h"
+
+#include "ui/game.h"
 
 int main(void) {
     initApp();
@@ -43,3 +46,6 @@ int main(void) {
 
 #define CONTEXT_ARENA_IMPLEMENTATION
 #include "contextArena.h"
+
+#define RAND_IMPLEMENTATION
+#include "rand.h"
