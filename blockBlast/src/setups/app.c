@@ -30,6 +30,12 @@ s64 initApp(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
+    appFont = LoadFont("../assets/fonts/Nunito/Nunito-Black.ttf");
+    if (!IsFontValid(appFont)) {
+        log_warn("App font wasn't proprely loaded");
+    }
+    // if (initFonts()) return false;
+
     initGame();
 
     return 1;
@@ -38,6 +44,8 @@ s64 initApp(void) {
 void freeApp(void) {
     arena_free(&globalArena);
     arena_free(&tempArena);
+
+    freeFonts();
 
     CloseWindow();
 }
