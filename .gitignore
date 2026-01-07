@@ -42,6 +42,9 @@ dkms.conf
 # debug information files
 *.dwo
 
+# TrueType Font
+*.ttf
+
 # Specific file ignores
 .clangd
 compile_flags.txt
