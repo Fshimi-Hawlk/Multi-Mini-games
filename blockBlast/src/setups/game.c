@@ -23,6 +23,8 @@ void initGame(void) {
         .x = boardPos.x - boardPxSize.x / 2.0f ,
         .y = boardPos.y - boardPxSize.y / 2.0f 
     };
+        
+            buildScoreText();
 
     da_reserve(&prefabsBag, 200);
     initPrefabsAndVariants(&prefabsBag);

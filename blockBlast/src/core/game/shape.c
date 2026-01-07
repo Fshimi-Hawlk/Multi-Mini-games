@@ -1,5 +1,7 @@
-#include "core/game/shape.h"
+#include "core/game/game.h"
 #include "core/game/board.h"
+#include "core/game/shape.h"
+
 #include "utils/globals.h"
 #include "utils/utils.h"
 
@@ -146,7 +148,13 @@ void handleShape(ActivePrefab_St* const shape) {
     
 
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+        if (shape->dragging) {
         releaseShape(shape, &game.board);
+
+            if (shape->placed) {
+                manageScore(&game, shape->prefab);
+            }
+        }
     }
 }
 
@@ -232,15 +240,11 @@ void mirrorPrefab(Prefab_St* const prefab) {
 }
 
 void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
-    if (shape->dragging) {
         shape->dragging = false;
         dragging = false;
 
         if (isShapePlaceable(shape)) {
             placeShape(shape, board);
-            if (checkBoardForClearing(board)) {
-                clearBoard(board);
-            }
             shape->placed = true;
         }
     }

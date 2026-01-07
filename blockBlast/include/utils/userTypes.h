@@ -87,7 +87,11 @@ typedef enum {
 typedef struct {
     Board_St board;
     PrefabSlots_t slots;
+    
     u64 score;
+    u8 streakCount;
+    char scoreText[32];
+
     bool8 gameOver;
     SceneState_Et sceneState;
     GamePrefabVariant_Et prefabVariant;
