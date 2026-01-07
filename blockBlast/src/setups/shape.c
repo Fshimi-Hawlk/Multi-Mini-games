@@ -1,8 +1,8 @@
-#include "utils/globals.h"
-#include "core/game/shape.h"
 #include "setups/shape.h"
+#include "core/game/shape.h"
+#include "utils/globals.h"
 
-void initPrefabsAndVariants(Prefab_DA_St* const prefabsBag) {
+void initPrefabsAndVariants(PrefabBag_St* const prefabsBag) {
     u8 initCount = game.prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
                  ? _prefabNameCount : prefabCount;
 
@@ -16,6 +16,24 @@ void initPrefabsAndVariants(Prefab_DA_St* const prefabsBag) {
         }
 
         addPrefabAndVariants(prefab, prefabsBag);
+    }
+
+    for (u8 i = 1; i < MAX_BLOCK_PER_SHAPE; ++i) { // hence 0 is left to zero intentionally
+        prefabsPerSizeOffsets[i] = prefabsBag->count - 1;
+    }
+
+    // it assumed that prefabBag is sorted by blockCount ascending
+    // if it's init via `initPrefabsAndVariants`, then it is.
+    for (u32 i = 1; i < prefabsBag->count; ++i) {
+        if (prefabsBag->items[i - 1].blockCount != prefabsBag->items[i].blockCount) {
+            prefabsPerSizeOffsets[(prefabsBag->items[i].blockCount - 1)] = i;
+        }
+    }
+
+    // back propagation in case of gaps avoiding wrong max for unset offsets
+    for (u8 i = MAX_BLOCK_PER_SHAPE - 2; i > 0; --i) { 
+        if (prefabsPerSizeOffsets[i] == prefabsBag->count - 1) 
+            prefabsPerSizeOffsets[i] = prefabsPerSizeOffsets[i + 1]; 
     }
 }
 

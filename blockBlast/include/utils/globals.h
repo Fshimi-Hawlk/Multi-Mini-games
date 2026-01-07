@@ -7,8 +7,12 @@ extern Rectangle windowRect;
 extern Font      appFont;
 extern Font      fonts[MAX_FONT_COUNT];
 
-extern Prefab_DA_St prefabsBag;
+extern PrefabBag_St prefabsBag;
+extern PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE];
 extern ActivePrefab_St *shapeBag;
+
+// array to record the starting indexes whenever the blockCount changes
+extern u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE];
 
 extern GameState_St game;
 extern GameState_St algoGame;

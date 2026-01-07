@@ -26,7 +26,7 @@ a ^= b; // a ^ b
 b ^= a; // b ^ (a ^ b) = b ^ b ^ a = 0 ^ a = a
 a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b
 */
-#define swap(a, b) do { a ^= b; b ^= a; a ^= b} while (0)
+#define swap(a, b) do { a ^= b; b ^= a; a ^= b; } while (0)
 #define clamp(v, min, max) min(max((min), (v)), (max))
 
 #define vec2Add(v1, v2, T) (T) { .x = (v1).x + (v2).x, .y = (v1).y + (v2).y }
@@ -59,6 +59,25 @@ a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b
 #define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
 #define ARRAY_GET(array, index) \
     (assert((size_t)index < ARRAY_LEN(array)), array[(size_t)index])
+
+// Shuffle (Fisher-Yates)
+#define shuffleArray(array, size) \
+do { \
+    for (u32 i = size - 1; i > 0; --i) { \
+        u32 r = prng_rand() % (i + 1); \
+        if (r == i) continue; \
+        swap(array[i], array[r]); \
+    } \
+} while (0)
+#define da_shuffle(da) shuffleArray((da)->items, (da)->count)
+
+#define da_printContent(typeFmt, da) \
+do { \
+    for (u64 i = 0; i < (da)->count; ++i) { \
+        printf(typeFmt, (da)->items[i]); \
+    } \
+    nl \
+} while (0)
 
 #define return_defer(value) do { result = (value); goto defer; } while(0)
 

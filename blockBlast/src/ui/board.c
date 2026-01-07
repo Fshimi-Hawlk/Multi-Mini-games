@@ -1,5 +1,4 @@
 #include "ui/board.h"
-#include "raylib.h"
 #include "utils/globals.h"
 
 void drawBlock(const f32Vector2 pos, const color32 color) {

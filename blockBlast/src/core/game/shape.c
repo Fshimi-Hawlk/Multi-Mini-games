@@ -111,7 +111,7 @@ s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape) {
     return vec2Scale(shapeBoardPos, 1.0f/BLOCK_PX_SIZE, s8Vector2);
 }
 
-void addPrefabAndVariants(Prefab_St prefab, Prefab_DA_St* const prefabsBag) {
+void addPrefabAndVariants(Prefab_St prefab, PrefabBag_St* const prefabsBag) {
     da_append(prefabsBag, prefab);
 
     for (u8 k = 1; k < prefab.orientations; ++k) {
@@ -146,10 +146,9 @@ void handleShape(ActivePrefab_St* const shape) {
         shape->center = Vector2Add(mousePos, mouseDeltaFromShapeCenter);
     }
     
-
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         if (shape->dragging) {
-        releaseShape(shape, &game.board);
+            releaseShape(shape, &game.board);
 
             if (shape->placed) {
                 manageScore(&game, shape->prefab);
@@ -159,12 +158,45 @@ void handleShape(ActivePrefab_St* const shape) {
 }
 
 void shuffleSlots(GameState_St* const game) {
+    // the default weights
+    f32 sizeWeights[MAX_BLOCK_PER_SHAPE] = {
+        0.05f, 0.20f, 0.25f, 0.25f, 0.10f, 0.05f, 0.00f, 0.00f, 0.10f
+    };
+
     for (u8 i = 0; i < 3; ++i) {
         ActivePrefab_St* const shape = &game->slots[i];
-        shape->prefab = &prefabsBag.items[rand() % prefabsBag.count];
         shape->center = defaultPositions[i];
         shape->colorIndex = prng_rand() % _blockColorCount;
         shape->placed = false;
+        shape->id = i;
+
+        u8 sizeIdx;
+
+        do {
+            f32 prob = prng_randf();
+            f32 weightedSum = 0.0f;
+            for (sizeIdx = 0; sizeIdx < MAX_BLOCK_PER_SHAPE; ++sizeIdx) {
+                weightedSum += sizeWeights[sizeIdx];
+                if (prob <= weightedSum) break;
+            }
+        } while (bags[sizeIdx].count == 0);
+    
+        PrefabIndexBag_St* bag = &bags[sizeIdx];
+        u32 prefab_idx = bag->items[--bag->count];
+        shape->prefab = &prefabsBag.items[prefab_idx];
+    }
+
+    // refill if needed
+    for (u8 i = 0; i < MAX_BLOCK_PER_SHAPE; ++i) {
+        PrefabIndexBag_St* bag = &bags[i];
+        if (bag->count == 0) {
+            u32 start = prefabsPerSizeOffsets[i];
+            bag->count = (i == MAX_BLOCK_PER_SHAPE - 1 ? prefabsBag.count - start : prefabsPerSizeOffsets[i + 1] - start);
+            if (bag->count == 0) continue; // no shape of that size in the prefabs;
+            
+            for (u32 k = 0; k < bag->count; ++k) bag->items[k] = start + k;
+            da_shuffle(bag);
+        }
     }
 }
 
@@ -240,8 +272,8 @@ void mirrorPrefab(Prefab_St* const prefab) {
 }
 
 void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
-        shape->dragging = false;
-        dragging = false;
+    shape->dragging = false;
+    dragging = false;
 
         if (isShapePlaceable(shape)) {
             placeShape(shape, board);

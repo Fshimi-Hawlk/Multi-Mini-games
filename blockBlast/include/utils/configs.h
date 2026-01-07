@@ -2,7 +2,7 @@
 #define CONFIGS_H
 
 #define WINDOW_TITLE "Block Blast"
-#define WINDOW_WIDTH 800
+#define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 800 // 600
 
 #define APP_BACKGROUND_COLOR (color32) {.r = 18, .g = 18, .b = 18, .a = 255}

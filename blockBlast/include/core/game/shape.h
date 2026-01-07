@@ -16,7 +16,7 @@ f32Vector2 getOffsetCenter(const Prefab_St prefab);
 f32Vector2 getIthBlockPosition(const ActivePrefab_St shape, const u8 i);
 s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape);
 
-void addPrefabAndVariants(Prefab_St prefab, Prefab_DA_St* const prefabsBag);
+void addPrefabAndVariants(Prefab_St prefab, PrefabBag_St* const prefabsBag);
 void handleShape(ActivePrefab_St* const shape);
 void shuffleSlots(GameState_St* const game);
 void placeShape(const ActivePrefab_St* const shape, Board_St* const board);

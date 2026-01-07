@@ -54,11 +54,9 @@ typedef struct {
     u8 width, height; // bounding box (for quick collision checks)
 } Prefab_St;
 
-typedef struct {
-    Prefab_St *items;
-    u64 count;
-    u64 capacity;
-} Prefab_DA_St;
+typeDA(Prefab_St, PrefabBag_St);
+typeDA(u32, PrefabIndexBag_St);
+
 
 typedef struct {
     const Prefab_St* prefab;
@@ -84,6 +82,7 @@ typedef enum {
     _sceneStateCount
 } SceneState_Et;
 
+// For saves: serialize this (e.g., via fwrite).
 typedef struct {
     Board_St board;
     PrefabSlots_t slots;
@@ -95,7 +94,6 @@ typedef struct {
     bool8 gameOver;
     SceneState_Et sceneState;
     GamePrefabVariant_Et prefabVariant;
-    // For saves: serialize this (e.g., via fwrite).
 } GameState_St;
 
 // typedef struct {

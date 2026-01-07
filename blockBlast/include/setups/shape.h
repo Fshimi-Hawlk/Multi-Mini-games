@@ -3,7 +3,7 @@
 
 #include "utils/userTypes.h"
 
-void initPrefabsAndVariants(Prefab_DA_St* const prefabBag);
+void initPrefabsAndVariants(PrefabBag_St* const prefabBag);
 void initPrefab(Prefab_St* const prefab);
 
 #endif // SETUPS_SHAPE_H

@@ -3,9 +3,12 @@
 
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[MAX_FONT_COUNT] = {0};
+Font      appFont = {0};
 
-Prefab_DA_St prefabsBag = {0};
+PrefabBag_St prefabsBag = {0};
+PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE] = {0};
 ActivePrefab_St *shapeBag = NULL;
+u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE] = {0};
 
 GameState_St game = {0};
 GameState_St algoGame = {0};
