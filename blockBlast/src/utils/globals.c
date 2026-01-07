@@ -1,3 +1,10 @@
+/**
+ * @file globals.c
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Definitions of global variables.
+ */
+
 #include "utils/globals.h"
 #include "utils/userTypes.h"
 

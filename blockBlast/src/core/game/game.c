@@ -1,3 +1,10 @@
+/**
+ * @file game.h (core/game)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Score management functions implementatuion.
+ */
+
 #include "core/game/game.h"
 #include "core/game/board.h"
 

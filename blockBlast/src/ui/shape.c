@@ -1,3 +1,10 @@
+/**
+ * @file shape.c (ui)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Rendering of shapes and slots.
+ */
+
 #include "core/game/shape.h"
 #include "ui/shape.h"
 #include "ui/board.h"

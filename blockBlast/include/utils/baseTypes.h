@@ -1,3 +1,10 @@
+/**
+ * @file baseTypes.h
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Basic integer and vector type aliases.
+ */
+
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 

@@ -1,3 +1,10 @@
+/**
+ * @file game.c (ui)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Main UI dispatch.
+ */
+
 #include "ui/game.h"
 #include "ui/board.h"
 #include "ui/shape.h"

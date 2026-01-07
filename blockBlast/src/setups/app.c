@@ -1,3 +1,10 @@
+/**
+ * @file app.c
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Application setup and teardown.
+ */
+
 #include "utils/globals.h"
 #include "setups/app.h"
 #include "setups/game.h"

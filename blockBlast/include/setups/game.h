@@ -1,15 +1,19 @@
+/**
+ * @file game.h (setups)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Full game state initialization.
+ */
+
 #ifndef SETUPS_GAME_H
 #define SETUPS_GAME_H
 
 /**
- * @brief Initializes the game state, camera, and 3D highlight model.
+ * @brief Initializes the game state and related resources.
  *
- * Sets up the Othello board with starting pieces, configures the initial
- * free camera position and parameters, saves the initial camera state,
- * generates and loads the torus mesh/model used for move highlights,
- * and hides the cursor.
- *
- * @param board The game board array to initialize.
+ * Sets up the board (clears it, sets position and dimensions), initializes the three prefab slots,
+ * resets score and streak, fills the prefab bag if needed, shuffles the initial slots,
+ * and performs any other one-time game setup.
  */
 void initGame(void);
 

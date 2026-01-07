@@ -1,3 +1,10 @@
+/**
+ * @file board.c (ui)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Board rendering implementation.
+ */
+
 #include "ui/board.h"
 #include "utils/globals.h"
 

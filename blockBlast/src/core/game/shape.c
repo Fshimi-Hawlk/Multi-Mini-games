@@ -1,3 +1,10 @@
+/**
+ * @file shape.c
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Implementation of shape handling and manipulation.
+ */
+
 #include "core/game/game.h"
 #include "core/game/board.h"
 #include "core/game/shape.h"
@@ -62,7 +69,17 @@ bool8 isShapePlaceable(const ActivePrefab_St* const shape) {
     return canBePlaced;
 }
 
-// Find min and max coordinates
+/**
+ * @brief Finds the minimum and maximum coordinates among a prefab's block offsets.
+ *
+ * Iterates through the provided offsets and computes the bounding box min/max values.
+ * Used during rotation/mirroring to normalize offsets.
+ *
+ * @param offsets       Array of block offsets.
+ * @param blockCount    Number of blocks in the prefab.
+ * @param outMin        Output: minimum x/y coordinates.
+ * @param outMax        Output: maximum x/y coordinates.
+ */
 static void findPrefabMinMax(const s8Vector2 *const offsets, const u8 blockCount, s8Vector2* const min, s8Vector2* const max) {
     min->x = offsets[0].x;
     min->y = offsets[0].y;

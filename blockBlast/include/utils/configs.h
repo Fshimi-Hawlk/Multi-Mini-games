@@ -1,3 +1,10 @@
+/**
+ * @file configs.h
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Compile-time configuration constants.
+ */
+
 #ifndef CONFIGS_H
 #define CONFIGS_H
 

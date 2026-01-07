@@ -1,3 +1,10 @@
+/**
+ * @file utils.c
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Implementation of utility functions.
+ */
+
 #include "utils/utils.h"
 
 u64 randint(u64 min, u64 max) {

@@ -1,3 +1,10 @@
+/**
+ * @file common.h
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Common includes, typedefs, and configuration headers.
+ */
+
 #ifndef COMMON_H
 #define COMMON_H
 

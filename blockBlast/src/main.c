@@ -1,3 +1,10 @@
+/**
+ * @file main.c
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Program entry point and main loop.
+ */
+
 #include "utils/globals.h"
 
 #include "setups/app.h"

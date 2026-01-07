@@ -1,30 +1,43 @@
+/**
+ * @file globals.h
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Global variables and resources.
+ */
+
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
+/**
+ * @brief Global application state and resources.
+ *
+ * All extern variables used throughout the game.
+ */
+
 #include "userTypes.h"
 
-extern Rectangle windowRect;
-extern Font      appFont;
-extern Font      fonts[MAX_FONT_COUNT];
+extern Rectangle windowRect;            ///< Main window rectangle (set at init).
+extern Font      appFont;               ///< Primary font for UI text.
+extern Font      fonts[MAX_FONT_COUNT]; ///< Array of loaded fonts in increasing sizes.
 
-extern PrefabBag_St prefabsBag;
-extern PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE];
-extern ActivePrefab_St *shapeBag;
+extern PrefabBag_St prefabsBag;                     ///< Bag containing all available prefabs and variants.
+extern PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE]; ///< Bags for random prefab selection by block count.
+extern ActivePrefab_St *shapeBag;                   ///< Temporary array used when viewing all prefabs (SCENE_STATE_ALL_PREFABS).
 
-// array to record the starting indexes whenever the blockCount changes
-extern u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE];
 
-extern GameState_St game;
-extern GameState_St algoGame;
+extern u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE]; ///< array to record the starting indexes whenever the blockCount changes
 
-extern f32Vector2 mouseDeltaFromShapeCenter;
-extern bool8 dragging;
+extern GameState_St game;       ///< Main game state.
+extern GameState_St algoGame;   ///< Secondary game state (used for AI/simulation?).
 
-extern const f32Vector2 defaultPositions[3];
+extern f32Vector2 mouseDeltaFromShapeCenter;    ///< Offset from shape center when dragging.
+extern bool8 dragging;                          ///< Global flag indicating if any shape is being dragged.
 
-extern const color32 blockColors[_blockColorCount];
+extern const f32Vector2 defaultPositions[3]; ///< Default screen positions for the three slots.
 
-extern const Prefab_St prefabs[];
-extern const u32 prefabCount;
+extern const color32 blockColors[_blockColorCount]; ///< Color palette for each BlockColor_Et.
+
+extern const Prefab_St prefabs[];  ///< Static array of base prefab definitions.
+extern const u32 prefabCount;      ///< Number of entries in the prefabs[] array.
 
 #endif // UTILS_GLOBALS_H

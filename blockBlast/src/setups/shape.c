@@ -1,3 +1,10 @@
+/**
+ * @file shape.c (setups)
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
+ * @brief Prefab initialization and variant computation.
+ */
+
 #include "setups/shape.h"
 #include "core/game/shape.h"
 #include "utils/globals.h"
