@@ -275,20 +275,22 @@ void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
     shape->dragging = false;
     dragging = false;
 
-        if (isShapePlaceable(shape)) {
-            placeShape(shape, board);
-            shape->placed = true;
-        }
+    if (isShapePlaceable(shape)) {
+        placeShape(shape, board);
+        shape->placed = true;
+    } else {
+        shape->center = defaultPositions[shape->id];
     }
 }
 
 void printPrefabInfo(const Prefab_St prefab) {
-    for (u8 i = 0; i < prefab.blockCount; ++i) {
-        printf("(%d, %d) ", prefab.offsets[i].x, prefab.offsets[i].y);
-    }
-
     f32Vector2 offsetCenter = getOffsetCenter(prefab);
-    printf("| bc: %u | w: %u, h: %u | c: (%.1f, %.1f) | o: %d | canMirror: %s\n", 
+    printf("| bc: %u | w: %u, h: %u | c: (%.1f, %.1f) | o: %d | canMirror: %s, offsets: ", 
         prefab.blockCount, prefab.width, prefab.height, offsetCenter.x, offsetCenter.y, prefab.orientations, boolStr(prefab.canMirror)
     );
+
+    for (u8 i = 0; i < prefab.blockCount; ++i) {
+        printf("(%u| %d, %d) ", i, prefab.offsets[i].x, prefab.offsets[i].y);
+    }
+    nl
 }

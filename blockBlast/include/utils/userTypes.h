@@ -64,6 +64,7 @@ typedef struct {
     bool8 placed;
     BlockColor_Et colorIndex;
     bool8 dragging;
+    u8 id;
 } ActivePrefab_St;
 
 typedef ActivePrefab_St PrefabSlots_t[3];

@@ -6,7 +6,6 @@ bool8 isInBound(const s8Vector2 pos) {
         && (0 <= pos.y) && (pos.y < game.board.height);
 }
 
-
 static bool8 isRowFull(const Board_St* const board, const u8 row) {
     for (u8 col = 0; col < board->width; ++col) {
         if (board->blocks[row][col].hitsLeft == 0) return false;
