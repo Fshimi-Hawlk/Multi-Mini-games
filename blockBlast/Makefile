@@ -95,11 +95,15 @@
 # Compiler and flags
 # Base flags (always present)
 BASE_CFLAGS := \
+	-Wno-newline-eof \
 	-Iinclude \
-	-I..
+	-I../thirdparty \
+	-I../firstparty \
 
 # Linker base
 BASE_LDFLAGS := \
+	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
+	-l:libraylib.a \
 	-lm
 
 # Modes
