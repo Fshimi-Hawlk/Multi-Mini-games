@@ -21,11 +21,10 @@ extern Font      appFont;               ///< Primary font for UI text.
 extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 extern PrefabBag_St prefabsBag;                     ///< Bag containing all available prefabs and variants.
-extern PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE]; ///< Bags for random prefab selection by block count.
+extern PrefabIndexBag_St bags[MAX_SHAPE_SIZE]; ///< Bags for random prefab selection by block count.
 extern ActivePrefab_St *shapeBag;                   ///< Temporary array used when viewing all prefabs (SCENE_STATE_ALL_PREFABS).
 
-
-extern u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE]; ///< array to record the starting indexes whenever the blockCount changes
+extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE]; ///< array to record the starting indexes whenever the blockCount changes
 
 extern GameState_St game;       ///< Main game state.
 extern GameState_St algoGame;   ///< Secondary game state (used for AI/simulation?).

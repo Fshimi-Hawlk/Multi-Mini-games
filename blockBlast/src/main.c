@@ -5,16 +5,20 @@
  * @brief Program entry point and main loop.
  */
 
-#include "utils/globals.h"
-
-#include "setups/app.h"
-
 #include "core/game/shape.h"
-
+#include "core/game/game.h"
+#include "setups/app.h"
 #include "ui/game.h"
 
+#include "utils/globals.h"
+#include "utils/utils.h"
+
 int main(void) {
-    initApp();
+    if (!initApp()) {
+        log_fatal("Couldn't initialize correctly the app. Aborting");
+        freeApp();
+        return 1;
+    }
 
     // game.sceneState = SCENE_STATE_ALL_PREFABS;
 

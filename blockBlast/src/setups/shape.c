@@ -25,7 +25,7 @@ void initPrefabsAndVariants(PrefabBag_St* const prefabsBag) {
         addPrefabAndVariants(prefab, prefabsBag);
     }
 
-    for (u8 i = 1; i < MAX_BLOCK_PER_SHAPE; ++i) { // hence 0 is left to zero intentionally
+    for (u8 i = 1; i < MAX_SHAPE_SIZE; ++i) { // hence 0 is left to zero intentionally
         prefabsPerSizeOffsets[i] = prefabsBag->count - 1;
     }
 
@@ -38,9 +38,9 @@ void initPrefabsAndVariants(PrefabBag_St* const prefabsBag) {
     }
 
     // back propagation in case of gaps avoiding wrong max for unset offsets
-    for (u8 i = MAX_BLOCK_PER_SHAPE - 2; i > 0; --i) { 
-        if (prefabsPerSizeOffsets[i] == prefabsBag->count - 1) 
-            prefabsPerSizeOffsets[i] = prefabsPerSizeOffsets[i + 1]; 
+    for (u8 i = MAX_SHAPE_SIZE - 2; i > 0; --i) {
+        if (prefabsPerSizeOffsets[i] == prefabsBag->count - 1)
+            prefabsPerSizeOffsets[i] = prefabsPerSizeOffsets[i + 1];
     }
 }
 

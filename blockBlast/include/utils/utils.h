@@ -65,7 +65,7 @@
 /**
  * @brief Clamps a value between min and max.
  */
-#define clamp(v, min, max) min(max((min), (v)), (max))
+#define clamp(v, _min, _max) min(max((_min), (v)), (_max))
 
 /**
  * @brief Constructs a Vector2 by adding/subtracting/multiplying/dividing components.
@@ -124,7 +124,7 @@
 /**
  * @brief Returns the number of elements in a **static** array.
  */
-#define ARRAY_LEN(array) (sizeof(array)/sizeof(array[0]))
+#define ARRAY_LEN(array) (sizeof(array)/ (f32) sizeof(*array))
 
 /**
  * @brief Safely accesses an array element with bounds assertion.

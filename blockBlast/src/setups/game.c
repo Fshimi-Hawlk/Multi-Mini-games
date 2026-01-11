@@ -45,8 +45,8 @@ void initGame(void) {
                 u8 size_idx = prefabsBag.items[i].blockCount - 1;
                 da_append(&bags[size_idx], i);
             }
-        
-            for (u8 s = 0; s < MAX_BLOCK_PER_SHAPE; ++s) {
+
+            for (u8 s = 0; s < MAX_SHAPE_SIZE; ++s) {
                 PrefabIndexBag_St* bag = &bags[s];
                 if (bag->count == 0) continue;
                 da_shuffle(bag);

@@ -13,9 +13,10 @@ Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
 PrefabBag_St prefabsBag = {0};
-PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE] = {0};
+PrefabIndexBag_St bags[MAX_SHAPE_SIZE] = {0};
 ActivePrefab_St *shapeBag = NULL;
-u32 prefabsPerSizeOffsets[MAX_BLOCK_PER_SHAPE] = {0};
+
+u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE] = {0};
 
 GameState_St game = {0};
 GameState_St algoGame = {0};

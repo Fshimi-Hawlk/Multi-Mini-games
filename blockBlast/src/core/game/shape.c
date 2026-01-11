@@ -192,7 +192,7 @@ void shuffleSlots(GameState_St* const game) {
         do {
             f32 prob = prng_randf();
             f32 weightedSum = 0.0f;
-            for (sizeIdx = 0; sizeIdx < MAX_BLOCK_PER_SHAPE; ++sizeIdx) {
+            for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
                 weightedSum += sizeWeights[sizeIdx];
                 if (prob <= weightedSum) break;
             }
@@ -204,7 +204,7 @@ void shuffleSlots(GameState_St* const game) {
     }
 
     // refill if needed
-    for (u8 i = 0; i < MAX_BLOCK_PER_SHAPE; ++i) {
+    for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
         PrefabIndexBag_St* bag = &bags[i];
         if (bag->count == 0) {
             u32 start = prefabsPerSizeOffsets[i];

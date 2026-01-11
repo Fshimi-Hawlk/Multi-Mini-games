@@ -85,7 +85,7 @@ typedef struct {
     u8 blockCount;                          ///< Number of blocks in the shape.
     s8 orientations;                        ///< Number of unique rotations (computed at init).
     bool8 canMirror;                        ///< Whether the shape has a distinct mirror variant.
-    u8Vector2 offsets[MAX_BLOCK_PER_SHAPE]; ///< Relative offsets from center.
+    u8Vector2 offsets[MAX_SHAPE_SIZE];      ///< Relative offsets from center.
     u8 width, height;                       ///< Bounding box for quick collision checks.
 } Prefab_St;
 
@@ -138,7 +138,7 @@ typedef enum {
 typedef struct {
     Board_St board;                     ///< Current board state.
     PrefabSlots_t slots;                ///< Current three available prefabs.
-    
+
     u64 score;                          ///< Player score.
     u8 streakCount;                     ///< Current combo streak.
     char scoreText[32];                 ///< Pre-formatted score string for UI.
