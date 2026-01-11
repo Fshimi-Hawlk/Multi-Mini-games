@@ -11,9 +11,9 @@
 #include "utils/userTypes.h"
 
 /**
- * @brief Builds the score text string based on the current game state.
+ * @brief Builds the score and streak texts string based on the current game state.
  */
-void buildScoreText(void);
+void buildScoreRelatedTexts(void);
 
 /**
  * @brief Calculates the score based on the board's current state.
@@ -30,5 +30,7 @@ f32 calculateScore(const Board_St* const board);
  * @param prefab Pointer to the prefab structure.
  */
 void manageScore(GameState_St* const game, const Prefab_St* const prefab);
+
+void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta);
 
 #endif // CORE_GAME_GAME_H

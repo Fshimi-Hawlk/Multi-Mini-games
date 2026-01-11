@@ -175,11 +175,6 @@ void handleShape(ActivePrefab_St* const shape) {
 }
 
 void shuffleSlots(GameState_St* const game) {
-    // the default weights
-    f32 sizeWeights[MAX_BLOCK_PER_SHAPE] = {
-        0.05f, 0.20f, 0.25f, 0.25f, 0.10f, 0.05f, 0.00f, 0.00f, 0.10f
-    };
-
     for (u8 i = 0; i < 3; ++i) {
         ActivePrefab_St* const shape = &game->slots[i];
         shape->center = defaultPositions[i];
@@ -193,7 +188,7 @@ void shuffleSlots(GameState_St* const game) {
             f32 prob = prng_randf();
             f32 weightedSum = 0.0f;
             for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
-                weightedSum += sizeWeights[sizeIdx];
+                weightedSum += game->sizeWeights.weights[sizeIdx];
                 if (prob <= weightedSum) break;
             }
         } while (bags[sizeIdx].count == 0);
@@ -238,7 +233,7 @@ void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
 
     rotateBy %= 4;
 
-    s8Vector2 newOffsets[MAX_BLOCK_PER_SHAPE];
+    s8Vector2 newOffsets[MAX_SHAPE_SIZE];
     memcpy(newOffsets, prefab->offsets, prefab->blockCount * sizeof(*prefab->offsets));
 
     // Apply rotations
@@ -271,7 +266,7 @@ void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
 void mirrorPrefab(Prefab_St* const prefab) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 
-    s8Vector2 newOffsets[MAX_BLOCK_PER_SHAPE];
+    s8Vector2 newOffsets[MAX_SHAPE_SIZE];
     memcpy(newOffsets, prefab->offsets, prefab->blockCount * sizeof(*prefab->offsets));
 
     for (u32 i = 0; i < prefab->blockCount; ++i) {
@@ -305,7 +300,7 @@ void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
 
 void printPrefabInfo(const Prefab_St prefab) {
     f32Vector2 offsetCenter = getOffsetCenter(prefab);
-    printf("| bc: %u | w: %u, h: %u | c: (%.1f, %.1f) | o: %d | canMirror: %s, offsets: ", 
+    printf("| bc: %u | w: %u, h: %u | c: (%.1f, %.1f) | o: %d | canMirror: %s, offsets: ",
         prefab.blockCount, prefab.width, prefab.height, offsetCenter.x, offsetCenter.y, prefab.orientations, boolStr(prefab.canMirror)
     );
 

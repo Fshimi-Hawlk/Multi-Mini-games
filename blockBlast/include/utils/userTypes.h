@@ -112,6 +112,11 @@ typedef struct {
  */
 typedef ActivePrefab_St PrefabSlots_t[3];
 
+typedef struct {
+    float weights[MAX_SHAPE_SIZE];  // index 0 = size 1, ..., index 8 = size 9
+    float baseWeights[MAX_SHAPE_SIZE];
+} SizeWeight_St;
+
 /**
  * @brief The game board structure.
  */
@@ -141,7 +146,10 @@ typedef struct {
 
     u64 score;                          ///< Player score.
     u8 streakCount;                     ///< Current combo streak.
+    u8 streakPlacementResetCnt;
     char scoreText[32];                 ///< Pre-formatted score string for UI.
+    char streakText[32];
+    SizeWeight_St sizeWeights;
 
     bool8 gameOver;                     ///< Game over flag.
     SceneState_Et sceneState;           ///< Current scene/view.

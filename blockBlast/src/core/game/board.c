@@ -23,6 +23,11 @@ bool8 isInBound(const s8Vector2 pos) {
  * @return true if the row is full, false otherwise.
  */
 static bool8 isRowFull(const Board_St* const board, const u8 row) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return false;
+    }
+    
     for (u8 col = 0; col < board->width; ++col) {
         if (board->blocks[row][col].hitsLeft == 0) return false;
     }
@@ -39,6 +44,11 @@ static bool8 isRowFull(const Board_St* const board, const u8 row) {
  * @return true if the column is full, false otherwise.
  */
 static bool8 isColumnFull(const Board_St* const board, const u8 col) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return false;
+    }
+    
     for (u8 row = 0; row < board->width; ++row) {
         if (board->blocks[row][col].hitsLeft == 0) return false;
     }
@@ -52,6 +62,11 @@ static bool8 isColumnFull(const Board_St* const board, const u8 col) {
  * @param row   Row index to clear.
  */
 static void clearRow(Board_St* const board, const u8 row) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return;
+    }
+    
     for (u8 col = 0; col < board->width; ++col) {
         board->blocks[row][col].hitsLeft = 0;
     }
@@ -64,12 +79,22 @@ static void clearRow(Board_St* const board, const u8 row) {
  * @param col   Column index to clear.
  */
 static void clearColumn(Board_St* const board, const u8 col) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return;
+    }
+
     for (u8 row = 0; row < board->width; ++row) {
         board->blocks[row][col].hitsLeft = 0;
     }
 }
 
 bool8 checkBoardForClearing(const Board_St* const board) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return false;
+    }
+    
     bool8 needClearing = false;
     for (u8 row = 0; row < board->height; ++row) {
         board->rowsToClear[row] = isRowFull(board, row);
@@ -85,6 +110,11 @@ bool8 checkBoardForClearing(const Board_St* const board) {
 }
 
 void clearBoard(Board_St* const board) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return;
+    }
+    
     for (u8 row = 0; row < board->height; ++row) {
         if (board->rowsToClear[row]) clearRow(board, row);
     }
@@ -92,4 +122,22 @@ void clearBoard(Board_St* const board) {
     for (u8 col = 0; col < board->width; ++col) {
         if (board->columnsToClear[col]) clearColumn(board, col);
     }
+}
+
+u32 getEmptyCellCount(const Board_St* const board) {
+    if (board == NULL) {
+        log_warn("Received NULL pointer");
+        return 0;
+    }
+
+    u32 empty_cells = 0;
+    for (u32 y = 0; y < board->height; y++) {
+        for (u32 x = 0; x < board->width; x++) {
+            if (board->blocks[y][x].hitsLeft == 0) {
+                empty_cells++;
+            }
+        }
+    }
+
+    return empty_cells;
 }

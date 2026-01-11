@@ -33,4 +33,6 @@ bool8 checkBoardForClearing(const Board_St* const board);
  */
 void clearBoard(Board_St* const board);
 
+u32 getEmptyCellCount(const Board_St* const board);
+
 #endif // CORE_GAME_BOARD_H

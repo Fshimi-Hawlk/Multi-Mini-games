@@ -14,13 +14,33 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
+void initSizeWeights(GameState_St* const game) {
+    f32 baseWeights[MAX_SHAPE_SIZE] = {
+        [0] = 0.05f,    // size 1
+        [1] = 0.20f,
+        [2] = 0.25f,
+        [3] = 0.25f,
+        [4] = 0.10f,
+        [5] = 0.05f,
+        [6] = 0.00f,
+        [7] = 0.00f,
+        [8] = 0.10f     // the big 9-unit one
+    };
+
+    for (u8 i = 0; i < MAX_SHAPE_SIZE; i++) {
+        game->sizeWeights.weights[i] = game->sizeWeights.baseWeights[i] = baseWeights[i];
+    }
+}
+
 void initGame(void) {
     switch (game.sceneState) {
         case SCENE_STATE_GAME: {
             game.board.width = game.board.height = 8;
             game.board.rowsToClear = context_alloc(game.board.height * sizeof(bool8));
             game.board.columnsToClear = context_alloc(game.board.width * sizeof(bool8));
-        
+
+            initSizeWeights(&game);
+
             f32Vector2 boardPos = {
                 .x = WINDOW_WIDTH / 2.0f,
                 .y = WINDOW_HEIGHT / 3.0f
@@ -35,9 +55,9 @@ void initGame(void) {
                 .x = boardPos.x - boardPxSize.x / 2.0f ,
                 .y = boardPos.y - boardPxSize.y / 2.0f
             };
-        
-            buildScoreText();
-        
+
+            buildScoreRelatedTexts();
+
             da_reserve(&prefabsBag, 200);
             initPrefabsAndVariants(&prefabsBag);
 

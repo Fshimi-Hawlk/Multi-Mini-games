@@ -24,6 +24,8 @@ int main(void) {
 
     // log_info("%u", prefabsBag.count);
 
+    f64 prevScore = game.score;
+
     while (!WindowShouldClose()) {
         bool8 allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
@@ -33,7 +35,13 @@ int main(void) {
         }
 
         if (allPlaced) {
+            adjustSizeWeights(&game, game.score - prevScore);
+            for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
+                printf("%.3f ", game.sizeWeights.weights[i]);
+            }
+            nl
             shuffleSlots(&game);
+            prevScore = game.score;
         }
 
         if (IsKeyPressed(KEY_S)) {
