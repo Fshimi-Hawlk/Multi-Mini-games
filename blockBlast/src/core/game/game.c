@@ -19,7 +19,7 @@ f32 calculateScore(const Board_St* const board) {
     for (u8 row = 0; row < board->width; ++row) {
         linesCleared += board->rowsToClear[row];
     }
-    
+
     for (u8 col = 0; col < board->height; ++col) {
         linesCleared += board->columnsToClear[col];
     }

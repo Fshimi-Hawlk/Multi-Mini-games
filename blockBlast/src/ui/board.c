@@ -23,7 +23,7 @@ void drawBoard(const Board_St board) {
                 .x = board.pos.x + BLOCK_PX_SIZE * c,
                 .y = board.pos.y + BLOCK_PX_SIZE * r
             };
-            
+
             Block_St block = board.blocks[r][c];
             color32 tileColor;
             if (block.hitsLeft == 0) {

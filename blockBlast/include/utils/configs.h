@@ -16,7 +16,6 @@
 #define BOARD_EMPTY_TILE_COLOR (color32) {.r = 22, .g = 16, .b = 79, .a = 255}
 #define BLOCK_OUTLINE_COLOR (color32) {.r = 22, .g = 16, .b = 36, .a = 255}
 
-#define MAX_FONT_COUNT     12
 #define APP_TEXT_FONT_SIZE 32
 
 #define MAX_BLOCK_PER_SHAPE 9

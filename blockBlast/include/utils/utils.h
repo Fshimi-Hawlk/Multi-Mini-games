@@ -52,9 +52,9 @@
 /**
  * @brief Swaps two variables of the same type using XOR (no temporary needed).
  *
- * Xor proprety: 
+ * Xor proprety:
  * V(x), x ^ x = 0
- * 
+ *
  * a ^= b; // a ^ b
  * b ^= a; // b ^ (a ^ b) = b ^ b ^ a = 0 ^ a = a
  * a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b

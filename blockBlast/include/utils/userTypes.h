@@ -49,6 +49,15 @@ enum {
     _prefabNameCount
 };
 
+typedef enum {
+    FONT8,
+    FONT10, FONT12, FONT14, FONT16, FONT18,
+    FONT20, FONT22, FONT24, FONT26, FONT28,
+    FONT30, FONT32, FONT34, FONT36, FONT38,
+    FONT40, FONT42, FONT44, FONT46, FONT48,
+    _fontSizeCount
+} FontSize_Et;
+
 /**
  * @brief Variants of the prefab set (default, complete, extra, etc.).
  */

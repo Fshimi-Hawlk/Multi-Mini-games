@@ -25,7 +25,7 @@ bool8 haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
         u8 index = prefab2.offsets[i].x * 6 + prefab2.offsets[i].y;
         same &= hashmap[index];
     }
-    
+
     return same;
 }
 
@@ -162,7 +162,7 @@ void handleShape(ActivePrefab_St* const shape) {
     } else if (shape->dragging) {
         shape->center = Vector2Add(mousePos, mouseDeltaFromShapeCenter);
     }
-    
+
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
         if (shape->dragging) {
             releaseShape(shape, &game.board);
@@ -197,7 +197,7 @@ void shuffleSlots(GameState_St* const game) {
                 if (prob <= weightedSum) break;
             }
         } while (bags[sizeIdx].count == 0);
-    
+
         PrefabIndexBag_St* bag = &bags[sizeIdx];
         u32 prefab_idx = bag->items[--bag->count];
         shape->prefab = &prefabsBag.items[prefab_idx];
@@ -208,9 +208,12 @@ void shuffleSlots(GameState_St* const game) {
         PrefabIndexBag_St* bag = &bags[i];
         if (bag->count == 0) {
             u32 start = prefabsPerSizeOffsets[i];
-            bag->count = (i == MAX_BLOCK_PER_SHAPE - 1 ? prefabsBag.count - start : prefabsPerSizeOffsets[i + 1] - start);
+            bag->count = i == MAX_SHAPE_SIZE - 1
+                       ? prefabsBag.count - start
+                       : prefabsPerSizeOffsets[i + 1] - start;
+
             if (bag->count == 0) continue; // no shape of that size in the prefabs;
-            
+
             for (u32 k = 0; k < bag->count; ++k) bag->items[k] = start + k;
             da_shuffle(bag);
         }

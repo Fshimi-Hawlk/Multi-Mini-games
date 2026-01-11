@@ -15,7 +15,7 @@ void initPrefabsAndVariants(PrefabBag_St* const prefabsBag) {
 
     for (u32 i = 0; i < initCount; ++i) {
         Prefab_St prefab = prefabs[i];
-        
+
         if (prefab.orientations > -1) {
             log_warn("Prefab %u hasn't setup correctly in the codebase.", i);
         } else {
@@ -55,12 +55,12 @@ void initPrefab(Prefab_St* const prefab) {
 
     mirrorPrefab(&prefabCmpMirror);
     prefab->canMirror = !haveSimilarOffsets(*prefab, prefabCmpMirror);
-    
+
     while (!haveSimilarOffsets(*prefab, prefabCmp)) {
         prefab->orientations++;
         rotatePrefab(&prefabCmp, 1);
     }
-    
+
     prefab->orientations += prefab->orientations > 0;
 
     if (!prefab->canMirror) return;
@@ -79,7 +79,7 @@ void initPrefab(Prefab_St* const prefab) {
         if (foundDuplicate) break;
         rotatePrefab(&prefabCmpMirror, 1);
     }
-    
+
     if (foundDuplicate) {
         prefab->canMirror = false;
     }

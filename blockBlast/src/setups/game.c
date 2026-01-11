@@ -25,22 +25,22 @@ void initGame(void) {
                 .x = WINDOW_WIDTH / 2.0f,
                 .y = WINDOW_HEIGHT / 3.0f
             };
-        
+
             f32Vector2 boardPxSize = {
                 .x = BLOCK_PX_SIZE * game.board.width,
                 .y = BLOCK_PX_SIZE * game.board.height,
             };
-        
+
             game.board.pos = (f32Vector2) {
                 .x = boardPos.x - boardPxSize.x / 2.0f ,
-                .y = boardPos.y - boardPxSize.y / 2.0f 
+                .y = boardPos.y - boardPxSize.y / 2.0f
             };
         
             buildScoreText();
         
             da_reserve(&prefabsBag, 200);
             initPrefabsAndVariants(&prefabsBag);
-        
+
             for (u32 i = 0; i < prefabsBag.count; ++i) {
                 u8 size_idx = prefabsBag.items[i].blockCount - 1;
                 da_append(&bags[size_idx], i);
@@ -59,9 +59,9 @@ void initGame(void) {
             f32 offset = BLOCK_PX_SIZE * 8.0f;
             u8 prefabPerRow = (WINDOW_WIDTH - offset) / offset;
             // u8 prefabPerCol = (WINDOW_HEIGHT - offset) / offset;
-        
+
             // log_info("%u, %u", prefabPerRow, prefabPerCol);
-        
+
             shapeBag = context_alloc(prefabsBag.count * sizeof(*shapeBag));
             for (u32 i = 0; i < prefabsBag.count; ++i) {
                 shapeBag[i] = (ActivePrefab_St) {

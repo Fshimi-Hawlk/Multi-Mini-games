@@ -9,7 +9,7 @@
 #include "utils/userTypes.h"
 
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-Font      fonts[MAX_FONT_COUNT] = {0};
+Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
 PrefabBag_St prefabsBag = {0};

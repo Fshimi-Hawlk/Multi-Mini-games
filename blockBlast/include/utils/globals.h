@@ -18,7 +18,7 @@
 
 extern Rectangle windowRect;            ///< Main window rectangle (set at init).
 extern Font      appFont;               ///< Primary font for UI text.
-extern Font      fonts[MAX_FONT_COUNT]; ///< Array of loaded fonts in increasing sizes.
+extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 extern PrefabBag_St prefabsBag;                     ///< Bag containing all available prefabs and variants.
 extern PrefabIndexBag_St bags[MAX_BLOCK_PER_SHAPE]; ///< Bags for random prefab selection by block count.

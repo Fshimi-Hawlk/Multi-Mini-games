@@ -12,28 +12,30 @@
 bool8 initFonts(void) {
     u64 fontSize = 8;
 
-    for (u64 fontId = 0; fontId < MAX_FONT_COUNT; fontId++) {
-        fonts[fontId] = LoadFontEx("assets/arial.ttf", fontSize, NULL, 0);
+    bool8 allFontLoaded = true;
+
+    for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
+        fonts[fontId] = LoadFontEx("../assets/fonts/Nunito/Nunito-Black.ttf", fontSize, NULL, 0);
         if (!IsFontValid(fonts[fontId])) {
             log_warn("Font %zu (%d) wasn't proprely loaded", fontId, fontSize);
-            return false;
+            allFontLoaded = false;
         }
-        
+
         fontSize += 2;
     }
 
-    return true;
+    return allFontLoaded;
 }
 
 void freeFonts(void) {
-    for (u64 fontId = 0; fontId < MAX_FONT_COUNT; fontId++) {
+    for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
         UnloadFont(fonts[fontId]);
     }
 }
 
 bool8 initApp(void) {
     srand(time(NULL));
-    
+
     u64 seeds[2] = { 0 };
     plat_get_entropy(seeds, sizeof(seeds));
     prng_seed(seeds[0], seeds[1]);
@@ -42,11 +44,9 @@ bool8 initApp(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
-    appFont = LoadFont("../assets/fonts/Nunito/Nunito-Black.ttf");
-    if (!IsFontValid(appFont)) {
-        log_warn("App font wasn't proprely loaded");
-    }
-    // if (initFonts()) return false;
+    if (!initFonts()) {
+        log_warn("Couldn't initialize every fonts");
+    };
 
     initGame();
 
