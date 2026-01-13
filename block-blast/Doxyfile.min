@@ -1,0 +1,37 @@
+# Minimal Doxyfile for Block Blast project
+DOXYFILE_ENCODING      = UTF-8
+
+PROJECT_NAME           = "Block Blast"
+PROJECT_NUMBER         = 2026.01.13
+PROJECT_BRIEF          = "Recreation of the famous game named \"Block Blast\", by Hungry Studio with extra elements when the initial implementation is done"
+
+OUTPUT_DIRECTORY       = ./docs
+CREATE_SUBDIRS         = YES
+CREATE_SUBDIRS_LEVEL   = 2
+
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = ../
+STRIP_FROM_INC_PATH    = include ../firstparty ../thirdparty
+
+OPTIMIZE_OUTPUT_FOR_C  = YES
+
+INPUT                  = src include
+RECURSIVE              = YES
+FILE_PATTERNS          = *.c *.h *.md
+
+EXCLUDE                = tests docs build ../thirdparty
+EXCLUDE_SYMLINKS       = YES
+
+SEARCH_INCLUDES        = YES
+INCLUDE_PATH           = include ../firstparty ../thirdparty
+
+EXTRACT_ALL            = YES
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+
+PREDEFINED             = _DEBUG
+
+GENERATE_LATEX         = NO
+
+# Optional: faster generation on multi-core machines
+NUM_PROC_THREADS       = 0

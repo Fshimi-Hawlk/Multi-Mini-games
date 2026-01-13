@@ -46,6 +46,7 @@ dkms.conf
 *.ttf
 
 # Specific file ignores
+build/**/*
 .clangd
 compile_flags.txt
 main

@@ -1,25 +1,76 @@
-# Multi-Mini-games
-Collection of multiple sub-projects/mini-games playable through a single-player/multi-player platformer-style interactive lobby
+# Multi Mini-Games
 
-The project is devided in branch per sub-project. 
+**A collection of mini-games playable through a unified interactive lobby (single-player or multiplayer platformer-style hub).**
+
+This is a monorepo-style project where each mini-game lives in its own **dedicated branch**. The main branch (`main`) contains:
+- Shared code & assets (`firstparty/`, `thirdparty/`, `assets/`)
+- The lobby/hub code
+- Common utilities (build system, save/load framework, etc.)
+
+## Project Structure
+
+```
+.
+├── main/                     # Lobby & hub code (platformer-style menu world)
+├── firstparty/               # Your reusable single-header libs (stb-style)
+├── thirdparty/               # External dependencies
+├── assets/                   # Shared fonts, images, sounds, levels, etc.
+├── docs/                     # (optional) Aggregated or shared documentation
+├── README.md                 # This file
+├── CHANGELOG.md              # (recommended) Overall project changes
+├── LICENSE                   # (add one!)
+└── .gitignore
+```
 
 
-## Current branch: Block Blast
-The initial Block Blast game, by Hungry Studio, is an endless-mode block puzzle on an 8x8 grid where you place three polyomino-style shapes per turn to clear full rows, columns, or both for points. Game over occurs when none of the remaining shapes can be placed anywhere on the board.
+Each mini-game is developed in its own branch, e.g.:
+- `block-blast` → current active branch
+- `future-game-1`, `future-game-2`, etc. (once started)
 
-The idea for this sub-project is to first reproduce the game, then add new features. Reproducing here means have a board, 3 "prefabs" polyomino-style shapes that can be placed on the board, and the different algorithms to:
- - generate the given prefabs 
- - compute the score when 
-   - placing 
-   - clearing rows/colums
-   - cleared streaks
+When a game is "done" (or reaches a milestone), it can be merged into `main`.
 
-The feature to be added afterward are the following:
- - New prefabs:
-    The base game have the usual polyomino-style shapes, e.g. unit, T, L, z, +, | 2/3/4/5-wide, 2x3, 3x3 (Note: there are also mirror variants for some of them), which is already a good amount of prefabs but more will certainly make the game more interesting and complex.
- - Different board layout:
-    The base game include only one board shape of 8x8 tiles. So i'm adding more, not just only different size square, but a whole slew of shapes: rectangle, circle, other polygons, ... And some layout with holes in them to make them more varied.
- - Tile but with durability:
-    Some tile may require more than one clear to destroy them, tougher tile if you want. They could be recognize via some visual changes.
- - Save/Load:
-    As a game can last some time, the player can decided to save the current state of the game, and then quit. So then later they can load and continue where they left.
+## Current Active Branch: block-blast
+
+This branch implements a recreation + extension of **Block Blast!** by [Hungry Studio](https://www.hungrystudio.com/) — a hugely popular relaxing block puzzle (70M+ DAU reported in 2026).
+
+### Original Game Rules (Confirmed)
+- Endless puzzle on an **8×8 grid**.
+- Each turn: **three random polyomino shapes** appear (no rotation allowed).
+- Drag & drop to place them.
+- Fill any complete row **or** column → clears automatically, scores points.
+- **Combos/streaks** (multiple clears in one placement or consecutively) give bonus points.
+- Game over when no shape can be placed anywhere.
+- Relaxing, no timer, offline-friendly.
+
+→ Play the original: [iOS App Store](https://apps.apple.com/us/app/block-blast/id1617391485) | [Google Play](https://play.google.com/store/apps/details?id=com.block.juggle)
+
+### This Sub-Project Goals
+1. **Faithful classic mode recreation**  
+   - 8×8 grid  
+   - Random shape generation (classic polyominoes: monomino, domino, T/L/Z/S/I/O, plus, lines 2–5, 2×3, 3×3, mirrors/variants)  
+   - Placement, row/column clearing, basic scoring + combo/streak logic
+
+2. **Planned extensions** (after core is solid)  
+   - Expanded shape pool  
+   - Custom board layouts (rectangles, circles, polygons, boards with holes)  
+   - Tiles with durability (require multiple clears; visually distinct)  
+   - Save/load system for long sessions
+
+→ See detailed README in the `block-blast` branch:  
+[`block-blast/README.md`](./block-blast/README.md) (or switch to branch to view it)
+
+## How to Work with Branches
+
+- List branches: `git branch -a`
+- Switch to a game: `git checkout block-blast`
+- Create new game branch: `git checkout -b new-game-name`
+- Build/run: (add instructions here once you have a Makefile/CMake setup)  
+  e.g. `make` from root, or `cd block-blast && make`
+
+## Roadmap / Status
+
+- [x] Lobby skeleton (basic platformer hub)
+- [ ] First playable game: Block Blast (in progress on `block-blast` branch)
+- [ ] Shared save/load framework
+- [ ] Second game slot
+- [ ] Multiplayer lobby features (TBD)
