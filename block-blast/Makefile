@@ -11,30 +11,30 @@
 ##          
 ##          The library objects are linked into both the main executable and every test binary,
 ##          while the main entry point is only linked into the primary executable.
-##          This separation prevents multiple-definition errors when building tests,
-##          since each test file contains its own main() function.
-##          
-##          Test binaries are built independently: each test *.c is compiled and linked
-##          with all library objects to produce a standalone executable.
+##          This separation prevents multiple-definition errors when building tests.
 ##          
 ##          Supported compilation modes:
-##            - release     : optimized build using GCC
-##            - debug       : warnings and debug symbols using GCC
-##            - extra-debug : sanitizers and pedantic checks using Clang
+##            - release         : optimized build using GCC
+##            - basic-debug     : warnings + debug symbols using GCC
+##            - strict-debug    : pedantic checks without sanitizers using GCC
+##            - clang-debug     : sanitizers + pedantic checks using Clang (requires clang installed)
+##            - valgrind-debug  : debug build using GCC, runs under Valgrind (requires valgrind installed)
 ##          
 ##          Object files → build/obj/
 ##          Main executable → build/bin/<name>
 ##          Test executables → build/bin/tests/<name>
 ##          
 ##          Automatic dependency tracking is ENABLED by default (-MMD -MP).
-##          This generates .d files and includes them so that header changes trigger
-##          correct incremental recompilation.
-##          Use NO_DEPENDENCY_TRACKING=1 to disable it (reduces I/O overhead).
+##          Use NO_DEPENDENCY_TRACKING=1 to disable.
 ##          
-##          Custom flags can be added via EXTRA_CFLAGS / EXTRA_LDFLAGS.
+##          Custom flags via EXTRA_CFLAGS / EXTRA_LDFLAGS.
 ##          Build is silent by default; use VERBOSE=1 to show commands.
 ##          
-##          Key targets:
+##          Logging (in valgrind-debug and run-tests):
+##            - Creates timestamped folder: logs/valgrind-<dd-mm-YYYY-HH-MM-SS>/ or logs/tests-<dd-mm-YYYY-HH-MM-SS>/
+##            - Captures stdout/stderr + Valgrind diagnostics in .log files
+## 
+## @section Key targets
 ##            - all              : build main executable (default)
 ##            - tests            : build all test executables
 ##            - run-tests        : build and run all tests, showing stdout live,
@@ -42,7 +42,8 @@
 ##                                 (format: dd-mm-YYYY-HH-MM-SS) with conditional banners
 ##            - rebuild          : clean and rebuild main
 ##            - rebuild-tests    : clean and rebuild tests
-##            - run / gdb        : run or debug the main binary
+##            - run-main         : run the main binary
+##            - run-gdb          : debug the main binary with gdb
 ##            - clean / clean-obj: cleanup
 ##            - compile_commands : generate compile_commands.json for clangd
 ## 
@@ -52,44 +53,28 @@
 ##     make
 ##     make all
 ## 
-##   Debug build of main executable:
-##     make MODE=debug
+##   Debug builds:
+##     make MODE=basic-debug
+##     make MODE=strict-debug
 ## 
-##   Extra-debug build with verbose output:
-##     make MODE=extra-debug VERBOSE=1
+##   Sanitizers / Valgrind:
+##     make MODE=clang-debug
+##     make MODE=valgrind-debug run-main
+##     make MODE=valgrind-debug run-tests
 ## 
-##   Build and run all tests (recommended for development):
-##     make run-tests
-##     make run-tests MODE=debug
-##     make run-tests MODE=extra-debug NO_DEPENDENCY_TRACKING=1
-##
-##     if the main entry point in 'src' isn't named "main" then
-##     make rebuild run-tests MODE=extra-debug MAIN_NAME="The_name_of_the_entry_point_in_src"
+##   Tests with live output + logs:
+##     make run-tests MODE=basic-debug
+##     make run-tests MODE=clang-debug
 ## 
-##   Just build tests (without running):
-##     make tests
-## 
-##   Force full rebuild of everything:
-##     make rebuild
-##     make rebuild-tests
-## 
-##   Run the main program or debug it:
-##     make run
-##     make gdb
-## 
-##   Clean everything and start fresh:
-##     make clean
-##     make clean && make run-tests MODE=extra-debug
-## 
-##   Generate compile_commands.json for clangd/language server:
-##     make compile_commands
-## 
-##   Custom main filename (e.g. app.c instead of main.c):
+##   Custom main file or extras:
 ##     make MAIN_NAME=app MODE=release
+##     make EXTRA_CFLAGS="-Wshadow -Wconversion" MODE=strict-debug VERBOSE=1
 ## 
-##   Add extra compiler flags:
-##     make EXTRA_CFLAGS="-Wshadow -Wconversion"
-##
+##   Full rebuild + run/debug:
+##     make rebuild run-main
+##     make rebuild-tests
+##     make run-gdb
+## 
 ## @author  Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 
 # Compiler and flags
@@ -109,14 +94,15 @@ BASE_LDFLAGS := \
 # Modes
 MODE ?= release
 ifeq ($(MODE),release)
-    CC := gcc
-    CFLAGS := \
+	CC := gcc
+	CFLAGS := \
 		-O2
-    LDFLAGS := \
+	LDFLAGS := \
 		-O2
-else ifeq ($(MODE),debug)
-    CC := gcc
-    CFLAGS := \
+	TOOL := 
+else ifeq ($(MODE),basic-debug)
+	CC := gcc
+	CFLAGS := \
 		-Wall \
 		-Wextra \
 		-g \
@@ -126,13 +112,37 @@ else ifeq ($(MODE),debug)
 		-Wno-deprecated-declarations \
 		-D_STACK_TRACE \
 		-D_DEBUG
-    LDFLAGS := \
+	LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
-else ifeq ($(MODE),extra-debug)
-    CC := clang
-    CFLAGS := \
+	TOOL := 
+else ifeq ($(MODE),strict-debug)
+	CC := gcc
+	CFLAGS := \
+		-Werror \
+		-Wall \
+		-Wextra \
+		-pedantic \
+		-g \
+		-O0 \
+		-fno-omit-frame-pointer \
+		-Wno-newline-eof \
+		-Wno-unused-function \
+		-Wno-deprecated-declarations \
+		-Wno-gnu-zero-variadic-macro-arguments \
+		-D_STACK_TRACE \
+		-D_DEBUG
+	LDFLAGS := \
+		-g \
+		-rdynamic \
+		-O0 \
+		-fno-omit-frame-pointer
+	TOOL := 
+else ifeq ($(MODE),clang-debug)
+	ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
+		CC := clang
+		CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -147,14 +157,47 @@ else ifeq ($(MODE),extra-debug)
 		-Wno-gnu-zero-variadic-macro-arguments \
 		-D_STACK_TRACE \
 		-D_DEBUG
-    LDFLAGS := \
+		LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
 		-fno-omit-frame-pointer \
 		-fsanitize=address,undefined
+		TOOL := 
+	else
+		$(info Clang not detected. Use basic-debug or strict-debug instead.)
+		ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
+			$(info Valgrind detected — try MODE=valgrind-debug for runtime checks.)
+		endif
+		$(error Clang required for clang-debug mode)
+	endif
+else ifeq ($(MODE),valgrind-debug)
+	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
+		CC := gcc
+		CFLAGS := \
+		-Wall \
+		-Wextra \
+		-g \
+		-O0 \
+		-Wno-newline-eof \
+		-Wno-unused-function \
+		-Wno-deprecated-declarations \
+		-D_STACK_TRACE \
+		-D_DEBUG
+		LDFLAGS := \
+		-g \
+		-rdynamic \
+		-O0
+		TOOL := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
+	else
+		$(info Valgrind not detected. Use basic-debug or strict-debug instead.)
+		ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
+			$(info Clang detected — try MODE=clang-debug for compile-time sanitizers.)
+		endif
+		$(error Valgrind required for valgrind-debug mode)
+	endif
 else
-    $(error Unknown MODE=$(MODE). Use release, debug or extra-debug)
+	$(error Unknown MODE=$(MODE). Use release, basic-debug, strict-debug, clang-debug, valgrind-debug)
 endif
 
 # Combine with base
@@ -195,24 +238,24 @@ DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
 
 # Verbose mode (default silent)
 ifeq ($(VERBOSE),1)
-    SILENT_PREFIX :=
+	SILENT_PREFIX :=
 else
-    SILENT_PREFIX := @
+	SILENT_PREFIX := @
 endif
 
 # Automatic dependency tracking control (enabled by default)
 ifeq ($(NO_DEPENDENCY_TRACKING),1)
-    DEP_FLAGS :=
-    DEPS :=
+	DEP_FLAGS :=
+	DEPS :=
 else
-    DEP_FLAGS := -MMD -MP
-    # All dependency files
-    DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
+	DEP_FLAGS := -MMD -MP
+	# All dependency files
+	DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
 endif
 
 # Include dependency files only when tracking is enabled
 ifneq ($(NO_DEPENDENCY_TRACKING),1)
-    -include $(DEPS)
+	-include $(DEPS)
 endif
 
 # Prevent make from deleting intermediate object files
@@ -258,10 +301,25 @@ rebuild: clean all
 
 rebuild-tests: clean tests
 
-run:
-	@if [ -f $(BIN) ]; then $(BIN); else echo "No executable"; fi
+run-main:
+	@if [ -f $(BIN) ]; then \
+		if [ "$(MODE)" = "valgrind-debug" ]; then \
+			$(eval TIMESTAMP := $(shell date "+%d-%m-%Y-%H-%M-%S")) \
+			$(eval LOG_DIR := logs/valgrind-$(TIMESTAMP)) \
+			mkdir -p "$(LOG_DIR)" && \
+			log_file="$(LOG_DIR)/main-run-valgrind.log" && \
+			echo "Running main under Valgrind... (output saved to $$log_file)" && \
+			$(TOOL) $(BIN) > "$$log_file" 2>&1 && \
+			echo "Valgrind finished. Log: $$log_file" || \
+			(echo "Valgrind failed. See $$log_file" && exit 1); \
+		else \
+			$(TOOL) $(BIN); \
+		fi; \
+	else \
+		echo "No executable"; \
+	fi
 
-gdb:
+run-gdb:
 	@if [ -f $(BIN) ]; then gdb $(BIN); else echo "No executable"; fi
 
 # Run all test executables:
@@ -270,7 +328,7 @@ gdb:
 # - In the log file: only show banners and sections if there is actual content
 run-tests: tests
 	$(eval TIMESTAMP := $(shell date "+%d-%m-%Y-%H-%M-%S"))
-	$(eval LOG_DIR := logs/$(TIMESTAMP))
+	$(eval LOG_DIR := logs/tests-$(TIMESTAMP))
 	@mkdir -p "$(LOG_DIR)"
 	@echo "Running all tests (stdout shown below, full stdout+stderr saved in $(LOG_DIR))..."
 	@echo "====================================================================="
@@ -278,7 +336,11 @@ run-tests: tests
 	for test_bin in $(TEST_BINS); do \
 		if [ -f "$$test_bin" ]; then \
 			test_name=$$(basename "$$test_bin"); \
-			log_file="$(LOG_DIR)/$$test_name.log"; \
+			if [ "$(MODE)" = "valgrind-debug" ]; then \
+				log_file="$(LOG_DIR)/valgrind-$$test_name.log"; \
+			else \
+				log_file="$(LOG_DIR)/$$test_name.log"; \
+			fi;
 			echo ">>> Running $$test_name..."; \
 			echo ""; \
 			echo "--- Output ---------------------------------------------------------"; \
@@ -287,7 +349,7 @@ run-tests: tests
 			stdout_tmp=$$(mktemp); \
 			stderr_tmp=$$(mktemp); \
 			\
-			./$$test_bin >"$$stdout_tmp" 2>"$$stderr_tmp"; \
+			$(TOOL) ./$$test_bin >"$$stdout_tmp" 2>"$$stderr_tmp"; \
 			test_status=$$?; \
 			\
 			{ \
@@ -348,19 +410,25 @@ help:
 	@echo "    tests                Build all test executables"
 	@echo "    rebuild              Force the recompilation of the entire codebase"
 	@echo "    rebuild-tests        Force the recompilation of the test executables"
-	@echo "    run                  Run the app"
-	@echo "    gdb                  Run the app in gdb"
+	@echo "    run-main             Run the app"
+	@echo "    run-gdb              Run the app in gdb"
 	@echo "    run-tests            Build and run all tests (fails on first error)"
 	@echo "    clean                Remove all build artifacts"
 	@echo "    clean-obj            Remove object files"
 	@echo "    compile_commands     Generate compile_commands.json for clangd"
 	@echo ""
 	@echo "OPTIONS:"
-	@echo "    MODE=<str>                  Compilation type: release, debug, extra-debug"
+	@echo "    MODE=<str>                  Compilation type: release, basic-debug, strict-debug, clang-debug, valgrind-debug"
 	@echo "                                Default: release"
+	@echo "                                Note: clang-debug requires Clang installed system-wide."
+	@echo "                                Note: valgrind-debug requires Valgrind installed system-wide; runs binaries under Valgrind with leak checks."
+	@echo "                                Logging in valgrind-debug and run-tests:"
+	@echo "                                  - Creates timestamped folder: logs/valgrind-<dd-mm-YYYY-HH-MM-SS>/ or logs/tests-<dd-mm-YYYY-HH-MM-SS>/"
+	@echo "                                  - run-main: main-run-valgrind.log"
+	@echo "                                  - run-tests: per-test .log files (valgrind- prefixed when in valgrind-debug)"
 	@echo "    VERBOSE=1                   Show all compilation commands (default: silent)"
 	@echo "    NO_DEPENDENCY_TRACKING=1    Disable automatic dependency tracking (.d files)"
 	@echo "    EXTRA_CFLAGS=\"<str>\"        Add custom compiler flags"
 	@echo "    EXTRA_LDFLAGS=\"<str>\"       Add custom linker flags"
 
-.PHONY: all tests run-tests clean clean-obj rebuild run gdb compile_commands help
+.PHONY: all tests run-tests clean clean-obj rebuild run-main run-gdb compile_commands help
