@@ -45,8 +45,17 @@ dkms.conf
 # TrueType Font
 *.ttf
 
+# Doxygen output
+docs/
+*.html
+*.css
+*.js
+*.png
+*.svg
+latex/
+
 # Specific file ignores
-build/**/*
+build/
 .clangd
 compile_flags.txt
 main

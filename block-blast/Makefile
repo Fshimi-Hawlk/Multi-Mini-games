@@ -75,7 +75,7 @@
 ##     make rebuild-tests
 ##     make run-gdb
 ## 
-## @author  Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
+## */ @author  Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 
 # Compiler and flags
 # Base flags (always present)

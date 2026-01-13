@@ -4,30 +4,12 @@
 
 This is a monorepo-style project where each mini-game lives in its own **dedicated branch**. The main branch (`main`) contains:
 - Shared code & assets (`firstparty/`, `thirdparty/`, `assets/`)
-- The lobby/hub code
-- Common utilities (build system, save/load framework, etc.)
-
-## Project Structure
-
-```
-.
-├── main/                     # Lobby & hub code (platformer-style menu world)
-├── firstparty/               # Your reusable single-header libs (stb-style)
-├── thirdparty/               # External dependencies
-├── assets/                   # Shared fonts, images, sounds, levels, etc.
-├── docs/                     # (optional) Aggregated or shared documentation
-├── README.md                 # This file
-├── CHANGELOG.md              # (recommended) Overall project changes
-├── LICENSE                   # (add one!)
-└── .gitignore
-```
-
 
 Each mini-game is developed in its own branch, e.g.:
 - `block-blast` → current active branch
 - `future-game-1`, `future-game-2`, etc. (once started)
 
-When a game is "done" (or reaches a milestone), it can be merged into `main`.
+When a game is finished, it will be reviewed to be merged into `main`.
 
 ## Current Active Branch: block-blast
 
@@ -64,13 +46,20 @@ This branch implements a recreation + extension of **Block Blast!** by [Hungry S
 - List branches: `git branch -a`
 - Switch to a game: `git checkout block-blast`
 - Create new game branch: `git checkout -b new-game-name`
-- Build/run: (add instructions here once you have a Makefile/CMake setup)  
-  e.g. `make` from root, or `cd block-blast && make`
 
-## Roadmap / Status
+## Documentation
 
-- [x] Lobby skeleton (basic platformer hub)
-- [ ] First playable game: Block Blast (in progress on `block-blast` branch)
-- [ ] Shared save/load framework
-- [ ] Second game slot
-- [ ] Multiplayer lobby features (TBD)
+API & code documentation is generated with Doxygen.
+
+To generate locally:
+
+```bash
+# From the sub-project root (e.g. block-blast/)
+doxygen Doxyfile.min
+# or if you renamed it
+doxygen Doxyfile
+```
+
+The output appears in `./docs/html/`.
+Open `docs/html/index.html` in your browser.
+**Note**: The generated files are **not** committed to git — regenerate them whenever needed.
