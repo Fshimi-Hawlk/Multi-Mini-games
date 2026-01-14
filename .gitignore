@@ -45,18 +45,32 @@ dkms.conf
 # TrueType Font
 *.ttf
 
-# Doxygen output
+# Build artifacts
+build/
+bin/
+obj/
+*.a
+*.so
+*.lib
+main
+
+# Doxygen
 docs/
+html/
+latex/
+xml/
 *.html
 *.css
 *.js
 *.png
 *.svg
-latex/
 
-# Specific file ignores
-build/
-.clangd
-compile_flags.txt
-main
+# Logs / temp
+*.log
+.cache/
+.vscode/
+.clangd/
+
+# Other
 template.h
+compile_flags.txt

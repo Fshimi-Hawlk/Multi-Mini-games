@@ -1,65 +1,105 @@
 # Multi Mini-Games
 
-**A collection of mini-games playable through a unified interactive lobby (single-player or multiplayer platformer-style hub).**
+## Cadre :
 
-This is a monorepo-style project where each mini-game lives in its own **dedicated branch**. The main branch (`main`) contains:
-- Shared code & assets (`firstparty/`, `thirdparty/`, `assets/`)
+**Projet de L2 Informatique 2025-2026**
+janvier 2026 --> avril 2026
 
-Each mini-game is developed in its own branch, e.g.:
-- `block-blast` → current active branch
-- `future-game-1`, `future-game-2`, etc. (once started)
+## Membres :
 
-When a game is finished, it will be reviewed to be merged into `main`.
+[BAUDET Léandre](Leandre.Baudet.Etu@univ-lemans.fr)
+[BERGE Kimi](Kimi.Berge.Etu@univ-lemans.fr)
+[CAILLON Charles](Charles_Caillon.Etu@univ-lemans.fr)
+[CHAUVEAU Maxime](Maxime.Chauveau.Etu@univ-lemans.fr)
 
-## Current Active Branch: block-blast
+**Collection of independent mini-games, eventually integrated into a unified interactive lobby (single-player with potential multiplayer extensions).**
 
-This branch implements a recreation + extension of **Block Blast!** by [Hungry Studio](https://www.hungrystudio.com/) — a hugely popular relaxing block puzzle (70M+ DAU reported in 2026).
+The lobby will be a platformer-style hub where players navigate to access each mini-game as a "scene" (seamless switch, same window/executable).
 
-### Original Game Rules (Confirmed)
-- Endless puzzle on an **8×8 grid**.
-- Each turn: **three random polyomino shapes** appear (no rotation allowed).
-- Drag & drop to place them.
-- Fill any complete row **or** column → clears automatically, scores points.
-- **Combos/streaks** (multiple clears in one placement or consecutively) give bonus points.
-- Game over when no shape can be placed anywhere.
-- Relaxing, no timer, offline-friendly.
+Tech stack: Pure C with raylib for graphics/input/audio.
 
-→ Play the original: [iOS App Store](https://apps.apple.com/us/app/block-blast/id1617391485) | [Google Play](https://play.google.com/store/apps/details?id=com.block.juggle)
+## Project Workflow (Monorepo with Branches)
 
-### This Sub-Project Goals
-1. **Faithful classic mode recreation**  
-   - 8×8 grid  
-   - Random shape generation (classic polyominoes: monomino, domino, T/L/Z/S/I/O, plus, lines 2–5, 2×3, 3×3, mirrors/variants)  
-   - Placement, row/column clearing, basic scoring + combo/streak logic
+- Development happens in **dedicated branches** per mini-game (e.g., `block-blast`).
+- Shared resources (code, assets, dependencies) live at root and are accessible from branches.
+- When a mini-game is stable/complete:
+  - Merge branch into `main`.
+  - Game code becomes a folder at root (e.g., `block-blast/`).
+  - Integrate as lib/module for lobby scene switching.
+- Root `main` branch always contains: lobby code (future), shared folders, and merged games.
 
-2. **Planned extensions** (after core is solid)  
-   - Expanded shape pool  
-   - Custom board layouts (rectangles, circles, polygons, boards with holes)  
-   - Tiles with durability (require multiple clears; visually distinct)  
-   - Save/load system for long sessions
+## Current Active Branch
 
-→ See detailed README in the `block-blast` branch:  
-[`block-blast/README.md`](./block-blast/README.md) (or switch to branch to view it)
+`block-blast` — Recreation + extensions of *Block Blast!* by Hungry Studio.
 
-## How to Work with Branches
+For details, switch to the branch and read its `README.md`.
 
-- List branches: `git branch -a`
-- Switch to a game: `git checkout block-blast`
-- Create new game branch: `git checkout -b new-game-name`
+## Repository Structure (Root Level)
 
-## Documentation
-
-API & code documentation is generated with Doxygen.
-
-To generate locally:
-
-```bash
-# From the sub-project root (e.g. block-blast/)
-doxygen Doxyfile.min
-# or if you renamed it
-doxygen Doxyfile
+```
+.
+├── assets/                   # Shared + per-game assets (images, fonts, sounds, data for saves/leaderboards)
+│   ├── fonts                 # Different fonts used by the games
+│   └── block-blast/          # Example per-game subdir (added post-merge)
+├── build
+│   ├── bin/
+│   └── obj/
+├── firstparty/               # Reusable single-header libs (stb-style, your own)
+├── thirdparty/               # External deps (raylib static lib, PCG rand, etc.)
+├── docs/                     # (Future) Aggregated/shared documentation across all games/lobby
+├── LICENSE                   # Project license
+├── CHANGELOG.md              # High-level changes (branch creations, merges, shared updates)
+├── CONTRIBUTING.md           # Guidelines for contributions/PRs
+├── TODO.md                   # Internal reminders (global Makefile, lobby integration, etc.)
+├── .gitignore                # Ignores build/, logs/, docs/, etc.
+├── Makefile                  # (Future global) Build all merged games/lobby at once
+└── README.md                 # This file
 ```
 
-The output appears in `./docs/html/`.
-Open `docs/html/index.html` in your browser.
-**Note**: The generated files are **not** committed to git — regenerate them whenever needed.
+Post-merge example (after block-blast merge):
+
+```
+├── block-blast/              # Merged game: src/, include/, tests/, etc.s
+```
+
+## Getting Started (Git Commands)
+
+```bash
+# Clone the repo
+git clone https://github.com/yourusername/multi-mini-games.git
+cd multi-mini-games
+
+# List all branches
+git branch -a
+
+# Switch to a mini-game branch
+git checkout block-blast
+
+# Create/start a new mini-game branch
+git checkout -b new-game-name
+```
+
+## Building & Running (Sub-Project Level)
+From inside a branch root (e.g., after `git checkout block-blast`):
+
+See all options: `make help`
+- Default build (release): `make` or `make all`
+- Debug/sanitizers: `make MODE=clang-debug` (requires Clang installed)
+- Valgrind checks: `make MODE=valgrind-debug run-main` or `make MODE=valgrind-debug run-tests` (requires Valgrind installed)
+- Tests: `make run-tests` (live output + logs in logs/tests-<timestamp>/)
+- Full rebuild + run: `make rebuild run-main`
+
+**Note**: Global root Makefile coming later (for building all merged games/lobby at once — see [TODO](TODO.md)).
+
+## Generating Documentation (Sub-Project Level)
+
+From branch root:
+
+```bash
+doxygen Doxyfile.min
+```
+
+Output: [web page](./docs/html/index.html) (open in browser).  
+Includes code API + Makefile documentation.  
+Generated files are ignored in git — regenerate as needed.  
+**Future**: Root-level docs aggregation (all games + lobby in one view)  
