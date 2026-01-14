@@ -38,7 +38,7 @@ Card pop_card(Deck* d) {
     return remove_at(d, 0); 
 }
 
-// Mélange Fisher-Yates (chaine -> tableau -> chaine)
+// Mélange Fisher-Yates (chaine -> tableau -> chaine) et ne pas oublier srand(time(NULL)) dans le main
 void shuffle_deck(Deck* d) {
     if (d->size < 2) return;
 

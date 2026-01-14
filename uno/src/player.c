@@ -2,14 +2,21 @@
 #include <string.h>
 
 // Initialise un joueur
+
 void init_player(Player* p, int id, const char* name) {
+
+    if (p == NULL) return; // verifie que le pointeur existe 
+
+    //élimine les déchets mémoire (pour eviter les failles reseaux)
+    memset(p, 0, sizeof(Player));
+
     p->id = id;
-    strncpy(p->name, name, sizeof(p->name) - 1);
-    p->name[sizeof(p->name) - 1] = '\0'; 
-    
-    p->hand.head = NULL;
-    p->hand.size = 0;
-    p->is_local = 1; 
+    p->is_local = 1; // Valeur par défaut
+
+    if (name != NULL) {
+        strncpy(p->name, name, sizeof(p->name) - 1);
+        // Pas besoin de '\0' grace memset
+    }
 }
 
 // Fait piocher une carte 
