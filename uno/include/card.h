@@ -29,12 +29,6 @@ typedef struct {
     int size;
 } Deck;
 
-// --- STRUCTURE DU JOUEUR ---
-typedef struct {
-    int id;
-    char name[50];
-    Deck hand;
-} Player;
 
 // --- PROTOTYPES ---
 void push_card(Deck* d, Card c);
@@ -42,5 +36,6 @@ Card pop_card(Deck* d);
 Card remove_at(Deck* d, int index);
 void shuffle_deck(Deck* d);
 void init_uno_deck(Deck* d);
+void free_deck(Deck* d);
 
 #endif
