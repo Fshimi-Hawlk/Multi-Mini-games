@@ -1,39 +1,52 @@
 # CONTRIBUTING.md
 
-This project uses a monorepo with branch-per-game workflow. Contributions are welcome via issues or pull requests.
+Internal guidelines for the Multi Mini-Games project
 
-## How to Contribute
+This is a monorepo with branch-per-game workflow. All team members coordinate via GitHub issues/PRs or direct discussion.
 
-### 1. Branch Workflow
-- Work on feature branches off `main` (e.g., `git checkout -b feature/new-shape-system`).
-- For new mini-games: create a dedicated branch (`git checkout -b new-game-name`).
-- Keep branches focused — one feature or game at a time.
-- When ready: open PR to `main` (for merges) or relevant branch.
+## Workflow
 
-### 2. Code Style & Conventions
-- See the markdown file: [code style & conventions](./CodeStyleAndConventions.md)
+### Branches
+- Develop features or fixes on branches off `main` (e.g., `git checkout -b feature/custom-boards`).
+- New mini-games: dedicated branch from `main` (`git checkout -b new-game-name`).
+- Keep branches focused and short-lived.
+- When ready:
+  - Open PR to `main` (for merges/shared changes) or target branch.
+  - Discuss big changes in team chat/meeting first.
 
-### 3. Commit Messages
-- Conventional Commits style:
-  - `feat: add custom board support`
-  - `fix: resolve placement overlap bug`
-  - `docs: update README with build instructions`
-  - `refactor: extract shape generation logic`
+### Merging Sub-Games
+- Once a game branch is stable: PR to merge into `main` as a folder.
+- Post-merge: integrate as lib/module for lobby scene switching.
 
-### 4. Pull Requests
-- Title: Clear summary.
-- Description: What/why, reference issues if any.
-- Keep PRs small and reviewable.
-- Ensure builds pass (`make MODE=clang-debug`, `make run-tests`).
+## Code Style & Conventions
+- See separate file: [Code Style & Conventions](./CodeStyleAndConventions.md)
 
-### 5. Issues
-- Use GitHub Issues for bugs, features, or ideas.
-- Label appropriately (bug, enhancement, documentation).
+## Commit Messages
+Use Conventional Commits:
+- `feat: add durability tiles`
+- `fix: correct streak scoring`
+- `docs: update build instructions`
+- `refactor: split shape logic`
+- `test: add placement tests`
 
-### 6. Testing
-- Add tests in `tests/` when possible.
-- Run `make run-tests` before PR.
+## Pull Requests
+- Title: concise summary.
+- Description: explain what/why, link related issues.
+- Keep PRs small for quick review.
+- Run checks locally: `make MODE=clang-debug`, `make run-tests`.
 
-Questions? Open an issue or discuss in PR comments.
+## Issues
+- Create GitHub issues for bugs, features, or discussions.
+- Use labels: bug, enhancement, documentation, etc.
 
-Happy coding!
+## Testing
+- Add unit/integration tests in `tests/` for new logic.
+- Always run `make run-tests` (prefer `MODE=clang-debug` or `valgrind-debug`) before committing/PR.
+
+## General
+- Use raylib only (no external windowing changes).
+- Prefix game-specific functions (e.g., `bb_` for Block Blast).
+- Update Doxygen comments for public API.
+- Ping team on PRs for review.
+
+Coordinate on larger changes to avoid conflicts.
