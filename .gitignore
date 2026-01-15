@@ -49,9 +49,6 @@ dkms.conf
 build/
 bin/
 obj/
-*.a
-*.so
-*.lib
 main
 
 # Doxygen
