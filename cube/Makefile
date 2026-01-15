@@ -292,7 +292,7 @@ compile_commands:
 	@sed -i '$$ s/,$$/]/' compile_commands.json
 
 clean:
-	$(SILENT_PREFIX)rm -rf $(OBJ_DIR) $(BIN_DIR)/*
+	$(SILENT_PREFIX)rm -rf build
 
 clean-obj:
 	$(SILENT_PREFIX)rm -rf $(OBJ_DIR)/*
