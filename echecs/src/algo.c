@@ -387,6 +387,8 @@ void promotionChoice(Board_t board) {
     else if (mousePos.x >= xPromotion + CELL_PX_SIZE * 3 && mousePos.x <= xPromotion + CELL_PX_SIZE * 4) {
         promotionVers = PIECE_NAME_QUEEN;
     }
+    else
+        return;
 
     piece->name = promotionVers;
     waitingForPromotion = false;
