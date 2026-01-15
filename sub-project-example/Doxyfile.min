@@ -1,0 +1,38 @@
+# Minimal Doxyfile
+DOXYFILE_ENCODING       = UTF-8
+
+PROJECT_NAME            = "Sub-Project Name"
+PROJECT_NUMBER          = 2026.01.13-1 # <Use the date of the commit>-<commit current count of the day>
+PROJECT_BRIEF           = "Sub-Project Brief..."
+
+OUTPUT_DIRECTORY        = ./docs
+CREATE_SUBDIRS          = YES
+CREATE_SUBDIRS_LEVEL    = 2
+
+FULL_PATH_NAMES         = YES
+STRIP_FROM_PATH         = ../
+STRIP_FROM_INC_PATH     = include ../firstparty ../thirdparty
+
+OPTIMIZE_OUTPUT_FOR_C   = YES
+
+INPUT                   = src include makefile.md
+RECURSIVE               = YES
+FILE_PATTERNS           = *.c *.h *.md
+
+EXCLUDE                 = tests docs build ../thirdparty Makefile
+EXCLUDE_SYMLINKS        = YES
+
+SEARCH_INCLUDES         = YES
+INCLUDE_PATH            = include ../firstparty ../thirdparty
+
+EXTRACT_ALL             = YES
+HIDE_UNDOC_MEMBERS      = YES
+HIDE_UNDOC_CLASSES      = YES
+
+PREDEFINED              = _DEBUG
+
+# Comment out if Latex File generation is needed
+GENERATE_LATEX          = NO
+
+# Optional: faster generation on multi-core machines
+NUM_PROC_THREADS        = 0
