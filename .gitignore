@@ -53,3 +53,33 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# TrueType Font
+*.ttf
+
+# Build artifacts
+build/
+bin/
+obj/
+main
+
+# Doxygen
+docs/
+html/
+latex/
+xml/
+*.html
+*.css
+*.js
+*.png
+*.svg
+
+# Logs / temp
+*.log
+.cache/
+.vscode/
+.clangd/
+
+# Other
+template.h
+compile_flags.txt
