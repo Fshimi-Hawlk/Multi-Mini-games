@@ -16,18 +16,6 @@
 *.gch
 *.pch
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
 # Executables
 *.exe
 *.out
@@ -53,3 +41,22 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# TrueType Font
+*.ttf
+
+# Build artifacts
+build/
+bin/
+obj/
+main
+
+# Logs / temp
+*.log
+.cache/
+.vscode/
+.clangd/
+
+# Other
+template.h
+compile_flags.txt
