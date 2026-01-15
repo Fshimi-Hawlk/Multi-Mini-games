@@ -1,7 +1,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define screenWidth 800
-#define screenHeight 600
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
 
 #endif
