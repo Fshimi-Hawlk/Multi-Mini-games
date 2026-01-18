@@ -1,6 +1,8 @@
-# Block Blast Recreation
+# Documentation
 
-**A faithful reproduction + feature expansion of the popular mobile puzzle *Block Blast!* by [Hungry Studio](https://www.hungrystudio.com/).**
+## Breif
+
+A faithful **reproduction** + **feature expansion** of the popular mobile puzzle *Block Blast!* by [**Hungry Studio**](https://www.hungrystudio.com/).
 
 ## Overview
 

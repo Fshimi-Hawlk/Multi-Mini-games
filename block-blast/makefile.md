@@ -34,15 +34,15 @@ Default: `release`
 
 ## Key Targets
 
-- `all`               → Build main executable (default target)
-- `tests`             → Build all test executables
-- `run-tests`         → Build + run all tests (live stdout + per-test logs in `logs/tests-<timestamp>/`)
-- `rebuild`           → `clean` + `all`
-- `rebuild-tests`     → `clean` + `tests`
-- `run-main`          → Run main binary (uses Valgrind wrapper in `valgrind-debug` mode)
-- `run-gdb`           → Run main binary under gdb
-- `clean`             → Remove `build/`
-- `compile_commands`  → Generate `compile_commands.json` for clangd / language servers
+- `all`               -> Build main executable (default target)
+- `tests`             -> Build all test executables
+- `run-tests`         -> Build + run all tests (live stdout + per-test logs in `logs/tests-<timestamp>/`)
+- `rebuild`           -> `clean` + `all`
+- `rebuild-tests`     -> `clean` + `tests`
+- `run-main`          -> Run main binary (uses Valgrind wrapper in `valgrind-debug` mode)
+- `run-gdb`           -> Run main binary under gdb
+- `clean`             -> Remove `build/`
+- `compile_commands`  -> Generate `compile_commands.json` for clangd / language servers
 
 ## Example Commands
 
