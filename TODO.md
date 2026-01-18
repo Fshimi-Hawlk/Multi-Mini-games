@@ -1,35 +1,33 @@
 # TODO.md — Multi Mini-Games Monorepo
 
-High-level reminders for root/main branch tasks.  
-Prioritized roughly by importance/dependency order.
+High-priority / medium-priority tasks for the root project (mostly things that affect everyone or prepare the final game collection).
 
-## Immediate / Setup
+Items are roughly ordered from "we should do this quite soon" to "nice to have later".
 
-- [ ] Create root-level global Makefile  
-  Wrapper to build everything at once (lobby + all merged sub-games as libs).  
-  Possible targets: `make all`, `make lobby`, `make sub-project` (post-merge), clean-all, etc.
+## Right now – most urgent
 
-- [ ] Add root `docs/` folder  
-  Purpose: Aggregated/shared documentation.  
-  - Top-level Doxyfile for documenting lobby code + firstparty/shared utils.  
-  - Optional: Index page linking to per-game docs (`sub-project/docs/html/`, etc.).  
-  - Later: Automated generation of combined API reference across all merged games.
+- [ ] Create one global Makefile at root level  
+  Goal: be able to write `make all`, `make lobby`, `make clean-all`, etc.  
+  and build everything (lobby + already merged games) with one command.
 
-## Integration (Post First Merge)
+- [ ] Create root `docs/` folder  
+  - Put a main Doxyfile there for lobby + shared code  
+  - Later: make one big documentation site linking all games + lobby
 
-- [ ] Define sub-game integration standard  
-  - Each merged game compiled as static lib.  
-  - Public header per game (e.g., `subProjectAPI.h` with prefixed functions, e.g., `subProject_init()`, `subProject_update()`, `subProject_draw()`, `subProject_cleanup()`, ...).  
-  - Lobby calls these for seamless scene switching (reuse same window, unload/load assets).
+## When the first game is merged into main
 
-- [ ] Shared save/load framework  
-  - Common utils in firstparty/ for persisting state (JSON or binary).  
-  - Per-game data in `assets/<game>/saves/` or `assets/<game>/leaderboards/`.
+- [ ] Write down clear rules for how a game should be structured so the lobby can use it  
+  Example: game must provide init/update/draw/cleanup functions with a common prefix
 
-- [ ] Leaderboards / persistent data structure  
-  - Decide format (local files, simple DB, or in-memory for now).  
-  - Subdirs like `assets/sub-project/data/`.
+- [ ] Decide how to save scores / progress / settings  
+  → Simple files in assets/game-name/saves/ ? JSON? Something else?  
+  → Create shared code in firstparty/ for loading & saving
 
-## Future
+- [ ] Think about leaderboards format (local files for now — no online)
 
-- [ ] Roadmap section in root README (checklist of merged games, lobby progress).
+## Later / nice to have
+
+- [ ] Add a "Roadmap" or "Games status" section in README.md  
+  Example table: which games are started / in progress / finished / merged
+
+Feel free to add new items or move priorities — discuss big changes in the group chat first.

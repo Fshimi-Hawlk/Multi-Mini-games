@@ -1,58 +1,62 @@
 # Multi Mini-Games
 
-## Cadre :
+## Project Overview
 
-**Projet de L2 Informatique 2025-2026**  
-janvier 2026 → avril 2026
+**Second-year Computer Science Bachelor's project (2025-2026)**  
+Development period: January 2026 – April 2026
 
-## Membres :
+### Members:
 
-- [BAUDET Léandre](Leandre.Baudet.Etu@univ-lemans.fr)  
-- [BERGE Kimi](Kimi.Berge.Etu@univ-lemans.fr)  
-- [CAILLON Charles](Charles_Caillon.Etu@univ-lemans.fr)  
-- [CHAUVEAU Maxime](Maxime.Chauveau.Etu@univ-lemans.fr)  
+- BAUDET Léandre: Leandre.Baudet.Etu@univ-lemans.fr  
+- BERGE Kimi: Kimi.Berge.Etu@univ-lemans.fr  
+- CAILLON Charles: Charles_Caillon.Etu@univ-lemans.fr  
+- CHAUVEAU Maxime: Maxime.Chauveau.Etu@univ-lemans.fr  
 
-**Collection of independent mini-games, eventually integrated into a unified interactive lobby (single-player with potential multiplayer extensions).**
+### Goal
 
-The lobby will be a platformer-style hub where players navigate to access each mini-game as a "scene" (seamless switch, same window/executable).
+Create several small independent mini-games in C using **raylib**.  
+Later, connect them inside one program through a common **lobby** (a simple platformer-style menu world).  
+Players walk to a door/zone → the corresponding mini-game starts in the same window (no new executable).
 
-Tech stack: Pure C with raylib for graphics/input/audio.
+- Single-player mode (for now)
+- Multiplayer mode (planned later)
 
-## Project Workflow (Monorepo with Branches)
+## Project Workflow
 
-- Development happens in **dedicated branches** per mini-game (e.g., `sub-project`).
-- Shared resources (code, assets, dependencies) live at root and are accessible from branches.
-- When a mini-game is stable/complete:
-  - Merge branch into `main`.
-  - Game code becomes a folder at root (e.g., `sub-project/`).
-  - Integrate as lib/module for lobby scene switching.
+We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/monorepos/) (one single repository for everything) with **one branch per mini-game**.
+
+1. The stable, shared code lives on branch **`main`**.
+2. Each mini-game is developed on its **own branch** (example: `block-blast`, `snake`, ...).
+3. When a game is ready (plays well, looks finished, tests pass), we merge that branch into `main`.
+4. After merging, the game folder becomes part of `main` and we start connecting it to the lobby.
+
 - Example sub-project template: See `sub-project-example/` (includes structure, Makefile, Doxyfile.min, makefile.md documentation, and README template).
 
 ## Current Active Branch
 
-`block-blast` — Recreation + extensions of *Block Blast!* by Hungry Studio.
+`blockBlast` — Recreation + extensions of *Block Blast!* by Hungry Studio.
 
-For details, switch to the branch and read its `README.md`.
+-> For details, go inside `block-blast/` folder and read its own `README.md`.
 
 ## Repository Structure (Root Level)
 
 ```
 .
-├── assets/                   # Shared + per-game assets (images, fonts, sounds, data for saves/leaderboards)
+├── assets/                   # Images, sounds, fonts — shared or per game
 │   ├── fonts/                # Different fonts used by the games
-│   └── sub-project/          # Example per-game subdir (added post-merge) (WIP)
+│   └── sub-project/          # Example per-game subdir (added post-merge) (WIP: no sure if it'll stay olike this)
 ├── firstparty/               # Reusable single-header libs made by the team
 ├── thirdparty/               # External deps (raylib static lib, PCG rand, etc.)
 │   └── NOTICE                # Third-party license notices & attributions (e.g., for rand.h PCG)
-├── sub-project-example/      # Template for new sub-projects (copy/structure reference)
-│   ├── src/                  # Source files
-│   ├── include/              # Headers
-│   ├── docs/                 # Generated Doxygen output
-│   ├── tests/                # Test sources
+├── sub-project-example/      # Template — copy this structure when starting a new game
+│   ├── src/                  # .c files
+│   ├── include/              # .h files
+│   ├── docs/                 # generated documentation
+│   ├── tests/                # unit tests
 │   ├── CHANGELOG.md          # Per-sub-project detailed changelog
-│   ├── Makefile              # Sub-project build script (copy to new branches)
-│   ├── makefile.md           # Documentation for the Makefile targets/modes
-│   ├── Doxyfile.min          # Minimal Doxygen config for per-sub-project docs
+│   ├── Makefile              
+│   ├── makefile.md           # Explains make commands to build the sub-project
+│   ├── Doxyfile.min          # Minimal Doxygen configs for per-sub-project docs
 │   └── README.md             # Template README for new sub-projects
 ├── docs/                     # (Future) Aggregated/shared documentation across all games/lobby
 ├── LICENSE                   # Project license
@@ -61,7 +65,7 @@ For details, switch to the branch and read its `README.md`.
 ├── TODO.md                   # Internal reminders (global Makefile, lobby integration, etc.)
 ├── .gitignore                # Ignores build/, logs/, docs/, etc.
 ├── Makefile                  # (Future global) Build all merged games/lobby at once
-└── README.md                 # This file
+└── README.md                 # <-- This file
 ```
 
 Post-merge example (after a sub-project merge):
@@ -70,25 +74,8 @@ Post-merge example (after a sub-project merge):
 ├── sub-project/              # Merged game: src/, include/, tests/, etc.
 ```
 
-
-## Getting Started (Git Commands)
-
-```bash
-# Clone the repo
-git clone https://github.com/Fshimi-Hawlk/Multi-Mini-games
-cd Multi-Mini-games
-
-# List all branches
-git branch -a
-
-# Switch to a mini-game branch
-git checkout sub-project
-
-# Create/start a new mini-game branch
-git checkout -b new-sub-project
-```
-
 ## Building & Running (Sub-Project Level)
+
 From inside a branch root (e.g., after `git checkout sub-project` or in `sub-project-example/`):
 
 See all options: `make help`
@@ -100,15 +87,14 @@ See all options: `make help`
 
 **Note**: Global root Makefile coming later (for building all merged games/lobby at once — see [TODO](TODO.md)).
 
-## Generating Documentation (Sub-Project Level)
+## Generating Documentation (Per Game)
 
-From branch root (or `sub-project-example/`):
+Inside a game folder:
 
 ```bash
 doxygen Doxyfile.min
 ```
 
-Output: [./docs/html/index.html](./docs/html/index.html) (open in browser).  
-Includes code API + Makefile documentation.  
-Generated files are ignored in git — regenerate as needed.  
+->You can see the generated documentation in: [./docs/html/index.html](./docs/html/index.html).  
+
 **Future**: Root-level docs aggregation (all games + lobby in one view)  
