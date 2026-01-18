@@ -51,17 +51,6 @@ bin/
 obj/
 main
 
-# Doxygen
-docs/
-html/
-latex/
-xml/
-*.html
-*.css
-*.js
-*.png
-*.svg
-
 # Logs / temp
 *.log
 .cache/
@@ -71,3 +60,4 @@ xml/
 # Other
 template.h
 compile_flags.txt
+compile_commands.txt
