@@ -9,7 +9,7 @@ The Makefile manages:
 - Building the main executable from `src/` (excluding the main entry point)
 - Building independent test executables from `tests/`
 - Linking shared library objects to both main and tests (avoids multiple-definition errors)
-- Multiple build modes: release, basic-debug, strict-debug, clang-debug (sanitizers), valgrind-debug
+- Multiple build modes: release, debug, strict-debug, clang-debug (sanitizers), valgrind-debug
 - Automatic header dependency tracking (`-MMD -MP`) — disable with `NO_DEPENDENCY_TRACKING=1`
 - Silent builds by default — enable verbose output with `VERBOSE=1`
 - Custom flags via `EXTRA_CFLAGS` / `EXTRA_LDFLAGS`
@@ -22,13 +22,13 @@ Output locations:
 
 ## Supported Build Modes
 
-| Mode            | Compiler | Flags / Features                              | Requirements          | Notes                                      |
-|-----------------|----------|-----------------------------------------------|-----------------------|--------------------------------------------|
-| `release`       | gcc      | `-O2`                                         | None                  | Optimized, no debug info                   |
-| `basic-debug`   | gcc      | `-Wall -Wextra -g -O0`                        | None                  | Basic warnings + debug symbols             |
-| `strict-debug`  | gcc      | `-Werror -Wall -Wextra -pedantic -g -O0`      | None                  | Strict warnings, no sanitizers             |
-| `clang-debug`   | clang    | `-Werror -pedantic -fsanitize=address,undefined` | Clang installed     | Compile-time sanitizers (ASan + UBSan)     |
-| `valgrind-debug`| gcc      | `-Wall -Wextra -g -O0`                        | Valgrind installed    | Debug build + runtime Valgrind checks      |
+| Mode            | Compiler | Flags / Features                         | Requirements       | Notes                                  |
+|-----------------|----------|------------------------------------------|--------------------|----------------------------------------|
+| `release`       | gcc      | `-O2`                                    | None               | Optimized, no debug info               |
+| `debug`         | gcc      | `-Wall -Wextra -g -O0`                   | None               | Basic warnings + debug symbols         |
+| `strict-debug`  | gcc      | `-Werror -Wall -Wextra -pedantic -g -O0` | None               | Strict warnings, no sanitizers         |
+| `clang-debug`   | clang    | same + `-fsanitize=address,undefined`    | Clang installed    | Compile-time sanitizers (ASan + UBSan) |
+| `valgrind-debug`| gcc      | `-Werror -Wall -Wextra -pedantic -g -O0` | Valgrind installed | runtime Valgrind checks                |
 
 Default: `release`
 
@@ -41,8 +41,7 @@ Default: `release`
 - `rebuild-tests`     → `clean` + `tests`
 - `run-main`          → Run main binary (uses Valgrind wrapper in `valgrind-debug` mode)
 - `run-gdb`           → Run main binary under gdb
-- `clean`             → Remove all build artifacts (`build/`)
-- `clean-obj`         → Remove only object files
+- `clean`             → Remove `build/`
 - `compile_commands`  → Generate `compile_commands.json` for clangd / language servers
 
 ## Example Commands
@@ -57,7 +56,7 @@ make all
 ### Debug builds:  
 
 ```bash
-make MODE=basic-debug
+make MODE=debug
 make MODE=strict-debug
 ```
 
@@ -72,7 +71,7 @@ make MODE=valgrind-debug run-tests
 make MODE=valgrind-debug run-tests
 
 ```bash
-make run-tests MODE=basic-debug
+make run-tests MODE=debug
 make run-tests MODE=clang-debug
 ```
 
