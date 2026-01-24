@@ -7,7 +7,7 @@
 #include <string.h>
 
 // --- STRUCTURES DES CARTES ---
-typedef enum { RED, YELLOW, GREEN, BLUE, BLACK } Card_Color;
+typedef enum { CARD_RED, CARD_YELLOW, CARD_GREEN, CARD_BLUE, CARD_BLACK } Card_Color;
 
 typedef enum {
     ZERO = 0, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,
