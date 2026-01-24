@@ -18,7 +18,7 @@ void push_card(Deck* d, Card c) {
 // Retrait d'une carte
 Card remove_at(Deck* d, int index) {
     if (index < 0 || index >= d->size || d->head == NULL) 
-        return (Card){BLACK, ZERO};
+        return (Card){CARD_BLACK, ZERO};
 
     Node** pp = &(d->head);
     for (int i = 0; i < index; i++) {
@@ -63,7 +63,7 @@ void init_uno_deck(Deck* d) {
     d->head = NULL;
     d->size = 0;
 
-    for (int c = RED; c <= BLUE; c++) {
+    for (int c = CARD_RED; c <= CARD_BLUE; c++) {
         push_card(d, (Card){c, ZERO}); // Un seul 0 par couleur
         for (int v = ONE; v <= NINE; v++) {
             push_card(d, (Card){c, v}); push_card(d, (Card){c, v}); // Deux de chaque 1-9
@@ -75,8 +75,8 @@ void init_uno_deck(Deck* d) {
         }
     }
     for (int i = 0; i < 4; i++) {
-        push_card(d, (Card){BLACK, JOKER});
-        push_card(d, (Card){BLACK, PLUS_FOUR});
+        push_card(d, (Card){CARD_BLACK, JOKER});
+        push_card(d, (Card){CARD_BLACK, PLUS_FOUR});
     }
 }
 
