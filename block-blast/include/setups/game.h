@@ -9,11 +9,10 @@
 #define SETUPS_GAME_H
 
 /**
- * @brief Initializes the game state and related resources.
+ * @brief Initializes the full game: RNG, window, fonts, prefabs, board, and state.
  *
- * Sets up the board (clears it, sets position and dimensions), initializes the three prefab slots,
- * resets score and streak, fills the prefab bag if needed, shuffles the initial slots,
- * and performs any other one-time game setup.
+ * Seeds PRNG, opens window, loads fonts, sets up board position, fills prefab bags,
+ * shuffles initial slots, and prepares camera/UI if needed.
  */
 void initGame(void);
 

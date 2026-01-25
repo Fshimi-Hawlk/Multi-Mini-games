@@ -21,7 +21,12 @@
 void drawBlock(const f32Vector2 pos, const color32 color);
 
 /**
- * @brief Draws the entire game board, rendering each block based on its state.
+* @brief Renders the game board, including all blocks and empty tiles.
+ *
+ * Iterates over the grid, choosing colors based on block state:
+ * - Empty (hitsLeft == 0): BOARD_EMPTY_TILE_COLOR
+ * - Removed (hitsLeft < 0): APP_BACKGROUND_COLOR (faded)
+ * - Active: From blockColors[], potentially brightness-adjusted by hitsLeft.
  *
  * @param board The board structure to draw.
  */

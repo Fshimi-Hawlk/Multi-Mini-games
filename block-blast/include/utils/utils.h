@@ -39,12 +39,19 @@
 #define GiB(n) ((u64) (n) << 30)
 
 /**
- * @brief Aligns a value up to the next power-of-2 boundary.
+* @brief Aligns a value upward to the nearest multiple of a power-of-2.
+ *
+ * Useful for memory alignment in arenas or buffers.
+ * Formula: (n + p - 1) & ~(p - 1)
+ *
+ * @note Assumes 'p' is a power of 2; if not, behavior is undefined.
  *
  * @param n Value to align.
  * @param p Power-of-2 alignment (must be power of 2).
  */
 #define alignUpPow2(n, p) (((u64) (n) + (u64) (p) - 1) & (~((u64) (p) - 1)))
+
+#define castTo(newType) *(newType*) &
 
 /*
 

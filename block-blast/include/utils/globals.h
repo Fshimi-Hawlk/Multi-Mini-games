@@ -20,8 +20,8 @@ extern Rectangle windowRect;            ///< Main window rectangle (set at init)
 extern Font      appFont;               ///< Primary font for UI text.
 extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
-extern PrefabBag_St prefabsBag;                     ///< Bag containing all available prefabs and variants.
-extern PrefabIndexBag_St bags[MAX_SHAPE_SIZE]; ///< Bags for random prefab selection by block count.
+extern PrefabBagVec_St prefabsBag;                  ///< Bag containing all available prefabs and variants.
+extern PrefabIndexBagVec_St bags[MAX_SHAPE_SIZE];   ///< Bags for random prefab selection by block count.
 extern ActivePrefab_St *shapeBag;                   ///< Temporary array used when viewing all prefabs (SCENE_STATE_ALL_PREFABS).
 
 extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE]; ///< array to record the starting indexes whenever the blockCount changes

@@ -9,7 +9,7 @@
 #include "core/game/shape.h"
 #include "utils/globals.h"
 
-void initPrefabsAndVariants(PrefabBag_St* const prefabsBag) {
+void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag) {
     u8 initCount = game.prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
                  ? _prefabNameCount : prefabCount;
 

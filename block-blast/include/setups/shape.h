@@ -13,12 +13,18 @@
 /**
  * @brief Initializes the prefab bag with all prefabs and their variants.
  *
+ * Loops over base prefabs (up to prefabCount or _prefabNameCount based on variant),
+ * initializes each, then adds rotations and mirrors if applicable.
+ *
  * @param prefabBag Pointer to the prefab bag dynamic array.
  */
-void initPrefabsAndVariants(PrefabBag_St* const prefabBag);
+void initPrefabsAndVariants(PrefabBagVec_St* const prefabBag);
 
 /**
  * @brief Initializes a single prefab, computing orientations and mirroring.
+ *
+ * Rotates and compares offsets to find unique orientations. Checks for mirror duplicates.
+ * Updates prefab->orientations and ->canMirror accordingly.
  *
  * @param prefab Pointer to the prefab to initialize.
  */

@@ -59,27 +59,42 @@ typedef enum {
 } FontSize_Et;
 
 /**
- * @brief Variants of the prefab set (default, complete, extra, etc.).
+ * @brief Variants of prefab sets used in the game.
+ *
+ * This enum determines which collection of prefabs is active during gameplay.
  */
 typedef enum {
-    GAME_PREFAB_VARIANT_DEFAULT,
-    GAME_PREFAB_VARIANT_COMPLETE,
-    GAME_PREFAB_VARIANT_EXTRA,
-    _gamePrefabVariantCount
+    GAME_PREFAB_VARIANT_DEFAULT,    ///< Basic set of shapes, suitable for standard play.
+    GAME_PREFAB_VARIANT_COMPLETE,   ///< Includes all possible shapes and variants for variety.
+    GAME_PREFAB_VARIANT_EXTRA,      ///< Additional experimental shapes.
+    _gamePrefabVariantCount         ///< sentinel for array sizing and looping, not a valid variant.
 } GamePrefabVariant_Et;
 
 /**
- * @brief Represents a single block on the board. Can be refered as `unit`
+ * @brief A single block on the board, holding its color and durability.
+ *
+ * Blocks are the basic units placed on the board.
  */
 typedef struct {
     BlockColor_Et colorIndex;   ///< Color of the block.
+
+    /**
+     * @brief Tracks how many times it needs to be part of a cleared line before removal.
+     *
+     * hitsLeft == 0: Empty space, ready for placement.
+     * hitsLeft > 0: Occupied, contributes to line clears.
+     * hitsLeft < 0: Special state, like visually faded or removed but still drawn for effects.
+     */
     u8 hitsLeft;                ///< Remaining hits before the block is cleared (0 = empty).
 } Block_St;
 
 /**
- * @brief Static definition of a prefab shape.
+ * @brief Static blueprint for a shape (prefab), defining its block layout and transformations.
  *
- * Describes the layout, possible rotations, and mirroring.
+ * Prefabs describe reusable shapes made of blocks. They're static data used to instance
+ * ActivePrefab_St during gameplay. The offsets are relative to the shape's center, and
+ * the bounding box (width/height) is computed for quick collision and placement checks.
+ * Orientations and mirroring are precomputed during init to avoid duplicates.
  */
 typedef struct {
     u8 blockCount;                          ///< Number of blocks in the shape.
@@ -90,13 +105,26 @@ typedef struct {
 } Prefab_St;
 
 /**
- * @brief Dynamic array types for prefabs and indices.
+ * @brief Dynamic array (vector) holding a collection of prefabs.
+ *
+ * This is a growable container for Prefab_St, used as a "bag" to store all available
+ * shapes and their variants. It's populated at init and sampled randomly during play.
  */
-typeDA(Prefab_St, PrefabBag_St);
-typeDA(u32, PrefabIndexBag_St);
+typeDA(Prefab_St, PrefabBagVec_St);
 
 /**
- * @brief Represents a prefab currently available to the player.
+ * @brief Dynamic array (vector) for prefab indices, grouped by block count.
+ *
+ * This holds indices into the prefabsBag, allowing quick random selection by size.
+ * Each "bag" corresponds to a shape size (e.g., bags[3] for 3-block shapes).
+ */
+typeDA(u32, PrefabIndexBagVec_St);
+
+/**
+ * @brief An instance of a prefab that's active in the UI, ready for player interaction.
+ *
+ * This extends Prefab_St with runtime state like position, color, and interaction flags.
+ * Used in slots for dragging/placing. The id helps identify which slot it occupies.
  */
 typedef struct {
     const Prefab_St* prefab;    ///< Pointer to the static prefab definition.
@@ -104,7 +132,7 @@ typedef struct {
     bool8 placed;               ///< Whether this shape has been placed this turn.
     BlockColor_Et colorIndex;   ///< Color assigned to this instance.
     bool8 dragging;             ///< Whether the player is currently dragging it.
-    u8 id;                      ///< Slot ID (0-2).
+    u8 id;                      ///< Slot index (0-2).
 } ActivePrefab_St;
 
 /**
@@ -112,20 +140,46 @@ typedef struct {
  */
 typedef ActivePrefab_St PrefabSlots_t[3];
 
+/**
+ * @brief Weights for random prefab selection based on shape size.
+ *
+ * This struct manages probabilities for picking shapes of different sizes.
+ * baseWeights are fixed starting values, while weights are adjusted dynamically
+ * during play to balance difficulty or variety.
+ */
 typedef struct {
-    float weights[MAX_SHAPE_SIZE];  // index 0 = size 1, ..., index 8 = size 9
-    float baseWeights[MAX_SHAPE_SIZE];
+    f32 baseWeights[MAX_SHAPE_SIZE];    ///< Initial probabilities per size
+    f32 weights[MAX_SHAPE_SIZE];        ///< Runtime-adjusted weights
 } SizeWeight_St;
 
 /**
- * @brief The game board structure.
+ * @brief The main game board: an 8×8 (or configurable) grid of blocks.
+ *
+ * The board uses row-major storage: blocks[y][x].
+ * Most fields are initialized once at game start
  */
 typedef struct {
-    Block_St blocks[BOARD_HEIGHT][BOARD_WIDTH];  ///< Row-major grid of blocks.
-    f32Vector2 pos;                              ///< Screen position of top-left corner.
-    u8 width, height;                            ///< Board dimensions (usually 8x8).
-    bool8 *rowsToClear;                          ///< Temporary flags for clearing (allocated at init).
-    bool8 *columnsToClear;                       ///< Temporary flags for clearing (allocated at init).
+    /**
+     * Grid of blocks. Each cell holds color + durability.
+     * hitsLeft == 0  → empty tile
+     * hitsLeft <  0  → special/removed state (visual only, not clickable)
+     * hitsLeft >  0  → block exists, needs that many more clears
+     */
+    Block_St blocks[BOARD_HEIGHT][BOARD_WIDTH];
+    
+    /**
+     * Screen-space top-left corner of the board.
+     * Usually set once during layout and not changed unless UI is resized.
+     */
+    f32Vector2 pos;
+
+    u8 width, height;       ///< Logical dimensions
+
+    /**
+     * Array of flags indicating which rows/columns are full and
+     * should be cleared at the end of the current placement.
+     */
+    bool8 *rowsToClear, *columnsToClear;
 } Board_St;
 
 /**
@@ -138,7 +192,11 @@ typedef enum {
 } SceneState_Et;
 
 /**
- * @brief Complete game state suitable for saving/loading.
+ * @brief Core game state, encapsulating board, UI, and scoring.
+ *
+ * This struct is designed for easy saving/loading (e.g., via fwrite). It holds
+ * everything needed to resume a game: board layout, active shapes, score, and mode.
+ * The scoreText and streakText are pre-formatted for quick UI drawing.
  */
 typedef struct {
     Board_St board;                     ///< Current board state.
@@ -146,9 +204,9 @@ typedef struct {
 
     u64 score;                          ///< Player score.
     u8 streakCount;                     ///< Current combo streak.
-    u8 streakPlacementResetCnt;
-    char scoreText[32];                 ///< Pre-formatted score string for UI.
-    char streakText[32];
+    u8 streakPlacementResetCnt;         ///< Prefab placement counter to reset streak under a specific threshold
+    char scoreText[32];                 ///< Formatted score string for UI.
+    char streakText[32];                ///< Formatted streak string for UI.
     SizeWeight_St sizeWeights;
 
     bool8 gameOver;                     ///< Game over flag.

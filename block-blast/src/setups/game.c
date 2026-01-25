@@ -14,7 +14,15 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-void initSizeWeights(GameState_St* const game) {
+/**
+ * @brief Initializes size-based weights for random prefab selection.
+ *
+ * Sets baseWeights to fixed probabilities, copies to weights for runtime adjustment.
+ * Larger shapes might have lower weights to control difficulty.
+ *
+ * @param game Pointer to the current game state.
+ */
+static void initSizeWeights(GameState_St* const game) {
     f32 baseWeights[MAX_SHAPE_SIZE] = {
         [0] = 0.05f,    // size 1
         [1] = 0.20f,
@@ -22,9 +30,9 @@ void initSizeWeights(GameState_St* const game) {
         [3] = 0.25f,
         [4] = 0.10f,
         [5] = 0.05f,
-        [6] = 0.00f,
-        [7] = 0.00f,
-        [8] = 0.10f     // the big 9-unit one
+        [6] = 0.00f,    // will never change, since no shape of size 7 exist, it's set by default to zero
+        [7] = 0.00f,    // will never change, since no shape of size 8 exist, it's set by default to zero
+        [8] = 0.10f     // size 9
     };
 
     for (u8 i = 0; i < MAX_SHAPE_SIZE; i++) {
@@ -67,7 +75,7 @@ void initGame(void) {
             }
 
             for (u8 s = 0; s < MAX_SHAPE_SIZE; ++s) {
-                PrefabIndexBag_St* bag = &bags[s];
+                PrefabIndexBagVec_St* bag = &bags[s];
                 if (bag->count == 0) continue;
                 da_shuffle(bag);
             }

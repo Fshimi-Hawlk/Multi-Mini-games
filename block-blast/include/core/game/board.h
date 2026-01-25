@@ -19,10 +19,16 @@
 bool8 isInBound(const s8Vector2 pos);
 
 /**
- * @brief Checks the board for full rows/columns that need clearing.
+ * @brief Scans the board and marks full rows and columns for clearing.
  *
- * @param board Pointer to the board.
- * @return true if clearing is needed, false otherwise.
+ * A row/column is considered full when **every** cell has hitsLeft > 0.
+ * Empty cells (hitsLeft == 0) disqualify the line.
+ *
+ * Results are written into board->rowsToClear[] and board->columnsToClear[].
+ * These arrays **must** be valid and zero-initialized before calling this function.
+ *
+ * @return true if at least one row **or** column is full (i.e. clearBoard() would do something)
+ * @return false if the board has no completable lines
  */
 bool8 checkBoardForClearing(const Board_St* const board);
 
@@ -33,6 +39,15 @@ bool8 checkBoardForClearing(const Board_St* const board);
  */
 void clearBoard(Board_St* const board);
 
+/**
+ * @brief Counts empty cells (hitsLeft == 0) on the board.
+ *
+ * Used to check for game over (no space left) or available moves.
+ * Iterates over the entire grid.
+ *
+ * @param board Pointer to the board.
+ * @return Anount of empty cell
+ */
 u32 getEmptyCellCount(const Board_St* const board);
 
 #endif // CORE_GAME_BOARD_H

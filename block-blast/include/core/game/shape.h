@@ -11,7 +11,14 @@
 #include "utils/userTypes.h"
 
 /**
- * @brief Checks if two prefabs have similar block offsets.
+ * @brief Checks if two prefabs have identical block layouts via offsets.
+ *
+ * Uses a small hashmap (36 bytes, for 6x6 grid) to mark positions from
+ * the first prefab, then verifies all positions from the second are marked.
+ *
+ * @note The largest offsets is have a 6 either in the x or y (and 1 in the other component), 
+ *       hence the 6x6 hashmap.
+ * @note Assumes offsets are normalized.
  *
  * @param prefab1 First prefab.
  * @param prefab2 Second prefab.
@@ -96,22 +103,40 @@ s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape);
 /**
  * @brief Adds a prefab and its rotated/mirrored variants to the bag.
  *
+ * Generates variants only if orientations > 0 or canMirror is true, avoiding duplicates.
+ * Each variant is a separate Prefab_St entry in the bag.
+ *
  * @param prefab The base prefab.
  * @param prefabsBag Pointer to the prefab bag.
  */
-void addPrefabAndVariants(Prefab_St prefab, PrefabBag_St* const prefabsBag);
+void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag);
 
 /**
- * @brief Handles user interaction with a shape (dragging, rotating, etc.).
+ * @brief Handles user interaction with a shape (dragging, release).
+ *
+ * Integrates with global dragging flag.
  *
  * @param shape Pointer to the active shape.
  */
 void handleShape(ActivePrefab_St* const shape);
 
 /**
- * @brief Shuffles and refills the prefab slots.
+ * @brief Refills all three player slots with new random shapes and resets their state.
  *
- * @param game Pointer to the game state.
+ * For each of the three slots:
+ *   - Sets .id = slot index (0,1,2)
+ *   - Calls randomizeShape() -> new prefab, color, position, etc.
+ *
+ * After filling all slots, calls refillShapeBags() to repopulate the size-grouped
+ * index bags from the master prefabsBag (usually needed because randomizeShape
+ * consumed indices).
+ *
+ * Typical usage:
+ *   - Called when all three shapes have been placed (end of turn)
+ *   - Called on shuffle key press (debug / cheat)
+ *   - Called at game start
+ *
+ * @param game   Main game state
  */
 void shuffleSlots(GameState_St* const game);
 
@@ -125,10 +150,20 @@ void placeShape(const ActivePrefab_St* const shape, Board_St* const board);
 
 
 /**
- * @brief Rotates the prefab by a given amount (90 degrees per unit).
+ * @brief Rotates the prefab's offsets by 90° × rotateBy times (clockwise).
  *
- * @param prefab Pointer to the prefab.
- * @param rotateBy Number of 90-degree rotations.
+ * Rotation is done in-place on prefab->offsets[].
+ * The function uses standard 2D rotation formulas:
+ *   new_x =  old_y
+ *   new_y = -old_x
+ *
+ * After rotation the bounding box (width/height) is **not** automatically updated —
+ * call setPrefabBoundingBox() afterwards if needed.
+ *
+ * @note Does **not** check for duplicate orientations — that's done during initPrefab().
+ *
+ * @param prefab    Prefab to modify (offsets are mutated)
+ * @param rotateBy  Number of 90° clockwise rotations (0 = no-op, negative = counterclockwise)
  */
 void rotatePrefab(Prefab_St* const prefab, u8 rotateBy);
 
