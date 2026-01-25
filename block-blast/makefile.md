@@ -42,7 +42,6 @@ Default: `release`
 - `run-main`          -> Run main binary (uses Valgrind wrapper in `valgrind-debug` mode)
 - `run-gdb`           -> Run main binary under gdb
 - `clean`             -> Remove `build/`
-- `compile_commands`  -> Generate `compile_commands.json` for clangd / language servers
 
 ## Example Commands
 
@@ -91,9 +90,16 @@ make run-gdb
 ```
 
 ## Logging Behavior
-- `run-tests`: Creates `logs/tests-<dd-mm-YYYY-HH-MM-SS>/` with per-test `.log` files (stdout + stderr)  
-- `valgrind-debug` mode: `Creates logs/valgrind-<dd-mm-YYYY-HH-MM-SS>/` with Valgrind output + stdout/stderr  
-- Logs only include sections (STDOUT/STDERR) if content exists  
+- `run-tests`: Creates `logs/tests-<dd-mm-YYYY-HH-MM-SS>/` with per-test `.log` files (stdout + stderr)
+- In `valgrind-debug` mode: also creates `logs/valgrind-<dd-mm-YYYY-HH-MM-SS>/` for main or tests
+- Logs only include STDOUT/STDERR sections if they contain content
+- **Output reliability note**: To ensure the last `printf` lines appear even if a test crashes (SIGABRT, ASAN failure, etc.), line buffering is forced via `stdbuf --output=L --error=L` when available.  
+  If `stdbuf` is not installed (from GNU coreutils), a warning is printed once when running `make run-tests`, and output may be incomplete on abnormal termination. In that case, add `fflush(stdout);` / `fflush(stderr);` after important prints in the test code.
+
+## Dependencies & Portability Notes
+- `clang-debug` mode requires `clang` installed
+- `valgrind-debug` mode requires `valgrind` installed
+- `stdbuf` (used in `run-tests` for reliable output on crash) is optional but strongly recommended on development machines. It is part of GNU coreutils (almost always present on Linux; may be missing on minimal containers or some BSDs).
 
 ## Author
 [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
