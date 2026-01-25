@@ -21,5 +21,6 @@ typedef struct {
 void init_game_logic(GameState* g);
 int is_move_valid(int active_color, Card played, Card top);
 void distribute_cards(GameState* g);
-
+int try_play_card(GameState *g, int playerIndex, int cardIndex);
+int player_draw_card(GameState *g, int playerIndex);
 #endif
