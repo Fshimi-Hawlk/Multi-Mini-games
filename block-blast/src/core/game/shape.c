@@ -51,19 +51,17 @@ bool8 isShapeInBound(const ActivePrefab_St* const shape) {
     return isInBound(shapeBoardPos) && (shapeBoardPos.x + shape->prefab->width <= game.board.width) && (shapeBoardPos.y + shape->prefab->height <= game.board.height);
 }
 
-bool8 isShapePlaceable(const ActivePrefab_St* const shape) {
-    s8Vector2 shapeBoardPos = mapShapeToBoardPos(shape);
-
+bool8 isShapePlaceable(const ActivePrefab_St *const shape, const s8Vector2 pos) {
     bool8 canBePlaced = isShapeInBound(shape);
-    if (canBePlaced) {
-        for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
-            u8Vector2 blockPos = {
-                .x = shapeBoardPos.x + shape->prefab->offsets[j].x,
-                .y = shapeBoardPos.y + shape->prefab->offsets[j].y
-            };
+    if (!canBePlaced) return false;
 
-            canBePlaced &= game.board.blocks[blockPos.y][blockPos.x].hitsLeft == 0;
-        }
+    for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
+        u8Vector2 blockPos = {
+            .x = pos.x + shape->prefab->offsets[j].x,
+            .y = pos.y + shape->prefab->offsets[j].y
+        };
+
+        canBePlaced &= game.board.blocks[blockPos.y][blockPos.x].hitsLeft == 0;
     }
 
     return canBePlaced;
@@ -128,7 +126,7 @@ s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape) {
     return vec2Scale(shapeBoardPos, 1.0f/BLOCK_PX_SIZE, s8Vector2);
 }
 
-void addPrefabAndVariants(Prefab_St prefab, PrefabBag_St* const prefabsBag) {
+void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag) {
     da_append(prefabsBag, prefab);
 
     for (u8 k = 1; k < prefab.orientations; ++k) {
@@ -174,55 +172,178 @@ void handleShape(ActivePrefab_St* const shape) {
     }
 }
 
-void shuffleSlots(GameState_St* const game) {
-    for (u8 i = 0; i < 3; ++i) {
-        ActivePrefab_St* const shape = &game->slots[i];
-        shape->center = defaultPositions[i];
-        shape->colorIndex = prng_rand() % _blockColorCount;
-        shape->placed = false;
-        shape->id = i;
+/**
+ * @brief Re-populates all size-grouped prefab index bags from the master prefabsBag.
+ *
+ * This function is called after consuming prefabs (typically via shuffleSlots() -> randomizeShape())
+ * to make sure every size group that can still offer shapes has its indices ready.
+ *
+ * Behavior:
+ *   - Only refills a bag if it is currently empty (count == 0)
+ *   - Uses precomputed `prefabsPerSizeOffsets[]` to know the start index and range
+ *     of each size group inside the flat `prefabsBag.items` array
+ *   - For the last size group (size == MAX_SHAPE_SIZE-1), the range goes until the end
+ *     of prefabsBag
+ *   - Copies consecutive indices (start + k) into the bag
+ *   - Shuffles the bag contents so the order of delivery is randomized each refill
+ *
+ * @note Edge cases handled:
+ *   - If a size group has no prefabs at all -> bag remains count==0 (skipped)
+ *   - If a bag still has items -> left untouched (avoids unnecessary work and preserves
+ *     any remaining shuffle order from previous refill)
+ *
+ * @note Performance:
+ *   - O(total number of prefabs in all refilled groups) per call
+ *   - Usually fast because only empty bags are processed
+ */
+static void refillShapeBags(void) {
+    for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
+        PrefabIndexBagVec_St* bag = &bags[i];
 
-        u8 sizeIdx;
+        // Skip refill if this size still has unused prefabs
+        if (bag->count != 0) continue;
 
-        do {
-            f32 prob = prng_randf();
-            f32 weightedSum = 0.0f;
-            for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
-                weightedSum += game->sizeWeights.weights[sizeIdx];
-                if (prob <= weightedSum) break;
-            }
-        } while (bags[sizeIdx].count == 0);
+        u32 start = prefabsPerSizeOffsets[i];
 
-        PrefabIndexBag_St* bag = &bags[sizeIdx];
-        u32 prefab_idx = bag->items[--bag->count];
-        shape->prefab = &prefabsBag.items[prefab_idx];
+        // Compute how many prefabs exist for this size
+        bag->count = i == MAX_SHAPE_SIZE - 1
+                   ? prefabsBag.count - start
+                   : prefabsPerSizeOffsets[i + 1] - start;
+
+        // no shape of that size in the prefabs;
+        if (bag->count == 0) continue;
+
+        // Fill with consecutive indices from the master bag
+        for (u32 k = 0; k < bag->count; ++k) bag->items[k] = start + k;
+
+        // Randomize delivery order for this size group
+        da_shuffle(bag);
+    }
+}
+
+/**
+ * @brief Picks a non-empty prefab index bag using current size-based weights.
+ *
+ * Performs weighted random selection among shape sizes (1 to MAX_SHAPE_SIZE).
+ * The probability of choosing size k is roughly proportional to weights[k].
+ *
+ * Implementation detail:
+ *   - Generates uniform random value in [0,1)
+ *   - Walks cumulative sum until it exceeds the random value
+ *   - If the selected bag happens to be empty (count == 0), the whole draw is repeated
+ *
+ * @note This is rejection sampling: it keeps trying until it finds a bag that still has prefabs left.
+ * @note In normal play this almost never loops more than once or twice.
+ * @note If **all** bags become empty at the same time -> infinite loop.
+ *
+ * @param weights   Array of length MAX_SHAPE_SIZE with current selection probabilities
+ *                  (typically game->sizeWeights.weights)
+ * @return          Pointer to one of the global `bags[]` entries that has count > 0
+ */
+static PrefabIndexBagVec_St* getRandomPrefabBag(const f32 weights[MAX_SHAPE_SIZE]) {
+    u8 sizeIdx;
+
+    do {
+        f32 prob = prng_randf();
+        f32 weightedSum = 0.0f;
+        for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
+            weightedSum += weights[sizeIdx];
+            if (prob <= weightedSum) break;
+        }
+    } while (bags[sizeIdx].count == 0);
+
+    return &bags[sizeIdx];
+}
+
+/**
+ * @brief Replaces the prefab and visual state of one shape slot with a random new one.
+ *
+ * Resets:
+ *   - position to default slot location
+ *   - color to uniform random color
+ *   - placed and dragging flags
+ *
+ * Then:
+ *   1. Asks getRandomPrefabBag() for a non-empty bag (weighted by size)
+ *   2. Pops the last index from that bag (treats it as a LIFO stack)
+ *   3. Assigns the corresponding prefab from prefabsBag
+ *
+ * @note Important side effect:
+ *   Decrements `.count` in one of the global bags[] arrays.
+ *   If that bag reaches 0, future calls may reject that size until refilled.
+ *
+ * @note Does **not** check whether the bag actually had items left — relies on
+ * getRandomPrefabBag() to never return an empty bag.
+ *
+ * @param shape     One of the three slots (game->slots[0..2]) — modified in-place
+ * @param weights   Current size selection weights (usually game->sizeWeights.weights)
+ */
+void randomizeShape(ActivePrefab_St* const shape, const f32 weights[MAX_SHAPE_SIZE]) {
+    shape->center = defaultPositions[shape->id];
+    shape->colorIndex = prng_rand() % _blockColorCount;
+    shape->placed = false;
+
+    PrefabIndexBagVec_St* bag = getRandomPrefabBag(weights);
+    u32 prefab_idx = bag->items[--bag->count];
+    shape->prefab = &prefabsBag.items[prefab_idx];
+}
+
+/**
+ * @brief Algorithm for automatic shape placement (WIP).
+ *
+ * Tries to find optimal positions for shapes to maximize clears and score.
+ * Currently incomplete; simulates placements on algoGame state.
+ *
+ * @param game Pointer to the game state.
+ */
+void placingAlgo(const GameState_St* const game) {
+    GameState_St algoGame = {0};
+    memcpy(&algoGame, game, sizeof(algoGame));
+
+    DA(u8Vector2) cellIndices = {0};
+    for (u8 row = 0; row < algoGame.board.height; ++row) {
+        for (u8 col = 0; col < algoGame.board.width; ++col) {
+            if (algoGame.board.blocks[row][col].hitsLeft != 0) continue;
+            u8Vector2 pos = {col, row};
+            da_append(&cellIndices, pos);
+        }
     }
 
-    // refill if needed
-    for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
-        PrefabIndexBag_St* bag = &bags[i];
-        if (bag->count == 0) {
-            u32 start = prefabsPerSizeOffsets[i];
-            bag->count = i == MAX_SHAPE_SIZE - 1
-                       ? prefabsBag.count - start
-                       : prefabsPerSizeOffsets[i + 1] - start;
+    for (u32 i = 0; i < 3; ++i) {
+        ActivePrefab_St* shape = &algoGame.slots[i];
+        randomizeShape(shape, algoGame.sizeWeights.weights);
 
-            if (bag->count == 0) continue; // no shape of that size in the prefabs;
+        da_foreach(u8Vector2, cellIndex, &cellIndices) {
+            if (!isShapePlaceable(shape, castTo(s8Vector2) cellIndex)) continue;
+            placeShape(shape, *cellIndex, &algoGame.board);
+            break;
+        }
 
-            for (u32 k = 0; k < bag->count; ++k) bag->items[k] = start + k;
-            da_shuffle(bag);
+        // removes every cell that was filled
+        for (u32 i = 0; i < cellIndices.count; ++i) {
+            u8Vector2 cellIndex = cellIndices.items[i];
+            if (algoGame.board.blocks[cellIndex.y][cellIndex.x].hitsLeft == 0) continue;
+            da_remove_unordered(&cellIndices, i);
         }
     }
 }
 
-void placeShape(const ActivePrefab_St* const shape, Board_St* const board) {
-    s8Vector2 shapeBoardPos = mapShapeToBoardPos(shape);
+void shuffleSlots(GameState_St* const game) {
+    for (u8 i = 0; i < 3; ++i) {
+        game->slots[i].id = i;
+        randomizeShape(&game->slots[i], game->sizeWeights.weights);
+    }
 
+    refillShapeBags();
+}
+
+void placeShape(const ActivePrefab_St* const shape, const u8Vector2 pos, Board_St* const board) {
     for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
         u8Vector2 blockPos = {
-            .x = shapeBoardPos.x + shape->prefab->offsets[j].x,
-            .y = shapeBoardPos.y + shape->prefab->offsets[j].y
+            .x = pos.x + shape->prefab->offsets[j].x,
+            .y = pos.y + shape->prefab->offsets[j].y
         };
+
         board->blocks[blockPos.y][blockPos.x].hitsLeft = 1;
         board->blocks[blockPos.y][blockPos.x].colorIndex = shape->colorIndex;
     }
@@ -290,8 +411,10 @@ void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
     shape->dragging = false;
     dragging = false;
 
-    if (isShapePlaceable(shape)) {
-        placeShape(shape, board);
+    s8Vector2 shapeBoardPos = mapShapeToBoardPos(shape);
+    if (isShapePlaceable(shape, shapeBoardPos)) {
+
+        placeShape(shape, castTo(u8Vector2) shapeBoardPos, board);
         shape->placed = true;
     } else {
         shape->center = defaultPositions[shape->id];

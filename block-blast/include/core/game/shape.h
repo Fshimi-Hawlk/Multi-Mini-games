@@ -46,9 +46,10 @@ bool8 isShapeInBound(const ActivePrefab_St* const shape);
  * @brief Checks if the shape can be placed on the board without overlap.
  *
  * @param shape Pointer to the active shape.
+ * @param pos Position, on the board, of the shape to be placed.
  * @return true if placeable, false otherwise.
  */
-bool8 isShapePlaceable(const ActivePrefab_St* const shape);
+bool8 isShapePlaceable(const ActivePrefab_St *const shape, const s8Vector2 pos);
 
 /**
  * @brief Sets the bounding box (width/height) for a prefab.
@@ -146,7 +147,7 @@ void shuffleSlots(GameState_St* const game);
  * @param shape Pointer to the active shape.
  * @param board Pointer to the board.
  */
-void placeShape(const ActivePrefab_St* const shape, Board_St* const board);
+void placeShape(const ActivePrefab_St* const shape, const u8Vector2 pos, Board_St* const board);
 
 
 /**

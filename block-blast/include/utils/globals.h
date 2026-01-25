@@ -27,7 +27,6 @@ extern ActivePrefab_St *shapeBag;                   ///< Temporary array used wh
 extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE]; ///< array to record the starting indexes whenever the blockCount changes
 
 extern GameState_St game;       ///< Main game state.
-extern GameState_St algoGame;   ///< Secondary game state (used for AI/simulation?).
 
 extern f32Vector2 mouseDeltaFromShapeCenter;    ///< Offset from shape center when dragging.
 extern bool8 dragging;                          ///< Global flag indicating if any shape is being dragged.
