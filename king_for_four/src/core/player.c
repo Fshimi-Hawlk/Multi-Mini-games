@@ -1,4 +1,4 @@
-#include "player.h"
+#include "../../include/core/player.h"
 #include <string.h>
 
 // Initialise un joueur
@@ -28,3 +28,4 @@ void draw_to_hand(Player* p, Deck* draw_pile) {
         printf("Plus de cartes dans la pioche pour %s !\n", p->name);
     }
 }
+

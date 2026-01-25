@@ -35,6 +35,7 @@ void push_card(Deck* d, Card c);
 Card pop_card(Deck* d);
 Card remove_at(Deck* d, int index);
 void shuffle_deck(Deck* d);
+void human_shuffle_deck(Deck* d);
 void init_uno_deck(Deck* d);
 void free_deck(Deck* d);
 

@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "../include/game.h"
+#include "../include/core/game.h"
 
 /* Debug : Affiche le nom d'une carte */
 void print_card_debug(Card c) {
