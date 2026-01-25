@@ -1,4 +1,4 @@
-#include "../include/UI.h"
+#include "ui/renderer.h"
 #include <stdio.h>
 
 // Dimensions de ta planche playingCards.png
@@ -9,13 +9,15 @@
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
-    // Chargement de la planche de sprites
+    // Chargement de la planche de sprites (Faces)
     assets.cardSheet = LoadTexture("assets/textures/playingCards.png");
+
+    // Chargement du dos (Back)
+    assets.cardBack = LoadTexture("assets/textures/cardBack_blue5.png");
     
-    if (assets.cardSheet.id == 0) {
-        printf("ERREUR CRITIQUE: Texture playingCards.png introuvable !\n");
-    }
-    
+    // Vérifications de sécurité
+    if (assets.cardSheet.id == 0) printf("ERREUR CRITIQUE: Texture playingCards.png introuvable !\n");
+    if (assets.cardBack.id == 0)  printf("ERREUR CRITIQUE: Texture cardBack_blue5.png introuvable !\n");
 
 
     return assets;
@@ -23,7 +25,7 @@ GameAssets LoadAssets(void) {
 
 void UnloadAssets(GameAssets assets) {
     UnloadTexture(assets.cardSheet);
-    // UnloadFont(assets.gameFont);
+    UnloadTexture(assets.cardBack);
 }
 
 // --- LOGIQUE DE DÉCOUPE ---
@@ -70,21 +72,30 @@ Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
 }
 
 // --- AFFICHAGE DE LA TABLE (Talon + Pioche) ---
+
 void RenderTable(GameState *g, GameAssets assets) {
-    float scale = 2.0f;
+    float scale = 1.0f;
+    
+    // Calcul de la taille cible (Destination) basé sur ta planche de cartes
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
     
     float centerX = GetScreenWidth() / 2.0f;
     float centerY = GetScreenHeight() / 2.0f;
 
-    // 1. DESSIN DE LA PIOCHE
+    // --- 1. DESSIN DE LA PIOCHE (Le Dos des cartes) ---
     Rectangle deckPos = { centerX - cardW - 20, centerY - (cardH/2), cardW, cardH };
-    DrawRectangleRec(deckPos, DARKBLUE);
-    DrawRectangleLinesEx(deckPos, 2, WHITE);
-    DrawText("PIOCHE", deckPos.x + 10, deckPos.y + cardH/2 - 10, 20, WHITE);
+    
+    // On définit la zone de l'image source (toute l'image du dos)
+    Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
+    
+    // On dessine le dos en l'étirant pour qu'il rentre exactement dans deckPos
+    DrawTexturePro(assets.cardBack, sourceBack, deckPos, (Vector2){0,0}, 0.0f, WHITE);
+    
+    // (Optionnel) Un petit contour blanc pour faire ressortir la pile
+    // DrawRectangleLinesEx(deckPos, 1, WHITE); 
 
-    // 2. DESSIN DU TALON (La carte jouée)
+    // --- 2. DESSIN DU TALON (La carte jouée) ---
     if (g->discard_pile.head != NULL) {
         Card topCard = g->discard_pile.head->card; 
 
@@ -140,10 +151,10 @@ void RenderHand(Player *p, GameAssets assets) {
             const char* text = "";
             switch(current->card.value) {
                 case SKIP:      text = "PASSE"; break;
-                case REVERSE:   text = "<-->"; break;
+                case REVERSE:   text = "<--->"; break;
                 case PLUS_TWO:  text = "+2"; break;
                 case PLUS_FOUR: text = "+4"; break;
-                case JOKER:     text = "WILD"; break;
+                case JOKER:     text = "COLOR"; break;
                 default: break;
             }
             
@@ -152,8 +163,8 @@ void RenderHand(Player *p, GameAssets assets) {
             int textY = dest.y + 5; // En haut à gauche de la carte
             
             DrawText(text, textX+2, textY+2, 20, BLACK); // Ombre noire
-            DrawText(text, textX, textY, 20, WHITE);     // Texte blanc
-            DrawText(text, textX, textY, 20, WHITE);     // (Doublé pour effet "gras")
+            DrawText(text, textX, textY, 20, BLACK);     // Texte blanc
+            DrawText(text, textX, textY, 20, BLACK);     // (Doublé pour effet "gras")
         }
 
         // Passage à la carte suivante

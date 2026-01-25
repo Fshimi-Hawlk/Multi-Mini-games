@@ -1,4 +1,4 @@
-#include "player.h"
+#include "../../include/core/player.h"
 #include <string.h>
 
 // Initialise un joueur

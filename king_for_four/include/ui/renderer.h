@@ -2,11 +2,12 @@
 #define UI_H
 
 #include "raylib.h"
-#include "game.h"
+#include "core/game.h"
 
 // Structure pour stocker les textures chargées
 typedef struct {
     Texture2D cardSheet;
+    Texture2D cardBack;
     Texture2D background;
     Font gameFont;
 } GameAssets;

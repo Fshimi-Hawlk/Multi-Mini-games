@@ -1,4 +1,5 @@
-#include "game.h"
+#include "core/game.h"
+#include "core/card.h"
 #include <stddef.h>
 
 /* Règle des couleurs : [Talon (0-3)][Joué (0-4)] */

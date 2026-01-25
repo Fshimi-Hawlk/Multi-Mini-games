@@ -1,4 +1,4 @@
-#include "card.h"
+#include "../../include/core/card.h"
 
 // Ajout en tête
 void push_card(Deck* d, Card c) {
