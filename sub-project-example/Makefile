@@ -13,7 +13,6 @@
 # Compiler and flags
 # Base flags (always present)
 BASE_CFLAGS := \
-	-Wno-newline-eof \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
@@ -40,10 +39,8 @@ else ifeq ($(MODE),debug)
 		-Wextra \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-gnu-zero-variadic-macro-arguments \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -60,10 +57,8 @@ else ifeq ($(MODE),strict-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-gnu-zero-variadic-macro-arguments \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -82,9 +77,9 @@ else ifeq ($(MODE),clang-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
+		-Wno-newline-eof \
 		-Wno-gnu-zero-variadic-macro-arguments \
 		-fno-omit-frame-pointer \
 		-fsanitize=address,undefined \
