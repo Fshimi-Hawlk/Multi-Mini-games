@@ -85,6 +85,10 @@ typedef struct { \
     } while (0)
 
 #define da_last(da) (da)->items[(ASSERT((da)->count > 0), (da)->count-1)]
+
+/**
+  *  Remove the i-th item of the dynamic array without conserving order.
+  */
 #define da_remove_unordered(da, i)               \
     do {                                             \
         size_t j = (i);                              \
