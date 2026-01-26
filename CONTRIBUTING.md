@@ -1,49 +1,61 @@
 # CONTRIBUTING.md
 
-Internal guidelines for the Multi Mini-Games project
+Guidelines for working together on the Multi Mini-Games project
 
-This is a [monorepo](https://wellarchitected.github.com/library/scenarios/monorepos/) with branch-per-game workflow.
+We're all figuring out collaborative Git workflows at the same time. — mistakes will happen and that's okay.  
+The most important rule is: communicate.
 
-## Workflow
+## Basic Workflow (very simplified)
 
-### Branches
-- Develop features or fixes on branches off `main` (e.g., `git checkout -b feature/custom-boards`).
-- New mini-games: dedicated branch from `main` (`git checkout -b new-game-name`).
-- Keep branches focused and short-lived.
-- When ready:
-  - Open [PR](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) to `main` (for merges/shared changes) or target branch.
-  - Discuss big changes in team chat/meeting first.
+1. Everything stable lives on branch `main`
+2. Each mini-game gets its own branch (example: `block-blast`, `snake-classic`, `memory-game`)
+3. You work only on your branch
+4. When your game is playable and reasonably clean -> you create a Pull Request (PR) to merge it into `main`
+5. After review + any small fixes -> merge -> the game becomes part of the main project
 
-### Merging Sub-Games
-- Once a game branch is stable: PR to merge into `main` as a folder.
-- Post-merge: integrate as lib/module for lobby scene switching.
+## Git commands you will use most
 
-## Code Style & Conventions
-- See separate file: [Code Style & Conventions](CodeStyleAndConventions.md)
-- You certainly have your own style and convention, and that's fine. But try to respect
-some of it to be consistent. If you disagree with some of the points, propose a change 
-and we'll discuss about it.
+```
+git pull origin main               # always start
+git checkout -b my-game-name       # create your branch
+# ... work + commit frequently ...
+git push origin my-game-name
+# then go to GitHub -> create Pull Request from your branch to main
+```
 
-## Commit Messages
-Use Conventional Commits:
-- `feat: add durability tiles` (feature)
-- `fix: correct streak scoring`
-- `docs: update build instructions` (documentation)
-- `refactor: split shape logic`
-- `test: add placement tests`
+## Commit messages — our simple rule
 
-## Pull Requests
-- Title: concise summary.
-- Description: explain what/why.
-- Keep PRs small for quick review.
-- Run checks locally: `make MODE=clang-debug`, `make run-tests`.
+We try to follow "Conventional Commits" — it looks like this:
 
-## Testing
-- Add unit/integration tests in `sub-project/tests/` for new logic.
-- Always run `make run-tests` (prefer `MODE=clang-debug` or `valgrind-debug`) before committing/PR.
+- `feat: add player movement with arrow keys`
+- `fix: prevent crash when clicking too fast`
+- `docs: improve README installation steps`
+- `style: reformat code + fix indentation`
+- `refactor: move repeated code into utilsDrawRectangle()`
+- `test: add checks for score calculation`
 
-## General
-- Use raylib.
-- [WIP] Prefix game-specific functions (e.g., `subProject_` for any sub-project).
-- Update Doxygen comments for public API.
-- Ping team on PRs for review.
+For trivial changes (whitespace, better variable name, ...), either make a tiny commit (style: trim trailing whitespace) or fold it into the next meaningful commit — both are fine.
+
+## Pull Requests (PRs)
+
+- Title: short sentence describing the change
+- Description: explain the why (especially for bigger changes)
+- Before opening PR: run `make MODE=clang-debug run-tests`
+
+## Code Style
+
+So, to start things up, see the linked [CodeStyleAndConventions.md](./CodeStyleAndConventions.md)
+
+-> It's mostly how I've been writing so far.  
+-> Goal => have some baseline consistency, I'm not expecting perfect uniformity.  
+-> If anything feels inconvenient, overly strict/pedantic, or just wrong — bring it up (chat or PR that edits the file). We can adopt parts, ignore parts, or write something new together.  
+
+Even partial adherence helps — big style differences make everyone's life harder when reading/reviewing.
+
+## Reviews & questions
+
+- Ping the group chat when you open a PR
+- It's normal to ask "is this okay?" or "what do you think about this approach?"
+- Merge conflicts happen — ask for help when they do, there's no shame
+
+Thanks for working together — take your time, ask questions, and enjoy making the games!
