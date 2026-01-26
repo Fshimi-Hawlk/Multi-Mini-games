@@ -7,3 +7,9 @@ s32 main(void) {
 
 #define RAND_IMPLEMENTATION
 #include "rand.h"
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"
+
+#define ARENA_IMPLEMENTATION
+#include "arena.h"
