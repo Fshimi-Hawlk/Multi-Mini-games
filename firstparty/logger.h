@@ -73,9 +73,14 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
 
 #define logger_log(fmt, ...) log_message(LOGGING_LEVEL_LOG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #define log_info(fmt, ...)   log_message(LOGGING_LEVEL_INFO,  __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
-#define log_debug(fmt, ...)  log_message(LOGGING_LEVEL_DEBUG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #define log_warn(fmt, ...)   log_message(LOGGING_LEVEL_WARN,  __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #define log_fatal(fmt, ...)  log_message(LOGGING_LEVEL_FATAL, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+
+#ifdef _DEBUG
+#define log_debug(fmt, ...)  log_message(LOGGING_LEVEL_DEBUG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
+#else
+#define log_debug(fmt, ...)
+#endif
 
 #ifdef _STACK_TRACE
 #define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); print_stack_trace()

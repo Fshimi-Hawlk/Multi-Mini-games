@@ -1,0 +1,69 @@
+# Minimal Doxyfile
+DOXYFILE_ENCODING       = UTF-8
+
+# ────────────────────────────────────────────────────────────────
+# Project metadata
+# ────────────────────────────────────────────────────────────────
+
+PROJECT_NAME            = "Sub-Project Name"
+PROJECT_NUMBER          = 2026.01.13-1 # <Use the date of the commit>-<commit current count of the day>
+PROJECT_BRIEF           = "Sub-Project Brief..."
+
+# ────────────────────────────────────────────────────────────────
+# Output configuration
+# ────────────────────────────────────────────────────────────────
+
+OUTPUT_DIRECTORY        = ./docs
+GENERATE_LATEX          = NO
+
+CREATE_SUBDIRS          = YES
+CREATE_SUBDIRS_LEVEL    = 2
+
+# ────────────────────────────────────────────────────────────────
+# Path handling and stripping
+# ────────────────────────────────────────────────────────────────
+
+FULL_PATH_NAMES         = YES
+STRIP_FROM_PATH         = ../
+STRIP_FROM_INC_PATH     = include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# Input files and scanning
+# ────────────────────────────────────────────────────────────────
+
+USE_MDFILE_AS_MAINPAGE  = README.md
+INPUT                   = README.md src include makefile.md
+RECURSIVE               = YES
+FILE_PATTERNS           = *.c *.h *.md
+
+EXCLUDE                 = tests docs build ../thirdparty Makefile
+EXCLUDE_SYMLINKS        = YES
+
+SEARCH_INCLUDES         = YES
+INCLUDE_PATH            = include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# C-specific optimization and extraction
+# ────────────────────────────────────────────────────────────────
+
+OPTIMIZE_OUTPUT_FOR_C   = YES
+
+EXTRACT_ALL             = YES
+HIDE_UNDOC_MEMBERS      = NO
+HIDE_UNDOC_CLASSES      = NO
+
+PREDEFINED              = _DEBUG
+
+# ────────────────────────────────────────────────────────────────
+# Source code visibility in documentation
+# ────────────────────────────────────────────────────────────────
+
+SOURCE_BROWSER          = NO
+INLINE_SOURCES          = NO
+VERBATIM_HEADERS        = NO
+
+# ────────────────────────────────────────────────────────────────
+# Performance / multi-core
+# ────────────────────────────────────────────────────────────────
+
+NUM_PROC_THREADS        = 0
