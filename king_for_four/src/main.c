@@ -45,7 +45,6 @@ int main(void)
                     init_uno_deck(&game.draw_pile);
                     
                     // UTILISATION DU MÉLANGE HUMAIN (Réaliste)
-                    // (Assure-toi d'avoir ajouté le prototype dans card.h)
                     human_shuffle_deck(&game.draw_pile); 
                     
                     game.num_players = 1;
@@ -101,8 +100,7 @@ int main(void)
                 case STATE_MENU:
                     // On dessine la table vide en fond pour l'ambiance
                     if (game.draw_pile.size == 0) { 
-                        // Petite astuce: si le jeu n'est pas lancé, on affiche juste un rectangle bleu
-                        // ou on ne dessine rien de spécial, RenderMenu fait le travail.
+                        
                     }
                     RenderMenu(); // Affiche le titre et "Cliquez pour jouer"
                     break;
