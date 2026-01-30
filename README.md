@@ -44,7 +44,15 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 │   └── NOTICE                # Third-party license notices & attributions (e.g., for rand.h PCG)
 ├── sub-project-example/      # Template — copy this structure when starting a new game
 │   ├── src/                  # .c files
+│   │   ├── core/
+│   │   ├── ui/
+│   │   ├── setups/
+│   │   └── utils/
 │   ├── include/              # .h files
+│   │   ├── core/
+│   │   ├── ui/
+│   │   ├── setups/
+│   │   └── utils/
 │   ├── docs/                 # generated documentation
 │   ├── tests/                # unit tests
 │   ├── CHANGELOG.md          # Per-sub-project detailed changelog
