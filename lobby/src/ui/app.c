@@ -2,7 +2,7 @@
     @file ui/app.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-08-04
     @brief Rendering logic for the player skin/character selection menu in the lobby.
 
     Contributors:
