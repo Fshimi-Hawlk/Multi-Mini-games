@@ -1,40 +1,42 @@
 /**
  * @file main.c
- * @brief Bowling game entry point
+ * @brief Suika game entry point
  * @author Multi Mini-Games Team
  * @date February 2026
  */
 
-#include "bowling.h"
+#include "suika.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 int main(void) {
+    // Initialize random seed
+    srand((unsigned int)time(NULL));
+    
     // Initialize window
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Bowling - Multi Mini-Games");
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Suika Game - Multi Mini-Games");
     SetTargetFPS(TARGET_FPS);
 
     // Initialize game
-    BowlingGame_St game = {0};
-    bowling_init(&game);
+    SuikaGame_St game = {0};
+    suika_init(&game);
 
     // Main game loop
     while (!WindowShouldClose()) {
         float deltaTime = GetFrameTime();
 
         // Update
-        bowling_update(&game, deltaTime);
+        suika_update(&game, deltaTime);
 
         // Draw
         BeginDrawing();
-        ClearBackground(RAYWHITE);
-        
-        bowling_draw(&game);
-        
+        suika_draw(&game);
         EndDrawing();
     }
 
     // Cleanup
-    bowling_cleanup(&game);
+    suika_cleanup(&game);
     CloseWindow();
 
     return 0;
