@@ -244,7 +244,11 @@ static PrefabIndexBagVec_St* getRandomPrefabBag(const f32 weights[MAX_SHAPE_SIZE
     u8 sizeIdx;
 
     do {
+#ifndef _USE_DEFAULT_RAND
         f32 prob = prng_randf();
+#else
+        f32 prob = randfloat();
+#endif
         f32 weightedSum = 0.0f;
         for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
             weightedSum += weights[sizeIdx];
@@ -280,7 +284,7 @@ static PrefabIndexBagVec_St* getRandomPrefabBag(const f32 weights[MAX_SHAPE_SIZE
  */
 void randomizeShape(ActivePrefab_St* const shape, const f32 weights[MAX_SHAPE_SIZE]) {
     shape->center = defaultPositions[shape->id];
-    shape->colorIndex = prng_rand() % _blockColorCount;
+    shape->colorIndex = RAND_FUNC() % _blockColorCount;
     shape->placed = false;
 
     PrefabIndexBagVec_St* bag = getRandomPrefabBag(weights);
@@ -407,18 +411,20 @@ void mirrorPrefab(Prefab_St* const prefab) {
     memcpy(prefab->offsets, newOffsets, prefab->blockCount * sizeof(*prefab->offsets));
 }
 
-void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
+void releaseShapeAt(ActivePrefab_St *const shape, s8Vector2 pos, Board_St *const board) {
     shape->dragging = false;
     dragging = false;
 
-    s8Vector2 shapeBoardPos = mapShapeToBoardPos(shape);
-    if (isShapePlaceable(shape, shapeBoardPos)) {
-
-        placeShape(shape, castTo(u8Vector2) shapeBoardPos, board);
+    if (isShapePlaceable(shape, pos)) {
+        placeShape(shape, castTo(u8Vector2) pos, board);
         shape->placed = true;
     } else {
         shape->center = defaultPositions[shape->id];
     }
+}
+
+void releaseShape(ActivePrefab_St* const shape, Board_St* const board) {
+    releaseShapeAt(shape, mapShapeToBoardPos(shape), board);
 }
 
 void printPrefabInfo(const Prefab_St prefab) {

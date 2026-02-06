@@ -36,9 +36,11 @@ void freeFonts(void) {
 bool8 initApp(void) {
     srand(time(NULL));
 
+#ifndef _USE_DEFAULT_RAND
     u64 seeds[2] = { 0 };
     plat_get_entropy(seeds, sizeof(seeds));
     prng_seed(seeds[0], seeds[1]);
+#endif
 
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);

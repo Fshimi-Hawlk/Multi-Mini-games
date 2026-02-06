@@ -249,8 +249,21 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
     vsnprintf(message, sizeof(message), fmt, args);
     va_end(args);
 
+    FILE* output;
+    switch (level) {
+        case LOGGING_LEVEL_WARN:
+        case LOGGING_LEVEL_ERROR:
+        case LOGGING_LEVEL_FATAL: {
+            output = stderr;
+        } break;
+
+        default: {
+            output = stdout;
+        }
+    }
+
     /* Print to stderr and log file */
-    fprintf(stderr, "%s[%s%s\033[0m%s] %s%s\033[0m:%s%d %s(%s%s%s)\033[0m: %s\n", yellow, levelColor, levelStr, yellow, fileColor, file, lineColor, line, yellow, functionColor, func, yellow, message);
+    fprintf(output, "%s[%s%s\033[0m%s] %s%s\033[0m:%s%d %s(%s%s%s)\033[0m: %s\n", yellow, levelColor, levelStr, yellow, fileColor, file, lineColor, line, yellow, functionColor, func, yellow, message);
     if (log_file) {
         fprintf(log_file, "%s [%s] %s:%d (%s): %s\n", timestamp, levelStr, file, line, func, message);
         fflush(log_file);

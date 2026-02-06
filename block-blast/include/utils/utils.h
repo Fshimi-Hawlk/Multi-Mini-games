@@ -150,13 +150,11 @@
 
 /**
  * @brief Shuffles an array in-place using Fisher-Yates algorithm.
- *
- * Requires prng_rand() to be available.
  */
 #define shuffleArray(array, size) \
 do { \
     for (u32 i = size - 1; i > 0; --i) { \
-        u32 r = prng_rand() % (i + 1); \
+        u32 r = RAND_FUNC() % (i + 1); \
         if (r == i) continue; \
         swap(array[i], array[r]); \
     } \
@@ -191,6 +189,7 @@ do { \
  */
 u64 randint(u64 min, u64 max);
 
+#ifndef _USE_DEFAULT_RAND
 /**
  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive) using a PRNG.
  *
@@ -199,6 +198,7 @@ u64 randint(u64 min, u64 max);
  * @return A random value in [min, max].
  */
 u64 prng_randint(u64 min, u64 max);
+#endif
 
 /**
  * @brief Generates a random float in the range [0.0, 1.0].
