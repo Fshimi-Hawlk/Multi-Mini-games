@@ -23,9 +23,9 @@ bool8 initFonts(void);
 void freeFonts(void);
 
 /**
- * @brief Initializes the application, including window, RNG, and game setup.
+ * @brief Initializes the app: RNG, window, fonts.
  *
- * @return true if successful, false otherwise.
+ * Seeds PRNG, opens window, loads fonts and initialize game.
  */
 bool8 initApp(void);
 
