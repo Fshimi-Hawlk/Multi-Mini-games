@@ -13,7 +13,6 @@
 # Compiler and flags
 # Base flags (always present)
 BASE_CFLAGS := \
-	-Wno-newline-eof \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
@@ -40,10 +39,9 @@ else ifeq ($(MODE),debug)
 		-Wextra \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-gnu-zero-variadic-macro-arguments \
+		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -60,10 +58,9 @@ else ifeq ($(MODE),strict-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-gnu-zero-variadic-macro-arguments \
+		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -82,6 +79,7 @@ else ifeq ($(MODE),clang-debug)
 		-pedantic \
 		-g \
 		-O0 \
+		-Wno-macro-redefined \
 		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
@@ -115,10 +113,9 @@ else ifeq ($(MODE),valgrind-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-newline-eof \
+		-Wno-macro-redefined \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-gnu-zero-variadic-macro-arguments \
 		-D_STACK_TRACE \
 		-D_DEBUG
 
@@ -168,7 +165,7 @@ MAIN_SOURCE := $(SRC_DIR)/$(MAIN_NAME).c
 MAIN_OBJECT := $(OBJ_DIR)/$(MAIN_NAME).o
 
 # Test sources/objects/bins (recursive)
-TEST_SOURCES := $(wildcard $(TEST_DIR)/**/*.c)
+TEST_SOURCES := $(shell find $(TEST_DIR) -name '*.c')
 TEST_OBJECTS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(OBJ_DIR)/tests/%.o)
 TEST_BINS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%)
 
@@ -201,7 +198,6 @@ else
 	DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
 endif
 
-# Include dependency files only when tracking is enabled
 ifneq ($(NO_DEPENDENCY_TRACKING),1)
 	-include $(DEPS)
 endif
@@ -227,13 +223,13 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $(CFLAGS) $(DEP_FLAGS) -c $< -o $@
 
-$(TEST_BIN_DIR)/% : $(OBJ_DIR)/tests/%.o $(LIB_OBJECTS)
+$(TEST_BIN_DIR)/% : $(OBJ_DIR)/tests/%.o
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $^ $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.c
 	$(SILENT_PREFIX)mkdir -p $(@D)
-	$(SILENT_PREFIX)$(CC) $(CFLAGS) $(DEP_FLAGS) -c $< -o $@
+	$(SILENT_PREFIX)$(CC) $(CFLAGS) -Isrc $(DEP_FLAGS) -c $< -o $@
 
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
