@@ -66,10 +66,9 @@ int main(int argc, char* argv[]) {
                     boardShape = nextBoardShape;
                     randomShape(&nextBoardShape);
 
-                    // if (isColliding(board, boardShape)) {
-                    //     whriteHighScore(highScore, score);
-                    //     return 1;
-                    // }
+                    if (isColliding(board, boardShape)) {
+                        return 1;
+                    }
                     
                     hasFoundMove = false;
                 }

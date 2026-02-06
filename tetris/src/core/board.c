@@ -36,9 +36,19 @@ bool isCollidingAt(board_t board, boardShape_st boardShape, iVector2 position) {
         int y = boardShape.shape[i].y + position.y;
         int x = boardShape.shape[i].x + position.x;
 
-        if (y < 0 || x < 0 || x >= BOARD_WIDTH)
+        // Collision si hors limites horizontales
+        if (x < 0 || x >= BOARD_WIDTH)
+            return true;
+        
+        // Collision si en bas du plateau
+        if (y >= BOARD_HEIGHT)
+            return true;
+        
+        // Collision si haut du plateau et on n'ignore pas
+        if (y < 0)
             continue;
 
+        // Collision si cellule occupée
         if (!isColorsEqual(board[y][x], BOARD_BACKGROUND_COLOR))
             return true;
     }
@@ -55,7 +65,10 @@ void putShapeInBoard(board_t board, boardShape_st boardShape) {
         int shapeCellY = boardShape.shape[i].y + boardShape.position.y;
         int shapeCellX = boardShape.shape[i].x + boardShape.position.x;
 
-        board[shapeCellY][shapeCellX] = boardShape.color;
+        // Vérifier les limites avant d'accéder
+        if (shapeCellY >= 0 && shapeCellY < BOARD_HEIGHT && shapeCellX >= 0 && shapeCellX < BOARD_WIDTH) {
+            board[shapeCellY][shapeCellX] = boardShape.color;
+        }
     }
 }
 
