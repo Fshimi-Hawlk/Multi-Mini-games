@@ -176,6 +176,15 @@ void rotatePrefab(Prefab_St* const prefab, u8 rotateBy);
 void mirrorPrefab(Prefab_St* const prefab);
 
 /**
+ * @brief Releases a shape at a precise position, placing it if valid or resetting position.
+ *
+ * @param shape Pointer to the active shape.
+ * @param pos   Position on the board
+ * @param board Pointer to the board.
+ */
+void releaseShapeAt(ActivePrefab_St *const shape, s8Vector2 pos, Board_St *const board);
+
+/**
  * @brief Releases a dragged shape, placing it if valid or resetting position.
  *
  * @param shape Pointer to the active shape.
