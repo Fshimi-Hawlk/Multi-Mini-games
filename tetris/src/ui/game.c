@@ -22,7 +22,7 @@ void drawPreview(board_t board, boardShape_st boardShape) {
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
 
-    for (; !isColliding(board, boardShape); (boardShape.position.y)++);;
+    for (; !isColliding(board, boardShape); (boardShape.position.y)++);
     (boardShape.position.y)--;
 
     for (int i = 0; i < 4; i++) {
