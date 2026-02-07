@@ -1,5 +1,6 @@
 #include "setups/app.h"
 #include "setups/audio.h"
+#include "setups/texture.h"
 
 #include "utils/common.h"
 
@@ -13,4 +14,11 @@ void lobby_initApp(void) {
 
     lobby_initAudio();
     lobby_initTextures();
+}
+
+void lobby_freeApp(void) {
+    lobby_freeAudio();
+    lobby_freeTextures();
+
+    CloseWindow();
 }

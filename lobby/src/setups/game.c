@@ -1,6 +1,7 @@
 #include "setups/game.h"
 
 #include "utils/globals.h"
+#include "utils/userTypes.h"
 
 static void initGrass(void) {
     Rectangle floor = platforms[0].rect;
@@ -44,6 +45,14 @@ static void initGrass(void) {
 
 void lobby_initGame(void) {
     initGrass();
+
+    game.subGameManager.currentScene = GAME_SCENE_LOBBY;
+    game.subGameManager.needGameInit = false;
+    game.subGameManager.gameHitGracePeriodActive = false;
+
+    game.subGameManager.miniGames[GAME_SCENE_TETRIS] = NULL;
+
+    game.subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = tetrisHitbox;
 
     game.playerVisuals.isTextureMenuOpen = false;
     game.playerVisuals.defaultTextureRect = (Rectangle) { 20, 60, 50, 50};

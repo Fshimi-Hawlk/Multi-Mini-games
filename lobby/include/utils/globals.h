@@ -46,6 +46,8 @@ extern Texture2D platformTextures[__platformTypeCount];
 extern Texture2D treeTexture;
 extern Texture2D backgroundTexture;
 
+extern Rectangle tetrisHitbox;
+
 // ────────────────────────────────────────────────
 // Skin selection UI
 // ────────────────────────────────────────────────
