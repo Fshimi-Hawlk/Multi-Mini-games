@@ -1,8 +1,13 @@
 #ifndef UTILS_CONFIGS_H
 #define UTILS_CONFIGS_H
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
+
+#define WINDOW_WIDTH    800
+#define WINDOW_HEIGHT   600
+#define WINDOW_NAME     "Tetris"
 
 #define BOARD_WIDTH 10
 #define BOARD_HEIGHT 20
