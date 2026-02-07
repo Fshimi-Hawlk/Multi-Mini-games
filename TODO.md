@@ -6,9 +6,8 @@ Items are roughly ordered from "we should do this quite soon" to "nice to have l
 
 ## Right now – most urgent
 
-- [ ] Create one global Makefile at root level  
-  Goal: be able to write `make all`, `make lobby`, `make clean-all`, etc.  
-  and build everything (lobby + already merged games) with one command.
+- [x] Create one global Makefile at root level  
+  -> Done. Supports lazy library builds, API header copying, incremental & force-rebuild targets.
 
 - [ ] Create root `docs/` folder  
   - Put a main Doxyfile there for lobby + shared code  
