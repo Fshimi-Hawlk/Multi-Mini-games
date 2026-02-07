@@ -2,14 +2,13 @@
 #include "core/board.h"
 #include "core/game.h"
 #include "core/shape.h"
+
 #include "ui/board.h"
 #include "ui/game.h"
 #include "ui/shape.h"
-#include "utils/common.h"
+
 #include "utils/configs.h"
-#include "utils/globals.h"
 #include "utils/types.h"
-#include "utils/utils.h"
 
 
 int main(int argc, char* argv[]) {
@@ -84,7 +83,7 @@ int main(int argc, char* argv[]) {
                 randomShape(&nextBoardShape);
 
                 if (isColliding(board, boardShape)) {
-                    whriteHighScore(highScore, score);
+                    writeHighScore(highScore, score);
                     return 1;
                 }
             }
@@ -93,7 +92,7 @@ int main(int argc, char* argv[]) {
             
         handleLineClears(board, lineArray, &lineNb);
         lineNbTotal += lineNb;
-        level = fminf(29, lineNbTotal / 10);
+        level = fminf(29, lineNbTotal / 10.0f);
         score += points[lineNb] * (level + 1);
 
         if (!lineNbTotal % 10 && !autoPlay)

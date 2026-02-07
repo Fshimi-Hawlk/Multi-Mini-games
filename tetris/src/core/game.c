@@ -1,5 +1,7 @@
 #include "core/game.h"
 #include "core/board.h"
+#include "core/shape.h"
+#include "utils/configs.h"
 
 void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove) {
     speed->t += GetFrameTime();
@@ -84,7 +86,7 @@ void readHighScore(int *highScore) {
     fclose(fd);
 }
 
-void whriteHighScore(int highScore, int score) {
+void writeHighScore(int highScore, int score) {
     if (score <= highScore) return;
 
     FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "w");

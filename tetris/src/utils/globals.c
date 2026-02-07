@@ -1,4 +1,5 @@
 #include "utils/globals.h"
+#include "core/shape.h"
 
 inputRepeat_st inputRepeat = {0, 0, 0, 0.2f, 0.05f};
 

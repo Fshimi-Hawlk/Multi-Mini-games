@@ -2,7 +2,6 @@
 #define CORE_SHAPE_H
 
 #include "utils/types.h"
-#include "utils/globals.h"
 
 #define I_SHAPE { \
     {-1, 0}, {0, 0}, {1, 0}, {2, 0} \

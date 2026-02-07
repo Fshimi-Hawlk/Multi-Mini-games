@@ -31,7 +31,7 @@ void drawPreview(board_t board, boardShape_st boardShape) {
 
         if (y < 0 || y >= BOARD_HEIGHT || x < 0 || x >= BOARD_WIDTH) continue;
 
-        DrawRectangle((offsetX + x * CELL_SIZE) - 1, (offsetY + y * CELL_SIZE) - 1, CELL_SIZE + 2, CELL_SIZE + 2, WHITE);
-        DrawRectangle(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE, CELL_SIZE, board[y][x]);
+        DrawRectangle     (offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE - 2, CELL_SIZE - 2, board[y][x]);
+        DrawRectangleLines(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE, CELL_SIZE, WHITE);
     }
 }
