@@ -92,18 +92,20 @@ else ifeq ($(MODE),clang-debug)
 		-fsanitize=address,undefined
 	TOOL := 
 else ifeq ($(MODE),valgrind-debug)
-    ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-        CC := gcc
-        CFLAGS := \
-        -Wall \
-        -Wextra \
-        -g \
-        -O0 \
-        -Wno-macro-redefined \
-        -Wno-unused-function \
-        -Wno-deprecated-declarations \
-        -D_STACK_TRACE \
-        -D_DEBUG
+	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
+		CC := gcc
+		CFLAGS := \
+		-Werror \
+		-Wall \
+		-Wextra \
+		-pedantic \
+		-g \
+		-O0 \
+		-Wno-macro-redefined \
+		-Wno-unused-function \
+		-Wno-deprecated-declarations \
+		-D_STACK_TRACE \
+		-D_DEBUG
 
         LDFLAGS := \
         -g \
@@ -371,4 +373,4 @@ help:
 	@echo "    run-tests uses stdbuf (from GNU coreutils) if available for reliable output on crashes;"
 	@echo "    warns if missing and suggests alternatives (e.g., fflush in test code)."
 
-.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests help
+.PHONY: all clean rebuild run-main run-gdb run-tests tests compile_commands help
