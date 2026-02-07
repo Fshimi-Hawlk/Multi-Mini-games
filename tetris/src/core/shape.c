@@ -1,4 +1,5 @@
 #include "core/shape.h"
+#include "utils/globals.h"
 
 void randomShape(boardShape_st* boardShape) {
     int n = rand() % SHAPE_MAX_ID;

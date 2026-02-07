@@ -5,24 +5,23 @@
  * @brief Main entry point for the lobby client, handling networking and module dispatching.
  */
 
-#include "raylib.h"
 #include "core/game.h"
+
 #include "ui/connection_screen.h"
-#include "firstparty/APIs/module_interface.h"
+#include "APIs/module_interface.h"
+
 #include "rudp_core.h"
 #include "utils/globals.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 
 /** @brief Port used for server communication. */
 #define SERVER_PORT 8080
+
 /** @brief Action code for game data transmission. */
 #define ACTION_GAME_DATA 5 
+
 
 /**
  * @brief Enum for different game states in the lobby.
@@ -35,19 +34,26 @@ typedef enum {
 /** @brief Current state of the game. */
 static GameState currentState = STATE_CONNECTION;
 
+
 /** @brief Global network socket for the client. */
 int network_socket = -1;
+
 /** @brief RUDP connection state for the server. */
 RUDP_Connection server_conn;
+
 /** @brief Global player structure for the local client. */
 Player_st player = { .position = { 400, 300 }, .radius = 20, .active = true };
+
 /** @brief Array of other players in the lobby. */
 Player_st otherPlayers[MAX_CLIENTS];
 
+
 /** @brief Registry of available mini-game modules. */
 static MiniGameModule* game_registry[256] = {0};
+
 /** @brief ID of the currently active mini-game module. */
 uint8_t active_game_id = 0;
+
 
 extern MiniGameModule LobbyModule; 
 extern MiniGameModule KingForFourClientModule;
