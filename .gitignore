@@ -47,8 +47,7 @@ dkms.conf
 
 # Build artifacts
 build/
-bin/
-obj/
+./*/build/
 main
 
 # Logs / temp

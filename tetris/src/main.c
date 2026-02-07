@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
     initBoard(board);
 
     SetTraceLogLevel(LOG_WARNING);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetris");
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
     SetTargetFPS(60);
 
     bool hasFoundMove = false;

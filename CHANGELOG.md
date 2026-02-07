@@ -14,10 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial monorepo structure with shared folders (`firstparty/`, `thirdparty/`, `assets/`).  
+- Initial monorepo structure with shared folders (`firstparty/`, `thirdparty/`, `assets/`).
 - Root documentation files: README.md, CONTRIBUTING.md, TODO.md, CodeStyleAndConventions.md
 - Example sub-project folder (`sub-project-example/`) showing the structure we want for each game
 - Basic legal files: LICENSE, NOTICE (for third-party code credits)
+- Root-level Makefile: supports building merged games' static libraries lazily, copying API headers to `firstparty/APIs/`, incremental lobby linking
+- New root Makefile targets: `rebuild-exe` (force lobby relink only), `clean-all` (root + all subdirs), `clean-libs`, `clean-exe`
+- Lazy library build behavior: modules only recompiled if sources changed, .a files copied only when updated
+- Automatic API header copying: each module's `<gamename>API.h` → `firstparty/APIs/` during library builds
 
 ### Changed
 - Updated root README with clearer explanations and Git commands suited for beginners
@@ -25,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated CHANGELOG.md itself to better explain update rules and reflect documentation improvements
 - Revised TODO.md wording to be more straightforward while keeping the task list intact
 - Reworded CodeStyleAndConventions.md to clearly state it is a preferred style (not strict law), with invitation to discuss points that feel inconvenient
+- Root Makefile: improved clean target separation (`clean` now only removes root `build/`, `clean-all` recurses into subdirs)
+- Root Makefile: `rebuild` now uses `clean-all` for complete reset
 
 ### Fixed
 - (none yet)

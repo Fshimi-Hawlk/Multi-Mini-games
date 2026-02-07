@@ -72,7 +72,7 @@ void mouvement(board_t board, boardShape_st* boardShape) {
 }
 
 void readHighScore(int *highScore) {
-    FILE* fd = fopen("data/highScore.txt", "r");
+    FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "r");
 
     if (!fd) {
         *highScore = 0;
@@ -87,7 +87,7 @@ void readHighScore(int *highScore) {
 void whriteHighScore(int highScore, int score) {
     if (score <= highScore) return;
 
-    FILE* fd = fopen("data/highScore.txt", "w");
+    FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "w");
 
     if (fd) {
         fprintf(fd, "%d", score);

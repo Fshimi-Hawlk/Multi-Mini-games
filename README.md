@@ -68,6 +68,20 @@ Post-merge example (after a sub-project merge):
 ├── sub-project/              # Merged game: src/, include/, tests/, etc.
 ```
 
+## Building & Running (Root Level – after games are merged)
+
+From the repository root:
+
+```bash
+make help               # see all targets
+make bin                # build libraries (if needed) + lobby executable
+make rebuild-exe        # force rebuild lobby executable only
+make run-exe            # run the lobby
+make run-tests          # run all tests across modules
+```
+
+See `makefile.md` for full documentation.
+
 ## Building & Running (Sub-Project Level)
 
 From inside a branch root (e.g., after `git checkout sub-project` or in `sub-project-example/`):
