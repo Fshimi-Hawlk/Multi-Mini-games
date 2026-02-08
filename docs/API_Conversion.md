@@ -523,6 +523,7 @@ int main(void) {
    - `make rebuild-libs`: Builds libs, copies APIs.
    - `make rebuild-exe`: Forces lobby relink.
    - `make run-exe`: Test.
+   - One liner: `make MODE=strict-debug rebuild run-exe`
 
 2. **Standalone Sub-Game**:
    - In game folder: `make rebuild run-main` (use temporary main if needed).
