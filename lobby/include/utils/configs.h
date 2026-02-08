@@ -1,17 +1,12 @@
 /**
  * @file configs.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
+ * @author 
+ * @date 
  * @brief Core configuration constants for the game.
- *
- * These #defines set up window, board, and visual parameters. They're compile-time
- * constants; change here to tweak game feel or resolution.
  */
 
 #ifndef CONFIGS_H
 #define CONFIGS_H
-
-// General Configs
 
 #ifndef ASSET_PATH
 #define ASSET_PATH "assets/"
@@ -19,14 +14,24 @@
 
 #define IMAGES_PATH ASSET_PATH "images/"
 
-#define WINDOW_TITLE "Block Blast"
-#define WINDOW_WIDTH 1000
-#define WINDOW_HEIGHT 800 // 600
+#define WINDOW_WIDTH    1000
+#define WINDOW_HEIGHT   600
+#define WINDOW_TITLE    "Lobby"
 
 #define APP_BACKGROUND_COLOR (color32) {.r = 18, .g = 18, .b = 18, .a = 255}
 
 #define APP_TEXT_FONT_SIZE 32       ///< Base text size
 
-// Game Configs
+// Game Constants
+#define GRAVITY 1200.0f
+#define MOVE_SPEED 300.0f
+#define JUMP_FORCE 500.0f
+#define GROUND_Y 50
+
+#define COYOTE_TIME 0.1f
+#define JUMP_BUFFER_TIME 0.1f
+#define MAX_JUMPS 2
+
+#define FRICTION 2000
 
 #endif // CONFIGS_H

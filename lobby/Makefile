@@ -143,22 +143,22 @@ LDFLAGS += $(BASE_LDFLAGS)
 CFLAGS += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
+# Output name
 MAIN_NAME ?= main
-
-# Lib compilation
-LIB_NAME   ?= unnamed
+LIB_NAME  ?= unnamed
 
 # Dirs
-SRC_DIR := src
-TEST_DIR := tests
+SRC_DIR   := src
+TEST_DIR  := tests
 
 BUILD_DIR := build
-OBJ_DIR := $(BUILD_DIR)/obj
-BIN_DIR := $(BUILD_DIR)/bin
+OBJ_DIR   := $(BUILD_DIR)/obj
+BIN_DIR   := $(BUILD_DIR)/bin
+LIB_DIR   := $(BUILD_DIR)/lib
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
-STATIC_LIB := $(BUILD_DIR)/lib/lib$(LIB_NAME).a
 
-BIN := $(BIN_DIR)/$(MAIN_NAME)
+STATIC_LIB := $(LIB_DIR)/lib$(LIB_NAME).a
+BIN        := $(BIN_DIR)/$(MAIN_NAME)
 
 # Library/shared sources/objects (recursive, excluding main.c)
 LIB_SOURCES := $(shell find $(SRC_DIR) -name '*.c' ! -name '$(MAIN_NAME).c')
@@ -238,6 +238,7 @@ $(TEST_BIN_DIR)/% : $(OBJ_DIR)/tests/%.o
 $(STATIC_LIB): $(LIB_OBJECTS)
 	@mkdir -p $(@D)
 	$(SILENT_PREFIX)ar rcs $@ $^
+	@echo "Static library created: $(notdir $@)"
 
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)

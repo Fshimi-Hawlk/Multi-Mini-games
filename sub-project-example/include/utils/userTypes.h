@@ -1,7 +1,7 @@
 /**
  * @file userTypes.h
- * @author 
- * @date 
+ * @author Fshimi Hawlk
+ * @date 2026-01-07
  * @brief Core type definitions used throughout the game.
  */
 
@@ -9,6 +9,8 @@
 #define USER_TYPES_H
 
 #include "common.h"
+
+// General Types
 
 typedef enum {
     FONT8,
@@ -19,6 +21,8 @@ typedef enum {
     _fontSizeCount
 } FontSize_Et;
 
+// Game's Types
 
+// TODO
 
 #endif // USER_TYPES_H

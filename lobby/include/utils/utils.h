@@ -1,7 +1,7 @@
 /**
  * @file utils.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
+ * @author 
+ * @date 
  * @brief General utility macros and helper functions.
  */
 
@@ -9,6 +9,7 @@
 #define UTILS_H
 
 #include "common.h"
+#include "userTypes.h"
 
 /**
  * @brief Invalid pointer value used as a sentinel.
@@ -150,11 +151,13 @@
 
 /**
  * @brief Shuffles an array in-place using Fisher-Yates algorithm.
+ *
+ * Requires prng_rand() to be available.
  */
 #define shuffleArray(array, size) \
 do { \
     for (u32 i = size - 1; i > 0; --i) { \
-        u32 r = RAND_FUNC() % (i + 1); \
+        u32 r = prng_rand() % (i + 1); \
         if (r == i) continue; \
         swap(array[i], array[r]); \
     } \
@@ -178,6 +181,15 @@ do { \
     nl \
 } while (0)
 
+/// DOC: TODO
+Rectangle getTextureRec(const Texture* const texture);
+
+/// DOC: TODO
+Rectangle getPlayerCollisionBox(const Player_st* const player);
+
+/// DOC: TODO
+Vector2 getPlayerCenter(const Player_st* const player);
+
 /**
  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive).
  *
@@ -189,16 +201,18 @@ do { \
  */
 u64 randint(u64 min, u64 max);
 
-// #ifndef _USE_DEFAULT_RAND
-// /**
-//  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive) using a PRNG.
-//  *
-//  * @param min The minimum value.
-//  * @param max The maximum value.
-//  * @return A random value in [min, max].
-//  */
-// u64 prng_randint(u64 min, u64 max);
-// #endif
+#ifdef RAND_H
+
+/**
+ * @brief Generates a random unsigned 64-bit integer between min and max (inclusive) using a PRNG.
+ *
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @return A random value in [min, max].
+ */
+u64 prng_randint(u64 min, u64 max);
+
+#endif
 
 /**
  * @brief Generates a random float in the range [0.0, 1.0].

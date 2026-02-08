@@ -19,25 +19,15 @@
 #include <math.h>
 #include <assert.h>
 
-// #ifndef _USE_DEFAULT_RAND
 // #include "rand.h"
-
-// #define RAND_FUNC prng_rand
-// #else
-// #define RAND_FUNC rand
-// #endif
-
 #include "logger.h"
+// #include "contextArena.h"
 
-#ifndef _USE_DEFAULT_ALLOC
-#include "contextArena.h"
+// #define REALLOC context_realloc
+// #define FREE
 
-#define REALLOC context_realloc
-#define FREE
-#endif
-
-// #include "nob/dynamicArray.h"
-// #include "nob/stringBuilder.h"
+#include "nob/dynamicArray.h"
+#include "nob/stringBuilder.h"
 // #include "stringView.h"
 
 #include "raylib.h"

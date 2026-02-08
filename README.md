@@ -44,19 +44,19 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 │   └── NOTICE                # Third-party license notices & attributions (e.g., for rand.h PCG)
 ├── sub-project-example/      # Template — copy this structure when starting a new game
 │   ├── src/                  # .c files
-│   │   ├── core/
-│   │   ├── ui/
-│   │   ├── setups/
-│   │   └── utils/
+│   │   ├── core/             # Core logic of the game
+│   │   ├── ui/               # Draw/Render of the game/app UI
+│   │   ├── setups/           # Init and free of the diverse game/app elements
+│   │   └── utils/            # Utils like common.h, globals.h, configs.h, ...
 │   ├── include/              # .h files
-│   │   ├── core/
-│   │   ├── ui/
-│   │   ├── setups/
-│   │   └── utils/
+│   │   ├── core/             # Core logic of the game
+│   │   ├── ui/               # Draw/Render of the game/app UI
+│   │   ├── setups/           # Init and free of the diverse game/app elements
+│   │   └── utils/            # Utils like common.h, globals.h, configs.h, ...
 │   ├── docs/                 # generated documentation
 │   ├── tests/                # unit tests
 │   ├── CHANGELOG.md          # Per-sub-project detailed changelog
-│   ├── Makefile              
+│   ├── Makefile              # Makefile to build the sub-project as a separated unit
 │   ├── makefile.md           # Explains make commands to build the sub-project
 │   ├── Doxyfile.min          # Minimal Doxygen configs for per-sub-project docs
 │   └── README.md             # Template README for new sub-projects
@@ -75,6 +75,20 @@ Post-merge example (after a sub-project merge):
 ```
 ├── sub-project/              # Merged game: src/, include/, tests/, etc.
 ```
+
+## Building & Running (Root Level – after games are merged)
+
+From the repository root:
+
+```bash
+make help               # see all targets
+make bin                # build libraries (if needed) + lobby executable
+make rebuild-exe        # force rebuild lobby executable only
+make run-exe            # run the lobby
+make run-tests          # run all tests across modules
+```
+
+See `makefile.md` for full documentation.
 
 ## Building & Running (Sub-Project Level)
 
