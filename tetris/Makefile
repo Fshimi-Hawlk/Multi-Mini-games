@@ -156,9 +156,10 @@ BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 BIN_DIR := $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
-STATIC_LIB := $(BUILD_DIR)/lib/lib$(LIB_NAME).a
+STATIC_LIB_DIR := $(BUILD_DIR)/lib
 
 BIN := $(BIN_DIR)/$(MAIN_NAME)
+STATIC_LIB := $(STATIC_LIB_DIR)/lib$(LIB_NAME).a
 
 # Library/shared sources/objects (recursive, excluding main.c)
 LIB_SOURCES := $(shell find $(SRC_DIR) -name '*.c' ! -name '$(MAIN_NAME).c')
@@ -236,7 +237,7 @@ $(TEST_BIN_DIR)/% : $(OBJ_DIR)/tests/%.o
 	$(SILENT_PREFIX)$(CC) $^ $(LDFLAGS) -o $@
 
 $(STATIC_LIB): $(LIB_OBJECTS)
-	@mkdir -p $(@D)
+	mkdir -p $(STATIC_LIB_DIR)
 	$(SILENT_PREFIX)ar rcs $@ $^
 
 clean:
@@ -248,7 +249,7 @@ rebuild-obj: clean $(LIB_OBJECTS)
 
 rebuild-tests: clean tests
 
-static-lib: rebuild-obj 
+static-lib: rebuild-obj $(STATIC_LIB)
 
 run-main:
 	@if [ -f $(BIN) ]; then \
