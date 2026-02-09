@@ -55,6 +55,8 @@ bool isGameRunning(const Game_St* game) {
 }
 
 void lobby_gameLoop(float dt) {
+    srand(time(NULL));
+
     updatePlayer(&player, platforms, platformCount, dt);
 
     cam.target = player.position;
