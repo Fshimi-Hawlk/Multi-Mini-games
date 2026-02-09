@@ -16,12 +16,13 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
+#include "APIs/tetrisAPI.h"
+
 /** @brief Port used for server communication. */
 #define SERVER_PORT 8080
 
 /** @brief Action code for game data transmission. */
 #define ACTION_GAME_DATA 5 
-
 
 /**
  * @brief Enum for different game states in the lobby.
@@ -158,10 +159,49 @@ void receive_network_data(void) {
     }
 }
 
-/**
- * @brief Main function containing the game loop.
- * @return Exit status of the application.
- */
+void lobby_gameLoop(float dt) {
+    srand(time(NULL));
+
+    updatePlayer(&player, platforms, platformCount, dt);
+
+    cam.target = player.position;
+
+    toggleSkinMenu();
+
+    if (isTextureMenuOpen) {
+        choosePlayerTexture(&player);
+    }
+
+    if (CheckCollisionCircleRec(player.position, player.radius, tetrisHitbox)) {
+        if (!gameHitGracePeriodActive) {
+            currentScene = GAME_SCENE_TETRIS;
+            needGameInit = true;
+            gameHitGracePeriodActive = true;
+        }
+    } else if (gameHitGracePeriodActive) {
+        gameHitGracePeriodActive = false;
+    }
+
+    BeginDrawing(); {
+        ClearBackground(RAYWHITE);
+        BeginMode2D(cam); {
+            DrawCircle(0, 0, 10, RED);
+
+            drawPlayer(&player);
+            drawPlatforms(platforms, platformCount);
+
+            DrawRectangleRec(tetrisHitbox, RED);
+        } EndMode2D();
+
+        DrawText("Multi-Mini-Games", WINDOW_WIDTH / 2 - MeasureText("Multi-Mini-Games", 20) / 2, 20, 20, PURPLE);
+        drawSkinButton();
+        
+        if (isTextureMenuOpen) {
+            drawMenuTextures();
+        }
+    } EndDrawing();
+}
+
 int main(void) {
     InitWindow(1280, 720, "Multi-Mini-Games");
     SetTargetFPS(60);
