@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 #include "raylib.h"
 
@@ -21,7 +22,7 @@ enum {
 
 typedef struct {
     int x, y;
-} vector2int_st;
+} iVector2_st;
 
 typedef struct {
     float timer;
@@ -32,15 +33,17 @@ bool isOOB();
 bool selfCollision(int bodyLength);
 int initBoard(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength);
 void updateBody(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength);
-void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], vector2int_st* appleCoord);
+void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], iVector2_st* appleCoord);
 void drawBoard(int board[SIZE_BOARD][SIZE_BOARD]);
+void drawSnake(float interpolation, iVector2_st direction);
 void writeRecord(int highScore);
 int readRecord();
-bool mouvement(vector2int_st* direction);
+bool mouvement(iVector2_st* direction);
 
 typedef struct element {
-	vector2int_st coord;
-	struct element* suivant;
+    iVector2_st coord;
+    Vector2 renderPos;
+    struct element* suivant;
 } t_element;
 
 t_element* tete;
@@ -48,8 +51,8 @@ t_element* queue;
 
 void initFile(void);
 bool fileVide(void);
-void ajouter(vector2int_st v);
-void retirer(vector2int_st* v);
+void ajouter(iVector2_st v);
+void retirer(iVector2_st* v);
 void freeFile();
 
 int main() {
@@ -63,16 +66,19 @@ int main() {
     int nbApple = 0;
     int highScore = readRecord();
     
-    vector2int_st direction = {.x = 1, .y = 0}; // Direction initiale : droite
+    iVector2_st direction = {.x = 1, .y = 0}; // Direction initiale : droite
+
+    iVector2_st nextDirection = direction;
+
     initFile();
-    ajouter((vector2int_st){.x = 5, .y = 10});
-    ajouter((vector2int_st){.x = 6, .y = 10});
-    ajouter((vector2int_st){.x = 7, .y = 10});
+    ajouter((iVector2_st){.x = 5, .y = 10});
+    ajouter((iVector2_st){.x = 6, .y = 10});
+    ajouter((iVector2_st){.x = 7, .y = 10});
     int bodyLength = 3;
 
-    vector2int_st temp;
+    iVector2_st temp;
 
-    vector2int_st appleCoord;
+    iVector2_st appleCoord;
 
     speed_st speed = {0, 0.2};
 
@@ -82,12 +88,16 @@ int main() {
     
     while (!WindowShouldClose()) {
         if (!move) {
-            move = mouvement(&direction);
+            move = mouvement(&nextDirection);
+        }
+        if (speed.timer < 0.05) {
+            direction = nextDirection;
         }
 
         speed.timer += GetFrameTime();
+
         if (speed.timer >= speed.delay) {
-            ajouter((vector2int_st){.x = queue->coord.x + direction.x, .y = queue->coord.y + direction.y});
+            ajouter((iVector2_st) {.x = queue->coord.x + direction.x, .y = queue->coord.y + direction.y});
 
             // Mettre à jour le board avec le corps
             updateBody(board, bodyLength);
@@ -117,12 +127,19 @@ int main() {
             move = false;
         }
 
+        float interpolation = speed.timer / speed.delay;
+        if (interpolation > 1.0f)
+            interpolation = 1.0f;
+
         BeginDrawing();
             ClearBackground(BACKGROUND_COLOR);
             
             drawBoard(board);
+            drawSnake(interpolation, direction);
+            
             DrawText(TextFormat("Score : %d", nbApple), CELL_SIZE * SIZE_BOARD + 10, 50, 20, BLACK);
             DrawText(TextFormat("High Score : %d", highScore), CELL_SIZE * SIZE_BOARD + 10, 100, 20, BLACK);
+            DrawFPS(10, 10);
         EndDrawing();
     }
 
@@ -172,7 +189,7 @@ void updateBody(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength) {
     }
 }
 
-void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], vector2int_st* appleCoord) {
+void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], iVector2_st* appleCoord) {
     do {
         appleCoord->x = rand() % SIZE_BOARD;
         appleCoord->y = rand() % SIZE_BOARD;
@@ -186,25 +203,47 @@ void drawBoard(int board[SIZE_BOARD][SIZE_BOARD]) {
         for (int x = 0; x < SIZE_BOARD; x++) {
             int posX = x * CELL_SIZE;
             int posY = y * CELL_SIZE;
-            switch (board[y][x]) {
-                case GRASS:
-                    if ((x + y) % 2 == 0)
-                        DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, (Color){100, 200, 100, 255});
-                    else
-                        DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, (Color){80, 170, 80, 255});
-                    break;
-                case HEAD:
-                    DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, DARKBLUE);
-                    break;
-                case BODY:
-                    DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLUE);
-                    break;
-                case APPLE:
-                    DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, RED);
-                    break;
-                default: break;
+            
+            if ((x + y) % 2 == 0)
+                DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, (Color){100, 200, 100, 255});
+            else
+                DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, (Color){80, 170, 80, 255});
+            
+            if (board[y][x] == APPLE) {
+                DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, RED);
             }
         }
+    }
+}
+
+void drawSnake(float interpolation, iVector2_st direction) {
+    t_element* current = tete;
+    
+    while (current != NULL) {
+        float renderX, renderY;
+        
+        if (current->suivant) {
+            // Interpoler vers la position du suivant
+            renderX = current->coord.x + (current->suivant->coord.x - current->coord.x) * interpolation;
+            renderY = current->coord.y + (current->suivant->coord.y - current->coord.y) * interpolation;
+        } else {
+            // Pour la queue (= tête du serpent), interpoler dans la direction
+            renderX = current->coord.x + direction.x * interpolation;
+            renderY = current->coord.y + direction.y * interpolation;
+            // printf("(%d:%d)\n", current->coord.x, current->coord.y);
+        }
+        
+
+        float posX = roundf(renderX * CELL_SIZE);
+        float posY = roundf(renderY * CELL_SIZE);
+        
+        if (current == queue) {
+            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, DARKBLUE);  // Tête
+        } else {
+            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLUE);  // Corps
+        }
+        
+        current = current->suivant;
     }
 }
 
@@ -232,21 +271,21 @@ int readRecord() {
     return highScore;
 }
 
-bool mouvement(vector2int_st* direction) {
+bool mouvement(iVector2_st* direction) {
     if (IsKeyDown(KEY_W) && !direction->y) { // Lettre Z
-        *direction = (vector2int_st){.x = 0, .y = -1};
+        *direction = (iVector2_st){.x = 0, .y = -1};
         return true;
     }
     if (IsKeyDown(KEY_S) && !direction->y) {
-        *direction = (vector2int_st){.x = 0, .y = 1};
+        *direction = (iVector2_st){.x = 0, .y = 1};
         return true;
     }
     if (IsKeyDown(KEY_A) && !direction->x) { // Lettre Q
-        *direction = (vector2int_st){.x = -1, .y = 0};
+        *direction = (iVector2_st){.x = -1, .y = 0};
         return true;
     }
     if (IsKeyDown(KEY_D) && !direction->x) {
-        *direction = (vector2int_st){.x = 1, .y = 0};
+        *direction = (iVector2_st){.x = 1, .y = 0};
         return true;
     }
     return false;
@@ -261,11 +300,13 @@ bool fileVide() {
 	return tete == NULL;
 }
 
-void ajouter(vector2int_st v) {
+void ajouter(iVector2_st v) {
 	t_element* nouv;
 
 	nouv = malloc(sizeof(t_element));
 	nouv->coord = v;
+    nouv->renderPos.x = (float)v.x;
+	nouv->renderPos.y = (float)v.y;
 	nouv->suivant = NULL;
 	if(fileVide())
 		tete = nouv;
@@ -274,7 +315,7 @@ void ajouter(vector2int_st v) {
 	queue = nouv;
 }
 
-void retirer(vector2int_st* v) {
+void retirer(iVector2_st* v) {
 	t_element* premier;
 
 	if(!fileVide()){
@@ -286,7 +327,7 @@ void retirer(vector2int_st* v) {
 }
 
 void freeFile() {
-	vector2int_st unused;
+	iVector2_st unused;
 	while (!fileVide()) {
 		retirer(&unused);
 	}
