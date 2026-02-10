@@ -42,31 +42,30 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 ├── firstparty/               # Reusable single-header libs made by the team
 ├── thirdparty/               # External deps (raylib static lib, PCG rand, etc.)
 │   └── NOTICE                # Third-party license notices & attributions (e.g., for rand.h PCG)
-├── sub-project-example/      # Template — copy this structure when starting a new game
-│   ├── src/                  # .c files
-│   │   ├── core/             # Core logic of the game
-│   │   ├── ui/               # Draw/Render of the game/app UI
-│   │   ├── setups/           # Init and free of the diverse game/app elements
-│   │   └── utils/            # Utils like common.h, globals.h, configs.h, ...
+├── sub-project-example/      # Template structure when starting a new game
+│   ├── docs/                 # generated documentation
 │   ├── include/              # .h files
 │   │   ├── core/             # Core logic of the game
 │   │   ├── ui/               # Draw/Render of the game/app UI
 │   │   ├── setups/           # Init and free of the diverse game/app elements
 │   │   └── utils/            # Utils like common.h, globals.h, configs.h, ...
-│   ├── docs/                 # generated documentation
+│   ├── src/                  # .c files -> same structure as include
 │   ├── tests/                # unit tests
 │   ├── CHANGELOG.md          # Per-sub-project detailed changelog
 │   ├── Makefile              # Makefile to build the sub-project as a separated unit
+│   ├── make/                 # Split of the previously monolith Makefile into digestable parts
 │   ├── makefile.md           # Explains make commands to build the sub-project
 │   ├── Doxyfile.min          # Minimal Doxygen configs for per-sub-project docs
 │   └── README.md             # Template README for new sub-projects
 ├── docs/                     # (Future) Aggregated/shared documentation across all games/lobby
+│   ├── API_Conversion.md     # Explains how to convert a game into an API to be intergrated into the lobby
+│   └── makefile.md           # Explains make commands to build the entire project
 ├── LICENSE                   # Project license
 ├── CHANGELOG.md              # High-level changes (branch creations, merges, shared updates)
-├── CONTRIBUTING.md           # Internal guidelines + code style link
-├── TODO.md                   # Internal reminders (global Makefile, lobby integration, etc.)
+├── CONTRIBUTING.md           # Internal guidelines
+├── TODO.md                   # Internal reminders (lobby integration, docs, etc.)
 ├── .gitignore                # Ignores build/, logs/, docs/, etc.
-├── Makefile                  # (Future global) Build all merged games/lobby at once
+├── Makefile                  # Build all merged games/lobby at once
 └── README.md                 # <-- This file
 ```
 
