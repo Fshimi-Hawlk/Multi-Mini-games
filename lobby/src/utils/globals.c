@@ -43,7 +43,7 @@ Rectangle defaultPlayerTextureRect = {
 
 Rectangle skinButtonRect = {
     WINDOW_WIDTH - 70,
-    WINDOW_HEIGHT / 2 - 25,
+    WINDOW_HEIGHT / 2.0f - 25,
     50,
     50
 };
