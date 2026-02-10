@@ -8,6 +8,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include "common.h"
 #include "userTypes.h"
 
 /**
