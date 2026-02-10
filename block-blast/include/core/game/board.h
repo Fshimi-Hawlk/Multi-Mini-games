@@ -14,9 +14,10 @@
  * @brief Checks if a position is within the board bounds.
  *
  * @param pos The position to check.
+ * @param board Pointer to the board.
  * @return true if in bounds, false otherwise.
  */
-bool8 isInBound(const s8Vector2 pos);
+bool isInBound(const s8Vector2 pos, const Board_St* const board);
 
 /**
  * @brief Scans the board and marks full rows and columns for clearing.
@@ -30,7 +31,7 @@ bool8 isInBound(const s8Vector2 pos);
  * @return true if at least one row **or** column is full (i.e. clearBoard() would do something)
  * @return false if the board has no completable lines
  */
-bool8 checkBoardForClearing(const Board_St* const board);
+bool checkBoardForClearing(const Board_St* const board);
 
 /**
  * @brief Clears marked rows and columns on the board.

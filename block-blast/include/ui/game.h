@@ -10,6 +10,9 @@
 
 #include "utils/userTypes.h"
 
+f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos);
+void drawText(const char* const text, Font font, f32 fontSize, f32Vector2 pos, color32 tint);
+
 /**
  * @brief Draws all UI elements for the current scene.
  *

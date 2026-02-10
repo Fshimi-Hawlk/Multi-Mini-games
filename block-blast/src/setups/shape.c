@@ -8,9 +8,10 @@
 #include "setups/shape.h"
 #include "core/game/shape.h"
 #include "utils/globals.h"
+#include "utils/userTypes.h"
 
-void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag) {
-    u8 initCount = game.prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
+void initPrefabsAndVariants(PrefabManager_St* const manager) {
+    u8 initCount = manager->prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
                  ? _prefabNameCount : prefabCount;
 
     for (u32 i = 0; i < initCount; ++i) {
@@ -22,24 +23,24 @@ void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag) {
             initPrefab(&prefab);
         }
 
-        addPrefabAndVariants(prefab, prefabsBag);
+        addPrefabAndVariants(prefab, &manager->prefabsBag);
     }
 
     for (u8 i = 1; i < MAX_SHAPE_SIZE; ++i) { // hence 0 is left to zero intentionally
-        prefabsPerSizeOffsets[i] = prefabsBag->count - 1;
+        prefabsPerSizeOffsets[i] = manager->prefabsBag.count - 1;
     }
 
     // it assumed that prefabBag is sorted by blockCount ascending
     // if it's init via `initPrefabsAndVariants`, then it is.
-    for (u32 i = 1; i < prefabsBag->count; ++i) {
-        if (prefabsBag->items[i - 1].blockCount != prefabsBag->items[i].blockCount) {
-            prefabsPerSizeOffsets[(prefabsBag->items[i].blockCount - 1)] = i;
+    for (u32 i = 1; i < manager->prefabsBag.count; ++i) {
+        if (manager->prefabsBag.items[i - 1].blockCount != manager->prefabsBag.items[i].blockCount) {
+            prefabsPerSizeOffsets[(manager->prefabsBag.items[i].blockCount - 1)] = i;
         }
     }
 
     // back propagation in case of gaps avoiding wrong max for unset offsets
     for (u8 i = MAX_SHAPE_SIZE - 2; i > 0; --i) {
-        if (prefabsPerSizeOffsets[i] == prefabsBag->count - 1)
+        if (prefabsPerSizeOffsets[i] == manager->prefabsBag.count - 1)
             prefabsPerSizeOffsets[i] = prefabsPerSizeOffsets[i + 1];
     }
 }
@@ -65,7 +66,7 @@ void initPrefab(Prefab_St* const prefab) {
 
     if (!prefab->canMirror) return;
 
-    bool8 foundDuplicate = false;
+    bool foundDuplicate = false;
     for (u8 i = 0; i < prefab->orientations; ++i) {
         for (u8 j = 0; j < prefab->orientations; ++j) {
             if (haveSimilarOffsets(prefabCmp, prefabCmpMirror)) {

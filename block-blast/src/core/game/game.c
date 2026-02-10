@@ -8,33 +8,32 @@
 #include "core/game/game.h"
 #include "core/game/board.h"
 
-#include "utils/globals.h"
 #include "utils/utils.h"
 
-void buildScoreRelatedTexts(void) {
+void buildScoreRelatedTexts(GameState_St* const game) {
     // build score text
-    snprintf(game.scoreText, sizeof(game.scoreText), "Score: %lu", game.score);
+    snprintf(game->scoreText, sizeof(game->scoreText), "Score: %lu", game->score);
 
     // build streak text
-    snprintf(game.streakText, sizeof(game.streakText), "Streak: %u", game.streakCount);
+    snprintf(game->streakText, sizeof(game->streakText), "Streak: %u", game->streakCount);
 }
 
 f32 calculateScore(const Board_St* const board) {
     u8 linesCleared = 0;
     for (u8 row = 0; row < board->width; ++row) {
-        linesCleared += board->rowsToClear[row];
+        linesCleared += (u8) board->rowsToClear[row];
     }
 
     for (u8 col = 0; col < board->height; ++col) {
-        linesCleared += board->columnsToClear[col];
+        linesCleared += (u8) board->columnsToClear[col];
     }
 
     f32 multiBonus = linesCleared > 1 ? 1.0f + 0.5f * (linesCleared - 1) : 1.0f;
     return linesCleared * SCORE_PER_LINE_CLEAR * multiBonus;
 }
 
-void manageScore(GameState_St* const game, const Prefab_St* const prefab) {
-    game->score += prefab->blockCount * SCORE_PER_UNIT_PLACED;
+void manageScore(GameState_St* const game, const u8 prefabBlockCount) {
+    game->score += prefabBlockCount * SCORE_PER_UNIT_PLACED;
 
     if (checkBoardForClearing(&game->board)) {
         clearBoard(&game->board);
@@ -51,7 +50,7 @@ void manageScore(GameState_St* const game, const Prefab_St* const prefab) {
         game->streakPlacementResetCnt = 0;
     }
 
-    buildScoreRelatedTexts();
+    buildScoreRelatedTexts(game);
 }
 
 void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
@@ -99,7 +98,7 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // This turn's performance
     f32 placementScore = 0;
     for (u8 i = 0; i < 3; ++i) {
-        placementScore += game->slots->prefab->blockCount * SCORE_PER_UNIT_PLACED;
+        placementScore += game->prefabManager.slots->prefab->blockCount * SCORE_PER_UNIT_PLACED;
     }
 
     f32 performanceBonus = scoreDelta - placementScore;
@@ -129,17 +128,17 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
             u32 s = lowEnd[i];
 
             // Protect floor during take
-            f32 floor = game->sizeWeights.baseWeights[s] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
-            f32 available = max(0.0f, game->sizeWeights.weights[s] - floor);
+            f32 floor = game->prefabManager.sizeWeights.baseWeights[s] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
+            f32 available = max(0.0f, game->prefabManager.sizeWeights.runTimeWeights[s] - floor);
             f32 take = min(available, amountPerLow);
-            game->sizeWeights.weights[s] -= take;
+            game->prefabManager.sizeWeights.runTimeWeights[s] -= take;
 
             // Distribute only to sizes that exist
             f32 amountPerHigh = take * 0.2f;
             for (u32 j = 0; j < 5; j++) {
                 u32 hs = highEnd[j];
-                if (game->sizeWeights.baseWeights[hs] > 0.0f) {
-                    game->sizeWeights.weights[hs] += amountPerHigh;
+                if (game->prefabManager.sizeWeights.baseWeights[hs] > 0.0f) {
+                    game->prefabManager.sizeWeights.runTimeWeights[hs] += amountPerHigh;
                 }
             }
         }
@@ -153,15 +152,15 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
 
         for (u32 i = 0; i < 5; i++) {
             u32 s = highEnd[i];
-            f32 floor = game->sizeWeights.baseWeights[s] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
-            f32 available = max(0.0f, game->sizeWeights.weights[s] - floor);
+            f32 floor = game->prefabManager.sizeWeights.baseWeights[s] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
+            f32 available = max(0.0f, game->prefabManager.sizeWeights.runTimeWeights[s] - floor);
             f32 take = min(available, amountPerHigh);
-            game->sizeWeights.weights[s] -= take;
+            game->prefabManager.sizeWeights.runTimeWeights[s] -= take;
 
             f32 amountPerLow = take * 0.25f;
             for (u32 j = 0; j < 4; j++) {
                 u32 ls = lowEnd[j];
-                game->sizeWeights.weights[ls] += amountPerLow;
+                game->prefabManager.sizeWeights.runTimeWeights[ls] += amountPerLow;
             }
         }
     }
@@ -170,18 +169,18 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // 3. Clamp & normalize
     f32 sum = 0.0f;
     for (u32 i = 0; i < MAX_SHAPE_SIZE; i++) {
-        f32 min = game->sizeWeights.baseWeights[i] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
-        game->sizeWeights.weights[i] = max(min, game->sizeWeights.weights[i]);
-        sum += game->sizeWeights.weights[i];
+        f32 min = game->prefabManager.sizeWeights.baseWeights[i] == 0.0f ? 0.0f : MIN_WEIGHT_IF_ENABLED;
+        game->prefabManager.sizeWeights.runTimeWeights[i] = max(min, game->prefabManager.sizeWeights.runTimeWeights[i]);
+        sum += game->prefabManager.sizeWeights.runTimeWeights[i];
     }
 
     if (sum > 0.0001f) {
         for (u32 i = 0; i < MAX_SHAPE_SIZE; i++) {
-            game->sizeWeights.weights[i] /= sum;
+            game->prefabManager.sizeWeights.runTimeWeights[i] /= sum;
         }
     } else { // Fallback
         for (u32 i = 0; i < MAX_SHAPE_SIZE; i++) {
-            game->sizeWeights.weights[i] = game->sizeWeights.baseWeights[i];
+            game->prefabManager.sizeWeights.runTimeWeights[i] = game->prefabManager.sizeWeights.baseWeights[i];
         }
     }
 }

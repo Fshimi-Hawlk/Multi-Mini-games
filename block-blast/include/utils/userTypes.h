@@ -99,7 +99,7 @@ typedef struct {
 typedef struct {
     u8 blockCount;                          ///< Number of blocks in the shape.
     s8 orientations;                        ///< Number of unique rotations (computed at init).
-    bool8 canMirror;                        ///< Whether the shape has a distinct mirror variant.
+    bool canMirror;                        ///< Whether the shape has a distinct mirror variant.
     u8Vector2 offsets[MAX_SHAPE_SIZE];      ///< Relative offsets from center.
     u8 width, height;                       ///< Bounding box for quick collision checks.
 } Prefab_St;
@@ -129,9 +129,9 @@ typeDA(u32, PrefabIndexBagVec_St);
 typedef struct {
     const Prefab_St* prefab;    ///< Pointer to the static prefab definition.
     f32Vector2 center;          ///< Current screen position center.
-    bool8 placed;               ///< Whether this shape has been placed this turn.
+    bool placed;               ///< Whether this shape has been placed this turn.
     BlockColor_Et colorIndex;   ///< Color assigned to this instance.
-    bool8 dragging;             ///< Whether the player is currently dragging it.
+    bool dragging;             ///< Whether the player is currently dragging it.
     u8 id;                      ///< Slot index (0-2).
 } ActivePrefab_St;
 
@@ -149,8 +149,28 @@ typedef ActivePrefab_St PrefabSlots_t[3];
  */
 typedef struct {
     f32 baseWeights[MAX_SHAPE_SIZE];    ///< Initial probabilities per size
-    f32 weights[MAX_SHAPE_SIZE];        ///< Runtime-adjusted weights
+    f32 runTimeWeights[MAX_SHAPE_SIZE]; ///< Runtime-adjusted weights
 } SizeWeight_St;
+
+/**
+ * @brief All runtime data related to prefabs.
+ *
+ * Contains:
+ *  - The complete bag of every prefab + all its unique rotations/mirrors
+ *  - Per-size index bags used for fast weighted random selection
+ *  - The three currently offered pieces (slots)
+ *  - Dynamic size weights that get adjusted during gameplay
+ *
+ * This keeps everything that belongs together in one place and makes save/load
+ * or multiple game instances trivial in the future.
+ */
+typedef struct {
+    GamePrefabVariant_Et prefabVariant;          ///< Which set of prefabs is active.
+    PrefabBagVec_St prefabsBag;                  ///< Complete bag of every prefab variant (rotations + mirrors when applicable).
+    PrefabIndexBagVec_St bags[MAX_SHAPE_SIZE];   ///< One bag per block count (size 1→9) containing indices into prefabsBag for O(1) weighted random picks.
+    PrefabSlots_t slots;                         ///< The three shapes currently offered to the player.
+    SizeWeight_St sizeWeights;                   ///< Runtime-adjusted weights for each size (used when picking the next shape).
+} PrefabManager_St;
 
 /**
  * @brief The main game board: an 8×8 (or configurable) grid of blocks.
@@ -179,7 +199,7 @@ typedef struct {
      * Array of flags indicating which rows/columns are full and
      * should be cleared at the end of the current placement.
      */
-    bool8 *rowsToClear, *columnsToClear;
+    bool *rowsToClear, *columnsToClear;
 } Board_St;
 
 /**
@@ -200,18 +220,17 @@ typedef enum {
  */
 typedef struct {
     Board_St board;                     ///< Current board state.
-    PrefabSlots_t slots;                ///< Current three available prefabs.
 
     u64 score;                          ///< Player score.
     u8 streakCount;                     ///< Current combo streak.
     u8 streakPlacementResetCnt;         ///< Prefab placement counter to reset streak under a specific threshold
     char scoreText[32];                 ///< Formatted score string for UI.
     char streakText[32];                ///< Formatted streak string for UI.
-    SizeWeight_St sizeWeights;
 
-    bool8 gameOver;                     ///< Game over flag.
+    PrefabManager_St prefabManager;     ///< All prefab-related data (bag, per-size bags, current slots, size weights).
+
+    bool gameOver;                      ///< Game over flag.
     SceneState_Et sceneState;           ///< Current scene/view.
-    GamePrefabVariant_Et prefabVariant; ///< Which set of prefabs is active.
 } GameState_St;
 
 // typedef struct {

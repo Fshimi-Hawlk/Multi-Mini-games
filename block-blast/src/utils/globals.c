@@ -12,8 +12,6 @@ Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
-PrefabBagVec_St prefabsBag = {0};
-PrefabIndexBagVec_St bags[MAX_SHAPE_SIZE] = {0};
 ActivePrefab_St *shapeBag = NULL;
 
 u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE] = {0};
@@ -22,7 +20,7 @@ GameState_St game = {0};
 GameState_St algoGame = {0};
 
 f32Vector2 mouseDeltaFromShapeCenter = {0};
-bool8 dragging = false;
+bool dragging = false;
 
 const f32Vector2 defaultPositions[3] = {
     {.x = WINDOW_WIDTH * 17.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},

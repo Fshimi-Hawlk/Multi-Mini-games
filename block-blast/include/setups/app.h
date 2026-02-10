@@ -15,7 +15,7 @@
  *
  * @return true if successful, false otherwise.
  */
-bool8 initFonts(void);
+bool initFonts(void);
 
 /**
  * @brief Frees all loaded fonts.
@@ -27,7 +27,7 @@ void freeFonts(void);
  *
  * Seeds PRNG, opens window, loads fonts and initialize game.
  */
-bool8 initApp(void);
+bool initApp(void);
 
 /**
  * @brief Frees application resources and closes the window.

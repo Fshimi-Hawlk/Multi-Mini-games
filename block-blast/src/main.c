@@ -27,7 +27,7 @@ int main(void) {
     f64 prevScore = game.score;
 
     while (!WindowShouldClose()) {
-        bool8 allPlaced = true;
+        bool allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
             handleShape(&game.slots[i]);
 

@@ -24,7 +24,7 @@
  * @param prefab2 Second prefab.
  * @return true if offsets match, false otherwise.
  */
-bool8 haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
+bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
 
 /**
  * @brief Checks if the mouse clicked on the shape.
@@ -32,15 +32,16 @@ bool8 haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
  * @param shape Pointer to the active shape.
  * @return true if clicked, false otherwise.
  */
-bool8 isShapeClicked(const ActivePrefab_St* const shape);
+bool isShapeClicked(const ActivePrefab_St* const shape);
 
 /**
  * @brief Checks if the shape is within board bounds.
  *
+ * @param board Pointer to the board.
  * @param shape Pointer to the active shape.
  * @return true if in bounds, false otherwise.
  */
-bool8 isShapeInBound(const ActivePrefab_St* const shape);
+bool isShapeInBound(const ActivePrefab_St* const shape, const Board_St* const board);
 
 /**
  * @brief Checks if the shape can be placed on the board without overlap.
@@ -49,7 +50,7 @@ bool8 isShapeInBound(const ActivePrefab_St* const shape);
  * @param pos Position, on the board, of the shape to be placed.
  * @return true if placeable, false otherwise.
  */
-bool8 isShapePlaceable(const ActivePrefab_St *const shape, const s8Vector2 pos);
+bool isShapePlaceable(const ActivePrefab_St *const shape, const s8Vector2 pos, const Board_St* const board);
 
 /**
  * @brief Sets the bounding box (width/height) for a prefab.
@@ -96,9 +97,10 @@ f32Vector2 getIthBlockPosition(const ActivePrefab_St shape, const u8 i);
  * @brief Maps the shape's center to board coordinates.
  *
  * @param shape Pointer to the active shape.
+ * @param board Pointer to the board.
  * @return The mapped board position.
  */
-s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape);
+s8Vector2 mapShapeToBoardPos(const ActivePrefab_St* const shape, const Board_St* const board);
 
 
 /**
@@ -137,14 +139,16 @@ void handleShape(ActivePrefab_St* const shape);
  *   - Called on shuffle key press (debug / cheat)
  *   - Called at game start
  *
- * @param game   Main game state
+ * @param manager   Main game's prefabs manager
  */
-void shuffleSlots(GameState_St* const game);
+void shuffleSlots(PrefabManager_St* const manager);
+
 
 /**
  * @brief Places the shape on the board.
  *
  * @param shape Pointer to the active shape.
+ * @param pos   Top left position of the shape.
  * @param board Pointer to the board.
  */
 void placeShape(const ActivePrefab_St* const shape, const u8Vector2 pos, Board_St* const board);

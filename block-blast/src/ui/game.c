@@ -40,7 +40,7 @@ void drawUI(const GameState_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
             drawBoard(game->board);
-            drawSlots(game->slots);
+            drawSlots(game->prefabManager.slots);
 
             f32Vector2 scoreTextPos = {
                 .x = game->board.pos.x,
@@ -60,7 +60,7 @@ void drawUI(const GameState_St* const game) {
         } break;
 
         case SCENE_STATE_ALL_PREFABS: {
-            for (u32 i = 0; i < prefabsBag.count; ++i) {
+            for (u32 i = 0; i < game->prefabManager.prefabsBag.count; ++i) {
                 drawShape(shapeBag[i]);
             }
         } break;

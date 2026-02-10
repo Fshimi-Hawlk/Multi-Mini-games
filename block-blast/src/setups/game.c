@@ -15,10 +15,10 @@
 #include "utils/utils.h"
 
 /**
- * @brief Initializes size-based weights for random prefab selection.
+ * @brief Initializes size-based runTimeWeights for random prefab selection.
  *
- * Sets baseWeights to fixed probabilities, copies to weights for runtime adjustment.
- * Larger shapes might have lower weights to control difficulty.
+ * Sets baseWeights to fixed probabilities, copies to runTimeWeights for runtime adjustment.
+ * Larger shapes might have lower runTimeWeights to control difficulty.
  *
  * @param game Pointer to the current game state.
  */
@@ -36,18 +36,18 @@ static void initSizeWeights(GameState_St* const game) {
     };
 
     for (u8 i = 0; i < MAX_SHAPE_SIZE; i++) {
-        game->sizeWeights.weights[i] = game->sizeWeights.baseWeights[i] = baseWeights[i];
+        game->prefabManager.sizeWeights.runTimeWeights[i] = game->prefabManager.sizeWeights.baseWeights[i] = baseWeights[i];
     }
 }
 
-void initGame(void) {
-    switch (game.sceneState) {
+void initGame(GameState_St* const game) {
+    switch (game->sceneState) {
         case SCENE_STATE_GAME: {
-            game.board.width = game.board.height = 8;
-            game.board.rowsToClear = context_alloc(game.board.height * sizeof(bool8));
-            game.board.columnsToClear = context_alloc(game.board.width * sizeof(bool8));
+            game->board.width = game->board.height = 8;
+            game->board.rowsToClear = context_alloc(game->board.height * sizeof(bool));
+            game->board.columnsToClear = context_alloc(game->board.width * sizeof(bool));
 
-            initSizeWeights(&game);
+            initSizeWeights(game);
 
             f32Vector2 boardPos = {
                 .x = WINDOW_WIDTH / 2.0f,
@@ -55,32 +55,32 @@ void initGame(void) {
             };
 
             f32Vector2 boardPxSize = {
-                .x = BLOCK_PX_SIZE * game.board.width,
-                .y = BLOCK_PX_SIZE * game.board.height,
+                .x = BLOCK_PX_SIZE * game->board.width,
+                .y = BLOCK_PX_SIZE * game->board.height,
             };
 
-            game.board.pos = (f32Vector2) {
+            game->board.pos = (f32Vector2) {
                 .x = boardPos.x - boardPxSize.x / 2.0f ,
                 .y = boardPos.y - boardPxSize.y / 2.0f
             };
 
-            buildScoreRelatedTexts();
+            buildScoreRelatedTexts(game);
 
-            da_reserve(&prefabsBag, 200);
-            initPrefabsAndVariants(&prefabsBag);
+            da_reserve(&game->prefabManager.prefabsBag, 200);
+            initPrefabsAndVariants(&game->prefabManager);
 
-            for (u32 i = 0; i < prefabsBag.count; ++i) {
-                u8 size_idx = prefabsBag.items[i].blockCount - 1;
-                da_append(&bags[size_idx], i);
+            for (u32 i = 0; i < game->prefabManager.prefabsBag.count; ++i) {
+                u8 size_idx = game->prefabManager.prefabsBag.items[i].blockCount - 1;
+                da_append(&game->prefabManager.bags[size_idx], i);
             }
 
             for (u8 s = 0; s < MAX_SHAPE_SIZE; ++s) {
-                PrefabIndexBagVec_St* bag = &bags[s];
+                PrefabIndexBagVec_St* bag = &game->prefabManager.bags[s];
                 if (bag->count == 0) continue;
                 da_shuffle(bag);
             }
 
-            shuffleSlots(&game);
+            shuffleSlots(&game->prefabManager);
         } break;
 
         case SCENE_STATE_ALL_PREFABS: {
@@ -90,10 +90,10 @@ void initGame(void) {
 
             // log_info("%u, %u", prefabPerRow, prefabPerCol);
 
-            shapeBag = context_alloc(prefabsBag.count * sizeof(*shapeBag));
-            for (u32 i = 0; i < prefabsBag.count; ++i) {
+            shapeBag = context_alloc(game->prefabManager.prefabsBag.count * sizeof(*shapeBag));
+            for (u32 i = 0; i < game->prefabManager.prefabsBag.count; ++i) {
                 shapeBag[i] = (ActivePrefab_St) {
-                    .prefab = &prefabsBag.items[i],
+                    .prefab = &game->prefabManager.prefabsBag.items[i],
                     .colorIndex = i % (_blockColorCount - 1),
                     .center = {
                         .x = offset * (1 + i % prefabPerRow),

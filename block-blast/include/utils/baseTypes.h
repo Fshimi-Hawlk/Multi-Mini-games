@@ -22,9 +22,6 @@ typedef int64_t  s64;
 typedef float    f32;
 typedef double   f64;
 
-typedef u8 bool8;
-typedef u32 bool32;
-
 typedef struct {
     u8 x, y;
 } u8Vector2;

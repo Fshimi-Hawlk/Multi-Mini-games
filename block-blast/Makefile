@@ -223,7 +223,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $(CFLAGS) $(DEP_FLAGS) -c $< -o $@
 
-$(TEST_BIN_DIR)/% : $(OBJ_DIR)/tests/%.o
+$(TEST_BIN_DIR)/% : $(LIB_OBJECTS) $(OBJ_DIR)/tests/%.o
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $^ $(LDFLAGS) -o $@
 
@@ -231,12 +231,20 @@ $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.c
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $(CFLAGS) -Isrc $(DEP_FLAGS) -c $< -o $@
 
+$(STATIC_LIB): $(LIB_OBJECTS)
+	@mkdir -p $(@D)
+	$(SILENT_PREFIX)ar rcs $@ $^
+
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
 rebuild: clean all
 
+rebuild-obj: clean $(LIB_OBJECTS)
+
 rebuild-tests: clean tests
+
+static-lib: rebuild-obj 
 
 run-main:
 	@if [ -f $(BIN) ]; then \
@@ -281,13 +289,14 @@ run-tests: tests
 					log_file="$(LOG_DIR)/$$test_name.log"; \
 				fi; \
 				echo ">>> Running $$test_name..."; \
+				echo "Command: $(STDBUF) $(TOOL) ./$$test_bin"; \
 				echo ""; \
 				echo "--- Output ---------------------------------------------------------"; \
 				\
 				stdout_tmp=$$(mktemp); \
 				stderr_tmp=$$(mktemp); \
 				\
-				$(STDBUF) $(TOOL) ./$$test_bin >"$$stdout_tmp" 2>"$$stderr_tmp"; \
+				( $(STDBUF) $(TOOL) ./$$test_bin > >(tee "$$stdout_tmp") 2> >(tee "$$stderr_tmp" >&2) ); \
 				test_status=$$?; \
 				\
 				{ \
@@ -310,8 +319,6 @@ run-tests: tests
 						echo "================================================"; \
 					fi; \
 				} > "$$log_file"; \
-				\
-				cat "$$stdout_tmp"; \
 				\
 				rm -f "$$stdout_tmp" "$$stderr_tmp"; \
 				echo "--------------------------------------------------------------------"; \
@@ -347,6 +354,7 @@ help:
 	@echo "    tests                Build all test executables (no execution)"
 	@echo "    rebuild              Clean and rebuild the main executable"
 	@echo "    rebuild-tests        Clean and rebuild test executables"
+	@echo "    static-lib           Build static library only (lib$(LIB_NAME).a)"
 	@echo "    run-main             Run the main binary (uses Valgrind in valgrind-debug mode)"
 	@echo "    run-gdb              Debug the main binary with gdb"
 	@echo "    run-tests            Build and run all tests, reporting failures at the end"
@@ -371,4 +379,4 @@ help:
 	@echo "    run-tests uses stdbuf (from GNU coreutils) if available for reliable output on crashes;"
 	@echo "    warns if missing and suggests alternatives (e.g., fflush in test code)."
 
-.PHONY: all clean rebuild run-main run-gdb run-tests tests compile_commands help
+.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests compile_commands help

@@ -13,7 +13,7 @@
 /**
  * @brief Builds the score and streak texts string based on the current game state.
  */
-void buildScoreRelatedTexts(void);
+void buildScoreRelatedTexts(GameState_St* const game);
 
 /**
  * @brief Computes score increment from the latest placement.
@@ -44,7 +44,7 @@ f32 calculateScore(const Board_St* const board);
  * @param game Pointer to the game state structure.
  * @param prefab Pointer to the prefab structure.
  */
-void manageScore(GameState_St* const game, const Prefab_St* const prefab);
+void manageScore(GameState_St* const game, const u8 prefabBlockCount);
 
 /**
  * @brief Adjusts the dynamic probability weights for prefab sizes based on game state.

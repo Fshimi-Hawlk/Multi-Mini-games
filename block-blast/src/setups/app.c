@@ -9,10 +9,10 @@
 #include "setups/app.h"
 #include "setups/game.h"
 
-bool8 initFonts(void) {
+bool initFonts(void) {
     u64 fontSize = 8;
 
-    bool8 allFontLoaded = true;
+    bool allFontLoaded = true;
 
     for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
         fonts[fontId] = LoadFontEx("../assets/fonts/Nunito/Nunito-Black.ttf", fontSize, NULL, 0);
@@ -33,7 +33,7 @@ void freeFonts(void) {
     }
 }
 
-bool8 initApp(void) {
+bool initApp(void) {
     srand(time(NULL));
 
 #ifndef _USE_DEFAULT_RAND
@@ -50,7 +50,7 @@ bool8 initApp(void) {
         log_warn("Couldn't initialize every fonts");
     };
 
-    initGame();
+    initGame(&game);
 
     return true;
 }

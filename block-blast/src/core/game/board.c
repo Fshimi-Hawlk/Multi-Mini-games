@@ -5,12 +5,12 @@
  * @brief Board clearing logic implementation.
  */
 
-#include "utils/globals.h"
+#include "utils/userTypes.h"
 #include "core/game/board.h"
 
-bool8 isInBound(const s8Vector2 pos) {
-    return (0 <= pos.x) && (pos.x < game.board.width)
-        && (0 <= pos.y) && (pos.y < game.board.height);
+bool isInBound(const s8Vector2 pos, const Board_St* const board) {
+    return (0 <= pos.x) && (pos.x < board->width)
+        && (0 <= pos.y) && (pos.y < board->height);
 }
 
 /**
@@ -22,7 +22,7 @@ bool8 isInBound(const s8Vector2 pos) {
  * @param row   Row index to check (0 to BOARD_HEIGHT-1).
  * @return true if the row is full, false otherwise.
  */
-static bool8 isRowFull(const Board_St* const board, const u8 row) {
+static bool isRowFull(const Board_St* const board, const u8 row) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return false;
@@ -43,7 +43,7 @@ static bool8 isRowFull(const Board_St* const board, const u8 row) {
  * @param col   Column index to check (0 to BOARD_WIDTH-1).
  * @return true if the column is full, false otherwise.
  */
-static bool8 isColumnFull(const Board_St* const board, const u8 col) {
+static bool isColumnFull(const Board_St* const board, const u8 col) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return false;
@@ -89,13 +89,13 @@ static void clearColumn(Board_St* const board, const u8 col) {
     }
 }
 
-bool8 checkBoardForClearing(const Board_St* const board) {
+bool checkBoardForClearing(const Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return false;
     }
     
-    bool8 needClearing = false;
+    bool needClearing = false;
     for (u8 row = 0; row < board->height; ++row) {
         board->rowsToClear[row] = isRowFull(board, row);
         needClearing |= board->rowsToClear[row];

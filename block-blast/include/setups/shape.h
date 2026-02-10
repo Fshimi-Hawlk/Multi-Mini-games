@@ -16,9 +16,9 @@
  * Loops over base prefabs (up to prefabCount or _prefabNameCount based on variant),
  * initializes each, then adds rotations and mirrors if applicable.
  *
- * @param prefabBag Pointer to the prefab bag dynamic array.
+ * @param game Pointer to the game's prefab manager.
  */
-void initPrefabsAndVariants(PrefabBagVec_St* const prefabBag);
+void initPrefabsAndVariants(PrefabManager_St* const manager);
 
 /**
  * @brief Initializes a single prefab, computing orientations and mirroring.

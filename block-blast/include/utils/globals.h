@@ -20,8 +20,6 @@ extern Rectangle windowRect;            ///< Main window rectangle (set at init)
 extern Font      appFont;               ///< Primary font for UI text.
 extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
-extern PrefabBagVec_St prefabsBag;                  ///< Bag containing all available prefabs and variants.
-extern PrefabIndexBagVec_St bags[MAX_SHAPE_SIZE];   ///< Bags for random prefab selection by block count.
 extern ActivePrefab_St *shapeBag;                   ///< Temporary array used when viewing all prefabs (SCENE_STATE_ALL_PREFABS).
 
 extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE]; ///< array to record the starting indexes whenever the blockCount changes
@@ -29,7 +27,7 @@ extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE]; ///< array to record the start
 extern GameState_St game;       ///< Main game state.
 
 extern f32Vector2 mouseDeltaFromShapeCenter;    ///< Offset from shape center when dragging.
-extern bool8 dragging;                          ///< Global flag indicating if any shape is being dragged.
+extern bool dragging;                          ///< Global flag indicating if any shape is being dragged.
 
 extern const f32Vector2 defaultPositions[3]; ///< Default screen positions for the three slots.
 
