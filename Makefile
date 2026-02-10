@@ -84,7 +84,7 @@ $(LIB_DIR)/lib%.a:
 	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	$(SILENT_PREFIX)echo "Building library for $(MOD_DIR) if needed..."
+	$(SILENT_PREFIX)echo "Building library for $(MOD_DIR)"
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
