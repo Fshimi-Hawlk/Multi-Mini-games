@@ -1,11 +1,23 @@
 /**
  * @file main.c
+ * @author Fshimi Hawlk
+ * @author LeandreB8
  * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-08
  * @date 2026-03-18
- * @brief Main entry point for the lobby client, handling networking and module dispatching.
+ * @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
+ *
+ * This file contains the top-level application loop.
+ * It initializes the window and shared resources, runs the lobby,
+ * and switches to individual games when triggered (e.g. collision with zone).
+ *
+ * Games are loaded on demand via their API (e.g. gameNameAPI.h) and run
+ * in the same process/window. No separate executables are spawned.
  */
 
-#include "core/game.h"
+#include "core/game.h"              // GameScene_Et, general game types
+#include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
+#include "ui/game.h"                // Player drawing, platform logic
 
 #include "ui/connection_screen.h"
 #include "APIs/module_interface.h"
@@ -159,11 +171,16 @@ void receive_network_data(void) {
     }
 }
 
-void lobby_gameLoop(float dt) {
-    srand(time(NULL));
+/**
+ * @brief Updates and renders the lobby scene (one frame).
+ * @param dt  Frame time delta (from GetFrameTime())
+ *
+ * Handles player movement, camera, UI menus, and game zone collision detection.
+ */
+static void lobby_gameLoop(float dt) {
+    static float lobbyTextXPos;
 
     updatePlayer(&player, platforms, platformCount, dt);
-
     cam.target = player.position;
 
     toggleSkinMenu();
@@ -172,9 +189,10 @@ void lobby_gameLoop(float dt) {
         choosePlayerTexture(&player);
     }
 
+    // Collision check with game zone (tetris example)
     if (CheckCollisionCircleRec(player.position, player.radius, tetrisHitbox)) {
         if (!gameHitGracePeriodActive) {
-            currentScene = GAME_SCENE_TETRIS;
+            currentScene = GAME_SCENE_GAME_NAME;
             needGameInit = true;
             gameHitGracePeriodActive = true;
         }
@@ -184,33 +202,55 @@ void lobby_gameLoop(float dt) {
 
     BeginDrawing(); {
         ClearBackground(RAYWHITE);
-        BeginMode2D(cam); {
-            DrawCircle(0, 0, 10, RED);
 
+        BeginMode2D(cam); {
+            DrawCircle(0, 0, 10, RED);          // Debug origin marker
             drawPlayer(&player);
             drawPlatforms(platforms, platformCount);
-
-            DrawRectangleRec(tetrisHitbox, RED);
+            DrawRectangleRec(tetrisHitbox, RED); // Debug hitbox
         } EndMode2D();
 
-        DrawText("Multi-Mini-Games", WINDOW_WIDTH / 2 - MeasureText("Multi-Mini-Games", 20) / 2, 20, 20, PURPLE);
+        lobbyTextXPos = (WINDOW_WIDTH - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
+
         drawSkinButton();
-        
+
         if (isTextureMenuOpen) {
             drawMenuTextures();
         }
     } EndDrawing();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Program entry point
+// ─────────────────────────────────────────────────────────────────────────────
+
 int main(void) {
-    InitWindow(1280, 720, "Multi-Mini-Games");
+    SetTraceLogLevel(LOG_WARNING);
+
+    // ── Initialization ───────────────────────────────────────────────────────
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
     InitConnectionScreen();
     
-    for(int i = 0; i < MAX_CLIENTS; i++) otherPlayers[i].active = false;
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        otherPlayers[i].active = false;
+    }
+
     register_minigame(&LobbyModule);
     register_minigame(&KingForFourClientModule);
+
+    // Load shared UI textures
+    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
+
+    playerTextures[0] = LoadTexture(IMAGES_PATH "earth.png"); playerTextureCount++;
+    playerTextures[1] = LoadTexture(IMAGES_PATH "trollFace.png"); playerTextureCount++;
+
+    cam.target = player.position;
+
+    // ── Main loop ────────────────────────────────────────────────────────────
+    Error_Et error = OK;
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -239,32 +279,44 @@ int main(void) {
         }
 
         switch (currentState) {
-            case STATE_CONNECTION:
+            case STATE_CONNECTION: {
                 static float timer = 0; timer += dt;
                 if (timer > 2.0f) { discover_servers(); timer = 0; }
                 if (UpdateConnectionScreen()) {
                     init_network(GetEnteredIP());
                     currentState = STATE_LOBBY;
                 }
-                BeginDrawing(); 
+
+                BeginDrawing(); {
                     ClearBackground(RAYWHITE);
                     DrawConnectionScreen(); 
-                EndDrawing();
-                break;
+                } EndDrawing();
+            } break;
 
-            case STATE_LOBBY:
+            case STATE_LOBBY: {
                 if (game_registry[active_game_id]) {
                     game_registry[active_game_id]->update(dt);
-                    BeginDrawing();
+
+                    BeginDrawing(); {
                         ClearBackground(RAYWHITE);
                         game_registry[active_game_id]->draw();
-                    EndDrawing();
+                    } EndDrawing();
                 }
-                break;
+            } break;
         }
     }
 
+    if (tetrisGame != NULL) {
+        tetris_freeGame(&tetrisGame);
+    }
+
+    for (int i = 0; i < playerTextureCount; i++)
+        UnloadTexture(playerTextures[i]);
+    
+    UnloadTexture(logoSkinButton);
+
     if (network_socket != -1) close(network_socket);
     CloseWindow();
+
     return 0;
 }
