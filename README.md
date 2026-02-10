@@ -54,7 +54,15 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 │   ├── docs/                 # generated documentation
 │   ├── tests/                # unit tests
 │   ├── CHANGELOG.md          # Per-sub-project detailed changelog
-│   ├── Makefile              
+│   ├── Makefile              # short, includes everything else
+│   ├── make/
+│   │   ├── 00-config.mk          # modes, compilers, BASE_CFLAGS, paths, variables
+│   │   ├── 10-sources.mk         # source finding, object lists, TEST_SOURCES, ...
+│   │   ├── 20-build-rules.mk     # pattern rules (.o : .c), linking rules
+│   │   ├── 30-targets-main.mk    # all, $(BIN), run-main, run-gdb, rebuild, ...
+│   │   ├── 40-targets-tests.mk   # tests, run-tests, TEST_BINS rules
+│   │   ├── 50-tools.mk           # clean, help, static-lib, debug helpers
+│   │   └── 99-overrides.mk       # optional file
 │   ├── makefile.md           # Explains make commands to build the sub-project
 │   ├── Doxyfile.min          # Minimal Doxygen configs for per-sub-project docs
 │   └── README.md             # Template README for new sub-projects
