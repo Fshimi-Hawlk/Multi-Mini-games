@@ -19,6 +19,12 @@ typedef enum {
     _fontSizeCount
 } FontSize_Et;
 
+typedef enum {
+    GAME_SCENE_LOBBY,
+    GAME_SCENE_GAME_NAME,
+//    __gameSceneCount // can be removed/commented out if not needed
+} GameScene_Et;
+
 typedef struct {
     Vector2 position;
     float radius;

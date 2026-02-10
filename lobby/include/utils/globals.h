@@ -9,7 +9,6 @@
 #define UTILS_GLOBALS_H
 
 #include "userTypes.h"
-#include "configs.h"
 
 extern Rectangle windowRect;            ///< Main window rectangle (set at init).
 extern Font      appFont;               ///< Primary font for UI text.
