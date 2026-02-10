@@ -22,17 +22,12 @@ typedef enum {
     _fontSizeCount
 } FontSize_Et;
 
-/**
- * @brief Enum for different game scenes.
- */
 typedef enum {
     GAME_SCENE_LOBBY,
     GAME_SCENE_GAME_NAME,
+//    __gameSceneCount // can be removed/commented out if not needed
 } GameScene_Et;
 
-/**
- * @brief Structure representing a player.
- */
 typedef struct {
     Vector2 position;     ///< Current position of the player.
     float radius;         ///< Radius of the player for physics.
