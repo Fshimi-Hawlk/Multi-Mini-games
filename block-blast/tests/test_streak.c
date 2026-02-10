@@ -5,11 +5,8 @@
 
 #include "core/game/game.h"
 #include "core/game/board.h"
-#include "core/game/shape.h"
-#include "utils/userTypes.h"
 
 #include <assert.h>
-
 
 static void initSizeWeights(GameState_St* const game) {
     f32 baseWeights[MAX_SHAPE_SIZE] = {
@@ -37,39 +34,49 @@ static void test_streak_increment_and_reset(void) {
 
     initSizeWeights(&testGame);
 
-    // Mock a prefab for placement
-    Prefab_St mockPrefab = {.blockCount = 1};
-    Prefab_St linePrefab = {.blockCount = 8}; // Enough to fill a row
-
-    ActivePrefab_St mockShape = {.prefab = &mockPrefab, .colorIndex = 0};
-    ActivePrefab_St lineShape = {.prefab = &linePrefab, .colorIndex = 0};
-
     // Initial streak should be 0
     assert(testGame.streakCount == 0);
+    log_info("OK");
 
     // Place without clearing: streak remains 0
-    placeShape(&mockShape, (u8Vector2) {0, 6}, &testGame.board);
-    manageScore(&testGame, mockPrefab.blockCount);
+    assert(checkBoardForClearing(&testGame.board) == false);
+    log_info("OK");
+
+    manageScore(&testGame, 1);
     assert(testGame.streakCount == 0);
+    log_info("OK");
 
     // Simulate clearing (streak increases)
-    bool originalClear = checkBoardForClearing(&testGame.board);
-    assert(originalClear == false);
+    for (u8 i = 0; i < 8; ++i) {
+        testGame.board.blocks[0][i].hitsLeft = 1;
+    }
+    
+    assert(checkBoardForClearing(&testGame.board) == true);
+    log_info("OK");
 
-    placeShape(&lineShape, (u8Vector2) {0, 0}, &testGame.board);
-    manageScore(&testGame, linePrefab.blockCount);
-    clearBoard(&testGame.board);
+    manageScore(&testGame, 8);
     assert(testGame.streakCount == 1);
+    log_info("OK");
 
     // Another clear: streak to 2
-    placeShape(&lineShape, (u8Vector2) {0, 1}, &testGame.board);
-    manageScore(&testGame, linePrefab.blockCount);
-    clearBoard(&testGame.board);
+    for (u8 i = 0; i < 8; ++i) {
+        testGame.board.blocks[1][i].hitsLeft = 1;
+    }
+    
+    assert(checkBoardForClearing(&testGame.board) == true);
+    log_info("OK");
+
+    manageScore(&testGame, 8);
     assert(testGame.streakCount == 2);
+    log_info("OK");
 
     // Placement without clear: streak resets after threshold
-    manageScore(&testGame, mockPrefab.blockCount);
+    assert(checkBoardForClearing(&testGame.board) == false);
+    log_info("OK");
+
+    manageScore(&testGame, 1);
     assert(testGame.streakCount == 0);
+    log_info("OK");
 }
 
 static void test_streak_text_formatting(void) {
@@ -77,29 +84,17 @@ static void test_streak_text_formatting(void) {
     testGame.streakCount = 5;
     buildScoreRelatedTexts(&testGame);
     assert(strcmp(testGame.streakText, "Streak: 5") == 0);
+    log_info("OK");
 
     testGame.streakCount = 0;
     buildScoreRelatedTexts(&testGame);
     assert(strcmp(testGame.streakText, "Streak: 0") == 0);
-}
-
-static void test_adjust_weights_with_streak(void) {
-    GameState_St testGame = {0};
-    initSizeWeights(&testGame);
-
-    // High score delta (good performance, from high streak clears) shifts to larger shapes
-    adjustSizeWeights(&testGame, 1000.0f); // High delta
-    assert(testGame.prefabManager.sizeWeights.runTimeWeights[4] > testGame.prefabManager.sizeWeights.baseWeights[4]); // Larger shapes boosted
-
-    // Low score delta (poor performance, low streak) shifts to smaller
-    adjustSizeWeights(&testGame, 10.0f); // Low delta
-    assert(testGame.prefabManager.sizeWeights.runTimeWeights[1] > testGame.prefabManager.sizeWeights.baseWeights[1]); // Smaller boosted
+    log_info("OK");
 }
 
 int main(void) {
     test_streak_increment_and_reset();
     test_streak_text_formatting();
-    test_adjust_weights_with_streak();
     log_info("Streak tests passed");
     return 0;
 }

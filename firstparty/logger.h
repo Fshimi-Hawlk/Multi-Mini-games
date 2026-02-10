@@ -2,8 +2,9 @@
 #define LOGGER_H
 
 #include <stdio.h>
-#include <stdlib.h>
+#include <stdbool.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <stddef.h>
 
 #include <time.h>
@@ -12,8 +13,11 @@
 #include <sys/stat.h>
 #include <sys/time.h>
 
-#define MAX_FRAMES    64
 #define PATH_MAX_LENGTH  256
+
+#ifndef MAX_TRACE_BACK_FRAMES
+#define MAX_TRACE_BACK_FRAMES 32
+#endif
 
 typedef const char *ColorString_t;
 
@@ -43,7 +47,21 @@ extern ColorString_t functionColor;
 extern ColorString_t fileColor;
 extern ColorString_t lineColor;
 
+typedef struct LogExtraInfoOpt_s {
+    bool _persistentOpt;
+    bool hideLineId; // hide everything about the line: [file line:column (funcName)]
+    bool enableTrace;
+    int  traceBackAmount;
+} LogExtraInfoOpt_St, *LogExtraInfoOptPtr_St;
+
+extern LogExtraInfoOpt_St _logExtraInfoOptions;
+
+#define setLogOpts(...) _logExtraInfoOptions = (LogExtraInfoOpt_St) {__VA_ARGS__}
+#define resetLogOpts() _logExtraInfoOptions = (LogExtraInfoOpt_St) {0}
+#define setLogOptsP(...) _logExtraInfoOptions = (LogExtraInfoOpt_St) {._persistentOpt = true, __VA_ARGS__}
+
 extern ColorString_t getLevelString(LoggingLevel_Et level);
+
 extern ColorString_t getLevelColor(LoggingLevel_Et level);
 
 /**
@@ -59,7 +77,7 @@ int init_logger(void);
  */
 void cleanup_logger(void);
 
-void print_stack_trace(void);
+void print_stack_trace(unsigned int targetDepth);
 
 /**
  * Log a message with the specified level, file, line, function, and format.
@@ -83,11 +101,10 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
 #endif
 
 #ifdef _STACK_TRACE
-#define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); print_stack_trace()
+#define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); print_stack_trace(MAX_TRACE_BACK_FRAMES)
 #else
 #define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif
-
 
 /**
  * Initialize the symbol handler. Call once at program start.
@@ -123,7 +140,6 @@ int get_caller_info(char *out, size_t outSize, unsigned int depth);
 
 
 #define print_caller_info() print_caller_info_at_depth(2)
-
 
 #endif // LOGGER_H
 
@@ -187,6 +203,8 @@ ColorString_t getLevelColor(LoggingLevel_Et level) {
 }
 
 static FILE *log_file = NULL;
+LogExtraInfoOpt_St _logExtraInfoOptions = {0};
+static int startDepth = 3;
 
 static void get_timestamp(char *buffer, size_t size) {
     time_t now = time(NULL);
@@ -249,35 +267,44 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
     vsnprintf(message, sizeof(message), fmt, args);
     va_end(args);
 
-    FILE* output;
-    switch (level) {
-        case LOGGING_LEVEL_WARN:
-        case LOGGING_LEVEL_ERROR:
-        case LOGGING_LEVEL_FATAL: {
-            output = stderr;
-        } break;
+    char logExtraInfoString[2048] = {0};
+    snprintf(logExtraInfoString, sizeof(logExtraInfoString), "%s[%s%s\033[0m%s]\033[0m ", yellow, levelColor, levelStr, yellow);
 
-        default: {
-            output = stdout;
-        }
+    if (!_logExtraInfoOptions.hideLineId) {
+        char lineLocationString[2048] = {0};
+        snprintf(lineLocationString, sizeof(logExtraInfoString), "%s%s\033[0m:%s%d %s(%s%s%s)\033[0m: ", fileColor, file, lineColor, line, yellow, functionColor, func, yellow);
+        strcat(logExtraInfoString, lineLocationString);
     }
 
     /* Print to stderr and log file */
-    fprintf(output, "%s[%s%s\033[0m%s] %s%s\033[0m:%s%d %s(%s%s%s)\033[0m: %s\n", yellow, levelColor, levelStr, yellow, fileColor, file, lineColor, line, yellow, functionColor, func, yellow, message);
+    fprintf(stderr, "%s%s\n", logExtraInfoString, message);
+
+    if (_logExtraInfoOptions.enableTrace) {
+        startDepth = 4;
+        if (_logExtraInfoOptions.traceBackAmount > 0) print_stack_trace(_logExtraInfoOptions.traceBackAmount);
+        else print_stack_trace(MAX_TRACE_BACK_FRAMES);
+        startDepth = 3;
+    }
+
+    if (!_logExtraInfoOptions._persistentOpt)
+        _logExtraInfoOptions = (LogExtraInfoOpt_St) {0};
+
     if (log_file) {
         fprintf(log_file, "%s [%s] %s:%d (%s): %s\n", timestamp, levelStr, file, line, func, message);
         fflush(log_file);
     }
 }
 
-void print_stack_trace(void) {
+void print_stack_trace(unsigned int targetDepth) {
     /* Print stack trace until main */
     fprintf(stderr, "%sStack trace\033[0m:\n", getLevelColor(LOGGING_LEVEL_TRACE));
     if (log_file) {
         fprintf(log_file, "Stack trace:\n");
     }
 
-    for (unsigned int depth = 3; depth < MAX_FRAMES; depth++) {
+    targetDepth = (targetDepth + startDepth) > MAX_TRACE_BACK_FRAMES ? MAX_TRACE_BACK_FRAMES : targetDepth + startDepth;
+
+    for (unsigned int depth = startDepth; depth < targetDepth; depth++) {
         char buf[512];
         if (get_caller_info(buf, sizeof(buf), depth) != 0) {
             fprintf(stderr, "  Error getting caller info at depth %u\n", depth);
@@ -411,8 +438,8 @@ void print_stack_trace(void) {
             init_symbol_handler();
         }
 
-        void *buffer[MAX_FRAMES];
-        int nptrs = backtrace(buffer, MAX_FRAMES);
+        void *buffer[MAX_TRACE_BACK_FRAMES];
+        int nptrs = backtrace(buffer, MAX_TRACE_BACK_FRAMES);
         if (nptrs <= (int)depth) {
             return snprintf(out, outSize, "No stack frame at depth %u", depth) < 0 ? -1 : 0;
         }
@@ -489,6 +516,7 @@ void print_stack_trace(void) {
 
         return 0; 
     }
+
 #endif
 
 #endif // LOGGER_IMPLEMENTATION

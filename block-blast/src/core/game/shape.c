@@ -23,7 +23,7 @@ bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
         hashmap[index] = true;
     }
 
-    for (u8 i = 0; i < prefab1.blockCount; ++i) {
+    for (u8 i = 0; i < prefab2.blockCount; ++i) {
         u8 index = prefab2.offsets[i].x * 6 + prefab2.offsets[i].y;
         same &= hashmap[index];
     }

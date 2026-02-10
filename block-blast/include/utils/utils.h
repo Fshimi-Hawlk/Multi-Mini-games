@@ -165,18 +165,20 @@ do { \
  */
 #define da_shuffle(da) shuffleArray((da)->items, (da)->count)
 
+#define array_printContent(typeFmt, a, count) \
+do { \
+    for (u64 i = 0; i < (count); ++i) { \
+        printf(typeFmt, a[i]); \
+    } \
+    nl \
+} while (0)
+
 /**
  * @brief Prints all items in a dynamic array using a printf format.
  *
  * Appends a newline after.
  */
-#define da_printContent(typeFmt, da) \
-do { \
-    for (u64 i = 0; i < (da)->count; ++i) { \
-        printf(typeFmt, (da)->items[i]); \
-    } \
-    nl \
-} while (0)
+#define da_printContent(typeFmt, da) array_printContent((typeFmt), (da)->items, (da)->count)
 
 /**
  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive).

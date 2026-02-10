@@ -123,7 +123,10 @@ static void test_clear_board(void) {
     for (u8 i = 0; i < 8; ++i) {
         testBoard.blocks[0][i].hitsLeft = 1;
     }
-    checkBoardForClearing(&testBoard);
+    
+    assert(checkBoardForClearing(&testBoard) == true);
+    log_info("OK");
+
     clearBoard(&testBoard);
     for (u8 i = 0; i < 8; ++i) {
         assert(testBoard.blocks[0][i].hitsLeft == 0); // Cleared

@@ -15,7 +15,9 @@
 static void test_calculate_score(void) {
     Board_St testBoard = {.width = 8, .height = 8};
     testBoard.rowsToClear = context_alloc(testBoard.height * sizeof(bool));
+    memset(testBoard.rowsToClear, 0, testBoard.height);
     testBoard.columnsToClear = context_alloc(testBoard.width * sizeof(bool));
+    memset(testBoard.columnsToClear, 0, testBoard.width);
 
     // No lines: 0
     assert(calculateScore(&testBoard) == 0.0f);
