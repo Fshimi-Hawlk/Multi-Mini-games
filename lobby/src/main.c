@@ -1,201 +1,245 @@
 /**
  * @file main.c
- * @author LeandreB8 - Fshimi Hawlk
- * @date 2026-02-08
- * @brief Program entry point – lobby main loop and game scene manager.
- *
- * This file contains the top-level application loop.
- * It initializes the window and shared resources, runs the lobby,
- * and switches to individual games when triggered (e.g. collision with zone).
- *
- * Games are loaded on demand via their API (e.g. gameNameAPI.h) and run
- * in the same process/window. No separate executables are spawned.
+ * @brief Client Lobby avec Réseau (Sockets TCP) - CORRIGÉ
  */
 
-#include "core/game.h"              // GameScene_Et, general game types
-#include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
-#include "ui/game.h"                // Player drawing, platform logic
+#include "core/game.h"
+#include "ui/app.h"
+#include "ui/game.h"
+#include "utils/globals.h"
 
-#include "utils/globals.h"          // Global constants (WINDOW_WIDTH, etc.)
+// --- INCLUDES RÉSEAU ---
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
+#include <errno.h>
+#include <fcntl.h> 
 
-#include "APIs/gameNameAPI.h"       // Example game API – replace/add others
+#include "protocol.h" 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Global / shared state
-// ─────────────────────────────────────────────────────────────────────────────
+// --- CORRECTION PATH ASSETS (Macro stringification) ---
+// Transforme les tokens non cotés (ex: lobby/assets/) en chaîne de caractères "lobby/assets/"
+#define STR_HELPER(x) #x
+#define STR(x) STR_HELPER(x)
 
-/** Player controlled by the user in the lobby */
-static Player_st player = {
-    .position   = {0, 250},
-    .radius     = 20,
-    .texture    = NULL,
-    .angle      = 0,
-    .velocity   = {0, 0},
-    .onGround   = false,
-    .nbJumps    = 0,
-    .coyoteTime = 0.1f,
-    .coyoteTimer= 0.1f,
-    .jumpBuffer = 0.2f
-};
+#ifdef ASSET_PATH
+    #define ASSETS_DIR STR(ASSET_PATH)
+#else
+    #define ASSETS_DIR "lobby/assets/"
+#endif
 
-/** Camera following the player in 2D mode */
-static Camera2D cam = {
-    .offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f},
-    .zoom   = 1.0f,
-};
+// On redéfinit IMAGES_PATH pour être sûr qu'il est correct
+#undef IMAGES_PATH
+#define IMAGES_PATH ASSETS_DIR "images/"
 
-/** Hitbox that triggers the GameName mini-game when player collides */
-static Rectangle tetrisHitbox = {
-    .x      = 600,
-    .y      = -150,
-    .width  = 75,
-    .height = 75
-};
 
-/** Current active scene (lobby or one of the mini-games) */
-static GameScene_Et currentScene = GAME_SCENE_LOBBY;
+// --- CONFIGURATION ---
+#define SERVER_IP "127.0.0.1"
+#define SERVER_PORT 8080
 
-/** Flag: game needs initialization on next frame */
-static bool needGameInit = false;
+// --- VARIABLES GLOBALES RÉSEAU ---
+int network_socket = -1;
+Player_st otherPlayers[MAX_CLIENTS]; 
 
-/** Prevents multiple rapid triggers when standing on hitbox */
-static bool gameHitGracePeriodActive = false;
+// --- FONCTIONS RÉSEAU ---
 
-/** Example instance of one game – add more for other games */
-static GameNameGame_St* gameNameGame = NULL;
+void init_network() {
+    struct sockaddr_in serv_addr;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Helper functions
-// ─────────────────────────────────────────────────────────────────────────────
+    if ((network_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+        perror("Erreur création socket");
+        return;
+    }
 
-/**
- * @brief Checks if a game instance is still running.
- * @param game  Pointer to a Game_St-compatible structure
- * @return true if game->running is true, false otherwise
- */
-bool isGameRunning(const Game_St* game) {
-    return game != NULL && game->running;
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = htons(SERVER_PORT);
+
+    // Conversion IP
+    if (inet_pton(AF_INET, SERVER_IP, &serv_addr.sin_addr) <= 0) {
+        perror("Adresse invalide");
+        return;
+    }
+
+    if (connect(network_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        perror("Connexion échouée");
+        network_socket = -1;
+        return;
+    }
+
+    printf(">>> CONNECTÉ AU SERVEUR !\n");
+
+    // Mode NON-BLOQUANT
+    fcntl(network_socket, F_SETFL, O_NONBLOCK);
+
+    // Envoi JOIN
+    PacketHeader header;
+    header.room_id = htons(0); 
+    header.sender_id = htons(0); // ID inconnu pour l'instant
+    header.action = LOBBY_JOIN;
+    header.length = htons(0);
+    send(network_socket, &header, sizeof(header), 0);
 }
 
-/**
- * @brief Updates and renders the lobby scene (one frame).
- * @param dt  Frame time delta (from GetFrameTime())
- *
- * Handles player movement, camera, UI menus, and game zone collision detection.
- */
-static void lobby_gameLoop(float dt) {
-    static float lobbyTextXPos;
+void send_my_position(Player_st *p) {
+    if (network_socket == -1) return;
 
+    PacketHeader header;
+    header.room_id = htons(0);
+    // Note: Le serveur remplira le sender_id correct lors du broadcast
+    header.sender_id = htons(0); 
+    header.action = LOBBY_MOVE;
+    header.length = htons(sizeof(Player_st));
+
+    uint8_t buffer[sizeof(PacketHeader) + sizeof(Player_st)];
+    
+    memcpy(buffer, &header, sizeof(PacketHeader));
+    memcpy(buffer + sizeof(PacketHeader), p, sizeof(Player_st));
+
+    send(network_socket, buffer, sizeof(buffer), 0);
+}
+
+void receive_network_data() {
+    if (network_socket == -1) return;
+
+    uint8_t buffer[1024];
+    ssize_t valread = recv(network_socket, buffer, sizeof(PacketHeader), MSG_PEEK);
+
+    if (valread >= (ssize_t)sizeof(PacketHeader)) {
+        // On consomme le header
+        recv(network_socket, buffer, sizeof(PacketHeader), 0);
+        
+        PacketHeader *header = (PacketHeader *)buffer;
+        uint16_t senderId = ntohs(header->sender_id);
+        uint16_t dataLen = ntohs(header->length);
+        uint8_t action = header->action;
+
+        // Sécurité
+        if (senderId >= MAX_CLIENTS) return; 
+
+        if (dataLen > 0) {
+            uint8_t payload[1024];
+            int totalRead = 0;
+            
+            // Boucle de lecture sécurisée
+            while(totalRead < dataLen) {
+                ssize_t bytes = recv(network_socket, payload + totalRead, dataLen - totalRead, 0);
+                if (bytes > 0) {
+                    totalRead += bytes;
+                } else if (bytes == -1 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
+                    continue; 
+                } else {
+                    return; 
+                }
+            }
+
+            if (action == LOBBY_MOVE && dataLen == sizeof(Player_st)) {
+                Player_st *ghost = (Player_st *)payload;
+                
+                // 1. Copier les données reçues
+                // ATTENTION: ghost->texture contient un pointeur invalide (adresse mémoire de l'autre PC)
+                otherPlayers[senderId] = *ghost; 
+                
+                // 2. Assigner une texture LOCALE valide (pointeur)
+                // On utilise la texture 1 (Troll) pour les autres joueurs
+                otherPlayers[senderId].texture = &playerTextures[1]; 
+            }
+        }
+    }
+}
+
+// --- GLOBALES JEU ---
+static Player_st player = {
+    .position = {0, 250}, .radius = 20, .velocity = {0, 0}, .onGround = false
+};
+static Camera2D cam = { .zoom = 1.0f };
+static Rectangle gameZoneHitbox = { .x = 600, .y = -150, .width = 75, .height = 75 };
+
+
+// --- MAIN LOOP ---
+
+static void lobby_gameLoop(float dt) {
+    static Vector2 lastSentPos = {0};
+
+    // 1. Mouvement
     updatePlayer(&player, platforms, platformCount, dt);
     cam.target = player.position;
 
+    // 2. Réseau : Envoi si mouvement
+    if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y) {
+        send_my_position(&player);
+        lastSentPos = player.position;
+    }
+
+    // 3. Réseau : Réception
+    receive_network_data();
+
+    // 4. UI
     toggleSkinMenu();
+    if (isTextureMenuOpen) choosePlayerTexture(&player);
 
-    if (isTextureMenuOpen) {
-        choosePlayerTexture(&player);
-    }
+    BeginDrawing();
+    ClearBackground(RAYWHITE);
+    BeginMode2D(cam);
+        
+        drawPlatforms(platforms, platformCount);
+        DrawCircle(0, 0, 10, RED);
 
-    // Collision check with game zone (tetris example)
-    if (CheckCollisionCircleRec(player.position, player.radius, tetrisHitbox)) {
-        if (!gameHitGracePeriodActive) {
-            currentScene = GAME_SCENE_GAME_NAME;
-            needGameInit = true;
-            gameHitGracePeriodActive = true;
+        // DESSINER MON JOUEUR
+        drawPlayer(&player);
+
+        // DESSINER LES AUTRES JOUEURS
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            // Vérifie si le joueur existe et a une texture valide
+            if (otherPlayers[i].texture != NULL && otherPlayers[i].texture->id != 0) {
+                
+                // Note: On déréférence le pointeur (*...) pour passer la Structure Texture2D
+                DrawTexturePro(
+                    *otherPlayers[i].texture, 
+                    (Rectangle){0, 0, (float)otherPlayers[i].texture->width, (float)otherPlayers[i].texture->height},
+                    (Rectangle){otherPlayers[i].position.x, otherPlayers[i].position.y, 40, 40},
+                    (Vector2){20, 20}, 
+                    otherPlayers[i].angle, 
+                    WHITE
+                );
+            }
         }
-    } else if (gameHitGracePeriodActive) {
-        gameHitGracePeriodActive = false;
-    }
 
-    BeginDrawing(); {
-        ClearBackground(RAYWHITE);
+        DrawRectangleRec(gameZoneHitbox, Fade(PURPLE, 0.5f));
 
-        BeginMode2D(cam); {
-            DrawCircle(0, 0, 10, RED);          // Debug origin marker
-            drawPlayer(&player);
-            drawPlatforms(platforms, platformCount);
-            DrawRectangleRec(tetrisHitbox, RED); // Debug hitbox
-        } EndMode2D();
-
-        lobbyTextXPos = (WINDOW_WIDTH - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
-        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
-
-        drawSkinButton();
-
-        if (isTextureMenuOpen) {
-            drawMenuTextures();
-        }
-    } EndDrawing();
+    EndMode2D();
+    DrawText("Lobby Multijoueur", 10, 10, 20, PURPLE);
+    drawSkinButton();
+    if (isTextureMenuOpen) drawMenuTextures();
+    EndDrawing();
 }
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Program entry point
-// ─────────────────────────────────────────────────────────────────────────────
 
 int main(void) {
     SetTraceLogLevel(LOG_WARNING);
+    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Multi-Mini-Games: CLIENT");
 
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-
-    // Load shared UI textures
+    // Chargement assets
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
-
+    
+    // Chargement des textures joueurs
     playerTextures[0] = LoadTexture(IMAGES_PATH "earth.png"); playerTextureCount++;
     playerTextures[1] = LoadTexture(IMAGES_PATH "trollFace.png"); playerTextureCount++;
+    
+    // Assignation de l'ADRESSE de la texture (car .texture est un pointeur)
+    player.texture = &playerTextures[0]; 
+    
+    cam.offset = (Vector2){WINDOW_WIDTH/2.0f, WINDOW_HEIGHT/2.0f};
 
-    cam.target = player.position;
-
-    // ── Main loop ────────────────────────────────────────────────────────────
-    Error_Et error = OK;
+    init_network();
 
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
-
-        switch (currentScene) {
-            case GAME_SCENE_LOBBY: {
-                lobby_gameLoop(dt);
-            } break;
-
-            case GAME_SCENE_GAME_NAME: {
-                if (needGameInit) {
-                    error = gameName_initGame(&gameNameGame, .fps = 120);
-                    needGameInit = false;
-
-                    if (error != OK) {
-                        log_fatal("GameName initialization failed: error %d", error);
-                        gameName_freeGame(&gameNameGame);
-                        currentScene = GAME_SCENE_LOBBY;
-                        break;
-                    }
-                }
-
-                gameName_gameLoop(gameNameGame);
-
-                if (!isGameRunning((Game_St*)gameNameGame)) {
-                    gameName_freeGame(&gameNameGame);
-                    currentScene = GAME_SCENE_LOBBY;
-                }
-            } break;
-
-            default:
-                log_error("Invalid GameScene_Et value: %d", currentScene);
-                break;
-        }
+        lobby_gameLoop(GetFrameTime());
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────────────
-    if (gameNameGame != NULL) {
-        gameName_freeGame(&gameNameGame);
-    }
-
-    for (int i = 0; i < playerTextureCount; i++) {
-        UnloadTexture(playerTextures[i]);
-    }
-
-    UnloadTexture(logoSkinButton);
-
+    if (network_socket != -1) close(network_socket);
     CloseWindow();
-
     return 0;
 }
 
