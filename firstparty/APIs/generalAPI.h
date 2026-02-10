@@ -63,6 +63,18 @@ typedef enum {
 // Game interface
 // ────────────────────────────────────────────────
 
+
+/**
+    @brief Identifiers of the different playable scenes / mini-games.
+
+    Used both as array indices and as state identifiers.
+*/
+typedef enum {
+    GAME_SCENE_LOBBY,       ///< Main lobby / hub world with platformer movement
+    GAME_SCENE_TETRIS,      ///< Tetris mini-game
+    __gameSceneCount
+} GameScene_Et;
+
 /**
     @brief Opaque forward declaration of the concrete game state.
 

@@ -1,4 +1,17 @@
-#include "APIs/generalAPI.h"
+/**
+ * @file main.c
+ * @author LeandreB8 - Fshimi Hawlk
+ * @date 2026-02-08
+ * @brief Program entry point – lobby main loop and game scene manager.
+ *
+ * This file contains the top-level application loop.
+ * It initializes the window and shared resources, runs the lobby,
+ * and switches to individual games when triggered (e.g. collision with zone).
+ *
+ * Games are loaded on demand via their API (e.g. gameNameAPI.h) and run
+ * in the same process/window. No separate executables are spawned.
+ */
+
 #include "core/game.h"
 
 #include "setups/app.h"
@@ -10,7 +23,13 @@
 #include "ui/game.h"
 #include "ui/app.h"
 
-#include "utils/globals.h"
+#include "core/game.h"              // GameScene_Et, general game types
+#include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
+#include "ui/game.h"                // Player drawing, platform logic
+
+#include "utils/globals.h"          // Global constants (WINDOW_WIDTH, etc.)
+
+#include "APIs/generalAPI.h"
 
 #include "APIs/tetrisAPI.h"
 #include "utils/userTypes.h"
@@ -72,6 +91,10 @@ void lobby_gameLoop(float dt) {
     } EndDrawing();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Program entry point
+// ─────────────────────────────────────────────────────────────────────────────
+
 int main(void) {
     lobby_initApp();
     lobby_initGame();
@@ -100,9 +123,9 @@ int main(void) {
                 }
             } break;
 
-            default: {
-                log_error("GameScene_Et");
-            }
+            default:
+                log_error("Invalid GameScene_Et value: %d", game.subGameManager.currentScene);
+                break;
         }
     }
 
