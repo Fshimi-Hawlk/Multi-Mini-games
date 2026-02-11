@@ -1,12 +1,21 @@
+/**
+ * @file reseauAPI.h
+ * @brief Permet de faire le lien entre lobby.c et main.c.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-07
+ */
+
 #ifndef RESEAU_API_H
 #define RESEAU_API_H
 
+#include "game_interface.h"
 
-#include "game_interface.h"  //API
+/**
+ * @brief Instance globale du module lobby, exportée pour le linker.
+ */
+extern GameInterface lobby_module; 
 
-extern GameInterface lobby_module; //format imposé par l'API
-
-#endif // Fin du #ifndef
+#endif
 
 /*
 Fichier .H                                 Fichier .C 
