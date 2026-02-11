@@ -3,6 +3,8 @@
  * @brief Définition du protocole de communication réseau.
  * * Ce fichier contient les structures de paquets et les énumérations d'actions
  * partagées entre le client et le serveur.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-7
  */
 
 #ifndef PROTOCOL_H
