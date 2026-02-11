@@ -2,6 +2,8 @@
  * @file lobby.c
  * @brief Implémentation de la logique de gestion du lobby.
  * * Gère les états des joueurs, les déplacements et les déconnexions.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-7
  */
 
 #include <stdlib.h> 

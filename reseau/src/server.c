@@ -3,6 +3,8 @@
  * @brief Cœur du serveur de jeu utilisant des sockets TCP.
  * * Ce fichier gère la multiplexion des connexions clients, la réception des paquets
  * via le protocole défini et la communication avec le module de jeu (lobby).
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-7
  */
 
 #include <stdio.h>

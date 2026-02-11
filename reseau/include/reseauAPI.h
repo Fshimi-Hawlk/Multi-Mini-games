@@ -3,6 +3,8 @@
  * @brief Interface d'abstraction pour l'API de jeu.
  * * Permet au serveur de manipuler différents modules de jeu via 
  * une structure GameInterface générique.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-02-7
  */
 
 #ifndef RESEAU_API_H
