@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @brief Client Lobby avec Réseau (Sockets TCP) - CORRIGÉ
+ * @brief Client Lobby avec Réseau (Sockets TCP)
  */
 
 #include "core/game.h"
@@ -9,6 +9,7 @@
 #include "utils/globals.h"
 
 // --- INCLUDES RÉSEAU ---
+#include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -37,7 +38,7 @@
 
 
 // --- CONFIGURATION ---
-#define SERVER_IP "127.0.0.1"
+#define SERVER_IP "10.153.19.92"
 #define SERVER_PORT 8080
 
 // --- VARIABLES GLOBALES RÉSEAU ---
@@ -152,7 +153,7 @@ void receive_network_data() {
 
 // --- GLOBALES JEU ---
 static Player_st player = {
-    .position = {0, 250}, .radius = 20, .velocity = {0, 0}, .onGround = false
+    .position = {0, 0}, .radius = 20, .velocity = {0, 0}, .onGround = false
 };
 static Camera2D cam = { .zoom = 1.0f };
 static Rectangle gameZoneHitbox = { .x = 600, .y = -150, .width = 75, .height = 75 };

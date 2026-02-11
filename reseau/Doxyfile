@@ -1,0 +1,111 @@
+# ────────────────────────────────────────────────────────────────
+# Configuration Doxygen - Module Réseau
+# ────────────────────────────────────────────────────────────────
+
+DOXYFILE_ENCODING      = UTF-8
+PROJECT_NAME           = "Module Réseau"
+PROJECT_NUMBER         = 1.0.0
+PROJECT_BRIEF          = "Server et lobby client qui utilise un protocole TCP avec encodage TLV avec instruction passer en API respectant la structure GameInterface"
+
+# ────────────────────────────────────────────────────────────────
+# Sortie
+# ────────────────────────────────────────────────────────────────
+
+OUTPUT_DIRECTORY       = docs
+GENERATE_LATEX         = NO
+GENERATE_MAN           = NO
+
+# Organisation des fichiers HTML générés
+CREATE_SUBDIRS         = YES
+# Permet d'avoir une arborescence propre dans la doc
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = .
+STRIP_FROM_INC_PATH    = include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# Entrées (Ce que Doxygen doit lire)
+# ────────────────────────────────────────────────────────────────
+
+# On définit README.md comme page d'accueil (même s'il n'existe pas encore)
+USE_MDFILE_AS_MAINPAGE = README.md
+
+# Liste explicite : Les dossiers de code + les fichiers de doc futurs
+INPUT                  = src \
+                         include \
+                         README.md \
+                         makefile.md
+
+# Pour descendre dans les sous-dossiers
+RECURSIVE              = YES
+
+# Extensions à analyser
+FILE_PATTERNS          = *.c *.h *.md
+
+# Dossiers à ignorer absolument (sinon Doxygen va scanner les .o ou sa propre sortie)
+EXCLUDE                = build docs
+EXCLUDE_SYMLINKS       = YES
+
+# ────────────────────────────────────────────────────────────────
+# Gestion des dépendances externes
+# ────────────────────────────────────────────────────────────────
+
+# Doxygen ira chercher les définitions dans ces dossiers pour faire les liens
+# mais ne générera pas leur documentation (car ils ne sont pas dans INPUT)
+INCLUDE_PATH           = include ../firstparty ../thirdparty
+SEARCH_INCLUDES        = YES
+USE_MATHJAX            = YES
+MATHJAX_RELPATH        = https://cdn.jsdelivr.net/npm/mathjax@2
+
+# ────────────────────────────────────────────────────────────────
+# Options C 
+# ────────────────────────────────────────────────────────────────
+
+OPTIMIZE_OUTPUT_FOR_C  = YES
+
+# Tout extraire, même ce qui n'est pas encore commenté
+EXTRACT_ALL            = YES
+# Important pour un serveur : voir les fonctions 'static' (privées au fichier)
+EXTRACT_STATIC         = YES
+# Affiche les variables globales
+EXTRACT_LOCAL_CLASSES  = YES
+
+# Macros prédéfinies pour que Doxygen comprenne certains blocs de code
+PREDEFINED             = _DEBUG
+
+# ────────────────────────────────────────────────────────────────
+# Graphiques (Nécessite Graphviz)
+# ────────────────────────────────────────────────────────────────
+
+HAVE_DOT               = YES
+# Génère le graphe d'appel (qui appelle qui ?)
+CALL_GRAPH             = YES
+# Génère le graphe des appelants (qui m'appelle ?)
+CALLER_GRAPH           = YES
+# Style UML pour les structures
+UML_LOOK               = YES
+
+# ────────────────────────────────────────────────────────────────
+# Navigation
+# ────────────────────────────────────────────────────────────────
+
+# Active le volet de navigation à gauche (très pratique)
+GENERATE_TREEVIEW      = YES
+
+# ────────────────────────────────────────────────────────────────
+# Customisation visuelle (Doxygen Awesome)
+# ────────────────────────────────────────────────────────────────
+
+# Ajoute les fichiers JS pour qu'ils soient copiés dans docs/html/
+HTML_EXTRA_FILES       = doxygen-awesome-darkmode-toggle.js \
+                         doxygen-awesome-fragment-copy-button.js \
+                         doxygen-awesome-interactive-toc.js
+
+# Utilise le CSS principal
+HTML_EXTRA_STYLESHEET  = doxygen-awesome.css
+
+# Indispensable pour injecter les boutons dans l'interface
+HTML_HEADER            = header.html
+# Optionnel : Pour une meilleure expérience sur mobile/tablette
+HTML_COLORSTYLE        = LIGHT
+# Rend les graphes compatibles avec le mode sombre et le design Awesome
+DOT_TRANSPARENT        = YES
