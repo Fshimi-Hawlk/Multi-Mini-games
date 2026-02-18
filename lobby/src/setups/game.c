@@ -1,9 +1,9 @@
 #include "setups/game.h"
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
+#include "utils/utils.h"
 
-static void initGrass(void) {
+void lobby_initGrass(void) {
     Rectangle floor = platforms[0].rect;
     grassCount = 0;
 
@@ -32,51 +32,13 @@ static void initGrass(void) {
                 .angle = 0.0f,
                 .velocity = 0.0f,
                 .color = (Color){
-                    (unsigned char)Clamp(35 + colorVar - (depth * 15), 10, 255),
-                    (unsigned char)Clamp(90 + colorVar - (depth * 70), 20, 180),
-                    (unsigned char)Clamp(25 - (depth * 10), 5, 255),
+                    clamp(35 + colorVar - (depth * 15), 10, 255),
+                    clamp(90 + colorVar - (depth * 70), 20, 180),
+                    clamp(25 - (depth * 10), 5, 255),
                     255
                 }
             };
             grassCount++;
         }
     }
-}
-
-void lobby_initGame(void) {
-    initGrass();
-
-    game.subGameManager.currentScene = GAME_SCENE_LOBBY;
-    game.subGameManager.needGameInit = false;
-    game.subGameManager.gameHitGracePeriodActive = false;
-
-    game.subGameManager.miniGames[GAME_SCENE_TETRIS] = NULL;
-
-    game.subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = tetrisHitbox;
-
-    game.playerVisuals.isTextureMenuOpen = false;
-    game.playerVisuals.defaultTextureRect = (Rectangle) { 20, 60, 50, 50};
-
-    game.player = (Player_St) {
-        .position = {0, 300},
-        .radius = 20,
-
-        .angle = 0,
-
-        .velocity = {0, 0},
-
-        .onGround = false,
-        .nbJumps = 0,
-
-        .coyoteTime = 0.1f,
-        .coyoteTimer = 0.1f,
-
-        .jumpBuffer = 0.0f
-    };
-
-    game.cam = (Camera2D) {
-        .target = game.player.position,
-        .offset = (Vector2){WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT * 0.66f},
-        .zoom = 1.0f,
-    };
 }

@@ -47,7 +47,6 @@ void drawMenuTextures(const LobbyGame_St* const game) {
     f32 radius = destRect.width / 2.0f;
     DrawCircleV((Vector2) {destRect.x + radius, destRect.y + radius}, radius, BLUE);
 
-    
     DrawText("choose your skin :", 20, 40, 20, DARKGRAY);
     for (u32 i = 1; i < __playerTextureCount; i++) {
         Color textureTint = game->player.unlockedTextures[i] ? WHITE : GRAY;

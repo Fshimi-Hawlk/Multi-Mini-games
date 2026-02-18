@@ -65,6 +65,13 @@ typedef enum {
 // Game interface
 // ────────────────────────────────────────────────
 
+typedef enum {
+    FONT12, FONT24, FONT32, 
+    FONT48, FONT64, FONT96, 
+    FONT128,
+    _fontSizeCount
+} FontSize_Et;
+
 /**
     @brief Identifiers of the different playable scenes / mini-games.
 

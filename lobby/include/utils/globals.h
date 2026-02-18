@@ -27,8 +27,6 @@
 // Lobby world content
 // ────────────────────────────────────────────────
 
-extern LobbyGame_St game;
-
 /**
     brief Static array of platform definitions for the lobby scene.
           Size is determined by platformCount.
@@ -57,6 +55,7 @@ extern Rectangle tetrisHitbox;
           Used both for rendering and input detection.
 */
 extern Rectangle skinButtonRect;
+extern Texture2D logoSkinButton;
 
 /**
     brief Texture used for the skin selection menu toggle button.

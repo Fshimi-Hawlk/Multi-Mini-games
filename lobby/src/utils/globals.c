@@ -29,9 +29,6 @@
 */
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
-
-LobbyGame_St game = {0};
 
 float gameTime = 0.0f;
 
@@ -72,13 +69,6 @@ Platform_St platforms[] = {
 };
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
-
-Rectangle tetrisHitbox = {
-    .x = 600,
-    .y = -150,
-    .width = 75,
-    .height = 75
-};
 
 Rectangle skinButtonRect = { WINDOW_WIDTH - 70, WINDOW_HEIGHT / 2.0f - 25, 50, 50 };
 

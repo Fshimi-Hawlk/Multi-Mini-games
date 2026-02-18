@@ -45,9 +45,8 @@
     to compute destination rectangle and pivot point.
 
     @param game      Pointer to the full lobby game state (provides textures and visuals)
-    @param player    Pointer to the player state (position, radius, textureId, angle, etc.)
 */
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player);
+void drawPlayer(const LobbyGame_St* const game);
 
 void drawPlatforms(const Platform_St *const platforms, const int count);
 

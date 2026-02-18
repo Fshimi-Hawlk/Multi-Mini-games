@@ -27,26 +27,27 @@
     @see `utils/utils.h` for `getTextureRec`
 */
 
-#include "ui/game.h"
-
 #include "core/game.h"
+
+#include "ui/game.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
-    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
-        DrawCircleV(player->position, player->radius, BLUE);
-    } else {
-        DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            getPlayerCollisionBox(&game->player),
-            getPlayerCenter(&game->player),
-            player->angle,
-            WHITE
-        );
+void drawPlayer(const LobbyGame_St* const game) {
+    if (game->player.textureId == PLAYER_TEXTURE_DEFAULT) {
+        DrawCircleV(game->player.position, game->player.radius, BLUE);
+        return;
     }
+    
+    DrawTexturePro(
+        game->playerVisuals.textures[game->player.textureId],
+        getTextureRec(game->playerVisuals.textures[game->player.textureId]),  // source
+        getPlayerCollisionBox(&game->player), // destination
+        getPlayerCenter(&game->player), // origine du pivot
+        game->player.angle, // angle en degrés
+        WHITE
+    );
 }
 
 void drawPlatforms(const Platform_St* const platforms, const int count) {
