@@ -1,8 +1,32 @@
 /**
  * @file logger.h
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-18
- * @brief Comprehensive logging system with colors and stack trace support.
+ * @author Fshimi-Hawlk
+ * @date 2025-07-14
+ * @date 2026-02-18
+ * @brief Flexible, colored console + file logger with stack trace support (Linux-focused).
+ *
+ * Provides a set of logging macros (`log_info`, `log_warn`, `log_error`, etc.) that:
+ *   - output to stderr with ANSI color coding
+ *   - optionally append to a file (debug builds only)
+ *   - can include file/line/function information
+ *   - support optional stack traces on errors (when _STACK_TRACE defined)
+ *
+ * Features:
+ *   - 7 logging levels (LOG, TRACE, DEBUG, INFO, WARN, ERROR, FATAL)
+ *   - runtime-configurable extra info (hide location, enable trace, trace depth)
+ *   - debug-only file logging + symbol resolution via addr2line (Linux)
+ *   - no-op in release builds for most heavy operations
+ *
+ * Usage guidelines:
+ *   - Call init_logger() early in main() (usually after window init)
+ *   - Call cleanup_logger() before exit
+ *   - Use macros instead of direct log_message() calls
+ *   - Stack traces require _STACK_TRACE define and addr2line in PATH
+ *
+ * Platform notes:
+ *   - Full functionality (colors + file + stack trace) on Linux in debug builds
+ *   - Colors and console output work on Windows (with ANSI support) but no stack trace
+ *   - File logging and symbol resolution are #ifdef _DEBUG guarded
  */
 
 #ifndef LOGGER_H
@@ -32,9 +56,10 @@
 #define MAX_TRACE_BACK_FRAMES 32
 #endif
 
-/**
- * @brief Type for ANSI color strings.
- */
+// ────────────────────────────────────────────────
+// Types & Globals
+// ────────────────────────────────────────────────
+
 typedef const char *ColorString_t;
 
 /**
@@ -81,77 +106,26 @@ extern ColorString_t fileColor;
 extern ColorString_t lineColor;
 
 /**
- * @struct LogExtraInfoOpt_s
- * @brief Options for additional information in log messages.
+ * @brief Runtime options controlling log output appearance and detail.
  */
-typedef struct LogExtraInfoOpt_s {
-    bool _persistentOpt;  /**< If true, options persist after one log call. */
-    bool hideLineId;      /**< If true, hides [file line:column (funcName)]. */
-    bool enableTrace;     /**< If true, enables stack trace for the log call. */
-    int  traceBackAmount; /**< Number of frames to trace back. */
-} LogExtraInfoOpt_St, *LogExtraInfoOptPtr_St;
+typedef struct {
+    bool _persistentOpt;        // if true, options are not reset after each log
+    bool hideLineId;            // suppress file:line (func) prefix
+    bool enableTrace;           // print stack trace after every log message
+    int  traceBackAmount;       // number of frames to show (0 = use MAX_TRACE_BACK_FRAMES)
+} LogExtraInfoOpt_St;
 
 /** @brief Global logging options. */
 extern LogExtraInfoOpt_St _logExtraInfoOptions;
 
-/**
- * @brief Macro to set logging options temporarily.
- */
-#define setLogOpts(...) _logExtraInfoOptions = (LogExtraInfoOpt_St) {__VA_ARGS__}
-/**
- * @brief Macro to reset logging options to default.
- */
-#define resetLogOpts() _logExtraInfoOptions = (LogExtraInfoOpt_St) {0}
-/**
- * @brief Macro to set logging options persistently.
- */
-#define setLogOptsP(...) _logExtraInfoOptions = (LogExtraInfoOpt_St) {._persistentOpt = true, __VA_ARGS__}
+// Convenience macros to set logging options
+#define setLogOpts(...)     _logExtraInfoOptions = (LogExtraInfoOpt_St) {__VA_ARGS__}
+#define resetLogOpts()      _logExtraInfoOptions = (LogExtraInfoOpt_St) {0}
+#define setLogOptsP(...)    _logExtraInfoOptions = (LogExtraInfoOpt_St) {._persistentOpt = true, __VA_ARGS__}
 
-/**
- * @brief Gets the string representation of a logging level.
- * @param level The logging level.
- * @return String representation (e.g., "INFO").
- */
-extern ColorString_t getLevelString(LoggingLevel_Et level);
-
-/**
- * @brief Gets the color string associated with a logging level.
- * @param level The logging level.
- * @return ANSI color string.
- */
-extern ColorString_t getLevelColor(LoggingLevel_Et level);
-
-/**
- * @brief Initializes the logger. Creates/opens the log file.
- * 
- * Call once at program start.
- * @return 0 on success, <0 on error.
- */
-int init_logger(void);
-
-/**
- * @brief Cleans up the logger. Closes the log file.
- * 
- * Call once at program end.
- */
-void cleanup_logger(void);
-
-/**
- * @brief Prints a stack trace to stderr and the log file.
- * @param targetDepth Maximum number of frames to print.
- */
-void print_stack_trace(unsigned int targetDepth);
-
-/**
- * @brief Logs a message with the specified level, file, line, function, and format.
- * 
- * @param level Log level (e.g., LOGGING_LEVEL_INFO).
- * @param file Source file name (usually __FILE__).
- * @param line Source line number (usually __LINE__).
- * @param func Function name (usually __func__).
- * @param fmt Format string, followed by variadic arguments.
- */
-void log_message(LoggingLevel_Et level, const char *file, int line, const char *func, const char *fmt, ...);
+// ────────────────────────────────────────────────
+// Logging Macros (preferred interface)
+// ────────────────────────────────────────────────
 
 /** @brief Macro for generic log message. */
 #define logger_log(fmt, ...) log_message(LOGGING_LEVEL_LOG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
@@ -176,34 +150,75 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
 #define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif
 
+// ────────────────────────────────────────────────
+// Core API
+// ────────────────────────────────────────────────
+
+extern ColorString_t getLevelString(LoggingLevel_Et level);
+
+extern ColorString_t getLevelColor(LoggingLevel_Et level);
+
+// ────────────────────────────────────────────────
+// Core API
+// ────────────────────────────────────────────────
+
+extern ColorString_t getLevelString(LoggingLevel_Et level);
+
+extern ColorString_t getLevelColor(LoggingLevel_Et level);
+
 /**
- * @brief Initializes the symbol handler for stack traces.
- * 
- * Call once at program start.
- * @return 0 or positive on success, <0 on error.
+ * @brief Initialize logger: create/open log file (debug builds) + symbol handler.
+ * @return 0 on success, negative on failure
+ */
+int init_logger(void);
+
+/**
+ * @brief Close log file and clean up symbol handler.
+ */
+void cleanup_logger(void);
+
+/**
+ * @brief Print stack trace to stderr and log file (if open).
+ * @param targetDepth maximum number of frames to show
+ */
+void print_stack_trace(unsigned int targetDepth);
+
+/**
+ * Log a message with the specified level, file, line, function, and format.
+ * @param level Log level (e.g., "INFO", "ERROR").
+ * @param file Source file name (use __FILE__).
+ * @param line Source line number (use __LINE__).
+ * @param func Function name (use __func__).
+ * @param fmt Format string, followed by variadic arguments.
+ */
+void log_message(LoggingLevel_Et level, const char *file, int line, const char *func, const char *fmt, ...);
+
+// ────────────────────────────────────────────────
+// Symbol / Caller Info (mostly Linux)
+// ────────────────────────────────────────────────
+
+/**
+ * @brief Initialize platform-specific symbol handler (addr2line preparation on Linux).
+ * @return 0 or positive on success
  */
 int init_symbol_handler(void);
 
 /**
- * @brief Cleans up the symbol handler.
- * 
- * Call once at program end.
+ * @brief Cleanup symbol handler resources (no-op on Linux).
  */
 void cleanup_symbol_handler(void);
 
 /**
- * @brief Fills a buffer with caller information at a specific backtrace depth.
- * 
- * @param out Buffer to fill.
- * @param outSize Size of the buffer.
- * @param depth Backtrace index (0 = self, 1 = direct caller, etc.).
- * @return 0 on success, <0 on error.
+ * @brief Get caller information at given backtrace depth.
+ * @param out       output buffer
+ * @param outSize   size of output buffer
+ * @param depth     stack depth (0 = current function, 1 = caller, ...)
+ * @return 0 on success, <0 on error
  */
 int get_caller_info(char *out, size_t outSize, unsigned int depth);
 
 /**
- * @brief Macro to print caller info at a specific depth.
- * @param depth Backtrace depth.
+ * @brief Print caller info at specified depth to stdout.
  */
 #define print_caller_info_at_depth(depth)               \
     do {                                               \

@@ -7,6 +7,14 @@
  * @date 2026-03-18
  * @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
  *
+ * Contributors:
+ * - LeandreB8:
+ *    - Implemented basic lobby's logic (initialization, game loop, ...)
+ * - Fshimi-Hawlk:
+ *    - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+ *    - Implememted sub-game playablity inside lobby logic via API
+ *    - Added documentation
+ *
  * This file contains the top-level application loop.
  * It initializes the window and shared resources, runs the lobby,
  * and switches to individual games when triggered (e.g. collision with zone).
@@ -212,28 +220,6 @@ static void lobby_gameLoop(float dt) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 int main(void) {
-    SetTraceLogLevel(LOG_WARNING);
-
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
-    SetTargetFPS(60);
-
-    InitConnectionScreen();
-    
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        otherPlayers[i].active = false;
-    }
-
-    register_minigame(&LobbyModule);
-    register_minigame(&KingForFourClientModule);
-
-    // Load shared UI textures
-    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
-
-    playerTextures[0] = LoadTexture(IMAGES_PATH "earth.png"); playerTextureCount++;
-    playerTextures[1] = LoadTexture(IMAGES_PATH "trollFace.png"); playerTextureCount++;
-
-    cam.target = player.position;
 
     // ── Main loop ────────────────────────────────────────────────────────────
     Error_Et error = OK;
@@ -243,6 +229,15 @@ int main(void) {
         log_fatal("Couldn't load the lobby properly.");
         return 1;
     }
+
+    InitConnectionScreen();
+    
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        otherPlayers[i].active = false;
+    }
+
+    register_minigame(&LobbyModule);
+    register_minigame(&KingForFourClientModule);
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -295,8 +290,8 @@ int main(void) {
                     } EndDrawing();
                 }
             } break;
-
-            /**
+        }
+        /**
             switch (game->subGameManager.currentScene) {
                 case GAME_SCENE_LOBBY: {
                     lobby_gameLoop(game);
@@ -338,3 +333,6 @@ int main(void) {
 
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"
