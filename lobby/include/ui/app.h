@@ -8,10 +8,12 @@
 #ifndef UI_APP_H
 #define UI_APP_H
 
+#include "utils/userTypes.h"
+
 /**
  * @brief Renders the texture selection menu.
  */
-void drawMenuTextures(void);
+void drawMenuTextures(const LobbyGame_St* const game);
 
 /**
  * @brief Renders the skin selection button.
