@@ -27,12 +27,12 @@ git push origin my-game-name
 
 We try to follow "Conventional Commits" — it looks like this:
 
-- `feat: add player movement with arrow keys`
-- `fix: prevent crash when clicking too fast`
-- `docs: improve README installation steps`
-- `style: reformat code + fix indentation`
-- `refactor: move repeated code into utilsDrawRectangle()`
-- `test: add checks for score calculation`
+- `- feat: Add player movement with arrow keys`
+- `- fix: Prevent crash when clicking too fast`
+- `- doc: Improve README installation steps`
+- `- style: Reformat code + fix indentation`
+- `- refactor: Move repeated code into utilsDrawRectangle()`
+- `- test: Add checks for score calculation`
 
 For trivial changes (whitespace, better variable name, ...), either make a tiny commit (style: trim trailing whitespace) or fold it into the next meaningful commit — both are fine.
 

@@ -1,6 +1,3 @@
-#ifndef GAMENAME_API_H
-#define GAMENAME_API_H
-
 /**
  * @file gameNameAPI.h
  * @author Fshimi Hawlk
@@ -16,7 +13,10 @@
  *       functions to this API.
  */
 
-#include "generalAPI.h"
+#ifndef GAMENAME_API_H
+#define GAMENAME_API_H
+
+#include "APIs/generalAPI.h"
 
 /* Forward declaration — internal definition is private to the module */
 typedef struct GameNameGame_St GameNameGame_St;
@@ -66,11 +66,14 @@ typedef struct {
 Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St configs);
 
 /**
- * @brief Executes one frame of the game (input → update → render).
+ * @brief Executes one frame of the game (input -> update -> render).
  *
  * Should be called once per frame inside the main application loop.
  *
  * @param[in,out] game      Valid game instance (must not be NULL)
+ *
+ * @return OK on success
+ * @return ERROR_NULL_POINTER if game is invalid
  *
  * @pre  game != NULL and game was successfully initialized
  * @pre  Raylib window and drawing context are active
@@ -78,12 +81,15 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St conf
  * @note If the game decides to end (win/lose/quit), it should set
  *       ((Game_St*)game)->running = false;
  */
-void gameName_gameLoop(GameNameGame_St* const game);
+Error_Et gameName_gameLoop(GameNameGame_St* const game);
 
 /**
  * @brief Releases all resources associated with the game and frees the handle.
  *
  * @param[in,out] game      Pointer to the game handle. Will be set to NULL.
+ *
+ * @return OK on success
+ * @return ERROR_NULL_POINTER if game is invalid
  *
  * @pre  game may be NULL or point to a valid initialized game
  * @post *game == NULL
@@ -92,6 +98,6 @@ void gameName_gameLoop(GameNameGame_St* const game);
  * @note Safe to call multiple times (idempotent).
  * @note Does **not** close the Raylib window or terminate the program.
  */
-void gameName_freeGame(GameNameGame_St** game);
+Error_Et gameName_freeGame(GameNameGame_St** game);
 
 #endif // GAMENAME_API_H
