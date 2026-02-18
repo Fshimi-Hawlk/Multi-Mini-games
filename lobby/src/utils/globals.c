@@ -1,8 +1,33 @@
 /**
  * @file globals.c
+ * @author LeandreB8
+ * @author Fshimi-Hawlk
  * @author i-Charlys (CAILLON Charles)
+ * @date 2026-01-12
  * @date 2026-03-18
- * @brief Definitions of global variables used in the lobby.
+ * @brief Definitions of program-wide global variables used in the lobby.
+ *
+ * Contributors:
+ * - LeandreB8:
+ *    - Provided the initial variables and harcoded platform
+ * - Fshimi-Hawlk:
+ *    - Provided documentation
+ *    - Moved some of the variables to dedicated struct.
+ *
+ * Contains shared state and constants used across the application:
+ *   - Window rectangle and UI button placement
+ *   - Font handles
+ *   - Mini-game instance pointers (games[])
+ *   - Lobby platform definitions (platforms[] + platformCount)
+ *   - Default player sprite rectangle
+ *   - Shared player texture array
+ *   - Skin menu toggle and button texture
+ *
+ * The lobby level geometry (platforms) is hard-coded here.
+ * Mini-game registration happens via the games[] array.
+ * Skin menu visibility is controlled by isTextureMenuOpen.
+ *
+ * @see utils/globals.h for type definitions and extern declarations
  */
 
 #include "utils/globals.h"
@@ -36,21 +61,11 @@ Platform_st platforms[] = {
 /** @brief Number of platforms in the lobby. */
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-
-/** @brief Default source rectangle for player textures. */
-Rectangle defaultPlayerTextureRect = {
-    20,
-    60,
-    50,
-    50
-};
-
-/** @brief Rectangle for the skin selection button. */
 Rectangle skinButtonRect = {
-    WINDOW_WIDTH - 70,
-    WINDOW_HEIGHT / 2.0f - 25,
-    50,
-    50
+    .x = WINDOW_WIDTH - 70,
+    .y = WINDOW_HEIGHT / 2.0f - 25,
+    .width = 50,
+    .height = 50
 };
 
 /** @brief Trigger zone for the King For Four game. */
