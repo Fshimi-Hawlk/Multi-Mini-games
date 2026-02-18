@@ -1,18 +1,18 @@
 #include "ui/game.h"
 #include "utils/utils.h"
 
-void drawPlayer(const Player_st* const player) {
-    if (player->texture == NULL) {
-        DrawCircleV(player->position, player->radius, BLUE);
+void drawPlayer(const LobbyGame_St* const game) {
+    if (game->player.visuals.textureId == PLAYER_TEXTURE_DEFAULT) {
+        DrawCircleV(game->player.position, game->player.radius, BLUE);
         return;
     }
     
     DrawTexturePro(
-        *player->texture,
-        getTextureRec(player->texture),  // source
-        getPlayerCollisionBox(player), // destination
-        getPlayerCenter(player), // origine du pivot
-        player->angle, // angle en degrés
+        game->player.visuals.textures[game->player.visuals.textureId],
+        getTextureRec(game->player.visuals.textures[game->player.visuals.textureId]),  // source
+        getPlayerCollisionBox(&game->player), // destination
+        getPlayerCenter(&game->player), // origine du pivot
+        game->player.angle, // angle en degrés
         WHITE
     );
 }

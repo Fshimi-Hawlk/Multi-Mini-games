@@ -14,19 +14,12 @@ extern Rectangle windowRect;            ///< Main window rectangle (set at init)
 extern Font      appFont;               ///< Primary font for UI text.
 extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
-
 extern Platform_st platforms[];
-extern int platformCount;
-
-extern Texture2D playerTextures[];
-extern int playerTextureCount;
-
-extern Rectangle defaultPlayerTextureRect;
-
+extern u32 platformCount;
+ 
 extern Rectangle skinButtonRect;
+extern Texture2D logoSkinButton;
 
 extern bool isTextureMenuOpen;
-
-extern Texture2D logoSkinButton;
 
 #endif // UTILS_GLOBALS_H
