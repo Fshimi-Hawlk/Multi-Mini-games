@@ -29,6 +29,9 @@ typedef enum {
     // Add more specific codes later if needed, but keep them generic enough
 } Error_Et;
 
+typedef struct Game_St Game_St;
+typedef Error_Et (*freeGame_Ft)(void*);
+
 /**
  * @brief Minimal common game state structure.
  *
@@ -38,10 +41,14 @@ typedef enum {
  * This allows the lobby to check basic state (especially .running)
  * without knowing the concrete game type.
  */
-typedef struct {
-    bool running;              ///< Whether the game is still active (true = continue, false = ended)
-    // Future: add common fields here (e.g. score, timePlayed, paused, etc.)
+struct Game_St {
+    bool running;               ///< Whether the game is still active (true = continue, false = ended)
+    bool paused;                ///< Whether the game is paused or not
+    long score;                 ///< Score gain during the last played game
+
+    freeGame_Ft freeGame;       ///< Function to free the game's data
+
     // Only add fields that truly belong to *every* game.
-} Game_St;
+};
 
 #endif // GENERAL_API_H
