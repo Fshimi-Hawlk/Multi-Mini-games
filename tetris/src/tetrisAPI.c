@@ -11,7 +11,8 @@
 #include "utils/configs.h"
 #include "utils/types.h"
 
-#include "logger.h"
+#include "APIs/generalAPI.h"
+#include "APIs/tetrisAPI.h"
 
 struct TetrisGame_St {
     bool running;
@@ -31,7 +32,16 @@ struct TetrisGame_St {
     int highScore;
 };
 
-TetrisGame_St* tetris_initGame(void) {
+Error_Et tetris_freeGameWrapper(void* game) {
+    return tetris_freeGame((TetrisGame_St**) game);
+}
+
+Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
+    (void) configs; // unused
+
+    (*game) = malloc(sizeof(*(*game)));
+    if (*game == NULL) return ERROR_ALLOC;
+
     TetrisGame_St* game = calloc(sizeof(*game), 1);
 
     game->speed.duration = 1.0f;
@@ -52,11 +62,11 @@ TetrisGame_St* tetris_initGame(void) {
     readHighScore(&game->highScore);
 
     initBoard(game->board);
-    return game;
+    return OK;
 }
 
-void tetris_gameLoop(TetrisGame_St* const game) {
-    if (!game->running) return;
+Error_Et tetris_gameLoop(TetrisGame_St* const game) {
+    if (!game->running) return ERROR_NULL_POINTER;
 
     mouvement(game->board, &game->boardShape);
 
@@ -71,7 +81,7 @@ void tetris_gameLoop(TetrisGame_St* const game) {
         if (isColliding(game->board, game->boardShape)) {
             writeHighScore(game->highScore, game->score);
             game->running = false;
-            return;
+            return OK;
         }
     }
 
@@ -96,10 +106,15 @@ void tetris_gameLoop(TetrisGame_St* const game) {
 
         drawInformations(game->score, game->difficultyMultiplier, game->clearedLineAmount, game->highScore);
     EndDrawing();
+
+    return OK;
 }
 
-void tetris_freeGame(TetrisGame_St** game) {
-    if (game != NULL) {
+Error_Et tetris_freeGame(TetrisGame_St** game) {
+    if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
+    TetrisGame_St* gameRef = *game;
+
+    if (gameRef->clearedLines != NULL) {
         free((*game)->clearedLines);
         (*game)->clearedLines = NULL;
 
@@ -108,5 +123,5 @@ void tetris_freeGame(TetrisGame_St** game) {
 
         free(*game);
         *game = NULL;
-    }
+    return OK;
 }

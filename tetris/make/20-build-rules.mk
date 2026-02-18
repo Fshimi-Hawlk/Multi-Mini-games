@@ -20,5 +20,4 @@ $(OBJ_DIR)/tests/%.o: $(TEST_DIR)/%.c
 
 $(STATIC_LIB): $(LIB_OBJECTS)
 	@mkdir -p $(@D)
-	@mkdir -p $(LIB_DIR)
 	$(SILENT_PREFIX)ar rcs $@ $^

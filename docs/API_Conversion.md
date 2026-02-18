@@ -115,7 +115,7 @@ typedef struct {
 Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs);
 
 /**
- * @brief Executes one frame of the game (input → update → render).
+ * @brief Executes one frame of the game (input -> update -> render).
  *
  * Should be called once per frame inside the main application loop.
  *

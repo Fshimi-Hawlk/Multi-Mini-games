@@ -120,7 +120,7 @@ void cleanup_symbol_handler(void);
 /**
  * Fill `out` (of size `outSize`) with the caller info at
  * backtrace index `depth`.  E.g.:
- *   depth = 1 → immediate caller of the function that calls this.
+ *   depth = 1 -> immediate caller of the function that calls this.
  *
  * Returns 0 on success (even if symbol not found), <0 on error.
  */
