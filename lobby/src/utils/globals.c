@@ -1,4 +1,3 @@
-#include "firstparty/APIs/chatAPI.h"
 /**
  * @file globals.c
  * @author i-Charlys (CAILLON Charles)
@@ -7,7 +6,7 @@
  */
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
+#include "APIs/chatAPI.h"
 
 /** @brief Main window rectangle (set at init). */
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
@@ -35,12 +34,8 @@ Platform_st platforms[] = {
     {{250, 150, 100, 30}, BROWN, 0.5},
 };
 /** @brief Number of platforms in the lobby. */
-int platformCount = sizeof(platforms) / sizeof(platforms[0]);
+u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-/** @brief Array of available player textures. */
-Texture2D playerTextures[2] = {0};
-/** @brief Number of player textures currently loaded. */
-int playerTextureCount = 0;
 
 /** @brief Default source rectangle for player textures. */
 Rectangle defaultPlayerTextureRect = {

@@ -11,7 +11,7 @@
  * It initializes the window and shared resources, runs the lobby,
  * and switches to individual games when triggered (e.g. collision with zone).
  *
- * Games are loaded on demand via their API (e.g. gameNameAPI.h) and run
+ * Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
  * in the same process/window. No separate executables are spawned.
  */
 
@@ -19,8 +19,10 @@
 #include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
 #include "ui/game.h"                // Player drawing, platform logic
 
+#include "lobbyAPI.h"
+#include "APIs/tetrisAPI.h"
+
 #include "ui/connection_screen.h"
-#include "APIs/module_interface.h"
 
 #include "rudp_core.h"
 #include "utils/globals.h"
@@ -30,23 +32,8 @@
 
 #include "APIs/tetrisAPI.h"
 
-/** @brief Port used for server communication. */
-#define SERVER_PORT 8080
-
-/** @brief Action code for game data transmission. */
-#define ACTION_GAME_DATA 5 
-
-/**
- * @brief Enum for different game states in the lobby.
- */
-typedef enum { 
-    STATE_CONNECTION, ///< Initial connection state.
-    STATE_LOBBY      ///< Active lobby state.
-} GameState;
-
 /** @brief Current state of the game. */
-static GameState currentState = STATE_CONNECTION;
-
+static GameState currentState = GAME_STATE_CONNECTION;
 
 /** @brief Global network socket for the client. */
 int network_socket = -1;
@@ -59,7 +46,6 @@ Player_st player = { .position = { 400, 300 }, .radius = 20, .active = true };
 
 /** @brief Array of other players in the lobby. */
 Player_st otherPlayers[MAX_CLIENTS];
-
 
 /** @brief Registry of available mini-game modules. */
 static MiniGameModule* game_registry[256] = {0};
@@ -252,13 +238,19 @@ int main(void) {
     // ── Main loop ────────────────────────────────────────────────────────────
     Error_Et error = OK;
 
+    LobbyGame_St* game = NULL;
+    if (lobby_initGame(&game) == ERROR_ALLOC) {
+        log_fatal("Couldn't load the lobby properly.");
+        return 1;
+    }
+
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
         receive_network_data();
 
         static bool switch_sent = false;
-        if (currentState == STATE_LOBBY && active_game_id == 0) {
+        if (currentState == GAME_STATE_LOBBY && active_game_id == 0) {
             bool trigger = (checkGameTrigger(&player) == 1) || IsKeyPressed(KEY_K);
             if (trigger && !switch_sent) {
                 RUDP_Header leave_h; RUDP_GenerateHeader(&server_conn, 6 /* LOBBY_LEAVE */, &leave_h);
@@ -284,7 +276,7 @@ int main(void) {
                 if (timer > 2.0f) { discover_servers(); timer = 0; }
                 if (UpdateConnectionScreen()) {
                     init_network(GetEnteredIP());
-                    currentState = STATE_LOBBY;
+                    currentState = GAME_STATE_LOBBY;
                 }
 
                 BeginDrawing(); {
@@ -293,7 +285,7 @@ int main(void) {
                 } EndDrawing();
             } break;
 
-            case STATE_LOBBY: {
+            case GAME_STATE_LOBBY: {
                 if (game_registry[active_game_id]) {
                     game_registry[active_game_id]->update(dt);
 
@@ -303,20 +295,46 @@ int main(void) {
                     } EndDrawing();
                 }
             } break;
+
+            /**
+            switch (game->subGameManager.currentScene) {
+                case GAME_SCENE_LOBBY: {
+                    lobby_gameLoop(game);
+                } break;
+
+                case GAME_SCENE_TETRIS: {
+                    Game_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_TETRIS];
+                    TetrisGame_St** tetrisRef = (TetrisGame_St**) miniRef;
+                    if (game->subGameManager.needGameInit) {
+                        error = tetris_initGame(tetrisRef);
+                        game->subGameManager.needGameInit = false;
+
+                        if (error != OK) {
+                            log_fatal("Tetris initialization failed: error %d", error);
+                            tetris_freeGame(tetrisRef);
+                            game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                            break;
+                        }
+                    }
+
+                    tetris_gameLoop(*tetrisRef);
+
+                    if (!(*miniRef)->running) {
+                        tetris_freeGame(tetrisRef);
+                        game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                    }
+                } break;
+
+                default:
+                    log_error("Invalid GameScene_Et value: %d", game->subGameManager.currentScene);
+                    break;
+            }
         }
+        */
     }
 
-    if (tetrisGame != NULL) {
-        tetris_freeGame(&tetrisGame);
-    }
-
-    for (int i = 0; i < playerTextureCount; i++)
-        UnloadTexture(playerTextures[i]);
-    
-    UnloadTexture(logoSkinButton);
-
-    if (network_socket != -1) close(network_socket);
-    CloseWindow();
+    // ── Cleanup ──────────────────────────────────────────────────────────────
+    lobby_freeGame(&game);
 
     return 0;
 }

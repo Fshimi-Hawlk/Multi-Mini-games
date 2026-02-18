@@ -14,7 +14,7 @@
  * @brief Renders the player to the screen.
  * @param player Pointer to the player structure to draw.
  */
-void drawPlayer(const Player_st* const player);
+void drawPlayer(const LobbyGame_St* const game);
 
 /**
  * @brief Renders the platforms to the screen.

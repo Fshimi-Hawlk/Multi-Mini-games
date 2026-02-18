@@ -46,6 +46,16 @@
 #define APP_TEXT_FONT_SIZE 32
 
 /**
+    @brief Port used for server communication.
+*/
+#define SERVER_PORT 8080
+
+/**
+    @brief Action code for game data transmission.
+*/
+#define ACTION_GAME_DATA 5
+
+/**
  * @brief Gravity constant for physics.
  */
 #define GRAVITY 1200.0f
