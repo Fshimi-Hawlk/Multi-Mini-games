@@ -1,5 +1,3 @@
-#include "tetrisAPI.h"
-
 #include "core/board.h"
 #include "core/game.h"
 #include "core/shape.h"
@@ -15,7 +13,11 @@
 #include "APIs/tetrisAPI.h"
 
 struct TetrisGame_St {
-    bool running;
+    bool running;               ///< Whether the game is still active (true = continue, false = ended)
+    bool paused;                ///< Whether the game is paused or not
+    long score;                 ///< Score gain during the last played game
+
+    freeGame_Ft freeGame;       ///< Function to free the game's data
 
     board_t board;
     
@@ -28,7 +30,6 @@ struct TetrisGame_St {
     int clearedLineAmount;
     int *rewardedPointsPerClearedLineCount;
     int difficultyMultiplier;
-    int score;
     int highScore;
 };
 
@@ -42,26 +43,39 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     (*game) = malloc(sizeof(*(*game)));
     if (*game == NULL) return ERROR_ALLOC;
 
-    TetrisGame_St* game = calloc(sizeof(*game), 1);
+    TetrisGame_St* gameRef = *game;
 
-    game->speed.duration = 1.0f;
+    memset(*game, 0, sizeof(*gameRef));
+    gameRef->freeGame = tetris_freeGameWrapper;
+
+    gameRef->speed.duration = 1.0f;
     
-    game->clearedLines = calloc(sizeof(*game->clearedLines), 4);
+    gameRef->clearedLines = calloc(sizeof(*gameRef->clearedLines), 4);
+    if (gameRef->clearedLines == NULL) {
+        tetris_freeGame(game);
+        return ERROR_ALLOC;
+    }
 
-    game->rewardedPointsPerClearedLineCount = calloc(sizeof(*game->rewardedPointsPerClearedLineCount), 5);
-    game->rewardedPointsPerClearedLineCount[0] = 0;
-    game->rewardedPointsPerClearedLineCount[1] = 40;
-    game->rewardedPointsPerClearedLineCount[2] = 100;
-    game->rewardedPointsPerClearedLineCount[3] = 300;
-    game->rewardedPointsPerClearedLineCount[4] = 1200;
+    gameRef->rewardedPointsPerClearedLineCount = calloc(sizeof(*gameRef->rewardedPointsPerClearedLineCount), 5);
+    if (gameRef->rewardedPointsPerClearedLineCount == NULL) {
+        tetris_freeGame(game);
+        return ERROR_ALLOC;
+    }
 
-    game->running = true;
+    gameRef->rewardedPointsPerClearedLineCount[0] = 0;
+    gameRef->rewardedPointsPerClearedLineCount[1] = 40;
+    gameRef->rewardedPointsPerClearedLineCount[2] = 100;
+    gameRef->rewardedPointsPerClearedLineCount[3] = 300;
+    gameRef->rewardedPointsPerClearedLineCount[4] = 1200;
 
-    randomShape(&game->boardShape);
-    randomShape(&game->nextBoardShape);
-    readHighScore(&game->highScore);
+    gameRef->running = true;
 
-    initBoard(game->board);
+    randomShape(&gameRef->boardShape);
+    randomShape(&gameRef->nextBoardShape);
+    readHighScore(&gameRef->highScore);
+
+    initBoard(gameRef->board);
+
     return OK;
 }
 
@@ -115,13 +129,17 @@ Error_Et tetris_freeGame(TetrisGame_St** game) {
     TetrisGame_St* gameRef = *game;
 
     if (gameRef->clearedLines != NULL) {
-        free((*game)->clearedLines);
-        (*game)->clearedLines = NULL;
+        free(gameRef->clearedLines);
+        gameRef->clearedLines = NULL;
+    }
 
-        free((*game)->rewardedPointsPerClearedLineCount);
-        (*game)->rewardedPointsPerClearedLineCount = NULL;
+    if (gameRef->rewardedPointsPerClearedLineCount != NULL) {
+        free(gameRef->rewardedPointsPerClearedLineCount);
+        gameRef->rewardedPointsPerClearedLineCount = NULL;
+    }
 
-        free(*game);
-        *game = NULL;
+    free(gameRef);
+    *game = NULL;
+
     return OK;
 }
