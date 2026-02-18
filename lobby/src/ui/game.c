@@ -1,32 +1,51 @@
 /**
  * @file game.c
+ * @author Fshimi-Hawlk
+ * @author LeandreB8
  * @author i-Charlys (CAILLON Charles)
+ * @date 2026-01-30
  * @date 2026-03-18
- * @brief Implementation of UI rendering functions for game elements in the lobby.
+ * @brief Low-level drawing routines for lobby gameplay elements.
+ *
+ * Contributors:
+ * - LeandreB8:
+ *    - Provided the initial drawing logic
+ * - Fshimi-Hawlk:
+ *    - Provided documentation
+ *    - Reworked the texture logic
+ *
+ * This file contains primitive rendering functions used to visualize:
+ *   - the player character (either debug circle or textured sprite)
+ *   - static platforms in the lobby world
+ *
+ * These functions are meant to be called during the main render pass after
+ * the camera has been set up. They operate directly on Raylib drawing primitives
+ * and expect world-space coordinates.
+ *
+ * All functions in this file are stateless with respect to side-effects outside
+ * of Raylib's drawing context - they only read game state and issue draw calls.
+ *
+ * @see `core/game.h` for `getPlayerCollisionBox` and `getPlayerCenter`
+ * @see `utils/utils.h` for `getTextureRec`
  */
 
 #include "ui/game.h"
+#include "core/game.h"
 #include "utils/utils.h"
-#include "utils/globals.h"
 
-/**
- * @brief Renders the player to the screen.
- * @param player Pointer to the player structure to draw.
- */
-void drawPlayer(const LobbyGame_St* const game) {
-    if (game->player.visuals.textureId == PLAYER_TEXTURE_DEFAULT) {
-        DrawCircleV(game->player.position, game->player.radius, BLUE);
-        return;
+void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
+    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
+        DrawCircleV(player->position, player->radius, BLUE);
+    } else {
+        DrawTexturePro(
+            game->playerVisuals.textures[player->textureId],
+            getTextureRec(game->playerVisuals.textures[player->textureId]),
+            getPlayerCollisionBox(&game->player),
+            getPlayerCenter(&game->player),
+            player->angle,
+            WHITE
+        );
     }
-    
-    DrawTexturePro(
-        game->player.visuals.textures[game->player.visuals.textureId],
-        getTextureRec(game->player.visuals.textures[game->player.visuals.textureId]),  // source
-        getPlayerCollisionBox(&game->player), // destination
-        getPlayerCenter(&game->player), // origine du pivot
-        game->player.angle, // angle en degrés
-        WHITE
-    );
 }
 
 /**
@@ -35,8 +54,9 @@ void drawPlayer(const LobbyGame_St* const game) {
  * @param nbPlatforms Number of platforms in the array.
  */
 void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
-    for (int i = 0; i < nbPlatforms; i++)
+    for (int i = 0; i < nbPlatforms; i++) {
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
+    }
     
     // Zone de trigger pour le jeu
     DrawRectangleLinesEx(kingForFourZone, 2, GOLD);
