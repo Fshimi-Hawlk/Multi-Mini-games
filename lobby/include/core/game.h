@@ -1,4 +1,5 @@
 /**
+<<<<<<< HEAD
     @file core/game.h
     @author Fshimi-Hawlk
     @date 2026-01-30
@@ -27,6 +28,36 @@
     @see `core/game.c`        for implementation details
     @see `utils/userTypes.h`  for Player_St, LobbyGame_St, Platform_St definitions
     @see `utils/globals.h`    for skinButtonRect (used in toggleSkinMenu)
+=======
+ * @file game.h
+ * @author Fshimi-Hawlk
+ * @date 2026-01-30
+ * @date 2026-02-18
+ * @brief Core logic and helper functions for the lobby gameplay (player update, collision, skin selection).
+ *
+ * This header declares the main functions that drive:
+ *   - player physics and input handling
+ *   - circle-vs-rectangle collision resolution
+ *   - skin / texture selection logic
+ *   - skin menu toggle
+ *
+ * Functions are split between:
+ *   - pure helpers (getPlayerCollisionBox, getPlayerCenter) — used by rendering
+ *   - update / simulation logic (updatePlayer, resolveCircleRectCollision)
+ *   - UI interaction logic (choosePlayerTexture, toggleSkinMenu)
+ *
+ * All update functions expect dt in seconds (typically GetFrameTime()).
+ * Collision functions assume circle-based player representation.
+ *
+ * Typical usage in the lobby main loop:
+ *   updatePlayer(&game->player, platforms, platformCount, GetFrameTime());
+ *   toggleSkinMenu(game);
+ *   choosePlayerTexture(&game->player, game);
+ *
+ * @see core/game.c        for implementation details
+ * @see utils/userTypes.h  for Player_st, LobbyGame_St, Platform_st definitions
+ * @see utils/globals.h    for skinButtonRect (used in toggleSkinMenu)
+>>>>>>> 3291263 (- doc: Rework/Refined file docstrings)
  */
 
 #ifndef CORE_GAME_H

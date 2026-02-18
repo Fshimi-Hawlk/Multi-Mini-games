@@ -44,8 +44,6 @@ extern Texture2D platformTextures[__platformTypeCount];
 extern Texture2D treeTexture;
 extern Texture2D backgroundTexture;
 
-extern Rectangle tetrisHitbox;
-
 // ────────────────────────────────────────────────
 // Skin selection UI
 // ────────────────────────────────────────────────
@@ -55,6 +53,11 @@ extern Rectangle tetrisHitbox;
           Used both for rendering and input detection.
 */
 extern Rectangle skinButtonRect;
+
+/**
+ * @brief Texture used for the skin selection menu toggle button.
+ *        Usually a gear icon, palette symbol or similar.
+ */
 extern Texture2D logoSkinButton;
 
 /**

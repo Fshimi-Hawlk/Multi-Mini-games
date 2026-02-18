@@ -35,6 +35,9 @@
 #define ASSET_PATH "assets/"
 #endif
 
+/**
+ * @brief Subdirectory containing all image files.
+ */
 #define IMAGES_PATH ASSET_PATH "images/"
 #define SKINS_PATH  IMAGES_PATH "skins/"
 #define SOUNDS_PATH ASSET_PATH "sounds/"

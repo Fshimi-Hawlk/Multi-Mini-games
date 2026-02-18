@@ -37,6 +37,11 @@ typedef struct {
     Color color;
 } GrassBlade_St;
 
+/**
+ * @brief Identifiers of the different playable scenes / mini-games.
+ *
+ * Used both as array indices and as state identifiers.
+ */
 typedef enum {
     FIREFLY_MODE_WANDER,
     FIREFLY_MODE_LOOP,

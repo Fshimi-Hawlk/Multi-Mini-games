@@ -1,14 +1,39 @@
-#include "setups/app.h"
+#include "setups/texture.h"
 #include "utils/globals.h"
 
-void lobby_initTextures(void) {
-    logoSkinButton  = LoadTexture(IMAGES_PATH "logoSkin.png");
+Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
+    Error_Et error = OK;
 
-    game.playerVisuals.textures[PLAYER_TEXTURE_EARTH]      = LoadTexture(SKINS_PATH "earth.png");
-    game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(SKINS_PATH "trollFace.png");
+    const char *playerTexturePaths[__playerTextureCount] = {
+        [PLAYER_TEXTURE_EARTH] = IMAGES_PATH "earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+    };
 
-    platformTextures[PLATFORM_TYPE_GRASS]     = LoadTexture(IMAGES_PATH "grass.png");
-    platformTextures[PLATFORM_TYPE_WOODPLANK] = LoadTexture(IMAGES_PATH "wood_plank.png");
+    for (u8 i = 0; i < __playerTextureCount; ++i) {
+        playerTextures[i] = LoadTexture(playerTexturePaths[i]);
+        if (!IsTextureValid(playerTextures[i])) {
+            error = ERROR_TEXTURE_LOAD;
+        }
+    }
+
+    // Load shared UI textures
+    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
+    if (!IsTextureValid(logoSkinButton)) {
+        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
+        error =  ERROR_TEXTURE_LOAD;
+    }
+
+    const char *platformTexturePaths[__platformTypeCount] = {
+        [PLATFORM_TYPE_GRASS]     = IMAGES_PATH "grass.png",
+        [PLATFORM_TYPE_WOODPLANK] = IMAGES_PATH "wood_plank.png",
+    };
+
+    for (u32 i = 0; i < __platformTypeCount; ++i) {
+        platformTextures[i] = LoadTexture(platformTexturePaths[i]);
+        if(!IsTextureValid(platformTextures[i])) {
+            error = ERROR_TEXTURE_LOAD;
+        }
+    }
 
     SetTextureWrap(platformTextures[PLATFORM_TYPE_GRASS], TEXTURE_WRAP_REPEAT);
     SetTextureWrap(platformTextures[PLATFORM_TYPE_WOODPLANK], TEXTURE_WRAP_REPEAT);
@@ -22,15 +47,16 @@ void lobby_initTextures(void) {
     GenTextureMipmaps(&backgroundTexture);
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_BILINEAR);
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_TRILINEAR);
+
+    return error;
 }
 
-void lobby_freeTextures(void) {
+void lobby_freeTextures(Texture2D playerTextures[__playerTextureCount]) {
     if (IsTextureValid(logoSkinButton)) UnloadTexture(logoSkinButton);
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {
-        if (!IsTextureValid(game.playerVisuals.textures[i])) continue;
-
-        UnloadTexture(game.playerVisuals.textures[i]);
+        if (!IsTextureValid(playerTextures[i])) continue;
+        UnloadTexture(playerTextures[i]);
     }
 
     for (u8 i = 0; i < __platformTypeCount; ++i) {

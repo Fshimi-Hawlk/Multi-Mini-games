@@ -1,7 +1,9 @@
 #ifndef SETUPS_TEXTURE_H
 #define SETUPS_TEXTURE_H
 
-void lobby_initTextures(void);
-void lobby_freeTextures(void);
+#include "utils/userTypes.h"
+
+Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]);
+void lobby_freeTextures(Texture2D playerTextures[__playerTextureCount]);
 
 #endif // SETUPS_TEXTURE_H

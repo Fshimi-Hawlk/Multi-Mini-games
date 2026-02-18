@@ -38,6 +38,10 @@
 
 #include <stdbool.h>
 
+// ────────────────────────────────────────────────
+// Error codes (used project-wide)
+// ────────────────────────────────────────────────
+
 /**
     @brief Standardized error codes for initialization, operations and resource loading.
 
