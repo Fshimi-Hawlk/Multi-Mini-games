@@ -65,7 +65,6 @@ typedef enum {
 // Game interface
 // ────────────────────────────────────────────────
 
-
 /**
     @brief Identifiers of the different playable scenes / mini-games.
 
