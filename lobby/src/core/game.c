@@ -1,4 +1,5 @@
 #include "core/game.h"
+
 #include "utils/utils.h"
 #include "utils/globals.h"
 
@@ -14,7 +15,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
         if (player->velocity.x > 0) {
             player->velocity.x -= FRICTION * dt;
             if (player->velocity.x < 0) player->velocity.x = 0;
-        } 
+        }
         else if (player->velocity.x < 0) {
             player->velocity.x += FRICTION * dt;
             if (player->velocity.x > 0) player->velocity.x = 0;
@@ -24,7 +25,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     // Rotation en fonction de la direction
     if (player->velocity.x > 0) {
         player->angle += 360 * dt; // tourner dans le sens horaire
-    } 
+    }
     else if (player->velocity.x < 0) {
         player->angle -= 360 * dt; // tourner dans le sens anti-horaire
     }
@@ -32,7 +33,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     // INPUT JUMP -> buffer
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    } 
+    }
     else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
@@ -71,7 +72,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
             player->jumpBuffer = 0;
         }
         // Double jump
-        // adding: `player->nbJumps >= 1` to the below cond makes that player can't 
+        // adding: `player->nbJumps >= 1` to the below cond makes that player can't
         // air jump if they haven't already jump previously
         else if (player->nbJumps < MAX_JUMPS) {
             player->velocity.y = -500;
@@ -128,30 +129,41 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
 void choosePlayerTexture(Player_st* player) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
-        Rectangle destRect = defaultPlayerTextureRect;
-    
-        for (int i = 0; i < playerTextureCount; i++) {
+        Rectangle destRect = player->visuals.defaultTextureRect;
+
+        for (int i = 0; i < __playerTextureCount; i++) {
             destRect.x = 20 + i * 60;
             if (CheckCollisionPointRec(mousePos, destRect)) {
-                player->texture = &playerTextures[i];
+                player->visuals.textureId = i;
                 isTextureMenuOpen = false;
                 break;
             }
         }
+
+        if (!isTextureMenuOpen) return;
     }
-    if (IsKeyPressed(KEY_ONE)) {
-        player->texture = &playerTextures[0];
-        isTextureMenuOpen = false;
-    }
-    if (IsKeyPressed(KEY_TWO)) {
-        player->texture = &playerTextures[1];
-        isTextureMenuOpen = false;
+
+    switch (GetKeyPressed()) {
+        case KEY_ONE: {
+            player->visuals.textureId = PLAYER_TEXTURE_DEFAULT;
+            isTextureMenuOpen = false;
+        } break;
+
+        case KEY_TWO: {
+            player->visuals.textureId = PLAYER_TEXTURE_EARTH;
+            isTextureMenuOpen = false;
+        } break;
+
+        case KEY_THREE: {
+            player->visuals.textureId = PLAYER_TEXTURE_TROLL_FACE;
+            isTextureMenuOpen = false;
+        } break;
     }
 }
 
 void toggleSkinMenu(void) {
     bool cond = (
-        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && 
+        IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)
     ) || IsKeyPressed(KEY_P);
 

@@ -182,7 +182,7 @@ do { \
 } while (0)
 
 /// DOC: TODO
-Rectangle getTextureRec(const Texture* const texture);
+Rectangle getTextureRec(const Texture texture);
 
 /// DOC: TODO
 Rectangle getPlayerCollisionBox(const Player_st* const player);

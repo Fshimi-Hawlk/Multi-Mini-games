@@ -7,10 +7,10 @@
 
 #include "utils/utils.h"
 
-Rectangle getTextureRec(const Texture* const texture) {
+Rectangle getTextureRec(const Texture texture) {
     return (Rectangle) {
-        .width = texture->width,
-        .height = texture->height
+        .width = texture.width,
+        .height = texture.height
     };
 }
 

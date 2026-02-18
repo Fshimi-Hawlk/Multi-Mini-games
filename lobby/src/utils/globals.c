@@ -6,11 +6,12 @@
  */
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
+
+Game_St* games[__gameSceneCount] = {0};
 
 Platform_st platforms[] = {
     // Sol principal
@@ -29,10 +30,8 @@ Platform_st platforms[] = {
     {{-350, 150, 100, 30}, BROWN, 0.5},
     {{250, 150, 100, 30}, BROWN, 0.5},
 };
-int platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-Texture2D playerTextures[2] = {0}; // à revoir pour une gestion dynamique
-int playerTextureCount = 0;
+u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
 Rectangle defaultPlayerTextureRect = {
     20,
@@ -40,6 +39,8 @@ Rectangle defaultPlayerTextureRect = {
     50,
     50
 };
+
+Texture playerTextures[__playerTextureCount] = {0};
 
 Rectangle skinButtonRect = {
     WINDOW_WIDTH - 70,

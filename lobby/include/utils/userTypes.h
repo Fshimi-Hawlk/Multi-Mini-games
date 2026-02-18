@@ -9,6 +9,7 @@
 #define USER_TYPES_H
 
 #include "common.h"
+#include "APIs/generalAPI.h"
 
 typedef enum {
     FONT8,
@@ -21,16 +22,30 @@ typedef enum {
 
 typedef enum {
     GAME_SCENE_LOBBY,
-    GAME_SCENE_GAME_NAME,
-//    __gameSceneCount // can be removed/commented out if not needed
+    GAME_SCENE_TETRIS,
+   __gameSceneCount // can be removed/commented out if not needed
 } GameScene_Et;
+
+typedef enum {
+    PLAYER_TEXTURE_DEFAULT,
+    PLAYER_TEXTURE_EARTH,
+    PLAYER_TEXTURE_TROLL_FACE,
+    __playerTextureCount,
+} PlayerTexture_Et;
+
+typedef struct {
+    Rectangle defaultTextureRect;
+    PlayerTexture_Et textureId;
+    Texture textures[__playerTextureCount];
+    // possibly future: Rectangle currentSourceRect; or animation state
+} PlayerVisuals_St;
 
 typedef struct {
     Vector2 position;
     float radius;
 
-    Texture2D* texture;
     float angle;
+    PlayerVisuals_St visuals;
 
     Vector2 velocity;
     
@@ -49,5 +64,24 @@ typedef struct {
     float roundness;
 } Platform_st;
 
+typedef struct {
+    Rectangle gameHitboxes[__gameSceneCount];
+    Game_St* miniGames[__gameSceneCount];
+
+    GameScene_Et currentScene;
+
+    bool needGameInit;
+    bool gameHitGracePeriodActive;
+} SubGameManager_St;
+
+typedef struct {
+    bool running;
+    bool paused;                ///< Whether the game is paused or not
+
+    Player_st player;
+    Camera2D cam;
+
+    SubGameManager_St subGameManager;
+} LobbyGame_St;
 
 #endif // USER_TYPES_H
