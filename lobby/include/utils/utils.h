@@ -1,8 +1,27 @@
 /**
  * @file utils.h
- * @author 
- * @date 
- * @brief General utility macros and helper functions.
+ * @author Fshimi-Hawlk
+ * @date 2026-01-07
+ * @date 2026-02-18
+ * @brief General-purpose macros, inline helpers and small utility functions used across the project.
+ *
+ * This header provides:
+ *   - Safe arithmetic and alignment macros
+ *   - Vector2 construction / formatting helpers
+ *   - Debugging / development aids (TODO, UNREACHABLE, dcall)
+ *   - Common idioms (defer, clamp, signof, swap, array utilities)
+ *   - Basic randomization and texture helpers
+ *   - Platform-specific line endings and unused-value suppression
+ *
+ * Most macros are type-safe where possible or clearly documented when they assume integer types.
+ * Functions are kept minimal and focused - larger utilities belong in their own .c/.h pairs.
+ *
+ * Intended usage:
+ *   - Included via "common.h" in nearly every source file
+ *   - Used for quick inline operations, debug instrumentation, and reducing boilerplate
+ *
+ * @note Many macros use do-while(0) or direct expressions for safe expansion in all contexts.
+ * @note Some macros (swap, shuffleArray) assume non-overlapping operands or valid PRNG.
  */
 
 #ifndef UTILS_H
@@ -181,14 +200,16 @@ do { \
     nl \
 } while (0)
 
-/// DOC: TODO
+/**
+ * @brief Returns the full source rectangle of a texture ({0, 0, w, h}).
+ *
+ * Used consistently as the source rect in DrawTexture* calls.
+ * Acts as a future-proof hook for sprite-sheet or sub-region support.
+ *
+ * @param texture Valid Raylib Texture2D
+ * @return Rectangle spanning the entire texture
+ */
 Rectangle getTextureRec(const Texture texture);
-
-/// DOC: TODO
-Rectangle getPlayerCollisionBox(const Player_st* const player);
-
-/// DOC: TODO
-Vector2 getPlayerCenter(const Player_st* const player);
 
 /**
  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive).

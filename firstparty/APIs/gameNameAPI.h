@@ -1,103 +1,121 @@
 /**
  * @file gameNameAPI.h
- * @author Fshimi Hawlk
- * @date 2026-02-07
+ * @author Fshimi-Hawlk
+ * @date 2026-02-07                // Creation date
+ * @date 2026-02-18                // Last meaningful changes (optional - remove if unchanged)
  * @brief Public API for the GameName mini-game.
  *
- * This header defines the opaque game handle and the minimal set of functions
- * required to control the game from the lobby.
+ * This header defines the opaque game handle type and the minimal set of functions
+ * required to integrate and control the mini-game from the lobby.
  *
- * @note The internal structure GameNameGame_St is **opaque** outside this module.
- *       The lobby and other modules must never access fields directly.
- *       If access to specific state is needed, add dedicated getter/setter
- *       functions to this API.
+ * Design principles:
+ *   - The internal structure `GameNameGame_St` is **completely opaque** outside this module.
+ *   - The lobby interacts only through this API - never accesses fields directly.
+ *   - All functions follow the `gameName_*` naming prefix.
+ *   - Errors are reported using the shared `Error_Et` codes from generalAPI.h.
+ *   - The game state embeds `Game_St` as its first member (for type-safe casting).
+ *
+ * @note Window creation, OpenGL context, and main loop timing are **not** managed by the game.
+ *       The lobby is responsible for BeginDrawing()/EndDrawing(), BeginMode2D(), etc.
+ *
+ * @see generalAPI.h for the required `Game_St` base structure and error codes
  */
 
-#ifndef GAMENAME_API_H
-#define GAMENAME_API_H
+#ifndef GAME_NAME_API_H
+#define GAME_NAME_API_H
 
+/// @note: if you reading this file inside `firstparty/APIs` this following
+///        include may have siggly-lines, but there's actually no real issue.
+///        So, if any then just forget about it.
 #include "APIs/generalAPI.h"
 
-/* Forward declaration — internal definition is private to the module */
+// ────────────────────────────────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────────────────────────────────
+
+/**
+ * @brief Forward declaration - internal game state definition is private.
+ */
 typedef struct GameNameGame_St GameNameGame_St;
 
 /**
- * @brief Configuration options passed to the initialization function.
+ * @brief Configuration parameters passed during initialization.
  *
- * Default values should be sensible for standalone and lobby usage.
+ * All fields have safe defaults when zero-initialized.
  */
 typedef struct {
-    unsigned int fps;          ///< Target frame rate (0 = uncapped, usually 60 or 120)
-    // Add more options here when needed (difficulty, audio volume, window flags, ...)
+    unsigned int fps;           ///< Target frame rate (0 = uncapped, common: 60 or 120)
+    // Difficulty level, audio flags, seed for procedural generation, etc. can be added here
 } GameNameConfigs_St;
 
 /**
- * @brief Convenience macro for C99 compound literal initialization syntax.
+ * @brief Convenience macro for C99 compound literal initialization.
  *
- * Allows calls like:
+ * Example:
+ *   GameNameGame_St* game = NULL;
  *   gameName_initGame(&game, .fps = 144);
  */
-#define gameName_initGame(game, ...) \
-    gameName_initGame__full(game, (GameNameConfigs_St){ __VA_ARGS__ })
+#define gameName_initGame(game_ptr, ...) \
+    gameName_initGame__full((game_ptr), (GameNameConfigs_St){ __VA_ARGS__ })
 
-/* ────────────────────────────────────────────────────────────────────────────
-   Core game lifecycle functions
-   All functions follow the naming pattern: gameName_*
-   ──────────────────────────────────────────────────────────────────────────── */
+// ────────────────────────────────────────────────────────────────────────────
+// Core lifecycle API
+// ────────────────────────────────────────────────────────────────────────────
 
 /**
- * @brief Allocates and initializes a new GameName game instance.
+ * @brief Allocates and initializes a new instance of the GameName mini-game.
  *
- * @param[out] game         Double pointer to receive the allocated game handle.
+ * @param[out] game_ptr     Double pointer to receive the new game handle.
  *                          Set to NULL on failure.
- * @param[in]  configs      Configuration values (FPS, difficulty, etc.)
+ * @param[in]  configs      Initialization options (FPS, difficulty, etc.)
  *
  * @return OK on success
- * @return ERROR_ALLOC if memory allocation failed
- * @return other Error_Et codes on other initialization failures
+ * @return ERROR_ALLOC on memory allocation failure
+ * @return other Error_Et codes for initialization failures (e.g. resource loading)
  *
- * @pre  *game == NULL
- * @post On success: *game points to a valid, initialized game object
- * @post On failure: *game remains NULL
+ * @pre  *game_ptr == NULL
+ * @post On success: *game_ptr points to a valid game object with base.running = true
+ * @post On failure: *game_ptr remains NULL
  *
- * @note Does **not** initialize or manage the Raylib window/context.
- *       Window creation/cleanup is the responsibility of the caller (lobby).
+ * @note Does **not** create or manage the Raylib window/context.
+ *       Caller (lobby) must handle InitWindow(), SetTargetFPS(), etc.
  */
-Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St configs);
+Error_Et gameName_initGame__full(GameNameGame_St** game_ptr, GameNameConfigs_St configs);
 
 /**
- * @brief Executes one frame of the game (input -> update -> render).
+ * @brief Executes one full frame of the game: process input → update state → render.
  *
- * Should be called once per frame inside the main application loop.
+ * Should be called once per frame inside the lobby's main loop when this game is active.
  *
- * @param[in,out] game      Valid game instance (must not be NULL)
+ * @param[in,out] game      Valid game instance handle
  *
  * @return OK on success
- * @return ERROR_NULL_POINTER if game is invalid
+ * @return ERROR_NULL_POINTER if game is NULL
+ * @return other Error_Et codes on runtime failures (rare)
  *
- * @pre  game != NULL and game was successfully initialized
- * @pre  Raylib window and drawing context are active
+ * @pre  game != NULL and was successfully initialized
+ * @pre  Raylib drawing context is active (BeginDrawing() called)
  *
- * @note If the game decides to end (win/lose/quit), it should set
- *       ((Game_St*)game)->running = false;
+ * @note If the game reaches an end condition (win/lose/quit), it must set
+ *       `((Game_St*)game)->running = false;`
  */
 Error_Et gameName_gameLoop(GameNameGame_St* const game);
 
 /**
- * @brief Releases all resources associated with the game and frees the handle.
+ * @brief Releases all resources owned by the game and frees the handle.
  *
- * @param[in,out] game      Pointer to the game handle. Will be set to NULL.
+ * @param[in,out] game_ptr  Pointer to the game handle. Set to NULL after cleanup.
  *
  * @return OK on success
- * @return ERROR_NULL_POINTER if game is invalid
+ * @return ERROR_NULL_POINTER if *game_ptr is invalid (but still sets to NULL)
  *
- * @pre  game may be NULL or point to a valid initialized game
- * @post *game == NULL
- * @post All game-allocated resources are freed
+ * @pre  game_ptr may be NULL or point to a valid game
+ * @post *game_ptr == NULL
+ * @post All game-owned resources (textures, sounds, internal arrays, etc.) are freed
  *
- * @note Safe to call multiple times (idempotent).
- * @note Does **not** close the Raylib window or terminate the program.
+ * @note Idempotent - safe to call multiple times.
+ * @note Does **not** close the Raylib window or call CloseWindow().
  */
-Error_Et gameName_freeGame(GameNameGame_St** game);
+Error_Et gameName_freeGame(GameNameGame_St** game_ptr);
 
-#endif // GAMENAME_API_H
+#endif // GAME_NAME_API_H

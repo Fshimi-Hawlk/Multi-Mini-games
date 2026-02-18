@@ -2,6 +2,7 @@
  * @file lobbyAPI.h
  * @author Fshimi Hawlk
  * @date 2026-02-07
+ * @date 2026-02-18
  * @brief Public API for the Lobby mini-game.
  *
  * This header defines the opaque game handle and the minimal set of functions

@@ -1,8 +1,17 @@
 /**
  * @file main.c
- * @author LeandreB8 - Fshimi Hawlk
- * @date 2026-02-08
+ * @author LeandreB8
+ * @date 2026-01-12
+ * @date 2026-02-18
  * @brief Program entry point – lobby main loop and game scene manager.
+ *
+ * Contributors:
+ * - LeandreB8:
+ *    - Implemented basic lobby's logic (initialization, game loop, ...)
+ * - Fshimi-Hawlk:
+ *    - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+ *    - Implememted sub-game playablity inside lobby logic via API
+ *    - Added documentation
  *
  * This file contains the top-level application loop.
  * It initializes the window and shared resources, runs the lobby,
@@ -21,7 +30,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 int main(void) {
-    
+
     // ── Main loop ────────────────────────────────────────────────────────────
     Error_Et error = OK;
 
