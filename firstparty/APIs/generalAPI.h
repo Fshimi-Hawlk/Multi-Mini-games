@@ -12,6 +12,8 @@
  * It serves as the minimal common interface layer.
  */
 
+#include <stdbool.h>
+
 /**
  * @brief Standardized error codes returned by most initialization and operation functions.
  *
@@ -19,10 +21,11 @@
  * The convention is: OK = 0, everything else is an error.
  */
 typedef enum {
-    OK = 0,                    ///< Operation completed successfully
-    ERROR_NULL_POINTER,        ///< Required pointer argument was NULL
-    ERROR_ALLOC,               ///< Memory allocation failed (malloc/calloc/realloc)
-    ERROR_INVALID              ///< Argument value is invalid/out of range/illegal state
+    OK = 0,                     ///< Operation completed successfully
+    ERROR_NULL_POINTER,         ///< Required pointer argument was NULL
+    ERROR_ALLOC,                ///< Memory allocation failed (malloc/calloc/realloc)
+    ERROR_INVALID,              ///< Argument value is invalid/out of range/illegal state
+    ERROR_TEXTURE_LOAD          ///< Texture couldn't load proprely
     // Add more specific codes later if needed, but keep them generic enough
 } Error_Et;
 

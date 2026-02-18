@@ -4,8 +4,8 @@
 #     Main targets: see 'make help' for the full list and descriptions
 #     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
 #
-#     Full documentation →  makefile.md
-#     Quick usage        →  make help
+#     Full documentation ->  makefile.md
+#     Quick usage        ->  make help
 #
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 # ───────────────────────────────────────────────────────────────
