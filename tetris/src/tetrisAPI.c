@@ -82,12 +82,6 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     gameRef->speed.duration = 1.0f;
 
     // Scoring table (classic values)
-    gameRef->rewardedPointsPerClearedLineCount = calloc(5, sizeof(int));
-    if (!gameRef->rewardedPointsPerClearedLineCount) {
-        tetris_freeGame(game);
-        return ERROR_ALLOC;
-    }
-
     gameRef->rewardedPointsPerClearedLineCount = calloc(sizeof(*gameRef->rewardedPointsPerClearedLineCount), 5);
     if (gameRef->rewardedPointsPerClearedLineCount == NULL) {
         tetris_freeGame(game);
