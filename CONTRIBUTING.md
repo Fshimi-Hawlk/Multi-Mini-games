@@ -2,7 +2,7 @@
 
 Guidelines for working together on the Multi Mini-Games project
 
-We're all figuring out collaborative Git workflows at the same time. — mistakes will happen and that's okay.  
+We're all figuring out collaborative Git workflows at the same time. - mistakes will happen and that's okay.  
 The most important rule is: communicate.
 
 ## Basic Workflow (very simplified)
@@ -23,9 +23,9 @@ git push origin my-game-name
 # then go to GitHub -> create Pull Request from your branch to main
 ```
 
-## Commit messages — our simple rule
+## Commit messages - our simple rule
 
-We try to follow "Conventional Commits" — it looks like this:
+We try to follow "Conventional Commits" - it looks like this:
 
 - `feat: add player movement with arrow keys`
 - `fix: prevent crash when clicking too fast`
@@ -34,7 +34,7 @@ We try to follow "Conventional Commits" — it looks like this:
 - `refactor: move repeated code into utilsDrawRectangle()`
 - `test: add checks for score calculation`
 
-For trivial changes (whitespace, better variable name, ...), either make a tiny commit (style: trim trailing whitespace) or fold it into the next meaningful commit — both are fine.
+For trivial changes (whitespace, better variable name, ...), either make a tiny commit (style: trim trailing whitespace) or fold it into the next meaningful commit - both are fine.
 
 ## Pull Requests (PRs)
 
@@ -48,14 +48,14 @@ So, to start things up, see the linked [CodeStyleAndConventions.md](./CodeStyleA
 
 -> It's mostly how I've been writing so far.  
 -> Goal => have some baseline consistency, I'm not expecting perfect uniformity.  
--> If anything feels inconvenient, overly strict/pedantic, or just wrong — bring it up (chat or PR that edits the file). We can adopt parts, ignore parts, or write something new together.  
+-> If anything feels inconvenient, overly strict/pedantic, or just wrong - bring it up (chat or PR that edits the file). We can adopt parts, ignore parts, or write something new together.  
 
-Even partial adherence helps — big style differences make everyone's life harder when reading/reviewing.
+Even partial adherence helps - big style differences make everyone's life harder when reading/reviewing.
 
 ## Reviews & questions
 
 - Ping the group chat when you open a PR
 - It's normal to ask "is this okay?" or "what do you think about this approach?"
-- Merge conflicts happen — ask for help when they do, there's no shame
+- Merge conflicts happen - ask for help when they do, there's no shame
 
-Thanks for working together — take your time, ask questions, and enjoy making the games!
+Thanks for working together - take your time, ask questions, and enjoy making the games!

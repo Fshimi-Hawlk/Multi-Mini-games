@@ -1,7 +1,34 @@
-#include "utils/common.h"
+/**
+ * @file gamename.c
+ * @author <Author's name>
+ * @date <File creation date>
+ * @date <File last update date>
+ * @brief Implementation of the GameName mini-game.
+ *
+ * Contributors:
+ *   - <Author's name>: // at the very least note what you did
+ *      - What they provided
+ *      - What they changed
+ *   - <Contributor's name>: // if you contributed, note what you did
+ *      - What they provided
+ *      - What they changed
+ *
+ * Longer description if needed (2–5 lines max):
+ *   - What this file/module does
+ *   - Key types/functions it exposes
+ *   - Important constraints or usage rules
+ *   - Cross-references to related files (@see ...)
+ *
+ * // Try to align the `for` for better readability
+ * // Try to keep the same order of the includes
+ * @see `utils/userTypes.h`  for ...
+ * @see `APIs/generalAPI.h`  for the general interface
+ * @see `gameNameAPI.h`      for the public interface
+ */
+
 #include "utils/userTypes.h"
 
-#define GAMENAME_API_IMPLEMENTATION
+#include "APIs/generalAPI.h"
 #include "gameNameAPI.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -10,7 +37,7 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 struct GameNameGame_St {
-    Game_St base;              // Must be first — allows safe cast to Game_St*
+    Game_St base;              // Must be first - allows safe cast to Game_St*
 
     // Game-specific fields
     // int someCounter;
@@ -21,6 +48,11 @@ struct GameNameGame_St {
 // ─────────────────────────────────────────────────────────────────────────────
 // Implementation
 // ─────────────────────────────────────────────────────────────────────────────
+
+/// @note: that wrapper serve as an interface to avoid any annoying warning
+Error_Et gameName_freeGameWrapper(void* game) {
+    return gameName_freeGame((GameNameGame_St**) game);
+}
 
 Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St configs) {
     if (game == NULL) {
@@ -34,8 +66,11 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St conf
         return ERROR_ALLOC;
     }
 
+    // Have a game reference to avoid constant deferencement
+    GameNameGame_St* gameRef = *game;
+
     // Initialize common base fields
-    (*game)->base.running = true;
+    gameRef->base.running = true;
 
     // Apply custom configuration
     if (configs.fps > 0) {
@@ -43,21 +78,21 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St conf
     }
 
     // Initialize game-specific resources
-    // (*game)->playerSprite = LoadTexture("assets/player.png");
-    // if ((*game)->playerSprite.id == 0) { ... error handling ... }
+    // gameRef->playerSprite = LoadTexture("assets/player.png");
+    // if (gameRef->playerSprite.id == 0) { ... error handling ... }
 
     log_info("GameName initialized successfully (FPS: %u)", configs.fps ? configs.fps : 60);
     return OK;
 }
 
-void gameName_gameLoop(GameNameGame_St* const game) {
+Error_Et gameName_gameLoop(GameNameGame_St* const game) {
     if (game == NULL) {
-        log_error("NULL game pointer in gameLoop");
-        return;
+        log_debug("NULL game pointer in gameLoop");
+        return ERROR_NULL_POINTER;
     }
 
     if (!game->base.running) {
-        return;
+        return OK;
     }
 
     // ── Input ────────────────────────────────────────────────────────────────
@@ -67,32 +102,29 @@ void gameName_gameLoop(GameNameGame_St* const game) {
     // ...
 
     // ── Draw ─────────────────────────────────────────────────────────────────
-    BeginDrawing();
-    {
+    BeginDrawing(); {
         ClearBackground(RAYWHITE);
 
         // Draw game elements...
         // DrawTexture(game->playerSprite, x, y, WHITE);
-    }
-    EndDrawing();
+    } EndDrawing();
 
-    // Example end condition
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        game->base.running = false;
-    }
+    return OK;
 }
 
-void gameName_freeGame(GameNameGame_St** game)
-{
+Error_Et gameName_freeGame(GameNameGame_St** game) {
     if (game == NULL || *game == NULL) {
-        return;
+        return ERROR_NULL_POINTER;
     }
 
-    // Unload game-specific resources
-    // UnloadTexture((*game)->playerSprite);
+    GameNameGame_St* gameRef = *game;
 
-    free(*game);
+    // Unload game-specific resources
+    // e.g. UnloadTexture(gameRef->playerSprite);
+
+    free(gameRef);
     *game = NULL;
 
     log_debug("GameName resources freed");
+    return OK;
 }

@@ -36,7 +36,7 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 
 ```
 .
-├── assets/                   # Images, sounds, fonts — shared or per game
+├── assets/                   # Images, sounds, fonts - shared or per game
 │   ├── fonts/                # Different fonts used by the games
 │   └── sub-project/          # Example per-game subdir (added post-merge) (WIP: no sure if it'll stay olike this)
 ├── firstparty/               # Reusable single-header libs made by the team
@@ -100,7 +100,7 @@ See all options: `make help`
 - Tests: `make run-tests` (live output + logs in `logs/tests-<timestamp>/`)
 - Full rebuild + run: `make rebuild run-main`
 
-**Note**: Global root Makefile coming later (for building all merged games/lobby at once — see [TODO](TODO.md)).
+**Note**: Global root Makefile coming later (for building all merged games/lobby at once - see [TODO](TODO.md)).
 
 ## Generating Documentation (Per Game)
 

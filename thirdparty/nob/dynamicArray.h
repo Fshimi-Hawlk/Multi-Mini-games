@@ -6,7 +6,7 @@
  * https://github.com/tsoding/nob.h/blob/master/nob.h
  *
  * This is a modified version split into separate headers for personal use.
- * No restrictions apply — you can use, modify, and distribute freely.
+ * No restrictions apply - you can use, modify, and distribute freely.
  */
 
 #ifndef DYNAMIC_ARRAY_H_

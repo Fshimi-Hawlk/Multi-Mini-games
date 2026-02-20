@@ -1,14 +1,34 @@
 /**
  * @file utils.h
- * @author Fshimi Hawlk
+ * @author Fshimi-Hawlk
  * @date 2026-01-07
- * @brief General utility macros and helper functions.
+ * @date 2026-02-20
+ * @brief General-purpose macros, inline helpers and small utility functions used across the project.
+ *
+ * This header provides:
+ *   - Safe arithmetic and alignment macros
+ *   - Vector2 construction / formatting helpers
+ *   - Debugging / development aids (TODO, UNREACHABLE, dcall)
+ *   - Common idioms (defer, clamp, signof, swap, array utilities)
+ *   - Basic randomization and texture helpers
+ *   - Platform-specific line endings and unused-value suppression
+ *
+ * Most macros are type-safe where possible or clearly documented when they assume integer types.
+ * Functions are kept minimal and focused - larger utilities belong in their own .c/.h pairs.
+ *
+ * Intended usage:
+ *   - Included via "common.h" in nearly every source file
+ *   - Used for quick inline operations, debug instrumentation, and reducing boilerplate
+ *
+ * @note Many macros use do-while(0) or direct expressions for safe expansion in all contexts.
+ * @note Some macros (swap, shuffleArray) assume non-overlapping operands or valid PRNG.
  */
 
 #ifndef UTILS_H
 #define UTILS_H
 
 #include "common.h"
+#include "userTypes.h"
 
 /**
  * @brief Invalid pointer value used as a sentinel.
@@ -150,11 +170,13 @@
 
 /**
  * @brief Shuffles an array in-place using Fisher-Yates algorithm.
+ *
+ * Requires prng_rand() to be available.
  */
 #define shuffleArray(array, size) \
 do { \
     for (u32 i = size - 1; i > 0; --i) { \
-        u32 r = RAND_FUNC() % (i + 1); \
+        u32 r = prng_rand() % (i + 1); \
         if (r == i) continue; \
         swap(array[i], array[r]); \
     } \
@@ -189,16 +211,18 @@ do { \
  */
 u64 randint(u64 min, u64 max);
 
-// #ifndef _USE_DEFAULT_RAND
-// /**
-//  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive) using a PRNG.
-//  *
-//  * @param min The minimum value.
-//  * @param max The maximum value.
-//  * @return A random value in [min, max].
-//  */
-// u64 prng_randint(u64 min, u64 max);
-// #endif
+#ifdef RAND_H
+
+/**
+ * @brief Generates a random unsigned 64-bit integer between min and max (inclusive) using a PRNG.
+ *
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @return A random value in [min, max].
+ */
+u64 prng_randint(u64 min, u64 max);
+
+#endif
 
 /**
  * @brief Generates a random float in the range [0.0, 1.0].

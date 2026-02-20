@@ -66,4 +66,4 @@ Author: Tsoding
 
 Originally extracted from: https://github.com/tsoding/nob.h
 
-Feel free to use, modify, or delete anything — it's all public domain.
+Feel free to use, modify, or delete anything - it's all public domain.

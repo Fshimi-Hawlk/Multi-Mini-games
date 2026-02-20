@@ -10,8 +10,8 @@ The Makefile manages:
 - Building independent test executables from `tests/`
 - Linking shared library objects to both main and tests (avoids multiple-definition errors)
 - Multiple build modes: release, debug, strict-debug, clang-debug (sanitizers), valgrind-debug
-- Automatic header dependency tracking (`-MMD -MP`) — disable with `NO_DEPENDENCY_TRACKING=1`
-- Silent builds by default — enable verbose output with `VERBOSE=1`
+- Automatic header dependency tracking (`-MMD -MP`) - disable with `NO_DEPENDENCY_TRACKING=1`
+- Silent builds by default - enable verbose output with `VERBOSE=1`
 - Custom flags via `EXTRA_CFLAGS` / `EXTRA_LDFLAGS`
 - Logging for tests and valgrind runs in timestamped folders under `logs/`
 

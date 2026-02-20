@@ -6,7 +6,7 @@ rebuild-obj: clean $(LIB_OBJECTS)
 
 rebuild-tests: clean tests
 
-static-lib: rebuild-obj $(LIB_OBJECTS)
+static-lib: rebuild-obj $(STATIC_LIB)
 
 run-main:
 	@if [ -f $(BIN) ]; then \

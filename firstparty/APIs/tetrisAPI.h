@@ -1,21 +1,21 @@
 /**
- * @file gameNameAPI.h
+ * @file tetrisAPI.h
  * @author Fshimi-Hawlk
- * @date 2026-01-07
- * @date 2026-02-20
- * @brief Public API for the GameName mini-game.
+ * @date 2026-02-07
+ * @date 2026-02-18
+ * @brief Public API for the Tetris mini-game.
  *
  * Defines the opaque game handle and the minimal lifecycle functions
- * required to integrate GameName into the lobby.
+ * required to integrate Tetris into the lobby.
  *
- * @note The internal structure `GameNameGame_St` is **opaque** outside this module.
+ * @note The internal structure `TetrisGame_St` is **opaque** outside this module.
  *       Direct field access from the lobby or other modules is forbidden.
  *
  * @see generalAPI.h for the required `Game_St` base structure and `Error_Et` codes
  */
 
-#ifndef GAMENAME_API_H
-#define GAMENAME_API_H
+#ifndef TETRIS_API_H
+#define TETRIS_API_H
 
 #include "APIs/generalAPI.h"
 
@@ -26,35 +26,34 @@
 /**
  * @brief Opaque forward declaration - internal definition is private.
  */
-typedef struct GameNameGame_St GameNameGame_St;
+typedef struct TetrisGame_St TetrisGame_St;
 
 /**
- * @brief Configuration parameters for GameName initialization.
+ * @brief Configuration parameters for Tetris initialization.
  *
  * Fields have safe defaults when zero-initialized.
  */
 typedef struct {
-    char __useless;             ///< Avoids warning for initGame macro
     unsigned int fps;           ///< Target frame rate (0 = uncapped; common values: 60, 120, 144)
     // Future: difficulty preset, hold piece enabled, ghost piece visibility, etc.
-} GameNameConfigs_St;
+} TetrisConfigs_St;
 
 /**
  * @brief Convenience macro using C99 compound literal syntax.
  *
  * Example usage:
- *   GameNameGame_St* game = NULL;
- *   gameName_initGame(&game, .fps = 120);
+ *   TetrisGame_St* game = NULL;
+ *   tetris_initGame(&game, .fps = 120);
  */
-#define gameName_initGame(game_ptr, ...) \
-    gameName_initGame__full((game_ptr), (GameNameConfigs_St){ .__useless = 0, __VA_ARGS__ })
+#define tetris_initGame(game_ptr, ...) \
+    tetris_initGame__full((game_ptr), (TetrisConfigs_St){ .fps = 60, __VA_ARGS__ })
 
 // ────────────────────────────────────────────────────────────────────────────
 // Core lifecycle API
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * @brief Allocates and initializes a new GameName game instance.
+ * @brief Allocates and initializes a new Tetris game instance.
  *
  * @param[out] game_ptr     Double pointer receiving the new game handle (set to NULL on failure)
  * @param[in]  configs      Initialization options
@@ -69,12 +68,12 @@ typedef struct {
  *
  * @note Does **not** create/manage the Raylib window or context - lobby responsibility.
  */
-Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St configs);
+Error_Et tetris_initGame__full(TetrisGame_St** game_ptr, TetrisConfigs_St configs);
 
 /**
  * @brief Runs one complete frame: input processing → logic update → rendering.
  *
- * Called once per frame when GameName is the active mini-game.
+ * Called once per frame when Tetris is the active mini-game.
  *
  * @param[in,out] game      Valid game instance handle
  *
@@ -87,7 +86,7 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St conf
  * @note When game-over condition is reached, the function sets
  *       `((Game_St*)game)->running = false;`
  */
-Error_Et gameName_gameLoop(GameNameGame_St* const game);
+Error_Et tetris_gameLoop(TetrisGame_St* const game);
 
 /**
  * @brief Frees all resources owned by the game and releases the handle.
@@ -104,6 +103,6 @@ Error_Et gameName_gameLoop(GameNameGame_St* const game);
  * @note Idempotent - safe to call multiple times.
  * @note Does **not** close the Raylib window or call CloseWindow().
  */
-Error_Et gameName_freeGame(GameNameGame_St** game);
+Error_Et tetris_freeGame(TetrisGame_St** game_ptr);
 
-#endif // GAMENAME_API_H
+#endif // TETRIS_API_H

@@ -76,7 +76,7 @@ else ifeq ($(MODE),clang-debug)
 	else
 		$(info Clang not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-			$(info Valgrind detected — try MODE=valgrind-debug for runtime checks.)
+			$(info Valgrind detected - try MODE=valgrind-debug for runtime checks.)
 		endif
 		$(error Clang required for clang-debug mode)
 	endif
@@ -104,7 +104,7 @@ else ifeq ($(MODE),valgrind-debug)
 	else
 		$(info Valgrind not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
-			$(info Clang detected — try MODE=clang-debug for compile-time sanitizers.)
+			$(info Clang detected - try MODE=clang-debug for compile-time sanitizers.)
 		endif
 		$(error Valgrind required for valgrind-debug mode)
 	endif
@@ -140,7 +140,9 @@ TEST_DIR := tests
 # Dirs
 BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
+LIB_DIR := $(BUILD_DIR)/lib
 BIN_DIR := $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
 
+STATIC_LIB  ?= $(LIB_DIR)/lib$(LIB_NAME).a
 BIN := $(BIN_DIR)/$(MAIN_NAME)

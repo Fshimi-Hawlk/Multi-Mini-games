@@ -229,7 +229,7 @@ help:
 	@echo "Notes:"
 	@echo "  - libs are built lazily (only when sources change)"
 	@echo "  - rebuild-exe forces relinking of the lobby executable"
-	@echo "  - clean only affects root build/ — use clean-all for full reset"
+	@echo "  - clean only affects root build/ - use clean-all for full reset"
 	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
 
 .PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests help

@@ -1,16 +1,40 @@
 /**
  * @file globals.c
- * @author 
- * @date 
- * @brief Definitions of global variables.
+ * @author LeandreB8
+ * @date 2026-01-12
+ * @date 2026-02-18
+ * @brief Definitions of program-wide global variables.
+ *
+ * Contributors:
+ * - LeandreB8:
+ *    - Provided the initial variables and harcoded platform
+ * - Fshimi-Hawlk:
+ *    - Provided documentation
+ *    - Moved some of the variables to dedicated struct.
+ *
+ * Contains shared state and constants used across the application:
+ *   - Window rectangle and UI button placement
+ *   - Font handles
+ *   - Mini-game instance pointers (games[])
+ *   - Lobby platform definitions (platforms[] + platformCount)
+ *   - Default player sprite rectangle
+ *   - Shared player texture array
+ *   - Skin menu toggle and button texture
+ *
+ * The lobby level geometry (platforms) is hard-coded here.
+ * Mini-game registration happens via the games[] array.
+ * Skin menu visibility is controlled by isTextureMenuOpen.
+ *
+ * @see utils/globals.h for type definitions and extern declarations
  */
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
+
+Game_St* games[__gameSceneCount] = {0};
 
 Platform_st platforms[] = {
     // Sol principal
@@ -29,25 +53,14 @@ Platform_st platforms[] = {
     {{-350, 150, 100, 30}, BROWN, 0.5},
     {{250, 150, 100, 30}, BROWN, 0.5},
 };
-int platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-Texture2D playerTextures[2] = {0}; // à revoir pour une gestion dynamique
-int playerTextureCount = 0;
-
-Rectangle defaultPlayerTextureRect = {
-    20,
-    60,
-    50,
-    50
-};
+u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
 Rectangle skinButtonRect = {
-    WINDOW_WIDTH - 70,
-    WINDOW_HEIGHT / 2.0f - 25,
-    50,
-    50
+    .x = WINDOW_WIDTH - 70,
+    .y = WINDOW_HEIGHT / 2.0f - 25,
+    .width = 50,
+    .height = 50
 };
-
-bool isTextureMenuOpen = false;
 
 Texture2D logoSkinButton;

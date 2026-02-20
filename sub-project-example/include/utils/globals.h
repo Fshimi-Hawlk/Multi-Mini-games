@@ -1,29 +1,61 @@
 /**
  * @file globals.h
- * @author Fshimi Hawlk
+ * @author Fshimi-Hawlk
  * @date 2026-01-07
- * @brief Global variables and resources.
+ * @date 2026-02-20
+ * @brief Central location for process-wide global variables and pre-loaded resources.
+ *
+ * This header declares variables that are:
+ *   - initialized once during program startup (usually in main() or init function)
+ *   - read (and sometimes modified) from many different parts of the codebase
+ *   - representing fundamental state or resources shared across systems
+ *
+ * Guidelines for usage:
+ *   - Prefer passing context structs (GameNameGame_St, etc.) through function parameters
+ *     whenever reasonable - reduce usage of these globals over time.
+ *   - Only declare truly global / singleton-like items here.
+ *   - Initialization order and thread-safety (currently single-threaded) must be
+ *     carefully managed in the startup sequence.
+ *
+ * @see main.c / init functions for where most of these globals are set
  */
 
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-/**
- * @brief Global application state and resources.
- *
- * All extern variables used throughout the game.
- */
-
 #include "userTypes.h"
 
-// General Globals
+// ────────────────────────────────────────────────
+// Window & display
+// ────────────────────────────────────────────────
 
-extern Rectangle windowRect;            ///< Main window rectangle (set at init).
-extern Font      appFont;               ///< Primary font for UI text.
-extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
+/**
+ *  Rectangle describing the full client area of the application window.
+ *  Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
+ */
+extern Rectangle windowRect;
 
+// ────────────────────────────────────────────────
+// Fonts
+// ────────────────────────────────────────────────
+
+/**
+ *  @brief Default font used for most UI labels, buttons and in-game text.
+ *         Normally corresponds to fonts[FONT16] or similar mid-size variant.
+ */
+extern Font      appFont;
+
+/**
+ *  @brief Array of pre-loaded fonts at different sizes.
+ *         Indexed by FontSize_Et values (FONT8 … FONT48).
+ *         All fonts should use the same typeface for visual consistency.
+ */
+extern Font      fonts[_fontSizeCount];
+
+// ────────────────────────────────────────────────
 // Game's Globals
+// ────────────────────────────────────────────────
 
-// TODO
+
 
 #endif // UTILS_GLOBALS_H
