@@ -23,18 +23,42 @@ git push origin my-game-name
 # then go to GitHub -> create Pull Request from your branch to main
 ```
 
-## Commit messages - our simple rule
+## Commit messages
 
-We try to follow "Conventional Commits" - it looks like this:
+We try to follow "Conventional Commits" style.  
+The prefix tells everyone at a glance what kind of change it is.  
+Most important ones for us right now:
 
-- `feat: add player movement with arrow keys`
-- `fix: prevent crash when clicking too fast`
-- `docs: improve README installation steps`
-- `style: reformat code + fix indentation`
-- `refactor: move repeated code into utilsDrawRectangle()`
-- `test: add checks for score calculation`
+- `feat:`      new feature / visible functionality
+- `fix:`       bug fix (something was wrong and now works correctly)
+- `docs:`      documentation, comments, README, etc.
+- `style:`     formatting, whitespace, indentation, naming (no logic change)
+- `refactor:`  improve internal code structure without changing observable behavior
+- `test:`      adding or changing tests
+- `chore:`     maintenance tasks, small cleanups, tooling updates that don't fit anywhere else
+- `build:`     changes to build system (Makefile, compiler flags, dependencies, scripts)
 
-For trivial changes (whitespace, better variable name, ...), either make a tiny commit (style: trim trailing whitespace) or fold it into the next meaningful commit - both are fine.
+Quick reference table:
+
+| Type       | Purpose / When to use it                                                                 | Changes the produced game binary? | Semantic Versioning impact | Example commit message (our project context)                     |
+|------------|------------------------------------------------------------------------------------------|-----------------------------------|----------------------------|-------------------------------------------------------------------|
+| `feat`     | Introduces new gameplay, mechanic, screen, scoring rule, etc.                            | Yes                               | Minor ↑                    | feat: Added block-blast piece rotation with X key                   |
+| `fix`      | Corrects broken / incorrect behavior (crashes, wrong scoring, visual glitches, etc.)    | Yes                               | Patch ↑                    | fix: Snake no longer wraps around when wall collision is off      |
+| `refactor` | Reworks code structure, extracts helpers, removes duplication, improves readability     | Usually yes                       | None                       | refactor: Moved repeated DrawRectangle calls into `ui/game.c`     |
+| `docs`     | Changes to comments, README, INSTALL, doxygen-style docs, game instructions              | No                                | None                       | docs: Documented memory-game power-up spawn probability             |
+| `style`    | Pure formatting: indentation, line breaks, trailing whitespace, brace placement         | No                                | None                       | style: Trimed some white space                  |
+| `test`     | Adding, fixing or improving test code (even if tests are very basic right now)          | No (tests only)                   | None                       | test: Added basic score overflow check for snake-classic            |
+| `chore`    | Housekeeping: .gitignore, unused files, version bumps, small tooling tweaks, cleanups   | Almost never                      | None                       | chore: Ignored compile_commands.json and .cache/ in .gitignore     |
+| `build`    | Makefile changes, new compiler flags, debug/release modes, linker options, etc.         | No (build only)                   | None                       | build: Added -O2 optimization to release build in Makefile          |
+
+For very tiny things (fixing one typo in a variable name, removing trailing whitespace) you have two options:
+
+- make a small `style:` or `chore:` commit
+- fold it into the next meaningful commit (totally fine)
+
+We are not being super strict about this yet - the goal is just to make the history more readable when reviewing PRs or looking back later.
+
+If you are unsure which prefix to pick, just choose the one that feels closest and we can tweak it during review. Or ask in chat.
 
 ## Pull Requests (PRs)
 
