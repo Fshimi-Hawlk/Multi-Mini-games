@@ -1,28 +1,33 @@
 /**
- * @file common.h
- * @author Fshimi-Hawlk
- * @date 2026-01-07
- * @date 2026-02-18
- * @brief Central inclusion point for standard library headers, Raylib, foundational typedefs,
- *        and most commonly needed project headers.
- *
- * This header should be included (directly or indirectly via other headers) in nearly
- * every .c file in the project. It provides:
- *   - essential C standard library headers
- *   - Raylib and related math/rendering headers
- *   - project-wide base types, configuration constants, and basic utilities
- *   - dynamic array implementation (nob/dynamicArray.h)
- *
- * Design intent:
- *   - Minimize repeated #includes across source files
- *   - Establish a predictable set of always-available symbols
- *   - Keep the set of includes minimal and justified
- *
- * Current state notes:
- *   - Several arena/context and string-related headers are commented out because
- *     they are not used in the current lobby codebase.
- *   - When memory management moves beyond simple malloc/free, the REALLOC/FREE
- *     macros should be re-enabled and pointed to the chosen allocator.
+    @file utils/common.h
+    @author Fshimi-Hawlk
+    @date 2026-01-07
+    @date 2026-02-23
+    @brief Central inclusion point for standard library headers, Raylib, foundational typedefs,
+           and most commonly needed project headers.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Added documentation start-up
+            - Added general usage libraries
+
+    This header should be included (directly or indirectly via other headers) in nearly
+    every .c file in the project. It provides:
+        - essential C standard library headers
+        - Raylib and related math/rendering headers
+        - project-wide base types, configuration constants, and basic utilities
+        - dynamic array implementation (nob/dynamicArray.h)
+
+    Design intent:
+        - Minimize repeated the includes across source files
+        - Establish a predictable set of always-available symbols
+        - Keep the set of includes minimal and justified
+
+    Current state notes:
+        - Several arena/context and string-related headers are commented out because
+          they are not used in the current lobby codebase.
+        - When memory management moves beyond simple malloc/free, the REALLOC/FREE
+          macros should be re-enabled and pointed to the chosen allocator.
  */
 
 #ifndef COMMON_H
@@ -78,7 +83,7 @@
 // ────────────────────────────────────────────────
 
 /**
- * @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
+    @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
  */
 typedef Vector2 f32Vector2;
 #define f32Vector2_def      // marker to indicate the typedef is active
@@ -91,8 +96,8 @@ typedef Vector2 f32Vector2;
 // ────────────────────────────────────────────────
 
 /**
- * @brief Alias treating Color as RGBA component struct (same memory layout).
- *        Used mainly for clarity when emphasizing color components.
+    @brief Alias treating Color as RGBA component struct (same memory layout).
+           Used mainly for clarity when emphasizing color components.
  */
 typedef Color ColorRGBA_St;
 typedef ColorRGBA_St color32;

@@ -83,3 +83,8 @@ Even partial adherence helps - big style differences make everyone's life harder
 - Merge conflicts happen - ask for help when they do, there's no shame
 
 Thanks for working together - take your time, ask questions, and enjoy making the games!
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

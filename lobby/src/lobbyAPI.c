@@ -1,49 +1,49 @@
 /**
- * @file lobbyAPI.c
- * @author Fshimi-Hawlk
- * @date 2026-02-08
- * @date 2026-02-18
- * @brief Lobby / hub scene - entry point and central navigation area
- *
- * Contributors:
- * - LeandreB8:
- *    - Provided the initial logic for init and the game loop.
- * - Fshimi-Hawlk:
- *    - Moved reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
- *    - Added documentation
- *
- * This module implements the main lobby scene that serves as the central hub
- * of the multi mini-game application. The player can:
- *   - move around a small 2D platformer-style world,
- *   - open a skin / texture selection menu,
- *   - collide with designated trigger zones to launch individual mini-games.
- *
- * Responsibilities:
- *   - Setting seed for rand
- *   - Window & camera initialization
- *   - Player movement & basic platformer physics (via shared updatePlayer())
- *   - Skin / player texture selection UI
- *   - Collision-based mini-game activation with grace period / debounce
- *   - Debug visualization (hitboxes, origin marker)
- *   - Resource loading & cleanup for lobby-specific assets
- *
- * Important data flow:
- *   LobbyGame_St -> owns player, camera, sub-game manager state
- *   SubGameManager -> controls which scene is active and whether initialization
- *                    is required on next frame
- *
- * Mini-game activation is currently performed via rectangular hitbox checks.
- * Future directions may include UI buttons, portals with animations, etc.
- *
- * @note    Most mini-game specific logic is delegated to the corresponding
- *          scene modules through the function pointer table in SubGameManager.
- *
- * @see core/game.h     for `choosePlayerTexture()`, `toggleSkinMenu()`, `updatePlayer()`
- * @see ui/app.h        for `drawMenuTextures()`, `drawSkinButton()`
- * @see ui/game.h       for `drawPlatforms()`, `drawPlayer()`
- * @see utils/globals   for `logoSkinButton`, `platformCount`, `platforms`
- * @see APIs/generalAPI for `Error_Et`
- */
+    @file lobbyAPI.c
+    @author Fshimi-Hawlk
+    @date 2026-02-08
+    @date 2026-02-23
+    @brief Lobby / hub scene - entry point and central navigation area
+
+    Contributors:
+        - LeandreB8:
+            - Provided the initial logic for init and the game loop.
+        - Fshimi-Hawlk:
+            - Moved reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+            - Added documentation
+
+    This module implements the main lobby scene that serves as the central hub
+    of the multi mini-game application. The player can:
+        - move around a small 2D platformer-style world,
+        - open a skin / texture selection menu,
+        - collide with designated trigger zones to launch individual mini-games.
+
+    Responsibilities:
+        - Setting seed for rand
+        - Window & camera initialization
+        - Player movement & basic platformer physics (via shared updatePlayer())
+        - Skin / player texture selection UI
+        - Collision-based mini-game activation with grace period / debounce
+        - Debug visualization (hitboxes, origin marker)
+        - Resource loading & cleanup for lobby-specific assets
+
+    Important data flow:
+      LobbyGame_St -> owns player, camera, sub-game manager state
+      SubGameManager -> controls which scene is active and whether initialization
+                       is required on next frame
+
+    Mini-game activation is currently performed via rectangular hitbox checks.
+    Future directions may include UI buttons, portals with animations, etc.
+
+    @note    Most mini-game specific logic is delegated to the corresponding
+             scene modules through the function pointer table in SubGameManager.
+
+    @see `core/game.h`       for `choosePlayerTexture()`, `toggleSkinMenu()`, `updatePlayer()`
+    @see `ui/app.h`          for `drawMenuTextures()`, `drawSkinButton()`
+    @see `ui/game.h`         for `drawPlatforms()`, `drawPlayer()`
+    @see `utils/globals.h`   for `logoSkinButton`, `platformCount`, `platforms`
+    @see `APIs/generalAPI.h` for `Error_Et`
+*/
 
 #include "core/game.h"
 

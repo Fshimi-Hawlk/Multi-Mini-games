@@ -1,12 +1,12 @@
-# **Code Style & Conventions**
+# Code Style & Conventions
 
-## **Naming Conventions**
+## Naming Conventions
 
-### **Functions & Variables**
+### Functions & Variables
 
 camelCase, starting with lowercase.
 
-### **Function Parameter Ordering**
+### Function Parameter Ordering
 
 To improve readability of function signatures and callsites:
 
@@ -32,7 +32,7 @@ All typedef’d types use PascalCase. Suffix indicates kind/complexity:
 
 When exact bit-width or memory layout is **not** the main concern and readability matters more, use these convenient short aliases:
 
-```c
+```
 typedef unsigned int   uint;    // instead of unsigned int everywhere
 typedef unsigned char  uchar;
 typedef unsigned short ushort;
@@ -45,7 +45,7 @@ typedef unsigned short ushort;
 - Prefer the short aliases (`uint`, `iVector2`, `uVector2`, etc.) in normal gameplay code, UI logic, counters, indices, etc. - this is exactly why they exist.
 - Never fall back to plain `int` / `unsigned int` / `float` in new code unless there is a very specific reason (e.g. interacting with a third-party API that demands it).
 
-## **Static Keyword Usage**
+## Static Keyword Usage
 
 Use `static` to keep things private to a file/module unless sharing is required:
 
@@ -54,17 +54,17 @@ Use `static` to keep things private to a file/module unless sharing is required:
 
 This reduces name clashes.
 
-## **Formatting**
+## Formatting
 
-### **Indentation**:
+### Indentation
 
 4 spaces
 
-### **Braces**:
+### Braces*
 
 Opening brace on same line for control structures, types and function definitions.
 
-```C
+```
 while (...) {
     ...
 }
@@ -116,7 +116,7 @@ ReturnType someFunc(...) {
 
 **Note on forward declarations**: If absolutely needed, use a tag temporarily:
 
-```c
+```
 typedef struct SomeStruct_s SomeStruct_St;
 
 struct SomeStruct_s {
@@ -128,13 +128,13 @@ struct SomeStruct_s {
 
 Trivial functions (1–2 simple statements) may be written on a single line to reduce vertical noise:
 
-```c
+```
 static u32 hashU32(u32 v) { return v * 2654435761u; }
 ```
 
 Longer bodies must use multi-line formatting with braces on separate lines.
 
-### **Spacing**:
+### Spacing
 
 - Space after keywords (`if (...)`, `while (...)`, `for (...; ...; ...)`).
 
@@ -148,7 +148,7 @@ Longer bodies must use multi-line formatting with braces on separate lines.
 
 - const placement:
 
-```c
+```
 void func(Type var);                  // Value can be changed
 void func(const Type var);            // Value unchanged
 
@@ -171,7 +171,7 @@ void func(const Type* const var);     // Neither can change
 
 Parenthesize non-trivial expressions with mixed operators to avoid precedence bugs and improve clarity:
 
-```c
+```
 // Preferred
 if ((flags & MASK) == VALUE) { ... }
 
@@ -242,23 +242,25 @@ Every single `.h` and `.c` file starts with exactly this block. No exceptions.
 
 ```
 /**
- * @file filename.c / filename.h
- * @author <Your name here> [or list multiple if you really co-authored from the start]
- * @date YYYY-MM-DD              // Creation date - never touch this one again
- * @date YYYY-MM-DD              // Last time someone meaningfully changed this file (update only when needed)
- * @brief One clear sentence that tells what this file is actually for.
- *
- * Contributors:
- *   - <Name>:
- *     - What you added / changed / fixed (keep it short)
- *   - <Name>:
- *     - ...
- *
- * If the file needs more context than fits in @brief, write 2-5 lines here.
- * Use @see `path/to/related/file.h` when this file depends heavily on another one.
- *
- * @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
- */
+    @file gameNameAPI.c
+    @author <Your name here> [or list multiple if you really co-authored from the start]
+    @date YYYY-MM-DD              // Creation date - never touch this one again
+    @date YYYY-MM-DD              // Last time someone meaningfully changed this file (update only when needed)
+    @brief One clear sentence that tells what this file is actually for.
+  
+    Contributors:
+        - <Name>:
+            - What you added / changed / fixed (keep it short)
+        - <Name>:
+            - ...
+  
+    If the file needs more context than fits in @brief, write 2-5 lines here.
+    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
+
+    // Try to align the `for` for better readability
+    // Try to keep the same order of the includes
+    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+*/
 ```
 
 Important notes so nobody gets confused:
@@ -275,21 +277,21 @@ Important notes so nobody gets confused:
 
 If the function is public (i.e. declared in `.h`, not static in `.c`), it gets a proper Doxygen block right above the declaration in the header.
 
-```c
+```
 /**
- * @brief One sentence that says what the function actually does.
- *
- * If there's anything subtle, non-obvious or important to know before calling it,
- * explain it here (2-6 lines max usually).
- *
- * @param[in]     player       Current player state - position, velocity, etc.
- * @param[out]    outRect      Filled with the world-space collision rectangle
- * @return                     Pointer to the texture, or NULL if not found
- *
- * @pre  player != NULL and player->radius > 0
- * @post outRect is always axis-aligned and fully contains the player circle
- * @note Uses radius*2 for width/height - assumes circle collision shape
- */
+    @brief One sentence that says what the function actually does.
+
+    If there's anything subtle, non-obvious or important to know before calling it,
+    explain it here (2-6 lines max usually).
+
+    @param[in]     player       Current player state - position, velocity, etc.
+    @param[out]    outRect      Filled with the world-space collision rectangle
+    @return                     Pointer to the texture, or NULL if not found
+
+    @pre  player != NULL and player->radius > 0
+    @post outRect is always axis-aligned and fully contains the player circle
+    @note Uses radius*2 for width/height - assumes circle collision shape
+*/
 Rectangle getPlayerCollisionBox(const Player_st* player);
 ```
 
@@ -308,10 +310,10 @@ Static functions inside `.c` files usually only need a short `//` comment above 
 Whenever a type is public (in `.h`), give it a `@brief` and comment the **fields/values** that aren't screamingly obvious.
 
 Struct example (from `userTypes.h` style):
-```c
+```
 /**
- * @brief Visual and rendering state of the player - kept separate from physics on purpose.
- */
+    @brief Visual and rendering state of the player - kept separate from physics on purpose.
+*/
 typedef struct {
     Rectangle defaultTextureRect;               ///< Default source rect when no animation/special state
     bool      isTextureMenuOpen;                ///< Is the skin selection overlay visible right now?
@@ -320,12 +322,12 @@ typedef struct {
 ```
 
 Enum example:
-```c
+```
 /**
- * @brief All available font sizes - used to index fonts[] array.
- *
- * The sentinel _fontSizeCount is not a real size - it's just the array length.
- */
+    @brief All available font sizes - used to index fonts[] array.
+
+    The sentinel _fontSizeCount is not a real size - it's just the array length.
+*/
 typedef enum {
     FONT8,
     FONT10, FONT12, FONT14, FONT16, FONT18,
@@ -341,42 +343,42 @@ typedef enum {
 - Extern globals or file-scope statics -> prefer short `///<` comment on the same line when the meaning is obvious
 - When more explanation is needed (units, ownership, future plans, conditional compilation context), use a full multi-line `/** ... */` block just above the declaration
 
-**Short single-line style** (globals.h style):
-```c
+**Short single-line style** (globals.h style):  
+```
 extern Rectangle skinButtonRect;        ///< Clickable area for the skin menu toggle button
 ```
 
-**Multi-line style when more description helps** (configs.h style):
-```c
+**Multi-line style when more description helps** (configs.h style):  
+```
 /**
- * @brief Default base font size for most UI text and in-game labels.
- *        Other sizes are usually derived from this via the fonts[] array.
- */
+    @brief Default base font size for most UI text and in-game labels.
+           Other sizes are usually derived from this via the fonts[] array.
+*/
 #define APP_TEXT_FONT_SIZE 32
 ```
 
-**Conditional compilation case** - place the documentation inside the block if the define is conditional:
-```c
+**Conditional compilation case** - place the documentation inside the block if the define is conditional:  
+```
 #ifndef ASSET_PATH
 /**
- * @brief Root directory for all game assets (textures, sounds, fonts, etc.).
- *        Can be overridden at compile time (e.g. -DASSET_PATH="/custom/assets/").
- */
+    @brief Root directory for all game assets (textures, sounds, fonts, etc.).
+           Can be overridden at compile time (e.g. -DASSET_PATH="/custom/assets/").
+*/
 #define ASSET_PATH "assets/"
 #endif
 ```
 
-**Macro-like helper** (utils.h style):
-```c
+**Macro-like helper** (utils.h style):  
+```
 /**
- * @brief Returns the full texture rectangle {0, 0, w, h}.
- *
- * Used everywhere before DrawTexture* calls.
- * Makes it easy to later support sprite sheets or trimmed textures.
- *
- * @param texture Valid Raylib Texture2D
- * @return Rectangle spanning the entire texture
- */
+    @brief Returns the full texture rectangle {0, 0, w, h}.
+
+    Used everywhere before DrawTexture* calls.
+    Makes it easy to later support sprite sheets or trimmed textures.
+
+    @param texture Valid Raylib Texture2D
+    @return Rectangle spanning the entire texture
+*/
 Rectangle getTextureRec(const Texture texture);
 ```
 
@@ -398,3 +400,8 @@ Rectangle getTextureRec(const Texture texture);
 - Simple `malloc`/`calloc` acceptable for low-allocation code
 
 - Prefer arena-based allocation (`globalArena`, `tempArena`, `context_alloc`) for easier management.
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

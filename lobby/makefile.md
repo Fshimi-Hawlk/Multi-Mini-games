@@ -101,5 +101,13 @@ make run-gdb
 - `valgrind-debug` mode requires `valgrind` installed
 - `stdbuf` (used in `run-tests` for reliable output on crash) is optional but strongly recommended on development machines. It is part of GNU coreutils (almost always present on Linux; may be missing on minimal containers or some BSDs).
 
-## Author
-[Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+## Related documentation
+
+
+- \subpage makefile-structure : **[README.md](./make/README.md)**     -> How the Makefile is **internally structured**
+- This file           -> How to **use** the Makefile (targets, modes, examples, logging behavior)  
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

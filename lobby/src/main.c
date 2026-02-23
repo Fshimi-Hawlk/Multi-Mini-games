@@ -1,37 +1,35 @@
 /**
- * @file main.c
- * @author LeandreB8
- * @date 2026-01-12
- * @date 2026-02-18
- * @brief Program entry point – lobby main loop and game scene manager.
- *
- * Contributors:
- * - LeandreB8:
- *    - Implemented basic lobby's logic (initialization, game loop, ...)
- * - Fshimi-Hawlk:
- *    - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
- *    - Implememted sub-game playablity inside lobby logic via API
- *    - Added documentation
- *
- * This file contains the top-level application loop.
- * It initializes the window and shared resources, runs the lobby,
- * and switches to individual games when triggered (e.g. collision with zone).
- *
- * Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
- * in the same process/window. No separate executables are spawned.
- */
+    @file main.c
+    @author LeandreB8
+    @date 2026-01-12
+    @date 2026-02-18
+    @brief Program entry point – lobby main loop and game scene manager.
+    
+    Contributors:
+        - LeandreB8:
+            - Implemented basic lobby's logic (initialization, game loop, ...)
+        - Fshimi-Hawlk:
+            - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+            - Implememted sub-game playablity inside lobby logic via API
+            - Added documentation
+    
+    This file contains the top-level application loop.
+    It initializes the window and shared resources, runs the lobby,
+    and switches to individual games when triggered (e.g. collision with zone).
+    
+    Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
+    in the same process/window. No separate executables are spawned.
+*/
 
 #include "lobbyAPI.h"
 #include "APIs/tetrisAPI.h"
 
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Program entry point
-// ─────────────────────────────────────────────────────────────────────────────
-
-int main(void) {
-
-    // ── Main loop ────────────────────────────────────────────────────────────
+/**
+    @brief Program entry point.
+    @return 0 on clean exit, non-zero on early failure
+*/
+s32 main(void) {
+    // ── Initialization ───────────────────────────────────────────────────────
     Error_Et error = OK;
 
     LobbyGame_St* game = NULL;
@@ -40,6 +38,7 @@ int main(void) {
         return 1;
     }
 
+    // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
         // float dt = GetFrameTime();
 
@@ -78,7 +77,6 @@ int main(void) {
     }
 
     // ── Cleanup ──────────────────────────────────────────────────────────────
-
     lobby_freeGame(&game);
 
     return 0;

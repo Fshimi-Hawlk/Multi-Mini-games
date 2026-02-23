@@ -1,30 +1,23 @@
 /**
- * @file gamename.c
- * @author <Author's name>
- * @date <File creation date>
- * @date <File last update date>
- * @brief Implementation of the GameName mini-game.
- *
- * Contributors:
- *   - <Author's name>: // at the very least note what you did
- *      - What they provided
- *      - What they changed
- *   - <Contributor's name>: // if you contributed, note what you did
- *      - What they provided
- *      - What they changed
- *
- * Longer description if needed (2–5 lines max):
- *   - What this file/module does
- *   - Key types/functions it exposes
- *   - Important constraints or usage rules
- *   - Cross-references to related files (@see ...)
- *
- * // Try to align the `for` for better readability
- * // Try to keep the same order of the includes
- * @see `utils/userTypes.h`  for ...
- * @see `APIs/generalAPI.h`  for the general interface
- * @see `gameNameAPI.h`      for the public interface
- */
+    @file gameNameAPI.c
+    @author Fshimi-Hawlk
+    @date 2026-01-25              // Creation date - never touch this one again
+    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @brief One clear sentence that tells what this file is actually for.
+  
+    Contributors:
+        - Fshimi-Hawlk:
+            - Provided documentation start-up
+        - <Name>:
+            - What you added / changed / fixed (keep it short)
+  
+    If the file needs more context than fits in @brief, write 2-5 lines here.
+    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
+
+    // Try to align the `for` for better readability
+    // Try to keep the same order of the includes
+    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+*/
 
 #include "utils/userTypes.h"
 
@@ -72,6 +65,9 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, GameNameConfigs_St conf
     // Initialize common base fields
     gameRef->base.running = true;
 
+    /// @note: if `configs` isn't used in this function, 
+    ///        to avoid warning, put at the top of the 
+    ///        function `(void) configs`
     // Apply custom configuration
     if (configs.fps > 0) {
         SetTargetFPS(configs.fps);
@@ -106,7 +102,7 @@ Error_Et gameName_gameLoop(GameNameGame_St* const game) {
         ClearBackground(RAYWHITE);
 
         // Draw game elements...
-        // DrawTexture(game->playerSprite, x, y, WHITE);
+
     } EndDrawing();
 
     return OK;

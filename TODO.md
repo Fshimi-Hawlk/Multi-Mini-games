@@ -1,4 +1,4 @@
-# TODO.md - Multi Mini-Games Monorepo
+# TODO
 
 High-priority / medium-priority tasks for the root project (mostly things that affect everyone or prepare the final game collection).
 
@@ -31,3 +31,8 @@ Items are roughly ordered from "we should do this quite soon" to "nice to have l
   -> See [Gantt chart](https://github.com/users/Fshimi-Hawlk/projects/1)
 
 Feel free to add new items or move priorities - discuss big changes in the group chat first.
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

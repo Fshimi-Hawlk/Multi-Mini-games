@@ -15,3 +15,8 @@ and this sub-project adheres to [Semantic Versioning](https://semver.org/spec/v2
 ### Fixed
 
 ### Removed
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

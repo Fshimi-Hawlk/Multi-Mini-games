@@ -93,6 +93,7 @@ When building libraries (`libs`, `bin`, `rebuild-libs`):
 - `valgrind-debug` -> needs `valgrind`
 - `cmp` (used to skip unchanged files) -> almost always present on Unix-like systems
 
-## Author
+## Credits
 
-[Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

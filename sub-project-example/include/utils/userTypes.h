@@ -1,37 +1,34 @@
 /**
- * @file userTypes.h
- * @author Fshimi-Hawlk
- * @date 2026-01-07
- * @date 2026-02-20
- * @brief Core type definitions used throughout the game.
- *
- * Contributors:
- * - Fshimi-Hawlk:
- *    - Added documentation start-up
- *    - Added `FontSize_Et`
- *
- * Longer description if needed (2–5 lines max):
- *   - What this file/module does
- *   - Key types/functions it exposes
- *   - Important constraints or usage rules
- *   - Cross-references to related files (@see ...)
- *
- * @note Any noteworthy limitation, future plan or non-obvious decision
- * @see `modulePath/moduleName` for [[`stuff that comes from the module`], ...]
- */
+    @file userTypes.h
+    @author Fshimi-Hawlk
+    @date 2026-01-25
+    @date 2026-02-23
+    @brief Core type definitions used throughout the game.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Added documentation start-up
+            - Added `FontSize_Et`
+
+    If the file needs more context than fits in @brief, write 2-5 lines here.
+    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
+
+    // Try to align the `for` for better readability
+    // Try to keep the same order of the includes
+    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+*/
 
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
 
 #include "common.h"
-#include "APIs/generalAPI.h"
 
 /**
- * @brief Available font sizes used for in-game UI and text rendering.
- *
- * Values are listed in ascending order.  
- * `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
- */
+    @brief Available font sizes used for in-game UI and text rendering.
+
+    Values are listed in ascending order.  
+    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+*/
 typedef enum {
     FONT8,
     FONT10, FONT12, FONT14, FONT16, FONT18,

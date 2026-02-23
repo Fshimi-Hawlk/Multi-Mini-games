@@ -1,4 +1,4 @@
-# Makefile System Structure
+@page makefile-structure Makefile System Structure
 
 This project uses a **modular, split Makefile** approach for better maintainability, readability and platform extensibility.
 
@@ -6,7 +6,7 @@ All Makefile logic lives inside the `make/` directory.
 The root `Makefile` is kept minimal - it only includes the modular pieces in a strict numbered order.
 
 ## Directory Layout
-```bash
+```
 sub-project-root/
 ├── Makefile                  # <- very short: just includes + .PHONY
 ├── make/
@@ -70,8 +70,8 @@ Later files consume those variables to create rules and targets.
 
 ## Related documentation
 
-- **[makefile.md](../makefile.md)**     -> How to **use** the Makefile (targets, modes, examples, logging behavior)  
+- **[Makefile Documentation](../makefile.md)**     -> How to **use** the Makefile (targets, modes, examples, logging behavior)  
 - This file           -> How the Makefile is **internally structured**
 
-**Last updated: February 21, 2026**  
+**Last updated: February 22, 2026**  
 **Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

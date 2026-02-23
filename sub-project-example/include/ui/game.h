@@ -1,32 +1,26 @@
 /**
- * @file game.h
- * @author Fshimi-Hawlk
- * @date 2026-01-07
- * @date 2026-02-20
- * @brief Public interface for low-level drawing functions used in the lobby scene.
- *
- * This header declares the core rendering helpers responsible for visualizing
- * the main gameplay elements of the lobby (player character and platforms).
- *
- * Longer description if needed (2–5 lines max):
- *   - What this file/module does
- *   - Key types/functions it exposes
- *   - Important constraints or usage rules
- *   - Cross-references to related files (@see ...)
- *
- * @note Any noteworthy limitation, future plan or non-obvious decision
- * @see ui/app.c                for implementation
- * @see `modulePath/moduleName` for [[`stuff that comes from the module`], ...]
- */
+    @file ui/game.h
+    @author Fshimi-Hawlk
+    @date 2026-02-08              // Creation date - never touch this one again
+    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @brief One clear sentence that tells what this file is actually for.
+
+    If the file needs more context than fits in @brief, write 2-5 lines here.
+    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
+
+    // Try to align the `for` for better readability
+    // Try to keep the same order of the includes
+    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+*/
 
 #ifndef UI_GAME_H
 #define UI_GAME_H
 
 /**
- * @brief Draws all UI elements for the current scene.
- *
- *  TODO
- */
+    @brief Draws all UI elements for the current scene.
+
+    TODO
+*/
 void drawUI(void);
 
 #endif // UI_GAME_H

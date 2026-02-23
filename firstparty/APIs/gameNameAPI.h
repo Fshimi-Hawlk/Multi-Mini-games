@@ -97,7 +97,7 @@ Error_Et gameName_initGame__full(GameNameGame_St** game_ptr, GameNameConfigs_St 
  * @pre  Raylib drawing context is active (BeginDrawing() called)
  *
  * @note If the game reaches an end condition (win/lose/quit), it must set
- *       `((Game_St*)game)->running = false;`
+ *       `game.base->running = false;`
  */
 Error_Et gameName_gameLoop(GameNameGame_St* const game);
 

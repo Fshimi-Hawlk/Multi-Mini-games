@@ -1,7 +1,7 @@
-# Converting a Sub-Game to an API and Integrating into the Lobby
+# API Conversion & Integration
 
-**Last updated: February 20, 2026**  
-**Author: Fshimi Hawlk**  
+Converting a Sub-Game to an API and Integrating into the Lobby
+
 **Based on project structure as of Multi Mini-Games monorepo v[Unreleased]**
 
 This guide provides a step-by-step explanation of how to convert an individual sub-game (e.g., `tetris/`, `block-blast/`) into a reusable API that can be integrated into the main lobby. The goal is to allow the lobby to launch and run the game seamlessly within the same window, without restarting the application or managing separate executables.
@@ -552,3 +552,8 @@ int main(void) {
 - **Logging**: Use `logger.h` for consistency.
 - **Testing**: Add API tests in `tests/`.
 - **If Stuck**: Check `makefile.md` for build details; discuss in group chat.
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

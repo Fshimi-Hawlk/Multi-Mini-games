@@ -1,20 +1,31 @@
 /**
- * @file main.c
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Minimal program entry point – application setup and main loop skeleton.
- *
- * This file serves as a starting template or fallback main.
- * In a full lobby-integrated build, most logic is moved to a dedicated main.c.
- */
+    @file main.c
+    @author Fshimi-Hawlk
+    @date 2026-01-25              // Creation date - never touch this one again
+    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @brief One clear sentence that tells what this file is actually for.
+    
+    Contributors:
+        - Fshimi-Hawlk:
+            - Provided documentation start-up
+        - <Name>:
+            - What you added / changed / fixed (keep it short)
 
-#include "utils/common.h"           // Common macros, helpers
-#include "setups/app.h"             // High-level app init/free
+    If the file needs more context than fits in @brief, write 2-5 lines here.
+    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
+
+    // Try to align the `for` for better readability
+    // Try to keep the same order of the includes
+    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+*/
+
+#include "utils/common.h"
+#include "setups/app.h"
 
 /**
- * @brief Program entry point.
- * @return 0 on clean exit, non-zero on early failure
- */
+    @brief Program entry point.
+    @return 0 on clean exit, non-zero on early failure
+*/
 int main(void) {
     // ── Initialization ───────────────────────────────────────────────────────
     if (!initApp()) {
@@ -25,7 +36,6 @@ int main(void) {
 
     // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
 
         // Game logic goes here (update, input, simulation)
         // ...
@@ -35,6 +45,7 @@ int main(void) {
 
             // Game rendering goes here
             // ...
+            
         } EndDrawing();
     }
 
@@ -53,7 +64,7 @@ int main(void) {
 #include "contextArena.h"
 
 // Required when custom rand.h implementation is used (not default)
-#if !defined(_USE_DEFAULT_RAND)
-// #define RAND_IMPLEMENTATION
-// #include "rand.h"
+#if defined RAND_H
+#define RAND_IMPLEMENTATION
+#include "rand.h"
 #endif

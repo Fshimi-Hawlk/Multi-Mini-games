@@ -1,9 +1,22 @@
 /**
- * @file globals.c
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Definitions of global variables.
- */
+    @file utils/globals.c
+    @author Fshimi-Hawlk
+    @date 2026-01-25
+    @date 2026-02-23
+    @brief Definitions of program-wide global variables.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Provided documentation
+        - <Name>:
+            - ...
+
+    Contains shared state and constants used across the application:
+        - Window rectangle
+        - Font handles
+
+    @see `utils/globals.h` for full documentation and extern declarations
+*/
 
 #include "utils/globals.h"
 
@@ -15,3 +28,4 @@ Font      appFont = {0};
 
 // Game's Variables
 
+// TODO

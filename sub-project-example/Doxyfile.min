@@ -1,4 +1,3 @@
-# Minimal Doxyfile
 DOXYFILE_ENCODING       = UTF-8
 
 # ────────────────────────────────────────────────────────────────
@@ -6,7 +5,7 @@ DOXYFILE_ENCODING       = UTF-8
 # ────────────────────────────────────────────────────────────────
 
 PROJECT_NAME            = "Sub-Project Name"
-PROJECT_NUMBER          = 2026.01.13-1 # <Use the date of the commit>-<commit current count of the day>
+PROJECT_NUMBER          = 2026.02.23-1 # <date of the commit>-<current commit count of the day>
 PROJECT_BRIEF           = "Sub-Project Brief..."
 
 # ────────────────────────────────────────────────────────────────
@@ -14,6 +13,7 @@ PROJECT_BRIEF           = "Sub-Project Brief..."
 # ────────────────────────────────────────────────────────────────
 
 OUTPUT_DIRECTORY        = ./docs
+HTML_OUTPUT             = html
 GENERATE_LATEX          = NO
 
 CREATE_SUBDIRS          = YES
@@ -32,7 +32,7 @@ STRIP_FROM_INC_PATH     = include ../firstparty ../thirdparty
 # ────────────────────────────────────────────────────────────────
 
 USE_MDFILE_AS_MAINPAGE  = README.md
-INPUT                   = README.md src include makefile.md
+INPUT                   = README.md src include makefile.md make/internal-structure.md
 RECURSIVE               = YES
 FILE_PATTERNS           = *.c *.h *.md
 
@@ -61,6 +61,29 @@ PREDEFINED              = _DEBUG
 SOURCE_BROWSER          = NO
 INLINE_SOURCES          = NO
 VERBATIM_HEADERS        = NO
+
+# ────────────────────────────────────────────────────────────────
+# Graph generation
+# ────────────────────────────────────────────────────────────────
+
+HAVE_DOT                = YES
+DOT_NUM_THREADS         = 0
+
+INCLUDE_GRAPH           = YES
+INCLUDED_BY_GRAPH       = YES
+
+COLLABORATION_GRAPH     = YES
+DIRECTORY_GRAPH         = YES
+DIR_GRAPH_MAX_DEPTH     = 1000
+
+CALL_GRAPH              = NO
+CALLER_GRAPH            = NO
+CLASS_GRAPH             = NO
+
+# Cosmetic / performance
+DOT_IMAGE_FORMAT        = svg
+INTERACTIVE_SVG         = YES
+DOT_MULTI_TARGETS       = YES
 
 # ────────────────────────────────────────────────────────────────
 # Performance / multi-core
