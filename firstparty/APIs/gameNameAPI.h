@@ -1,8 +1,9 @@
 /**
  * @file gameNameAPI.h
  * @author Fshimi-Hawlk
- * @date 2026-02-07                // Creation date
- * @date 2026-02-18                // Last meaningful changes (optional - remove if unchanged)
+ * @author Maxime-CHAUVEAU
+ * @date 2026-02-07
+ * @date 2026-02-23
  * @brief Public API for the GameName mini-game.
  *
  * This header defines the opaque game handle type and the minimal set of functions
@@ -19,6 +20,7 @@
  *       The lobby is responsible for BeginDrawing()/EndDrawing(), BeginMode2D(), etc.
  *
  * @see generalAPI.h for the required `Game_St` base structure and error codes
+ * @see gameConfig.h for configuration options
  */
 
 #ifndef GAME_NAME_API_H
@@ -28,6 +30,7 @@
 ///        include may have siggly-lines, but there's actually no real issue.
 ///        So, if any then just forget about it.
 #include "APIs/generalAPI.h"
+#include "APIs/gameConfig.h"
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -38,26 +41,6 @@
  */
 typedef struct GameNameGame_St GameNameGame_St;
 
-/**
- * @brief Configuration parameters passed during initialization.
- *
- * All fields have safe defaults when zero-initialized.
- */
-typedef struct {
-    unsigned int fps;           ///< Target frame rate (0 = uncapped, common: 60 or 120)
-    // Difficulty level, audio flags, seed for procedural generation, etc. can be added here
-} GameNameConfigs_St;
-
-/**
- * @brief Convenience macro for C99 compound literal initialization.
- *
- * Example:
- *   GameNameGame_St* game = NULL;
- *   gameName_initGame(&game, .fps = 144);
- */
-#define gameName_initGame(game_ptr, ...) \
-    gameName_initGame__full((game_ptr), (GameNameConfigs_St){ __VA_ARGS__ })
-
 // ────────────────────────────────────────────────────────────────────────────
 // Core lifecycle API
 // ────────────────────────────────────────────────────────────────────────────
@@ -67,10 +50,11 @@ typedef struct {
  *
  * @param[out] game_ptr     Double pointer to receive the new game handle.
  *                          Set to NULL on failure.
- * @param[in]  configs      Initialization options (FPS, difficulty, etc.)
+ * @param[in]  configs      Video/Audio configuration (NULL = defaults)
  *
  * @return OK on success
  * @return ERROR_ALLOC on memory allocation failure
+ * @return ERROR_INVALID_CONFIG if configuration parameters are invalid
  * @return other Error_Et codes for initialization failures (e.g. resource loading)
  *
  * @pre  *game_ptr == NULL
@@ -79,8 +63,22 @@ typedef struct {
  *
  * @note Does **not** create or manage the Raylib window/context.
  *       Caller (lobby) must handle InitWindow(), SetTargetFPS(), etc.
+ *
+ * @note If configs is NULL, the game uses default settings from gameConfig.h.
+ *       Games should check configs->video and configs->audio pointers before accessing.
  */
-Error_Et gameName_initGame__full(GameNameGame_St** game_ptr, GameNameConfigs_St configs);
+Error_Et gameName_initGame__full(GameNameGame_St** game_ptr, const GameConfig_St* configs);
+
+/**
+ * @brief Convenience macro for C99 compound literal initialization.
+ *
+ * Example:
+ *   GameNameGame_St* game = NULL;
+ *   gameName_initGame(&game);  // uses defaults
+ *   gameName_initGame(&game, .video = &(VideoConfig_St){.fps = 144});
+ */
+#define gameName_initGame(game_ptr, ...) \
+    gameName_initGame__full((game_ptr), &(GameConfig_St){ __VA_ARGS__ })
 
 /**
  * @brief Executes one full frame of the game: process input → update state → render.
@@ -117,5 +115,15 @@ Error_Et gameName_gameLoop(GameNameGame_St* const game);
  * @note Does **not** close the Raylib window or call CloseWindow().
  */
 Error_Et gameName_freeGame(GameNameGame_St** game_ptr);
+
+/**
+ * @brief Checks if the game is still running.
+ *
+ * @param[in] game  Game instance handle (may be NULL)
+ *
+ * @return true if game is valid and running
+ * @return false if game is NULL or has stopped
+ */
+bool gameName_isRunning(const GameNameGame_St* game);
 
 #endif // GAME_NAME_API_H

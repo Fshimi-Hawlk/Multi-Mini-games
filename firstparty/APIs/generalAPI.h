@@ -1,6 +1,7 @@
 /**
     @file generalAPI.h
     @author Fshimi-Hawlk
+    @author Maxime-CHAUVEAU
     @date 2026-01-08
     @date 2026-02-23
     @brief Minimal shared interface and common types used by all mini-games and the lobby.
@@ -50,7 +51,11 @@ typedef enum {
     ERROR_NULL_POINTER,         ///< Required pointer argument was NULL
     ERROR_ALLOC,                ///< Memory allocation failed
     ERROR_INVALID,              ///< Argument value or state is invalid/illegal
+    ERROR_INVALID_CONFIG,       ///< Configuration parameter is invalid
     ERROR_TEXTURE_LOAD,         ///< Failed to load a required texture
+    ERROR_AUDIO_LOAD,           ///< Failed to load audio resource
+    ERROR_WINDOW_INIT,          ///< Failed to initialize window/display
+    ERROR_ASSET_LOAD,           ///< Failed to load game assets
     // Future extension point: add more codes here as needed
 } Error_Et;
 
