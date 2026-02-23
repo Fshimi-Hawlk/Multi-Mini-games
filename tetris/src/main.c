@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
                     randomShape(&nextBoardShape);
 
                     if (isColliding(board, boardShape)) {
-                        return 1;
+                        break;
                     }
                     
                     hasFoundMove = false;
@@ -114,3 +114,6 @@ int main(int argc, char* argv[]) {
     CloseWindow();
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"

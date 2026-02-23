@@ -1,51 +1,45 @@
 /**
- * @file player.c
- * @author Fshimi-Hawlk
- * @author LeandreB8
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-02-08
- * @date 2026-02-18
- * @brief Player physics, collision, input handling and skin selection logic in the lobby.
- *
- * Contributors:
- * - LeandreB8:
- *   - Circle-vs-rectangle collision with basic resolution and ground detection
- *   - Horizontal movement with friction, rotation based on direction
- *   - Coyote time, jump buffering, limited air jumps
- *   - Mouse + keybind driven skin selection
- *   - Skin menu toggle
- * - Fshimi-Hawlk:
- *   - Moved the game logic off main to this file
- *   - Reworked player texture logic
- *   - Provided documentation
- *
- * This file contains the core systems that drive the lobby player character:
- *   - Movement and input processing (horizontal + jump)
- *   - Gravity, velocity integration, friction
- *   - Circle-rectangle collision and penetration resolution
- *   - Coyote time and jump buffering mechanics
- *   - Texture/skin selection via mouse or number keys
- *   - Toggle logic for the skin selection overlay
- *
- * All update functions expect:
- *   - dt in seconds (typically from GetFrameTime())
- *   - platforms in world coordinates
- *   - functions to be called once per frame in the main update loop
- *
- * Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
- * by draw routines and assume the player's collision shape is always a circle.
- *
- * @see utils/userTypes.h     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
- * @see utils/configs.h       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
- * @see utils/globals.h       for `skinButtonRect`
- * @see core/game.h           for `resolveCircleRectCollision()` declaration
- */
+    @file core/game.c
+    @author Fshimi-Hawlk
+    @author LeandreB8
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-02-08
+    @date 2026-03-18
+    @brief Player physics, collision, input handling and skin selection logic in the lobby.
 
-/**
- * @file game.c
- * @date 2026-03-18
- * @brief Implementation of core game logic for the lobby (physics and collisions).
- */
+    Contributors:
+        - LeandreB8:
+            - Circle-vs-rectangle collision with basic resolution and ground detection
+            - Horizontal movement with friction, rotation based on direction
+            - Coyote time, jump buffering, limited air jumps
+            - Mouse + keybind driven skin selection
+            - Skin menu toggle
+        - Fshimi-Hawlk:
+            - Moved the game logic off main to this file
+            - Reworked player texture logic
+            - Provided documentation
+
+    This file contains the core systems that drive the lobby player character:
+        - Movement and input processing (horizontal + jump)
+        - Gravity, velocity integration, friction
+        - Circle-rectangle collision and penetration resolution
+        - Coyote time and jump buffering mechanics
+        - Texture/skin selection via mouse or number keys
+        - Toggle logic for the skin selection overlay
+
+    All update functions expect:
+        - dt in seconds (typically from GetFrameTime())
+        - platforms in world coordinates
+        - functions to be called once per frame in the main update loop
+
+    Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
+    by draw routines and assume the player's collision shape is always a circle.
+
+    @see `utils/userTypes.h`     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
+    @see `utils/globals.h`       for `skinButtonRect`
+    @see `core/game.h`           for `resolveCircleRectCollision()` declaration
+*/
 
 #include "core/game.h"
 

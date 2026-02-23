@@ -1,3 +1,30 @@
+# ───────────────────────────────────────────────────────────────
+# OS detection (runs on the machine where "make" is invoked)
+# ───────────────────────────────────────────────────────────────
+UNAME_S := $(shell uname -s)
+
+ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
+    OS := darwin
+else ifeq ($(findstring Linux,$(UNAME_S)),Linux)
+    OS := linux
+else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
+    OS := mingw
+else ifeq ($(findstring MSYS,$(UNAME_S)),MSYS)
+    OS := mingw
+else
+    $(error Unsupported OS: $(UNAME_S). Supported: Linux, macOS (Darwin), Windows (MinGW/MSYS))
+endif
+
+# Platform-specific configuration
+include $(MAKEFILE_DIR)make/platform/$(OS).mk
+
+# Executable extension (used by BIN and TEST_BINS)
+ifeq ($(OS),mingw)
+    EXE_EXT := .exe
+else
+    EXE_EXT :=
+endif
+
 # Compiler and flags
 
 # Modes
@@ -76,11 +103,14 @@ else ifeq ($(MODE),clang-debug)
 	else
 		$(info Clang not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-			$(info Valgrind detected — try MODE=valgrind-debug for runtime checks.)
+			$(info Valgrind detected - try MODE=valgrind-debug for runtime checks.)
 		endif
 		$(error Clang required for clang-debug mode)
 	endif
 else ifeq ($(MODE),valgrind-debug)
+	ifneq ($(OS),linux)
+        $(error valgrind-debug mode is only supported on Linux (native Valgrind unavailable on $(OS)))
+    endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
 		CFLAGS := \
@@ -104,7 +134,7 @@ else ifeq ($(MODE),valgrind-debug)
 	else
 		$(info Valgrind not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
-			$(info Clang detected — try MODE=clang-debug for compile-time sanitizers.)
+			$(info Clang detected - try MODE=clang-debug for compile-time sanitizers.)
 		endif
 		$(error Valgrind required for valgrind-debug mode)
 	endif
@@ -147,4 +177,4 @@ BIN_DIR := $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
 
 STATIC_LIB  ?= $(LIB_DIR)/lib$(LIB_NAME).a
-BIN := $(BIN_DIR)/$(MAIN_NAME)
+BIN := $(BIN_DIR)/$(MAIN_NAME)$(EXE_EXT)
