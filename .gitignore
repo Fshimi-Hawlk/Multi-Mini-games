@@ -47,8 +47,7 @@ dkms.conf
 
 # Build artifacts
 build/
-bin/
-obj/
+./*/build/
 main
 
 # Logs / temp
@@ -60,4 +59,3 @@ main
 # Other
 template.h
 compile_flags.txt
-compile_commands.txt

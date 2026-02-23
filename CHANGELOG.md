@@ -14,10 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- Initial monorepo structure with shared folders (`firstparty/`, `thirdparty/`, `assets/`).  
+- Initial monorepo structure with shared folders (`firstparty/`, `thirdparty/`, `assets/`).
 - Root documentation files: README.md, CONTRIBUTING.md, TODO.md, CodeStyleAndConventions.md
 - Example sub-project folder (`sub-project-example/`) showing the structure we want for each game
 - Basic legal files: LICENSE, NOTICE (for third-party code credits)
+- Root-level Makefile: supports building merged games' static libraries lazily, copying API headers to `firstparty/APIs/`, incremental lobby linking
 
 ### Changed
 - Updated root README with clearer explanations and Git commands suited for beginners
@@ -31,3 +32,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - (none yet)
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

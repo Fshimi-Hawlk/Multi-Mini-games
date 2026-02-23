@@ -1,11 +1,53 @@
+/**
+ * @file contextArena.h
+ * @author Fshimi-Hawlk
+ * @date 2026-01-14
+ * @date 2026-02-18
+ * @brief Thin context-aware wrapper around a generic arena allocator.
+ *
+ * Provides a single "current" arena pointer (`contextArena`) that can be switched
+ * between different arenas (global, temporary, per-frame, per-level, etc.) at runtime.
+ *
+ * Main goals:
+ *   - Centralize allocation calls without passing Arena* everywhere
+ *   - Allow easy switching of allocation context (e.g. global for persistent data,
+ *     temp for per-frame scratch memory)
+ *   - Offer familiar string/formatting helpers backed by arena allocation
+ *
+ * Current implementation:
+ *   - Two static arenas: `globalArena` (persistent) and `tempArena` (scratch)
+ *   - `contextArena` defaults to `globalArena`
+ *   - All functions forward to the corresponding `arena_xxx` function from arena.h
+ *
+ * Usage pattern:
+ *   - Call arena_init() on globalArena/tempArena during startup
+ *   - Switch context when needed: contextArena = &tempArena;
+ *   - Use context_alloc(), context_strdup(), context_sprintf() in hot paths
+ *   - Reset temp arena at end of frame: arena_reset(&tempArena);
+ *
+ * Important notes:
+ *   - No automatic reset or freeing - caller must manage arena lifetime
+ *   - All allocations are bump-style (linear, no individual free)
+ *
+ * @see arena.h for the underlying arena implementation
+ */
+
 #ifndef CONTEXT_ARENA_H
 #define CONTEXT_ARENA_H
 
 #include "arena.h"
 
+// ────────────────────────────────────────────────
+// Global context arenas
+// ────────────────────────────────────────────────
+
 static Arena globalArena;
 static Arena tempArena;
 static Arena* contextArena;
+
+// ────────────────────────────────────────────────
+// Core allocation API
+// ────────────────────────────────────────────────
 
 /**
  * @brief Allocates memory from the current context arena.
@@ -25,6 +67,10 @@ void *context_alloc(size_t size_bytes);
  */
 void *context_realloc(void *oldptr, size_t oldsz, size_t newsz);
 
+// ────────────────────────────────────────────────
+// Convenience duplication helpers
+// ────────────────────────────────────────────────
+
 /**
  * @brief Duplicates a C string in the current context arena.
  *
@@ -41,6 +87,10 @@ char *context_strdup(const char *cstr);
  * @return Allocated copy of the data.
  */
 void *context_memdup(void *data, size_t size);
+
+// ────────────────────────────────────────────────
+// Formatting helpers
+// ────────────────────────────────────────────────
 
 /**
  * @brief sprintf into arena-allocated buffer.
@@ -107,4 +157,4 @@ char *context_vsprintf(const char *format, va_list args) {
 #define ARENA_IMPLEMENTATION
 #include "arena.h"
 
-#endif // CONTEXT_ARENA_IMPLEMTATION
+#endif // CONTEXT_ARENA_IMPLEMENTATION
