@@ -34,14 +34,16 @@
 #include "utils/configs.h"
 #include "utils/types.h"
 
+#include "logger.h"
+
 #include "APIs/generalAPI.h"
-#include "APIs/tetrisAPI.h"
+#include "tetrisAPI.h"
 
 /**
- * @brief Concrete Tetris game state - embeds Game_St as first member.
+ * @brief Concrete Tetris game state
  */
 struct TetrisGame_St {
-    Game_St base;                   // Must be first - allows safe cast to Game_St*
+    BaseGame_St base;               // Must be first - allows safe cast to BaseGame_St*
 
     board_t board;
 
@@ -71,7 +73,10 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     (void)configs; // Currently unused - future: difficulty, etc.
 
     *game = malloc(sizeof(TetrisGame_St));
-    if (*game == NULL) return ERROR_ALLOC;
+    if (*game == NULL) {
+        log_error("Failed to allocate TetrisGame_St");
+        return ERROR_ALLOC;
+    }
 
     TetrisGame_St* gameRef = *game;
     memset(gameRef, 0, sizeof(*gameRef));
@@ -107,11 +112,16 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     readHighScore(&gameRef->highScore);
     initBoard(gameRef->board);
 
+    log_debug("Tetris initialized successfully");
     return OK;
 }
 
 Error_Et tetris_gameLoop(TetrisGame_St* const game) {
-    if (game == NULL) return ERROR_NULL_POINTER;
+    if (game == NULL) {
+        log_error("NULL game pointer in gameLoop");
+        return ERROR_NULL_POINTER;
+    }
+
     if (!game->base.running) return OK;
 
     mouvement(game->board, &game->boardShape);

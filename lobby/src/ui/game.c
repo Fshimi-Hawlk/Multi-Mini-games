@@ -1,33 +1,33 @@
 /**
- * @file game.c
- * @author Fshimi-Hawlk
- * @author LeandreB8
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-01-30
- * @date 2026-03-18
- * @brief Low-level drawing routines for lobby gameplay elements.
- *
- * Contributors:
- * - LeandreB8:
- *    - Provided the initial drawing logic
- * - Fshimi-Hawlk:
- *    - Provided documentation
- *    - Reworked the texture logic
- *
- * This file contains primitive rendering functions used to visualize:
- *   - the player character (either debug circle or textured sprite)
- *   - static platforms in the lobby world
- *
- * These functions are meant to be called during the main render pass after
- * the camera has been set up. They operate directly on Raylib drawing primitives
- * and expect world-space coordinates.
- *
- * All functions in this file are stateless with respect to side-effects outside
- * of Raylib's drawing context - they only read game state and issue draw calls.
- *
- * @see `core/game.h` for `getPlayerCollisionBox` and `getPlayerCenter`
- * @see `utils/utils.h` for `getTextureRec`
- */
+    @file ui/game.c
+    @author Fshimi-Hawlk
+    @author LeandreB8
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-01-30
+    @date 2026-03-23
+    @brief Low-level drawing routines for lobby gameplay elements.
+
+    Contributors:
+        - LeandreB8:
+            - Provided the initial drawing logic
+        - Fshimi-Hawlk:
+            - Provided documentation
+            - Reworked the texture logic
+
+    This file contains primitive rendering functions used to visualize:
+        - the player character (either debug circle or textured sprite)
+        - static platforms in the lobby world
+
+    These functions are meant to be called during the main render pass after
+    the camera has been set up. They operate directly on Raylib drawing primitives
+    and expect world-space coordinates.
+
+    All functions in this file are stateless with respect to side-effects outside
+    of Raylib's drawing context - they only read game state and issue draw calls.
+
+    @see `core/game.h` for `getPlayerCollisionBox` and `getPlayerCenter`
+    @see `utils/utils.h` for `getTextureRec`
+*/
 
 #include "ui/game.h"
 #include "core/game.h"

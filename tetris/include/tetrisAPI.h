@@ -45,8 +45,8 @@ typedef struct {
  *   TetrisGame_St* game = NULL;
  *   tetris_initGame(&game, .fps = 120);
  */
-#define tetris_initGame(game_ptr, ...) \
-    tetris_initGame__full((game_ptr), (TetrisConfigs_St){ .fps = 60, __VA_ARGS__ })
+#define tetris_initGame(game, ...) \
+    tetris_initGame__full((game), (TetrisConfigs_St){ .fps = 60, __VA_ARGS__ })
 
 // ────────────────────────────────────────────────────────────────────────────
 // Core lifecycle API
@@ -55,16 +55,16 @@ typedef struct {
 /**
  * @brief Allocates and initializes a new Tetris game instance.
  *
- * @param[out] game_ptr     Double pointer receiving the new game handle (set to NULL on failure)
- * @param[in]  configs      Initialization options
+ * @param[out] game     Double pointer receiving the new game handle (set to NULL on failure)
+ * @param[in]  configs  Initialization options
  *
  * @return OK on success
  * @return ERROR_ALLOC on memory allocation failure
  * @return other Error_Et codes on initialization failure
  *
- * @pre  *game_ptr == NULL
- * @post On success: *game_ptr points to a valid game with base.running = true
- * @post On failure: *game_ptr remains NULL
+ * @pre  *game == NULL
+ * @post On success: *game points to a valid game with base.running = true
+ * @post On failure: *game remains NULL
  *
  * @note Does **not** create/manage the Raylib window or context — lobby responsibility.
  */
@@ -91,18 +91,18 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game);
 /**
  * @brief Frees all resources owned by the game and releases the handle.
  *
- * @param[in,out] game_ptr  Pointer to the game handle (set to NULL after cleanup)
+ * @param[in,out] game  Pointer to the game handle (set to NULL after cleanup)
  *
  * @return OK on success
- * @return ERROR_NULL_POINTER if *game_ptr is invalid (still sets to NULL)
+ * @return ERROR_NULL_POINTER if *game is invalid (still sets to NULL)
  *
- * @pre  game_ptr may be NULL or point to a valid game
- * @post *game_ptr == NULL
+ * @pre  game may be NULL or point to a valid game
+ * @post *game == NULL
  * @post All game-owned resources are freed
  *
  * @note Idempotent — safe to call multiple times.
  * @note Does **not** close the Raylib window or call CloseWindow().
  */
-Error_Et tetris_freeGame(TetrisGame_St** game_ptr);
+Error_Et tetris_freeGame(TetrisGame_St** game);
 
 #endif // TETRIS_API_H
