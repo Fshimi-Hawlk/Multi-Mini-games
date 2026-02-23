@@ -21,4 +21,4 @@ include $(MAKEFILE_DIR)make/50-tools.mk
 # Optional local overrides (not in git)
 -include $(MAKEFILE_DIR)make/99-overrides.mk
 
-.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests help
+.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests docs doxygen help

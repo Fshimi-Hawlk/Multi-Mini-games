@@ -111,13 +111,24 @@ See all options: `make help`
 
 **Note**: Global root Makefile coming later (for building all merged games/lobby at once - see [TODO](TODO.md)).
 
-## Generating Documentation (Per Game)
+## Generating Documentation
+
+### At Project-Root-level
+
+```bash
+make docs
+```
+
+-> open [docs/index.html](./docs/index.html)
+
+### Per Game
 
 Inside a game folder:
 
 ```bash
-doxygen Doxyfile.min
+make docs
 ```
+-> You can see the generated documentation in: [./docs/html/index.html](../../docs/html/index.html).
 
 ## Credits
 

@@ -197,6 +197,11 @@ rebuild-exe: clean-exe bin
 
 rebuild-tests: clean tests
 
+docs-root:
+	@./generate-root-docs.sh
+
+docs: docs-root
+
 # ───────────────────────────────────────────────────────────────
 # Help
 # ───────────────────────────────────────────────────────────────
@@ -220,6 +225,8 @@ help:
 	@echo "    tests            Build all test executables"
 	@echo "    rebuild-tests    Clean and rebuild test executables"
 	@echo "    run-tests        Run all tests"
+	@echo "    docs-root        Build the root documentation"
+	@echo "    run-tests        Build the root documentation"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
@@ -232,4 +239,4 @@ help:
 	@echo "  - clean only affects root build/ - use clean-all for full reset"
 	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
 
-.PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests help
+.PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests docs docs-root help
