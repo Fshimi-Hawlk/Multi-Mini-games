@@ -2,7 +2,7 @@
 
 This file documents the **root-level Makefile** of the Multi Mini-Games monorepo.
 
-It allows building all merged games' static libraries, copying their API headers to `firstparty/APIs/`, and linking everything into the lobby executable — with lazy/incremental behavior whenever possible.
+It allows building all merged games' static libraries, copying their API headers to `firstparty/APIs/`, and linking everything into the lobby executable - with lazy/incremental behavior whenever possible.
 
 ## Overview
 
@@ -20,9 +20,9 @@ Same as sub-projects:
 
 | Mode              | Compiler | Key flags                              | Requirements       |
 |-------------------|----------|----------------------------------------|--------------------|
-| `release`         | gcc      | `-O2`                                  | —                  |
-| `debug`           | gcc      | `-Wall -Wextra -g -O0`                 | —                  |
-| `strict-debug`    | gcc      | `-Werror -Wall -Wextra -pedantic -g`   | —                  |
+| `release`         | gcc      | `-O2`                                  | -                  |
+| `debug`           | gcc      | `-Wall -Wextra -g -O0`                 | -                  |
+| `strict-debug`    | gcc      | `-Werror -Wall -Wextra -pedantic -g`   | -                  |
 | `clang-debug`     | clang    | + `-fsanitize=address,undefined`       | Clang              |
 | `valgrind-debug`  | gcc      | `-g -O0` + Valgrind wrapper at runtime | Valgrind           |
 
@@ -93,6 +93,7 @@ When building libraries (`libs`, `bin`, `rebuild-libs`):
 - `valgrind-debug` -> needs `valgrind`
 - `cmp` (used to skip unchanged files) -> almost always present on Unix-like systems
 
-## Author
+## Credits
 
-[Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**

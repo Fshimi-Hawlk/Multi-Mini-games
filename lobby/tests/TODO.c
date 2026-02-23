@@ -32,7 +32,7 @@
 
 #error "Tests not implemented yet - see tests/TODO.c"
 
-#include "utils/baseTypes.h"
+#include "baseTypes.h"
 
 s32 main(void) {
 

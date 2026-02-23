@@ -1,35 +1,32 @@
 /**
- * @file main.c
- * @author Fshimi Hawlk
- * @author LeandreB8
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-02-08
- * @date 2026-03-18
- * @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
- *
- * Contributors:
- * - LeandreB8:
- *    - Implemented basic lobby's logic (initialization, game loop, ...)
- * - Fshimi-Hawlk:
- *    - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
- *    - Implememted sub-game playablity inside lobby logic via API
- *    - Added documentation
- *
- * This file contains the top-level application loop.
- * It initializes the window and shared resources, runs the lobby,
- * and switches to individual games when triggered (e.g. collision with zone).
- *
- * Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
- * in the same process/window. No separate executables are spawned.
- */
+    @file main.c
+    @author Fshimi Hawlk
+    @author LeandreB8
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-02-08
+    @date 2026-03-18
+    @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
+    
+    Contributors:
+        - LeandreB8:
+            - Implemented basic lobby's logic (initialization, game loop, ...)
+        - Fshimi-Hawlk:
+            - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+            - Implememted sub-game playablity inside lobby logic via API
+            - Added documentation
+    
+    This file contains the top-level application loop.
+    It initializes the window and shared resources, runs the lobby,
+    and switches to individual games when triggered (e.g. collision with zone).
+    
+    Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
+    in the same process/window. No separate executables are spawned.
+*/
 
 #include "core/game.h"              // GameScene_Et, general game types
-#include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
-#include "ui/game.h"                // Player drawing, platform logic
 
 #include "lobbyAPI.h"
 #include "APIs/tetrisAPI.h"
-
 #include "ui/connection_screen.h"
 
 #include "rudp_core.h"
@@ -215,13 +212,13 @@ static void lobby_gameLoop(float dt) {
     } EndDrawing();
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Program entry point
-// ─────────────────────────────────────────────────────────────────────────────
-
+/**
+    @brief Program entry point.
+    @return 0 on clean exit, non-zero on early failure
+*/
 int main(void) {
 
-    // ── Main loop ────────────────────────────────────────────────────────────
+    // ── Initialization ───────────────────────────────────────────────────────
     Error_Et error = OK;
 
     LobbyGame_St* game = NULL;
@@ -239,6 +236,16 @@ int main(void) {
     register_minigame(&LobbyModule);
     register_minigame(&KingForFourClientModule);
 
+    InitConnectionScreen();
+    
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        otherPlayers[i].active = false;
+    }
+
+    register_minigame(&LobbyModule);
+    register_minigame(&KingForFourClientModule);
+
+    // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
@@ -336,3 +343,6 @@ int main(void) {
 
 #define LOGGER_IMPLEMENTATION
 #include "logger.h"
+
+#define SYSTEM_SETTINGS_IMPLEMENTATION
+#include "systemSettings.h"
