@@ -8,7 +8,7 @@ void lobby_initApp(void) {
 
     SetTraceLogLevel(LOG_WARNING);
 
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Lobby Multi-Mini-Games");
+    InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
     SetTargetFPS(60);
 
     lobby_initAudio();

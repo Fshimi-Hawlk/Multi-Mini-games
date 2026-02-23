@@ -30,12 +30,6 @@
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 
-#include "stdbool.h"
-
-// ────────────────────────────────────────────────
-// Error codes (used project-wide)
-// ────────────────────────────────────────────────
-
 #include <stdbool.h>
 
 // ────────────────────────────────────────────────

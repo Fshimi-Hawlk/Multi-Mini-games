@@ -4,10 +4,10 @@
 #include "utils/utils.h"
 
 void updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
-    const float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
-    const float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
-    const float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
-    const float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
+    const float viewL = camera.target.x - (systemSettings.video.width / 2.0f) - 100.0f;
+    const float viewR = camera.target.x + (systemSettings.video.width / 2.0f) + 100.0f;
+    const float viewT = camera.target.y - (systemSettings.video.height / 2.0f) - 100.0f;
+    const float viewB = camera.target.y + (systemSettings.video.height / 2.0f) + 100.0f;
 
     for (int i = 0; i < grassCount; ++i) {
         GrassBlade_St* b = &grassBlades[i];
@@ -66,10 +66,10 @@ void drawGrass(const Player_St* const player, const Camera2D camera) {
     DrawRectangleGradientV(skyLeft, GROUND_Y, SKY_WIDTH, 1000.0f,
                            (Color){45, 35, 25, 255}, (Color){20, 15, 10, 255});
 
-    float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
-    float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
-    float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
-    float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
+    float viewL = camera.target.x - (systemSettings.video.width / 2.0f) - 100.0f;
+    float viewR = camera.target.x + (systemSettings.video.width / 2.0f) + 100.0f;
+    float viewT = camera.target.y - (systemSettings.video.height / 2.0f) - 100.0f;
+    float viewB = camera.target.y + (systemSettings.video.height / 2.0f) + 100.0f;
 
     for (int i = 0; i < grassCount; ++i) {
         GrassBlade_St* b = &grassBlades[i];

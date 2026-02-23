@@ -1,5 +1,6 @@
 #include "setups/game.h"
 
+#include "utils/constants.h"
 #include "utils/globals.h"
 #include "utils/utils.h"
 
@@ -10,7 +11,7 @@ void lobby_initGrass(void) {
     float stepX = 3.0f;
     float stepY = 5.0f;
 
-    for (float y = floor.y; y < floor.y + 200.0f; y += stepY) {
+    for (float y = GROUND_Y; y < GROUND_Y + 600.0f; y += stepY) {
         for (float x = -X_LIMIT - 500; x < X_LIMIT + 500; x += stepX) {
             if (grassCount >= MAX_GRASS_BLADES) break;
 
@@ -23,7 +24,7 @@ void lobby_initGrass(void) {
             else if (type < 9) baseHeight = 15.0f + (rand() % 15);
             else baseHeight = 2.0f + (rand() % 4);
 
-            float depth = (y - floor.y) / floor.height;
+            float depth = (y - GROUND_Y) / floor.height;
             float colorVar = (float)(rand() % 35);
 
             grassBlades[grassCount] = (GrassBlade_St){

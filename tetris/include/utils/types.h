@@ -1,12 +1,7 @@
 #ifndef UTILS_TYPES_H
 #define UTILS_TYPES_H
 
-#include "configs.h"
 #include "common.h"
-
-typedef struct iVector2 {
-    int x, y;
-} iVector2;
 
 typedef iVector2 tetramino[4];
 typedef Color board_t[BOARD_HEIGHT][BOARD_WIDTH];

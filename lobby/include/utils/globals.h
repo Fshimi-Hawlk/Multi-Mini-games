@@ -55,9 +55,9 @@ extern Texture2D backgroundTexture;
 extern Rectangle skinButtonRect;
 
 /**
- * @brief Texture used for the skin selection menu toggle button.
- *        Usually a gear icon, palette symbol or similar.
- */
+    brief Texture used for the skin selection menu toggle button.
+          Usually a gear icon, palette symbol or similar.
+*/
 extern Texture2D logoSkinButton;
 
 /**

@@ -2,7 +2,7 @@
     @file utils/common.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-09-04
     @brief Central inclusion point for standard library headers, Raylib, foundational typedefs,
            and most commonly needed project headers.
 
@@ -91,6 +91,7 @@ typedef Vector2 f32Vector2;
 #endif // f32Vector2_def
 
 #include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
+#include "systemSettings.h"
 #include "configs.h"                // tuning constants, paths, physics values
 #include "constants.h"
 
