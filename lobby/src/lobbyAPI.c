@@ -1,59 +1,61 @@
 /**
- * @file lobbyAPI.c
- * @author Fshimi-Hawlk
- * @date 2026-02-08
- * @date 2026-02-18
- * @brief Lobby / hub scene - entry point and central navigation area
- *
- * Contributors:
- * - LeandreB8:
- *    - Provided the initial logic for init and the game loop.
- * - Fshimi-Hawlk:
- *    - Moved reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
- *    - Added documentation
- *
- * This module implements the main lobby scene that serves as the central hub
- * of the multi mini-game application. The player can:
- *   - move around a small 2D platformer-style world,
- *   - open a skin / texture selection menu,
- *   - collide with designated trigger zones to launch individual mini-games.
- *
- * Responsibilities:
- *   - Setting seed for rand
- *   - Window & camera initialization
- *   - Player movement & basic platformer physics (via shared updatePlayer())
- *   - Skin / player texture selection UI
- *   - Collision-based mini-game activation with grace period / debounce
- *   - Debug visualization (hitboxes, origin marker)
- *   - Resource loading & cleanup for lobby-specific assets
- *
- * Important data flow:
- *   LobbyGame_St -> owns player, camera, sub-game manager state
- *   SubGameManager -> controls which scene is active and whether initialization
- *                    is required on next frame
- *
- * Mini-game activation is currently performed via rectangular hitbox checks.
- * Future directions may include UI buttons, portals with animations, etc.
- *
- * @note    Most mini-game specific logic is delegated to the corresponding
- *          scene modules through the function pointer table in SubGameManager.
- *
- * @see core/game.h     for `choosePlayerTexture()`, `toggleSkinMenu()`, `updatePlayer()`
- * @see ui/app.h        for `drawMenuTextures()`, `drawSkinButton()`
- * @see ui/game.h       for `drawPlatforms()`, `drawPlayer()`
- * @see utils/globals   for `logoSkinButton`, `platformCount`, `platforms`
- * @see APIs/generalAPI for `Error_Et`
- */
+    @file lobbyAPI.c
+    @author Fshimi-Hawlk
+    @date 2026-02-08
+    @date 2026-02-23
+    @brief Lobby / hub scene - entry point and central navigation area
+
+    Contributors:
+        - LeandreB8:
+            - Provided the initial logic for init and the game loop.
+        - Fshimi-Hawlk:
+            - Moved reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
+            - Added documentation
+
+    This module implements the main lobby scene that serves as the central hub
+    of the multi mini-game application. The player can:
+        - move around a small 2D platformer-style world,
+        - open a skin / texture selection menu,
+        - collide with designated trigger zones to launch individual mini-games.
+
+    Responsibilities:
+        - Setting seed for rand
+        - Window & camera initialization
+        - Player movement & basic platformer physics (via shared updatePlayer())
+        - Skin / player texture selection UI
+        - Collision-based mini-game activation with grace period / debounce
+        - Debug visualization (hitboxes, origin marker)
+        - Resource loading & cleanup for lobby-specific assets
+
+    Important data flow:
+      LobbyGame_St -> owns player, camera, sub-game manager state
+      SubGameManager -> controls which scene is active and whether initialization
+                       is required on next frame
+
+    Mini-game activation is currently performed via rectangular hitbox checks.
+    Future directions may include UI buttons, portals with animations, etc.
+
+    @note    Most mini-game specific logic is delegated to the corresponding
+             scene modules through the function pointer table in SubGameManager.
+
+    @see `core/game.h`       for `choosePlayerTexture()`, `toggleSkinMenu()`, `updatePlayer()`
+    @see `ui/app.h`          for `drawMenuTextures()`, `drawSkinButton()`
+    @see `ui/game.h`         for `drawPlatforms()`, `drawPlayer()`
+    @see `utils/globals.h`   for `logoSkinButton`, `platformCount`, `platforms`
+    @see `APIs/generalAPI.h` for `Error_Et`
+*/
 
 #include "core/game.h"
 
+#include "raylib.h"
 #include "ui/app.h"
 #include "ui/game.h"
 
+#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "lobbyAPI.h"
-#include "APIs/generalAPI.h"
+#include "systemSettings.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error;
@@ -62,9 +64,17 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     SetTraceLogLevel(LOG_WARNING);
 
     // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
+    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
 
     (void) configs; // Configs aren't used yet
+
+    systemSettings = DEFAULT_SYSTEM_SETTING;
+    systemSettings.video.resizable = true;
+    systemSettings.video.title = "Lobby";
+    error = applySystemSettings();
+    if (error != OK) {
+        log_error("System settings couldn't be applied corretly");
+    }
 
     (*game) = malloc(sizeof(LobbyGame_St));
     if (*game == NULL) return ERROR_ALLOC;
@@ -100,7 +110,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     /** Camera following the player in 2D mode */
     gameRef->cam = (Camera2D) {
-        .offset = {WINDOW_WIDTH / 2.0f, WINDOW_HEIGHT / 2.0f},
+        .offset = {systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f},
         .zoom   = 1.0f,
     };
     
@@ -171,7 +181,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             }
         } EndMode2D();
 
-        lobbyTextXPos = (WINDOW_WIDTH - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+        lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
         DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
         drawSkinButton();

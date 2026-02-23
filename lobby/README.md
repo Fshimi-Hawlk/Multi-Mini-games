@@ -1,6 +1,6 @@
-# Sub-Project Name
+# Lobby
 
-**Sub-Project Brief**
+**Lobby Brief**
 
 ## Overview
 
@@ -8,15 +8,20 @@ Some overview
 
 ### Core Gameplay 
 
-The sub-project core gameplay description
+The lobby core gameplay description
 
 [some link]()
 
 ## Project Goals
 
-sub-project goals
+lobby goals
 
 ## Tech / Structure Notes
 - Language: C
-- Folders: `src/`, `include/`, `tests/`, `assets/`, etc.
-- Documentation: Generated via Doxygen -> see [`docs/html/index.html`](./docs/html/index.html) (after running `doxygen`)
+- Folders: `src/`, `include/`, `tests/`, `assets/`, `docs`
+- Documentation: Generated via Doxygen -> see [`docs/index.html`](../../docs/index.html) (after running `make docs`)
+
+## Credits
+
+**Last updated: February 22, 2026**  
+**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
