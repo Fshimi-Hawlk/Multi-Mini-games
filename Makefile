@@ -28,7 +28,7 @@ endif
 MAKEFLAGS += --no-print-directory
 
 # Excluded directories
-EXCLUDED_DIRS := assets build docs firstparty lobby logs thirdparty
+EXCLUDED_DIRS := assets build docs firstparty lobby logs thirdparty sub-project-example
 
 # Detect modules (normalize by removing trailing /)
 MODULES := $(patsubst %/,%,$(wildcard */))
@@ -71,7 +71,7 @@ $(LIB_DIR)/lib%.a:
 	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	$(SILENT_PREFIX)echo "Building library for $(MOD_DIR)"
+	@echo "Building library for $(MOD_DIR)"
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
@@ -94,7 +94,7 @@ $(LIB_DIR)/lib%.a:
 
 # Normal incremental build of lobby executable
 bin: libs
-	$(SILENT_PREFIX)echo "Building lobby executable"
+	@echo "Building lobby executable (if needed)..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
 	$(SILENT_PREFIX)$(MAKE) -C lobby \
 		MODE=$(MODE) \
@@ -105,7 +105,7 @@ bin: libs
 
 # Force rebuild of lobby executable only (removes exe first)
 rebuild-exe: libs
-	$(SILENT_PREFIX)echo "Force rebuilding lobby executable..."
+	@echo "Force rebuilding lobby executable..."
 	$(SILENT_PREFIX)rm -f $(BIN_DIR)/$(MAIN_NAME)
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
 	$(SILENT_PREFIX)$(MAKE) -C lobby \
@@ -136,13 +136,13 @@ tests:
 			$(MAKE) -C "$$dir" tests MODE=$(MODE) VERBOSE=$(VERBOSE) || exit 1; \
 		fi; \
 	done
-	$(SILENT_PREFIX)echo ""
-	$(SILENT_PREFIX)echo "All test binaries built."
+	@echo ""
+	@echo "All test binaries built."
 
 run-tests: tests
-	$(SILENT_PREFIX)echo ""
-	$(SILENT_PREFIX)echo "Running all tests across modules..."
-	$(SILENT_PREFIX)echo "───────────────────────────────────────────────"
+	@echo ""
+	@echo "Running all tests across modules..."
+	@echo "───────────────────────────────────────────────"
 	$(SILENT_PREFIX)all_passed=1; \
 	total_modules=0; \
 	failed_modules=0; \
@@ -155,7 +155,7 @@ run-tests: tests
 			echo ""; \
 		fi; \
 	done
-	$(SILENT_PREFIX)echo "───────────────────────────────────────────────"
+	@echo "───────────────────────────────────────────────"
 	$(SILENT_PREFIX)if [ $$all_passed -eq 1 ]; then \
 		echo "ALL TESTS PASSED across $$total_modules module(s)."; \
 	else \
@@ -197,6 +197,11 @@ rebuild-exe: clean-exe bin
 
 rebuild-tests: clean tests
 
+docs-root:
+	@./generate-root-docs.sh
+
+docs: docs-root
+
 # ───────────────────────────────────────────────────────────────
 # Help
 # ───────────────────────────────────────────────────────────────
@@ -220,6 +225,8 @@ help:
 	@echo "    tests            Build all test executables"
 	@echo "    rebuild-tests    Clean and rebuild test executables"
 	@echo "    run-tests        Run all tests"
+	@echo "    docs-root        Build the root documentation"
+	@echo "    run-tests        Build the root documentation"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
@@ -229,7 +236,7 @@ help:
 	@echo "Notes:"
 	@echo "  - libs are built lazily (only when sources change)"
 	@echo "  - rebuild-exe forces relinking of the lobby executable"
-	@echo "  - clean only affects root build/ — use clean-all for full reset"
+	@echo "  - clean only affects root build/ - use clean-all for full reset"
 	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
 
-.PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests help
+.PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests docs docs-root help

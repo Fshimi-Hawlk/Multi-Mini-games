@@ -34,6 +34,14 @@ clean:
 
 static-lib: rebuild-obj $(STATIC_LIB)
 
+clean-docs:
+	@rm -rf docs/html docs/index.html 2>/dev/null || true
+
+doxygen: generate-docs.sh
+	@./generate-docs.sh
+
+docs: clean-docs doxygen
+
 help:
 	@echo "Usage: make [OPTIONS] [TARGET]"
 	@echo ""
@@ -48,6 +56,9 @@ help:
 	@echo "    run-gdb              Debug the main binary with gdb"
 	@echo "    run-tests            Build and run all tests, reporting failures at the end"
 	@echo "    clean                Remove all build artifacts and build folder"
+	@echo "    doxygen              Build documentation"
+	@echo "    clean-docs           Remove all of the generated documentation"
+	@echo "    docs                	Remove and build documentation"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>                  Compilation type: release, debug, strict-debug, clang-debug, valgrind-debug"

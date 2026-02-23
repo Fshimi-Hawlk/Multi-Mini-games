@@ -2,30 +2,31 @@
  * @file baseTypes.h
  * @author Fshimi-Hawlk
  * @date 2026-01-07
- * @date 2026-02-18
- * @brief Fixed-size integer aliases and small vector types used as near-primitive types throughout the project.
+ * @date 2026-02-20
+ * @brief Fixed-size integer aliases, small vector types, and common shorthand aliases
+ *        used as near-primitive types throughout the entire project (firstparty).
  *
  * This header defines:
  *   - unambiguous fixed-width integer types (u8, s32, u64, etc.)
  *   - matching small vector types (mostly 2D) with the same component types
+ *   - convenient shorthand aliases (uint, uchar, iVector2, uVector2, ...) for cases
+ *     where exact bit-width is not the primary concern
  *
  * Purpose:
  *   - Eliminate platform/size ambiguity when exact bit-width matters (networking, serialization, bitfields, etc.)
  *   - Provide lightweight named vector types that feel like built-ins
- *   - Keep all "primitive-feeling" typedefs in one place (as per project code style)
+ *   - Offer readable short aliases so team members don't fall back to plain `int`/`float` everywhere
+ *   - Keep all "primitive-feeling" typedefs in one shared place
  *
- * Guidelines:
- *   - Use these types instead of plain int/float when size or signedness is semantically important
- *   - For general-purpose 2D coordinates / velocities prefer Raylib's Vector2 (f32Vector2 is equivalent)
- *   - The various integer-based Vector2 types are mainly useful for grid coordinates, tile indices, texture sizes, etc.
- *
- * @note f32Vector2 is conditionally defined only if not already defined elsewhere (usually in common.h)
+ * @note All types in this file are part of the shared firstparty layer and should be used consistently across
+ *       the lobby and every sub-game.
  */
 
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // ────────────────────────────────────────────────
 // Fixed-width scalar types
@@ -47,6 +48,19 @@ typedef float     f32;    ///< 32-bit IEEE 754 floating-point
 typedef double    f64;    ///< 64-bit IEEE 754 floating-point
 
 // ────────────────────────────────────────────────
+// Convenience shorthand aliases (use when readability > exact size)
+// ────────────────────────────────────────────────
+
+typedef unsigned char       uchar;   ///< Shorthand for unsigned char
+typedef unsigned short      ushort;  ///< Shorthand for unsigned short
+typedef unsigned int        uint;    ///< Shorthand for unsigned int
+typedef unsigned long       ulong;   ///< Shorthand for unsigned long
+typedef unsigned long long  ullong;  ///< Shorthand for unsigned long long
+
+typedef struct { int  x, y; } iVector2;   ///< Signed int 2D vector - convenient when exact 32-bit width is not required.
+typedef struct { uint x, y; } uVector2;   ///< Unsigned int 2D vector - convenient when exact 32-bit width is not required.
+
+// ────────────────────────────────────────────────
 // 2D vector types (integer components)
 // ────────────────────────────────────────────────
 
@@ -59,7 +73,7 @@ typedef struct { s16 x, y; } s16Vector2;  ///< 16-bit signed
 typedef struct { u32 x, y; } u32Vector2;  ///< 32-bit unsigned
 typedef struct { s32 x, y; } s32Vector2;  ///< 32-bit signed (common for large grid/world positions)
 
-typedef struct { u64 x, y; } u64Vector2;  ///< 64-bit unsigned (rare — mostly for very large indices)
+typedef struct { u64 x, y; } u64Vector2;  ///< 64-bit unsigned (rare - mostly for very large indices)
 typedef struct { s64 x, y; } s64Vector2;  ///< 64-bit signed
 
 // ────────────────────────────────────────────────
@@ -68,14 +82,14 @@ typedef struct { s64 x, y; } s64Vector2;  ///< 64-bit signed
 
 #ifndef f32Vector2_def
 /**
- * @brief 32-bit float 2D vector — equivalent to Raylib's Vector2.
+ * @brief 32-bit float 2D vector - equivalent to Raylib's Vector2.
  *        Defined here only if not already provided (e.g. via common.h).
  */
 typedef struct { f32 x, y; } f32Vector2;
 #endif
 
 /**
- * @brief 64-bit float 2D vector (rarely needed — mostly for high-precision calculations).
+ * @brief 64-bit float 2D vector (rarely needed - mostly for high-precision calculations).
  */
 typedef struct { f64 x, y; } f64Vector2;
 
