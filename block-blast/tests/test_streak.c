@@ -3,8 +3,8 @@
  * @brief Unit tests for streak tracking and display.
  */
 
-#include "core/game/game.h"
-#include "core/game/board.h"
+#include "core/game.h"
+#include "core/board.h"
 
 #include <assert.h>
 

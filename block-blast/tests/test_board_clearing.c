@@ -3,8 +3,7 @@
  * @brief Unit tests for row/column detection and clearing.
  */
 
-#include "core/game/board.h"
-#include "utils/common.h"
+#include "core/board.h"
 
 #include <assert.h>
 

@@ -5,7 +5,7 @@
  * @brief Rendering of shapes and slots.
  */
 
-#include "core/game/shape.h"
+#include "core/shape.h"
 #include "ui/shape.h"
 #include "ui/board.h"
 // #include "utils/configs.h"

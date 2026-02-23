@@ -3,12 +3,11 @@
  * @brief Unit tests for scoring system.
  */
 
-#include "core/game/game.h"
-#include "core/game/board.h"
-#include "core/game/shape.h"
-#include "utils/common.h"
+#include "core/game.h"
+#include "core/board.h"
+#include "core/shape.h"
+
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 #include <assert.h>
 

@@ -5,8 +5,8 @@
  * @brief Score management functions implementatuion.
  */
 
-#include "core/game/game.h"
-#include "core/game/board.h"
+#include "core/game.h"
+#include "core/board.h"
 
 #include "utils/utils.h"
 

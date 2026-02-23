@@ -5,8 +5,8 @@
  * @brief Program entry point and main loop.
  */
 
-#include "core/game/shape.h"
-#include "core/game/game.h"
+#include "core/shape.h"
+#include "core/game.h"
 #include "setups/app.h"
 #include "ui/game.h"
 
@@ -29,23 +29,23 @@ int main(void) {
     while (!WindowShouldClose()) {
         bool allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
-            handleShape(&game.slots[i]);
+            handleShape(&game.prefabManager.slots[i]);
 
-            allPlaced &= game.slots[i].placed;
+            allPlaced &= game.prefabManager.slots[i].placed;
         }
 
         if (allPlaced) {
             adjustSizeWeights(&game, game.score - prevScore);
             for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
-                printf("%.3f ", game.sizeWeights.weights[i]);
+                printf("%.3f ", game.prefabManager.sizeWeights.baseWeights[i]);
             }
             nl
-            shuffleSlots(&game);
+            shuffleSlots(&game.prefabManager);
             prevScore = game.score;
         }
 
         if (IsKeyPressed(KEY_S)) {
-            shuffleSlots(&game);
+            shuffleSlots(&game.prefabManager);
         }
 
         BeginDrawing(); {

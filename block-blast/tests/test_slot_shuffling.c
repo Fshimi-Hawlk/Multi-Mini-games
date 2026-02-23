@@ -4,7 +4,7 @@
  */
 
 #include "setups/shape.h"
-#include "core/game/shape.h"
+#include "core/shape.h"
 #include "utils/utils.h"
 
 #include <assert.h>

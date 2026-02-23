@@ -5,7 +5,7 @@
 
 #include "utils/globals.h"
 
-#include "core/game/game.h"
+#include "core/game.h"
 
 #include "setups/app.h"
 

@@ -3,11 +3,8 @@
  * @brief Unit tests for shape validation and placement.
  */
 
-#include "core/game/shape.h"
-#include "utils/common.h"
-#include "utils/configs.h"
+#include "core/shape.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 #include <assert.h>
 

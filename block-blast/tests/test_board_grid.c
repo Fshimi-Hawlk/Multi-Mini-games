@@ -3,9 +3,8 @@
  * @brief Unit tests for 8x8 grid and board data.
  */
 
-#include "core/game/board.h"
+#include "core/board.h"
 #include "setups/game.h"
-#include "utils/userTypes.h"
 
 #include <assert.h>
 

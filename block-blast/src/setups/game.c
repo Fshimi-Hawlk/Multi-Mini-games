@@ -8,8 +8,8 @@
 #include "setups/game.h"
 #include "setups/shape.h"
 
-#include "core/game/game.h"
-#include "core/game/shape.h"
+#include "core/game.h"
+#include "core/shape.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"

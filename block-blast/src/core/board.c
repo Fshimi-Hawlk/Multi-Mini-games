@@ -6,7 +6,7 @@
  */
 
 #include "utils/userTypes.h"
-#include "core/game/board.h"
+#include "core/board.h"
 
 bool isInBound(const s8Vector2 pos, const Board_St* const board) {
     return (0 <= pos.x) && (pos.x < board->width)

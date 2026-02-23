@@ -5,13 +5,11 @@
  * @brief Implementation of shape handling and manipulation.
  */
 
-#include "core/game/game.h"
-#include "core/game/board.h"
-#include "core/game/shape.h"
+#include "core/game.h"
+#include "core/board.h"
+#include "core/shape.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 #include "utils/utils.h"
 
 bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {

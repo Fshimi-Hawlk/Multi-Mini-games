@@ -4,9 +4,8 @@
  */
 
 #include "setups/shape.h"
-#include "core/game/shape.h"
+#include "core/shape.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 #include <assert.h>
 
