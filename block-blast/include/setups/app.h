@@ -8,7 +8,7 @@
 #ifndef SETUPS_APP_H
 #define SETUPS_APP_H
 
-#include "utils/baseTypes.h"
+#include "baseTypes.h"
 
 /**
  * @brief Initializes and loads all application fonts.

@@ -11,7 +11,9 @@
 #include "core/game.h"
 #include "core/shape.h"
 
+#include "utils/common.h"
 #include "utils/globals.h"
+#include "utils/userTypes.h"
 #include "utils/utils.h"
 
 /**
@@ -22,7 +24,7 @@
  *
  * @param game Pointer to the current game state.
  */
-static void initSizeWeights(GameState_St* const game) {
+static void initSizeWeights(PrefabManager_St* const manager) {
     f32 baseWeights[MAX_SHAPE_SIZE] = {
         [0] = 0.05f,    // size 1
         [1] = 0.20f,
@@ -36,7 +38,7 @@ static void initSizeWeights(GameState_St* const game) {
     };
 
     for (u8 i = 0; i < MAX_SHAPE_SIZE; i++) {
-        game->prefabManager.sizeWeights.runTimeWeights[i] = game->prefabManager.sizeWeights.baseWeights[i] = baseWeights[i];
+        manager->sizeWeights.runTimeWeights[i] = manager->sizeWeights.baseWeights[i] = baseWeights[i];
     }
 }
 
@@ -47,7 +49,7 @@ void initGame(GameState_St* const game) {
             game->board.rowsToClear = context_alloc(game->board.height * sizeof(bool));
             game->board.columnsToClear = context_alloc(game->board.width * sizeof(bool));
 
-            initSizeWeights(game);
+            initSizeWeights(&game->prefabManager);
 
             f32Vector2 boardPos = {
                 .x = WINDOW_WIDTH / 2.0f,

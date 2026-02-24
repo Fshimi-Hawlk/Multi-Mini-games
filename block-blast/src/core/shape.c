@@ -251,7 +251,7 @@ static PrefabIndexBagVec_St* getRandomPrefabBag(PrefabManager_St* const manager)
         f32 prob = randfloat();
 #endif
         f32 weightedSum = 0.0f;
-        for (sizeIdx = 0; sizeIdx < manager->bags->count; ++sizeIdx) {
+        for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
             weightedSum += manager->sizeWeights.runTimeWeights[sizeIdx];
             if (prob <= weightedSum) break;
         }

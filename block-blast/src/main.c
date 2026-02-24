@@ -36,10 +36,7 @@ int main(void) {
 
         if (allPlaced) {
             adjustSizeWeights(&game, game.score - prevScore);
-            for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
-                printf("%.3f ", game.prefabManager.sizeWeights.baseWeights[i]);
-            }
-            nl
+            array_printContent("%.3f", game.prefabManager.sizeWeights.runTimeWeights, MAX_SHAPE_SIZE);
             shuffleSlots(&game.prefabManager);
             prevScore = game.score;
         }
