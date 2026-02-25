@@ -67,7 +67,7 @@ s32 main(void) {
 
                     error = applySystemSettings();
                     if (error != OK) {
-                        log_error("System settings couldn't be applied corretly");
+                        log_error("System settings couldn't be applied correctly");
                     }
                 }
 

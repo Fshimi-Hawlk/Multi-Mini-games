@@ -65,6 +65,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     // ── Initialization ───────────────────────────────────────────────────────
     InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
+    SetWindowPosition(100, 100);
 
     (void) configs; // Configs aren't used yet
 
@@ -82,7 +83,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     LobbyGame_St* gameRef = *game;
     memset(gameRef, 0, sizeof(*gameRef));
 
-    /** Hitbox that triggers the GameName mini-game when player collides */
+    /** Hitbox that triggers the Tetris mini-game when player collides */
     gameRef->subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = (Rectangle) {
         .x      = 600,
         .y      = -150,
