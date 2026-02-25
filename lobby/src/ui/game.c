@@ -52,3 +52,4 @@ void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
     }
 }
+

@@ -47,7 +47,8 @@ dkms.conf
 
 # Build artifacts
 build/
-./*/build/
+bin/
+obj/
 main
 
 # Logs / temp
@@ -58,4 +59,6 @@ main
 
 # Other
 template.h
-compile_flags.txt
+compile_flags.txtdocs/doxygen/
+
+docs/doxygen/
