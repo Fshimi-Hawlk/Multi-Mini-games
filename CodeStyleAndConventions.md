@@ -23,7 +23,8 @@ No Hungarian notation except the `_St`/`_Et` suffixes for types.
  - ### **Braces**:  
     - Control structures (if/while/for/switch) → opening brace on new line.
         ```C
-        while (!WindowShouldClose()) {
+        while (!WindowShouldClose())
+        {
             ...
         }
         ```
@@ -51,7 +52,7 @@ Example: `#ifndef CORE_GAME_BOARD_H`.
 
 ## Comments & Documentation
 
- - **Function Documentation**: Doxygen-style `/** @brief ... */` blocks in headers, see [doxygen documetation](https://www.doxygen.nl/manual/docblocks.html).
+ - **Function Documentation**: Doxygen-style `/** @brief ... */` blocks in headers, see [doxygen documentation](https://www.doxygen.nl/manual/docblocks.html).
  - **Inline Comments**: `//` for short notes, `/* ... */` for multi-line or disabled code.
  - **File Headers**: Include author, date, brief description.
  - **TODO/Warnings**: Plain comments, `TODO` macro or `log_warn` macro.

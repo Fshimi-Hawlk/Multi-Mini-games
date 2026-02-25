@@ -1,0 +1,158 @@
+/**
+    @page lobby_module Module Lobby
+
+    @section lobby_overview Vue d'ensemble
+
+    Le **Lobby** est le module central de Multi-Mini-Games. Il sert de hub de navigation
+    permettant au joueur de se deplacer dans un monde 2D style plateformer et d'acceder
+    aux differents mini-jeux via des zones de collision.
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+
+    @section lobby_arch Architecture
+
+    @subsection lobby_arch_components Composants principaux
+
+    - **LobbyGame_St**: Structure principale contenant l'etat complet du lobby
+    - **Player_st**: Entite joueur avec position, physique et skins
+    - **SubGameManager**: Gestionnaire de mini-jeux integres
+    - **Camera2D**: Camera suivant le joueur
+
+    @subsection lobby_arch_flow Flux de donnees
+
+    @verbatim
+    +------------------+
+    |   lobbyAPI.c     |
+    |  (point entree)  |
+    +--------+---------+
+             |
+             v
+    +------------------+     +------------------+
+    |   core/game.c    |---->|   ui/game.c      |
+    | (logique joueur) |     | (rendu joueur)   |
+    +------------------+     +------------------+
+             |
+             v
+    +------------------+
+    | SubGameManager   |
+    | (mini-jeux)      |
+    +------------------+
+    @endverbatim
+
+    @section lobby_api API du Lobby
+
+    @subsection lobby_api_init Initialisation
+
+    @code{.c}
+    Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs);
+    @endcode
+
+    Initialise le lobby avec:
+    - Creation de la fenetre via raylib
+    - Chargement des assets (textures, sons)
+    - Initialisation du joueur et de la camera
+    - Configuration des zones d'activation des mini-jeux
+
+    @subsection lobby_api_loop Boucle de jeu
+
+    @code{.c}
+    Error_Et lobby_gameLoop(LobbyGame_St* const game);
+    @endcode
+
+    Execute une frame du lobby:
+    - Mise a jour du joueur (deplacement, physique)
+    - Gestion du menu de skins
+    - Detection de collision avec zones de mini-jeux
+    - Rendu de la scene
+
+    @subsection lobby_api_free Liberation
+
+    @code{.c}
+    Error_Et lobby_freeGame(LobbyGame_St** game);
+    @endcode
+
+    Libere toutes les ressources:
+    - Textures du joueur
+    - Mini-jeux charges
+    - Fenetre raylib
+
+    @section lobby_integration Integration des mini-jeux
+
+    @subsection lobby_integration_hitbox Zones d'activation
+
+    Chaque mini-jeu est associe a une zone rectangulaire (hitbox).
+    Quand le joueur entre en collision avec cette zone, le jeu correspondant
+    est lance.
+
+    @code{.c}
+    // Definition d'une zone d'activation
+    game->subGameManager.gameHitboxes[GAME_SCENE_SUIKA] = (Rectangle) {
+        .x      = 600,
+        .y      = -150,
+        .width  = 75,
+        .height = 75
+    };
+    @endcode
+
+    @subsection lobby_integration_scene Gestion des scenes
+
+    Le `SubGameManager` gere la transition entre scenes:
+
+    @code{.c}
+    typedef struct {
+        BaseGame_St*     miniGames[__gameSceneCount];  // Instances des jeux
+        Rectangle        gameHitboxes[__gameSceneCount]; // Zones d'activation
+        GameScene_Et     currentScene;                  // Scene active
+        bool             needGameInit;                  // Initialisation requise
+        bool             gameHitGracePeriodActive;      // Anti-rebond
+    } SubGameManager_St;
+    @endcode
+
+    @section lobby_player Systeme joueur
+
+    @subsection lobby_player_physics Physique
+
+    Le joueur utilise un systeme de physique 2D basique:
+    - Gravite
+    - Deplacement horizontal
+    - Saut avec coyote time et jump buffering
+    - Collision avec plateformes
+
+    @subsection lobby_player_skins Systeme de skins
+
+    Le joueur peut changer d'apparence via le menu de skins:
+
+    @code{.c}
+    typedef enum {
+        PLAYER_TEXTURE_DEFAULT,
+        PLAYER_TEXTURE_EARTH,
+        PLAYER_TEXTURE_TROLL_FACE,
+        __playerTextureCount
+    } PlayerTextureId_Et;
+    @endcode
+
+    @section lobby_files Fichiers importants
+
+    | Fichier | Description |
+    |---------|-------------|
+    | `lobby/src/lobbyAPI.c` | Point d'entree et API publique |
+    | `lobby/src/core/game.c` | Logique du joueur et du lobby |
+    | `lobby/src/ui/game.c` | Rendu du lobby |
+    | `lobby/src/ui/app.c` | Interface utilisateur (menu skins) |
+    | `lobby/include/lobbyAPI.h` | Header API publique |
+    | `lobby/include/utils/globals.h` | Variables globales |
+
+    @section lobby_config Configuration
+
+    Le lobby utilise `systemSettings` pour la configuration video:
+
+    @code{.c}
+    systemSettings = DEFAULT_SYSTEM_SETTING;
+    systemSettings.video.resizable = true;
+    systemSettings.video.title = "Lobby";
+    @endcode
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+*/

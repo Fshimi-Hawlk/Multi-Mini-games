@@ -59,4 +59,5 @@ main
 
 # Other
 template.h
-compile_flags.txt
+compile_flags.txtdocs/doxygen/
+

@@ -1,0 +1,180 @@
+/**
+    @mainpage Multi-Mini-Games - Documentation
+
+    @section intro_sec Introduction
+
+    **Multi-Mini-Games** est un projet de Licence Informatique (2e annee, 2025-2026)
+    developpe en C avec la bibliotheque **raylib**. Le projet consiste a creer plusieurs
+    mini-jeux independants, puis a les integrer dans un lobby commun.
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+
+    @section team_sec Equipe projet
+
+    - BAUDET Leandre: Leandre.Baudet.Etu@univ-lemans.fr
+    - BERGE Kimi: Kimi.Berge.Etu@univ-lemans.fr
+    - CAILLON Charles: Charles_Caillon.Etu@univ-lemans.fr
+    - CHAUVEAU Maxime: Maxime.Chauveau.Etu@univ-lemans.fr
+
+    @section structure_sec Structure des dossiers
+
+    @verbatim
+    Multi-Mini-games/
+    ├── assets/                 # Images, sons, polices partages
+    │   └── fonts/              # Polices utilisees par les jeux
+    ├── docs/                   # Documentation du projet
+    │   ├── Doxyfile            # Configuration Doxygen principale
+    │   ├── mainpage.dox        # Cette page
+    │   ├── API_Conversion.md   # Guide de conversion API
+    │   └── makefile.md         # Documentation du Makefile
+    ├── lobby/                  # Module lobby (menu central)
+    │   ├── include/            # Headers du lobby
+    │   ├── src/                # Sources du lobby
+    │   ├── docs/               # Documentation specifique
+    │   └── assets/             # Assets du lobby
+    ├── suika/                  # Jeu Suika (Watermelon Game)
+    │   ├── include/            # Headers du jeu
+    │   ├── src/                # Sources du jeu
+    │   ├── docs/               # Documentation specifique
+    │   └── assets/             # Assets du jeu
+    ├── firstparty/             # Bibliotheques internes reutilisables
+    │   ├── APIs/               # APIs des mini-jeux
+    │   │   ├── generalAPI.h    # API de base commune
+    │   │   └── suikaAPI.h      # API du jeu Suika
+    │   ├── logger.h            # Systeme de logging
+    │   ├── baseTypes.h         # Types de base
+    │   └── contextArena.h      # Gestionnaire de memoire arena
+    ├── thirdparty/             # Bibliotheques externes
+    │   ├── raylib.h            # Raylib header
+    │   ├── libs/               # Bibliotheques compilees
+    │   └── arena.h             # Arena allocator
+    ├── Makefile                # Makefile racine
+    ├── README.md               # Description du projet
+    └── CONTRIBUTING.md         # Guide de contribution
+    @endverbatim
+
+    @section compile_sec Comment compiler
+
+    @subsection compile_root Au niveau racine
+
+    @code{.sh}
+    make help               # Voir toutes les cibles disponibles
+    make bin                # Compiler les bibliotheques + executable lobby
+    make rebuild-exe        # Forcer la recompilation de l'executable
+    make run-exe            # Lancer le lobby
+    make run-tests          # Executer tous les tests
+    make docs               # Generer la documentation
+    @endcode
+
+    @subsection compile_game Au niveau d'un mini-jeu
+
+    @code{.sh}
+    cd suika
+    make help               # Voir les options
+    make                    # Compilation par defaut (release)
+    make MODE=clang-debug   # Compilation avec debug/sanitizers
+    make run-main           # Lancer le jeu
+    make run-tests          # Executer les tests
+    @endcode
+
+    @section add_game_sec Comment ajouter un nouveau jeu
+
+    @subsection add_game_step1 Etape 1: Creer la structure
+
+    Copier le dossier `sub-project-example/` ou suivre la structure:
+
+    @verbatim
+    mon-jeu/
+    ├── assets/             # Assets specifiques
+    ├── include/
+    │   ├── core/           # Logique du jeu
+    │   ├── ui/             # Interface utilisateur
+    │   ├── utils/          # Utilitaires
+    │   └── monJeuAPI.h     # API publique
+    ├── src/                # Fichiers .c
+    ├── tests/              # Tests unitaires
+    ├── Makefile
+    └── Doxyfile.min
+    @endverbatim
+
+    @subsection add_game_step2 Etape 2: Implementer l'API
+
+    Le fichier API doit suivre le pattern defini dans `generalAPI.h`:
+
+    @code{.c}
+    typedef struct MonJeu_St MonJeu_St;
+
+    Error_Et monJeu_initGame(MonJeu_St** game);
+    Error_Et monJeu_gameLoop(MonJeu_St* game);
+    Error_Et monJeu_freeGame(MonJeu_St** game);
+    @endcode
+
+    La structure du jeu doit avoir `BaseGame_St base;` comme **premier membre**:
+
+    @code{.c}
+    struct MonJeu_St {
+        BaseGame_St base;    // OBLIGATOIRE en premier
+        // Champs specifiques...
+    };
+    @endcode
+
+    @subsection add_game_step3 Etape 3: Integrer au lobby
+
+    1. Ajouter l'enum dans `lobby/include/utils/userTypes.h`:
+       @code{.c}
+       typedef enum {
+           GAME_SCENE_LOBBY,
+           GAME_SCENE_SUIKA,
+           GAME_SCENE_MON_JEU,  // Nouveau
+           __gameSceneCount
+       } GameScene_Et;
+       @endcode
+
+    2. Ajouter la hitbox dans `lobby/src/lobbyAPI.c`:
+       @code{.c}
+       game->subGameManager.gameHitboxes[GAME_SCENE_MON_JEU] = (Rectangle) {
+           .x = 700, .y = -150, .width = 75, .height = 75
+       };
+       @endcode
+
+    3. Ajouter l'initialisation dans le switch de scene.
+
+    @subsection add_game_step4 Etape 4: Compiler et tester
+
+    @code{.sh}
+    # Dans le dossier du jeu
+    make && make run-main
+
+    # Dans le dossier racine
+    make bin && make run-exe
+    @endcode
+
+    @section modules_sec Modules
+
+    - @ref lobby_module "Lobby" - Hub central de navigation
+    - @ref suika_module "Suika" - Jeu Watermelon Game
+
+    @section docs_sec Documentation
+
+    Cette documentation est generee avec Doxygen. Pour la regenerer:
+
+    @code{.sh}
+    cd docs
+    doxygen Doxyfile
+    @endcode
+
+    Ouvrir ensuite `docs/doxygen/html/index.html`.
+
+    @section license_sec Licence
+
+    Voir le fichier LICENSE a la racine du projet.
+
+    @section credits_sec Credits
+
+    Projet realise dans le cadre du Licence Informatique 2e annee.
+    Universite du Mans - 2025-2026
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+*/

@@ -6,7 +6,7 @@ Un clone du célèbre jeu Suika où vous combinez des fruits pour créer des fru
 
 ## Fonctionnalités
 
-- Physique 2D réaliste avec Box2D
+- Physique 2D avec simulation personnalisée
 - 11 types de fruits différents (cerise → pastèque)
 - Système de fusion : 2 fruits identiques = 1 fruit plus gros
 - Score basé sur les fusions
@@ -23,10 +23,10 @@ Un clone du célèbre jeu Suika où vous combinez des fruits pour créer des fru
 ## Fruits (du plus petit au plus grand)
 
 1. Cerise 🍒
-2. Fraise 🍓
-3. Raisin 🍇
-4. Orange 🍊
-5. Kaki 🟠
+2. Raisin 🍇
+3. Fraise 🍓
+4. Clémentine 🍊
+5. Orange 🟠
 6. Pomme 🍎
 7. Poire 🍐
 8. Pêche 🍑

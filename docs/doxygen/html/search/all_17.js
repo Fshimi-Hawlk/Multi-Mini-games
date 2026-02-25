@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['règles_0',['Règles',['../md_suika_2README.html#autotoc_md43',1,'']]],
+  ['racine_1',['Au niveau racine',['../index.html#compile_root',1,'']]],
+  ['radius_2',['radius',['../structPlayer__st.html#abf66aa6e7b2795598b1503b7c675506b',1,'Player_st::radius'],['../structFruitProperties__St.html#a4d22b8f5b371d82654d38ba1fe0666d9',1,'FruitProperties_St::radius'],['../structFruit__St.html#afe9b3ce0ecda5f45df62051849c10a1e',1,'Fruit_St::radius']]],
+  ['randfloat_3',['randfloat',['../utils_8c.html#aef3cac1153323cedec3f6eed5b83c97d',1,'randfloat(void):&#160;utils.c'],['../suika_2include_2utils_2utils_8h.html#aef3cac1153323cedec3f6eed5b83c97d',1,'randfloat(void):&#160;utils.c']]],
+  ['randint_4',['randint',['../utils_8c.html#a70d41cbd578fdb7174003395df545fd8',1,'randint(u64 min, u64 max):&#160;utils.c'],['../suika_2include_2utils_2utils_8h.html#a70d41cbd578fdb7174003395df545fd8',1,'randint(u64 min, u64 max):&#160;utils.c']]],
+  ['readme_2emd_5',['readme.md',['../suika_2README_8md.html',1,'(Global Namespace)'],['../lobby_2README_8md.html',1,'(Global Namespace)']]],
+  ['rebuild_20run_20debug_3a_6',['rebuild run debug:',['../md_lobby_2makefile.html#autotoc_md27',1,'Full rebuild + run/debug:'],['../md_suika_2makefile.html#autotoc_md59',1,'Full rebuild + run/debug:']]],
+  ['rect_7',['rect',['../structPlatform__st.html#a4fd9cd89709e2c2c3eb88313f075c19f',1,'Platform_st']]],
+  ['reference_20what_20lives_20where_8',['reference what lives where',['../makefile-structure.html#autotoc_md49',1,'Quick Reference - What lives where'],['../makefile-structure.html#autotoc_md10',1,'Quick Reference - What lives where']]],
+  ['regles_20de_20base_9',['Regles de base',['../suika_module.html#suika_rules_basic',1,'']]],
+  ['regles_20du_20jeu_10',['Regles du jeu',['../suika_module.html#suika_rules',1,'']]],
+  ['related_20documentation_11',['related documentation',['../md_suika_2makefile.html#autotoc_md62',1,'Related documentation'],['../makefile-structure.html#autotoc_md51',1,'Related documentation'],['../makefile-structure.html#autotoc_md11',1,'Related documentation'],['../md_lobby_2makefile.html#autotoc_md30',1,'Related documentation']]],
+  ['release_20mode_20default_20_3a_12',['release mode default :',['../md_suika_2makefile.html#autotoc_md55',1,'Basic build (release mode, default):'],['../md_lobby_2makefile.html#autotoc_md23',1,'Basic build (release mode, default):']]],
+  ['removed_13',['removed',['../md_lobby_2CHANGELOG.html#autotoc_md5',1,'Removed'],['../md_suika_2CHANGELOG.html#autotoc_md37',1,'Removed']]],
+  ['resetlogopts_14',['resetLogOpts',['../logger_8h.html#adbe7733bb0c8ca34164f0266de543f04',1,'logger.h']]],
+  ['resizable_15',['resizable',['../structVideoSettings__St.html#afd41de2ed71b4bbe4f8a5afb3c5635e7',1,'VideoSettings_St']]],
+  ['resolvecirclerectcollision_16',['resolvecirclerectcollision',['../lobby_2src_2core_2game_8c.html#a30238db470edcd0634463922ff874a7d',1,'resolveCircleRectCollision(Player_st *player, Rectangle rect):&#160;game.c'],['../suika_2include_2core_2game_8h.html#ad71bc3f7df8cd8a88823d069c8e1a3a2',1,'resolveCircleRectCollision(Player_st *player, const Rectangle rect):&#160;game.c']]],
+  ['return_5fdefer_17',['return_defer',['../suika_2include_2utils_2utils_8h.html#a098c75becf880aa39e4f22b8348f8d06',1,'utils.h']]],
+  ['rgb_18',['RGB',['../suika_2include_2utils_2configs_8h.html#a4a118ad3ee36468a3fa616977a64864e',1,'configs.h']]],
+  ['rotation_19',['rotation',['../structFruit__St.html#a1dffcfa99c06e4cd5c6134659f660fe7',1,'Fruit_St']]],
+  ['roundness_20',['roundness',['../structPlatform__st.html#af3d2b9e3b6c9283323cae3917bc5d706',1,'Platform_st']]],
+  ['run_20debug_3a_21',['run debug:',['../md_lobby_2makefile.html#autotoc_md27',1,'Full rebuild + run/debug:'],['../md_suika_2makefile.html#autotoc_md59',1,'Full rebuild + run/debug:']]],
+  ['running_22',['running',['../structBaseGame__St.html#addb4b7829740b8b9441916eac1699c8f',1,'BaseGame_St']]]
+];
