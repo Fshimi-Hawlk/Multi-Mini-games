@@ -133,3 +133,4 @@ void drawWorldBoundaries(const Player_St* const player) {
         DrawLineEx((Vector2){limitR, wallTop}, (Vector2){limitR, wallTop + wallHeight}, 3.0f, (Color){255, 255, 255, alpha});
     }
 }
+

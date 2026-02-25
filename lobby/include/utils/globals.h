@@ -49,19 +49,13 @@ extern Texture2D backgroundTexture;
 // ────────────────────────────────────────────────
 
 /**
-    brief Screen-space rectangle where the "change skin" button is drawn and clickable.
+    @brief Screen-space rectangle where the "change skin" button is drawn and clickable.
           Used both for rendering and input detection.
 */
 extern Rectangle skinButtonRect;
 
 /**
-    brief Texture used for the skin selection menu toggle button.
-          Usually a gear icon, palette symbol or similar.
-*/
-extern Texture2D logoSkinButton;
-
-/**
-    brief Texture used for the skin selection menu toggle button.
+    @brief Texture used for the skin selection menu toggle button.
           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;

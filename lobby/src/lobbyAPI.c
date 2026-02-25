@@ -47,7 +47,6 @@
 
 #include "core/game.h"
 
-#include "raylib.h"
 #include "ui/app.h"                 // UI helpers (skin menu, buttons, etc.)
 #include "ui/game.h"                // Player drawing, platform logic
 #include "ui/grass.h"
@@ -61,7 +60,6 @@
 #include "utils/globals.h"
 
 #include "lobbyAPI.h"
-#include "systemSettings.h"
 
 static void updateCameraOnWindowResize(LobbyGame_St* const game) {
     const f32 originalWidth  = 800;

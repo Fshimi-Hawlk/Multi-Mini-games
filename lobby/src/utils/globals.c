@@ -70,8 +70,7 @@ Platform_St platforms[] = {
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-Rectangle skinButtonRect = { WINDOW_WIDTH - 70, WINDOW_HEIGHT / 2.0f - 25, 50, 50 };
-
+Rectangle skinButtonRect = {0};
 Texture2D logoSkinButton = {0};
 
 Texture2D platformTextures[__platformTypeCount] = {0};
