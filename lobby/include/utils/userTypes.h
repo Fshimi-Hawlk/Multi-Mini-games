@@ -52,7 +52,7 @@ typedef enum {
 */
 typedef enum {
     GAME_SCENE_LOBBY,       ///< Main lobby / hub world with platformer movement
-    GAME_SCENE_TETRIS,      ///< Classic falling blocks mini-game
+    GAME_SCENE_TETRIS,      ///< Tetris mini-game
     __gameSceneCount
 } GameScene_Et;
 

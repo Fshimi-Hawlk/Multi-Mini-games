@@ -1,24 +1,99 @@
 # ───────────────────────────────────────────────────────────────
-# Makefile ─ Project build system
-#
-#     Main targets: see 'make help' for the full list and descriptions
-#     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
-#
-#     Full documentation ->  makefile.md
-#     Quick usage        ->  make help
-#
-# Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
+# Lobby Makefile
+# Build: make [MODE=release|debug|strict-debug|clang-debug|valgrind-debug]
 # ───────────────────────────────────────────────────────────────
 
-MAKEFILE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-include $(MAKEFILE_DIR)make/00-config.mk
-include $(MAKEFILE_DIR)make/10-sources.mk
-include $(MAKEFILE_DIR)make/20-build-rules.mk
-include $(MAKEFILE_DIR)make/30-targets-main.mk
-include $(MAKEFILE_DIR)make/40-targets-tests.mk
-include $(MAKEFILE_DIR)make/50-tools.mk
+MODE ?= debug
+VERBOSE ?= 0
+MAIN_NAME := lobby
 
-# Optional local overrides (not in git)
--include $(MAKEFILE_DIR)make/99-overrides.mk
+SILENT := $(if $(filter 1,$(VERBOSE)),,@)
 
-.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests docs doxygen clean-docs help
+CC := gcc
+
+CFLAGS_common := -Iinclude -I../thirdparty -I../firstparty -I../tetris/include
+LDFLAGS_common := -L../thirdparty/libs/raylib-5.5_linux_amd64 -l:libraylib.a -lm ../tetris/build/lib/libtetris.a
+
+ifeq ($(MODE),release)
+    CFLAGS := -O2 -DNDEBUG $(CFLAGS_common)
+    LDFLAGS := -O2 $(LDFLAGS_common)
+else ifeq ($(MODE),debug)
+    CFLAGS := -Wall -Wextra -g -O0 -D_DEBUG $(CFLAGS_common)
+    LDFLAGS := -g -rdynamic -O0 $(LDFLAGS_common)
+else ifeq ($(MODE),strict-debug)
+    CFLAGS := -Werror -Wall -Wextra -pedantic -g -O0 -D_DEBUG $(CFLAGS_common)
+    LDFLAGS := -g -rdynamic -O0 -fno-omit-frame-pointer $(LDFLAGS_common)
+else ifeq ($(MODE),clang-debug)
+    CC := clang
+    CFLAGS := -Werror -Wall -Wextra -pedantic -g -O0 -D_DEBUG -fsanitize=address,undefined -Wno-gnu-zero-variadic-macro-arguments $(CFLAGS_common)
+    LDFLAGS := -g -O0 -fsanitize=address,undefined $(LDFLAGS_common)
+else ifeq ($(MODE),valgrind-debug)
+    CFLAGS := -Werror -Wall -Wextra -pedantic -g -O0 -D_DEBUG $(CFLAGS_common)
+    LDFLAGS := -g -rdynamic -O0 -fno-omit-frame-pointer $(LDFLAGS_common)
+else
+    $(error Unknown MODE=$(MODE). Use: release, debug, strict-debug, clang-debug, valgrind-debug)
+endif
+
+SRC_DIR := src
+BUILD_DIR := build
+OBJ_DIR := $(BUILD_DIR)/obj
+BIN_DIR := $(BUILD_DIR)/bin
+
+SOURCES := $(shell find $(SRC_DIR) -name '*.c')
+OBJECTS := $(SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+DEPS := $(OBJECTS:.o=.d)
+
+BIN := $(BIN_DIR)/$(MAIN_NAME)
+TETRIS_LIB := ../tetris/build/lib/libtetris.a
+
+CFLAGS += -MMD -MP
+-include $(DEPS)
+
+.PHONY: all clean rebuild run run-main run-gdb help tetris
+
+all: tetris $(BIN)
+
+tetris:
+	$(MAKE) -C ../tetris MODE=$(MODE)
+
+$(BIN): $(OBJECTS)
+	$(SILENT)mkdir -p $(@D)
+	$(SILENT)$(CC) $^ $(LDFLAGS) -o $@
+	@echo "Built: $@"
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(SILENT)mkdir -p $(@D)
+	$(SILENT)$(CC) $(CFLAGS) -c $< -o $@
+
+clean:
+	$(SILENT)rm -rf $(BUILD_DIR)
+
+rebuild: clean all
+
+run: all
+	@./$(BIN)
+
+run-main: all
+ifeq ($(MODE),valgrind-debug)
+	@mkdir -p logs
+	@valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes ./$(BIN) 2>&1 | tee logs/valgrind-$$(date +%d-%m-%Y-%H-%M-%S).log
+else
+	@./$(BIN)
+endif
+
+run-gdb: all
+	@gdb ./$(BIN)
+
+help:
+	@echo "Usage: make [TARGET] [MODE=...]"
+	@echo ""
+	@echo "Targets: all | clean | rebuild | run | run-main | run-gdb | help"
+	@echo ""
+	@echo "Modes:"
+	@echo "  release        - Optimized build"
+	@echo "  debug          - Debug build (default)"
+	@echo "  strict-debug   - Strict debug with -Werror"
+	@echo "  clang-debug    - Clang with sanitizers"
+	@echo "  valgrind-debug - For valgrind testing"
+	@echo ""
+	@echo "Options: VERBOSE=1 to show commands"
