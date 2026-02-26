@@ -11,13 +11,13 @@ A faithful **reproduction** + **feature expansion** of the popular mobile puzzle
 ### Core Gameplay (Original Game)
 - Each turn, **three random polyomino shapes** appear at the bottom.
 - Drag and drop them onto the grid (no rotation in classic mode).
-- Fill any **full row** or **full column** → it clears automatically, awarding points.
+- Fill any **full row** or **full column** -> it clears automatically, awarding points.
 - **Combos & streaks** give bonus points (e.g., clearing multiple lines at once or consecutively).
 - Game over when none of the three shapes can be placed anywhere on the board.
 
 The original is known for its calm pace, no timers, offline play, and addictive "just one more turn" feel. It has millions of downloads and remains a top free puzzle game on iOS/Android.
 
-→ Official app links:  
+-> Official app links:  
 [App Store (iOS)](https://apps.apple.com/us/app/block-blast/id1617391485) · [Google Play (Android)](https://play.google.com/store/apps/details?id=com.block.juggle)
 
 ## Project Goals
@@ -53,6 +53,6 @@ This sub-project aims to:
 ## Tech / Structure Notes
 - Language: C
 - Folders: `src/`, `include/`, `tests/`, `assets/`, etc.
-- Documentation: Generated via Doxygen → see [`docs/html/index.html`](./docs/html/index.html) (after running `doxygen`)
+- Documentation: Generated via Doxygen -> see [`docs/html/index.html`](./docs/html/index.html) (after running `doxygen`)
 
 Contributions, ideas, or bug reports are welcome!

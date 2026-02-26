@@ -18,7 +18,6 @@ else ifeq ($(MODE),debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -37,7 +36,7 @@ else ifeq ($(MODE),strict-debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
+		-Wno-unused-variable \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -56,7 +55,6 @@ else ifeq ($(MODE),clang-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-macro-redefined \
 		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \

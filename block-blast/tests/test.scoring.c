@@ -1,11 +1,11 @@
 /**
- * @file test_scoring.c
- * @brief Unit tests for scoring system.
- */
+    file test_scoring.c
+    brief Unit tests for scoring system.
+*/
 
 #include "core/game.h"
 #include "core/board.h"
-#include "core/shape.h"
+#include "core/placement.h"
 
 #include "utils/globals.h"
 
@@ -44,7 +44,7 @@ static void test_manage_score(void) {
     testGame.board.rowsToClear = context_alloc(testGame.board.height * sizeof(bool));
     testGame.board.columnsToClear = context_alloc(testGame.board.width * sizeof(bool));
     
-    ActivePrefab_St mockShape = {.prefab = &prefabs[PREFAB_1x4]};
+    Shape_St mockShape = {.prefab = &prefabs[PREFAB_1x4]};
 
     // Base placement: +40 (no clear)
     placeShape(&mockShape, (u8Vector2) {0, 0}, &testGame.board);

@@ -26,6 +26,7 @@
 #define BASE_TYPES_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 // ────────────────────────────────────────────────
 // Fixed-width scalar types

@@ -1,19 +1,20 @@
 /**
- * @file shape.c (setups)
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Prefab initialization and variant computation.
- */
+    @file shape.c (setups)
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Prefab initialization and variant computation.
+*/
 
 #include "setups/shape.h"
 
-#include "core/shape.h"
+#include "core/prefab.h"
 
 #include "utils/globals.h"
 
-void initPrefabsAndVariants(PrefabManager_St* const manager) {
-    u8 initCount = manager->prefabVariant == GAME_PREFAB_VARIANT_DEFAULT
-                 ? _prefabNameCount : prefabCount;
+void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag, GamePrefabVariant_Et variant) {
+    u8 initCount = variant == GAME_PREFAB_VARIANT_DEFAULT
+                 ? _prefabNameCount
+                 : prefabCount;
 
     for (u32 i = 0; i < initCount; ++i) {
         Prefab_St prefab = prefabs[i];
@@ -24,24 +25,24 @@ void initPrefabsAndVariants(PrefabManager_St* const manager) {
             initPrefab(&prefab);
         }
 
-        addPrefabAndVariants(prefab, &manager->prefabsBag);
+        addPrefabAndVariants(prefab, prefabsBag);
     }
 
     for (u8 i = 1; i < MAX_SHAPE_SIZE; ++i) { // hence 0 is left to zero intentionally
-        prefabsPerSizeOffsets[i] = manager->prefabsBag.count - 1;
+        prefabsPerSizeOffsets[i] = prefabsBag->count - 1;
     }
 
     // it assumed that prefabBag is sorted by blockCount ascending
     // if it's init via `initPrefabsAndVariants`, then it is.
-    for (u32 i = 1; i < manager->prefabsBag.count; ++i) {
-        if (manager->prefabsBag.items[i - 1].blockCount != manager->prefabsBag.items[i].blockCount) {
-            prefabsPerSizeOffsets[(manager->prefabsBag.items[i].blockCount - 1)] = i;
+    for (u32 i = 1; i < prefabsBag->count; ++i) {
+        if (prefabsBag->items[i - 1].blockCount != prefabsBag->items[i].blockCount) {
+            prefabsPerSizeOffsets[(prefabsBag->items[i].blockCount - 1)] = i;
         }
     }
 
     // back propagation in case of gaps avoiding wrong max for unset offsets
     for (u8 i = MAX_SHAPE_SIZE - 2; i > 0; --i) {
-        if (prefabsPerSizeOffsets[i] == manager->prefabsBag.count - 1)
+        if (prefabsPerSizeOffsets[i] == prefabsBag->count - 1)
             prefabsPerSizeOffsets[i] = prefabsPerSizeOffsets[i + 1];
     }
 }

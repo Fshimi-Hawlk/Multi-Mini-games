@@ -2,11 +2,11 @@
 #define BLOCK_BLAST_API_H
 
 /**
- * @file utils.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief .
- */
+    @file utils.h
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief .
+*/
 
 /*
 TODO

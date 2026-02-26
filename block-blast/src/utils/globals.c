@@ -1,19 +1,22 @@
 /**
- * @file globals.c
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Definitions of global variables.
- */
+    @file globals.c
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Definitions of global variables.
+*/
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
-ActivePrefab_St *shapeBag = NULL;
+GameState_St mainGameState = {0};
+GameState_St previousGameState = {0};
 
+Shape_St *shapeBag = NULL;
+GamePrefabVariant_Et prefabVariant = GAME_PREFAB_VARIANT_DEFAULT;
+PrefabBagVec_St prefabsBag = {0};
 u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE] = {0};
 
 GameState_St game = {0};
@@ -28,7 +31,7 @@ const f32Vector2 defaultPositions[3] = {
     {.x = WINDOW_WIDTH * 82.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
 };
 
-const color32 blockColors[_blockColorCount] = {
+const Color blockColors[_blockColorCount] = {
     { .r = 254, .g =  40, .b =  44, .a = 255 }, // Red
     { .r = 232, .g = 116, .b =  33, .a = 255 }, // Orange
     { .r = 242, .g = 187, .b =  58, .a = 255 }, // Yellow

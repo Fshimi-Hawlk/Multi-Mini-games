@@ -1,9 +1,9 @@
 /**
- * @file common.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Common includes, typedefs, and configuration headers.
- */
+    @file common.h
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Common includes, typedefs, and configuration headers.
+*/
 
 #ifndef COMMON_H
 #define COMMON_H
@@ -46,9 +46,6 @@
 
 typedef Vector2 f32Vector2;
 #define f32Vector2_def
-
-typedef Color ColorRGBA_St;
-typedef ColorRGBA_St color32;
 
 #include "baseTypes.h"
 #include "configs.h"

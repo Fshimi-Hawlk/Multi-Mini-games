@@ -1,56 +1,135 @@
 /**
- * @file game.h (core/game)
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Score management functions implementatuion.
- */
+    @file game.h (core/game)
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Score management functions implementatuion.
+*/
 
 #include "core/game.h"
 #include "core/board.h"
+#include "core/placement.h"
 
 #include "utils/utils.h"
 
-void buildScoreRelatedTexts(GameState_St* const game) {
-    // build score text
-    snprintf(game->scoreText, sizeof(game->scoreText), "Score: %lu", game->score);
+#define da_copy(da, copy)  \
+    do {                   \
+        (copy)->count = 0; \
+        da_append_many(    \
+            (copy),        \
+            (da)->items,   \
+            (da)->count    \
+        );                 \
+    } while (0)
 
-    // build streak text
-    snprintf(game->streakText, sizeof(game->streakText), "Streak: %u", game->streakCount);
+PrefabManager_St deepcopyPrefabManager(const PrefabManager_St* const manager) {
+    PrefabManager_St copy = {0};
+    memcpy(&copy.sizeWeights, &manager->sizeWeights, sizeof(SizeWeight_St));
+
+    for (u8 i = 0; i < MAX_SHAPE_SIZE; i++) {
+        copy.bags[i].count = 0;
+        if (manager->bags[i].count == 0) continue;
+        da_append_many(&copy.bags[i], manager->bags[i].items, manager->bags[i].count);
+    }
+
+    return copy;
 }
 
-f32 calculateScore(const Board_St* const board) {
+AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* const shape) {
+    AnchorVec_St anchors = {0};
+
+    if (board == NULL || shape == NULL || shape->prefab == NULL) return anchors;
+
+    const u8 maxY = board->height - shape->prefab->height;
+    const u8 maxX = board->width - shape->prefab->width;
+
+    for (u8 y = 0; y <= maxY; ++y) {
+        for (u8 x = 0; x <= maxX; ++x) {
+            u8Vector2 anchor = {x, y};
+            if (isShapePlaceable(shape, castTo(s8Vector2) &anchor, board)) {
+                da_append(&anchors, anchor);
+            }
+        }
+    }
+
+    return anchors;
+}
+
+bool testGameOver(Board_St board, const ShapeSlots_t slots) {
+    static const u8 permutations[6][3] = {
+        {0, 1, 2}, {0, 2, 1},
+        {1, 0, 2}, {1, 2, 0},
+        {2, 0, 1}, {2, 1, 0}
+    };
+
+    bool allPlaced = true;
+    Board_St simBoard = board;
+
+    for (u8 p = 0; p < 6; p++) {
+        allPlaced = canPlaceAll(&simBoard, slots, permutations[p], 0);
+
+        if (allPlaced) break;
+    }
+
+    return !allPlaced;
+}
+
+void buildScoreRelatedTexts(ScoringState_St* const scoringState) {
+    // build score text
+    snprintf(scoringState->scoreText, sizeof(scoringState->scoreText), "Score: %lu", scoringState->score);
+
+    // build streak text
+    snprintf(scoringState->streakText, sizeof(scoringState->streakText), "Streak: %u", scoringState->streakCount);
+}
+
+/**
+    @brief Computes score increment from the latest placement.
+
+    Scoring rules (as currently implemented):
+      - Base: SCORE_PER_LINE_CLEAR per cleared line (row or column)
+      - Multiplier: 1.0 + 0.5 × (number of lines cleared - 1) when ≥ 2 lines
+        -> 1 line  = ×1.0
+        -> 2 lines = ×1.5
+        -> 3 lines = ×2.0
+        -> etc.
+
+    Counts both row clears and column clears independently.
+    Does **not** include the per-block-placed bonus — that's handled separately
+    in manageScore().
+
+    @param board  Board after placement but before clearBoard() is called
+    @return       Score to add from line clears only (float because of multiplier)
+*/
+static f32 calculateBoardClearingScore(const Board_St* const board) {
     u8 linesCleared = 0;
     for (u8 row = 0; row < board->width; ++row) {
-        linesCleared += (u8) board->rowsToClear[row];
+        linesCleared += board->rowsToClear[row];
     }
 
     for (u8 col = 0; col < board->height; ++col) {
-        linesCleared += (u8) board->columnsToClear[col];
+        linesCleared += board->columnsToClear[col];
     }
 
     f32 multiBonus = linesCleared > 1 ? 1.0f + 0.5f * (linesCleared - 1) : 1.0f;
     return linesCleared * SCORE_PER_LINE_CLEAR * multiBonus;
 }
 
-void manageScore(GameState_St* const game, const u8 prefabBlockCount) {
-    game->score += prefabBlockCount * SCORE_PER_UNIT_PLACED;
+void manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount) {
+    scoringState->score += prefabBlockCount * SCORE_PER_UNIT_PLACED;
 
-    if (checkBoardForClearing(&game->board)) {
-        clearBoard(&game->board);
+    if (checkBoardForClearing(board)) {
+        scoringState->streakCount++;
+        scoringState->streakGrace = (scoringState->streakCount + 1) / 2;
 
-        game->streakCount++;
-        game->streakPlacementResetCnt = 0;
-        game->score += calculateScore(&game->board) * game->streakCount;
-    } else {
-        game->streakPlacementResetCnt++;
+        scoringState->score += calculateBoardClearingScore(board) * scoringState->streakCount;
+    } else if (scoringState->streakGrace > 0) {
+        scoringState->streakGrace--;
+
+        if (scoringState->streakGrace == 0) {
+            scoringState->streakCount = 0;
+        }
     }
 
-    if (game->streakPlacementResetCnt >= (game->streakCount / 2.0f)) {
-        game->streakCount = 0;
-        game->streakPlacementResetCnt = 0;
-    }
-
-    buildScoreRelatedTexts(game);
+    buildScoreRelatedTexts(scoringState);
 }
 
 void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
@@ -77,7 +156,7 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     const f32 TRANSFER_PERF_WEIGHT       = 0.4f;     // how much this-turn perf affects transfer
 
     // Recovery boost when board is crowded (helps small shapes come back)
-    const f32 FULLNESS_RECOVERY_THRESHOLD  = 0.75f;    // board fullness above this → stronger left shift
+    const f32 FULLNESS_RECOVERY_THRESHOLD  = 0.75f;    // board fullness above this -> stronger left shift
     const f32 FULLNESS_RECOVERY_MULTIPLIER = 1.5f;     // how much extra mass to move when crowded
 
     // Minimum weight floors (already in your code, but centralized here)
@@ -87,10 +166,10 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // 1. Shift calculation
     f32 shift = 0.0f;
 
-    // Streak → bigger shapes
-    shift += game->streakCount * STREAK_SHIFT_PER_LEVEL;
+    // Streak -> bigger shapes
+    shift += game->scoring.streakCount * STREAK_SHIFT_PER_LEVEL;
 
-    // Fullness → smaller shapes when crowded
+    // Fullness -> smaller shapes when crowded
     u32 emptyCells = getEmptyCellCount(&game->board);
     f32 fullnessRatio = 1.0f - (emptyCells / (f32) (game->board.width * game->board.height));
     shift -= fullnessRatio * FULLNESS_MAX_SHIFT;
@@ -98,7 +177,7 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // This turn's performance
     f32 placementScore = 0;
     for (u8 i = 0; i < 3; ++i) {
-        placementScore += game->prefabManager.slots->prefab->blockCount * SCORE_PER_UNIT_PLACED;
+        placementScore += game->prefabManager.slots[i].prefab->blockCount * SCORE_PER_UNIT_PLACED;
     }
 
     f32 performanceBonus = scoreDelta - placementScore;
@@ -115,7 +194,7 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     const f32 lowEnd[]   = {0,1,2,3};
     const f32 highEnd[]  = {4,5,6,7,8};
 
-    f32 streakFactor = STREAK_FACTOR_BASE + game->streakCount * STREAK_FACTOR_PER_LEVEL;
+    f32 streakFactor = STREAK_FACTOR_BASE + game->scoring.streakCount * STREAK_FACTOR_PER_LEVEL;
     f32 totalTransfer = fabsf(shift) 
                       * (streakFactor + TRANSFER_PERF_WEIGHT * perfFactor)
                       * fullnessRatio;

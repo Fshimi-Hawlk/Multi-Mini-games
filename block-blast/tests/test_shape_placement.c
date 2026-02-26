@@ -29,7 +29,7 @@ static void test_shape_in_bounds(void) {
         .y = mockBoardPos.y - mockBoardPxSize.y / 2.0f
     };
 
-    ActivePrefab_St mockShape = {
+    Shape_St mockShape = {
         .center = mockBoard.pos,
         .prefab = &prefabs[PREFAB_1x1],
     };
@@ -44,7 +44,7 @@ static void test_shape_in_bounds(void) {
 
 static void test_can_place_at(void) {
     Board_St testBoard = {.width = 8, .height = 8};
-    ActivePrefab_St mockShape = {0};
+    Shape_St mockShape = {0};
     mockShape.prefab = &prefabs[PREFAB_1x1];
     s8Vector2 pos = {0, 0};
 
@@ -58,7 +58,7 @@ static void test_can_place_at(void) {
 
 static void test_place_shape(void) {
     Board_St testBoard = {.width = 8, .height = 8};
-    ActivePrefab_St mockShape = {
+    Shape_St mockShape = {
         .prefab = &prefabs[PREFAB_1x2],
         .colorIndex = 0
     };

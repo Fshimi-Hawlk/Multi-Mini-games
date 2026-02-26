@@ -1,9 +1,9 @@
 /**
- * @file utils.c
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Implementation of utility functions.
- */
+    @file utils.c
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Implementation of utility functions.
+*/
 
 #include "utils/utils.h"
 

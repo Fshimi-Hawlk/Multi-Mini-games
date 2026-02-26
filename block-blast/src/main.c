@@ -1,17 +1,19 @@
 /**
- * @file main.c
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Program entry point and main loop.
- */
+    @file main.c
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Program entry point and main loop.
+*/
 
 #include "core/shape.h"
+#include "core/placement.h"
 #include "core/game.h"
-#include "setups/app.h"
+
 #include "ui/game.h"
 
+#include "setups/app.h"
+
 #include "utils/globals.h"
-#include "utils/utils.h"
 
 int main(void) {
     if (!initApp()) {
@@ -22,33 +24,40 @@ int main(void) {
 
     // game.sceneState = SCENE_STATE_ALL_PREFABS;
 
-    // log_info("%u", prefabsBag.count);
-
-    f64 prevScore = game.score;
+    f64 prevScore = mainGameState.scoring.score; // TODO: Useful when loading a mainGameState from save file
 
     while (!WindowShouldClose()) {
-        bool allPlaced = true;
-        for (u8 i = 0; i < 3; ++i) {
-            handleShape(&game.prefabManager.slots[i]);
-
-            allPlaced &= game.prefabManager.slots[i].placed;
+        if (!mainGameState.gameOver) {
+            bool allPlaced = true;
+            for (u8 i = 0; i < 3; ++i) {
+                handleShape(&mainGameState, &mainGameState.prefabManager.slots[i]);
+    
+                allPlaced &= mainGameState.prefabManager.slots[i].placed;
+            }
+    
+            if (allPlaced) {
+                adjustSizeWeights(&mainGameState, mainGameState.scoring.score - prevScore);
+                // array_printContent("%.3f ", mainGameState.prefabManager.sizeWeights.runTimeWeights, MAX_SHAPE_SIZE);
+                shuffleSlots(&mainGameState.prefabManager);
+                // if (mainGameState.scoring.score > 0) {
+                    placementSimulation(&mainGameState);
+                // }
+                prevScore = mainGameState.scoring.score;
+            }
+    
+            if (IsKeyPressed(KEY_S)) {
+                shuffleSlots(&mainGameState.prefabManager);
+            }
         }
-
-        if (allPlaced) {
-            adjustSizeWeights(&game, game.score - prevScore);
-            array_printContent("%.3f", game.prefabManager.sizeWeights.runTimeWeights, MAX_SHAPE_SIZE);
-            shuffleSlots(&game.prefabManager);
-            prevScore = game.score;
-        }
-
-        if (IsKeyPressed(KEY_S)) {
-            shuffleSlots(&game.prefabManager);
+        
+        if (IsKeyPressed(KEY_U)) {
+            mainGameState = previousGameState;
         }
 
         BeginDrawing(); {
             ClearBackground(APP_BACKGROUND_COLOR);
 
-            drawUI(&game);
+            drawUI(&mainGameState);
         } EndDrawing();
     }
 

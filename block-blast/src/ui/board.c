@@ -1,14 +1,14 @@
 /**
- * @file board.c (ui)
- * @author Fshimi Hawlk
- * @date 2026-01-07
- * @brief Board rendering implementation.
- */
+    @file board.c (ui)
+    @author Fshimi Hawlk
+    @date 2026-01-07
+    @brief Board rendering implementation.
+*/
 
 #include "ui/board.h"
 #include "utils/globals.h"
 
-void drawBlock(const f32Vector2 pos, const color32 color) {
+void drawBlock(const f32Vector2 pos, const Color color) {
     s32 ix = roundf(pos.x);
     s32 iy = roundf(pos.y);
 
@@ -25,7 +25,7 @@ void drawBoard(const Board_St board) {
             };
 
             Block_St block = board.blocks[r][c];
-            color32 tileColor;
+            Color tileColor;
             if (block.hitsLeft == 0) {
                 tileColor = BOARD_EMPTY_TILE_COLOR;
             } else if (block.hitsLeft < 0) {
