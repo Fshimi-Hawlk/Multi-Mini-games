@@ -15,8 +15,8 @@ bool initBoard(Board_St* const board);
 /**
     @brief Initializes the game: prefabs, board, and state.
 
- Sets up board, fills prefab bags, shuffles initial slots.
+    Sets up board, fills prefab bags, shuffles initial slots.
 */
-void initGame(GameState_St* const game);
+bool initGame(GameState_St* const game, bool fromLoad);
 
 #endif // SETUPS_GAME_H

@@ -83,8 +83,6 @@ void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag) {
     }
 }
 
-
-
 void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 

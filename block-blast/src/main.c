@@ -9,10 +9,12 @@
 #include "core/placement.h"
 #include "core/game.h"
 
+#include "setups/save.h"
 #include "ui/game.h"
 
 #include "setups/app.h"
 
+#include "utils/common.h"
 #include "utils/globals.h"
 
 int main(void) {
@@ -45,13 +47,32 @@ int main(void) {
                 prevScore = mainGameState.scoring.score;
             }
     
-            if (IsKeyPressed(KEY_S)) {
+            if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
+                u64 newStateLoadingBufferSize = getSerializedGameStateSize(&mainGameState);
+                if (newStateLoadingBufferSize != stateLoadingBufferSize) {
+                    stateLoadingBufferSize = newStateLoadingBufferSize;
+                    if (stateLoadingBuffer != NULL) free(stateLoadingBuffer);
+                    stateLoadingBuffer = malloc(stateLoadingBufferSize);
+                }
+
+                if (stateLoadingBuffer == NULL) {
+                    log_error("Couldn't allocate stateLoadingBuffer");
+                }
+
+                s64 diff = serializeGameState(&mainGameState, stateLoadingBuffer, stateLoadingBufferSize);
+                if (diff != 0) {
+                    log_warn("The new computed buffer size is incorrect by %zi", diff);
+                }
+            } else if (IsKeyPressed(KEY_S)) {
                 shuffleSlots(&mainGameState.prefabManager);
             }
         }
         
         if (IsKeyPressed(KEY_U)) {
-            mainGameState = previousGameState;
+            if (!deserializeGameState(&mainGameState, stateLoadingBuffer, stateLoadingBufferSize, false)) {
+                log_warn("Couldn't deserialized last save");
+            }
+            buildScoreRelatedTexts(&mainGameState.scoring);
         }
 
         BeginDrawing(); {

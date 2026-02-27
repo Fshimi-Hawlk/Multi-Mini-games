@@ -236,6 +236,7 @@ typedef struct {
     char scoreText[32];         ///< "Score: %lu"
     char streakText[32];        ///< "Streak: %u"
 } ScoringState_St;
+
 /**
     @brief Core game state, encapsulating board, UI, and scoring.
 

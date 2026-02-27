@@ -14,6 +14,9 @@ Font      appFont = {0};
 GameState_St mainGameState = {0};
 GameState_St previousGameState = {0};
 
+u8* stateLoadingBuffer = NULL;
+u64 stateLoadingBufferSize = 0;
+
 Shape_St *shapeBag = NULL;
 GamePrefabVariant_Et prefabVariant = GAME_PREFAB_VARIANT_DEFAULT;
 PrefabBagVec_St prefabsBag = {0};

@@ -23,6 +23,9 @@ extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing
 extern GameState_St mainGameState;
 extern GameState_St previousGameState;
 
+extern u8* stateLoadingBuffer;
+extern u64 stateLoadingBufferSize;
+
 extern GamePrefabVariant_Et prefabVariant;          ///< Which set of prefabs is active.
 extern u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE];   ///< array to record the starting indexes whenever the blockCount changes
 extern PrefabBagVec_St prefabsBag;                  ///< Complete bag of every prefab variant (rotations + mirrors when applicable).

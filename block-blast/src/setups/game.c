@@ -6,6 +6,7 @@
 */
 
 #include "setups/game.h"
+#include "setups/save.h"
 #include "setups/shape.h"
 
 #include "core/game.h"
@@ -17,10 +18,10 @@
 
 /**
     @brief Initializes size-based runTimeWeights for random prefab selection.
- *
- * Sets baseWeights to fixed probabilities, copies to runTimeWeights for runtime adjustment.
- * Larger shapes might have lower runTimeWeights to control difficulty.
- *
+
+    Sets baseWeights to fixed probabilities, copies to runTimeWeights for runtime adjustment.
+    Larger shapes might have lower runTimeWeights to control difficulty.
+
     @param game Pointer to the current game state.
 */
 static void initSizeWeights(PrefabManager_St* const manager) {
@@ -46,8 +47,6 @@ bool initBoard(Board_St* const board) {
         log_warn("Received NULL board");
         return false;
     }
-
-    board->width = board->height = 8;
 
     f32Vector2 boardPos = {
         .x = WINDOW_WIDTH / 2.0f,
@@ -94,17 +93,30 @@ bool initPrefabManager(PrefabManager_St* const manager) {
     return true;
 }
 
-void initGame(GameState_St* const game) {
+bool initGame(GameState_St* const game, bool fromLoad) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
-            initBoard(&game->board);
-            buildScoreRelatedTexts(&game->scoring);
+            if (fromLoad) {
+                initPrefabManager(&game->prefabManager);
+                
+                if (!deserializeGameState(game, stateLoadingBuffer, stateLoadingBufferSize, true)) {
+                    log_warn("Can't load that save file");
+                }
 
-            da_reserve(&prefabsBag, 200);
-            initPrefabsAndVariants(&prefabsBag, prefabVariant);
-            
-            initPrefabManager(&game->prefabManager);
-            placementSimulation(game);
+                initBoard(&game->board);
+                buildScoreRelatedTexts(&game->scoring);
+            } else {
+                initPrefabsAndVariants(&prefabsBag, prefabVariant);
+                initPrefabManager(&game->prefabManager);
+
+                game->board.width = game->board.height = 8;
+                initBoard(&game->board);
+                buildScoreRelatedTexts(&game->scoring);
+                
+                placementSimulation(game);
+            }
+
+            return true;
         } break;
 
         case SCENE_STATE_ALL_PREFABS: {
@@ -125,6 +137,8 @@ void initGame(GameState_St* const game) {
                     }
                 };
             }
+
+            return true;
         } break;
 
         default: UNREACHABLE("GameSceneState_St");

@@ -5,6 +5,7 @@
     @brief Application setup and teardown.
 */
 
+#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "setups/app.h"
@@ -47,11 +48,15 @@ bool initApp(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
+#ifdef LOGGER_H
+    init_logger();
+#endif
+
     if (!initFonts()) {
         log_warn("Couldn't initialize every fonts");
     };
 
-    initGame(&mainGameState);
+    initGame(&mainGameState, false);
 
     return true;
 }
