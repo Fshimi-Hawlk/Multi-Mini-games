@@ -2,7 +2,7 @@
     @file utils/globals.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Central location for process-wide global variables and pre-loaded resources.
 
     This header declares variables that are:

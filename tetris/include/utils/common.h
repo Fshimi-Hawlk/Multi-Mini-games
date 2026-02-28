@@ -1,3 +1,10 @@
+/**
+    @file utils/common.h
+    @brief Central inclusion point for standard library headers, Raylib, and foundational typedefs for Tetris.
+
+    This header provides common includes needed across the Tetris module.
+ */
+
 #ifndef UTILS_COMMON_H
 #define UTILS_COMMON_H
 

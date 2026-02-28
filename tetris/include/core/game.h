@@ -4,6 +4,7 @@
 #include "utils/types.h"
 #include "utils/globals.h"
 
+bool isSoftDropping(board_t board, boardShape_st* boardShape);
 void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove);
 void mouvement(board_t board, boardShape_st* boardShape);
 

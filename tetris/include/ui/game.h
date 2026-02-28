@@ -1,3 +1,8 @@
+/**
+    @file ui/game.h
+    @brief UI rendering functions for Tetris game information display.
+ */
+
 #ifndef UI_GAME_H
 #define UI_GAME_H
 

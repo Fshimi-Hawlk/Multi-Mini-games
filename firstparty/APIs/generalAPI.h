@@ -3,7 +3,7 @@
     @author Fshimi-Hawlk
     @author Maxime-CHAUVEAU
     @date 2026-01-08
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Minimal shared interface and common types used by all mini-games and the lobby.
 
     This header defines:

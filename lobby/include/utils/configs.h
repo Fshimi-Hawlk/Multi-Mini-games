@@ -2,7 +2,7 @@
     @file utils/configs.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Central place for compile-time and tuning constants used throughout the game.
 
     This header defines:

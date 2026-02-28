@@ -2,7 +2,7 @@
     @file utils/userTypes.h
     @author LeandreB8
     @date 2026-01-12
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
 
     Contributors:

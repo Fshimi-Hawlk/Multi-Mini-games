@@ -2,7 +2,7 @@
     @file utils/common.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Central inclusion point for standard library headers, Raylib, foundational typedefs,
            and most commonly needed project headers.
 

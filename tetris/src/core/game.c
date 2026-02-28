@@ -3,6 +3,20 @@
 #include "core/shape.h"
 #include "utils/configs.h"
 
+bool isSoftDropping(board_t board, boardShape_st* boardShape) {
+    if (!IsKeyDown(KEY_DOWN)) return false;
+
+    boardShape->position.y++;
+    bool collision = isOOB(*boardShape) || isColliding(board, *boardShape);
+    boardShape->position.y--;
+
+    if (!collision) {
+        boardShape->position.y++;
+        return true;
+    }
+    return false;
+}
+
 void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove) {
     speed->t += GetFrameTime();
     speed->tDrop = fminf(speed->t / speed->duration, 1.0f);
@@ -51,7 +65,7 @@ void mouvement(board_t board, boardShape_st* boardShape) {
         inputRepeat.rightTimer = 0.0f;
     }
 
-    // BAS (accélère la chute)
+    // BAS (soft drop - accélère la chute)
     if (IsKeyDown(KEY_DOWN)) {
         if (inputRepeat.downTimer <= 0.0f) {
             boardShape->position.y++;

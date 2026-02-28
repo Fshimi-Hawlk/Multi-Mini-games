@@ -2,7 +2,7 @@
     @file tetrisAPI.h
     @author Fshimi-Hawlk
     @date 2026-02-07
-    @date 2026-02-18
+    @date 2026-02-28
     @brief Public API for the Tetris mini-game.
 
     Defines the opaque game handle and the minimal lifecycle functions

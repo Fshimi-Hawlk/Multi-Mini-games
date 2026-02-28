@@ -1,3 +1,8 @@
+/**
+    @file utils/types.h
+    @brief Type definitions for Tetris including board, shapes, and game state.
+ */
+
 #ifndef UTILS_TYPES_H
 #define UTILS_TYPES_H
 

@@ -555,5 +555,5 @@ int main(void) {
 
 ## Credits
 
-**Last updated: February 22, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: February 28, 2026**  
+**Author: Maxime CHAUVEAU**

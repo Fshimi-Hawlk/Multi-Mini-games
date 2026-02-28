@@ -1,3 +1,8 @@
+/**
+    @file core/board.h
+    @brief Core board management functions for Tetris including collision detection and line clearing.
+ */
+
 #ifndef CORE_BOARD_H
 #define CORE_BOARD_H
 

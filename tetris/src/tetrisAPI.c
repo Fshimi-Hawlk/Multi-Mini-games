@@ -2,7 +2,7 @@
  * @file tetris.c
  * @author Fshimi-Hawlk
  * @date 2026-02-07
- * @date 2026-02-18
+ * @date 2026-02-28
  * @brief Implementation of the Tetris mini-game.
  *
  * Contains the concrete `TetrisGame_St` definition and the core logic:
@@ -84,7 +84,7 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     gameRef->base.freeGame = tetris_freeGameWrapper;
     gameRef->base.running  = true;
 
-    gameRef->speed.duration = 1.0f;
+    gameRef->speed.duration = INITIAL_DROP_DELAY;
 
     // Scoring table (classic values)
     gameRef->rewardedPointsPerClearedLineCount = calloc(sizeof(*gameRef->rewardedPointsPerClearedLineCount), 5);
@@ -155,7 +155,7 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
 
     // Speed increases every 10 lines (min 0.3 s delay)
     if (game->clearedLineAmount % 10 == 0) {
-        game->speed.duration = fmaxf(0.3f, 1.0f - 0.025f * game->difficultyMultiplier);
+        game->speed.duration = fmaxf(MIN_DROP_DELAY, INITIAL_DROP_DELAY - 0.025f * game->difficultyMultiplier);
     }
 
     BeginDrawing();

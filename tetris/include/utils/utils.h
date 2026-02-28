@@ -1,3 +1,8 @@
+/**
+    @file utils/utils.h
+    @brief Utility functions for Tetris including color comparison helpers.
+ */
+
 #ifndef UTILS_UTILS_H
 #define UTILS_UTILS_H
 

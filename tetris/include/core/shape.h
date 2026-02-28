@@ -1,3 +1,8 @@
+/**
+    @file core/shape.h
+    @brief Core functionality for Tetris tetromino shapes including rotation and generation.
+ */
+
 #ifndef CORE_SHAPE_H
 #define CORE_SHAPE_H
 

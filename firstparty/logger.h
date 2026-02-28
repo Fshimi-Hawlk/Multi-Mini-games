@@ -2,7 +2,7 @@
  * @file logger.h
  * @author Fshimi-Hawlk
  * @date 2025-07-14
- * @date 2026-02-18
+ * @date 2026-02-28
  * @brief Flexible, colored console + file logger with stack trace support (Linux-focused).
  *
  * Provides a set of logging macros (`log_info`, `log_warn`, `log_error`, etc.) that:

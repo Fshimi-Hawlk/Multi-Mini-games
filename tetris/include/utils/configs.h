@@ -20,4 +20,11 @@
 
 #define CYAN RGB(0, 255, 255)
 
+#define INITIAL_DROP_DELAY 1.0f
+#define MIN_DROP_DELAY 0.1f
+#define SOFT_DROP_MULTIPLIER 20.0f
+
+#define INPUT_INITIAL_DELAY 0.2f
+#define INPUT_REPEAT_DELAY 0.05f
+
 #endif

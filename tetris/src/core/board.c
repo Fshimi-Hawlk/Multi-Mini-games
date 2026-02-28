@@ -88,10 +88,11 @@ void detectFullLines(board_t board, int lineArray[4], int *lineNb) {
 }
 
 void clearLines(board_t board, int lineArray[4], int lineNb) {
-    for (int i = 0; i < lineNb; i++) {
-        for (int y = lineArray[i] - 1; y >= 0; y--) {
+    for (int i = lineNb - 1; i >= 0; i--) {
+        int lineY = lineArray[i];
+        for (int y = lineY; y > 0; y--) {
             for (int x = 0; x < BOARD_WIDTH; x++) {
-                board[y + 1][x] = board[y][x];
+                board[y][x] = board[y - 1][x];
             }
         }
         for (int x = 0; x < BOARD_WIDTH; x++) {

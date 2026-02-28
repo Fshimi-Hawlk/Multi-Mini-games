@@ -2,7 +2,7 @@
  * @file baseTypes.h
  * @author Fshimi-Hawlk
  * @date 2026-01-07
- * @date 2026-02-20
+ * @date 2026-02-28
  * @brief Fixed-size integer aliases, small vector types, and common shorthand aliases
  *        used as near-primitive types throughout the entire project (firstparty).
  *

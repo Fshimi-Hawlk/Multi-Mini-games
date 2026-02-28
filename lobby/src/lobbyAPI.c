@@ -2,7 +2,7 @@
     @file lobbyAPI.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-02-28
     @brief Lobby / hub scene - entry point and central navigation area
 
     Contributors:

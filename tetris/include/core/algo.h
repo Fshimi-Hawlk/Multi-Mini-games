@@ -1,3 +1,8 @@
+/**
+    @file core/algo.h
+    @brief AI algorithm functions for Tetris (evaluation and move finding).
+ */
+
 #ifndef CORE_ALGO_H
 #define CORE_ALGO_H
 

@@ -226,7 +226,7 @@ help:
 	@echo "    rebuild-tests    Clean and rebuild test executables"
 	@echo "    run-tests        Run all tests"
 	@echo "    docs-root        Build the root documentation"
-	@echo "    run-tests        Build the root documentation"
+	@echo "    docs             Build all documentation (alias for docs-root)"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
