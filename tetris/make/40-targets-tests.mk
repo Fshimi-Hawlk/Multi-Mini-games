@@ -1,6 +1,6 @@
 tests: $(TEST_BINS)
 	@if [ -z "$(TEST_BINS)" ]; then \
-		echo "No tests found — nothing to build."; \
+		echo "No tests found - nothing to build."; \
 	else \
 		echo "Test binaries built: $(notdir $(TEST_BINS))"; \
 	fi
