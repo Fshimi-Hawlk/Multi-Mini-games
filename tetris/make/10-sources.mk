@@ -13,7 +13,7 @@ MAIN_OBJECT := $(OBJ_DIR)/$(MAIN_NAME).o
 # Test sources/objects/bins (recursive)
 TEST_SOURCES := $(shell find $(TEST_DIR) -name '*.c')
 TEST_OBJECTS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(OBJ_DIR)/tests/%.o)
-TEST_BINS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%)
+TEST_BINS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%$(EXE_EXT))
 
 # All deps
 DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)

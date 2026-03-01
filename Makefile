@@ -17,8 +17,6 @@ MODE ?= release
 VERBOSE ?= 0
 MAIN_NAME ?= main
 
-SHELL = /bin/sh
-
 # Verbose mode (default silent)
 ifeq ($(VERBOSE),1)
 	SILENT_PREFIX :=
@@ -203,10 +201,8 @@ rebuild-bin: clean-bin bin
 
 rebuild-tests: clean tests
 
-docs-root:
+docs:
 	@./generate-root-docs.sh
-
-docs: docs-root
 
 # ───────────────────────────────────────────────────────────────
 # Help
@@ -231,8 +227,7 @@ help:
 	@echo "    tests            Build all test executables"
 	@echo "    rebuild-tests    Clean and rebuild test executables"
 	@echo "    run-tests        Run all tests"
-	@echo "    docs-root        Build the root documentation"
-	@echo "    run-tests        Build the root documentation"
+	@echo "    docs             Build the root documentation"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
@@ -245,4 +240,4 @@ help:
 	@echo "  - clean only affects root build/ — use clean-all for full reset"
 	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
 
-.PHONY: all libs bin rebuild-bin run-server run-lobby tests run-tests clean clean-all clean-libs clean-bin rebuild rebuild-libs rebuild-tests help
+.PHONY: all libs bin rebuild-bin run-server run-lobby tests run-tests clean clean-all clean-libs clean-bin rebuild rebuild-libs rebuild-tests docs help
