@@ -6,13 +6,13 @@ It allows building all merged games' static libraries, copying their API headers
 
 ## Overview
 
-- Builds static libraries (`lib<gamename>.a`) from each module folder (`tetris/`, `block-blast/`, etc.)
-- Copies each module's `<gamename>API.h` -> `firstparty/APIs/`
-- Links all libraries into the lobby executable
-- Supports the same build modes as sub-project Makefiles
-- Output locations:
-  - Libraries: `build/lib/lib<gamename>.a`
-  - Lobby executable: `build/bin/<MAIN_NAME>` (default: `main`)
+- Builds static libraries (`lib<gamename>.a`) from each module folder (`tetris/`, `block-blast/`, etc.)  
+- Copies each module's `<gamename>API.h` -> `firstparty/APIs/`  
+- Links all libraries into the lobby executable  
+- Supports the same build modes as sub-project Makefiles  
+- Output locations:  
+  - Libraries: `build/lib/lib<gamename>.a`  
+  - Lobby executable: `build/bin/<MAIN_NAME>` (default: `main`)  
 
 ## Supported Build Modes
 
@@ -30,21 +30,21 @@ Default: `release`
 
 ## Key Root-Level Targets
 
-`all` / `make`     -> Build libraries + lobby executable
-`rebuild`          -> Clean + rebuild everything
-`clean`            -> Remove root-level build/ folder only
-`clean-all`        -> Remove root build/ + clean every submodule
-`clean-libs`       -> Clean only libraries (root + subdirs)
-`clean-exe`        -> Clean only lobby executable
-`libs`             -> Build/update static libraries + copy API headers
-`rebuild-libs`     -> Clean + force rebuild all libraries + copy API headers
-`bin`              -> Build lobby executable (incremental, depends on libs)
-`rebuild-exe`      -> **Force** rebuild lobby executable only
-`run-exe`          -> Run the lobby executable from `build/bin`
-`tests`            -> Build test binaries in all modules + lobby
-`rebuild-tests`    -> Clean + rebuild tests
-`run-tests`        -> Run all tests and show summary
-`help`             -> Print an help message
+`all` / `make`     -> Build libraries + lobby executable  
+`rebuild`          -> Clean + rebuild everything  
+`clean`            -> Remove root-level build/ folder only  
+`clean-all`        -> Remove root build/ + clean every submodule  
+`clean-libs`       -> Clean only libraries (root + subdirs)  
+`clean-exe`        -> Clean only lobby executable  
+`libs`             -> Build/update static libraries + copy API headers  
+`rebuild-libs`     -> Clean + force rebuild all libraries + copy API headers  
+`bin`              -> Build lobby executable (incremental, depends on libs)  
+`rebuild-exe`      -> **Force** rebuild lobby executable only  
+`run-exe`          -> Run the lobby executable from `build/bin`  
+`tests`            -> Build test binaries in all modules + lobby  
+`rebuild-tests`    -> Clean + rebuild tests  
+`run-tests`        -> Run all tests and show summary  
+`help`             -> Print an help message  
 
 ## Common Commands
 
@@ -53,6 +53,9 @@ Default: `release`
 make bin                # incremental build
 make rebuild-exe        # force relink lobby only
 make run-exe            # run
+
+# One liner
+make MODE=clang-debug rebuild run-exe
 
 # Full reset
 make rebuild
@@ -70,7 +73,7 @@ make MODE=clang-debug run-tests
 Each module sets its own asset prefix at compile time:  
 
 - Standalone build (inside game folder): `assets/...`  
-- Root build: `<modulename>/assets/...` (e.g. `tetris/assets/...`)  
+- Root build: `<module-name>/assets/...` (e.g. `tetris/assets/...`)  
 
 This is done via `-DASSET_PATH="..."` passed through EXTRA_CFLAGS.  
 
@@ -78,7 +81,7 @@ This is done via `-DASSET_PATH="..."` passed through EXTRA_CFLAGS.
 
 When building libraries (`libs`, `bin`, `rebuild-libs`):
 
-- Each module's `<modulename>API.h` (e.g. `tetrisAPI.h`) is copied from `<module>/include/` to `firstparty/APIs/`
+- Each module's `<module-name>API.h` (e.g. `tetrisAPI.h`) is copied from `<module>/include/` to `firstparty/APIs/`
 - Copy happens only if the file exists
 
 ## Logging & Debugging

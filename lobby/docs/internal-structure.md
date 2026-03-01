@@ -1,4 +1,4 @@
-@page makefile-structure Makefile System Structure
+# makefile-structure Makefile System Structure
 
 This project uses a **modular, split Makefile** approach for better maintainability, readability and platform extensibility.
 
