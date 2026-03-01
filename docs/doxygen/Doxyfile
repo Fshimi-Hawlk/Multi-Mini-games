@@ -1,0 +1,98 @@
+# Doxyfile - Multi-Mini-Games Documentation
+# @author Maxime CHAUVEAU
+# @date February 2026
+
+DOXYFILE_ENCODING       = UTF-8
+
+# ────────────────────────────────────────────────────────────────
+# Project metadata
+# ────────────────────────────────────────────────────────────────
+
+PROJECT_NAME            = "Multi-Mini-Games Template"
+PROJECT_NUMBER          = 2026.02.24-1
+PROJECT_BRIEF           = "Template pour creer des mini-jeux avec lobby integre"
+PROJECT_LOGO            =
+
+# ────────────────────────────────────────────────────────────────
+# Output configuration
+# ────────────────────────────────────────────────────────────────
+
+OUTPUT_DIRECTORY        = .
+HTML_OUTPUT             = doxygen/html
+GENERATE_HTML           = YES
+GENERATE_LATEX          = NO
+
+CREATE_SUBDIRS          = NO
+
+# ────────────────────────────────────────────────────────────────
+# Path handling and stripping
+# ────────────────────────────────────────────────────────────────
+
+FULL_PATH_NAMES         = YES
+STRIP_FROM_PATH         = ../
+STRIP_FROM_INC_PATH     = ../lobby/include ../tetris/include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# Input files and scanning
+# ────────────────────────────────────────────────────────────────
+
+USE_MDFILE_AS_MAINPAGE  = doxygen/mainpage_fr.dox
+INPUT                   = ../lobby ../tetris ../firstparty doxygen
+RECURSIVE               = YES
+FILE_PATTERNS           = *.c *.h *.md *.dox
+
+EXCLUDE                 = tests build logs ../thirdparty/libs Makefile index.html html
+EXCLUDE_SYMLINKS        = YES
+
+SEARCH_INCLUDES         = YES
+INCLUDE_PATH            = ../lobby/include ../tetris/include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# C-specific optimization and extraction
+# ────────────────────────────────────────────────────────────────
+
+OPTIMIZE_OUTPUT_FOR_C   = YES
+
+EXTRACT_ALL             = YES
+EXTRACT_PRIVATE         = NO
+EXTRACT_STATIC          = YES
+HIDE_UNDOC_MEMBERS      = NO
+HIDE_UNDOC_CLASSES      = NO
+
+PREDEFINED              = _DEBUG
+
+# ────────────────────────────────────────────────────────────────
+# Source code visibility in documentation
+# ────────────────────────────────────────────────────────────────
+
+SOURCE_BROWSER          = YES
+INLINE_SOURCES          = NO
+VERBATIM_HEADERS        = YES
+
+# ────────────────────────────────────────────────────────────────
+# Graph generation
+# ────────────────────────────────────────────────────────────────
+
+HAVE_DOT                = YES
+DOT_NUM_THREADS         = 0
+
+INCLUDE_GRAPH           = YES
+INCLUDED_BY_GRAPH       = YES
+
+COLLABORATION_GRAPH     = YES
+DIRECTORY_GRAPH         = YES
+DIR_GRAPH_MAX_DEPTH     = 3
+
+CALL_GRAPH              = YES
+CALLER_GRAPH            = YES
+CLASS_GRAPH             = YES
+
+DOT_IMAGE_FORMAT        = svg
+INTERACTIVE_SVG         = YES
+DOT_MULTI_TARGETS       = YES
+
+# ────────────────────────────────────────────────────────────────
+# Performance / multi-core
+# ────────────────────────────────────────────────────────────────
+
+NUM_PROC_THREADS        = 0
