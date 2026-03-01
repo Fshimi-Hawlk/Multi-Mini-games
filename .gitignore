@@ -58,7 +58,4 @@ main
 .clangd/
 
 # Other
-template.h
-compile_flags.txtdocs/doxygen/
-
 docs/doxygen/
