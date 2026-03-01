@@ -1,4 +1,7 @@
 # Minimal Doxyfile
+# @author Fshimi-Hawlk
+# @date February 2026
+
 DOXYFILE_ENCODING       = UTF-8
 
 # ────────────────────────────────────────────────────────────────
@@ -6,7 +9,7 @@ DOXYFILE_ENCODING       = UTF-8
 # ────────────────────────────────────────────────────────────────
 
 PROJECT_NAME            = "Lobby"
-PROJECT_NUMBER          = 2026.02.23-1 # <date of the commit>-<current commit count of the day>
+PROJECT_NUMBER          = 2026.02.28-1 # <date of the commit>-<current commit count of the day>
 PROJECT_BRIEF           = "Lobby Brief..."
 
 # ────────────────────────────────────────────────────────────────
