@@ -1,6 +1,6 @@
-@page license Project License
+@page license License
 
-# zlib/libpng License
+## zlib/libpng License
 
 This software is provided 'as-is', without any express or implied
 warranty.  In no event will the authors be held liable for any damages
@@ -20,9 +20,9 @@ freely, subject to the following restrictions:
 
 3. This notice may not be removed or altered from any source distribution.
 
-@section third_party Portions of this software include code from:
+## Portions of this software include code from:
 
-- raylib (raylib.h, rlgl.h, raymath.h) – Copyright (c) 2013-2025 Ramon Santamaria (@raysan5) – zlib/libpng license
+- raylib (raylib.h, rlgl.h, raymath.h) – Copyright (c) 2013-2025 Ramon Santamaria (`@raysan5`) – zlib/libpng license
 - nob.h dynamic array & string builder – Public domain (Unlicense) by Tsoding
 - arena.h – Copyright (c) 2022 Alexey Kutepov – MIT license
 - PCG random number generator (in rand.h) – Apache License 2.0 by Melissa O'Neill (pcg-random.org), adapted by Magicalbat
@@ -31,3 +31,5 @@ Full original license texts and authors are preserved in the respective header f
 
 **Last updated:** March 02, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+
+@ref mainpage "Back to Home"
