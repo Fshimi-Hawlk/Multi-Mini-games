@@ -34,5 +34,6 @@ Feel free to add new items or move priorities - discuss big changes in the group
 
 ## Credits
 
-**Last updated: February 22, 2026**  
+**Created: January 15, 2025**  
+**Last updated: March 02, 2026**  
 **Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
