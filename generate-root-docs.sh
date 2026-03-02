@@ -8,13 +8,13 @@ echo "Generating Doxygen documentation for $(basename "$PWD")..."
 
 rm -rf docs/doxygen/html docs/doxygen/index.html 2>/dev/null || true
 
-cd docs
+cd docs/doxygen
 
 # Run Doxygen
-doxygen doxygen/Doxyfile
+doxygen Doxyfile
 
 # Create convenient redirect at docs/index.html
-cat > doxygen/index.html << 'REDIRECT'
+cat > index.html << 'REDIRECT'
 <!DOCTYPE html>
 <html lang="en">
 <head>
