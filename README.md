@@ -132,5 +132,6 @@ make docs
 
 ## Credits
 
-**Last updated: February 22, 2026**  
+**Created: December 16, 2025**  
+**Last updated: March 02, 2026**  
 **Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
