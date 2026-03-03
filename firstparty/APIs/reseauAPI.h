@@ -1,21 +1,16 @@
 /**
  * @file reseauAPI.h
- * @brief Permet de faire le lien entre lobby.c et main.c.
+ * @brief Interface d'abstraction pour l'API de jeu.
+ * * Permet au serveur de manipuler différents modules de jeu via 
+ * une structure GameInterface générique.
  * @author i-Charlys (CAILLON Charles)
- * @date 2026-02-07
+ * @date 2026-02-7
  */
 
 #ifndef RESEAU_API_H
 #define RESEAU_API_H
 
 #include "game_interface.h"
-
-/**
- * @brief Instance globale du module lobby, exportée pour le linker.
- */
-extern GameInterface lobby_module; 
-
-#endif
 
 /*
 Fichier .H                                 Fichier .C 
@@ -42,3 +37,13 @@ Fichier .H                                 Fichier .C
      |                        |
      +------------------------+
      */
+
+
+
+/**
+ * @brief Instance externe du module lobby.
+ * * Cette variable est définie dans lobby.c et liée lors de la compilation.
+ */
+extern GameInterface lobby_module; 
+
+#endif

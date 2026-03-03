@@ -10,6 +10,7 @@
 #include <string.h> 
 #include "protocol.h"       
 #include "game_interface.h" 
+#include "../../lobby/include/utils/userTypes.h"
 
 /**
  * @struct LobbyState
