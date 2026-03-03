@@ -44,6 +44,7 @@ typedef struct { \
     size_t count, capacity; \
 } daName
 
+#ifdef CONTEXT_ARENA_H
 #define da_reserve(da, expected_capacity)                                                   \
     do {                                                                                    \
         if ((expected_capacity) > (da)->capacity) {                                         \
@@ -51,7 +52,7 @@ typedef struct { \
             while ((expected_capacity) > new_capacity) {                                    \
                 new_capacity *= 2;                                                          \
             }                                                                               \
-            (da)->items = REALLOC(                                                          \
+            (da)->items = context_realloc(                                                  \
                 (da)->items,                                                                \
                 (da)->capacity * sizeof(*(da)->items),                                      \
                 new_capacity * sizeof(*(da)->items)                                         \
@@ -60,6 +61,23 @@ typedef struct { \
             (da)->capacity = new_capacity;                                                  \
         }                                                                                   \
     } while (0)
+#else
+#define da_reserve(da, expected_capacity)                                                   \
+    do {                                                                                    \
+        if ((expected_capacity) > (da)->capacity) {                                         \
+            size_t new_capacity = (da)->capacity == 0 ? DA_INIT_CAP : (da)->capacity * 2;   \
+            while ((expected_capacity) > new_capacity) {                                    \
+                new_capacity *= 2;                                                          \
+            }                                                                               \
+            (da)->items = realloc(                                                          \
+                (da)->items,                                                                \
+                (da)->capacity * sizeof(*(da)->items)                                       \
+            );                                                                              \
+            ASSERT((da)->items != NULL);                                                    \
+            (da)->capacity = new_capacity;                                                  \
+        }                                                                                   \
+    } while (0)
+#endif
 
 // Append an item to a dynamic array
 #define da_append(da, item)                \
