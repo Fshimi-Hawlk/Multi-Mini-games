@@ -8,6 +8,9 @@
 #ifndef CONNECTION_SCREEN_H
 #define CONNECTION_SCREEN_H
 
+#define LOBBY_ROOM_QUERY 3  // Client -> Réseau (Où sont les serveurs ?)
+#define LOBBY_ROOM_INFO  4  // Serveur -> Client (Je suis ici : IP + Nom)
+
 #include <stdbool.h>
 
 

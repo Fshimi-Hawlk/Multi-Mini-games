@@ -64,30 +64,37 @@ static Rectangle gameZoneHitbox = { .x = 600, .y = -150, .width = 75, .height = 
 void init_network(const char* target_ip) {
     struct sockaddr_in serv_addr;
 
+    // 1. Création de la socket
     if ((network_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) < 0) {
         perror("Erreur création socket UDP");
         return;
     }
 
+    // 2. Activation du Broadcast (Optionnel ici, mais utile pour la découverte plus tard)
+    int broadcastPermission = 1;
+    setsockopt(network_socket, SOL_SOCKET, SO_BROADCAST, &broadcastPermission, sizeof(broadcastPermission));
+
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(SERVER_PORT);
-
     if (inet_pton(AF_INET, target_ip, &serv_addr.sin_addr) <= 0) {
         perror("Adresse invalide");
         return;
     }
 
+    // 3. Liaison (Connect UDP ne fait pas de Handshake, il définit juste la cible par défaut)
     if (connect(network_socket, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         perror("Erreur liaison adresse UDP");
         network_socket = -1;
         return;
     }
 
+    // 4. Initialisation RUDP & Non-bloquant
     RUDP_InitConnection(&server_conn);
     fcntl(network_socket, F_SETFL, O_NONBLOCK);
 
     printf(">>> ROUTAGE UDP PRÊT VERS LE SERVEUR (%s) !\n", target_ip);
 
+    // 5. Envoi du paquet de Join
     RUDP_Header header;
     RUDP_GenerateHeader(&server_conn, LOBBY_JOIN, &header);
     header.sender_id = htons(0);
@@ -109,9 +116,6 @@ void send_my_position(Player_st *p) {
     send(network_socket, buffer, sizeof(buffer), 0);
 }
 
-// Multi-Mini-games/lobby/src/main.c
-
-// Multi-Mini-games/lobby/src/main.c
 
 void receive_network_data(void) {
     if (network_socket == -1) return;

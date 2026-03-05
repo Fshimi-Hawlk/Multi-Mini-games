@@ -10,6 +10,8 @@
 // --- ACTIONS RÉSEAU ---
 #define LOBBY_JOIN 1
 #define LOBBY_MOVE 2
+#define LOBBY_ROOM_QUERY 3 
+#define LOBBY_ROOM_INFO  4 
 
 // --- CONSTANTES RUDP ---
 #define MAX_SEQUENCE 65535
