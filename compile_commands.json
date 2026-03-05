@@ -18,6 +18,24 @@
     "output": "build/obj/lobby.o"
   },
   {
+    "file": "src/rudp_core.c",
+    "arguments": [
+      "gcc",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I../firstparty",
+      "-I../thirdparty",
+      "-O2",
+      "-c",
+      "src/rudp_core.c",
+      "-o",
+      "build/obj/rudp_core.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/reseau",
+    "output": "build/obj/rudp_core.o"
+  },
+  {
     "file": "src/core/game.c",
     "arguments": [
       "gcc",

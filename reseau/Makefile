@@ -5,10 +5,10 @@ CC = gcc
 # Includes complets
 CFLAGS = -Wall -Wextra -Iinclude -I../firstparty -I../thirdparty -O2
 
-# 1. Configuration de la Librairie (contient lobby.c et lobby_module)
+# 1. Configuration de la Librairie (contient lobby.c, rudp_core.c et lobby_module)
 LIB_NAME ?= reseau
-LIB_SRC = src/lobby.c
-LIB_OBJ = build/obj/lobby.o
+LIB_SRC = src/lobby.c src/rudp_core.c
+LIB_OBJ = build/obj/lobby.o build/obj/rudp_core.o
 LIB_TARGET = build/lib/lib$(LIB_NAME).a
 
 # 2. Configuration du Serveur
@@ -30,7 +30,7 @@ $(LIB_TARGET): $(LIB_OBJ)
 # --- Serveur ---
 server: $(SERVER_BIN)
 
-# CORRECTION ICI : On ajoute $(LIB_OBJ) pour que le serveur connaisse 'lobby_module'
+# Le serveur connaît maintenant 'lobby_module' ET les fonctions 'RUDP_*'
 $(SERVER_BIN): $(SERVER_OBJ) $(LIB_OBJ)
 	@mkdir -p build/bin
 	$(CC) $(CFLAGS) $^ -o $@
