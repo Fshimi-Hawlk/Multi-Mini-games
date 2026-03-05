@@ -10,6 +10,7 @@
 
 #define LOBBY_ROOM_QUERY 3  // Client -> Réseau (Où sont les serveurs ?)
 #define LOBBY_ROOM_INFO  4  // Serveur -> Client (Je suis ici : IP + Nom)
+#define ACTION_GAME_DATA  5  
 
 #include <stdbool.h>
 

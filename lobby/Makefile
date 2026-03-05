@@ -16,6 +16,7 @@ BASE_CFLAGS := \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
+	-I..
 
 # Linker base
 BASE_LDFLAGS := \
@@ -27,10 +28,8 @@ BASE_LDFLAGS := \
 MODE ?= release
 ifeq ($(MODE),release)
 	CC := gcc
-	CFLAGS := \
-		-O2
-	LDFLAGS := \
-		-O2
+	CFLAGS := -O2
+	LDFLAGS := -O2
 	TOOL := 
 else ifeq ($(MODE),debug)
 	CC := gcc
@@ -176,14 +175,10 @@ TEST_BINS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%)
 # Output buffering helper (improves crash visibility)
 STDBUF :=
 ifneq ($(shell command -v stdbuf 2>/dev/null),)
-    STDBUF := stdbuf --output=L --error=L
+	STDBUF := stdbuf --output=L --error=L
 else
-    # We check again only when run-tests is actually called
-    STDBUF_MISSING_MSG := stdbuf not found (from GNU coreutils). Last printf lines may be missing on crash/abort.\nPlease add 'fflush(stdout);' after important prints or install coreutils.
+	STDBUF_MISSING_MSG := stdbuf not found (from GNU coreutils). Last printf lines may be missing on crash/abort.\nPlease add 'fflush(stdout);' after important prints or install coreutils.
 endif
-
-# All deps
-DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
 
 # Verbose mode (default silent)
 ifeq ($(VERBOSE),1)
@@ -192,13 +187,12 @@ else
 	SILENT_PREFIX := @
 endif
 
-# Automatic dependency tracking control (enabled by default)
+# Automatic dependency tracking control
 ifeq ($(NO_DEPENDENCY_TRACKING),1)
 	DEP_FLAGS :=
 	DEPS :=
 else
 	DEP_FLAGS := -MMD -MP
-	# All dependency files
 	DEPS := $(LIB_OBJECTS:.o=.d) $(MAIN_OBJECT:.o=.d) $(TEST_OBJECTS:.o=.d)
 endif
 
@@ -385,4 +379,4 @@ help:
 	@echo "    run-tests uses stdbuf (from GNU coreutils) if available for reliable output on crashes;"
 	@echo "    warns if missing and suggests alternatives (e.g., fflush in test code)."
 
-.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests compile_commands help
+.PHONY: all clean rebuild static-lib run-main run-gdb run-tests tests help

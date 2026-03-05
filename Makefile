@@ -51,7 +51,7 @@ LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 # Main Targets
 # ───────────────────────────────────────────────────────────────
 
-# MODIFICATION ICI : On construit le jeu (bin) ET le serveur
+# On construit le jeu (bin) ET le serveur
 all: bin server
 
 # Nouvelle cible pour le serveur
@@ -70,7 +70,7 @@ $(LIB_DIR)/lib%.a:
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
 		LIB_NAME=$(LIB_NAME) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"$(MOD_DIR)/assets/\""
+		EXTRA_CFLAGS="-DASSET_PATH=\"$(MOD_DIR)/assets/\" -I.."
 	$(SILENT_PREFIX)mkdir -p $(LIB_DIR)
 	$(SILENT_PREFIX)if cmp -s $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@ 2>/dev/null; then \
 		echo "  lib$(LIB_NAME).a unchanged"; \
@@ -93,7 +93,7 @@ bin: libs
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
 		BIN_DIR=../$(BIN_DIR) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include" \
+		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include -I.." \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
 rebuild-exe: libs
@@ -104,7 +104,7 @@ rebuild-exe: libs
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
 		BIN_DIR=../$(BIN_DIR) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include" \
+		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include -I.." \
 		EXTRA_LDFLAGS="$(LIBS_REL)" \
 		rebuild
 
@@ -145,4 +145,4 @@ rebuild-exe: clean-exe bin
 
 help:
 	@echo "Usage: make [OPTIONS] [TARGET]"
-	@echo "TARGETS: all, server, rebuild, clean, clean-all, libs, bin"
+	@echo "TARGETS: all, server, rebuild, clean, clean-all, libs, bin, run-exe"

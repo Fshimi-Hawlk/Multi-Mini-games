@@ -44,33 +44,9 @@ void* lobby_create() {
  */
 
 
-// Multi-Mini-games/reseau/src/lobby.c
-
 void lobby_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
-    LobbyState *s = (LobbyState*)state;
-
-    if (action == LOBBY_JOIN) {
-        printf("[LOBBY] Le joueur %d rejoint. Envoi de l'état du monde...\n", player_id);
-        // 1. On annonce le nouveau joueur aux anciens
-        broadcast(0, player_id, LOBBY_MOVE, &s->players[player_id], sizeof(Player_st));
-        
-        // 2. On envoie TOUS les joueurs existants au nouveau joueur
-        for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (i != player_id) {
-                // On simule un broadcast ciblé (exclude_id = i pour n'envoyer qu'à player_id ?) 
-                // Pour simplifier, on renvoie simplement les positions lors des prochains ticks.
-                broadcast(0, i, LOBBY_MOVE, &s->players[i], sizeof(Player_st));
-            }
-        }
-    }
-
-    if (action == LOBBY_MOVE && len == sizeof(Player_st)) {
-        Player_st *p = (Player_st*)payload;
-        s->players[player_id] = *p;
-        if (broadcast) {
-            broadcast(0, player_id, LOBBY_MOVE, payload, len);
-        }
-    }
+    // On ne regarde même pas ce qu'il y a dedans. On diffuse.
+    broadcast(0, player_id, action, payload, len);
 }
 
 /**
