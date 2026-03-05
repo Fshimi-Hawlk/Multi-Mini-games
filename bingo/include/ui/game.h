@@ -1,8 +1,8 @@
 /**
     @file ui/game.h
     @author Fshimi-Hawlk
-    @date 2026-02-08              // Creation date - never touch this one again
-    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @date 2026-03-03
+    @date 2026-03-05
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.
@@ -16,11 +16,15 @@
 #ifndef UI_GAME_H
 #define UI_GAME_H
 
+#include "utils/userTypes.h"
+
+void bingo_drawChoiceCards(const BingoGame_St* const game);
+
 /**
-    @brief Draws all UI elements for the current scene.
+    @brief Draws the player card.
 
     TODO
 */
-void drawUI(void);
+void bingo_drawCard(const BingoGame_St* const game);
 
 #endif // UI_GAME_H
