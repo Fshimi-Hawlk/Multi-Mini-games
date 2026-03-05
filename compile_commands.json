@@ -1,0 +1,198 @@
+[
+  {
+    "file": "src/lobby.c",
+    "arguments": [
+      "gcc",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I../firstparty",
+      "-I../thirdparty",
+      "-O2",
+      "-c",
+      "src/lobby.c",
+      "-o",
+      "build/obj/lobby.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/reseau",
+    "output": "build/obj/lobby.o"
+  },
+  {
+    "file": "src/core/game.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/core/game.c",
+      "-o",
+      "build/obj/core/game.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/core/game.o"
+  },
+  {
+    "file": "src/ui/app.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/ui/app.c",
+      "-o",
+      "build/obj/ui/app.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/ui/app.o"
+  },
+  {
+    "file": "src/ui/game.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/ui/game.c",
+      "-o",
+      "build/obj/ui/game.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/ui/game.o"
+  },
+  {
+    "file": "src/ui/input_button.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/ui/input_button.c",
+      "-o",
+      "build/obj/ui/input_button.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/ui/input_button.o"
+  },
+  {
+    "file": "src/ui/connection_screen.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/ui/connection_screen.c",
+      "-o",
+      "build/obj/ui/connection_screen.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/ui/connection_screen.o"
+  },
+  {
+    "file": "src/utils/globals.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/utils/globals.c",
+      "-o",
+      "build/obj/utils/globals.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/utils/globals.o"
+  },
+  {
+    "file": "src/utils/utils.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/utils/utils.c",
+      "-o",
+      "build/obj/utils/utils.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/utils/utils.o"
+  },
+  {
+    "file": "src/main.c",
+    "arguments": [
+      "gcc",
+      "-O2",
+      "-Iinclude",
+      "-I../thirdparty",
+      "-I../firstparty",
+      "-DASSET_PATH=lobby/assets/",
+      "-I../reseau/include",
+      "-MMD",
+      "-MP",
+      "-c",
+      "src/main.c",
+      "-o",
+      "build/obj/main.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/lobby",
+    "output": "build/obj/main.o"
+  },
+  {
+    "file": "src/server.c",
+    "arguments": [
+      "gcc",
+      "-Wall",
+      "-Wextra",
+      "-Iinclude",
+      "-I../firstparty",
+      "-I../thirdparty",
+      "-O2",
+      "-c",
+      "src/server.c",
+      "-o",
+      "build/obj/server.o"
+    ],
+    "directory": "/home/charl/Documents/Projet/Multi-Mini-games/reseau",
+    "output": "build/obj/server.o"
+  }
+]

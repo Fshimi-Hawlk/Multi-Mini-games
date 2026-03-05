@@ -15,6 +15,8 @@
 /** @brief Nombre maximum de joueurs acceptés simultanément sur le serveur. */
 #define MAX_CLIENTS 30 
 
+#pragma pack(push, 1)
+
 /**
  * @struct PacketHeader
  * @brief En-tête de tous les paquets réseau.
@@ -27,6 +29,8 @@ typedef struct __attribute__((packed)) {
     uint8_t  action;    /**< Type d'action (voir LobbyAction) */
     uint16_t length;    /**< Taille du corps (payload) qui suit l'en-tête */
 } PacketHeader; 
+
+#pragma pack(pop)
 
 /**
  * @enum LobbyAction
