@@ -29,15 +29,15 @@ typedef struct {
     float delay;
 } speed_st;
 
-bool isOOB();
-bool selfCollision(int bodyLength);
+bool isOOB(void);
+bool selfCollision(int bodyLength, iVector2_st headCoord);
 int initBoard(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength);
 void updateBody(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength);
 void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], iVector2_st* appleCoord);
 void drawBoard(int board[SIZE_BOARD][SIZE_BOARD]);
 void drawSnake(float interpolation, iVector2_st direction);
 void writeRecord(int highScore);
-int readRecord();
+int readRecord(void);
 bool mouvement(iVector2_st* direction);
 
 typedef struct element {
@@ -46,16 +46,16 @@ typedef struct element {
     struct element* suivant;
 } t_element;
 
-t_element* tete;
-t_element* queue;
+t_element* head;
+t_element* tail;
 
-void initFile(void);
-bool fileVide(void);
-void ajouter(iVector2_st v);
-void retirer(iVector2_st* v);
-void freeFile();
+void initQueue(void);
+bool isQueueEmpty(void);
+void queueAppend(iVector2_st v);
+void queueRemove(iVector2_st* v);
+void freeQueue(void);
 
-int main() {
+int main(void) {
     srand(time(NULL));
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
@@ -70,10 +70,10 @@ int main() {
 
     iVector2_st nextDirection = direction;
 
-    initFile();
-    ajouter((iVector2_st){.x = 5, .y = 10});
-    ajouter((iVector2_st){.x = 6, .y = 10});
-    ajouter((iVector2_st){.x = 7, .y = 10});
+    initQueue();
+    queueAppend((iVector2_st){.x = 5, .y = 10});
+    queueAppend((iVector2_st){.x = 6, .y = 10});
+    queueAppend((iVector2_st){.x = 7, .y = 10});
     int bodyLength = 3;
 
     iVector2_st temp;
@@ -85,46 +85,49 @@ int main() {
     initBoard(board, bodyLength);
     spawnApple(board, &appleCoord);
     bool move = false;
+
+    bool gameOver = false;
+
+    iVector2_st nextPos;
     
     while (!WindowShouldClose()) {
-        if (!move) {
-            move = mouvement(&nextDirection);
-        }
-        if (speed.timer < 0.05) {
-            direction = nextDirection;
-        }
-
-        speed.timer += GetFrameTime();
-
-        if (speed.timer >= speed.delay) {
-            ajouter((iVector2_st) {.x = queue->coord.x + direction.x, .y = queue->coord.y + direction.y});
-
-            // Mettre à jour le board avec le corps
-            updateBody(board, bodyLength);
-
-            if (board[queue->coord.y][queue->coord.x] == APPLE) {
-                bodyLength++;
-                spawnApple(board, &appleCoord);
-                nbApple++;
-            } 
-            else {
-                // Si le serpent n'a pas mangé de pomme, la dernière partie du corps devient de l'herbe
-                retirer(&temp);
-                board[temp.y][temp.x] = GRASS;
+        if (!gameOver) {
+            if (!move) {
+                move = mouvement(&nextDirection);
             }
-
-            if (isOOB() || selfCollision(bodyLength)) {
+            
+            nextPos = (iVector2_st){.x = tail->coord.x + direction.x, .y = tail->coord.y + direction.y};
+            
+            if (selfCollision(bodyLength, nextPos) || nextPos.x < 0 || nextPos.x >= SIZE_BOARD || nextPos.y < 0 || nextPos.y >= SIZE_BOARD) {
                 if (nbApple > highScore) {
                     writeRecord(nbApple);
                 }
-                return 0;
+                gameOver = true;
             }
+            else {
+                speed.timer += GetFrameTime();
+                
+                if (speed.timer >= speed.delay) {
+                    direction = nextDirection;
+                    queueAppend(nextPos);
+                    updateBody(board, bodyLength);
 
-            // Met à jour le board avec la tête
-            board[queue->coord.y][queue->coord.x] = HEAD;
+                    if (board[tail->coord.y][tail->coord.x] == APPLE) {
+                        bodyLength++;
+                        spawnApple(board, &appleCoord);
+                        nbApple++;
+                    } 
+                    else {
+                        queueRemove(&temp);
+                        board[temp.y][temp.x] = GRASS;
+                    }
 
-            speed.timer = 0;
-            move = false;
+                    board[tail->coord.y][tail->coord.x] = HEAD;
+
+                    speed.timer = 0;
+                    move = false;
+                }
+            }
         }
 
         float interpolation = speed.timer / speed.delay;
@@ -139,24 +142,23 @@ int main() {
             
             DrawText(TextFormat("Score : %d", nbApple), CELL_SIZE * SIZE_BOARD + 10, 50, 20, BLACK);
             DrawText(TextFormat("High Score : %d", highScore), CELL_SIZE * SIZE_BOARD + 10, 100, 20, BLACK);
-            DrawFPS(10, 10);
         EndDrawing();
     }
 
-    freeFile();
+    freeQueue();
     CloseWindow();
     return 0;
 }
 
-bool isOOB() {
-    if (!queue) return true;
-    return queue->coord.x < 0 || queue->coord.x >= SIZE_BOARD || queue->coord.y < 0 || queue->coord.y >= SIZE_BOARD;
+bool isOOB(void) {
+    if (!tail) return true;
+    return tail->coord.x < 0 || tail->coord.x >= SIZE_BOARD || tail->coord.y < 0 || tail->coord.y >= SIZE_BOARD;
 }
 
-bool selfCollision(int bodyLength) {
-    t_element* temp = tete;
+bool selfCollision(int bodyLength, iVector2_st headCoord) {
+    t_element* temp = head;
     for (int i = 0; i < bodyLength - 1 && temp != NULL; i++) {
-        if (queue->coord.x == temp->coord.x && queue->coord.y == temp->coord.y) {
+        if (headCoord.x == temp->coord.x && headCoord.y == temp->coord.y) {
             return true;
         }
         temp = temp->suivant;
@@ -171,18 +173,18 @@ int initBoard(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength) {
         }
     }
     
-    t_element* temp = tete;
+    t_element* temp = head;
     for (int i = 0; i < bodyLength - 1 && temp != NULL; i++) {
         board[temp->coord.y][temp->coord.x] = BODY;
         temp = temp->suivant;
     }
-    board[queue->coord.y][queue->coord.x] = HEAD;
+    board[tail->coord.y][tail->coord.x] = HEAD;
 
     return 0;
 }
 
 void updateBody(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength) {
-    t_element* temp = tete;
+    t_element* temp = head;
     for (int i = 0; i < bodyLength && temp != NULL; i++) {
         board[temp->coord.y][temp->coord.x] = BODY;
         temp = temp->suivant;
@@ -217,30 +219,28 @@ void drawBoard(int board[SIZE_BOARD][SIZE_BOARD]) {
 }
 
 void drawSnake(float interpolation, iVector2_st direction) {
-    t_element* current = tete;
+    t_element* current = head;
     
     while (current != NULL) {
         float renderX, renderY;
         
         if (current->suivant) {
-            // Interpoler vers la position du suivant
+            // Interpoler de la position actuelle vers la suivante
             renderX = current->coord.x + (current->suivant->coord.x - current->coord.x) * interpolation;
             renderY = current->coord.y + (current->suivant->coord.y - current->coord.y) * interpolation;
         } else {
-            // Pour la queue (= tête du serpent), interpoler dans la direction
+            // Pour la tête
             renderX = current->coord.x + direction.x * interpolation;
             renderY = current->coord.y + direction.y * interpolation;
-            // printf("(%d:%d)\n", current->coord.x, current->coord.y);
         }
         
-
         float posX = roundf(renderX * CELL_SIZE);
         float posY = roundf(renderY * CELL_SIZE);
         
-        if (current == queue) {
-            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, DARKBLUE);  // Tête
+        if (current == tail) {
+            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, DARKBLUE);
         } else {
-            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLUE);  // Corps
+            DrawRectangle(posX, posY, CELL_SIZE, CELL_SIZE, BLUE);
         }
         
         current = current->suivant;
@@ -257,7 +257,7 @@ void writeRecord(int highScore) {
     fclose(fd);
 }
 
-int readRecord() {
+int readRecord(void) {
     int highScore = 0;
 
     FILE *fd = fopen("assets/highScore.txt", "r");
@@ -291,16 +291,16 @@ bool mouvement(iVector2_st* direction) {
     return false;
 }
 
-void initFile() {
-	tete = NULL;
-	queue = NULL;
+void initQueue() {
+	head = NULL;
+	tail = NULL;
 }
 
-bool fileVide() {
-	return tete == NULL;
+bool isQueueEmpty() {
+	return head == NULL;
 }
 
-void ajouter(iVector2_st v) {
+void queueAppend(iVector2_st v) {
 	t_element* nouv;
 
 	nouv = malloc(sizeof(t_element));
@@ -308,27 +308,27 @@ void ajouter(iVector2_st v) {
     nouv->renderPos.x = (float)v.x;
 	nouv->renderPos.y = (float)v.y;
 	nouv->suivant = NULL;
-	if(fileVide())
-		tete = nouv;
+	if(isQueueEmpty())
+		head = nouv;
 	else
-		queue->suivant = nouv;
-	queue = nouv;
+		tail->suivant = nouv;
+	tail = nouv;
 }
 
-void retirer(iVector2_st* v) {
+void queueRemove(iVector2_st* v) {
 	t_element* premier;
 
-	if(!fileVide()){
-		premier = tete;
+	if(!isQueueEmpty()){
+		premier = head;
 		*v = premier->coord;
-		tete = premier->suivant;
+		head = premier->suivant;
 		free(premier);
 	}
 }
 
-void freeFile() {
+void freeQueue(void) {
 	iVector2_st unused;
-	while (!fileVide()) {
-		retirer(&unused);
+	while (!isQueueEmpty()) {
+		queueRemove(&unused);
 	}
 }
