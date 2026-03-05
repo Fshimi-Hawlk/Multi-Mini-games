@@ -2,7 +2,7 @@
     @file globals.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-02-23
+    @date 2026-03-05
     @brief Central location for process-wide global variables and pre-loaded resources.
 
     This header declares variables that are:
@@ -54,6 +54,9 @@ extern Font      fonts[_fontSizeCount];
 // Game's Globals
 // ────────────────────────────────────────────────
 
-
+extern const char* const LETTERS[5];
+extern const f32 SHOW_DELAY;
+extern const f32 GRACE_TIME;
+extern const f32 CHOICE_DELAY;
 
 #endif // UTILS_GLOBALS_H

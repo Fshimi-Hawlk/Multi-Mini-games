@@ -2,7 +2,7 @@
     @file utils/globals.c
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-02-23
+    @date 2026-03-05
     @brief Definitions of program-wide global variables.
 
     Contributors:
@@ -28,4 +28,8 @@ Font      appFont = {0};
 
 // Game's Variables
 
-// TODO
+const char* const LETTERS[5] = {"B", "I", "N", "G", "O"};
+
+const f32 SHOW_DELAY   = 1.5f;
+const f32 GRACE_TIME   = 1.0f;
+const f32 CHOICE_DELAY = 3.5f;

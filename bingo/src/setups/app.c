@@ -1,15 +1,14 @@
 /**
     @file app.c
     @author Fshimi Hawlk
-    @date 2026-01-07
+    @date 2026-03-02
+    @date 2026-03-05
     @brief Application setup and teardown.
 */
 
-#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "setups/app.h"
-#include "setups/game.h"
 
 bool initFonts(void) {
     u64 fontSize = 8;
@@ -45,11 +44,9 @@ bool initApp(void) {
     init_logger();
 #endif
 
-    // if (!initFonts()) {
-    //     log_warn("Couldn't initialize every fonts");
-    // };
-
-    initGame();
+    if (!initFonts()) {
+        log_warn("Couldn't initialize every fonts");
+    };
 
     return true;
 }
