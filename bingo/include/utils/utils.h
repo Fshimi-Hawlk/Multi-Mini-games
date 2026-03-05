@@ -2,6 +2,7 @@
     @file utils.h
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-03-05
     @brief General utility macros and helper functions.
 */
 
@@ -207,6 +208,16 @@ do { \
 */
 #define da_printContent(typeFmt, da) array_printContent((typeFmt), (da)->items, (da)->count)
 #define da_printContentCustom(typePrintFn, da) array_printContentCustom((typePrintFn), (da)->items, (da)->count)
+
+#define getRectPos(rec) (Vector2) {.x = (rec).x, .y = (rec).y}
+#define getRectSize(rec) (Vector2) {.x = (rec).width, .y = (rec).height}
+
+#define scaleRec(rec, scalor) (Rectangle) { \
+    .x = (rec).x,                           \
+    .y = (rec).y,                           \
+    .width = (rec).width * scalor,          \
+    .height = (rec).height * scalor,        \
+}
 
 /**
     @brief Generates a random unsigned 64-bit integer between min and max (inclusive).

@@ -2,7 +2,7 @@
     @file configs.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-20
+    @date 2026-03-05
     @brief Central place for compile-time and tuning constants used throughout the game.
 
     Contributors:
@@ -57,12 +57,12 @@
 /**
     @brief Default client-area height of the application window (pixels).
 */
-#define WINDOW_HEIGHT   600
+#define WINDOW_HEIGHT   700
 
 /**
     @brief Window title shown in the title bar / task manager.
 */
-#define WINDOW_TITLE    "GameName"
+#define WINDOW_TITLE    "Bingo"
 
 /**
     @brief Background clear color used at the start of each frame.

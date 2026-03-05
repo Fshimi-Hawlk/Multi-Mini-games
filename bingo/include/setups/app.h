@@ -2,13 +2,14 @@
     @file app.h (setups)
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-03-03
     @brief Application initialization and cleanup.
 */
 
 #ifndef SETUPS_APP_H
 #define SETUPS_APP_H
 
-#include "baseTypes.h"
+#include "stdbool.h"
 
 /**
     @brief Initializes and loads all application fonts.

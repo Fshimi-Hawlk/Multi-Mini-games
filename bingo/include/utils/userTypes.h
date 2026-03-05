@@ -2,7 +2,7 @@
     @file userTypes.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-02-23
+    @date 2026-03-03
     @brief Core type definitions used throughout the game.
 
     Contributors:
@@ -41,6 +41,85 @@ typedef enum {
 
 // Game's Types
 
-// TODO
+typedef uint Card_t[5][5];
+
+/**
+    @brief All data related to one player's bingo card.
+    @note Currently fixed to PLAYER_COUNT = 1; designed to become array later.
+*/
+typedef struct {
+    Card_t          numbers;      // 0..99, free space usually UINT32_MAX or 0
+    bool            daubs[5][5];
+    Card_t          misclicks;    // 0-2 ok, >=3 = penalized / lost square
+} PlayerCard_St;
+
+/**
+    @brief Ball pool and draw history management.
+*/
+typedef struct {
+    uint            encodedBalls[500];  // pre-shuffled 100*col+num values
+    uint            remainingCount;     // starts at 500, decrements
+    // uint         drawnHistory[500];  // optional: for replay / statistics
+} BallSystem_St;
+
+/**
+    @brief Current active call being displayed / available for daubing.
+*/
+typedef struct {
+    uint            encodedValue;       // full encoded ball (100*col+1 + num)
+    uint            column;             // 0..4  (B/I/N/G/O)
+    uint            number;             // 0..99
+    char            displayedText[16];  // "B-42", "N-17", etc.
+    f32             timer;              // time since this call started
+} CallState_St;
+
+typedef enum {
+    GAME_SCENE_CARD_CHOICE,
+    GAME_SCENE_PLAYING,
+    GAME_SCENE_LAUNCHING,
+    GAME_SCENE_END,
+} GameScene_Et;
+
+/**
+    @brief Overall game flow and outcome state.
+*/
+typedef struct {
+    GameScene_Et    scene;
+    const char*     resultMessage;      // "BINGO! You win!", "No more balls - Game Over", etc.
+    f32             gameDuration;
+    uint            ballsDrawnTotal;
+} GameProgress_St;
+
+typedef struct {
+    Rectangle   innerRect;        // final positioned rectangles for the 12 previews
+    Rectangle   bordersRect;      // optional: positioned borders
+    Rectangle   backgroundRect;   // optional: positioned background
+    Card_t      values;
+    bool        selected;
+} CardUI_St;
+
+/**
+    @brief Visual/layout constants and computed positions.
+*/
+typedef struct {
+    f32Vector2  windowCenter;
+    Rectangle   cardRectsRect;          // main game card area (if still needed)
+    Rectangle   cardRect;               // main card frame
+    Rectangle   cardRectBorder;         // main card border
+    Rectangle   choiceCardProto;        // prototype small card (unpositioned)
+    CardUI_St   choiceCards[12];
+} Layout_St;
+
+/**
+    @brief Core mutable game data – split into logical sub-structures.
+*/
+typedef struct {
+    CardUI_St* previouslySelectedCard;
+    PlayerCard_St   player;
+    BallSystem_St   balls;
+    CallState_St    currentCall;
+    GameProgress_St progress;
+    Layout_St       layout;
+} BingoGame_St;
 
 #endif // USER_TYPES_H
