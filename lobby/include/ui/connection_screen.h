@@ -33,4 +33,10 @@ bool UpdateConnectionScreen(void);
  */
 void DrawConnectionScreen(void);
 
+/**
+ * @brief Ajoute un serveur découvert à la liste UI.
+ * Cette déclaration permet à main.c de l'appeler.
+ */
+void AddDiscoveredRoom(const char* ip, const char* name);
+
 #endif // CONNECTION_SCREEN_H
