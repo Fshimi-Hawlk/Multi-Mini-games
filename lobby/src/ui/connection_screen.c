@@ -74,26 +74,37 @@ void AddDiscoveredRoom(const char* ip, const char* name) {
     roomsCount++;
 }
 
+// On déclare que cette fonction est définie dans un autre fichier (main.c)
+extern void discover_servers(void);
+
 bool UpdateConnectionScreen(void) {
     UpdateIPInput(&ipInput, ipBuffer, &letterCount);
 
-    // Si on clique sur rafraîchir, on pourrait déclencher un drapeau pour main.c
+    // Logique du bouton Rafraîchir
     if (UpdateConnectButton(&refreshButton, true)) {
-        // Logique : Envoyer LOBBY_ROOM_QUERY vers 255.255.255.255
-        // Pour l'instant on simule une réponse locale pour le test
-        AddDiscoveredRoom("127.0.0.1", "Serveur Local (Test)");
+        // --- ACTION RÉELLE ---
+        // On vide la liste actuelle pour ne pas accumuler des vieux serveurs
+        // (Optionnel : roomsCount = 0;)
+        
+        // On lance le SONAR (Broadcast UDP)
+        discover_servers(); 
+        
+        // --- SUPPRESSION DE LA SIMULATION ---
+        // Plus besoin de AddDiscoveredRoom("127.0.0.1", ...) ici !
     }
 
-    // Gestion du clic sur une room de la liste
+    // 3. Gestion du clic sur une room détectée par le réseau
+    // C'est receive_network_data() dans main.c qui remplit ce tableau asynchronement
     for (int i = 0; i < roomsCount; i++) {
         if (UpdateConnectButton(&discoveredRooms[i].button, true)) {
-            // ACTION : On remplit l'input avec l'IP de la room cliquée
+            // Si on clique sur une room, on injecte son IP dans le champ de saisie
             strncpy(ipBuffer, discoveredRooms[i].ip, IP_MAX_LENGTH);
-            letterCount = strlen(ipBuffer);
+            letterCount = (int)strlen(ipBuffer);
             ipInput.isIPValid = true;
         }
     }
 
+    // 4. Retourne true si on clique sur "Se Connecter"
     return UpdateConnectButton(&connectButton, ipInput.isIPValid);
 }
 
