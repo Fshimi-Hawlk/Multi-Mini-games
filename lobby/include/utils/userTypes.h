@@ -25,22 +25,20 @@ typedef enum {
 //    __gameSceneCount // can be removed/commented out if not needed
 } GameScene_Et;
 
+// lobby/include/utils/userTypes.h
+
 typedef struct {
     Vector2 position;
     float radius;
-
     Texture2D* texture;
     float angle;
-
     Vector2 velocity;
-    
     bool onGround;
     int nbJumps;
-
     float coyoteTime;
     float coyoteTimer;
-
     float jumpBuffer;
+    bool active;
 } Player_st;
 
 typedef struct {
