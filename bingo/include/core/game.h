@@ -1,8 +1,8 @@
 /**
     @file core/game.h
     @author Fshimi-Hawlk
-    @date 2026-02-08              // Creation date - never touch this one again
-    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @date 2026-03-02
+    @date 2026-03-05
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.
@@ -16,6 +16,8 @@
 #ifndef CORE_GAME_GAME_H
 #define CORE_GAME_GAME_H
 
-// TODO
+#include "utils/userTypes.h"
+
+void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos);
 
 #endif // CORE_GAME_GAME_H

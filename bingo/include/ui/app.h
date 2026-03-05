@@ -16,6 +16,13 @@
 #ifndef UI_APP_H
 #define UI_APP_H
 
-// TODO
+#include "utils/userTypes.h"
+
+/**
+    @brief Draws all UI elements.
+
+    TODO
+*/
+void bingo_drawUI(const BingoGame_St* game);
 
 #endif // UI_APP_H

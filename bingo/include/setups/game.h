@@ -1,7 +1,8 @@
 /**
     @file game.h (setups)
     @author Fshimi Hawlk
-    @date 2026-01-07
+    @date 2026-03-02
+    @date 2026-03-05
     @brief Full game state initialization.
 */
 
@@ -11,10 +12,8 @@
 #include "utils/userTypes.h"
 
 /**
-    @brief Initializes the game: prefabs, board, and state.
-
-    Sets up board, fills prefab bags, shuffles initial slots.
+    @brief Initializes the game: states, cards, ...
 */
-bool initGame(void);
+void bingo_initGame(BingoGame_St* game);
 
 #endif // SETUPS_GAME_H
