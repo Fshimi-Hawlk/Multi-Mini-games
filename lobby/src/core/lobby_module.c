@@ -27,11 +27,12 @@ static Camera2D camera = { 0 };
 void lobby_init(void) {
     printf("[LOBBY] Chargement du niveau et de la caméra...\n");
     
-    // Chemins en dur pour esquiver les bugs du Makefile
-    playerTextures[0] = LoadTexture("lobby/assets/trollFace.png");
-    playerTextures[1] = LoadTexture("lobby/assets/earth.png");
+    
+    // 
+    playerTextures[0] = LoadTexture("assets/images/trollFace.png");
+    playerTextures[1] = LoadTexture("assets/images/earth.png");
     playerTextureCount = 2;
-    logoSkinButton = LoadTexture("lobby/assets/logoSkin.png");
+    logoSkinButton = LoadTexture("assets/images/logoSkin.png");
     
     player.texture = &playerTextures[0];
 

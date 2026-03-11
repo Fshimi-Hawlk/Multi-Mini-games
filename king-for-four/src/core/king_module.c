@@ -29,7 +29,9 @@ typedef struct {
 
 /** @brief Initialise une partie sur le serveur. */
 void* king_create_instance() {
-    GameState* state = malloc(sizeof(GameState));
+    // FIX 1 : On utilise calloc pour forcer la mémoire à zéro. 
+    // Malloc laissait les ID des joueurs avec des valeurs aléatoires.
+    GameState* state = calloc(1, sizeof(GameState));
     if (state) {
         init_game_logic(state);
         init_uno_deck(&state->draw_pile);
@@ -43,8 +45,10 @@ void* king_create_instance() {
 void king_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
     GameState* g = (GameState*)state;
 
-    // Validation : Est-ce le tour de ce joueur ?
-    if (g->players[g->current_player].id != player_id) return;
+    // Protection : Ignore les requêtes si le joueur courant n'est pas initialisé
+    if (g->num_players == 0 || g->players[g->current_player].id != player_id) {
+        return;
+    }
 
     if (action == ACTION_PLAY_CARD) {
         int card_index = *((int*)payload);
@@ -55,8 +59,14 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
         player_draw_card(g, g->current_player);
     }
 
-    // Diffusion du nouvel état à TOUS les joueurs (Room 0 par défaut)
-    GameSyncPayload sync = { g->current_player, g->active_color, g->discard_pile.head->card };
+    // FIX 2 : Vérification stricte du pointeur du talon avant extraction
+    Card top_card = {CARD_BLACK, ZERO}; // Carte vide par défaut
+    if (g->discard_pile.head != NULL) {
+        top_card = g->discard_pile.head->card;
+    }
+
+    // Diffusion du nouvel état à TOUS les joueurs
+    GameSyncPayload sync = { g->current_player, g->active_color, top_card };
     broadcast(0, -1, ACTION_SYNC_GAME, &sync, sizeof(GameSyncPayload));
 }
 
