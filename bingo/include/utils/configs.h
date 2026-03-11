@@ -37,7 +37,7 @@
     @brief Root directory for all game assets (textures, sounds, fonts, etc.).
            Can be overridden at compile time (e.g. -DASSET_PATH="/custom/assets/").
 */
-#define ASSET_PATH "assets/"
+#define ASSET_PATH "../assets/"
 #endif
 
 /**
