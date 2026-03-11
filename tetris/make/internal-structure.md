@@ -1,4 +1,4 @@
-# makefile-structure Makefile System Structure
+# Makefile System Structure
 
 This project uses a **modular, split Makefile** approach for better maintainability, readability and platform extensibility.
 
@@ -6,8 +6,10 @@ All Makefile logic lives inside the `make/` directory.
 The root `Makefile` is kept minimal - it only includes the modular pieces in a strict numbered order.
 
 ## Directory Layout
+
 ```
 sub-project-root/
+├── makefile.md               # User-facing build instructions ("make help", modes, examples)
 ├── Makefile                  # <- very short: just includes + .PHONY
 ├── make/
 │   ├── 00-config.mk          # Compiler, modes, flags, directories, OS detection
@@ -17,16 +19,21 @@ sub-project-root/
 │   ├── 40-targets-tests.mk   # Test targets: tests, run-tests (with detailed logging)
 │   ├── 50-tools.mk           # Verbosity, dependency tracking, clean, help, stdbuf logic
 │   ├── 99-overrides.mk       # Optional, git-ignored local overrides
-│   └── platform/             # <- platform-specific configuration (added later)
-│       ├── linux.mk
-│       ├── darwin.mk
-│       └── mingw.mk
-├── makefile.md               # User-facing build instructions ("make help", modes, examples)
+│   ├── platform/             # <- platform-specific configuration (added later)
+│   │   ├── linux.mk
+│   │   ├── darwin.mk
+│   │   └── mingw.mk
+│   ├── scripts
+│   │   ├── generate-test-config.sh
+│   │   ├── run-tests.sh
+│   │   └── testSystemDocs.md
+│   └── internal-structure.md
 ├── src/
 ├── tests/
 ├── build/                    # generated
 └── ...
 ```
+
 ## Inclusion Order (important!)
 
 The files are included **in this exact sequence** from the root Makefile:

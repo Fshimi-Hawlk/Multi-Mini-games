@@ -49,10 +49,10 @@ void bingo_drawChoiceCards(const BingoGame_St* game) {
         f32 cellW = innerCard.width / 5.0f;
 
         for (u8 i = 0; i < 5; ++i) {
-            f32Vector2 textSize = MeasureTextEx(fonts[FONT32], LETTERS[i], 14, 0);
+            f32Vector2 textSize = MeasureTextEx(fonts[FONT14], LETTERS[i], 14, 0);
             f32 lx = innerCard.x + cellW * (i + 0.5f) - textSize.x / 2.0f;
             f32 ly = innerCard.y + cellW / 7.5;
-            DrawTextEx(fonts[FONT32], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
+            DrawTextEx(fonts[FONT14], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
         }
 
         for (u8 row = 0; row < 5; ++row) {
