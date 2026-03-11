@@ -1,8 +1,6 @@
 /**
  * @file server.c
  * @brief Serveur RUDP autoritaire avec support multi-modules sécurisé.
- * @author i-Charlys (CAILLON Charles) - Correctif de Production
- * @date 2026-03-11
  */
 
 #include <stdio.h>
@@ -16,17 +14,18 @@
 #include <netinet/in.h>
 #include <sys/time.h>
 #include <stdbool.h>
-#include <sys/select.h> // Nécessaire selon le standard POSIX.1-2001
+#include <sys/select.h>
 
 #include "rudp_core.h"
 #include "reseauAPI.h"
 #include "game_interface.h"
 
 #define PORT 8080
-#define TIMEOUT_US 5000000 
+#define TIMEOUT_US 5000000000
 #define SERVER_NAME "CachyOS-KingForFour-Server"
-#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDP_Header)) // Bornage strict (2037 octets)
+#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDP_Header))
 
+// Interfaces de routage
 extern GameInterface lobby_module; 
 extern GameInterface king_module;
 
@@ -42,9 +41,6 @@ UDP_Client clients[MAX_CLIENTS];
 GameInterface *active_module = NULL; 
 void* active_game_state = NULL;      
 
-/**
- * @brief Recherche ou alloue un slot pour un client basé sur son IP/Port.
- */
 int find_or_create_client(struct sockaddr_in *addr) {
     for(int i = 0; i < MAX_CLIENTS; i++) {
         if(clients[i].active && 
@@ -53,7 +49,6 @@ int find_or_create_client(struct sockaddr_in *addr) {
             return i;
         }
     }
-    
     for(int i = 0; i < MAX_CLIENTS; i++) {
         if(!clients[i].active) {
             clients[i].active = true;
@@ -67,17 +62,10 @@ int find_or_create_client(struct sockaddr_in *addr) {
     return -1;
 }
 
-/**
- * @brief Diffuse un message RUDP à tous les clients connectés avec protection contre le Buffer Overflow.
- */
 void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload, uint16_t len) {
     (void)room_id;
     uint8_t buffer[2048];
-    
-    // Protection mémoire : Tronquer silencieusement si la taille excède la capacité maximale physique
-    if (len > MAX_PAYLOAD_SIZE) {
-        len = MAX_PAYLOAD_SIZE;
-    }
+    if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active && i != exclude_id) {
@@ -96,9 +84,6 @@ void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload
     }
 }
 
-/**
- * @brief Répond aux requêtes de découverte de manière sécurisée (CWE-476).
- */
 void handle_discovery_query(struct sockaddr_in *client_addr) {
     RUDP_Header response;
     RUDP_Connection temp_conn;
@@ -111,7 +96,6 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
     memcpy(buffer, &response, sizeof(RUDP_Header));
     
     char info[256];
-    // Protection si le module ne possède pas de nom défini pour éviter une corruption format
     const char *module_name = (active_module && active_module->game_name) ? active_module->game_name : "Inconnu";
     snprintf(info, sizeof(info), "%s [%s]", SERVER_NAME, module_name);
     
@@ -121,9 +105,6 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
            (struct sockaddr *)client_addr, sizeof(struct sockaddr_in));
 }
 
-/**
- * @brief Nettoie les clients inactifs par calcul de différence temporelle de Tickrate.
- */
 void check_timeouts() {
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -144,7 +125,6 @@ void check_timeouts() {
 
 int main() {
     struct sockaddr_in server_addr;
-    
     for (int i = 0; i < MAX_CLIENTS; i++) clients[i].active = false;
 
     if ((master_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
@@ -159,13 +139,13 @@ int main() {
         perror("Bind fail"); exit(1);
     }
 
-    active_module = &king_module;
+    // Le serveur est forcé de démarrer sur le Lobby
+    active_module = &lobby_module;
     
-    // Protection Structurelle : Vérification de l'existence du pointeur de fonction
     if (active_module && active_module->create_instance) {
         active_game_state = active_module->create_instance();
     } else {
-        printf("[ERREUR CRITIQUE] Le module n'implémente pas l'interface `create_instance`.\n");
+        printf("[ERREUR] Le module n'implémente pas l'interface `create_instance`.\n");
         exit(1);
     }
 
@@ -187,7 +167,6 @@ int main() {
             ssize_t len = recvfrom(master_socket, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_addr, &addr_len);
 
             if (len >= (ssize_t)sizeof(RUDP_Header)) {
-                // Utilisation de memcpy pour s'assurer que l'accès en mémoire est correctement aligné (Prévention SIGBUS)
                 RUDP_Header header;
                 memcpy(&header, buffer, sizeof(RUDP_Header));
 
@@ -199,7 +178,6 @@ int main() {
                     if (id != -1 && RUDP_ProcessIncoming(&clients[id].rudp_state, &header)) {
                         gettimeofday(&clients[id].last_seen, NULL);
                         
-                        // Protection Structurelle : Vérification stricte avant déclenchement
                         if (active_module && active_module->on_action) {
                             active_module->on_action(
                                 active_game_state, 
