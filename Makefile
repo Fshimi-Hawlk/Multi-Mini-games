@@ -1,148 +1,88 @@
 # ───────────────────────────────────────────────────────────────
-# Top-Level Makefile ─ Project build system
+# Master Makefile ─ Système Monorepo pour Multi-Mini-Games
 # ───────────────────────────────────────────────────────────────
 
-# Force l'utilisation de sh pour la compatibilité
 SHELL = /bin/sh
-
 MODE ?= release
 VERBOSE ?= 0
-MAIN_NAME ?= main
 
-# Verbose mode (default silent)
+# Fait Physique : Fige le chemin absolu de la racine du projet
+ROOT_DIR := $(CURDIR)
+
+# CONFIGURATION
+MODULES_DIR := king-for-four
+LIB_NAME_RAW := kingforfour
+
 ifeq ($(VERBOSE),1)
-	SILENT_PREFIX :=
+    SILENT := 
 else
-	SILENT_PREFIX := @
+    SILENT := @
 endif
 
-# Suppress subdirectory messages
-MAKEFLAGS += --no-print-directory
-
-# Excluded directories
-EXCLUDED_DIRS := assets build docs firstparty lobby logs thirdparty tui-ver
-
-# Detect modules
-MODULES := $(patsubst %/,%,$(wildcard */))
-MODULES := $(filter-out $(EXCLUDED_DIRS), $(MODULES))
-
-SUBDIRS := $(MODULES) lobby
-
-FIRSTPARTY_API_DIR := firstparty/APIs
-
-# Root-level directories
-BUILD_DIR := build
+# Utilisation stricte de chemins absolus pour éviter les désynchronisations
+BUILD_DIR := $(ROOT_DIR)/build
 LIB_DIR   := $(BUILD_DIR)/lib
 BIN_DIR   := $(BUILD_DIR)/bin
+API_DIR   := $(ROOT_DIR)/firstparty/APIs
 
-# Computed lib names
-define compute-lib-name
-$(shell echo '$(1)' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
-endef
+.PHONY: all prepare libs server bin run-server run-lobby clean rebuild
 
-define compute-api-name
-$(shell echo '$(1)API.h')
-endef
+# L'ordre garantit que l'API existe avant de compiler le reste
+all: prepare libs server bin
 
-LIBS := $(foreach mod,$(MODULES),$(LIB_DIR)/lib$(call compute-lib-name,$(mod)).a)
-LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
+# 1. PRÉPARATION : Génération de l'API commune
+prepare:
+	$(SILENT)mkdir -p $(API_DIR) $(LIB_DIR) $(BIN_DIR)
+	$(SILENT)echo "===> Preparing API headers with correct types..."
+	$(SILENT)printf "#ifndef GENERAL_API_H\n#define GENERAL_API_H\n\ntypedef enum { OK = 0, ERROR_NULL_POINTER, ERROR_ALLOC, ERROR_INVALID } Error_Et;\n\ntypedef struct BaseGame_St {\n    int running;\n    int paused;\n    long score;\n    Error_Et (*freeGame)(void*);\n} BaseGame_St;\n\n#endif\n" > $(API_DIR)/generalAPI.h
 
-# ───────────────────────────────────────────────────────────────
-# Main Targets
-# ───────────────────────────────────────────────────────────────
-
-# On construit le jeu (bin) ET le serveur
-all: bin server
-
-# Nouvelle cible pour le serveur
-server:
-	$(SILENT_PREFIX)echo "Building dedicated server..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau server
-
-libs: $(LIBS)
-
-$(LIB_DIR)/lib%.a:
-	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
-	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
-	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	$(SILENT_PREFIX)echo "Building library for $(MOD_DIR) if needed..."
-	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
+# 2. LÉGION : Compilation du module de jeu en librairie statique
+libs: prepare
+	$(SILENT)echo "===> Building module: $(MODULES_DIR)"
+	$(SILENT)$(MAKE) -C $(MODULES_DIR) static-lib \
+		LIB_NAME=$(LIB_NAME_RAW) \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
-		LIB_NAME=$(LIB_NAME) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"$(MOD_DIR)/assets/\" -I.."
-	$(SILENT_PREFIX)mkdir -p $(LIB_DIR)
-	$(SILENT_PREFIX)if cmp -s $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@ 2>/dev/null; then \
-		echo "  lib$(LIB_NAME).a unchanged"; \
-	else \
-		echo "  Updating lib$(LIB_NAME).a"; \
-		cp $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@; \
-	fi
-	$(SILENT_PREFIX)mkdir -p $(FIRSTPARTY_API_DIR)
-	$(SILENT_PREFIX)if [ -f "$(MOD_DIR)/include/$(API_HEADER)" ]; then \
-		echo "  Updating API header: $(API_HEADER)"; \
-		cp "$(MOD_DIR)/include/$(API_HEADER)" "$(FIRSTPARTY_API_DIR)/"; \
-	else \
-		echo "  Warning: $(API_HEADER) not found in $(MOD_DIR)/include/"; \
+		EXTRA_CFLAGS="-I$(ROOT_DIR)/firstparty -I$(ROOT_DIR)"
+	$(SILENT)cp $(ROOT_DIR)/$(MODULES_DIR)/build/lib/lib$(LIB_NAME_RAW).a $(LIB_DIR)/
+	$(SILENT)if [ -f $(ROOT_DIR)/$(MODULES_DIR)/include/$(LIB_NAME_RAW)API.h ]; then \
+		cp $(ROOT_DIR)/$(MODULES_DIR)/include/$(LIB_NAME_RAW)API.h $(API_DIR)/; \
 	fi
 
+# 3. RÉSEAU : Construction du serveur autoritaire
+server: libs
+	$(SILENT)echo "===> Building Server"
+	$(SILENT)$(MAKE) -C reseau all \
+		MODE=$(MODE) \
+		VERBOSE=$(VERBOSE) \
+		EXTRA_CFLAGS="-I$(ROOT_DIR)/$(MODULES_DIR)/include -I$(ROOT_DIR) -I$(ROOT_DIR)/firstparty" \
+		EXTRA_LDFLAGS="$(LIB_DIR)/lib$(LIB_NAME_RAW).a"
+
+# 4. LOBBY : Construction du client (Interface Utilisateur)
 bin: libs
-	$(SILENT_PREFIX)echo "Building lobby executable (if needed)..."
-	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
-	$(SILENT_PREFIX)$(MAKE) -C lobby \
+	$(SILENT)echo "===> Building Lobby"
+	$(SILENT)$(MAKE) -C lobby all \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
-		BIN_DIR=../$(BIN_DIR) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include -I.." \
-		EXTRA_LDFLAGS="$(LIBS_REL)"
+		EXTRA_CFLAGS="-I$(ROOT_DIR)/reseau/include -I$(ROOT_DIR) -I$(ROOT_DIR)/firstparty" \
+		EXTRA_LDFLAGS="$(LIB_DIR)/lib$(LIB_NAME_RAW).a"
 
-rebuild-exe: libs
-	$(SILENT_PREFIX)echo "Force rebuilding lobby executable..."
-	$(SILENT_PREFIX)rm -f $(BIN_DIR)/$(MAIN_NAME)
-	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
-	$(SILENT_PREFIX)$(MAKE) -C lobby \
-		MODE=$(MODE) \
-		VERBOSE=$(VERBOSE) \
-		BIN_DIR=../$(BIN_DIR) \
-		EXTRA_CFLAGS="-DASSET_PATH=\"lobby/assets/\" -I../reseau/include -I.." \
-		EXTRA_LDFLAGS="$(LIBS_REL)" \
-		rebuild
+# 5. EXÉCUTION : Commandes de lancement sécurisées
+run-server: server
+	$(SILENT)echo "===> Starting Server..."
+	$(SILENT)cd reseau && ./build/bin/server
 
-run-exe:
-	@if [ -f $(BIN_DIR)/$(MAIN_NAME) ]; then \
-		$(BIN_DIR)/$(MAIN_NAME); \
-	else \
-		echo "No executable found at $(BIN_DIR)/$(MAIN_NAME)"; \
-		echo "Run 'make bin' or 'make rebuild-exe' first."; \
-	fi
+run-lobby: bin
+	$(SILENT)echo "===> Starting Lobby..."
+	$(SILENT)cd lobby && ./build/bin/main
 
-# Tests section omitted for brevity but standard targets follow...
-clean-libs:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
-		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
-		fi; \
-	done
-	$(SILENT_PREFIX)rm -rf $(LIB_DIR)
-
-clean-exe:
-	$(SILENT_PREFIX)rm -rf $(BIN_DIR)
-
+# 6. MAINTENANCE
 clean:
-	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
+	$(SILENT)echo "===> Cleaning Architecture..."
+	$(SILENT)rm -rf $(BUILD_DIR)
+	$(SILENT)rm -f $(API_DIR)/generalAPI.h $(API_DIR)/$(LIB_NAME_RAW)API.h
+	$(SILENT)$(MAKE) -C $(MODULES_DIR) clean
+	$(SILENT)$(MAKE) -C lobby clean
+	$(SILENT)$(MAKE) -C reseau clean
 
-clean-all: clean
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
-		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-			echo "Cleaning $$dir ..."; \
-			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
-		fi; \
-	done
-
-rebuild: clean-all all
-rebuild-libs: clean-libs libs
-rebuild-exe: clean-exe bin
-
-help:
-	@echo "Usage: make [OPTIONS] [TARGET]"
-	@echo "TARGETS: all, server, rebuild, clean, clean-all, libs, bin, run-exe"
+rebuild: clean all
