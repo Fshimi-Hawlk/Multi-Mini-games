@@ -13,6 +13,7 @@
 
 #include "common.h"
 #include "APIs/generalAPI.h"
+#include "suika_atlas.h"
 
 /**
     @brief Enumeration of all fruit types in the Suika game.
@@ -108,6 +109,12 @@ struct SuikaGame_St
     bool isGameOver;                /**< Whether game has ended */
     float gameOverTimer;            /**< Time since game over */
     float gravity;                  /**< Gravity acceleration in pixels/second^2 */
+    
+    // Fonctionnalité capacité 'P' - Auto-drop avec score désactivé
+    bool autoDropEnabled;           /**< Mode dépôt automatique activé (touche P) */
+    bool scoreMultiplierEnabled;    /**< Multiplicateur de score actif (désactivé pendant auto-drop) */
+    float boostCooldown;            /**< Temps de recharge du boost */
+    float baseDropCooldown;         /**< Temps de base entre les dépôts (1 seconde) */
 };
 
 typedef struct SuikaGame_St SuikaGame_St;

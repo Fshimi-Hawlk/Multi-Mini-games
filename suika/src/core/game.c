@@ -59,17 +59,18 @@ static Texture2D suika_loadTexture(const char* path)
 }
 
 static const FruitProperties_St FRUIT_PROPS[FRUIT_TYPE_COUNT] = {
-    {20.0f,  {255, 0, 0, 255},       10,   {46,  162, 83,  110}},
-    {25.0f,  {128, 0, 128, 255},     30,   {148, 180, 71,  83}},
-    {30.0f,  {255, 100, 100, 255},   20,   {277, 180, 71,  83}},
-    {35.0f,  {255, 165, 0, 255},     50,   {392, 137, 141, 163}},
-    {40.0f,  {255, 140, 0, 255},     40,   {599, 138, 160, 169}},
-    {45.0f,  {255, 0, 0, 255},       60,   {755, 79,  193, 232}},
-    {50.0f,  {173, 255, 47, 255},    70,   {74,  362, 144, 205}},
-    {55.0f,  {255, 218, 185, 255},   80,   {266, 376, 194, 201}},
-    {60.0f,  {255, 215, 0, 255},     90,   {476, 324, 190, 276}},
-    {70.0f,  {144, 238, 144, 255},   100,  {675, 377, 179, 210}},
-    {80.0f,  {34, 139, 34, 255},     150,  {886, 346, 239, 294}}
+    // {radius,  color,           points,  {x,   y,   w,   h}}
+    {22.5f,  {255, 0, 0, 255},       10,   {44,  130,  45,  70}},   // cherry
+    {22.0f,  {128, 0, 128, 255},     30,   {116, 136,  44,  64}},   // grape
+    {20.0f,  {255, 100, 100, 255},   20,   {216, 143,  40,  57}},   // strawberry
+    {48.0f,  {255, 165, 0, 255},      50,   {304, 109,  96, 113}},   // small_orange
+    {56.5f,  {255, 140, 0, 255},     40,   {451, 114, 113, 117}},   // big_orange
+    {57.0f,  {255, 0, 0, 255},       60,   {579,  88, 114, 134}},   // apple
+    {51.0f,  {173, 255, 47, 255},    70,   {58,  277, 102, 146}},   // pear
+    {56.5f,  {255, 218, 185, 255},   80,   {210, 305, 123, 113}},   // peach
+    {53.0f,  {255, 215, 0, 255},      90,   {369, 248, 106, 194}},   // pineapple
+    {61.0f,  {144, 238, 144, 255},   100,   {510, 288, 122, 144}},   // melon
+    {84.0f,  {34, 139, 34, 255},     150,   {672, 272, 168, 200}}   // watermelon
 };
 
 const FruitProperties_St* suika_getFruitProperties(FruitType_Et type)
@@ -110,6 +111,12 @@ void suika_init(SuikaGame_St* game)
     game->highScore = 0;
     game->isGameOver = false;
     game->gravity = 800.0f;
+
+    // Initialisation des nouvelles fonctionnalités
+    game->autoDropEnabled = false;
+    game->scoreMultiplierEnabled = true;
+    game->boostCooldown = 0.0f;
+    game->baseDropCooldown = 1.0f;
 
     for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
     {
@@ -171,13 +178,32 @@ void suika_update(SuikaGame_St* game, float deltaTime)
         return;
     }
 
+    // Gestion de la touche P pour activer/désactiver le mode auto-drop
+    if (IsKeyPressed(KEY_P))
+    {
+        game->autoDropEnabled = !game->autoDropEnabled;
+        game->scoreMultiplierEnabled = !game->autoDropEnabled; // Désactive le score en mode auto-drop
+    }
+
+    // Mise à jour du cooldown du boost
+    if (game->boostCooldown > 0.0f)
+    {
+        game->boostCooldown -= deltaTime;
+    }
+
     Vector2 mousePos = GetMousePosition();
     float minX = SUIKA_CONTAINER_X + game->nextFruit.radius;
     float maxX = SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH - game->nextFruit.radius;
     game->nextFruitX = Clamp(mousePos.x, minX, maxX);
     game->nextFruit.position.x = game->nextFruitX;
 
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+    // Mode auto-drop : spawn automatique des fruits
+    if (game->autoDropEnabled && game->canDrop)
+    {
+        suika_dropFruit(game);
+    }
+    // Mode normal : clic pour drop
+    else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         suika_dropFruit(game);
     }
@@ -189,7 +215,9 @@ void suika_update(SuikaGame_St* game, float deltaTime)
     if (!game->canDrop)
     {
         game->dropTimer += deltaTime;
-        if (game->dropTimer > 1.0f)
+        // En mode auto-drop, le délai est réduit par 4
+        float currentCooldown = game->autoDropEnabled ? game->baseDropCooldown / 4.0f : game->baseDropCooldown;
+        if (game->dropTimer > currentCooldown)
         {
             game->canDrop = true;
             game->dropTimer = 0.0f;
@@ -361,7 +389,11 @@ void suika_checkMerging(SuikaGame_St* game)
                                 game->fruits[k].isMerging = false;
                                 game->fruits[k].id = game->nextFruitId++;
 
-                                game->score += props->points;
+                                // Ajouter le score seulement si le multiplicateur est activé
+                                if (game->scoreMultiplierEnabled)
+                                {
+                                    game->score += props->points;
+                                }
 
                                 f1->isActive = false;
                                 f2->isActive = false;
