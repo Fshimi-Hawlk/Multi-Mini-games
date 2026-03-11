@@ -48,7 +48,7 @@ extern Font      appFont;
             Indexed by FontSize_Et values (FONT8 … FONT48).
             All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[_fontSizeCount];
+extern Font      fonts[__fontSizeCount];
 
 // ────────────────────────────────────────────────
 // Game's Globals
