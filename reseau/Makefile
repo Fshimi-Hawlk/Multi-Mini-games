@@ -30,10 +30,9 @@ $(LIB_TARGET): $(LIB_OBJ)
 # --- Serveur ---
 server: $(SERVER_BIN)
 
-# Le serveur connaît maintenant 'lobby_module' ET les fonctions 'RUDP_*'
 $(SERVER_BIN): $(SERVER_OBJ) $(LIB_OBJ)
 	@mkdir -p build/bin
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $^ $(EXTRA_LDFLAGS) -o $@
 	@echo "[RESEAU] Serveur compilé avec succès : $@"
 
 # --- Compilation générique ---
