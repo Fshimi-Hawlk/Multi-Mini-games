@@ -10,18 +10,22 @@
 
 #include "setups/app.h"
 
-bool initFonts(void) {
-    u64 fontSize = 8;
-
-    bool allFontLoaded = true;
-
-    for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
-        fonts[fontId] = LoadFontEx("../assets/fonts/Nunito/Nunito-Black.ttf", fontSize, NULL, 0);
+bool loadFontIdForSize(u64 fontId, f32 fontSize) {
+    fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
         if (!IsFontValid(fonts[fontId])) {
             log_warn("Font %zu (%d) wasn't proprely loaded", fontId, fontSize);
-            allFontLoaded = false;
+            return false;
         }
 
+    return true;
+}
+
+bool initFonts(void) {
+    u64 fontSize = 4;
+    bool allFontLoaded = true;
+    
+    for (u64 fontId = 0; allFontLoaded && fontId < __fontSizeCount; fontId++) {
+        allFontLoaded = loadFontIdForSize(fontId, fontSize);
         fontSize += 2;
     }
 
@@ -29,7 +33,7 @@ bool initFonts(void) {
 }
 
 void freeFonts(void) {
-    for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
+    for (u64 fontId = 0; fontId < __fontSizeCount; fontId++) {
         UnloadFont(fonts[fontId]);
     }
 }

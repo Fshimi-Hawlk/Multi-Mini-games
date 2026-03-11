@@ -30,14 +30,46 @@
     `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
 */
 typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
+                      FONT4,   FONT6,   FONT8,
+    FONT10,  FONT12,  FONT14,  FONT16,  FONT18,
+    FONT20,  FONT22,  FONT24,  FONT26,  FONT28,
+    FONT30,  FONT32,  FONT34,  FONT36,  FONT38,
+    FONT40,  FONT42,  FONT44,  FONT46,  FONT48,
+    FONT50,  FONT52,  FONT54,  FONT56,  FONT58,
+    FONT60,  FONT62,  FONT64,  FONT66,  FONT68,
+    FONT70,  FONT72,  FONT74,  FONT76,  FONT78,
+    FONT80,  FONT82,  FONT84,  FONT86,  FONT88,
+    FONT90,  FONT92,  FONT94,  FONT96,  FONT98,
+    FONT100, FONT102, FONT104, FONT106, FONT108,
+    FONT110, FONT112, FONT114, FONT116, FONT118,
+    FONT120, FONT122, FONT124, FONT126, FONT128,
+    __fontSizeCount
 } FontSize_Et;
 
+typedef enum GameState_Et {
+    STATE_GAMEPLAY = 0,
+    STATE_PAUSED,
+    STATE_SETTINGS_APP,
+    STATE_SETTINGS_GAME,
+    STATE_SETTINGS_KEYBINDS,
+    STATE_RESTART_CONFIRM,
+    STATE_ABANDON_CONFIRM
+} GameState_Et;
+
+typedef enum MenuItem_Et {
+    MENU_RESUME = 0,
+    MENU_SETTINGS,
+    MENU_RESTART,
+    MENU_ABANDON,
+    __menuItemCount
+} MenuItem_Et;
+
+typedef enum KeybindAction_Et {
+    ACTION_FULLSCREEN = 0,
+    ACTION_PAUSE,
+    // Add more game actions later
+    __keybindActionCount
+} KeybindAction_Et;
 
 // Game's Types
 
