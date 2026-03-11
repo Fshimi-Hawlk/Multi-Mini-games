@@ -26,11 +26,13 @@ Players walk to a door/zone → the corresponding mini-game starts in the same w
 We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/monorepos/) (one single repository for everything) with **one branch per mini-game**.
 
 1. The stable, shared code lives on branch **`main`**.
-2. Each mini-game is developed on its **own branch** (example: `block-blast`, `snake`, ...).
+2. Each mini-game is developed on its **own branch** (example: `solitaire`, `tetris`, ...).
 3. When a game is ready (plays well, looks finished, tests pass), we merge that branch into `main`.
 4. After merging, the game folder becomes part of `main` and we start connecting it to the lobby.
 
-- Example sub-project template: See `sub-project-example/` (includes structure, Makefile, Doxyfile.min, makefile.md documentation, and README template).
+## Current Games
+
+- **Solitaire (Klondike)** by Maxime CHAUVEAU - Classic card game with drag-and-drop
 
 ## Repository Structure (Root Level)
 
@@ -38,71 +40,75 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 .
 ├── assets/                   # Images, sounds, fonts — shared or per game
 │   ├── fonts/                # Different fonts used by the games
-│   └── sub-project/          # Example per-game subdir (added post-merge) (WIP: no sure if it'll stay olike this)
+│   └── solitaire/           # Solitaire card textures
+├── docs/                     # Documentation (bilingual: en/fr)
+│   └── doxygen/            # Doxygen documentation
 ├── firstparty/               # Reusable single-header libs made by the team
 ├── thirdparty/               # External deps (raylib static lib, PCG rand, etc.)
-│   └── NOTICE                # Third-party license notices & attributions (e.g., for rand.h PCG)
-├── sub-project-example/      # Template — copy this structure when starting a new game
-│   ├── src/                  # .c files
-│   ├── include/              # .h files
-│   ├── docs/                 # generated documentation
-│   ├── tests/                # unit tests
-│   ├── CHANGELOG.md          # Per-sub-project detailed changelog
-│   ├── Makefile              
-│   ├── makefile.md           # Explains make commands to build the sub-project
-│   ├── Doxyfile.min          # Minimal Doxygen configs for per-sub-project docs
-│   └── README.md             # Template README for new sub-projects
-├── docs/                     # (Future) Aggregated/shared documentation across all games/lobby
-├── LICENSE                   # Project license
-├── CHANGELOG.md              # High-level changes (branch creations, merges, shared updates)
-├── CONTRIBUTING.md           # Internal guidelines + code style link
-├── TODO.md                   # Internal reminders (global Makefile, lobby integration, etc.)
-├── .gitignore                # Ignores build/, logs/, docs/, etc.
-├── Makefile                  # (Future global) Build all merged games/lobby at once
-└── README.md                 # <-- This file
+│   └── NOTICE              # Third-party license notices
+├── lobby/                   # Main lobby (platformer-style menu)
+├── solitaire/               # Solitaire (Klondike) card game
+├── LICENSE                  # Project license
+├── CHANGELOG.md             # High-level changes
+├── CONTRIBUTING.md          # Guidelines for contributors
+├── TODO.md                  # Internal reminders
+├── .gitignore              # Ignores build/, logs/, docs/, etc.
+├── Makefile                # Root-level build system
+└── README.md               # <-- This file
 ```
 
-Post-merge example (after a sub-project merge):
+## Building & Running
 
-```
-├── sub-project/              # Merged game: src/, include/, tests/, etc.
-```
-
-## Building & Running (Root Level – after games are merged)
-
-From the repository root:
+### Root Level
 
 ```bash
 make help               # see all targets
-make bin                # build libraries (if needed) + lobby executable
+make bin                # build libraries + lobby executable
 make rebuild-exe        # force rebuild lobby executable only
 make run-exe            # run the lobby
 make run-tests          # run all tests across modules
 ```
 
-See `makefile.md` for full documentation.
-
-## Building & Running (Sub-Project Level)
-
-From inside a branch root (e.g., after `git checkout sub-project` or in `sub-project-example/`):
-
-See all options: `make help`
-- Default build (release): `make` or `make all`
-- Debug/sanitizers: `make MODE=clang-debug` (requires Clang installed)
-- Valgrind checks: `make MODE=valgrind-debug run-main` or `make MODE=valgrind-debug run-tests` (requires Valgrind installed)
-- Tests: `make run-tests` (live output + logs in `logs/tests-<timestamp>/`)
-- Full rebuild + run: `make rebuild run-main`
-
-**Note**: Global root Makefile coming later (for building all merged games/lobby at once — see [TODO](TODO.md)).
-
-## Generating Documentation (Per Game)
-
-Inside a game folder:
+### Per Game (e.g., Solitaire)
 
 ```bash
-doxygen Doxyfile.min
+cd solitaire
+make help               # see all targets
+make                    # build executable
+make run-main           # build and run
 ```
 
-->You can see the generated documentation in: [./docs/html/index.html](./docs/html/index.html).  
+### Build Modes
 
-**Future**: Root-level docs aggregation (all games + lobby in one view)  
+- **Release**: `make MODE=release` (default)
+- **Debug**: `make MODE=debug`
+- **Strict Debug**: `make MODE=strict-debug`
+- **Clang Debug**: `make MODE=clang-debug` (requires Clang)
+- **Valgrind Debug**: `make MODE=valgrind-debug` (requires Valgrind)
+
+## Documentation
+
+### Project Documentation
+
+- **English**: [docs/doxygen/en/](./docs/doxygen/en/)
+- **Français**: [docs/doxygen/fr/](./docs/doxygen/fr/)
+
+### Game Documentation
+
+Each game has its own documentation:
+- [solitaire/CHANGELOG.md](./solitaire/CHANGELOG.md)
+- [solitaire/CORRECTIONS.md](./solitaire/CORRECTIONS.md)
+
+### API Documentation
+
+See [docs/doxygen/](./docs/doxygen/) for full API documentation.
+
+## Code Style
+
+See [CodeStyleAndConventions.md](./CodeStyleAndConventions.md) for our coding conventions.
+
+## Credits
+
+**Created: January 2025**  
+**Last updated: March 2026**  
+**Authors: Fshimi Hawlk, Maxime CHAUVEAU, Léandre BAUDET, Kimi BERGE, Charles CAILLON**

@@ -112,6 +112,7 @@ typedef struct {
     int moves;
     float gameTime;
     bool isWon;
+    bool isLost;
     
     Card_St* selectedCard;
     
@@ -149,6 +150,9 @@ void solitaire_drawFromStock(SolitaireGameState* game);
 
 /** @brief Check win condition */
 void solitaire_checkWin(SolitaireGameState* game);
+
+/** @brief Check lose condition */
+void solitaire_checkLose(SolitaireGameState* game);
 
 /** @brief Get card name string */
 const char* solitaire_getCardName(const Card_St* card);

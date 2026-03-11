@@ -1,5 +1,63 @@
 # Changements et Corrections - Solitaire
 
+## Date: Mars 2026
+
+### Auteur
+Maxime CHAUVEAU
+
+### Problèmes corrigés - Session Mars 2026:
+
+#### 1. Bug du socle de pioche (stock pile)
+- **Avant**: Le socle affichait un as animé quand la pile était vide
+- **Après**: Le socle affiche maintenant un rectangle vide uniquement
+- **Fichiers modifiés**: `src/ui/renderer.c`
+
+#### 2. Cartes non distribuées aléatoirement
+- **Avant**: Les cartes étaient toujours distribuées dans le même ordre (pas de srand)
+- **Après**: Ajout de `srand((unsigned int)time(NULL))` dans `solitaire_init()`
+- **Fichiers modifiés**: `src/core/game.c`
+
+#### 3. Zone de clic pour recycler la pioche
+- **Avant**: Zone de clic chevauchait entre le stock et le waste
+- **Après**: Zone de clic unique sur le rectangle du stock uniquement
+- **Fichiers modifiés**: `src/core/game.c`
+
+#### 4. Double carte affichée lors du drag
+- **Avant**: La carte cliquée apparaissait à la fois à sa position et sous la souris
+- **Après**: La carte n'est affichée qu'à la position de la souris pendant le drag
+- **Fichiers modifiés**: `src/ui/renderer.c`
+
+#### 5. Cartes suivantes ne suivaient pas
+- **Avant**: En cliquant sur une carte au milieu d'une pile, seules cette carte bougeait
+- **Après**: Toutes les cartes au-dessus de la carte cliquée suivent maintenant
+- **Fichiers modifiés**: `src/core/game.c`, `src/ui/renderer.c`
+
+#### 6. Centrage de la carte sur la souris
+- **Avant**: La carte était décalée par rapport à la position du clic
+- **Après**: La carte est maintenant centrée sur le curseur de la souris
+- **Fichiers modifiés**: `src/core/game.c`, `src/ui/renderer.c`
+
+#### 7. Suppression incorrecte des cartes
+- **Avant**: Le code ne retirait qu'une seule carte de la pile source
+- **Après**: Le code retire maintenant le bon nombre de cartes (dragCount)
+- **Fichiers modifiés**: `src/core/game.c`
+
+#### 8. Détection de victoire
+- **Vérification**: La détection de victoire est appelée à chaque frame
+- **Fichiers modifiés**: `src/core/game.c`
+
+#### 9. Détection de défaite
+- **Ajout**: Vérification automatique toutes les 2 minutes
+- **Logique**: Vérifie s'il reste des mouvements possibles
+- **Fichiers modifiés**: `src/core/game.c`, `include/solitaire.h`, `src/ui/renderer.c`
+
+#### 10. Compilation avec tous les modes
+- **Vérification**: Le code compile avec release, debug, strict-debug, clang-debug, valgrind-debug
+- **Fix**: Correction du warning unused parameter `scale` dans `DrawCardFromAtlas`
+- **Fichiers modifiés**: `src/ui/renderer.c`
+
+---
+
 ## Date: Février 2026
 
 ### Auteur

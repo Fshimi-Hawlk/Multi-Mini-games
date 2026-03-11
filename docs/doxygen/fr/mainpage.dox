@@ -1,0 +1,81 @@
+/**
+    @page mainpage_fr Multi-Mini-Games - Documentation
+
+    @section intro_sec Introduction
+
+    **Multi-Mini-Games** est un projet de jeux miniatures independants en C avec raylib.
+    Les jeux sont integres dans un lobby commun - un menu style plateforme 2D.
+
+    En Mars 2026, le projet inclut:
+    - Un lobby fonctionnel avec mouvement, physique et elements UI
+    - Un jeu integre: **Solitaire (Klondike)** - jeu de cartes classique
+    - Infrastructure partagee: logging, types, utilitaires et API
+    - Outils de build et documentation
+
+    ### Langue / Language
+
+    - [English](../en/mainpage.md) or return to [Main Page](../index.html)
+    - Français
+
+    @section team_sec Equipe projet
+
+    - BAUDET Leandre:  Leandre.Baudet.Etu@univ-lemans.fr
+    - BERGE Kimi:      Kimi.Berge.Etu@univ-lemans.fr
+    - CAILLON Charles: Charles_Caillon.Etu@univ-lemans.fr
+    - CHAUVEAU Maxime: Maxime.Chauveau.Etu@univ-lemans.fr
+
+    @section structure_sec Structure des dossiers
+
+    @verbatim
+    Multi-Mini-Games/
+    ├── assets/                 # Images, sons, polices
+    │   └── solitaire/         # Textures des cartes
+    ├── docs/                   # Documentation
+    │   └── doxygen/           # Docs Doxygen (en/fr)
+    ├── lobby/                  # Menu central
+    ├── solitaire/              # Jeu de cartes Solitaire
+    ├── firstparty/             # Bibliotheques internes
+    ├── thirdparty/             # Bibliotheques externes
+    ├── Makefile
+    ├── README.md
+    └── CHANGELOG.md
+    @endverbatim
+
+    @section compile_sec Comment compiler
+
+    @subsection compile_root Compilation racine
+    @code{.sh}
+    make help               # Voir les options
+    make bin                # Compiler le lobby
+    make run-exe            # Lancer le lobby
+    @endcode
+
+    @subsection compile_game Compiler un jeu
+    @code{.sh}
+    cd solitaire
+    make help               # Voir les options
+    make                    # Compiler
+    make run-main           # Lancer le jeu
+    @endcode
+
+    @section modules_sec Modules
+
+    - @ref solitaire_fr "Solitaire" - Jeu de cartes Klondike
+
+    @section docs_sec Documentation
+
+    - [English](./../en/)
+    - [Français](./)
+
+    @section license_sec Licence
+
+    Voir le fichier LICENSE a la racine.
+
+    @section credits_sec Credits
+
+    Projet realise dans le cadre du Licence Informatique 2e annee.
+    Universite du Mans - 2025-2026
+
+    @author Maxime CHAUVEAU
+    @date Mars 2026
+*/

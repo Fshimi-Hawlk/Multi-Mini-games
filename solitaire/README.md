@@ -22,7 +22,8 @@ A fully-featured Klondike Solitaire implementation with drag-and-drop card movem
 - Score tracking (+10 for foundation moves, +5 for tableau moves)
 - Game timer
 - Win detection with congratulations screen
-- Animated card back symbols when piles are empty
+- Lose detection every 2 minutes
+- Empty stock pile with simple rectangle indicator
 
 ## Tech / Structure Notes
 
@@ -44,6 +45,14 @@ make static-lib # Build static library for lobby
 make run-main   # Build and run
 ```
 
+### Build Modes
+
+- **Release**: `make MODE=release` (default)
+- **Debug**: `make MODE=debug`
+- **Strict Debug**: `make MODE=strict-debug`
+- **Clang Debug**: `make MODE=clang-debug`
+- **Valgrind Debug**: `make MODE=valgrind-debug`
+
 ## API Usage
 
 ```c
@@ -55,6 +64,10 @@ while (solitaire_isRunning(game)) {
 }
 solitaire_freeGame(game);
 ```
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md) for detailed changes.
 
 ## Author
 

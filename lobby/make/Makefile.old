@@ -4,8 +4,8 @@
 #     Main targets: see 'make help' for the full list and descriptions
 #     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
 #
-#     Full documentation →  makefile.md
-#     Quick usage        →  make help
+#     Full documentation ->  makefile.md
+#     Quick usage        ->  make help
 #
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 # ───────────────────────────────────────────────────────────────
@@ -99,7 +99,7 @@ else ifeq ($(MODE),clang-debug)
 	else
 		$(info Clang not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-			$(info Valgrind detected — try MODE=valgrind-debug for runtime checks.)
+			$(info Valgrind detected - try MODE=valgrind-debug for runtime checks.)
 		endif
 		$(error Clang required for clang-debug mode)
 	endif
@@ -127,7 +127,7 @@ else ifeq ($(MODE),valgrind-debug)
 	else
 		$(info Valgrind not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
-			$(info Clang detected — try MODE=clang-debug for compile-time sanitizers.)
+			$(info Clang detected - try MODE=clang-debug for compile-time sanitizers.)
 		endif
 		$(error Valgrind required for valgrind-debug mode)
 	endif
@@ -210,7 +210,7 @@ all: $(BIN)
 
 tests: $(TEST_BINS)
 	@if [ -z "$(TEST_BINS)" ]; then \
-		echo "No tests found — nothing to build."; \
+		echo "No tests found - nothing to build."; \
 	else \
 		echo "Test binaries built: $(notdir $(TEST_BINS))"; \
 	fi

@@ -1,4 +1,4 @@
-all: static-lib $(BIN)
+all: $(BIN)
 
 rebuild: clean all
 

@@ -1,0 +1,91 @@
+# Doxyfile - Multi Mini-Games Documentation
+# @author Maxime CHAUVEAU, Fshimi Hawlk
+# @date March 2026
+
+DOXYFILE_ENCODING       = UTF-8
+
+# ────────────────────────────────────────────────────────────────
+# Project metadata
+# ────────────────────────────────────────────────────────────────
+
+PROJECT_NAME            = "Multi Mini-Games"
+PROJECT_NUMBER          = 2026.03
+PROJECT_BRIEF           = "Collection of raylib mini-games integrated into a lobby hub"
+PROJECT_LOGO            = 
+
+# ────────────────────────────────────────────────────────────────
+# Output
+# ────────────────────────────────────────────────────────────────
+
+OUTPUT_DIRECTORY        = .
+HTML_OUTPUT             = html
+GENERATE_HTML           = YES
+GENERATE_LATEX          = NO
+CREATE_SUBDIRS          = NO
+
+HTML_COLORSTYLE         = AUTO
+HTML_DYNAMIC_MENUS      = NO
+GENERATE_TREEVIEW       = YES
+DISABLE_INDEX           = NO
+GENERATE_LEGEND         = YES
+
+# ────────────────────────────────────────────────────────────────
+# Input & scanning
+# ────────────────────────────────────────────────────────────────
+
+USE_MDFILE_AS_MAINPAGE  = en/mainpage.md
+
+INPUT                   = en \
+                          fr
+
+RECURSIVE               = NO
+FILE_PATTERNS           = *.md *.dox *.c *.h
+
+EXCLUDE_PATTERNS        = */.git/* */build/* */logs/* */thirdparty/libs/*
+
+STRIP_FROM_PATH         = $(PWD)
+STRIP_FROM_INC_PATH     = $(PWD)
+# STRIP_FROM_INC_PATH     = $(PWD)/../lobby/include $(PWD)/../tetris/include $(PWD)/../firstparty $(PWD)/../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# C extraction & visibility
+# ────────────────────────────────────────────────────────────────
+
+OPTIMIZE_OUTPUT_FOR_C   = YES
+EXTRACT_ALL             = YES
+EXTRACT_PRIVATE         = NO
+EXTRACT_STATIC          = YES
+HIDE_UNDOC_MEMBERS      = NO
+HIDE_UNDOC_CLASSES      = NO
+
+# ────────────────────────────────────────────────────────────────
+# Graphs
+# ────────────────────────────────────────────────────────────────
+
+HAVE_DOT                = YES
+DOT_NUM_THREADS         = 0
+DOT_IMAGE_FORMAT        = svg
+INTERACTIVE_SVG         = YES
+
+INCLUDE_GRAPH           = YES
+INCLUDED_BY_GRAPH       = YES
+CALL_GRAPH              = YES
+CALLER_GRAPH            = YES
+CLASS_GRAPH             = YES
+COLLABORATION_GRAPH     = YES
+DIRECTORY_GRAPH         = YES
+DIR_GRAPH_MAX_DEPTH     = 3
+
+# ────────────────────────────────────────────────────────────────
+# Performance / Debugging
+# ────────────────────────────────────────────────────────────────
+
+NUM_PROC_THREADS        = 4
+QUIET                   = NO               # set to YES later if too noisy
+WARNINGS                = YES
+WARN_IF_UNDOCUMENTED    = YES
+WARN_FORMAT             = "$file:$line $text"
+
+# Enable this temporarily to debug page relation issues
+# DOT_GRAPH_MAX_NODES     = 50
+# MAX_DOT_GRAPH_DEPTH     = 1000

@@ -133,6 +133,7 @@ static void DrawCardFromAtlasTinted(GameAssets assets, int index, Vector2 positi
 }
 
 static void DrawCardFromAtlas(GameAssets assets, int index, Vector2 position, float scale) {
+    (void)scale;
     DrawCardFromAtlasTinted(assets, index, position, WHITE);
 }
 
@@ -167,28 +168,19 @@ static void RenderStock(const Pile_St *stock, GameAssets assets) {
     
     if (stock->count > 0) {
         DrawCardBack(assets, stock->position);
-    } else {
-        int aceIndices[] = {0, 13, 26, 39};
-        Color tints[] = {
-            {120, 60, 60, 180},
-            {120, 60, 60, 180},
-            {60, 60, 60, 180},
-            {60, 60, 60, 180}
-        };
-        int aceIndex = (int)(GetTime() * 2) % 4;
-        DrawCardFromAtlasTinted(assets, aceIndices[aceIndex], stock->position, tints[aceIndex]);
     }
 }
 
-static void RenderWaste(const Pile_St *waste, GameAssets assets) {
+static void RenderWaste(const Pile_St *waste, GameAssets assets, bool isDragSource) {
     DrawEmptySlotWide(waste->position, WASTE_ZONE_WIDTH, (Color){100, 150, 100, 255});
     
     if (waste->count > 0) {
         int spread = 25;
         int maxVisible = 3;
         int start = waste->count > maxVisible ? waste->count - maxVisible : 0;
+        int end = isDragSource ? waste->count - 1 : waste->count;
         float offsetX = 0;
-        for (int i = start; i < waste->count; i++) {
+        for (int i = start; i < end; i++) {
             Vector2 pos = {waste->position.x + offsetX, waste->position.y};
             RenderSingleCard(waste->cards[i], assets, pos);
             offsetX += spread;
@@ -214,10 +206,11 @@ static void RenderFoundation(const Pile_St *foundation, GameAssets assets, int i
     }
 }
 
-static void RenderTableauPile(const Pile_St *pile, GameAssets assets) {
+static void RenderTableauPile(const Pile_St *pile, GameAssets assets, bool isDragSource, int dragIndex, int dragCount) {
     DrawEmptySlot(pile->position, (Color){100, 150, 100, 255});
     
     for (int i = 0; i < pile->count; i++) {
+        if (isDragSource && i >= dragIndex && i < dragIndex + dragCount) continue;
         Vector2 pos = {
             pile->position.x,
             pile->position.y + i * CARD_OFFSET_Y
@@ -227,20 +220,23 @@ static void RenderTableauPile(const Pile_St *pile, GameAssets assets) {
 }
 
 void RenderGame(const SolitaireGameState *game, GameAssets assets) {
+    bool isDraggingFromWaste = game->dragState.isDragging && game->dragState.sourcePile == &game->waste;
+    
     RenderStock(&game->stock, assets);
-    RenderWaste(&game->waste, assets);
+    RenderWaste(&game->waste, assets, isDraggingFromWaste);
     
     for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
         RenderFoundation(&game->foundation[i], assets, i);
     }
     
     for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
-        RenderTableauPile(&game->tableau[i], assets);
+        bool isDragSource = game->dragState.isDragging && game->dragState.sourcePile == &game->tableau[i];
+        RenderTableauPile(&game->tableau[i], assets, isDragSource, game->dragState.sourceIndex, game->dragState.count);
     }
     
     if (game->dragState.isDragging) {
         Vector2 mousePos = GetMousePosition();
-        Vector2 dragPos = Vector2Subtract(mousePos, game->dragState.offset);
+        Vector2 dragPos = Vector2Subtract(mousePos, (Vector2){CARD_WIDTH / 2.0f, CARD_HEIGHT / 2.0f});
         for (int i = 0; i < game->dragState.count; i++) {
             Vector2 cardPos = {dragPos.x, dragPos.y + i * CARD_OFFSET_Y};
             RenderSingleCard(game->dragState.cards[i], assets, cardPos);
@@ -262,6 +258,13 @@ void RenderMenu(const SolitaireGameState *game, GameAssets assets) {
         char winText[64];
         sprintf(winText, "Score: %d  Temps: %.0fs", game->score, game->gameTime);
         DrawText(winText, SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, WHITE);
+        DrawText("Appuyez sur N pour rejouer", SCREEN_WIDTH/2 - 110, SCREEN_HEIGHT/2 + 30, 18, LIGHTGRAY);
+    } else if (game->isLost) {
+        DrawRectangle(SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 - 60, 400, 120, (Color){100, 0, 0, 200});
+        DrawText("PERDU !", SCREEN_WIDTH/2 - 60, SCREEN_HEIGHT/2 - 40, 30, RED);
+        char loseText[64];
+        sprintf(loseText, "Score: %d  Temps: %.0fs", game->score, game->gameTime);
+        DrawText(loseText, SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, WHITE);
         DrawText("Appuyez sur N pour rejouer", SCREEN_WIDTH/2 - 110, SCREEN_HEIGHT/2 + 30, 18, LIGHTGRAY);
     }
 }

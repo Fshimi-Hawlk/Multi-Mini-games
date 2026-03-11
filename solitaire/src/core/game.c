@@ -19,6 +19,8 @@
 void solitaire_init(SolitaireGameState* game) {
     memset(game, 0, sizeof(SolitaireGameState));
     
+    srand((unsigned int)time(NULL));
+    
     game->assets = malloc(sizeof(GameAssets));
     if (game->assets) {
         *game->assets = LoadAssets();
@@ -158,52 +160,26 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         Rectangle stockRect = {game->stock.position.x, game->stock.position.y, 
                               CARD_WIDTH, CARD_HEIGHT};
-        Rectangle wasteRect = {game->waste.position.x, game->waste.position.y,
-                              WASTE_ZONE_WIDTH, CARD_HEIGHT};
         
-        if (CheckCollisionPointRec(mousePos, stockRect) || 
-            (game->stock.count == 0 && CheckCollisionPointRec(mousePos, wasteRect))) {
-            gestionStock(game);
+        if (game->stock.count > 0) {
+            if (CheckCollisionPointRec(mousePos, stockRect)) {
+                gestionStock(game);
+            }
+        } else {
+            Rectangle recycleRect = {game->stock.position.x, game->stock.position.y, 
+                                   CARD_WIDTH, CARD_HEIGHT};
+            if (CheckCollisionPointRec(mousePos, recycleRect)) {
+                gestionStock(game);
+            }
         }
     }
     
     // Simple card selection (placeholder for full drag-drop)
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && !game->dragState.isDragging) {
-        // Check tableau piles
-        for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
-            if (game->tableau[i].count > 0) {
-                for (int j = game->tableau[i].count - 1; j >= 0; j--) {
-                    Card_St* card = game->tableau[i].cards[j];
-                    if (card->isFaceUp) {
-                        Vector2 cardPos = {
-                            game->tableau[i].position.x,
-                            game->tableau[i].position.y + j * CARD_OFFSET_Y
-                        };
-                        Rectangle cardRect = {cardPos.x, cardPos.y, CARD_WIDTH, CARD_HEIGHT};
-                        
-                        if (CheckCollisionPointRec(mousePos, cardRect)) {
-                            game->selectedCard = card;
-                            game->dragState.isDragging = true;
-                            game->dragState.sourcePile = &game->tableau[i];
-                            game->dragState.sourceIndex = j;
-                            game->dragState.offset = Vector2Subtract(mousePos, cardPos);
-                            
-                            // Add cards to drag
-                            game->dragState.count = 0;
-                            for (int k = j; k < game->tableau[i].count; k++) {
-                                game->dragState.cards[game->dragState.count++] = 
-                                    game->tableau[i].cards[k];
-                            }
-                            break;
-                        }
-                    }
-                }
-            }
-        }
+        bool cardClicked = false;
         
-        // Check waste pile
-        if (!game->dragState.isDragging && game->waste.count > 0) {
-            Card_St* card = game->waste.cards[game->waste.count - 1];
+        // Check waste pile FIRST (higher priority)
+        if (game->waste.count > 0) {
             int spread = 25;
             int maxVisible = 3;
             int start = game->waste.count > maxVisible ? game->waste.count - maxVisible : 0;
@@ -213,13 +189,50 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                                   CARD_WIDTH, CARD_HEIGHT};
             
             if (CheckCollisionPointRec(mousePos, wasteRect)) {
+                Card_St* card = game->waste.cards[game->waste.count - 1];
                 game->selectedCard = card;
                 game->dragState.isDragging = true;
                 game->dragState.sourcePile = &game->waste;
                 game->dragState.sourceIndex = game->waste.count - 1;
-                game->dragState.offset = Vector2Subtract(mousePos, game->waste.position);
+                game->dragState.offset = (Vector2){CARD_WIDTH / 2.0f, CARD_HEIGHT / 2.0f};
                 game->dragState.cards[0] = card;
                 game->dragState.count = 1;
+                cardClicked = true;
+            }
+        }
+        
+        // Check tableau piles
+        if (!cardClicked) {
+            for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
+                if (game->tableau[i].count > 0) {
+                    for (int j = game->tableau[i].count - 1; j >= 0; j--) {
+                        Card_St* card = game->tableau[i].cards[j];
+                        if (card->isFaceUp) {
+                            Vector2 cardPos = {
+                                game->tableau[i].position.x,
+                                game->tableau[i].position.y + j * CARD_OFFSET_Y
+                            };
+                            Rectangle cardRect = {cardPos.x, cardPos.y, CARD_WIDTH, CARD_HEIGHT};
+                            
+                            if (CheckCollisionPointRec(mousePos, cardRect)) {
+                                game->selectedCard = card;
+                                game->dragState.isDragging = true;
+                                game->dragState.sourcePile = &game->tableau[i];
+                                game->dragState.sourceIndex = j;
+                                game->dragState.offset = (Vector2){CARD_WIDTH / 2.0f, CARD_HEIGHT / 2.0f};
+                                
+                                // Add all cards above the clicked card
+                                game->dragState.count = 0;
+                                for (int k = j; k < game->tableau[i].count; k++) {
+                                    game->dragState.cards[game->dragState.count++] = game->tableau[i].cards[k];
+                                }
+                                cardClicked = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (cardClicked) break;
             }
         }
     }
@@ -227,6 +240,8 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
     // Handle drag release
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON) && game->dragState.isDragging) {
         bool moved = false;
+        int sourceIdx = game->dragState.sourceIndex;
+        int dragCount = game->dragState.count;
         
         // Try foundation piles
         for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
@@ -234,18 +249,21 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                                   game->foundation[i].position.y,
                                   CARD_WIDTH, CARD_HEIGHT};
             
-            if (CheckCollisionPointRec(mousePos, foundRect) && game->dragState.count == 1) {
+            if (CheckCollisionPointRec(mousePos, foundRect) && dragCount == 1) {
                 if (solitaire_isValidMove(game->dragState.cards[0], &game->foundation[i])) {
                     // Move to foundation
-                    game->dragState.sourcePile->count -= game->dragState.count;
+                    Pile_St* srcPile = game->dragState.sourcePile;
+                    for (int k = sourceIdx; k < srcPile->count - dragCount; k++) {
+                        srcPile->cards[k] = srcPile->cards[k + dragCount];
+                    }
+                    srcPile->count -= dragCount;
+                    
                     game->foundation[i].cards[game->foundation[i].count++] = 
                         game->dragState.cards[0];
                     
                     // Flip card if needed
-                    if (game->dragState.sourcePile->count > 0 && 
-                        game->dragState.sourcePile->type == PILE_TABLEAU) {
-                        Card_St* topCard = game->dragState.sourcePile->cards[
-                            game->dragState.sourcePile->count - 1];
+                    if (srcPile->count > 0 && srcPile->type == PILE_TABLEAU) {
+                        Card_St* topCard = srcPile->cards[srcPile->count - 1];
                         topCard->isFaceUp = true;
                     }
                     
@@ -266,7 +284,11 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                 if (CheckCollisionPointRec(mousePos, tabRect)) {
                     if (solitaire_isValidMove(game->dragState.cards[0], &game->tableau[i])) {
                         // Move to tableau
-                        game->dragState.sourcePile->count -= game->dragState.count;
+                        Pile_St* srcPile = game->dragState.sourcePile;
+                        for (int k = sourceIdx; k < srcPile->count - dragCount; k++) {
+                            srcPile->cards[k] = srcPile->cards[k + dragCount];
+                        }
+                        srcPile->count -= dragCount;
                         
                         for (int j = 0; j < game->dragState.count; j++) {
                             game->tableau[i].cards[game->tableau[i].count++] = 
@@ -274,10 +296,8 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                         }
                         
                         // Flip card if needed
-                        if (game->dragState.sourcePile->count > 0 &&
-                            game->dragState.sourcePile->type == PILE_TABLEAU) {
-                            Card_St* topCard = game->dragState.sourcePile->cards[
-                                game->dragState.sourcePile->count - 1];
+                        if (srcPile->count > 0 && srcPile->type == PILE_TABLEAU) {
+                            Card_St* topCard = srcPile->cards[srcPile->count - 1];
                             topCard->isFaceUp = true;
                         }
                         
@@ -297,6 +317,11 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
     // Check win
     solitaire_checkWin(game);
     
+    // Check loss every 2 minutes
+    if ((int)(game->gameTime) > 0 && (int)(game->gameTime) % 120 == 0 && (int)(game->gameTime - deltaTime) % 120 != 0) {
+        solitaire_checkLose(game);
+    }
+    
     // New game on N key
     if (IsKeyPressed(KEY_N)) {
         solitaire_init(game);
@@ -312,6 +337,49 @@ void solitaire_checkWin(SolitaireGameState* game) {
     if (totalCards == NUM_CARDS) {
         game->isWon = true;
     }
+}
+
+void solitaire_checkLose(SolitaireGameState* game) {
+    if (game->isWon) return;
+    
+    if (game->stock.count == 0 && game->waste.count == 0) {
+        game->isLost = true;
+        return;
+    }
+    
+    for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
+        if (game->tableau[i].count > 0) {
+            Card_St* topCard = game->tableau[i].cards[game->tableau[i].count - 1];
+            if (topCard->isFaceUp) {
+                for (int j = 0; j < NUM_FOUNDATION_PILES; j++) {
+                    if (solitaire_isValidMove(topCard, &game->foundation[j])) {
+                        return;
+                    }
+                }
+                for (int j = 0; j < NUM_TABLEAU_PILES; j++) {
+                    if (j != i && solitaire_isValidMove(topCard, &game->tableau[j])) {
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (game->waste.count > 0) {
+        Card_St* wasteTop = game->waste.cards[game->waste.count - 1];
+        for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
+            if (solitaire_isValidMove(wasteTop, &game->foundation[i])) {
+                return;
+            }
+        }
+        for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
+            if (solitaire_isValidMove(wasteTop, &game->tableau[i])) {
+                return;
+            }
+        }
+    }
+    
+    game->isLost = true;
 }
 
 Color solitaire_getSuitColor(Suit_Et suit) {
