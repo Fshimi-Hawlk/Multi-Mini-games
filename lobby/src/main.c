@@ -139,16 +139,18 @@ int main(void) {
         float dt = GetFrameTime();
         receive_network_data();
 
-        // Ajout : Touche 'K' pour switcher vers King For Four (ID 1)
-        if (currentState == STATE_LOBBY && active_game_id == 0 && IsKeyPressed(KEY_K)) {
-            uint8_t target_id = 1;
-            GameTLVHeader tlv = { .game_id = 0, .action = 0x20 /* LOBBY_SWITCH_GAME */, .length = 1 };
-            RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
-            uint8_t buffer[1024];
-            memcpy(buffer, &h, sizeof(h));
-            memcpy(buffer+sizeof(h), &tlv, sizeof(tlv));
-            memcpy(buffer+sizeof(h)+sizeof(tlv), &target_id, 1);
-            send(network_socket, buffer, sizeof(h)+sizeof(tlv)+1, 0);
+        // Trigger physique ou touche 'K' vers King For Four (ID 1)
+        if (currentState == STATE_LOBBY && active_game_id == 0) {
+            if (checkGameTrigger(&player) == 1 || IsKeyPressed(KEY_K)) {
+                uint8_t target_id = 1;
+                GameTLVHeader tlv = { .game_id = 0, .action = 0x20 /* LOBBY_SWITCH_GAME */, .length = 1 };
+                RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
+                uint8_t buffer[1024];
+                memcpy(buffer, &h, sizeof(h));
+                memcpy(buffer+sizeof(h), &tlv, sizeof(tlv));
+                memcpy(buffer+sizeof(h)+sizeof(tlv), &target_id, 1);
+                send(network_socket, buffer, sizeof(h)+sizeof(tlv)+1, 0);
+            }
         }
 
         switch (currentState) {
