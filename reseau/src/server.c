@@ -1,6 +1,16 @@
 /**
  * @file server.c
  * @brief Serveur RUDP autoritaire avec support multi-modules sécurisé.
+ * 
+ *  [CLIENT 1] <----RUDP----> [ SERVEUR ] <----RUDP----> [CLIENT 2]
+ *                               |
+ *                               v
+ *                    +---------------------+
+ *                    |   ROUTAGE MODULES   |
+ *                    +---------------------+
+ *                    | action = SWITCH?    | ----> Change active_module
+ *                    | action = GAME_DATA? | ----> on_action(active_game)
+ *                    +---------------------+
  */
 
 #include <stdio.h>
@@ -62,6 +72,12 @@ int find_or_create_client(struct sockaddr_in *addr) {
     return -1;
 }
 
+/**
+ * @brief Diffuse ou envoie un message à un client spécifique.
+ * 
+ *  BROADCAST (room >= 0): [S] ----> [C1, C2, C3, ...] (Sauf exclude_id)
+ *  UNICAST   (room <  0): [S] ----> [exclude_id]      (Cible unique)
+ */
 void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload, uint16_t len) {
     uint8_t buffer[2048];
     if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
