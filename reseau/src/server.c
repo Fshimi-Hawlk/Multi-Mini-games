@@ -191,17 +191,21 @@ int main() {
                             printf("[MODULE] Demande de switch vers ID: %d\n", target_game_id);
                             
                             // Pour simplifier, ID 1 = King for Four
-                            if (target_game_id == 1 && active_module != &king_module) {
-                                if (active_module && active_module->destroy_instance) {
-                                    active_module->destroy_instance(active_game_state);
+                            if (target_game_id == 1) {
+                                if (active_module != &king_module) {
+                                    if (active_module && active_module->destroy_instance) {
+                                        active_module->destroy_instance(active_game_state);
+                                    }
+                                    active_module = &king_module;
+                                    active_game_state = active_module->create_instance();
+                                    printf("[MODULE] Premier switch vers King For Four effectué.\n");
                                 }
-                                active_module = &king_module;
-                                active_game_state = active_module->create_instance();
-                                printf("[MODULE] Changement vers King For Four effectué.\n");
                                 
-                                // On ne TP QUE celui qui a demandé (Unicast)
+                                // On envoie TOUJOURS la confirmation au joueur qui demande (Unicast)
+                                // Même si le module est déjà actif pour d'autres.
                                 uint8_t switch_payload = 1;
                                 server_broadcast(-1, id, LOBBY_SWITCH_GAME, &switch_payload, 1);
+                                printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
                             }
                         }
                         else if (active_module && active_module->on_action) {
