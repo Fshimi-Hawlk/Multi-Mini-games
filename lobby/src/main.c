@@ -140,17 +140,22 @@ int main(void) {
         receive_network_data();
 
         // Trigger physique ou touche 'K' vers King For Four (ID 1)
+        static bool switch_sent = false;
         if (currentState == STATE_LOBBY && active_game_id == 0) {
-            if (checkGameTrigger(&player) == 1 || IsKeyPressed(KEY_K)) {
+            bool trigger = (checkGameTrigger(&player) == 1) || IsKeyPressed(KEY_K);
+            if (trigger && !switch_sent) {
                 uint8_t target_id = 1;
-                GameTLVHeader tlv = { .game_id = 0, .action = 0x20 /* LOBBY_SWITCH_GAME */, .length = 1 };
                 RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
-                uint8_t buffer[1024];
+                
+                uint8_t buffer[sizeof(RUDP_Header) + 1];
                 memcpy(buffer, &h, sizeof(h));
-                memcpy(buffer+sizeof(h), &tlv, sizeof(tlv));
-                memcpy(buffer+sizeof(h)+sizeof(tlv), &target_id, 1);
-                send(network_socket, buffer, sizeof(h)+sizeof(tlv)+1, 0);
+                buffer[sizeof(h)] = target_id; // On envoie l'ID DIRECTEMENT après le header RUDP
+                
+                send(network_socket, buffer, sizeof(buffer), 0);
+                switch_sent = true;
+                printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", target_id);
             }
+            if (!trigger) switch_sent = false; // Reset quand on sort de la zone
         }
 
         switch (currentState) {
