@@ -18,6 +18,7 @@ extern RUDP_Connection server_conn;
 #define ACTION_JOIN_GAME 0x13
 #define ACTION_START_GAME 0x14
 #define ACTION_SYNC_HAND 0x15
+#define ACTION_JOIN_ACK 0x16
 
 #define LOBBY_SWITCH_GAME 0x20
 
@@ -27,6 +28,8 @@ typedef struct {
     int active_color;
     Card top_card;
     int hand_sizes[4];
+    int status; // 0: WAITING, 1: PLAYING
+    int host_id;
 } GameSyncPayload;
 #pragma pack(pop)
 
@@ -34,11 +37,16 @@ typedef struct {
 static GameState local_state;
 static GameAssets assets;
 static bool assets_loaded = false;
+static int my_internal_id = -1;
+static int game_status = 0; // 0: WAITING
+static int game_host_id = -1;
+static int my_player_id_network = -1; // ID réseau du joueur (si on arrive à l'obtenir)
 
 static void send_to_server(uint8_t action, void* data, uint16_t len) {
     GameTLVHeader tlv = { .game_id = 1, .action = action, .length = len };
     RUDP_Header h;
     RUDP_GenerateHeader(&server_conn, 5 /* ACTION_GAME_DATA */, &h);
+    my_player_id_network = server_conn.local_sequence; // Pas très propre mais utile pour info
     
     uint8_t buffer[1024];
     memcpy(buffer, &h, sizeof(h));
@@ -54,17 +62,26 @@ void king_client_init(void) {
         assets_loaded = true;
     }
     init_game_logic(&local_state);
+    my_internal_id = -1;
+    game_status = 0;
     
     // On notifie le serveur qu'on rejoint King for Four
     send_to_server(ACTION_JOIN_GAME, NULL, 0);
 }
 
 void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
-    if (action == ACTION_SYNC_GAME) {
+    if (action == ACTION_JOIN_ACK) {
+        my_internal_id = *(int*)data;
+        my_player_id_network = player_id;
+        printf("[KING CLIENT] Reçu JOIN_ACK, mon ID interne est %d\n", my_internal_id);
+    }
+    else if (action == ACTION_SYNC_GAME) {
         GameSyncPayload* sync = (GameSyncPayload*)data;
         local_state.current_player = sync->current_player;
         local_state.active_color = sync->active_color;
-        local_state.num_players = 4; // On assume 4 pour le rendu des scores
+        local_state.num_players = 4; // Max
+        game_status = sync->status;
+        game_host_id = sync->host_id;
         
         // Mise à jour du talon
         if (local_state.discard_pile.head == NULL) {
@@ -82,7 +99,7 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
         int count = len / sizeof(Card);
         Card* cards = (Card*)data;
         
-        // On vide la main locale avant de la remplir
+        // La main est toujours affichée en bas, donc on la met dans players[0] pour le RenderHand
         while(local_state.players[0].hand.size > 0) {
             pop_card(&local_state.players[0].hand);
         }
@@ -94,14 +111,14 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
 }
 
 void king_client_update(float dt) {
-    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        // 1. Clic sur sa propre main (toujours players[0] localement pour RenderHand)
+    if (game_status == 1 && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // Clic sur sa propre main
         int clickedHandIndex = GetHoveredCardIndex(&local_state.players[0], assets);
         if (clickedHandIndex != -1) {
             send_to_server(ACTION_PLAY_CARD, &clickedHandIndex, sizeof(int));
         }
         else {
-            // 2. Clic sur la pioche
+            // Clic sur la pioche
             Rectangle deckRect = GetDeckRect(assets);
             if (CheckCollisionPointRec(GetMousePosition(), deckRect)) {
                 send_to_server(ACTION_DRAW_CARD, NULL, 0);
@@ -109,13 +126,12 @@ void king_client_update(float dt) {
         }
     }
 
-    if (IsKeyPressed(KEY_ENTER)) {
+    if (game_status == 0 && IsKeyPressed(KEY_ENTER)) {
+        // Seul l'hôte devrait pouvoir lancer, mais le serveur vérifiera
         send_to_server(ACTION_START_GAME, NULL, 0);
     }
     
-    // Retour au lobby local
     if (IsKeyPressed(KEY_ESCAPE)) {
-        // On pourrait envoyer une action de départ au serveur ici
         extern void switch_minigame(uint8_t game_id);
         switch_minigame(0);
     }
@@ -124,14 +140,44 @@ void king_client_update(float dt) {
 void king_client_draw(void) {
     ClearBackground((Color){0, 80, 0, 255}); // Vert un peu plus foncé
     
+    if (game_status == 0) {
+        // SALLE D'ATTENTE
+        DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
+        if (my_internal_id != -1) {
+            DrawText(TextFormat("Vous êtes le joueur %d", my_internal_id), 100, 180, 30, WHITE);
+            if (my_internal_id == 0) {
+                DrawText("Vous êtes l'HOTE. Appuyez sur ENTRÉE pour démarrer.", 100, 240, 30, GREEN);
+            } else {
+                DrawText("En attente de l'hôte pour démarrer la partie...", 100, 240, 30, LIGHTGRAY);
+            }
+        } else {
+            DrawText("Connexion au serveur...", 100, 180, 30, GRAY);
+        }
+        DrawText("ECHAP pour quitter", 10, 10, 20, RAYWHITE);
+        return;
+    }
+
+    // JEU EN COURS
     RenderTable(&local_state, assets);
     RenderHand(&local_state.players[0], assets);
     
-    DrawText("Appuyez sur ENTRÉE pour démarrer (Hôte seulement)", 10, 10, 20, RAYWHITE);
-    DrawText("ECHAP pour quitter", 10, 35, 20, RAYWHITE);
+    DrawText("ECHAP pour quitter", 10, 10, 20, RAYWHITE);
     
     if (local_state.current_player != -1) {
-        DrawText(TextFormat("Tour du joueur: %d", local_state.current_player), 10, 60, 20, YELLOW);
+        if (local_state.current_player == my_internal_id) {
+            DrawText("C'est VOTRE tour !", 10, 40, 30, GREEN);
+        } else {
+            DrawText(TextFormat("Tour du joueur %d", local_state.current_player), 10, 40, 20, YELLOW);
+        }
+    }
+    
+    // Affichage des cartes restantes pour les autres
+    int y_pos = 80;
+    for (int i = 0; i < 4; i++) {
+        if (i != my_internal_id && local_state.players[i].hand.size > 0) {
+            DrawText(TextFormat("Joueur %d: %d cartes", i, local_state.players[i].hand.size), 10, y_pos, 20, LIGHTGRAY);
+            y_pos += 30;
+        }
     }
 }
 
