@@ -48,7 +48,7 @@ libs: prepare
 		LIB_NAME=$(LIB_NAME_RAW) \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
-		EXTRA_CFLAGS="-I$(ROOT_DIR)/firstparty -I$(ROOT_DIR)"
+		EXTRA_CFLAGS="-I$(ROOT_DIR)/firstparty -I$(ROOT_DIR) -I$(ROOT_DIR)/reseau/include"
 	$(SILENT)cp $(ROOT_DIR)/$(MODULES_DIR)/build/lib/lib$(LIB_NAME_RAW).a $(LIB_DIR)/
 	$(SILENT)if [ -f $(ROOT_DIR)/$(MODULES_DIR)/include/$(LIB_NAME_RAW)API.h ]; then \
 		cp $(ROOT_DIR)/$(MODULES_DIR)/include/$(LIB_NAME_RAW)API.h $(API_DIR)/; \

@@ -36,10 +36,17 @@ Player_st otherPlayers[MAX_CLIENTS];
 
 // --- GESTION DES MODULES ---
 static MiniGameModule* game_registry[256] = {0};
-static uint8_t active_game_id = 0; 
+uint8_t active_game_id = 0; // FIX : Plus de 'static', on le rend public
 
-// Déclaration du module défini dans lobby_module.c
 extern MiniGameModule LobbyModule; 
+extern MiniGameModule KingForFourClientModule; // On importe le jeu de cartes
+
+// Fonction publique pour changer de jeu depuis n'importe où
+void switch_minigame(uint8_t game_id) {
+    if (game_registry[game_id]) {
+        active_game_id = game_id;
+    }
+}
 
 // --- FONCTIONS SYSTÈME ---
 
@@ -98,6 +105,13 @@ void receive_network_data(void) {
             continue;
         }
 
+        if (h->action == 0x20 /* LOBBY_SWITCH_GAME */ && RUDP_ProcessIncoming(&server_conn, h)) {
+            uint8_t target_game_id = *(uint8_t*)(buffer + sizeof(RUDP_Header));
+            printf("[SYSTEM] Switch réseau vers module ID:%d\n", target_game_id);
+            switch_minigame(target_game_id);
+            continue;
+        }
+
         if (h->action == ACTION_GAME_DATA && RUDP_ProcessIncoming(&server_conn, h)) {
             GameTLVHeader* g = (GameTLVHeader*)(buffer + sizeof(RUDP_Header));
             void* payload = (uint8_t*)g + sizeof(GameTLVHeader);
@@ -119,10 +133,23 @@ int main(void) {
     
     for(int i = 0; i < MAX_CLIENTS; i++) otherPlayers[i].active = false;
     register_minigame(&LobbyModule);
+    register_minigame(&KingForFourClientModule);
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         receive_network_data();
+
+        // Ajout : Touche 'K' pour switcher vers King For Four (ID 1)
+        if (currentState == STATE_LOBBY && active_game_id == 0 && IsKeyPressed(KEY_K)) {
+            uint8_t target_id = 1;
+            GameTLVHeader tlv = { .game_id = 0, .action = 0x20 /* LOBBY_SWITCH_GAME */, .length = 1 };
+            RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
+            uint8_t buffer[1024];
+            memcpy(buffer, &h, sizeof(h));
+            memcpy(buffer+sizeof(h), &tlv, sizeof(tlv));
+            memcpy(buffer+sizeof(h)+sizeof(tlv), &target_id, 1);
+            send(network_socket, buffer, sizeof(h)+sizeof(tlv)+1, 0);
+        }
 
         switch (currentState) {
             case STATE_CONNECTION:

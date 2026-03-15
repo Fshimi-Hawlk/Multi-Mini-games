@@ -63,12 +63,20 @@ int find_or_create_client(struct sockaddr_in *addr) {
 }
 
 void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload, uint16_t len) {
-    (void)room_id;
     uint8_t buffer[2048];
     if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
 
     for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (clients[i].active && i != exclude_id) {
+        bool should_send = false;
+        if (room_id == -1) {
+            // UNICAST mode: send ONLY to exclude_id (which is now target_id)
+            if (i == exclude_id) should_send = true;
+        } else {
+            // BROADCAST mode: send to all EXCEPT exclude_id
+            if (clients[i].active && i != exclude_id) should_send = true;
+        }
+
+        if (should_send && clients[i].active) {
             RUDP_Header header;
             RUDP_GenerateHeader(&clients[i].rudp_state, action, &header);
             header.sender_id = htons((uint16_t)exclude_id); 
@@ -178,7 +186,24 @@ int main() {
                     if (id != -1 && RUDP_ProcessIncoming(&clients[id].rudp_state, &header)) {
                         gettimeofday(&clients[id].last_seen, NULL);
                         
-                        if (active_module && active_module->on_action) {
+                        if (header.action == LOBBY_SWITCH_GAME) {
+                            uint8_t target_game_id = buffer[sizeof(RUDP_Header)];
+                            printf("[MODULE] Demande de switch vers ID: %d\n", target_game_id);
+                            
+                            // Pour simplifier, ID 1 = King for Four
+                            if (target_game_id == 1 && active_module != &king_module) {
+                                if (active_module && active_module->destroy_instance) {
+                                    active_module->destroy_instance(active_game_state);
+                                }
+                                active_module = &king_module;
+                                active_game_state = active_module->create_instance();
+                                printf("[MODULE] Changement vers King For Four effectué.\n");
+                                
+                                // On broadcast le switch à TOUS
+                                server_broadcast(0, -1, LOBBY_SWITCH_GAME, &target_game_id, 1);
+                            }
+                        }
+                        else if (active_module && active_module->on_action) {
                             active_module->on_action(
                                 active_game_state, 
                                 id, 
