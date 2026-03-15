@@ -56,6 +56,8 @@ void king_client_init(void) {
         assets = LoadAssets();
         assets_loaded = true;
     }
+    // Mise à zéro totale pour éviter les pointeurs fantômes
+    memset(&local_state, 0, sizeof(GameState));
     init_game_logic(&local_state);
     my_internal_id = -1;
     game_status = 0;
