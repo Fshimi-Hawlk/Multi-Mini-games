@@ -212,7 +212,7 @@ int main() {
                                 printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
                             }
                         }
-                        else if (active_module && active_module->on_action) {
+                        else if (active_module && active_module->on_action && active_game_state) {
                             active_module->on_action(
                                 active_game_state, 
                                 id, 
