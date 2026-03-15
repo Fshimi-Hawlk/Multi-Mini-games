@@ -144,6 +144,10 @@ int main(void) {
         if (currentState == STATE_LOBBY && active_game_id == 0) {
             bool trigger = (checkGameTrigger(&player) == 1) || IsKeyPressed(KEY_K);
             if (trigger && !switch_sent) {
+                // On prévient les autres qu'on quitte le lobby visuellement
+                RUDP_Header leave_h; RUDP_GenerateHeader(&server_conn, 6 /* LOBBY_LEAVE */, &leave_h);
+                send(network_socket, &leave_h, sizeof(leave_h), 0);
+
                 uint8_t target_id = 1;
                 RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
                 

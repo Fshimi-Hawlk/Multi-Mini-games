@@ -123,6 +123,10 @@ void check_timeouts() {
             if (elapsed > TIMEOUT_US) {
                 printf("[TIMEOUT] Client %d déconnecté\n", i);
                 clients[i].active = false;
+                
+                // On prévient les autres clients
+                server_broadcast(0, i, LOBBY_LEAVE, NULL, 0);
+
                 if (active_module && active_module->on_player_leave) {
                     active_module->on_player_leave(active_game_state, i);
                 }

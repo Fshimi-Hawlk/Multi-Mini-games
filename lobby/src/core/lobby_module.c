@@ -23,12 +23,11 @@ extern Player_st otherPlayers[MAX_CLIENTS];
 
 static Vector2 lastSentPos = {0};
 static Camera2D camera = { 0 };
+static bool firstFrame = true;
 
 void lobby_init(void) {
     printf("[LOBBY] Chargement du niveau et de la caméra...\n");
     
-    
-    // 
     playerTextures[0] = LoadTexture("assets/images/trollFace.png");
     playerTextures[1] = LoadTexture("assets/images/earth.png");
     playerTextureCount = 2;
@@ -41,15 +40,18 @@ void lobby_init(void) {
     camera.offset = (Vector2){ 1280.0f / 2.0f, 720.0f / 2.0f };
     camera.rotation = 0.0f;
     camera.zoom = 1.0f; 
+    firstFrame = true;
 }
 
 void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
-    if (player_id >= 0 && player_id < MAX_CLIENTS && action == 2 /* LOBBY_MOVE */) {
-        if (len >= sizeof(Player_st)) {
+    if (player_id >= 0 && player_id < MAX_CLIENTS) {
+        if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(Player_st)) {
             memcpy(&otherPlayers[player_id], data, sizeof(Player_st));
             otherPlayers[player_id].active = true;
-            
             otherPlayers[player_id].texture = &playerTextures[0]; 
+        }
+        else if (action == 6 /* LOBBY_LEAVE */) {
+            otherPlayers[player_id].active = false;
         }
     }
 }
@@ -68,7 +70,7 @@ void lobby_update(float dt) {
     }
 
     // 4. Réseau : Envoi du TLV
-    if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y) {
+    if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y || firstFrame) {
         GameTLVHeader tlv = { .game_id = 0, .action = 2, .length = sizeof(Player_st) };
         RUDP_Header h; RUDP_GenerateHeader(&server_conn, 5, &h);
         
@@ -81,6 +83,7 @@ void lobby_update(float dt) {
         
         send(network_socket, buffer, offset, 0);
         lastSentPos = player.position;
+        firstFrame = false;
     }
 }
 
@@ -95,7 +98,6 @@ void lobby_draw(void) {
     EndMode2D();
     
     // --- MODE UI (Ce qui est collé à l'écran) ---
-    DrawText("Appuyez sur 'K' pour jouer à King For Four", 10, 10, 20, RAYWHITE);
     drawSkinButton();
     if (isTextureMenuOpen) {
         drawMenuTextures();
