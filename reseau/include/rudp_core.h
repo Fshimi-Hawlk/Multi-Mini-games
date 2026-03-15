@@ -4,6 +4,18 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/*
+ +-----------------------------------------------------------------------+
+ |                          STRUCTURE D'UN PAQUET                        |
+ +-----------------------------------------------------------------------+
+ | [RUDP Header] (9 bytes) : Séquence, ACKs, Sender ID, Action RUDP      |
+ +-----------------------------------------------------------------------+
+ | [Game TLV]    (4 bytes) : Game ID, Action Jeu, Taille Payload         |
+ +-----------------------------------------------------------------------+
+ | [Payload]     (Variable): Données brutes (ex: Index carte, Position)  |
+ +-----------------------------------------------------------------------+
+*/
+
 // --- CONFIGURATION LOBBY ---
 #define MAX_CLIENTS 8
 
