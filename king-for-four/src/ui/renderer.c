@@ -10,10 +10,10 @@ GameAssets LoadAssets(void) {
     GameAssets assets;
     
     // Chargement de la planche de sprites (Faces)
-    assets.cardSheet = LoadTexture("king-for-four/assets/king_for_four/playingCards.png");
+    assets.cardSheet = LoadTexture("assets/textures/playingCards.png");
 
     // Chargement du dos (Back)
-    assets.cardBack = LoadTexture("king-for-four/assets/king_for_four/cardBack_blue5.png");
+    assets.cardBack = LoadTexture("assets/textures/cardBack_blue5.png");
     
     // Vérifications de sécurité
     if (assets.cardSheet.id == 0) printf("ERREUR CRITIQUE: Texture playingCards.png introuvable !\n");
