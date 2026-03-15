@@ -159,3 +159,10 @@ void toggleSkinMenu(void) {
         isTextureMenuOpen = !isTextureMenuOpen;
     }
 }
+
+int checkGameTrigger(Player_st* player) {
+    if (CheckCollisionCircleRec(player->position, player->radius, kingForFourZone)) {
+        return 1; // King For Four
+    }
+    return 0; // Aucun jeu
+}
