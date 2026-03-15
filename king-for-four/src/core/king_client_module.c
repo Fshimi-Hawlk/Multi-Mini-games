@@ -11,7 +11,7 @@
 extern int network_socket;
 extern RUDP_Connection server_conn;
 
-// Actions (DOIVENT CORRESPONDRE AU SERVEUR)
+// Actions
 #define ACTION_PLAY_CARD 0x10
 #define ACTION_DRAW_CARD 0x11
 #define ACTION_SYNC_GAME 0x12
@@ -20,33 +20,28 @@ extern RUDP_Connection server_conn;
 #define ACTION_SYNC_HAND 0x15
 #define ACTION_JOIN_ACK 0x16
 
-#define LOBBY_SWITCH_GAME 0x20
-
 #pragma pack(push, 1)
 typedef struct {
     int current_player;
     int active_color;
     Card top_card;
     int hand_sizes[4];
-    int status; // 0: WAITING, 1: PLAYING
+    int status; 
     int host_id;
 } GameSyncPayload;
 #pragma pack(pop)
 
-// État local du module client
 static GameState local_state;
 static GameAssets assets;
 static bool assets_loaded = false;
 static int my_internal_id = -1;
-static int game_status = 0; // 0: WAITING
-static int game_host_id = -1;
-static int my_player_id_network = -1;
+static int game_status = 0; 
 static float join_retry_timer = 0;
 
 static void send_to_server(uint8_t action, void* data, uint16_t len) {
     GameTLVHeader tlv = { .game_id = 1, .action = action, .length = len };
     RUDP_Header h;
-    RUDP_GenerateHeader(&server_conn, 5 /* ACTION_GAME_DATA */, &h);
+    RUDP_GenerateHeader(&server_conn, 5, &h);
     
     uint8_t buffer[1024];
     memcpy(buffer, &h, sizeof(h));
@@ -65,43 +60,53 @@ void king_client_init(void) {
     my_internal_id = -1;
     game_status = 0;
     join_retry_timer = 0;
-    // On ne l'envoie plus ici, on le fera dans update
 }
 
 void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
+    (void)player_id;
+    if (data == NULL) return;
+
     if (action == ACTION_JOIN_ACK) {
-        my_internal_id = *(int*)data;
-        my_player_id_network = player_id;
-        printf("[KING CLIENT] Reçu JOIN_ACK, mon ID interne est %d\n", my_internal_id);
+        if (len >= sizeof(int)) {
+            my_internal_id = *(int*)data;
+            printf("[KING CLIENT] Mon ID interne: %d\n", my_internal_id);
+        }
     }
     else if (action == ACTION_SYNC_GAME) {
-        GameSyncPayload* sync = (GameSyncPayload*)data;
-        local_state.current_player = sync->current_player;
-        local_state.active_color = sync->active_color;
-        local_state.num_players = 4;
-        game_status = sync->status;
-        game_host_id = sync->host_id;
-        
-        if (local_state.discard_pile.head == NULL) {
-            push_card(&local_state.discard_pile, sync->top_card);
-        } else {
-            local_state.discard_pile.head->card = sync->top_card;
-        }
-        
-        for (int i = 0; i < 4; i++) {
-            local_state.players[i].hand.size = sync->hand_sizes[i];
+        if (len >= sizeof(GameSyncPayload)) {
+            GameSyncPayload* sync = (GameSyncPayload*)data;
+            local_state.current_player = sync->current_player;
+            local_state.active_color = sync->active_color;
+            game_status = sync->status;
+            
+            if (local_state.discard_pile.head == NULL) {
+                push_card(&local_state.discard_pile, sync->top_card);
+            } else {
+                local_state.discard_pile.head->card = sync->top_card;
+            }
+            
+            for (int i = 0; i < 4; i++) {
+                local_state.players[i].hand.size = sync->hand_sizes[i];
+            }
         }
     }
     else if (action == ACTION_SYNC_HAND) {
         int count = len / sizeof(Card);
         Card* cards = (Card*)data;
-        while(local_state.players[0].hand.size > 0) pop_card(&local_state.players[0].hand);
-        for (int i = 0; i < count; i++) push_card(&local_state.players[0].hand, cards[i]);
+        
+        // Sécurité : vider proprement la liste chaînée sans crash
+        while(local_state.players[0].hand.head != NULL) {
+            pop_card(&local_state.players[0].hand);
+        }
+        local_state.players[0].hand.size = 0;
+        
+        for (int i = 0; i < count; i++) {
+            push_card(&local_state.players[0].hand, cards[i]);
+        }
     }
 }
 
 void king_client_update(float dt) {
-    // TENTATIVE DE CONNEXION RÉPÉTÉE
     if (my_internal_id == -1) {
         join_retry_timer += dt;
         if (join_retry_timer > 1.0f) {
@@ -122,7 +127,7 @@ void king_client_update(float dt) {
         }
     }
 
-    if (game_status == 0 && IsKeyPressed(KEY_ENTER)) {
+    if (game_status == 0 && IsKeyPressed(KEY_ENTER) && my_internal_id == 0) {
         send_to_server(ACTION_START_GAME, NULL, 0);
     }
     
@@ -140,41 +145,23 @@ void king_client_draw(void) {
         if (my_internal_id != -1) {
             DrawText(TextFormat("Vous êtes le JOUEUR %d", my_internal_id), 100, 180, 30, WHITE);
             if (my_internal_id == 0) {
-                DrawText("VOUS ÊTES L'HÔTE", 100, 220, 25, GREEN);
-                DrawText("Appuyez sur ENTRÉE pour lancer la partie", 100, 280, 30, RAYWHITE);
+                DrawText("VOUS ÊTES L'HÔTE. Appuyez sur ENTRÉE pour lancer.", 100, 240, 25, GREEN);
             } else {
-                DrawText("PARTIE NON DÉMARRÉE", 100, 220, 25, ORANGE);
-                DrawText("En attente de l'hôte...", 100, 280, 30, LIGHTGRAY);
+                DrawText("En attente de l'hôte...", 100, 240, 30, LIGHTGRAY);
             }
         } else {
-            DrawText("Connexion au serveur en cours...", 100, 180, 30, GRAY);
-            DrawText("(Assurez-vous que le serveur est lancé)", 100, 220, 20, DARKGRAY);
+            DrawText("Connexion au serveur...", 100, 180, 30, GRAY);
         }
-        DrawText("ECHAP pour quitter", 10, 10, 20, RAYWHITE);
         return;
     }
 
     RenderTable(&local_state, assets);
     RenderHand(&local_state.players[0], assets);
-    DrawText("ECHAP pour quitter", 10, 10, 20, RAYWHITE);
     
-    if (local_state.current_player != -1) {
-        if (local_state.current_player == my_internal_id) {
-            DrawRectangle(0, 40, 300, 40, (Color){0, 200, 0, 100});
-            DrawText("C'EST VOTRE TOUR !", 10, 45, 25, WHITE);
-        } else {
-            DrawText(TextFormat("Tour du Joueur %d", local_state.current_player), 10, 45, 25, YELLOW);
-        }
-    }
-    
-    int y_pos = 100;
-    for (int i = 0; i < 4; i++) {
-        int count = local_state.players[i].hand.size;
-        if (count > 0) {
-            Color c = (i == local_state.current_player) ? YELLOW : LIGHTGRAY;
-            DrawText(TextFormat("Joueur %d: %d cartes", i, count), 10, y_pos, 20, c);
-            y_pos += 25;
-        }
+    if (local_state.current_player == my_internal_id) {
+        DrawText("C'EST VOTRE TOUR !", 10, 40, 25, GREEN);
+    } else {
+        DrawText(TextFormat("Tour du Joueur %d", local_state.current_player), 10, 40, 25, YELLOW);
     }
 }
 
