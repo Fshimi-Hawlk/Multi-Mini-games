@@ -109,7 +109,14 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
         }
     }
 
-    // --- SYNCHRONISATION (Broadcaster à TOUS, même si internal_id == -1 pour voir l'attente) ---
+    // 3. SYNCHRONISATION
+    /*
+     +-----------------------------------------------------------------+
+     | SYNC GLOBALE (Broadcast) : Talon, Couleur, Qui joue, Nb cartes  |
+     +-----------------------------------------------------------------+
+     | SYNC PRIVÉE  (Unicast)   : Liste des cartes de MA main          |
+     +-----------------------------------------------------------------+
+    */
     Card top_card = {CARD_BLACK, ZERO};
     if (g->discard_pile.head != NULL) {
         top_card = g->discard_pile.head->card;

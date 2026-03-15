@@ -1,3 +1,13 @@
+/**
+ * @file king_client_module.c
+ * 
+ *  BOUCLE CLIENT :
+ *  [INPUT] ----> Check Clic? ----> send_to_server(ACTION_PLAY)
+ *     ^                                     |
+ *     |                                     v
+ *  [DRAW]  <---- local_state <---- [ON_DATA] (ACTION_SYNC)
+ */
+
 #include "APIs/module_interface.h"
 #include "core/game.h"
 #include "ui/renderer.h"
