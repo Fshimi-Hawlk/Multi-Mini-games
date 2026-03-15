@@ -95,6 +95,7 @@ void lobby_draw(void) {
     EndMode2D();
     
     // --- MODE UI (Ce qui est collé à l'écran) ---
+    DrawText("Appuyez sur 'K' pour jouer à King For Four", 10, 10, 20, RAYWHITE);
     drawSkinButton();
     if (isTextureMenuOpen) {
         drawMenuTextures();
