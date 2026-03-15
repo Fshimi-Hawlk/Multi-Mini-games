@@ -199,8 +199,9 @@ int main() {
                                 active_game_state = active_module->create_instance();
                                 printf("[MODULE] Changement vers King For Four effectué.\n");
                                 
-                                // On broadcast le switch à TOUS
-                                server_broadcast(0, -1, LOBBY_SWITCH_GAME, &target_game_id, 1);
+                                // Broadcast du switch à TOUS avec l'ID du jeu
+                                uint8_t switch_payload = 1;
+                                server_broadcast(0, -1, LOBBY_SWITCH_GAME, &switch_payload, 1);
                             }
                         }
                         else if (active_module && active_module->on_action) {
