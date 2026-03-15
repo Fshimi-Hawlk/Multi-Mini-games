@@ -9,5 +9,6 @@ void resolveCircleRectCollision(Player_st* const player, const Rectangle rect);
 
 void choosePlayerTexture(Player_st* const player);
 void toggleSkinMenu(void);
+int checkGameTrigger(Player_st* player);
 
 #endif

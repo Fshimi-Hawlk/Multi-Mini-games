@@ -25,6 +25,7 @@ extern Rectangle defaultPlayerTextureRect;
 
 extern Rectangle skinButtonRect;
 
+extern Rectangle kingForFourZone;
 extern bool isTextureMenuOpen;
 
 extern Texture2D logoSkinButton;
