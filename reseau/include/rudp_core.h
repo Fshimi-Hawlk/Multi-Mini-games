@@ -12,6 +12,7 @@
 #define LOBBY_MOVE 2
 #define LOBBY_ROOM_QUERY 3 
 #define LOBBY_ROOM_INFO  4 
+#define LOBBY_LEAVE      6
 #define LOBBY_SWITCH_GAME 0x20
 
 // --- CONSTANTES RUDP ---
