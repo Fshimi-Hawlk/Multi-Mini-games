@@ -27,6 +27,12 @@ void init_game_logic(GameState* g) {
     g->num_players = 0;
     g->draw_pile = (Deck){NULL, 0};
     g->discard_pile = (Deck){NULL, 0};
+    
+    // INITIALISATION CRITIQUE DES MAINS
+    for (int i = 0; i < 4; i++) {
+        g->players[i].hand.head = NULL;
+        g->players[i].hand.size = 0;
+    }
 }
 
 /**
