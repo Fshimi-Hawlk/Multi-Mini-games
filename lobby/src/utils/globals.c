@@ -48,6 +48,10 @@ Rectangle skinButtonRect = {
     50
 };
 
+Rectangle kingForFourZone = {
+    -350, 400 - 60, 100, 60
+};
+
 bool isTextureMenuOpen = false;
 
 Texture2D logoSkinButton;
