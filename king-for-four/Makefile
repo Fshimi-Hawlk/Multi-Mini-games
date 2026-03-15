@@ -67,8 +67,8 @@ else ifeq ($(MODE),valgrind-debug)
 	TOOL := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
 endif
 
-CFLAGS  += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
+CFLAGS  += $(BASE_CFLAGS) $(EXTRA_CFLAGS)
+LDFLAGS += $(BASE_LDFLAGS) $(EXTRA_LDFLAGS)
 
 # ==========================================
 # 4. DÉTECTION AUTOMATIQUE DES FICHIERS
