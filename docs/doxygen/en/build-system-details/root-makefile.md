@@ -86,8 +86,8 @@ make MODE=clang-debug run-tests
 
 To make assets work both standalone and in the lobby:
 
-- When building inside a game folder → uses `assets/…`
-- When building from root → uses `<gamename>/assets/…` (e.g. `tetris/assets/`)
+- When building inside a game folder -> uses `assets/…`
+- When building from root -> uses `<gamename>/assets/…` (e.g. `tetris/assets/`)
 
 This is controlled by passing `-DASSET_PATH="..."` via `EXTRA_CFLAGS` in the Makefile.
 
@@ -104,6 +104,15 @@ This lets the lobby `#include "APIs/tetrisAPI.h"` without path mess.
 - Tests create folders like `logs/tests-2026-03-16_14-30/`
 - Valgrind mode creates `logs/valgrind-<timestamp>/`
 - Add `VERBOSE=1` to any make command to see full gcc/clang lines
+
+## Generating Documentation
+
+```bash
+make docs
+```
+
+-> `open docs/doxygen/index.html`
+
 
 **Created:** March 02, 2025  
 **Last updated:** March 16, 2026  

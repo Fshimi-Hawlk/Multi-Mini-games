@@ -96,6 +96,14 @@ When building libraries (`libs`, `bin`, `rebuild-libs`):
 - `valgrind-debug` -> needs `valgrind`
 - `cmp` (used to skip unchanged files) -> almost always present on Unix-like systems
 
+## Generating Documentation
+
+```bash
+make docs
+```
+
+-> open [docs/doxygen/index.html](./doxygen/index.html)
+
 ## Credits
 
 **Created: February 07, 2025**  
