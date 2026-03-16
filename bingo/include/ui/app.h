@@ -1,8 +1,8 @@
 /**
     @file core/game.h
     @author Fshimi-Hawlk
-    @date 2026-02-08              // Creation date - never touch this one again
-    @date 2026-02-23              // Last time someone meaningfully changed this file (update only when needed)
+    @date 2026-03-03
+    @date 2026-03-16
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.

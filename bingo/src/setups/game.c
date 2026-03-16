@@ -2,13 +2,12 @@
     @file game.h (setups)
     @author Fshimi Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-16
     @brief Full game state initialization implementation.
 */
 
 #include "setups/game.h"
 
-#include "utils/globals.h"
 #include "utils/utils.h"
 
 static void computeLayout(Layout_St* layout) {
@@ -116,17 +115,16 @@ bool generateCard(Card_t card, uint *available, uint count) {
 }
 
 void bingo_initGame(BingoGame_St* game) {
-    // ── 1. Player card ──────────────────────────────────────────────────────
+    // Player card
     memset(game->player.numbers,   0, sizeof(game->player.numbers));
     memset(game->player.daubs,     0, sizeof(game->player.daubs));
     memset(game->player.misclicks, 0, sizeof(game->player.misclicks));
 
     // Free space (center)
     game->player.daubs[2][2] = true;
-    // Optional: mark free space number as sentinel so it never matches calls
     game->player.numbers[2][2] = UINT32_MAX;  // or keep 0 and rely on daubs check
 
-    // ── 2. Fill card numbers (random from 0..99 without replacement) ────────
+    // Fill card numbers (random from 0..99 without replacement)
     uint available[100];
     for (uint i = 0; i < 100; ++i) {
         available[i] = i;
@@ -138,7 +136,7 @@ void bingo_initGame(BingoGame_St* game) {
 
     // generateCard(game->player.numbers, available, 100);
 
-    // ── 3. Ball system ──────────────────────────────────────────────────────
+    // Ball system
     game->balls.remainingCount = 500;
 
     uint b = 0;
@@ -149,19 +147,22 @@ void bingo_initGame(BingoGame_St* game) {
     }
     shuffleArrayT(uint, game->balls.encodedBalls, 500, rand);
 
+    game->balls.choiceDelay = 3.5f;
+    game->balls.showDelay = 1.5f;
+    game->balls.graceDelay = 1.0f;
 
-    // ── 4. Current call ─────────────────────────────────────────────────────
+    // Current call
     game->currentCall.encodedValue = 0;
     game->currentCall.column       = 0;
     game->currentCall.number       = 0;
-    game->currentCall.timer        = SHOW_DELAY;
+    game->currentCall.timer        = game->balls.showDelay;
     game->currentCall.displayedText[0] = '\0';
 
 
-    // ── 5. Game progress ────────────────────────────────────────────────────
+    // Game progress
     game->progress.scene         = GAME_SCENE_CARD_CHOICE;
     game->progress.resultMessage = NULL;
 
-    // ── 6. Game layout ────────────────────────────────────────────────────
+    // Game layout
     computeLayout(&game->layout);
 }

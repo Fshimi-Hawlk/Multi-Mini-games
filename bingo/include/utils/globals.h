@@ -2,20 +2,8 @@
     @file globals.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-03-05
+    @date 2026-03-16
     @brief Central location for process-wide global variables and pre-loaded resources.
-
-    This header declares variables that are:
-      - initialized once during program startup (usually in main() or init function)
-      - read (and sometimes modified) from many different parts of the codebase
-      - representing fundamental state or resources shared across systems
-
-    Guidelines for usage:
-      - Prefer passing context structs (GameNameGame_St, etc.) through function parameters
-        whenever reasonable - reduce usage of these globals over time.
-      - Only declare truly global / singleton-like items here.
-      - Initialization order and thread-safety (currently single-threaded) must be
-        carefully managed in the startup sequence.
 */
 
 #ifndef UTILS_GLOBALS_H
@@ -24,24 +12,8 @@
 #include "userTypes.h"
 
 // ────────────────────────────────────────────────
-// Window & display
-// ────────────────────────────────────────────────
-
-/**
-     Rectangle describing the full client area of the application window.
-     Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
-
-// ────────────────────────────────────────────────
 // Fonts
 // ────────────────────────────────────────────────
-
-/**
-     @brief Default font used for most UI labels, buttons and in-game text.
-            Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
 
 /**
      @brief Array of pre-loaded fonts at different sizes.
@@ -55,8 +27,5 @@ extern Font      fonts[__fontSizeCount];
 // ────────────────────────────────────────────────
 
 extern const char* const LETTERS[5];
-extern const f32 SHOW_DELAY;
-extern const f32 GRACE_TIME;
-extern const f32 CHOICE_DELAY;
 
 #endif // UTILS_GLOBALS_H
