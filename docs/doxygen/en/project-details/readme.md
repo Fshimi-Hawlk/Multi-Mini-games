@@ -123,7 +123,7 @@ Note: root-level Makefile for building *everything* at once is still WIP — tra
 make docs
 ```
 
--> Open `docs/index.html` in your browser.
+-> open `docs/doxygen/index.html`
 
 ### Per sub-project / game
 
