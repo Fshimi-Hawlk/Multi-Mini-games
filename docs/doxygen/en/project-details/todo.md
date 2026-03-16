@@ -1,40 +1,53 @@
 @page todo TODO
 
-## Overview
+@ref index "Back to Home"
 
-High-priority / medium-priority tasks for the root project (mostly things that affect everyone or prepare the final game collection).
+**Last checked against project structure:** March 16, 2026
 
-Items are roughly ordered from "we should do this quite soon" to "nice to have later".
+This page lists the main open tasks for the whole monorepo.  
+Most of these are things that impact the lobby, shared code, or the overall collection of mini-games.  
 
-## Right now – most urgent
+Tasks are sorted roughly from "do this soon" to "would be cool later".  
+We update this file as we go - feel free to add items or change priorities after group discussion.
+
+## High priority - do these quite soon
 
 - [x] Create one global Makefile at root level  
-  -> Done. Supports lazy library builds, API header copying, incremental & force-rebuild targets.
+  -> Done. It now handles lazy library builds, copies API headers to firstparty/APIs/, supports incremental builds, force-rebuilds, debug modes, sanitizers, etc.
 
-- [/] Create root `docs/` folder  
-  -> Added `docs` folder to put in `API_Conversion.md`, `CodeStyleAndConventions.md` and `makefile.md` (root-level) in order to de-clutter the project folder. 
-  - Put a main Doxyfile there for lobby + shared code  
-  - Later: make one big documentation site linking all games + lobby
+- [ ] Finish setting up root `docs/` folder properly  
+  -> Already created the folder and moved several guides there (`API_Conversion.md`, `CodeStyleAndConventions.md`, `makefile.md`, etc.) to keep root clean.  
+  - Main Doxyfile is in `docs/` and documents lobby + shared code  
+  - Next: expand to include documentation for each game module once more are integrated
 
-## When the first game is merged into main
+## After the first game is fully merged into main
 
-- [X] Write down clear rules for how a game should be structured so the lobby can use it  
-  -> See @ref api_conversion API Conversion & Integration
+- [x] Write clear rules for turning a standalone game into a lobby-compatible API  
+  -> Done. See @ref api_conversion "API Conversion & Integration"
 
-- [ ] Decide how to save scores / progress / settings  
-  -> Simple files in assets/game-name/saves/ ? JSON? Something else?  
-  -> Create shared code in firstparty/ for loading & saving
+- [ ] Decide on save / progress / settings system  
+  -> Options so far: plain text files in `assets/<game-name>/saves/`, simple JSON, or something custom?  
+  -> Plan: add shared loading/saving helpers in `firstparty/` so every game can use the same code
 
-- [ ] Think about leaderboards format (local files for now - no online)
+- [ ] Define local leaderboard format  
+  -> Keep it simple for now (local files only, no online).  
+  -> Maybe JSON or binary in `assets/leaderboards/`?
 
-## Later / nice to have
+## Nice to have / longer term
 
-- [X] Add a "Roadmap"  
-  -> See [Gantt chart](https://github.com/users/Fshimi-Hawlk/projects/1)
+- [x] Add a visible roadmap  
+  -> Done. See the [Gantt chart on GitHub Projects](https://github.com/users/Fshimi-Hawlk/projects/1)  
+  -> Additionally, refer to @ref roadmap "Roadmap"  
 
-Feel free to add new items or move priorities - discuss big changes in the group chat first.
+- [ ] Add basic audio settings (volume sliders, mute toggles) in lobby  
+- [ ] Add persistent skin unlocks / cosmetics across games  
+- [ ] Experiment with very basic local multiplayer (split-screen or hotseat)  
+- [ ] Add simple error recovery in lobby (reload game on crash instead of exit)
 
-**Created:** March 02, 2026  
+Big changes should be discussed in the group chat first so everyone agrees.
+
+**Created:** March 02, 2025  
+**Last updated:** March 16, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
 
-@ref mainpage "Back to Home"
+@ref index "Back to Home"

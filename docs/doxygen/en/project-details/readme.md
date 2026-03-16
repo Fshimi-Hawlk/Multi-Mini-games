@@ -1,96 +1,142 @@
 @page readme README
 
+@ref index "Back to Home"
+
+**Last checked against project structure:** March 16, 2026
+
+# Multi Mini-Games
+
 ## Project Overview
 
-[REDACTED]
+**Second-year Computer Science Bachelor's project (2025-2026)**  
+Development period: January 2026 – April 2026
+
+### Members:
+
+- BAUDET Léandre:  Leandre.Baudet.Etu@univ-lemans.fr  
+- BERGE Kimi:      Kimi.Berge.Etu@univ-lemans.fr  
+- CAILLON Charles: Charles_Caillon.Etu@univ-lemans.fr  
+- CHAUVEAU Maxime: Maxime.Chauveau.Etu@univ-lemans.fr  
 
 ### Goal
 
 Create several small independent mini-games in C using **raylib**.  
-Later, connect them inside one program through a common **lobby** (a simple platformer-style menu world).  
-Players walk to a door/zone -> the corresponding mini-game starts in the same window (no new executable).
+Later on, connect them inside one single program through a common **lobby** — a simple platformer-style hub world.  
+Players walk around, reach a door or collision zone -> the chosen mini-game starts right there in the same window (no spawning new executables, no extra processes).
 
-- Single-player mode (for now)
-- Multiplayer mode (planned later)
+- Single-player focus for now
+- Multiplayer mode planned for later (local co-op or basic online)
 
 ## Project Workflow
 
-We use a **monorepo** (one single repository for everything) with **one branch per mini-game**.
+We are using a **monorepo** setup (everything lives in one repository) with **one branch per mini-game**.
 
-1. The stable, shared code lives on branch **main**.
-2. Each mini-game is developed on its **own branch** (example: `block-blast`, `snake-classic`, `memory-game`).
-3. When a game is ready (plays well, looks finished, tests pass), we merge that branch into `main`.
-4. After merging, the game folder becomes part of `main` and we start connecting it to the lobby.
+1. Stable shared code + merged games live on branch **main**.
+2. Each new mini-game gets developed on its **own dedicated branch** (examples: `block-blast`, `snake-classic`, `tetris`, `memory-game`, etc.).
+3. When a game is in good shape (gameplay solid, visuals decent, tests passing, API ready), we merge that branch into `main`.
+4. Once merged, the game folder becomes permanent on `main` and we work on hooking it up to the lobby.
 
-- Example sub-project template: See `sub-project-example/` (includes structure, Makefile, Doxyfile.min, makefile.md documentation, and README template).
+- New game starter template: look at folder `sub-project-example/`  
+  It already contains the recommended folder layout, Makefile, minimal Doxyfile, `makefile.md`, and a README stub.
 
-## Root-Level Repo Structure
+## Root-Level Repository Structure
 
 ```text
 .
-├── assets/                     # Images, sounds, fonts - shared or per game
-│   └── fonts/                  # Different fonts used by the games
-├── docs/                       # Aggregated/shared documentation across all games/lobby
-│   ├── API_Conversion.md       # Explains how to convert a game into an API to be intergrated into the lobby
-│   └── ...                     # more
-├── firstparty/                 # Shared C code
-├── thirdparty/                 # External libs
-├── lobby/                      # Hub code
-├── tetris/                     # Integrated game
-├── sub-project-example/        # Template
-├── Makefile                    # Root build
+├── assets/                     # shared + per-game images, sounds, fonts
+│   └── fonts/                  # fonts used across games
+├── docs/                       # shared documentation + Doxygen output
+│   ├── API_Conversion.md       # how to turn a standalone game into lobby-compatible API
+│   ├── makefile.md             # root make commands explained
+│   └── ...                     # other guides
+├── firstparty/                 # our own reusable headers & single-file libs
+├── thirdparty/                 # external dependencies + NOTICE file for licenses
+├── lobby/                      # the hub/world code
+├── tetris/                     # example of already integrated game
+├── sub-project-example/        # copy-paste template for starting new games
+├── Makefile                    # root-level build system (libs + lobby exe)
 ├── LICENSE.md
 ├── CONTRIBUTING.md
 ├── CHANGELOG.md
-└── TODO.md
+├── TODO.md
+└── .gitignore
 ```
 
-## Building & Running (Root Level – after games are merged)
+After more games get merged you will see additional top-level folders like `block-blast/`, `snake-classic/`, etc.
+
+## Sub-Project-Level Structure (each game / lobby)
+
+```text
+sub-project/
+├── assets/                 # game-specific images, sounds, fonts, etc.
+├── docs/                   # per-game generated html (after make docs)
+├── include/                # all headers
+│   ├── core/               # game logic headers
+│   ├── ui/                 # rendering / drawing code headers
+│   ├── setups/             # init & cleanup functions
+│   ├── utils/              # helpers, globals, configs, common types
+│   └── subProjectAPI.h     # lobby-facing API header
+├── src/                    # implementation files (mirrors include/ + main.c)
+├── tests/                  # unit tests
+├── CHANGELOG.md            # detailed per-game changes
+├── Makefile                # build this sub-project standalone or as lib
+├── make/                   # split Makefile logic into smaller files
+├── makefile.md             # commands & modes explained for this sub-project
+├── Doxyfile.min            # minimal Doxygen config for local docs
+└── README.md               # per-game readme (template provided)
+```
+
+## Building & Running (Root Level – merged games + lobby)
 
 From the repository root:
 
 ```bash
-make help               # see all targets
-make bin                # build libraries (if needed) + lobby executable
-make rebuild-exe        # force rebuild lobby executable only
-make run-exe            # run the lobby
-make run-tests          # run all tests across modules
+make help               # quick list of all useful targets
+make bin                # build needed libs + link the lobby executable
+make rebuild-exe        # force relink lobby exe (useful after lib changes)
+make run-exe            # launch the lobby
+make run-tests          # run tests from all modules (lobby + merged games)
 ```
 
-See @ref root_makefile for full documentation.
+Full command list and modes (debug, sanitizers, valgrind, etc.) explained in @ref root_makefile.
 
-## Building & Running (Sub-Project Level)
+## Building & Running (Inside a single sub-project / branch)
 
-From inside a branch root (e.g., after `git checkout sub-project` or in `sub-project-example/`):
+From inside `sub-project-example/`, `lobby/`, `tetris/`, or any game folder:
 
-See all options: `make help`
-- Default build (release): `make` or `make all`
-- Debug/sanitizers: `make MODE=clang-debug` (requires Clang installed)
-- Valgrind checks: `make MODE=valgrind-debug run-main` or `make MODE=valgrind-debug run-tests` (requires Valgrind installed)
-- Tests: `make run-tests` (live output + logs in `logs/tests-<timestamp>/`)
-- Full rebuild + run: `make rebuild run-main`
+```bash
+make help               # see available targets
+make                    # default build (release mode)
+make MODE=clang-debug   # debug + address/undefined sanitizers (needs clang)
+make MODE=valgrind-debug run-main   # run with valgrind memcheck
+make run-tests          # execute unit tests + save logs
+make rebuild run-main   # clean build then run the standalone main
+```
 
-**Note**: Global root Makefile coming later (for building all merged games/lobby at once - see @ref todo).
+Note: root-level Makefile for building *everything* at once is still WIP — track progress in @ref todo.
 
 ## Generating Documentation
 
-### At Project-Root-level
+### Root-level (whole project)
 
 ```bash
 make docs
 ```
 
--> open `docs/index.html`
+-> Open `docs/index.html` in your browser.
 
-### Per Game
+### Per sub-project / game
 
-Inside a game folder:
+Inside any game or lobby folder:
 
 ```bash
 make docs
 ```
 
--> You can see the generated documentation in: `./docs/html/index.html`.
+-> Open `./docs/html/index.html`.
 
-**Created:** March 02, 2026  
+**Created:** December 16, 2025  
+**Last updated:** March 16, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+
+@ref index "Back to Home"
