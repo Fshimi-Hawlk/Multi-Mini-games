@@ -1,5 +1,7 @@
 @page license License
 
+@ref index "Back to Home"
+
 ## zlib/libpng License
 
 This software is provided 'as-is', without any express or implied
@@ -32,4 +34,4 @@ Full original license texts and authors are preserved in the respective header f
 **Last updated:** March 02, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
 
-@ref mainpage "Back to Home"
+@ref index "Back to Home"
