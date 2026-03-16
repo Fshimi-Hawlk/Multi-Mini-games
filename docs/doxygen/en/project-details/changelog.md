@@ -1,46 +1,48 @@
 @page changelog Changelog
 
-## Overview
+@ref index "Back to Home"
 
-All notable changes to this project will be documented in this file.
+**Last checked against project structure:** March 16, 2026
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-(or Calendar Versioning where appropriate).
+This page lists all notable changes to the Multi Mini-Games monorepo.
 
-## How to update this file
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) conventions.  
+We use Semantic Versioning where it makes sense, or Calendar Versioning for early development stages.
 
-- Only **important** changes go here (new game started, big shared code added, lobby progress, big refactor, etc.)
-- We write in the **[Unreleased]** section until we decide it's time for a version (for example 0.1.0 when lobby + first few games work together)
+### How we maintain this changelog
 
-## [Unreleased]
+- Only significant changes are recorded here (new game integration, major shared code, big refactors, important documentation updates, etc.)
+- Everything goes under **[Unreleased]** until the team decides a version tag is ready (example: 0.1.0 when lobby + several games are playable together)
 
-### Added
-- Initial monorepo structure with shared folders (`firstparty/`, `thirdparty/`, `assets/`).
-- Root documentation files: README.md, CONTRIBUTING.md, TODO.md, CodeStyleAndConventions.md
-- Example sub-project folder (`sub-project-example/`) showing the structure we want for each game
-- Basic legal files: LICENSE, NOTICE (for third-party code credits)
-- Root-level Makefile: supports building merged games' static libraries lazily, copying API headers to `firstparty/APIs/`, incremental lobby linking
-- **Configuration system**: `gameConfig.h` with `GameConfig_St`, `AudioConfig_St`, `VideoConfig_St` and default macros
-- **Solitaire API**: `solitaireAPI.h` following the standard mini-game pattern (by Maxime CHAUVEAU)
-- **Tetris API stub**: `tetrisAPI.h` for future implementation
+### [Unreleased]
 
-### Changed
-- Updated root README with clearer explanations and Git commands suited for beginners
-- Rewrote CONTRIBUTING.md with simplified workflow explanations, beginner-friendly Git command examples, and softer tone regarding code style consistency
-- Updated CHANGELOG.md itself to better explain update rules and reflect documentation improvements
-- Revised TODO.md wording to be more straightforward while keeping the task list intact
-- Reworded CodeStyleAndConventions.md to clearly state it is a preferred style (not strict law), with invitation to discuss points that feel inconvenient
-- **Extended error codes**: Added `ERROR_INVALID_CONFIG`, `ERROR_AUDIO_LOAD`, `ERROR_WINDOW_INIT`, `ERROR_ASSET_LOAD` to `generalAPI.h`
-- **Standardized API pattern**: All mini-game APIs now use `GameConfig_St*` for configuration, added `isRunning()` function, and follow consistent naming
+#### Added
+- Monorepo foundation: shared folders (`firstparty/`, `thirdparty/`, `assets/`)
+- Core documentation files in root: README.md, CONTRIBUTING.md, TODO.md, CodeStyleAndConventions.md
+- Template folder `sub-project-example/` to guide new game structure
+- Legal basics: LICENSE and NOTICE files (third-party credits)
+- Root Makefile with lazy static-lib builds, API header copying to `firstparty/APIs/`, and incremental lobby executable linking
+- Central configuration system: `gameConfig.h` defining `GameConfig_St`, `AudioConfig_St`, `VideoConfig_St` + default macros
+- First full game API: `solitaireAPI.h` (standard mini-game pattern, implemented by Maxime CHAUVEAU)
+- Initial Tetris API header: `tetrisAPI.h` (stub for upcoming implementation)
 
-### Fixed
-- (none yet)
+#### Changed
+- Improved root README: clearer project explanation + beginner-friendly Git commands
+- Simplified and softened CONTRIBUTING.md: easier workflow steps, practical Git examples, less strict tone on style
+- This changelog itself: added clearer update rules and reflected recent doc improvements
+- Made TODO.md wording more direct while preserving the full task list
+- Updated CodeStyleAndConventions.md: now presented as a recommended style (not mandatory), with invitation to discuss inconvenient rules
+- Extended error handling: new codes `ERROR_INVALID_CONFIG`, `ERROR_AUDIO_LOAD`, `ERROR_WINDOW_INIT`, `ERROR_ASSET_LOAD` added to `generalAPI.h`
+- Standardized mini-game API pattern: consistent use of `GameConfig_St*`, added `isRunning()` helper, unified naming across games
 
-### Removed
-- (none yet)
+#### Fixed
+- (none recorded yet)
 
-**Last updated:** March 02, 2026  
+#### Removed
+- (none recorded yet)
+
+**Created:** January 15, 2025  
+**Last updated:** March 16, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
 
-@ref mainpage "Back to Home"
+@ref index "Back to Home"
