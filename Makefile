@@ -197,7 +197,7 @@ rebuild-exe: clean-exe bin
 
 rebuild-tests: clean tests
 
-docs-root:
+docs:
 	@./generate-root-docs.sh
 
 # ───────────────────────────────────────────────────────────────

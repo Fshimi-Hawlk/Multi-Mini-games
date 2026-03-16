@@ -90,7 +90,7 @@ make VERBOSE=1 EXTRA_CFLAGS="-Wshadow -Wconversion" MODE=strict-debug
 - In `valgrind-debug` mode: extra `logs/valgrind-<timestamp>/` folders with Valgrind reports
 - Logs only save non-empty output
 - Crash output reliability: uses `stdbuf --output=L --error=L` (line buffering) when available so last printf() lines show up even on SIGABRT or ASan crash
-- If `stdbuf` is missing → warning printed once, output might truncate on crash → add explicit `fflush(stdout); fflush(stderr);` in test code if needed
+- If `stdbuf` is missing -> warning printed once, output might truncate on crash -> add explicit `fflush(stdout); fflush(stderr);` in test code if needed
 
 ## Requirements & Portability
 
