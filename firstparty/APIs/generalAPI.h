@@ -80,6 +80,30 @@ typedef struct BaseGame_St BaseGame_St;
  */
 typedef Error_Et (*freeGame_Ft)(void*);
 
+
+/**
+    @brief Available font sizes used for in-game UI and text rendering.
+
+    Values are listed in ascending order.  
+    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+*/
+typedef enum {
+                      FONT4,   FONT6,   FONT8,
+    FONT10,  FONT12,  FONT14,  FONT16,  FONT18,
+    FONT20,  FONT22,  FONT24,  FONT26,  FONT28,
+    FONT30,  FONT32,  FONT34,  FONT36,  FONT38,
+    FONT40,  FONT42,  FONT44,  FONT46,  FONT48,
+    FONT50,  FONT52,  FONT54,  FONT56,  FONT58,
+    FONT60,  FONT62,  FONT64,  FONT66,  FONT68,
+    FONT70,  FONT72,  FONT74,  FONT76,  FONT78,
+    FONT80,  FONT82,  FONT84,  FONT86,  FONT88,
+    FONT90,  FONT92,  FONT94,  FONT96,  FONT98,
+    FONT100, FONT102, FONT104, FONT106, FONT108,
+    FONT110, FONT112, FONT114, FONT116, FONT118,
+    FONT120, FONT122, FONT124, FONT126, FONT128,
+    __fontSizeCount
+} FontSize_Et;
+
 /**
     @brief Common base structure that **every** mini-game state must embed as its first member.
 

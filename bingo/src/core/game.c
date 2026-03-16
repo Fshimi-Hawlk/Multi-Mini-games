@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-16
     @brief One clear sentence that tells what this file is actually for.
 
     Contributors:
@@ -89,7 +89,7 @@ void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos) {
 
             if (game->currentCall.timer <= 2) {
                 game->progress.scene = GAME_SCENE_PLAYING;
-                game->currentCall.timer = SHOW_DELAY + GRACE_TIME;
+                game->currentCall.timer = game->balls.showDelay + game->balls.graceDelay;
 
                 memcpy(game->player.numbers, game->previouslySelectedCard->values, sizeof(Card_t));
             }
@@ -99,7 +99,7 @@ void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos) {
             game->currentCall.timer += dt;
 
             // New ball
-            if (game->currentCall.timer >= CHOICE_DELAY) {
+            if (game->currentCall.timer >= game->balls.choiceDelay) {
                 game->currentCall.timer = 0.0f;
                 if (game->balls.remainingCount > 0) {
                     game->currentCall.encodedValue = game->balls.encodedBalls[--game->balls.remainingCount];
@@ -111,7 +111,7 @@ void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos) {
 
             // Input
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                bool inGrace = (SHOW_DELAY <= game->currentCall.timer && game->currentCall.timer <= (SHOW_DELAY + GRACE_TIME));
+                bool inGrace = (game->currentCall.timer <= (game->balls.showDelay + game->balls.graceDelay));
 
                 bool handled = false;
                 for (u8 r = 0; r < 5 && !handled; ++r) {
@@ -128,7 +128,7 @@ void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos) {
                         if (inGrace && isValidDaub(&game->currentCall, &game->player, r, c)) {
                             game->player.daubs[r][c] = true;
                             game->player.misclicks[r][c] = 0;
-                        } else {
+                        } else if (!game->player.daubs[r][c]) {
                             game->player.misclicks[r][c]++;
                             if (game->player.misclicks[r][c] >= 3) {
                                 game->player.daubs[r][c] = false;

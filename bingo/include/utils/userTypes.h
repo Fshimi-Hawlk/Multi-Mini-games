@@ -2,7 +2,7 @@
     @file userTypes.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-03-03
+    @date 2026-03-16
     @brief Core type definitions used throughout the game.
 
     Contributors:
@@ -46,31 +46,6 @@ typedef enum {
     __fontSizeCount
 } FontSize_Et;
 
-typedef enum GameState_Et {
-    STATE_GAMEPLAY = 0,
-    STATE_PAUSED,
-    STATE_SETTINGS_APP,
-    STATE_SETTINGS_GAME,
-    STATE_SETTINGS_KEYBINDS,
-    STATE_RESTART_CONFIRM,
-    STATE_ABANDON_CONFIRM
-} GameState_Et;
-
-typedef enum MenuItem_Et {
-    MENU_RESUME = 0,
-    MENU_SETTINGS,
-    MENU_RESTART,
-    MENU_ABANDON,
-    __menuItemCount
-} MenuItem_Et;
-
-typedef enum KeybindAction_Et {
-    ACTION_FULLSCREEN = 0,
-    ACTION_PAUSE,
-    // Add more game actions later
-    __keybindActionCount
-} KeybindAction_Et;
-
 // Game's Types
 
 typedef uint Card_t[5][5];
@@ -89,9 +64,12 @@ typedef struct {
     @brief Ball pool and draw history management.
 */
 typedef struct {
-    uint            encodedBalls[500];  // pre-shuffled 100*col+num values
-    uint            remainingCount;     // starts at 500, decrements
-    // uint         drawnHistory[500];  // optional: for replay / statistics
+    uint encodedBalls[500];  // pre-shuffled 100*col+num values
+    uint remainingCount;     // starts at 500, decrements
+    // uint drawnHistory[500];  // optional: for replay / statistics
+    f32 showDelay;
+    f32 choiceDelay;
+    f32 graceDelay;
 } BallSystem_St;
 
 /**

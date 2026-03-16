@@ -2,7 +2,7 @@
     @file app.c
     @author Fshimi Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-16
     @brief Application setup and teardown.
 */
 
@@ -13,7 +13,7 @@
 bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
         if (!IsFontValid(fonts[fontId])) {
-            log_warn("Font %zu (%d) wasn't proprely loaded", fontId, fontSize);
+            log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
             return false;
         }
 

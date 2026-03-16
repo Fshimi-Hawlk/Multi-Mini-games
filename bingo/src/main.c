@@ -2,7 +2,7 @@
     @file main.c
     @author Fshimi-Hawlk
     @date 2026-03-02
-    @date 2026-03-03
+    @date 2026-03-16
     @brief One clear sentence that tells what this file is actually for.
     
     Contributors:
@@ -37,8 +37,6 @@ s32 main(void) {
         return 1;
     }
 
-    SetExitKey(KEY_NULL);
-
     BingoGame_St game = {0};
 
     bingo_initGame(&game);
@@ -47,104 +45,46 @@ s32 main(void) {
         f32Vector2 mouse = GetMousePosition();
         f32 dt = GetFrameTime();
 
-        if (gameShouldClose || (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_ESCAPE))) {
-            break;
-        }
-
-        switch (currentState) {
-            case STATE_GAMEPLAY: {
-                bingo_updateGame(&game, dt, mouse);
-
-                if (IsKeyPressed(KEY_ESCAPE)) {
-                    currentState = STATE_PAUSED;
-                    selectedItem = MENU_RESUME;
-                }
-            } break;
-
-            case STATE_PAUSED: {
-                updatePauseMenu();
-            } break;
-
-            case STATE_SETTINGS_APP:
-            case STATE_SETTINGS_GAME: 
-            case STATE_SETTINGS_KEYBINDS: {
-                updateSettings();
-            } break;
-
-            case STATE_RESTART_CONFIRM:
-            case STATE_ABANDON_CONFIRM: {
-                updateConfirm();
-            } break;
-
-            default: {
-                log_error("GameState_Et(%u)", currentState);
-            } break;
-        }
+        bingo_updateGame(&game, dt, mouse);
 
         BeginDrawing(); {
             ClearBackground(APP_BACKGROUND_COLOR);
 
-            switch (currentState) {
-                case STATE_GAMEPLAY: {
-                    switch (game.progress.scene) {
-                        case GAME_SCENE_CARD_CHOICE: {
-                            bingo_drawChoiceCards(&game);
-                        } break;
-
-                        case GAME_SCENE_LAUNCHING: {
-                            bingo_drawChoiceCards(&game);
-
-                            char text[2] = {0};
-                            sprintf(text, "%.0f", game.currentCall.timer / 2);
-                            f32Vector2 textSize = MeasureTextEx(fonts[FONT48], text, 128, 0);
-
-                            DrawTextEx(
-                                fonts[FONT48], text,
-                                Vector2Subtract(game.layout.windowCenter, Vector2Scale(textSize, 0.5)), 
-                                128, 0, BLACK
-                            );
-                        } break;
-
-                        case GAME_SCENE_PLAYING: {
-                            bingo_drawCard(&game);
-                            bingo_drawUI(&game);
-                        } break;
-
-                        case GAME_SCENE_END: {
-                            f32 fontSize = 64;
-                            u32 w = MeasureText(game.progress.resultMessage, fontSize);
-                            Color col = (game.progress.resultMessage[0] == 'B') ? GREEN : RED;
-
-                            f32Vector2 textPos = {
-                                .x = game.layout.windowCenter.x - w / 2.0f,
-                                .y = game.layout.windowCenter.y - fontSize / 2.0f,
-                            };
-
-                            DrawTextEx(fonts[FONT48], game.progress.resultMessage, textPos, fontSize, 0, col);
-                        } break;
-                    }
+            switch (game.progress.scene) {
+                case GAME_SCENE_CARD_CHOICE: {
+                    bingo_drawChoiceCards(&game);
                 } break;
 
-                case STATE_PAUSED: {
-                    drawPauseOverlay();
+                case GAME_SCENE_LAUNCHING: {
+                    bingo_drawChoiceCards(&game);
+
+                    char text[2] = {0};
+                    sprintf(text, "%.0f", game.currentCall.timer / 2);
+                    f32Vector2 textSize = MeasureTextEx(fonts[FONT48], text, 128, 0);
+
+                    DrawTextEx(
+                        fonts[FONT48], text,
+                        Vector2Subtract(game.layout.windowCenter, Vector2Scale(textSize, 0.5)), 
+                        128, 0, BLACK
+                    );
                 } break;
 
-                case STATE_SETTINGS_APP:
-                case STATE_SETTINGS_GAME:
-                case STATE_SETTINGS_KEYBINDS: {
-                    drawSettings();
+                case GAME_SCENE_PLAYING: {
+                    bingo_drawCard(&game);
+                    bingo_drawUI(&game);
                 } break;
 
-                case STATE_RESTART_CONFIRM: {
-                    drawConfirm("Restart game?");
-                } break;
+                case GAME_SCENE_END: {
+                    f32 fontSize = 64;
+                    u32 w = MeasureText(game.progress.resultMessage, fontSize);
+                    Color col = (game.progress.resultMessage[0] == 'B') ? GREEN : RED;
 
-                case STATE_ABANDON_CONFIRM: {
-                    drawConfirm("Abandon and quit?");
-                } break;
+                    f32Vector2 textPos = {
+                        .x = game.layout.windowCenter.x - w / 2.0f,
+                        .y = game.layout.windowCenter.y - fontSize / 2.0f,
+                    };
 
-                default: {
-                    log_error("GameState_Et (%u)", currentState);
+                    DrawTextEx(fonts[FONT48], game.progress.resultMessage, textPos, fontSize, 0, col);
                 } break;
             }
 
