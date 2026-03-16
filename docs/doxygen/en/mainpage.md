@@ -2,201 +2,101 @@
 
 # Multi Mini-Games
 
-This monorepo hosts a collection of small, independent mini-games built in C with raylib as the primary graphics and input library.  
-The core concept is to unify these games under a single executable through a central **lobby** - a basic 2D platformer hub where players can explore a simple world, interact with elements, and trigger mini-games via collision zones. Games run in-place without spawning new processes or windows, ensuring a seamless experience.
+**Last checked against project structure:** March 16, 2026  
 
-As of late February 2026, the project includes:
-- A functional lobby with player movement, physics, and UI elements like skin selection.
-- One integrated mini-game: a classic **Tetris** implementation.
-- Shared infrastructure for logging, types, utilities, and API integration.
-- Build tools and documentation to facilitate adding more games.
+This monorepo hosts a collection of small, independent mini-games built in C with raylib.  
+The core idea is one single executable: a central **lobby** (simple 2D platformer hub) where you walk around and trigger games by walking into collision zones. Games run inside the lobby, no extra windows or processes.
 
-The setup emphasizes modularity, with games developed on branches before merging, and a focus on clean, consistent code to ease collaboration.
+As of March 2026 the project has:
+- Working lobby with movement, physics, and basic UI (skin selection).
+- One integrated game: Tetris.
+- Shared logging, types, utilities, and the API layer for adding more games.
+- Build system and documentation setup.
 
-## Project Goals and Vision
+@ref project_details "Project details"  
+@ref build_system "Build system"  
+@ref team_guidelines "Team guidelines"
 
-- **Mini-Game Variety**: Create diverse, fun games that stand alone but integrate well (e.g., puzzles, arcade, memory-based).
-- **Unified Experience**: Use the lobby as a playful menu system - no traditional UI lists; instead, physical navigation adds engagement.
-- **Technical Focus**: Stick to C for performance and learning; leverage raylib for cross-platform simplicity without heavy dependencies.
-- **Extensibility**: Design with future features in mind, like local saves, leaderboards, or basic multiplayer.
-- **Collaboration-Friendly**: Monorepo with clear workflows, style guides, and templates to onboard contributors quickly.
+## Quick Start
 
-Potential expansions (see @ref todo for priorities):
-- More games: Snake, Block-Blast, Solitaire, etc.
-- Persistent data: High-scores, unlocked skins, settings.
-- Polish: Audio configs, fullscreen toggles, error recovery.
-
-## Getting Started: Build and Run
-
-Start from the repository root. The Makefile supports incremental builds, multiple modes (release/debug/sanitizers), and targets for libs, executables, and tests.
-
-Common commands:
+From repository root:
 
 ```bash
-# Build static libs from merged games + link lobby executable (incremental)
-make libs
-make bin
-
-# Run the lobby
-make run-exe
-
-# Full rebuild in debug mode with strict warnings
-make MODE=strict-debug rebuild
-
-# Rebuild + run with address/undefined sanitizers (clang required)
-make MODE=clang-debug rebuild run-exe
-
-# Force relink lobby only (after lib changes)
-make rebuild-exe
-
-# Build and run all tests (lobby + games)
-make tests
-make run-tests
-
-# Clean everything (root + sub-projects)
-make clean-all
-
-# Full command list
-make help
+make libs      # build shared libs
+make bin       # link lobby executable
+make run-exe   # run the lobby
+make tests     # run all tests
 ```
 
-Modes include release (optimized), debug (symbols + warnings), strict-debug (warnings as errors), clang-debug (sanitizers), and valgrind-debug (memory checks at runtime).  
-For asset paths, use -DASSET_PATH="custom/path/" if needed.
+Full commands and modes (debug, sanitizers, valgrind, sub-project builds) -> @ref root_makefile "Root Makefile documentation"
 
-Detailed root Makefile guide: @ref root_makefile "Root Makefile documentation"
-
-Inside a sub-project folder (e.g., tetris/ or a new game):
+Inside any game folder (tetris/, new game, etc.):
 
 ```bash
-# Standalone build + run
 make rebuild run-main
-
-# Tests
-make run-tests MODE=clang-debug
-
-# Clean
-make clean
+make run-tests
 ```
 
-Sub-project Makefile details: @ref sub_makefile "Sub-Project Makefile documentation" (if you have one; otherwise link to root)
+Sub-project details stay in each game’s makefile.md.
 
 ## Repository Structure
 
-The monorepo uses a flat layout with shared folders at the top and per-game subfolders.
-
 ```text
 .
-├── assets/                     # textures, sounds, fonts (shared + game-specific subfolders)
-├── docs/                       # all project documentation (this site source)
-│   ├── API_Conversion.md       # guide: standalone game -> lobby-compatible API
-│   ├── CodeStyleAndConventions.md # style rules
-│   ├── makefile.md             # root-level build commands & modes
-│   └── ...                     # more shared guides
-├── firstparty/                 # utilities & types used by lobby and every game
-│   ├── APIs/                   # copied game API headers (e.g., tetrisAPI.h)
-│   ├── logger.h                # logging system
-│   ├── baseTypes.h             # types (u8, f32Vector2, etc.)
-│   ├── configs.h               # constants (paths, physics)
-│   ├── utils.h                 # helpers (clamp, randint, etc.)
-│   ├── generalAPI.h            # base game struct + errors
-│   └── ...                     # more utilities
-├── thirdparty/                 # external libs (nob.h for dynamic arrays, etc.)
-├── lobby/                      # hub code
-│   ├── src/                    # main.c, lobbyAPI.c, etc.
-│   ├── include/                # headers
-│   ├── tests/                  # unit tests
-│   ├── Makefile                # sub-build
-│   └── makefile.md             # sub-docs
+├── assets/
+├── docs/                       # this site source
+├── firstparty/                 # shared utils, logger, types, generalAPI
+├── thirdparty/
+├── lobby/
 ├── tetris/                     # example integrated game
-│   ├── src/                    # tetrisAPI.c, core/board.c, etc.
-│   ├── include/                # headers
-│   ├── tests/                  # tests
-│   ├── Makefile                # sub-build
-│   └── makefile.md             # sub-docs
-├── sub-project-example/        # template for new games
-├── Makefile                    # root build
-├── LICENSE.md                  # license
-├── CONTRIBUTING.md             # contribution guide
-├── CHANGELOG.md                # changes
-└── TODO.md                     # tasks
+├── sub-project-example/        # copy for new games
+├── Makefile                    # root
+├── LICENSE.md
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+└── TODO.md
 ```
 
-After merging more games, they appear as top-level folders like tetris/.
+After more games are merged they become top-level folders like tetris/.
 
-## Key Modules and Components
+## Current Modules
 
 ### Lobby Module
-Serves as the main entry point and scene manager.
-
-- **Physics and Movement**: Basic platformer with gravity, jumps, coyote time, friction (tunable in configs.h).
-- **UI Elements**: Skin toggle button, texture menu, debug hitboxes.
-- **Game Switching**: Detects player collision with game hitboxes, loads via API (e.g., tetris_initGame), runs loop until running=false.
-- **Configs**: Handles video/audio settings via systemSettings.h.
-
-Core files: lobby/src/main.c (entry), lobbyAPI.h/c (API), userTypes.h (structs/enums like Player_st, GameScene_Et).
-
-See: @ref lobby "Lobby Module Overview" (add if you create the page)
+Main entry point and scene manager.  
+Collision detection loads games via API.  
+See: @ref lobby "Lobby Module Overview" (add page later)
 
 ### Tetris Module
-A faithful classic Tetris clone.
+Classic Tetris with score, levels, next-piece preview.  
+Integrated through opaque struct + init/loop/free.  
+See: @ref tetris "Tetris Module Overview" (add page later)
 
-- **Gameplay**: Random tetrominoes, rotation/move/drop, collision, line clears.
-- **Progression**: Score based on clears (multiplied by level), speed ramps up.
-- **UI**: Board render, next piece preview, score/level display.
-- **Integration**: Opaque TetrisGame_St, init/loop/free functions.
+Shared stuff (logger, baseTypes, configs, utils, generalAPI) lives in firstparty/.
 
-Core files: tetrisAPI.h/c (API), core/board.h (logic), ui/board.h (render).
+## Development Workflow & Reminders
 
-See: @ref tetris "Tetris Module Overview" (add if you create the page)
-
-### Shared Utilities
-Reusable across all parts.
-
-- **Logging**: logger.h - levels (info/warn/error), colors, file output in debug, stack traces on Linux.
-- **Types**: baseTypes.h - fixed-width (u8/s32), vectors (u32Vector2), shorthands (uint/iVector2).
-- **Configs**: configs.h - ASSET_PATH, WINDOW_WIDTH, GRAVITY, JUMP_FORCE, etc.
-- **Utils**: utils.h - macros (clamp, swap, UNREACHABLE), functions (randint, getTextureRec).
-- **API Base**: generalAPI.h - Error_Et (OK, ERROR_ALLOC, etc.), BaseGame_St (running, score, freeGame).
-- **System Settings**: systemSettings.h - VideoSettings_St/AudioSettings_St, apply functions.
-
-Globals like windowRect, appFont in globals.h.
-
-## Development Workflow
-
-- **New Game**: Copy sub-project-example/, work on branch, merge when ready.
-- **API Conversion**: Make game lobby-compatible - opaque struct, embed BaseGame_St, provide init/loop/free.
-- **Commits**: Use prefixes (feat:, fix:, docs:, refactor:, etc.) - see @ref contributing.
-- **Reviews**: Run tests/sanitizers before PR; ping group for feedback.
-- **Docs**: Update @ref changelog for big changes; use Doxygen comments in code.
+- New game: copy sub-project-example/, branch, merge when API-ready.
+- API conversion steps -> @ref api_conversion
+- Commit style -> @ref contributing
+- Code style -> @ref code_style_and_conventions
+- Tests + sanitizers before any merge.
+- Update @ref changelog and @ref todo after big changes.
 
 Full guide: @ref contributing "CONTRIBUTING.md"
 
-Style rules: @ref code_style_and_conventions "CodeStyleAndConventions.md"
-
-Integration steps: @ref api_conversion "API_Conversion.md"
-
-## Testing and Debugging
-
-- **Modes**: Use clang-debug for sanitizers, valgrind-debug for leaks.
-- **Tests**: Per-module (tests/ folders), run via make run-tests - logs in timestamped folders.
-- **Logging**: VERBOSE=1 for build commands; log_* macros for runtime.
-- **Tools**: make run-gdb for debugging main.
-
 ## Roadmap and Open Tasks
 
-Short-term: Integrate more games, add saves/leaderboards.  
-Long-term: Multiplayer modes, online features?  
+Short-term: more games, saves, leaderboards.  
+Long-term ideas in TODO.md.
 
 Details: @ref todo "TODO.md"
 
 ## License
 
-zlib/libpng - permissive for use/distribution.  
+zlib/libpng. Full text: @ref license "LICENSE.md"
 
-Full: @ref license "LICENSE.md"
+Thanks to raylib, nob.h, etc. (credits in headers).
 
-Thanks to raylib (Ramon Santamaria), nob.h (Tsoding), and others - credits in headers.
-
-**Created:** February 2026  
-**Last updated:** March 02, 2026  
+**Created:** March 01, 2026  
+**Last updated:** March 16, 2026  
 **Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)

@@ -2,169 +2,165 @@
 
 Converting a Sub-Game to an API and Integrating into the Lobby
 
-**Based on project structure as of Multi Mini-Games monorepo**
+**Based on project structure as of March 16, 2026 – Multi Mini-Games monorepo**
 
-This guide provides a step-by-step explanation of how to convert an individual sub-game (e.g., `tetris/`, `block-blast/`) into a reusable API that can be integrated into the main lobby. The goal is to allow the lobby to launch and run the game seamlessly within the same window, without restarting the application or managing separate executables.
+This guide explains step-by-step how to convert a standalone mini-game (like `tetris/`, or a future `block-blast/`) into a reusable API that the lobby can load and run inside the same window - no new process, no extra window, just smooth switching.
 
-The process assumes you have a working standalone sub-game built with the project's Makefile system. It draws from the provided API examples (`generalAPI.h`, `gameNameAPI.h`, `gameNameAPI.c`) and lobby code (`main.c`). Key principles:
-- Use **opaque structures** to hide internal game details from the lobby (encapsulation).
-- Provide a standard interface: init, loop, free functions.
-- Handle errors consistently with `Error_Et`.
-- Ensure the game can run as a "scene" within the lobby's main loop.
+We assume you already have a working standalone game using our Makefile setup. This draws from `generalAPI.h`, the example `gameNameAPI.h` / `.c`, and how `lobby/main.c` works.  
+Key ideas we stick to:
+- **opaque structures** -> lobby never sees inside your game (good encapsulation)
+- standard interface: init, loop, free functions
+- errors always returned via `Error_Et`
+- game runs as a "scene" inside the lobby main loop
 
 ## Prerequisites
 
-- Your sub-game folder follows the template (`sub-project-example/`): `src/`, `include/`, `tests/`, `Makefile`.
-- The game runs standalone: `make rebuild run-main` works without errors.
-- Raylib is linked via the Makefile (e.g., `-lraylib` in `BASE_LDFLAGS`).
-- Familiarity with the root Makefile: it builds libraries lazily and copies `<gameName>API.h` to `firstparty/APIs/`.
-- Lobby code (`lobby/main.c`) uses a scene switcher (e.g., `currentScene`) to toggle between lobby and games.
+- Your game folder follows `sub-project-example/` structure: `src/`, `include/`, `tests/`, `Makefile`
+- Standalone build works: `make rebuild run-main` runs without crashing
+- Raylib is linked (usually via `-lraylib` in `BASE_LDFLAGS`)
+- You know the root Makefile copies game API headers to `firstparty/APIs/` during build
+- Lobby uses a scene switcher (`currentScene` in `lobby/main.c`) to go between lobby and games
 
-If your game doesn't meet these, start by aligning it with the template.
+If any of that is missing, fix it first by copying the template and getting standalone mode working.
+
+**Quick reminder**: After building from root, your `<gameName>API.h` gets copied to `firstparty/APIs/`. That's where the lobby includes it from (`#include "APIs/<gameName>API.h"`). Check that folder if you're lost.
 
 ## Step 1: Define the Game API Header (`include/<gameName>API.h`)
 
-Create or update a public API header in your game's `include/` folder. This header exposes only what the lobby needs: opaque types, enums, and function prototypes. Do not expose internal structs or details-use forward declarations for opacity.
+Create or update the public header in your game's `include/` folder.  
+This file only shows what the lobby needs - opaque types, function prototypes, maybe configs. Nothing internal.
 
 ### Key Elements
 
-1. **Include General API**:
-    - Use `#include "APIs/generalAPI.h"` for shared types like `Error_Et` and `Game_St`.
+1. **Include shared base API**  
+   `#include "APIs/generalAPI.h"` -> gives `Error_Et`, `Game_St`, etc.
 
-2. **Opaque Game Structure**:
-    - Declare `typedef struct <GameName>Game_St <GameName>Game_St;` (forward declaration).
-    - This hides internals. The lobby treats it as a black box.
-    - Ensure it embeds `Game_St` fields (e.g., `running`) at the start for casting compatibility (see notes in `gameNameAPI.h`).
+2. **Opaque game struct**  
+   `typedef struct <GameName>Game_St <GameName>Game_St;` (forward declaration only)  
+   Lobby sees it as a black box.  
+   **Important**: in the .c file, make `Game_St base;` the very first member so casting works safely.
 
-3. **Configuration Struct**:
-    - Define a configs struct (e.g., `<GameName>Configs_St`) for customizable options like FPS.
+3. **Configs struct (optional but nice)**  
+   `typedef struct { int fps; /* ... */ } <GameName>Configs_St;`
 
-4. **Error Handling**:
-    - Use `Error_Et` for return values (OK, ERROR_NULL_POINTER, etc.).
+4. **Error handling**  
+   All init-like functions return `Error_Et` (OK, ERROR_ALLOC, etc.)
 
-5. **Function Prototypes**:
-    - `Error_Et <gameName>_initGame__full(<GameName>Game_St** game, <GameName>Configs_St configs);` - Allocates and initializes.
-    - `void <gameName>_gameLoop(<GameName>Game_St* const game);` - Handles input, update, render.
-    - `void <gameName>_freeGame(<GameName>Game_St** game);` - Frees resources.
-    - Optional macro: `#define <gameName>_initGame(game, ...) <gameName>_initGame__full(game, (<GameName>Configs_St) { __VA_ARGS__ })` for simpler calls.
+5. **Main function prototypes**  
+   - `Error_Et <gameName>_initGame__full(<GameName>Game_St** game, <GameName>Configs_St configs);`  
+     Allocates + inits  
+   - `void <gameName>_gameLoop(<GameName>Game_St* const game);`  
+     Input, update, render one frame  
+   - `void <gameName>_freeGame(<GameName>Game_St** game);`  
+     Cleanup everything  
+   - Optional helper macro for easy init:  
+     `#define <gameName>_initGame(game, ...) <gameName>_initGame__full(game, (<GameName>Configs_St){ __VA_ARGS__ })`
 
-6. **Guards and Docs**:
-    - Use include guards: `#ifndef <GAME_NAME>_API_H`.
-    - Add Doxygen comments for functions and file.
-        Note: Refer to `CodeStyleAndConvetions.md` for more info.
+6. **Guards + docs**  
+   `#ifndef <GAME_NAME>_API_H`  
+   Add Doxygen-style comments (see `CodeStyleAndConventions.md`)
 
-### For an example check out [`gameNameAPI.h`](../firstparty/APIs/gameNameAPI.h)
+### Example
 
-**Note**:
-- Replace "GameName" / "gameName" with your game's name (e.g., "tetris" / "Tetris").
-- Keep signatures consistent across games for lobby compatibility.
+Look at [`firstparty/APIs/gameNameAPI.h`](../firstparty/APIs/gameNameAPI.h) or the real `tetrisAPI.h`
 
-## Step 2: Implement the API Functions (`<game-name>/src/<gameName>API.c`)
+**Note**  
+Replace `<GameName>` / `<gameName>` with your game (Tetris / tetris, etc.).  
+Keep function names and signatures the same across all games so lobby code stays simple.
 
-Create an implementation file for the API. This is where you move your game's core logic.
+## Step 2: Implement the API (`src/<gameName>API.c`)
+
+This is where you put the real struct definition and the function bodies.
 
 ### Key Elements
 
-1. **Full Struct Definition**:
-    - Define the full `struct <GameName>Game_St` here (not in the header).
-    - Embed general fields like `bool running;` at the start.
-    - Add game-specific fields (e.g., board, score).
+1. **Full struct**  
+   Define `struct <GameName>Game_St { Game_St base; /* your fields */ };`  
+   `base` **must** be first.
 
-2. **Initialization (`<gameName>_initGame__full`)**:
-    - Allocate the struct with `calloc(1, sizeof(*game))`.
-    - Set defaults (e.g., `game->running = true;`).
-    - Apply configs (e.g., `SetTargetFPS(configs.fps)` if non-default).
-    - Return `OK` on success, error codes on failure (e.g., `ERROR_ALLOC` if calloc fails).
-    - Do **not** manage the Raylib window-lobby handles that.
+2. **Init function**  
+   - `calloc(1, sizeof(*game))`  
+   - `game->base.running = true;`  
+   - Apply configs (e.g. `if (configs.fps > 0) SetTargetFPS(configs.fps);`)  
+   - Return error if alloc fails  
+   - **Do NOT** call InitWindow or anything window-related
 
-3. **Game Loop (`<gameName>_gameLoop`)**:
-    - Check if `game->base.running` (early return if not).
-    - Handle input (e.g., keys, events).
-    - Update game state.
-    - Render with `BeginDrawing()` / `EndDrawing()` (use Raylib globals like `ClearBackground`).
-    - Set `game->base.running = false` when game ends (e.g., quit key or game over).
+3. **Game loop**  
+   - Early return if `!game->base.running`  
+   - Input -> update logic -> `BeginDrawing()` -> render -> `EndDrawing()`  
+   - Set `game->base.running = false` when game should quit
 
-4. **Cleanup (`<gameName>_freeGame`)**:
-    - Free any allocated resources inside the struct.
-    - `free(*game); *game = NULL;`.
-    - Do **not** close the window or exit the process.
+4. **Free function**  
+   - Free textures, sounds, arrays, etc. inside the struct  
+   - `free(*game); *game = NULL;`
 
-5. **Includes and Utils**:
-    - Include Raylib, project utils (`userTypes.h`, `logger.h`).
-    - Use logger for errors/warnings.
+5. **Includes**  
+   Raylib, `logger.h`, `baseTypes.h`, `configs.h`, etc.
 
-### For an Example check out [tetrisAPI.c](../tetris/src/tetrisAPI.c)
+Look at [`tetris/src/tetrisAPI.c`](../tetris/src/tetrisAPI.c) for a full example.
 
-**Note**:
-- Test standalone first: Update your sub-game's `main.c` to use these functions.
-- Ensure no global state leaks-everything in the struct.
+**Note**  
+Test standalone first by updating your game's `main.c` to call these functions.  
+No global variables - everything lives inside the struct.
 
-## Step 3: Update the Game Code to Use the API
+## Step 3: Refactor game code to use the API
 
-1. **Refactor Existing Code**:
-    - Move all game logic into the API functions.
-    - Remove window management from game code (lobby handles `InitWindow`, `CloseWindow`).
-    - Use opaque pointers if needed for sub-components.
+- Move logic into init / loop / free  
+- Remove `InitWindow`, `CloseWindow`, `SetTargetFPS` from game code (lobby does it)  
+- Update Makefile to have a `static-lib` target  
+- Test `make static-lib` -> should give `build/lib/lib<gameName>.a`
 
-2. **Build as Library**:
-    - Update sub-game Makefile: Add `static-lib` target (as per root Makefile integration).
-    - Test: `make static-lib` produces `build/lib/lib<gameName>.a`.
+Keep a temporary standalone `main.c` for testing if you want.
 
-3. **Standalone Testing**:
-    - Keep a temporary `main.c` in the sub-game for testing: Call init/loop/free in a loop.
-    - Once integrated, remove or comment it out.
+## Step 4: Plug it into the lobby
 
-## Step 4: Integrate into the Lobby
+In `lobby/src/main.c`:
 
-The lobby uses a scene switcher to launch games.
+1. `#include "APIs/<gameName>API.h"`
 
-1. **Include the API**:
-    - `#include "APIs/<gameName>API.h"`
+2. Add to `GameScene_Et` enum
 
-2. **Scene Switch Logic**:
-    - In main loop, use an enum (`GameScene_Et`) for scenes.
-    - On trigger (e.g., collision with hitbox): Set scene to game, flag init needed.
-    - `Game_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_TETRIS];`
-    - `GameNameGame_St* gameNameRef = (GameNameGame_St*) *miniRef;`
-    - If init needed, call `<gameName>_initGame(&gameNameRef, [[.configsName = ...], ]);` and handle errors.
-    - Call `<gameName>_gameLoop(gameNameRef);`
-    - If `!(*miniRef)->running`, 
-        - free using `(*miniRef)->free(miniRef)`
-        - then switch back to lobby
+3. In main loop, when player hits trigger:
+   - Get pointer: `Game_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_XXX];`
+   - Cast if needed: `<GameName>Game_St* ref = (<GameName>Game_St*)*miniRef;`
+   - If first time: call init + error check
+   - Call loop: `<gameName>_gameLoop(ref);`
+   - If `!(*miniRef)->running`: call free, switch scene back to lobby
 
-### Checkout [`main.c`](../lobby/src/main.c)
+See how tetris is integrated in [`lobby/src/main.c`](../lobby/src/main.c)
 
-**Note**:
-- Creation of `miniRef` avoid to constantly cast to `Game_St*` for general fields accessing like `running`.
-- Add grace periods for hitboxes to prevent rapid toggling.
+**Tip**: Add a short grace/cooldown period after leaving a game so you don't re-enter instantly.
 
-## Step 5: Build and Test Integration
+## Step 5: Build and test everything
 
-1. **Root Build**:
-    - `make rebuild-libs`: Builds libs, copies APIs.
-    - `make rebuild-exe`: Forces lobby relink.
-    - `make run-exe`: Test.
-    - One liner: `make MODE=strict-debug rebuild run-exe`
+Root folder:
+- `make rebuild-libs` -> builds libs + copies APIs to firstparty/APIs/
+- `make rebuild-exe` -> relink lobby
+- `make run-exe`
+- Handy one-liner: `make MODE=strict-debug rebuild run-exe`
 
-2. **Standalone Sub-Game**:
-    - In game folder: `make rebuild run-main` (use temporary main if needed).
+Game folder (standalone):
+- `make rebuild run-main`
 
-3. **Debugging**:
-    - `make MODE=clang-debug rebuild-exe run-exe`
-    - Check logs for errors.
+With sanitizers:
+- `make MODE=clang-debug rebuild-exe run-exe`
+
+Check logs if something breaks.
 
 ## Common Pitfalls and Tips
 
-- **Incomplete Types**: Ensure lobby only uses opaque pointers-no direct struct access.
-- **Window Management**: Games must not call `InitWindow` / `CloseWindow`.
-- **Resource Leaks**: Free everything in `freeGame` (textures, etc.).
-- **Configs**: Use defaults; lobby can override (e.g., FPS).
-- **Logging**: Use `logger.h` for consistency.
-- **Testing**: Add API tests in `tests/`.
-- **If Stuck**: Check `makefile.md` for build details; discuss in group chat.
+- Forgot to put `Game_St base` as first struct member -> casting breaks  
+- Game calls `InitWindow` / `CloseWindow` -> crash or weird behaviour  
+- Leaking resources -> free textures/sounds/allocs in freeGame  
+- No `running` check at loop start -> runs after quit  
+- Rapid re-trigger on exit -> add 0.3–0.5s cooldown  
+- Configs ignored -> lobby can override, but use defaults  
+- Logging missing -> use logger.h macros  
+- No tests -> add some in `tests/` folder  
+- Still stuck? Check `makefile.md`, look at tetris files, or ask in group chat
 
 ## Credits
 
-**Created: February 10, 2026**  
-**Last updated: March 01, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Created:** February 10, 2026  
+**Last updated:** March 16, 2026  
+**Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)

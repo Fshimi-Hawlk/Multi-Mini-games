@@ -104,10 +104,10 @@ make run-gdb
 ## Related documentation
 
 
-- \subpage makefile-structure : **[README.md](./make/README.md)**     -> How the Makefile is **internally structured**
-- This file           -> How to **use** the Makefile (targets, modes, examples, logging behavior)  
+**[internal-structure.md](./make/internal-structure.md)**: How the Makefile is **internally structured**
 
 ## Credits
 
-**Last updated: February 22, 2026**  
+**Created: January 26, 2026**  
+**Last updated: March 16, 2026**  
 **Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
