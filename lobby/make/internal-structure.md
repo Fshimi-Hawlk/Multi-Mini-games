@@ -70,8 +70,8 @@ Later files consume those variables to create rules and targets.
 
 ## Related documentation
 
-- **[Makefile Documentation](../makefile.md)**     -> How to **use** the Makefile (targets, modes, examples, logging behavior)  
-- This file           -> How the Makefile is **internally structured**
+- **[Makefile Documentation](../makefile.md)**: How to **use** the Makefile (targets, modes, examples, logging behavior)  
 
-**Last updated: February 22, 2026**  
+**Created: February 23, 2026**  
+**Last updated: March 16, 2026**  
 **Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
