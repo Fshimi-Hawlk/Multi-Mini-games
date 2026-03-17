@@ -1,4 +1,9 @@
-#include "utils/common.h"
+#ifndef UI_GAME_H
+#define UI_GAME_H
 
-void drawBoard(int board[SIZE_BOARD][SIZE_BOARD]);
-void drawSnake(Queue_St* q, float interpolation, iVector2 direction);
+#include "utils/userTypes.h"
+
+void drawBoard(const Board_t board);
+void drawSnake(const Snake_St* const snake, f32 interpolation, iVector2 direction);
+
+#endif // UI_GAME_H

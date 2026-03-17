@@ -24,8 +24,8 @@
     @see gameConfig.h for configuration options
 */
 
-#ifndef GAME_NAME_API_H
-#define GAME_NAME_API_H
+#ifndef SNAKE_API_H
+#define SNAKE_API_H
 
 /// @note: if you reading this file inside `firstparty/APIs` this following
 ///        include may have siggly-lines, but there's actually no real issue.
@@ -64,7 +64,7 @@ typedef struct {
         snake_initGame(&game, .gameDifficulty = 144);
 */
 #define snake_initGame(game, ...) \
-    snake_initGame__full((game), (SnakeConfigs_St){ _ = 0, __VA_ARGS__ })
+    snake_initGame__full((game), (SnakeConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 /**
     @brief Allocates and initializes a new instance of the Snake mini-game.
@@ -136,4 +136,4 @@ Error_Et snake_freeGame(SnakeGame_St** game);
 */
 bool snake_isRunning(const SnakeGame_St* game);
 
-#endif // GAME_NAME_API_H
+#endif // SNAKE_API_H

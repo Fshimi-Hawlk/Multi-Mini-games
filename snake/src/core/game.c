@@ -4,10 +4,10 @@ bool isOOB(iVector2 coord) {
     return coord.x < 0 || coord.x >= SIZE_BOARD || coord.y < 0 || coord.y >= SIZE_BOARD;
 }
 
-bool selfCollision(int bodyLength, iVector2 headCoord) {
-    t_element* temp = head;
-    for (int i = 0; i < bodyLength - 1 && temp != NULL; i++) {
-        if (headCoord.x == temp->coord.x && headCoord.y == temp->coord.y) {
+bool selfCollision(const Snake_St* const snake, iVector2 nextHeadPos) {
+    SnakeBodyPart_St* temp = snake->head;
+    for (int i = 0; i < snake->bodyLength - 1 && temp != NULL; i++) {
+        if (nextHeadPos.x == temp->coord.x && nextHeadPos.y == temp->coord.y) {
             return true;
         }
         temp = temp->suivant;
@@ -15,38 +15,45 @@ bool selfCollision(int bodyLength, iVector2 headCoord) {
     return false;
 }
 
-int initBoard(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength) {
+int initBoard(Board_t board, const Snake_St* const snake) {
     for (int i = 0; i < SIZE_BOARD; i++) {
         for (int j = 0; j < SIZE_BOARD; j++) {
-            board[i][j] = GRASS;
+            board[i][j] = GAME_TILE_GRASS;
         }
     }
 
-    t_element* temp = head;
-    for (int i = 0; i < bodyLength - 1 && temp != NULL; i++) {
-        board[temp->coord.y][temp->coord.x] = BODY;
+    SnakeBodyPart_St* temp = snake->head;
+    for (int i = 0; i < snake->bodyLength - 1 && temp != NULL; i++) {
+        board[temp->coord.y][temp->coord.x] = GAME_TILE_BODY;
         temp = temp->suivant;
     }
-    board[tail->coord.y][tail->coord.x] = HEAD;
+    
+    board[snake->tail->coord.y][snake->tail->coord.x] = GAME_TILE_HEAD;
 
     return 0;
 }
 
-void updateBody(int board[SIZE_BOARD][SIZE_BOARD], int bodyLength) {
-    t_element* temp = head;
-    for (int i = 0; i < bodyLength && temp != NULL; i++) {
-        board[temp->coord.y][temp->coord.x] = BODY;
+void updateBoard(Board_t board, const Snake_St* const snake) {
+    SnakeBodyPart_St* temp = snake->head;
+    for (int i = 0; i < snake->bodyLength && temp != NULL; i++) {
+        board[temp->coord.y][temp->coord.x] = GAME_TILE_BODY;
         temp = temp->suivant;
     }
 }
 
-void spawnApple(int board[SIZE_BOARD][SIZE_BOARD], iVector2* appleCoord) {
-    do {
-        appleCoord->x = rand() % SIZE_BOARD;
-        appleCoord->y = rand() % SIZE_BOARD;
-    } while ((board[appleCoord->y][appleCoord->x] == HEAD) || (board[appleCoord->y][appleCoord->x] == BODY) || (board[appleCoord->y][appleCoord->x] == APPLE));
+void spawnApple(Board_t board) {
+    iVector2 appleCoord = {0};
 
-    board[appleCoord->y][appleCoord->x] = APPLE;
+    do {
+        appleCoord.x = rand() % SIZE_BOARD;
+        appleCoord.y = rand() % SIZE_BOARD;
+    } while (0
+     || (board[appleCoord.y][appleCoord.x] == GAME_TILE_HEAD) 
+     || (board[appleCoord.y][appleCoord.x] == GAME_TILE_BODY) 
+     || (board[appleCoord.y][appleCoord.x] == GAME_TILE_APPLE)
+    );
+
+    board[appleCoord.y][appleCoord.x] = GAME_TILE_APPLE;
 }
 
 void writeRecord(int highScore) {
@@ -75,62 +82,71 @@ int readRecord(void) {
 
 bool mouvement(iVector2* direction) {
     if (IsKeyDown(KEY_W) && !direction->y) { // Lettre Z
-        *direction = (iVector2){.x = 0, .y = -1};
+        *direction = (iVector2) {.x = 0, .y = -1};
         return true;
     }
     if (IsKeyDown(KEY_S) && !direction->y) {
-        *direction = (iVector2){.x = 0, .y = 1};
+        *direction = (iVector2) {.x = 0, .y = 1};
         return true;
     }
     if (IsKeyDown(KEY_A) && !direction->x) { // Lettre Q
-        *direction = (iVector2){.x = -1, .y = 0};
+        *direction = (iVector2) {.x = -1, .y = 0};
         return true;
     }
     if (IsKeyDown(KEY_D) && !direction->x) {
-        *direction = (iVector2){.x = 1, .y = 0};
+        *direction = (iVector2) {.x = 1, .y = 0};
         return true;
     }
     return false;
 }
 
-void initQueue(Queue_St* q) {
-    q->head = NULL;
-    q->tail = NULL;
+void initSnake(Snake_St* snake) {
+    memset(snake, 0, sizeof(*snake));
 }
 
-bool isQueueEmpty(Queue_St* q) {
-    return q->head == NULL;
+bool isSnakeEmpty(Snake_St* snake) {
+    return snake->head == NULL && snake->bodyLength == 0;
 }
 
-void queueAppend(Queue_St* q, iVector2 v) {
-    t_element* nouv;
+void snakeAppend(Snake_St* snake, iVector2 pos) {
+    SnakeBodyPart_St* newPart;
 
-    nouv = malloc(sizeof(t_element));
-    nouv->coord = v;
-    nouv->renderPos.x = (float)v.x;
-    nouv->renderPos.y = (float)v.y;
-    nouv->suivant = NULL;
-    if(isQueueEmpty(q))
-        q->head = nouv;
-    else
-        q->tail->suivant = nouv;
-    q->tail = nouv;
+    newPart = malloc(sizeof(SnakeBodyPart_St));
+    newPart->coord = pos;
+    newPart->renderPos.x = (float)pos.x;
+    newPart->renderPos.y = (float)pos.y;
+    newPart->suivant = NULL;
+
+    if(isSnakeEmpty(snake)) {
+        snake->head = newPart;
+    } else {
+        snake->tail->suivant = newPart;
+    }
+
+    snake->tail = newPart;
+
+    snake->bodyLength++;
 }
 
-void queueRemove(Queue_St* q, iVector2* v) {
-    t_element* premier;
+void snakeRemove(Snake_St* snake, iVector2* pos) {
+    SnakeBodyPart_St* head;
 
-    if (!isQueueEmpty(q)){
-        premier = q->head;
-        *v = premier->coord;
-        q->head = premier->suivant;
-        free(premier);
+    if (!isSnakeEmpty(snake)){
+        head = snake->head;
+
+        if (pos != NULL) {
+            *pos = head->coord;
+        }
+
+        snake->head = head->suivant;
+        free(head);
+
+        snake->bodyLength--;
     }
 }
 
-void freeQueue(Queue_St* q) {
-    iVector2 unused;
-    while (!isQueueEmpty(q)) {
-        queueRemove(q, &unused);
+void freeSnake(Snake_St* snake) {
+    while (!isSnakeEmpty(snake)) {
+        snakeRemove(snake, NULL);
     }
 }

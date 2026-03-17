@@ -1,4 +1,7 @@
+#include "APIs/generalAPI.h"
+#include "raylib.h"
 #include "utils/common.h"
+
 #include "snakeAPI.h"
 
 int main(void) {
@@ -8,10 +11,17 @@ int main(void) {
     SetTargetFPS(60);
 
     SnakeGame_St* game = NULL;
-    snake_initGame(game);
-    snake_gameLoop(game);
+    snake_initGame(&game);
+
+    while (!WindowShouldClose() && ((BaseGame_St*) game)->running) {
+        snake_gameLoop(game);
+    }
+    
     snake_freeGame(&game);
 
     CloseWindow();
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"
