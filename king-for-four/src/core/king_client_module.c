@@ -80,45 +80,48 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
 
     if (action == ACTION_JOIN_ACK) {
         if (len >= sizeof(int)) {
-            my_internal_id = *(int*)data;
+            memcpy(&my_internal_id, data, sizeof(int));
             printf("[KING CLIENT] Mon ID interne: %d\n", my_internal_id);
         }
     }
     else if (action == ACTION_SYNC_GAME) {
         if (len >= sizeof(GameSyncPayload)) {
-            GameSyncPayload* sync = (GameSyncPayload*)data;
-            local_state.current_player = sync->current_player;
-            local_state.active_color = sync->active_color;
-            game_status = sync->status;
+            GameSyncPayload sync;
+            memcpy(&sync, data, sizeof(GameSyncPayload));
+            local_state.current_player = sync.current_player;
+            local_state.active_color = sync.active_color;
+            game_status = sync.status;
             
             if (local_state.discard_pile.head == NULL) {
-                push_card(&local_state.discard_pile, sync->top_card);
+                push_card(&local_state.discard_pile, sync.top_card);
             } else {
-                local_state.discard_pile.head->card = sync->top_card;
+                local_state.discard_pile.head->card = sync.top_card;
             }
             
             for (int i = 0; i < 4; i++) {
-                local_state.players[i].hand.size = sync->hand_sizes[i];
+                local_state.players[i].hand.size = sync.hand_sizes[i];
             }
         }
     }
     else if (action == ACTION_SYNC_HAND) {
         int count = len / sizeof(Card);
-        Card* cards = (Card*)data;
+        uint8_t* ptr = (uint8_t*)data;
         
         // Sécurité : vider proprement la liste chaînée sans crash
-        while(local_state.players[0].hand.head != NULL) {
-            pop_card(&local_state.players[0].hand);
-        }
-        local_state.players[0].hand.size = 0;
+        clear_deck(&local_state.players[0].hand);
         
-        for (int i = 0; i < count; i++) {
-            push_card(&local_state.players[0].hand, cards[i]);
+        // On parcourt à l'envers pour que le push_card (qui ajoute en tête) 
+        // recrée l'ordre exact du serveur.
+        for (int i = count - 1; i >= 0; i--) {
+            Card c;
+            memcpy(&c, ptr + (i * sizeof(Card)), sizeof(Card));
+            push_card(&local_state.players[0].hand, c);
         }
     }
 }
 
 void king_client_update(float dt) {
+    if (!assets_loaded) return;
     if (my_internal_id == -1) {
         join_retry_timer += dt;
         if (join_retry_timer > 1.0f) {
@@ -150,6 +153,7 @@ void king_client_update(float dt) {
 }
 
 void king_client_draw(void) {
+    if (!assets_loaded) return;
     ClearBackground((Color){0, 80, 0, 255});
     
     if (game_status == 0) {

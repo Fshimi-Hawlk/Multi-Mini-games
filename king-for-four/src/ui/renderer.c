@@ -4,21 +4,22 @@
 // Dimensions de ta planche playingCards.png
 #define SHEET_COLS 5
 #define SHEET_ROWS 13
+#define CARD_SCALE 0.8f
 
 // --- CHARGEMENT DES RESSOURCES ---
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
-    // Chargement de la planche de sprites (Faces)
+    // Tentative de chargement depuis plusieurs chemins possibles (Monorepo compat)
     assets.cardSheet = LoadTexture("assets/textures/playingCards.png");
+    if (assets.cardSheet.id == 0) assets.cardSheet = LoadTexture("lobby/assets/textures/playingCards.png");
 
-    // Chargement du dos (Back)
     assets.cardBack = LoadTexture("assets/textures/cardBack_blue5.png");
+    if (assets.cardBack.id == 0) assets.cardBack = LoadTexture("lobby/assets/textures/cardBack_blue5.png");
     
     // Vérifications de sécurité
     if (assets.cardSheet.id == 0) printf("ERREUR CRITIQUE: Texture playingCards.png introuvable !\n");
     if (assets.cardBack.id == 0)  printf("ERREUR CRITIQUE: Texture cardBack_blue5.png introuvable !\n");
-
 
     return assets;
 }
@@ -115,9 +116,8 @@ void RenderHand(Player *p, GameAssets assets) {
     if (p->hand.head == NULL) return;
 
     // --- CONFIGURATION ---
-    float scale = 1.0f; // Assure-toi que c'est le même scale que dans RenderTable si tu veux
-    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
-    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
+    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
+    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
     int padding = 45; 
     int startX = 50;  
     int startY = GetScreenHeight() - cardH - 20;
@@ -194,10 +194,8 @@ void RenderHand(Player *p, GameAssets assets) {
 int GetHoveredCardIndex(Player *p, GameAssets assets) {
     if (p->hand.head == NULL) return -1;
 
-    // Doit être IDENTIQUE à RenderHand
-    float scale = 1.0f; 
-    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
-    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
+    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
+    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
     int padding = 45; 
     int startX = 50;  
     int startY = GetScreenHeight() - cardH - 20;
@@ -210,6 +208,9 @@ int GetHoveredCardIndex(Player *p, GameAssets assets) {
     while (current != NULL) {
         Rectangle hitBox = { startX + (i * padding), startY, cardW, cardH };
         
+        // On vérifie si la souris touche la carte.
+        // Puisque les cartes se superposent vers la droite, 
+        // l'index le plus élevé (le plus à droite) gagne le focus.
         if (CheckCollisionPointRec(mouse, hitBox)) {
             hoveredIndex = i;
         }

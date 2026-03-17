@@ -1,0 +1,16 @@
+Action             │ Commande                                                                         │
+  ├────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤
+  │ Clang (CachyOS)    │ make MODE=clang-debug run-server                                                 │
+  │ (Recommandé)       │ make MODE=clang-debug run-lobby                                                  │
+  ├────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤
+  │ Debugging (GDB)    │ make MODE=debug                                                                  │
+  │                    │ gdb ./lobby/build/bin/main                                                       │
+  │                    │ (Dans GDB: 'run', puis 'bt' après le crash)                                      │
+  ├────────────────────┼──────────────────────────────────────────────────────────────────────────────────┤
+  │ Lobby + Valgrind   │ make MODE=valgrind-debug VG_COMPAT=1 run-lobby                                   │
+  │ Serveur + Valgrind │ make MODE=valgrind-debug && valgrind --leak-check=full ./reseau/build/bin/server │
+  │ Nettoyer avant     │ make clean (conseillé si vous changez de MODE)                                   │
+  │                    │                                                                                  │
+  │ Nushell Env        │ $env.DEBUGINFOD_URLS = "https://debuginfod.archlinux.org"                        │
+  │                    │ (Run this before valgrind on CachyOS/Arch if you still want to use it)           │
+  └────────────────────┴──────────────────────────────────────────────────────────────────────────────────┤
