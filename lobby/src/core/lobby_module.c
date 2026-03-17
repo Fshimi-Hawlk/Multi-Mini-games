@@ -29,9 +29,14 @@ void lobby_init(void) {
     printf("[LOBBY] Chargement du niveau et de la caméra...\n");
     
     playerTextures[0] = LoadTexture("assets/images/trollFace.png");
+    if (playerTextures[0].id == 0) playerTextures[0] = LoadTexture("lobby/assets/images/trollFace.png");
+
     playerTextures[1] = LoadTexture("assets/images/earth.png");
+    if (playerTextures[1].id == 0) playerTextures[1] = LoadTexture("lobby/assets/images/earth.png");
+
     playerTextureCount = 2;
     logoSkinButton = LoadTexture("assets/images/logoSkin.png");
+    if (logoSkinButton.id == 0) logoSkinButton = LoadTexture("lobby/assets/images/logoSkin.png");
     
     player.texture = &playerTextures[0];
 

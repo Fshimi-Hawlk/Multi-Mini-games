@@ -17,21 +17,32 @@ void push_card(Deck* d, Card c) {
 
 // Retrait d'une carte
 Card remove_at(Deck* d, int index) {
-    if (index < 0 || index >= d->size || d->head == NULL) 
+    if (index < 0 || d->head == NULL) 
         return (Card){CARD_BLACK, ZERO};
 
     Node** pp = &(d->head);
-    for (int i = 0; i < index; i++) {
+    for (int i = 0; i < index && *pp != NULL; i++) {
         pp = &((*pp)->next);
     }
+
+    if (*pp == NULL) return (Card){CARD_BLACK, ZERO};
 
     Node* toDelete = *pp;
     Card c = toDelete->card;
     *pp = toDelete->next;
 
     free(toDelete);
-    d->size--;
+    if (d->size > 0) d->size--;
     return c;
+}
+
+void clear_deck(Deck* d) {
+    while (d->head != NULL) {
+        Node* tmp = d->head;
+        d->head = d->head->next;
+        free(tmp);
+    }
+    d->size = 0;
 }
 
 Card pop_card(Deck* d) {
@@ -40,10 +51,19 @@ Card pop_card(Deck* d) {
 
 // Mélange Fisher-Yates (chaine -> tableau -> chaine) et ne pas oublier srand(time(NULL)) dans le main
 void shuffle_deck(Deck* d) {
-    if (d->size < 2) return;
+    if (d->head == NULL || d->head->next == NULL) {
+        if (d->head == NULL) d->size = 0;
+        else d->size = 1;
+        return;
+    }
 
-    int count = d->size;
+    int count = 0;
+    Node* curr = d->head;
+    while (curr) { count++; curr = curr->next; }
+    d->size = count;
+
     Card* tempArray = malloc(sizeof(Card) * count);
+    if (!tempArray) return;
     
     for (int i = 0; i < count; i++) tempArray[i] = pop_card(d);
 
@@ -133,11 +153,20 @@ void _perform_single_riffle(Card* array, int count) {
 }
 
 void human_shuffle_deck(Deck* d) {
-    if (d->size < 2) return;
+    if (d->head == NULL || d->head->next == NULL) {
+        if (d->head == NULL) d->size = 0;
+        else d->size = 1;
+        return;
+    }
+
+    int count = 0;
+    Node* curr = d->head;
+    while (curr) { count++; curr = curr->next; }
+    d->size = count;
 
     // 1. Conversion Liste -> Tableau
-    int count = d->size;
     Card* tempArray = malloc(sizeof(Card) * count);
+    if (!tempArray) return;
     for (int i = 0; i < count; i++) tempArray[i] = pop_card(d);
 
     // 2. On répète le mélange 5 fois (Standard humain pour un bon mélange)

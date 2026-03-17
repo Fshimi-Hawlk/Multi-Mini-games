@@ -99,9 +99,9 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
             printf("[KING] Partie démarrée par l'hôte (Joueur %d).\n", player_id);
         }
         else if (real_action == ACTION_PLAY_CARD && ks->status == 1 && internal_id == g->current_player) {
-            int card_index = *((int*)real_payload);
-            if (try_play_card(g, internal_id, card_index)) {
-                g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
+            int card_index;
+            memcpy(&card_index, real_payload, sizeof(int));
+            if (try_play_card(g, internal_id, card_index)) {                g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
             }
         } else if (real_action == ACTION_DRAW_CARD && ks->status == 1 && internal_id == g->current_player) {
             player_draw_card(g, internal_id);

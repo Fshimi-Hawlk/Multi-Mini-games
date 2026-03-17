@@ -101,7 +101,9 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex) {
             // TODO: Ouvrir un menu pour choisir la couleur
             g->active_color = CARD_RED; // Temporaire pour tester
         } else {
-            g->active_color = played.color;
+            // Si on joue une carte de couleur, la couleur active redeviendra 
+            // celle du talon (on reset l'effet d'un éventuel Joker précédent)
+            g->active_color = -1;
         }
         
         printf("Carte jouée ! Reste : %d cartes\n", p->hand.size);
@@ -128,7 +130,7 @@ int player_draw_card(GameState *g, int playerIndex) {
         Card topVisible = pop_card(&g->discard_pile);
         
         // On déplace tout le reste du talon vers la pioche
-        while(g->discard_pile.size > 0) {
+        while(g->discard_pile.head != NULL) {
             push_card(&g->draw_pile, pop_card(&g->discard_pile));
         }
         

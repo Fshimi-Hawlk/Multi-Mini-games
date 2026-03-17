@@ -53,18 +53,27 @@ BASE_LDFLAGS := \
 MODE ?= release
 
 ifeq ($(MODE),release)
-	CC := gcc
-	CFLAGS := -O2 -s -Wall
-	LDFLAGS := -O2
+    CC := gcc
+    CFLAGS := -O2 -s -Wall
+    LDFLAGS := -O2
 else ifeq ($(MODE),debug)
-	CC := gcc
-	CFLAGS := -g -O0 -Wall -Wextra -D_DEBUG
-	LDFLAGS := -g -O0 -rdynamic
+    CC := gcc
+    CFLAGS := -g -O0 -Wall -Wextra -D_DEBUG
+    LDFLAGS := -g -O0 -rdynamic
 else ifeq ($(MODE),valgrind-debug)
-	CC := gcc
-	CFLAGS := -g -O0 -Wall -Wextra -D_DEBUG
-	LDFLAGS := -g -O0
-	TOOL := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
+    CC := gcc
+    CFLAGS := -g -O0 -Wall -Wextra -D_DEBUG
+    LDFLAGS := -g -O0
+    VG_FLAGS := --leak-check=full --show-leak-kinds=all --track-origins=yes
+    ifeq ($(VG_COMPAT),1)
+        $(info Valgrind: Compatibility mode enabled (--smc-check=all-non-file))
+        VG_FLAGS += --smc-check=all-non-file
+    endif
+    TOOL := valgrind $(VG_FLAGS)
+else ifeq ($(MODE),clang-debug)
+    CC := clang
+    CFLAGS := -g -O0 -Wall -Wextra -D_DEBUG -fsanitize=address,undefined -fno-omit-frame-pointer
+    LDFLAGS := -g -O0 -fsanitize=address,undefined
 endif
 
 CFLAGS  += $(BASE_CFLAGS) $(EXTRA_CFLAGS)
