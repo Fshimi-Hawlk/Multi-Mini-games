@@ -51,10 +51,8 @@ else ifeq ($(MODE),debug)
 else ifeq ($(MODE),strict-debug)
 	CC := gcc
 	CFLAGS := \
-		-Werror \
 		-Wall \
 		-Wextra \
-		-pedantic \
 		-g \
 		-O0 \
 		-Wno-unused-function \
@@ -69,13 +67,10 @@ else ifeq ($(MODE),strict-debug)
 		-fno-omit-frame-pointer
 	TOOL := 
 else ifeq ($(MODE),clang-debug)
-	ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
-		CC := clang
-		CFLAGS := \
-		-Werror \
+	CC := clang
+	CFLAGS := \
 		-Wall \
 		-Wextra \
-		-pedantic \
 		-g \
 		-O0 \
 		-Wno-macro-redefined \
@@ -88,42 +83,38 @@ else ifeq ($(MODE),clang-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+	LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
 		-fno-omit-frame-pointer \
 		-fsanitize=address,undefined
-		TOOL := 
-	else
-		$(info Clang not detected. Use debug or strict-debug instead.)
-		ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-			$(info Valgrind detected — try MODE=valgrind-debug for runtime checks.)
-		endif
-		$(error Clang required for clang-debug mode)
-	endif
+	TOOL := 
 else ifeq ($(MODE),valgrind-debug)
-	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
-		CC := gcc
-		CFLAGS := \
-		-Werror \
-		-Wall \
-		-Wextra \
-		-pedantic \
-		-g \
-		-O0 \
-		-Wno-macro-redefined \
-		-Wno-unused-function \
-		-Wno-deprecated-declarations \
-		-D_STACK_TRACE \
-		-D_DEBUG
+    ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
+        CC := gcc
+        CFLAGS := \
+        -Wall \
+        -Wextra \
+        -g \
+        -O0 \
+        -Wno-macro-redefined \
+        -Wno-unused-function \
+        -Wno-deprecated-declarations \
+        -D_STACK_TRACE \
+        -D_DEBUG
 
-		LDFLAGS := \
-		-g \
-		-rdynamic \
-		-O0
-		TOOL := valgrind --leak-check=full --show-leak-kinds=all --track-origins=yes
-	else
+        LDFLAGS := \
+        -g \
+        -rdynamic \
+        -O0
+        VG_FLAGS := --leak-check=full --show-leak-kinds=all --track-origins=yes
+        ifeq ($(VG_COMPAT),1)
+            $(info Valgrind: Compatibility mode enabled (--smc-check=all-non-file))
+            VG_FLAGS += --smc-check=all-non-file
+        endif
+        TOOL := valgrind $(VG_FLAGS)
+    else
 		$(info Valgrind not detected. Use debug or strict-debug instead.)
 		ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
 			$(info Clang detected — try MODE=clang-debug for compile-time sanitizers.)

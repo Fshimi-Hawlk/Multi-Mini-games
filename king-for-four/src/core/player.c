@@ -21,7 +21,7 @@ void init_player(Player* p, int id, const char* name) {
 
 // Fait piocher une carte 
 void draw_to_hand(Player* p, Deck* draw_pile) {
-    if (draw_pile->size > 0) {
+    if (draw_pile->head != NULL) {
         Card c = pop_card(draw_pile);
         push_card(&(p->hand), c);
     } else {
