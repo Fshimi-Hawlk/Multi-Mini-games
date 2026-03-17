@@ -1,11 +1,33 @@
 # Makefile pour le module RESEAU
 # Compatible avec le build system racine
 
-CC = gcc
 # Includes complets
-CFLAGS = -Wall -Wextra -Iinclude -I../firstparty -I../thirdparty -O2
+BASE_CFLAGS = -Wall -Wextra -Iinclude -I../firstparty -I../thirdparty
 
-# 1. Configuration de la Librairie (contient lobby.c, rudp_core.c et lobby_module)
+# Modes de compilation
+MODE ?= release
+
+ifeq ($(MODE),release)
+    CC := gcc
+    CFLAGS := -O2
+    LDFLAGS := -O2
+else ifeq ($(MODE),debug)
+    CC := gcc
+    CFLAGS := -g -O0 -D_DEBUG
+    LDFLAGS := -g -O0 -rdynamic
+else ifeq ($(MODE),clang-debug)
+    CC := clang
+    CFLAGS := -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer -D_DEBUG
+    LDFLAGS := -g -O0 -fsanitize=address,undefined
+else ifeq ($(MODE),valgrind-debug)
+    CC := gcc
+    CFLAGS := -g -O0 -D_DEBUG
+    LDFLAGS := -g -O0
+endif
+
+CFLAGS += $(BASE_CFLAGS)
+
+# 1. Configuration de la Librairie
 LIB_NAME ?= reseau
 LIB_SRC = src/lobby.c src/rudp_core.c
 LIB_OBJ = build/obj/lobby.o build/obj/rudp_core.o
@@ -32,13 +54,13 @@ server: $(SERVER_BIN)
 
 $(SERVER_BIN): $(SERVER_OBJ) $(LIB_OBJ)
 	@mkdir -p build/bin
-	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $^ $(EXTRA_LDFLAGS) -o $@
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $^ $(EXTRA_LDFLAGS) $(LDFLAGS) -o $@
 	@echo "[RESEAU] Serveur compilé avec succès : $@"
 
 # --- Compilation générique ---
 build/obj/%.o: src/%.c
 	@mkdir -p build/obj
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c $< -o $@
 
 # --- Nettoyage ---
 clean:
