@@ -21,5 +21,6 @@ typedef struct {
 
 Error_Et bowling_loadTextures(BowlingTextures_St* textures);
 void     bowling_unloadTextures(BowlingTextures_St* textures);
+void     bowling_fillBallTextures(BowlingTextures_St* textures);
 
 #endif

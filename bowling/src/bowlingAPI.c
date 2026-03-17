@@ -1295,6 +1295,8 @@ static bool bowling_handleTitleScreenInput(BowlingGame_St* game) {
         game->showAimGuide  = ts->showAimGuide;
         game->selectedSkin  = ts->selectedSkin;
         ts->showTitle       = false;
+        // Remplir les textures des boules avec leurs couleurs après l'écran d'accueil
+        bowling_fillBallTextures(&game->textures);
         return true;
     }
     return false;

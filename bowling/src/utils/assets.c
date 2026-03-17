@@ -67,19 +67,6 @@ static int detectAndExtractBalls(BowlingTextures_St* textures, Image image) {
                                  && centerPixel.a > 10;
 
             if (isValid) {
-                // Remplir tous les pixels transparents avec la couleur centrale
-                // → la sphère sera entièrement opaque (pas de "trou" aux bords de la texture)
-                Color fill = centerPixel;
-                fill.a = 255;
-                int total = cell_w * cell_h;
-                for (int px = 0; px < total; px++) {
-                    if (pixels[px].a < 128) {
-                        pixels[px] = fill;
-                    } else {
-                        pixels[px].a = 255; // forcer opacité totale
-                    }
-                }
-
                 textures->ballTextures[ballCount] = LoadTextureFromImage(ballImage);
                 if (IsTextureValid(textures->ballTextures[ballCount])) {
                     textures->ballCenterColors[ballCount] = centerPixel;
@@ -197,4 +184,41 @@ void bowling_unloadTextures(BowlingTextures_St* textures) {
     }
 
     log_info("Textures unloaded");
+}
+
+// Remplir les textures des boules avec leurs couleurs après l'écran d'accueil
+void bowling_fillBallTextures(BowlingTextures_St* textures) {
+    for (int i = 0; i < textures->ballTextureCount; i++) {
+        if (!IsTextureValid(textures->ballTextures[i])) continue;
+        
+        // Obtenir la couleur centrale de la boule
+        Color centerColor = textures->ballCenterColors[i];
+        
+        // Charger l'image de la texture pour la modifier
+        Image img = LoadImageFromTexture(textures->ballTextures[i]);
+        if (!IsImageValid(img)) continue;
+        
+        // Assurer que le format est correct
+        ImageFormat(&img, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8);
+        
+        Color* pixels = (Color*)img.data;
+        int total = img.width * img.height;
+        
+        // Remplir tous les pixels transparents avec la couleur centrale
+        for (int px = 0; px < total; px++) {
+            if (pixels[px].a < 128) {
+                pixels[px] = centerColor;
+                pixels[px].a = 255;
+            } else {
+                pixels[px].a = 255;
+            }
+        }
+        
+        // Mettre à jour la texture avec l'image modifiée
+        UpdateTexture(textures->ballTextures[i], img.data);
+        UnloadImage(img);
+        
+        log_info("Filled ball texture %d with color (%d, %d, %d)", 
+                 i, centerColor.r, centerColor.g, centerColor.b);
+    }
 }
