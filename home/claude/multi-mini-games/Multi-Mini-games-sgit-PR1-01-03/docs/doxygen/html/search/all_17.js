@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['table_0',['Quick Reference Table',['../sub_project_internal_makefile_structure.html#autotoc_md71',1,'']]],
+  ['targets_1',['targets',['../root_makefile.html#autotoc_md62',1,'Main Targets'],['../sub_project_makefile.html#autotoc_md75',1,'Most Useful Targets']]],
+  ['tasks_2',['Roadmap and Open Tasks',['../index.html#autotoc_md7',1,'']]],
+  ['team_20convention_3',['Merging rules (team convention)',['../contributing.html#autotoc_md57',1,'']]],
+  ['team_20guidelines_4',['Team Guidelines',['../team_guidelines.html',1,'']]],
+  ['team_2dguidelines_2emd_5',['team-guidelines.md',['../team-guidelines_8md.html',1,'']]],
+  ['term_6',['Nice to have / longer term',['../todo.html#autotoc_md41',1,'']]],
+  ['term_20structure_7',['Planned Longer-Term Structure',['../roadmap.html#autotoc_md22',1,'']]],
+  ['tetris_20module_8',['Tetris Module',['../index.html#autotoc_md5',1,'']]],
+  ['the_20api_20functions_9',['Step 2 – Implement the API functions',['../api_conversion.html#autotoc_md34',1,'']]],
+  ['the_20first_20game_20is_20fully_20merged_20into_20main_10',['After the first game is fully merged into main',['../todo.html#autotoc_md40',1,'']]],
+  ['the_20lobby_11',['Step 4 – Integrate into the lobby',['../api_conversion.html#autotoc_md36',1,'']]],
+  ['the_20pr_20branch_20two_20common_20cases_12',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md55',1,'']]],
+  ['the_20public_20api_20header_13',['Step 1 – Create the public API header',['../api_conversion.html#autotoc_md33',1,'']]],
+  ['these_20quite_20soon_14',['High priority - do these quite soon',['../todo.html#autotoc_md39',1,'']]],
+  ['this_20changelog_15',['How we maintain this changelog',['../changelog.html#autotoc_md24',1,'']]],
+  ['this_20software_20include_20code_20from_3a_16',['Portions of this software include code from:',['../license.html#autotoc_md31',1,'']]],
+  ['this_20way_17',['Why split and number this way?',['../sub_project_internal_makefile_structure.html#autotoc_md70',1,'']]],
+  ['to_20do_20ideas_20list_18',['Quick To-Do / Ideas List',['../roadmap.html#autotoc_md23',1,'']]],
+  ['to_20have_20longer_20term_19',['Nice to have / longer term',['../todo.html#autotoc_md41',1,'']]],
+  ['todo_20',['TODO',['../todo.html',1,'project_details']]],
+  ['todo_2emd_21',['todo.md',['../todo_8md.html',1,'']]],
+  ['two_20common_20cases_22',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md55',1,'']]]
+];

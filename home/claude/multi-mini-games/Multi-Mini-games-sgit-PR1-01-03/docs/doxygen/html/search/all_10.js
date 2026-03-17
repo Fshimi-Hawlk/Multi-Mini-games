@@ -1,0 +1,26 @@
+var searchData=
+[
+  ['macros_20preprocessor_0',['Macros &amp; Preprocessor',['../code_style_and_conventions.html#autotoc_md45',1,'']]],
+  ['main_1',['After the first game is fully merged into main',['../todo.html#autotoc_md40',1,'']]],
+  ['main_20targets_2',['Main Targets',['../root_makefile.html#autotoc_md62',1,'']]],
+  ['mainpage_2emd_3',['mainpage.md',['../mainpage_8md.html',1,'']]],
+  ['maintain_20this_20changelog_4',['How we maintain this changelog',['../changelog.html#autotoc_md24',1,'']]],
+  ['makefile_20documentation_5',['makefile documentation',['../root_makefile.html',1,'Root Makefile Documentation'],['../sub_project_makefile.html',1,'Sub-Project Makefile Documentation']]],
+  ['makefile_20structure_6',['Sub-Project Internal Makefile Structure',['../sub_project_internal_makefile_structure.html',1,'build_system']]],
+  ['management_7',['Memory Management',['../code_style_and_conventions.html#autotoc_md49',1,'']]],
+  ['march_202026_8',['Current Status (March 2026)',['../roadmap.html#autotoc_md21',1,'']]],
+  ['members_3a_9',['Members:',['../readme.html#autotoc_md11',1,'']]],
+  ['memory_20management_10',['Memory Management',['../code_style_and_conventions.html#autotoc_md49',1,'']]],
+  ['merge_11',['After merge',['../contributing.html#autotoc_md58',1,'']]],
+  ['merged_20games_20lobby_12',['Building &amp; Running (Root Level – merged games + lobby)',['../readme.html#autotoc_md16',1,'']]],
+  ['merged_20into_20main_13',['After the first game is fully merged into main',['../todo.html#autotoc_md40',1,'']]],
+  ['merging_20rules_20team_20convention_14',['Merging rules (team convention)',['../contributing.html#autotoc_md57',1,'']]],
+  ['messages_15',['Commit Messages',['../contributing.html#autotoc_md51',1,'']]],
+  ['mini_20games_16',['mini games',['../readme.html#autotoc_md9',1,'Multi Mini-Games'],['../index.html#autotoc_md0',1,'Multi Mini-Games']]],
+  ['modes_17',['modes',['../root_makefile.html#autotoc_md61',1,'Build Modes'],['../sub_project_makefile.html#autotoc_md74',1,'Supported Build Modes']]],
+  ['module_18',['module',['../index.html#autotoc_md4',1,'Lobby Module'],['../index.html#autotoc_md5',1,'Tetris Module']]],
+  ['modules_19',['Current Modules',['../index.html#autotoc_md3',1,'']]],
+  ['most_20',['Common Commands (what we use most)',['../root_makefile.html#autotoc_md63',1,'']]],
+  ['most_20useful_20targets_21',['Most Useful Targets',['../sub_project_makefile.html#autotoc_md75',1,'']]],
+  ['multi_20mini_20games_22',['multi mini games',['../index.html#autotoc_md0',1,'Multi Mini-Games'],['../readme.html#autotoc_md9',1,'Multi Mini-Games']]]
+];
