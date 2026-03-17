@@ -1,41 +1,37 @@
 /**
  * @file main.c
- * @brief Bowling game entry point
- * @author Multi Mini-Games Team
+ * @author Maxime CHAUVEAU
  * @date February 2026
+ * @brief Main entry point for the Bowling mini-game.
  */
 
-#include "bowling.h"
-#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "bowlingAPI.h"
+#include "utils/types.h"
+#include "logger.h"
 
-int main(void) {
-    // Initialize window
+int main(int argc, char* argv[]) {
+    (void)argc;
+    (void)argv;
+    srand(time(NULL));
+
+    SetTraceLogLevel(LOG_WARNING);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Bowling - Multi Mini-Games");
-    SetTargetFPS(TARGET_FPS);
+    SetTargetFPS(60);
 
-    // Initialize game
-    BowlingGame_St game = {0};
-    bowling_init(&game);
+    BowlingGame_St* game = NULL;
+    bowling_initGame(&game);
 
-    // Main game loop
     while (!WindowShouldClose()) {
-        float deltaTime = GetFrameTime();
-
-        // Update
-        bowling_update(&game, deltaTime);
-
-        // Draw
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        
-        bowling_draw(&game);
-        
-        EndDrawing();
+        bowling_gameLoop(game);
     }
 
-    // Cleanup
-    bowling_cleanup(&game);
+    bowling_freeGame(&game);
     CloseWindow();
 
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"

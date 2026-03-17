@@ -1,0 +1,36 @@
+/**
+ * @mainpage Multi Mini-Games Lobby
+ *
+ * @section intro_sec Introduction
+ *
+ * Welcome to the Multi Mini-Games Lobby documentation.
+ * This project provides a central hub for managing and launching multiple
+ * mini-games from a unified interface.
+ *
+ * @section features_sec Features
+ *
+ * - Game selection and management
+ * - Player session handling
+ * - Score tracking across games
+ * - Seamless integration with multiple mini-game modules
+ *
+ * @section arch_sec Architecture
+ *
+ * The lobby system acts as a central coordinator between the user interface
+ * and the various mini-game modules. It handles:
+ * - Game registration and discovery
+ * - State management for active sessions
+ * - Communication between games and the main application
+ *
+ * @section author_sec Author
+ *
+ * Maxime CHAUVEAU
+ *
+ * @section date_sec Date
+ *
+ * February 25, 2026
+ *
+ * @section version_sec Version
+ *
+ * 1.0.0
+ */

@@ -1,0 +1,17 @@
+PROJECT_NAME           = "Bowling Mini-Game"
+PROJECT_NUMBER         = "1.0.0"
+PROJECT_BRIEF          = "A bowling mini-game API"
+
+INPUT                  = ../include ../src
+RECURSIVE              = YES
+OUTPUT_DIRECTORY       = ./docs/html
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+
+FILE_PATTERNS          = *.c *.h *.cpp *.hpp *.dox
+SKIP_FUNCTION_MACROS   = NO

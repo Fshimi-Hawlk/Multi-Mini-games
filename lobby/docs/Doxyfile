@@ -1,0 +1,38 @@
+PROJECT_NAME           = "Multi Mini-Games Lobby"
+PROJECT_NUMBER         = "1.0.0"
+PROJECT_BRIEF          = "Central hub for managing multiple mini-games"
+PROJECT_LOGO           =
+
+OUTPUT_DIRECTORY       = ./docs/html
+INPUT                  = ../include ../src
+INPUT_ENCODING         = UTF-8
+FILE_PATTERNS          = *.c *.h *.cpp *.hpp *.dox
+RECURSIVE              = YES
+
+GENERATE_HTML          = YES
+HTML_OUTPUT            = html
+HTML_FILE_EXTENSION    = .html
+GENERATE_LATEX         = NO
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+
+OPTIMIZE_OUTPUT_FOR_C  = YES
+TAB_SIZE               = 4
+
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+MULTILINE_CPP_IS_BRIEF = YES
+
+SORT_MEMBER_DOCS       = YES
+SORT_BRIEF_DOCS        = YES
+SORT_MEMBERS_CTORS_1ST = YES
+
+HAVE_DOT               = NO

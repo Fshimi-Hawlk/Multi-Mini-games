@@ -1,0 +1,264 @@
+/**
+ * @file physics.c
+ * @author Maxime CHAUVEAU
+ * @date March 2026
+ * @brief Implementation of physics module for the Bowling mini-game.
+ */
+
+#include "physics.h"
+#include "utils/types.h"
+#include "utils/configs.h"
+#include <raylib.h>
+#include <raymath.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define LANE_WIDTH 4.5f
+#define LANE_LENGTH 105.0f
+#define GUTTER_WIDTH 0.4f
+#define GRAVITY 9.8f
+#define NUM_PINS 10
+
+void physics_initParticles(Particle_St* particles, int* particleCount) {
+    *particleCount = 0;
+    for (int i = 0; i < MAX_PARTICLES; i++) {
+        particles[i].life = 0.0f;
+    }
+}
+
+void physics_spawnParticles(Particle_St* particles, int* particleCount, Vector3 position, int count, Color baseColor) {
+    for (int i = 0; i < count && *particleCount < MAX_PARTICLES; i++) {
+        Particle_St* p = &particles[*particleCount];
+        p->position = position;
+        p->velocity = (Vector3){
+            (float)(GetRandomValue(-100, 100)) / 100.0f * 2.0f,
+            (float)(GetRandomValue(50, 150)) / 100.0f * 3.0f,
+            (float)(GetRandomValue(-100, 100)) / 100.0f * 2.0f
+        };
+        p->color = baseColor;
+        p->life = (float)(GetRandomValue(500, 1000)) / 1000.0f;
+        p->maxLife = p->life;
+        p->size = (float)(GetRandomValue(5, 15)) / 100.0f;
+        (*particleCount)++;
+    }
+}
+
+void physics_updateParticles(Particle_St* particles, int* particleCount, float deltaTime) {
+    int writeIndex = 0;
+    for (int i = 0; i < *particleCount; i++) {
+        Particle_St* p = &particles[i];
+        p->life -= deltaTime;
+        if (p->life <= 0.0f) {
+            continue;
+        }
+        p->velocity.y -= GRAVITY * deltaTime;
+        p->position = Vector3Add(p->position, Vector3Scale(p->velocity, deltaTime));
+        if (p->position.y < 0.0f) {
+            p->position.y = 0.0f;
+            p->velocity.y *= -0.3f;
+        }
+        if (i != writeIndex) {
+            particles[writeIndex] = *p;
+        }
+        writeIndex++;
+    }
+    *particleCount = writeIndex;
+}
+
+static const Vector3 PIN_POSITIONS[NUM_PINS] = {
+    {0.0f, 0.0f, -54.0f},
+    {-0.6f, 0.0f, -57.0f},
+    {0.6f, 0.0f, -57.0f},
+    {-1.2f, 0.0f, -60.0f},
+    {0.0f, 0.0f, -60.0f},
+    {1.2f, 0.0f, -60.0f},
+    {-1.8f, 0.0f, -63.0f},
+    {-0.6f, 0.0f, -63.0f},
+    {0.6f, 0.0f, -63.0f},
+    {1.8f, 0.0f, -63.0f}
+};
+
+void physics_setupPins(Pin_St* pins) {
+    for (int i = 0; i < NUM_PINS; i++) {
+        pins[i].position = PIN_POSITIONS[i];
+        pins[i].position.y = 0.5f;
+        pins[i].velocity = (Vector3){0.0f, 0.0f, 0.0f};
+        pins[i].angularVelocity = (Vector3){0.0f, 0.0f, 0.0f};
+        pins[i].rotation = (Vector3){0.0f, 0.0f, 0.0f};
+        pins[i].isStanding = true;
+        pins[i].mass = 1.5f;
+        pins[i].fallTime = 0.0f;
+        pins[i].rotationAngle = 0.0f;
+        pins[i].rotationAxis = (Vector3){1.0f, 0.0f, 0.0f};
+    }
+}
+
+void physics_resetBall(Ball_St* ball) {
+    ball->position = (Vector3){0.0f, 0.3f, 0.0f};
+    ball->velocity = (Vector3){0.0f, 0.0f, 0.0f};
+    ball->spin = (Vector3){0.0f, 0.0f, 0.0f};
+    ball->spinAmount = 0.0f;
+    ball->isRolling = false;
+    ball->visualRotation = 0.0f;
+    ball->rollAxis = (Vector3){1.0f, 0.0f, 0.0f};
+}
+
+void physics_launchBall(Ball_St* ball, Vector3 direction, float power, float spinAmount) {
+    ball->velocity = Vector3Scale(direction, power);
+    ball->spinAmount = spinAmount;
+    ball->spin = (Vector3){0.0f, 0.0f, spinAmount > 0 ? 1.0f : -1.0f};
+    ball->isRolling = true;
+}
+
+void physics_updateBallSpin(Ball_St* ball, float deltaTime) {
+    if (!ball->isRolling) return;
+    
+    if (fabsf(ball->spinAmount) > 0.01f) {
+        float spinEffect = ball->spinAmount * deltaTime * 2.0f;
+        ball->velocity.x += spinEffect;
+        
+        ball->spinAmount *= 0.995f;
+        if (fabsf(ball->spinAmount) < 0.01f) {
+            ball->spinAmount = 0.0f;
+        }
+    }
+    
+    float speed = Vector3Length(ball->velocity);
+    if (speed > 0.1f) {
+        // Roll axis = perpendicular to velocity, in horizontal plane (right-hand rule: v × Y)
+        // For a ball moving in -Z, roll axis should be +X (rotates forward = top goes toward -Z)
+        Vector3 velNorm = Vector3Normalize(ball->velocity);
+        Vector3 candidate = (Vector3){ -velNorm.z, 0.0f, velNorm.x };
+        float candidateLen = Vector3Length(candidate);
+        if (candidateLen > 0.01f) {
+            ball->rollAxis = Vector3Scale(candidate, 1.0f / candidateLen);
+        }
+        // Rolling without slipping: angle = arc_length / radius, converted to degrees
+        ball->visualRotation += (speed * deltaTime / ball->radius) * RAD2DEG;
+    }
+}
+
+void physics_checkCollisions(Ball_St* ball, Pin_St* pins, Particle_St* particles, int* particleCount) {
+    for (int i = 0; i < NUM_PINS; i++) {
+        if (pins[i].isStanding) {
+            float dist = Vector3Distance(ball->position, pins[i].position);
+            float minDist = ball->radius + 0.15f;
+            
+            if (dist < minDist) {
+                pins[i].isStanding = false;
+                pins[i].fallTime = 0.0f;
+                
+                Vector3 normal = Vector3Normalize(Vector3Subtract(pins[i].position, ball->position));
+                float impactSpeed = Vector3Length(ball->velocity);
+                float impulseMagnitude = impactSpeed * 1.5f;
+                pins[i].velocity = Vector3Scale(normal, impulseMagnitude);
+                
+                Vector3 randomAxis = Vector3Normalize((Vector3){
+                    (float)GetRandomValue(-100, 100) / 100.0f,
+                    (float)GetRandomValue(-50, 50) / 100.0f,
+                    (float)GetRandomValue(-100, 100) / 100.0f
+                });
+                pins[i].rotationAxis = randomAxis;
+                pins[i].angularVelocity = (Vector3){
+                    (float)GetRandomValue(-500, 500) / 100.0f,
+                    (float)GetRandomValue(-200, 200) / 100.0f,
+                    (float)GetRandomValue(-500, 500) / 100.0f
+                };
+                
+                physics_spawnParticles(particles, particleCount, pins[i].position, 8, (Color){255, 220, 180, 200});
+            }
+        }
+    }
+    
+    for (int i = 0; i < NUM_PINS; i++) {
+        for (int j = i + 1; j < NUM_PINS; j++) {
+            float dist = Vector3Distance(pins[i].position, pins[j].position);
+            
+            if (dist < 0.35f) {
+                bool pinIMoving = !pins[i].isStanding || Vector3Length(pins[i].velocity) > 0.1f;
+                bool pinJMoving = !pins[j].isStanding || Vector3Length(pins[j].velocity) > 0.1f;
+                
+                if (pinIMoving && pins[j].isStanding) {
+                    pins[j].isStanding = false;
+                    pins[j].fallTime = 0.0f;
+                    Vector3 normal = Vector3Normalize(Vector3Subtract(pins[j].position, pins[i].position));
+                    pins[j].velocity = Vector3Scale(normal, 3.0f);
+                    pins[j].rotationAxis = Vector3Normalize((Vector3){
+                        (float)GetRandomValue(-100, 100) / 100.0f,
+                        0.0f,
+                        (float)GetRandomValue(-100, 100) / 100.0f
+                    });
+                    pins[j].angularVelocity = (Vector3){2.0f, 0.5f, 1.0f};
+                }
+                
+                if (pinJMoving && pins[i].isStanding) {
+                    pins[i].isStanding = false;
+                    pins[i].fallTime = 0.0f;
+                    Vector3 normal = Vector3Normalize(Vector3Subtract(pins[i].position, pins[j].position));
+                    pins[i].velocity = Vector3Scale(normal, 3.0f);
+                    pins[i].rotationAxis = Vector3Normalize((Vector3){
+                        (float)GetRandomValue(-100, 100) / 100.0f,
+                        0.0f,
+                        (float)GetRandomValue(-100, 100) / 100.0f
+                    });
+                    pins[i].angularVelocity = (Vector3){2.0f, 0.5f, 1.0f};
+                }
+            }
+        }
+    }
+}
+
+bool physics_isGutterBall(Ball_St* ball, float laneWidth, float gutterWidth) {
+    float effectiveWidth = laneWidth / 2 - gutterWidth * 2.0f;
+    return ball->position.x < -effectiveWidth || 
+           ball->position.x > effectiveWidth;
+}
+
+void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth, float gutterWidth) {
+    physics_updateBallSpin(ball, deltaTime);
+    
+    Vector3 friction = Vector3Scale(ball->velocity, -0.25f);
+    ball->velocity = Vector3Add(ball->velocity, Vector3Scale(friction, deltaTime));
+    
+    float laneEdge = laneWidth * 1.3f / 2;
+    if (ball->position.x < -laneEdge || ball->position.x > laneEdge) {
+        ball->velocity.x *= -0.5f;
+        if (ball->position.x < -laneEdge) ball->position.x = -laneEdge;
+        if (ball->position.x > laneEdge) ball->position.x = laneEdge;
+    }
+    
+    ball->position = Vector3Add(ball->position, Vector3Scale(ball->velocity, deltaTime));
+    
+    if (ball->position.y < 0.3f) {
+        ball->position.y = 0.3f;
+    }
+}
+
+void physics_updatePins(Pin_St* pins, int pinCount, float deltaTime, float laneWidth, float laneLength) {
+    for (int i = 0; i < pinCount; i++) {
+        if (!pins[i].isStanding) {
+            pins[i].fallTime += deltaTime;
+            
+            pins[i].velocity.y -= GRAVITY * deltaTime;
+            pins[i].velocity = Vector3Scale(pins[i].velocity, 0.98f);
+            pins[i].position = Vector3Add(pins[i].position,
+                                                Vector3Scale(pins[i].velocity, deltaTime));
+            
+            pins[i].angularVelocity = Vector3Scale(pins[i].angularVelocity, 0.97f);
+            pins[i].rotationAngle += Vector3Length(pins[i].angularVelocity) * deltaTime;
+
+            if (pins[i].position.y < 0.15f) {
+                pins[i].position.y = 0.15f;
+                pins[i].velocity.y *= -0.2f;
+                pins[i].velocity.x *= 0.8f;
+                pins[i].velocity.z *= 0.8f;
+            }
+            
+            if (pins[i].position.x < -laneWidth - 0.5f || pins[i].position.x > laneWidth + 0.5f ||
+                pins[i].position.z < -laneLength - 0.5f || pins[i].position.z > 3.0f) {
+                pins[i].velocity = (Vector3){0, 0, 0};
+                pins[i].angularVelocity = (Vector3){0, 0, 0};
+            }
+        }
+    }
+}

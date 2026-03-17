@@ -4,6 +4,12 @@
 
 Un mini-jeu de bowling classique en 3D avec physique réaliste.
 
+## Auteur
+
+- **Auteur:** Maxime Chauveau
+- **Date:** 2026-03-16
+- **Version:** 3.0 (Raylib3D)
+
 ## Fonctionnalités
 
 - Physique réaliste pour la boule et les quilles
@@ -11,6 +17,7 @@ Un mini-jeu de bowling classique en 3D avec physique réaliste.
 - Système de score traditionnel (10 frames)
 - Contrôles intuitifs à la souris
 - Effets visuels et sonores
+- Décor 3D complet avec environnement
 
 ## Contrôles
 
@@ -24,18 +31,20 @@ Un mini-jeu de bowling classique en 3D avec physique réaliste.
 ```
 bowling/
 ├── src/
-│   ├── core/           # Logique du jeu
-│   │   ├── physics.c   # Moteur physique
-│   │   ├── scoring.c   # Système de score
-│   │   └── game.c      # Boucle principale
-│   ├── ui/             # Interface utilisateur
-│   │   └── hud.c       # Affichage score/infos
-│   ├── setups/         # Configuration
-│   │   └── init.c      # Initialisation
-│   └── utils/          # Utilitaires
-│       └── common.c    # Fonctions communes
-├── include/            # Headers correspondants
-└── tests/              # Tests unitaires
+│   ├── main.c            # Point d'entrée
+│   ├── bowlingAPI.c     # API principale du jeu
+│   ├── physics.c        # Moteur physique (ball, quilles, particules)
+│   ├── utils/
+│   │   └── assets.c     # Chargement des assets
+├── include/
+│   ├── bowlingAPI.h     # API publique
+│   ├── physics.h        # Déclarations du module physique
+│   └── utils/
+│       ├── types.h      # Types de base
+│       └── configs.h    # Chemins des assets
+├── assets/              # Textures (boules, quilles, piste)
+├── docs/                # Documentation Doxygen
+└── build/               # Objets compilés et binaires
 ```
 
 ## Compilation
