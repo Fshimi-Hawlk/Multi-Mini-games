@@ -20,4 +20,6 @@
 
 #define CYAN RGB(0, 255, 255)
 
+#define SOUNDS_PATH "assets/sounds/"
+
 #endif

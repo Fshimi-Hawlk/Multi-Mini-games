@@ -8,10 +8,15 @@
 #include "solitaire.h"
 #include <stdio.h>
 
+#include "audio.h"
+
 int main(void) {
     // Initialize window
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Solitaire - Multi Mini-Games");
     SetTargetFPS(TARGET_FPS);
+
+    InitAudioDevice();
+    initAudio();
 
     // Initialize game
     SolitaireGameState game = {0};
@@ -31,6 +36,9 @@ int main(void) {
     }
 
     // Cleanup
+    CloseAudioDevice();
+    freeAudio();
+
     solitaire_cleanup(&game);
     CloseWindow();
 

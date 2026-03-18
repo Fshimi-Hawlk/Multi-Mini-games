@@ -14,6 +14,7 @@
 #include <raymath.h>
 #include <stdio.h>
 
+#include "audio.h"
 
 
 void solitaire_init(SolitaireGameState* game) {
@@ -164,12 +165,16 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
         if (game->stock.count > 0) {
             if (CheckCollisionPointRec(mousePos, stockRect)) {
                 gestionStock(game);
+                PlaySound(sound_cardTurn);
+
             }
         } else {
             Rectangle recycleRect = {game->stock.position.x, game->stock.position.y, 
                                    CARD_WIDTH, CARD_HEIGHT};
             if (CheckCollisionPointRec(mousePos, recycleRect)) {
                 gestionStock(game);
+                PlaySound(sound_cardTurn);
+
             }
         }
     }
@@ -198,6 +203,9 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                 game->dragState.cards[0] = card;
                 game->dragState.count = 1;
                 cardClicked = true;
+                
+                PlaySound(sound_cardTurn);
+
             }
         }
         
@@ -225,9 +233,11 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                                 game->dragState.count = 0;
                                 for (int k = j; k < game->tableau[i].count; k++) {
                                     game->dragState.cards[game->dragState.count++] = game->tableau[i].cards[k];
+                                    PlaySound(sound_cardTurn);
                                 }
                                 cardClicked = true;
                                 break;
+
                             }
                         }
                     }
@@ -235,6 +245,8 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                 if (cardClicked) break;
             }
         }
+
+
     }
     
     // Handle drag release
@@ -271,7 +283,9 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                     moved = true;
                     break;
                 }
+                
             }
+            PlaySound(sound_cardTurn);
         }
         
         // Try tableau piles
