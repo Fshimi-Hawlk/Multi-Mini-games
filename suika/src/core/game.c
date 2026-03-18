@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include "raymath.h"
 #include "logger.h"
+#include "audio.h"
 
 static char g_assetPath[512] = {0};
 
@@ -243,6 +244,7 @@ void suika_dropFruit(SuikaGame_St* game)
             break;
         }
     }
+
 }
 
 void suika_update(SuikaGame_St* game, float deltaTime)
@@ -286,6 +288,7 @@ void suika_update(SuikaGame_St* game, float deltaTime)
     else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
         suika_dropFruit(game);
+        PlaySound(sound_drop);
     }
 
     suika_updatePhysics(game, deltaTime);
@@ -500,6 +503,8 @@ void suika_checkMerging(SuikaGame_St* game)
                                 
                                 // Effet visuel de particules lors de la fusion
                                 suika_spawnMergeParticles(game, midPos, props->color);
+
+                                PlaySound(sound_merge);
                                 
                                 f1->isActive = false;
                                 f2->isActive = false;

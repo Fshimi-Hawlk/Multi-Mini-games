@@ -14,12 +14,17 @@
 #include <stdlib.h>
 #include <time.h>
 
+#include "audio.h"
+
 int main(void)
 {
     srand((unsigned int)time(NULL));
 
     InitWindow(SUIKA_SCREEN_WIDTH, SUIKA_SCREEN_HEIGHT, "Suika Game - Multi Mini-Games");
     SetTargetFPS(60);
+
+    InitAudioDevice();
+    initAudio();
 
     SuikaGame_St* game = NULL;
     Error_Et error = suika_initGame(&game);
@@ -40,6 +45,9 @@ int main(void)
             break;
         }
     }
+
+    CloseAudioDevice();
+    freeAudio();
 
     suika_freeGame(&game);
     CloseWindow();

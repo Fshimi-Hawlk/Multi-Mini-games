@@ -38,4 +38,6 @@
 /** @brief Helper macro to create a Color from RGB values (alpha = 255) */
 #define RGB(r, g, b) (Color) {r, g, b, 255}
 
+#define SOUNDS_PATH "assets/sounds/"
+
 #endif
