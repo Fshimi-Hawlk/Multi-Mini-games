@@ -80,7 +80,7 @@
 // Bowling integration settings
 // ────────────────────────────────────────────────
 
-#define BOWLING_SCREEN_WIDTH  1280
-#define BOWLING_SCREEN_HEIGHT 720
+#define BOWLING_SCREEN_WIDTH  800
+#define BOWLING_SCREEN_HEIGHT 600
 
 #endif // CONFIGS_H

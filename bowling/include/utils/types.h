@@ -27,8 +27,8 @@ typedef double f64;
 #define BOWLING_MAX_FRAMES 10
 #define MAX_ROLLS_PER_FRAME 2
 
-#define SCREEN_WIDTH 1280
-#define SCREEN_HEIGHT 720
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 #define TARGET_FPS 60
 
 #endif

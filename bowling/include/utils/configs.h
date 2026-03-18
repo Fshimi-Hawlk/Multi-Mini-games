@@ -12,7 +12,7 @@
 
 #include "types.h"
 
-#define ASSETS_PATH   "assets/"
+#define ASSETS_PATH   "bowling/assets/"
 #define BALL_TEXTURE  ASSETS_PATH "boules.png"
 #define PIN_TEXTURE   ASSETS_PATH "quilles.png"
 #define LANE_TEXTURE  ASSETS_PATH "piste.png"

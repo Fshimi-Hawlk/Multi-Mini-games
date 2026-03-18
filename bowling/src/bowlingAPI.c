@@ -1353,6 +1353,10 @@ Error_Et bowling_initGame__full(BowlingGame_St** game, BowlingConfigs_St configs
         log_error("Failed to load textures – proceeding with procedural rendering");
         // not fatal – we render without textures
     }
+    
+    // Initialize audio if not already initialized
+    initAudio();
+    
     if (g->textures.ballTextureCount > 0)
         g->currentBallTextureIndex = GetRandomValue(0, g->textures.ballTextureCount - 1);
 
