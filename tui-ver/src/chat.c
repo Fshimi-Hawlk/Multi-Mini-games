@@ -1,8 +1,20 @@
+
+/**
+ * @file chat.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for chat functionality.
+ */
+
 #include "chat.h"
 #include "utils/globals.h"
 #include "utils/userTypes.h.h"
 #include "utils/utils.h"
 
+
+/**
+ * @brief The chat history structure, storing messages sent and received.
+ */
 static ChatHistory_St g_clientHistory = {0};
 static int            g_connectedCount = 0;
 
@@ -14,6 +26,13 @@ static void printHistory(void) {
     }
 }
 
+
+/**
+ * @brief Starts the chat client, connecting to the server at the given IP address.
+ * 
+ * @param serverIp The IP address of the server to connect to.
+ * @return int 0 on success, -1 on failure.
+ */
 int startChatClient(const char *serverIp) {
     int serverFd = socket(AF_INET, SOCK_STREAM, 0);
     if (serverFd < 0) { 
