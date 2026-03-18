@@ -98,6 +98,9 @@ Error_Et suika_freeGame(SuikaGame_St** game_ptr)
     suika_unloadAssets(game);
     suika_cleanup(game);
 
+    freeAudio();
+    CloseAudioDevice();
+
     free(game);
     *game_ptr = NULL;
 

@@ -41,7 +41,7 @@
 // Window & display
 // ────────────────────────────────────────────────
 
-#define WINDOW_WIDTH    1000        ///< Default client-area width of the application window (pixels).
+#define WINDOW_WIDTH    800         ///< Default client-area width of the application window (pixels).
 #define WINDOW_HEIGHT   600         ///< Default client-area height of the application window (pixels).
 
 #define WINDOW_TITLE    "Lobby"     ///< Window title shown in the title bar / task manager.

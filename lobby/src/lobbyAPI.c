@@ -68,6 +68,9 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs)
     InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
     SetWindowPosition(100, 100);
 
+    // Initialize audio device
+    InitAudioDevice();
+
     (void) configs; // Configs aren't used yet
 
     systemSettings = DEFAULT_SYSTEM_SETTING;

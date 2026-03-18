@@ -15,7 +15,7 @@
 #define SUIKA_SCREEN_WIDTH  800
 
 /** @brief Screen height in pixels */
-#define SUIKA_SCREEN_HEIGHT 900
+#define SUIKA_SCREEN_HEIGHT 600
 
 /** @brief Maximum number of fruits that can exist simultaneously */
 #define SUIKA_MAX_FRUITS        128
