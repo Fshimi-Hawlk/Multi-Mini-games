@@ -1,7 +1,9 @@
 /**
  * @file kingforfourAPI.h
- * @brief Interface publique pour le mini-jeu King-for-Four.
- * Intégration conforme au standard du Lobby (API Conversion).
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Public interface for the King-for-Four mini-game.
+ * Integration compliant with the Lobby standard (API Conversion).
  */
 
 #ifndef KINGFORFOUR_API_H
@@ -14,20 +16,22 @@
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * @brief Déclaration anticipée opaque. La définition interne est privée.
+ * @struct KingForFourGame_St
+ * @brief Opaque forward declaration. The internal definition is private.
  */
 typedef struct KingForFourGame_St KingForFourGame_St;
 
 /**
- * @brief Paramètres de configuration pour l'initialisation.
+ * @struct KingForFourConfigs_St
+ * @brief Configuration parameters for initialization.
  */
 typedef struct {
-    void *__useless;
-    unsigned int fps;           ///< Fréquence cible
+    void *__useless;            /**< Unused placeholder */
+    unsigned int fps;           /**< Target frequency (frames per second) */
 } KingForFourConfigs_St;
 
 /**
- * @brief Macro de commodité pour l'initialisation.
+ * @brief Convenience macro for initialization.
  */
 #define kingforfour_initGame(game, ...) \
     kingforfour_initGame__full((game), (KingForFourConfigs_St){ .fps = 60, __VA_ARGS__ })
@@ -37,17 +41,24 @@ typedef struct {
 // ────────────────────────────────────────────────────────────────────────────
 
 /**
- * @brief Alloue et initialise une instance de King-for-Four.
+ * @brief Allocates and initializes an instance of King-for-Four.
+ * @param game_ptr Pointer to the pointer where the game instance will be stored.
+ * @param configs Initialization configurations.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_initGame__full(KingForFourGame_St** game_ptr, KingForFourConfigs_St configs);
 
 /**
- * @brief Exécute une frame logique complète (Input -> Update -> Render).
+ * @brief Executes a complete logic frame (Input -> Update -> Render).
+ * @param game Pointer to the game instance.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_gameLoop(KingForFourGame_St* const game);
 
 /**
- * @brief Libère toutes les ressources allouées par le jeu.
+ * @brief Frees all resources allocated by the game.
+ * @param game Pointer to the pointer of the game instance.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_freeGame(KingForFourGame_St** game);
 
