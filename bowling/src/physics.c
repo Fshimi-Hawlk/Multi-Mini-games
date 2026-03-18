@@ -12,6 +12,7 @@
 #include <raymath.h>
 #include <stdlib.h>
 #include <math.h>
+#include "audio.h"
 
 // ── Mesures officielles ───────────────────────────
 // 1 unité = 1 mètre
@@ -123,6 +124,8 @@ void physics_launchBall(Ball_St* ball, Vector3 direction, float power, float spi
     ball->spinAmount = spinAmount;
     ball->spin       = (Vector3){0, 0, spinAmount > 0 ? 1.0f : -1.0f};
     ball->isRolling  = true;
+
+    PlaySound(sound_ballFall);
 }
 
 void physics_updateBallSpin(Ball_St* ball, float deltaTime) {
@@ -173,6 +176,7 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
         };
         physics_spawnParticles(particles, particleCount, pins[i].position, 10,
                                (Color){255,220,180,200});
+
     }
 
     // Quille ↔ quille (réaction en chaîne)
@@ -191,6 +195,8 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
                 pins[j].angularVelocity = (Vector3){pins[j].rotationAxis.x*5.0f, 0, pins[j].rotationAxis.z*5.0f};
                 physics_spawnParticles(particles, particleCount, pins[j].position, 5,
                                        (Color){240,200,160,180});
+                PlaySound(sound_pinFall);
+
             }
             if (jm && pins[i].isStanding) {
                 pins[i].isStanding = false; pins[i].fallTime = 0.0f;
@@ -203,6 +209,7 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
                                        (Color){240,200,160,180});
             }
         }
+
     }
 }
 
@@ -267,4 +274,5 @@ void physics_updatePins(Pin_St* pins, int pinCount, float deltaTime,
             pins[i].angularVelocity = (Vector3){0,0,0};
         }
     }
+
 }

@@ -18,4 +18,6 @@
 #define LANE_TEXTURE  ASSETS_PATH "piste.png"
 #define CROWD_MODEL   ASSETS_PATH "crowd.obj"
 
+#define SOUNDS_PATH ASSETS_PATH "sounds/"
+
 #endif

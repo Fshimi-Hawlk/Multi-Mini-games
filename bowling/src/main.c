@@ -10,6 +10,7 @@
 #include "bowlingAPI.h"
 #include "utils/types.h"
 #include "logger.h"
+#include "audio.h"
 
 int main(int argc, char* argv[]) {
     (void)argc;
@@ -20,6 +21,9 @@ int main(int argc, char* argv[]) {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Bowling - Multi Mini-Games");
     SetTargetFPS(60);
 
+    InitAudioDevice();
+    initAudio();
+
     BowlingGame_St* game = NULL;
     bowling_initGame(&game);
 
@@ -28,6 +32,10 @@ int main(int argc, char* argv[]) {
     }
 
     bowling_freeGame(&game);
+
+    freeAudio();
+    CloseAudioDevice();
+
     CloseWindow();
 
     return 0;

@@ -12,6 +12,7 @@
 #include "utils/configs.h"
 #include "physics.h"
 #include "logger.h"
+#include "audio.h"
 
 #include <raylib.h>
 #include <raymath.h>
@@ -461,6 +462,7 @@ static void bowling_handleBallStopped(BowlingGame_St* game) {
         bowling_triggerScoreAnim(game, "STRIKE!", (Color){255,70,30,255});
         game->audienceReactionTimer = 3.5f;
         game->audienceReactionType  = 1;
+        PlaySound(sound_strike);
     } else if (frame->numRolls == 2 && (knockedPins == NUM_PINS) && !frame->isStrike) {
         frame->isSpare = true;
         frame->score   = 10;
@@ -470,6 +472,8 @@ static void bowling_handleBallStopped(BowlingGame_St* game) {
         bowling_triggerScoreAnim(game, "SPARE!", (Color){80,180,255,255});
         game->audienceReactionTimer = 2.5f;
         game->audienceReactionType  = 2;
+        PlaySound(sound_strike);
+
     } else if (frame->numRolls >= 2) {
         frame->score = pinsThisRoll;
         if (pinsThisRoll == 0 && wasGutter) {
