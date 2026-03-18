@@ -3,7 +3,7 @@
  * @author i-Charlys (CAILLON Charles)
  * @date 2026-03-18
  * @brief Public interface for the King-for-Four mini-game.
- * Standard Lobby integration (API Conversion).
+ * Integration compliant with the Lobby standard (API Conversion).
  */
 
 #ifndef KINGFORFOUR_API_H
@@ -11,49 +11,54 @@
 
 #include "APIs/generalAPI.h"
 
+// ────────────────────────────────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────────────────────────────────
+
 /**
  * @struct KingForFourGame_St
- * @brief Opaque structure for King-for-Four game state.
- * The internal definition is private.
+ * @brief Opaque forward declaration. The internal definition is private.
  */
 typedef struct KingForFourGame_St KingForFourGame_St;
 
 /**
  * @struct KingForFourConfigs_St
- * @brief Configuration parameters for game initialization.
+ * @brief Configuration parameters for initialization.
  */
 typedef struct {
-    void *__useless;            /**< Unused placeholder. */
-    unsigned int fps;           /**< Target frames per second. */
+    void *__useless;            /**< Unused placeholder */
+    unsigned int fps;           /**< Target frequency (frames per second) */
 } KingForFourConfigs_St;
 
 /**
- * @brief Convenience macro for game initialization with default 60 FPS.
- * @param game Pointer to game state pointer.
- * @param ... Additional configuration fields.
+ * @brief Convenience macro for initialization.
  */
 #define kingforfour_initGame(game, ...) \
     kingforfour_initGame__full((game), (KingForFourConfigs_St){ .fps = 60, __VA_ARGS__ })
 
+// ────────────────────────────────────────────────────────────────────────────
+// API de Cycle de Vie
+// ────────────────────────────────────────────────────────────────────────────
+
 /**
- * @brief Allocates and initializes a King-for-Four game instance.
- * @param game_ptr Pointer to the location where the game state pointer will be stored.
- * @param configs Configuration parameters.
- * @return Error_Et status code.
+ * @brief Allocates and initializes an instance of King-for-Four.
+ * @param game_ptr Pointer to the pointer where the game instance will be stored.
+ * @param configs Initialization configurations.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_initGame__full(KingForFourGame_St** game_ptr, KingForFourConfigs_St configs);
 
 /**
  * @brief Executes a complete logic frame (Input -> Update -> Render).
- * @param game Pointer to the game state.
- * @return Error_Et status code.
+ * @param game Pointer to the game instance.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_gameLoop(KingForFourGame_St* const game);
 
 /**
  * @brief Frees all resources allocated by the game.
- * @param game Pointer to the game state pointer to free.
- * @return Error_Et status code.
+ * @param game Pointer to the pointer of the game instance.
+ * @return OK on success, or an error code.
  */
 Error_Et kingforfour_freeGame(KingForFourGame_St** game);
 

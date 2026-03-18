@@ -38,7 +38,10 @@ BASE_CFLAGS := \
 	-Wno-pointer-sign \
 	-I$(INC_DIR) \
 	-I$(FIRSTPARTY) \
-	-I$(RAYLIB_INC)
+	-I$(RAYLIB_INC) \
+	-I.. \
+	-I../reseau/include \
+	-I../lobby/include
 
 # Flags de l'éditeur de liens (Linker)
 BASE_LDFLAGS := \
