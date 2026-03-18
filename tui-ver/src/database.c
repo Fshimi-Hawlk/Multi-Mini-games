@@ -1,3 +1,12 @@
+
+
+/**
+ * @file database.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for database functionality.
+ */
+
 // database.c
 #include "database.h"
 #include <openssl/evp.h>
@@ -5,6 +14,14 @@
 
 static sqlite3 *db = NULL;
 
+
+/**
+ * @brief Computes a PBKDF2 hash of the given password using the provided salt.
+ * 
+ * @param password The password to hash.
+ * @param salt The salt to use for hashing.
+ * @param out The buffer to store the resulting hash in.
+ */
 static void pbkdf2_hash(const char *password, const unsigned char *salt, unsigned char *out) {
     PKCS5_PBKDF2_HMAC(password, -1, salt, 16, 100000, EVP_sha256(), 32, out);
 }
