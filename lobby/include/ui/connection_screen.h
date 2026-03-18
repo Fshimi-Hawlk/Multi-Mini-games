@@ -8,14 +8,8 @@
 #ifndef CONNECTION_SCREEN_H
 #define CONNECTION_SCREEN_H
 
-/** @brief Action code to query lobby rooms. */
-#define LOBBY_ROOM_QUERY 3
-/** @brief Action code for receiving lobby room info. */
-#define LOBBY_ROOM_INFO  4
-/** @brief Action code for game data. */
-#define ACTION_GAME_DATA  5  
-
 #include <stdbool.h>
+#include "rudp_core.h"
 
 /**
  * @brief Gets the IP address entered by the user.

@@ -51,6 +51,11 @@ void RenderTable(GameState *g, GameAssets assets);
  */
 void RenderHand(Player *p, GameAssets assets);
 
+/**
+ * @brief Renders opponent hands (card backs) around the table.
+ */
+void RenderOpponents(GameState *g, GameAssets assets, int my_id);
+
 // --- FONCTIONS D'INTERACTION ---
 
 /**

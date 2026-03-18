@@ -236,6 +236,25 @@ int main() {
                 if (header.action == LOBBY_ROOM_QUERY) {
                     handle_discovery_query(&client_addr);
                 } 
+                else if (header.action == LOBBY_JOIN) {
+                    int id = find_or_create_client(&client_addr);
+                    if (id != -1) {
+                        // Reset RUDP state for fresh join
+                        RUDP_InitConnection(&clients[id].rudp_state);
+                        RUDP_ProcessIncoming(&clients[id].rudp_state, &header);
+                        gettimeofday(&clients[id].last_seen, NULL);
+                        
+                        // Send back the assigned ID to the client
+                        uint16_t assigned_id = (uint16_t)id;
+                        server_broadcast(-1, id, LOBBY_JOIN, &assigned_id, sizeof(uint16_t));
+                        printf("[CONNEXION] ID %d envoyé au nouveau client\n", id);
+
+                        if (active_module && active_module->on_action) {
+                            active_module->on_action(active_game_state, id, header.action, 
+                                buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header), server_broadcast);
+                        }
+                    }
+                }
                 else {
                     int id = find_or_create_client(&client_addr);
                     if (id != -1 && RUDP_ProcessIncoming(&clients[id].rudp_state, &header)) {
@@ -257,24 +276,28 @@ int main() {
                                 }
                                 
                                 // On envoie TOUJOURS la confirmation au joueur qui demande (Unicast)
-                                // Même si le module est déjà actif pour d'autres.
                                 uint8_t switch_payload = 1;
                                 server_broadcast(-1, id, LOBBY_SWITCH_GAME, &switch_payload, 1);
                                 printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
-                        }
-                        else if (header.action == LOBBY_CHAT) {
-                            server_broadcast(0, id, LOBBY_CHAT, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header));
                             }
                         }
-                        else if (active_module && active_module->on_action && active_game_state) {
-                            active_module->on_action(
-                                active_game_state, 
-                                id, 
-                                header.action, 
-                                buffer + sizeof(RUDP_Header), 
-                                len - sizeof(RUDP_Header), 
-                                server_broadcast
-                            );
+                        else {
+                            // Chat global
+                            if (header.action == LOBBY_CHAT) {
+                                server_broadcast(0, id, LOBBY_CHAT, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header));
+                            }
+
+                            // Passer l'action au module actif (pour LOBBY_MOVE, LOBBY_CHAT/GAME_DATA, etc)
+                            if (active_module && active_module->on_action && active_game_state) {
+                                active_module->on_action(
+                                    active_game_state, 
+                                    id, 
+                                    header.action, 
+                                    buffer + sizeof(RUDP_Header), 
+                                    len - sizeof(RUDP_Header), 
+                                    server_broadcast
+                                );
+                            }
                         }
                     }
                 }

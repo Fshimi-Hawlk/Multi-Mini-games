@@ -21,8 +21,6 @@
 
 /** @brief Port used for server communication. */
 #define SERVER_PORT 8080
-/** @brief Action code for game data transmission. */
-#define ACTION_GAME_DATA 5 
 
 /**
  * @brief Enum for different game states in the lobby.
@@ -39,6 +37,8 @@ static GameState currentState = STATE_CONNECTION;
 int network_socket = -1;
 /** @brief RUDP connection state for the server. */
 RUDP_Connection server_conn;
+/** @brief Assigned player ID from server. */
+int my_id = -1;
 /** @brief Global player structure for the local client. */
 Player_st player = { .position = { 400, 300 }, .radius = 20, .active = true };
 /** @brief Array of other players in the lobby. */
@@ -134,6 +134,12 @@ void receive_network_data(void) {
             continue;
         }
 
+        if (h->action == LOBBY_JOIN && RUDP_ProcessIncoming(&server_conn, h)) {
+            my_id = (int)(*(uint16_t*)(buffer + sizeof(RUDP_Header)));
+            printf("[SYSTEM] ID assigné par le serveur : %d\n", my_id);
+            continue;
+        }
+
         if (h->action == 0x20 /* LOBBY_SWITCH_GAME */ && RUDP_ProcessIncoming(&server_conn, h)) {
             uint8_t target_game_id = *(uint8_t*)(buffer + sizeof(RUDP_Header));
             printf("[SYSTEM] Switch réseau vers module ID:%d\n", target_game_id);
@@ -158,6 +164,7 @@ void receive_network_data(void) {
  */
 int main(void) {
     InitWindow(1280, 720, "Multi-Mini-Games");
+    SetExitKey(KEY_NULL); // Prevent ESC from closing the window
     SetTargetFPS(60);
 
     InitConnectionScreen();

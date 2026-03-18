@@ -245,7 +245,7 @@ void king_on_tick(void* state) {
 
     if (g->players[cp].id < 0) { // C'est un bot
         ks->bot_timer += 0.016f; // Simulated delta
-        if (ks->bot_timer > 1.0f) { // 1 seconde de réflexion
+        if (ks->bot_timer > 1.5f) { // 1.5 secondes de réflexion pour plus de visibilité
             ks->bot_timer = 0;
             int card_idx = -1;
             calculate_best_move(g, cp, &card_idx);
