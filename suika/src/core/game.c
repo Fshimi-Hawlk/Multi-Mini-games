@@ -82,6 +82,83 @@ const FruitProperties_St* suika_getFruitProperties(FruitType_Et type)
     return &FRUIT_PROPS[0];
 }
 
+// ============================================
+// SYSTÈME DE PARTICULES POUR LES EFFETS VISUELS
+// ============================================
+
+static void suika_spawnMergeParticles(SuikaGame_St* game, Vector2 position, Color color)
+{
+    // Spawn 8-12 particules pour l'effet de fusion
+    int count = 8 + (rand() % 5);
+    for (int i = 0; i < count && game->particleCount < SUIKA_MAX_PARTICLES; i++)
+    {
+        Particle_St* p = &game->particles[game->particleCount++];
+        float angle = (float)(rand() % 360) * DEG2RAD;
+        float speed = 50.0f + (float)(rand() % 100);
+        
+        p->position = position;
+        p->velocity = (Vector2){cosf(angle) * speed, sinf(angle) * speed - 50.0f};
+        p->color = color;
+        p->color.a = 255;
+        p->life = 0.4f + (float)(rand() % 10) / 20.0f;
+        p->maxLife = p->life;
+        p->size = 3.0f + (float)(rand() % 5);
+        p->isActive = true;
+    }
+}
+
+static void suika_updateParticles(SuikaGame_St* game, float deltaTime)
+{
+    for (int i = 0; i < game->particleCount; i++)
+    {
+        Particle_St* p = &game->particles[i];
+        if (!p->isActive) continue;
+        
+        p->life -= deltaTime;
+        if (p->life <= 0.0f)
+        {
+            p->isActive = false;
+            continue;
+        }
+        
+        p->velocity.y += 200.0f * deltaTime; // Gravité légère
+        p->position.x += p->velocity.x * deltaTime;
+        p->position.y += p->velocity.y * deltaTime;
+        p->velocity.x *= 0.98f;
+        p->velocity.y *= 0.98f;
+    }
+    
+    // Compacter le tableau
+    int write = 0;
+    for (int read = 0; read < game->particleCount; read++)
+    {
+        if (game->particles[read].isActive)
+        {
+            if (write != read)
+            {
+                game->particles[write] = game->particles[read];
+            }
+            write++;
+        }
+    }
+    game->particleCount = write;
+}
+
+static void suika_drawParticles(const SuikaGame_St* game)
+{
+    for (int i = 0; i < game->particleCount; i++)
+    {
+        const Particle_St* p = &game->particles[i];
+        if (!p->isActive) continue;
+        
+        float alpha = p->life / p->maxLife;
+        Color c = p->color;
+        c.a = (unsigned char)(alpha * 255);
+        
+        DrawCircleV(p->position, p->size * alpha, c);
+    }
+}
+
 void suika_loadAssets(SuikaGame_St* game)
 {
     const char* assetPath = suika_getAssetPath();
@@ -102,6 +179,8 @@ void suika_unloadAssets(SuikaGame_St* game)
 void suika_init(SuikaGame_St* game)
 {
     memset(game->fruits, 0, sizeof(game->fruits));
+    memset(game->particles, 0, sizeof(game->particles));
+    game->particleCount = 0;
 
     game->nextFruitId = 0;
     game->nextFruitX = SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH / 2.0f;
@@ -124,6 +203,7 @@ void suika_init(SuikaGame_St* game)
         game->fruits[i].isMerging = false;
         game->fruits[i].rotation = 0.0f;
         game->fruits[i].angularVelocity = 0.0f;
+        game->fruits[i].glowIntensity = 0.0f;
     }
 
     suika_spawnNextFruit(game);
@@ -156,7 +236,7 @@ void suika_dropFruit(SuikaGame_St* game)
         {
             game->fruits[i] = game->nextFruit;
             game->fruits[i].isActive = true;
-            game->fruits[i].position.x = game->nextFruitX;
+            game->fruits[i].position.x = game->nextFruitX + (float)(rand() % 7 - 3);  // Incertitude de 3 pixels
 
             game->canDrop = false;
             suika_spawnNextFruit(game);
@@ -211,12 +291,15 @@ void suika_update(SuikaGame_St* game, float deltaTime)
     suika_updatePhysics(game, deltaTime);
     suika_checkMerging(game);
     suika_checkGameOver(game);
+    
+    // Mise à jour des particules
+    suika_updateParticles(game, deltaTime);
 
     if (!game->canDrop)
     {
         game->dropTimer += deltaTime;
-        // En mode auto-drop, le délai est réduit par 4
-        float currentCooldown = game->autoDropEnabled ? game->baseDropCooldown / 4.0f : game->baseDropCooldown;
+        // En mode auto-drop, le délai est réduit par 3
+        float currentCooldown = game->autoDropEnabled ? game->baseDropCooldown / 3.0f : game->baseDropCooldown;
         if (game->dropTimer > currentCooldown)
         {
             game->canDrop = true;
@@ -227,121 +310,141 @@ void suika_update(SuikaGame_St* game, float deltaTime)
 
 void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
 {
-    const float linearDamping = 0.99f;
-    const float angularDamping = 0.95f;
-    const float groundFriction = 0.9f;
-    const float restitution = 0.1f;
-    const float wallRestitution = 0.1f;
-    const float terminalVelocity = 800.0f;
+    // ============================================================
+    // MOTEUR PHYSIQUE STABLE POUR SUIKA
+    // Utilise delta time fixe, plusieurs passes, et correction stable
+    // ============================================================
     
-    for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
+    // Constants fixes pour la stabilité
+    const float FIXED_DT = 0.016f;          // ~60 FPS fixes
+    const int COLLISION_PASSES = 8;          // 8 itérations pour stabilité
+    const float GRAVITY = 900.0f;            // Gravité
+    const float DAMPING = 0.999f;            // Évite les tremblements
+    const float MAX_VELOCITY = 2000.0f;      // Limite de vitesse
+    const float WALL_BOUNCE = 0.3f;           // Rebond sur les murs
+    const float FRICTION = 0.95f;            // Friction au sol (réduite pour plus de glissement)
+    
+    // Appliquer plusieurs passes de physique pour la stabilité
+    for (int pass = 0; pass < COLLISION_PASSES; pass++)
     {
-        if (!game->fruits[i].isActive || game->fruits[i].isMerging)
-            continue;
-
-        Fruit_St* fruit = &game->fruits[i];
-
-        fruit->velocity.y += game->gravity * deltaTime;
-        
-        if (fruit->velocity.y > terminalVelocity)
+        // Mise à jour de chaque fruit
+        for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
         {
-            fruit->velocity.y = terminalVelocity;
-        }
-        if (fruit->velocity.y < -terminalVelocity)
-        {
-            fruit->velocity.y = -terminalVelocity;
-        }
-        
-        fruit->velocity.x *= linearDamping;
-        fruit->velocity.y *= linearDamping;
-        fruit->angularVelocity *= angularDamping;
-
-        fruit->position.x += fruit->velocity.x * deltaTime;
-        fruit->position.y += fruit->velocity.y * deltaTime;
-        
-        fruit->rotation += fruit->angularVelocity * deltaTime;
-
-        float minX = SUIKA_CONTAINER_X + fruit->radius;
-        float maxX = SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH - fruit->radius;
-        float maxY = SUIKA_CONTAINER_Y + SUIKA_CONTAINER_HEIGHT - fruit->radius;
-
-        if (fruit->position.x < minX)
-        {
-            fruit->position.x = minX;
-            fruit->velocity.x = -fruit->velocity.x * wallRestitution;
-            fruit->angularVelocity += fruit->velocity.y * 0.03f;
-        }
-        else if (fruit->position.x > maxX)
-        {
-            fruit->position.x = maxX;
-            fruit->velocity.x = -fruit->velocity.x * wallRestitution;
-            fruit->angularVelocity -= fruit->velocity.y * 0.03f;
-        }
-
-        if (fruit->position.y > maxY)
-        {
-            fruit->position.y = maxY;
-            fruit->velocity.y = -fruit->velocity.y * restitution;
-            if (fabsf(fruit->velocity.y) < 20.0f)
-            {
-                fruit->velocity.y = 0.0f;
-            }
-            fruit->velocity.x *= groundFriction;
-            fruit->angularVelocity = fruit->velocity.x * 0.02f;
-        }
-
-        for (int j = i + 1; j < SUIKA_MAX_FRUITS; j++)
-        {
-            if (!game->fruits[j].isActive || game->fruits[j].isMerging)
+            if (!game->fruits[i].isActive || game->fruits[i].isMerging)
                 continue;
 
-            Fruit_St* other = &game->fruits[j];
-            float dist = Vector2Distance(fruit->position, other->position);
-            float minDist = fruit->radius + other->radius;
+            Fruit_St* f = &game->fruits[i];
+            
+            // Gravité (une fraction par passe)
+            f->velocity.y += GRAVITY * FIXED_DT / (float)COLLISION_PASSES;
+            
+            // Limite de vitesse
+            if (f->velocity.y > MAX_VELOCITY) f->velocity.y = MAX_VELOCITY;
+            if (f->velocity.y < -MAX_VELOCITY) f->velocity.y = -MAX_VELOCITY;
+            if (f->velocity.x > MAX_VELOCITY) f->velocity.x = MAX_VELOCITY;
+            if (f->velocity.x < -MAX_VELOCITY) f->velocity.x = -MAX_VELOCITY;
+            
+            // Damping
+            f->velocity.x *= DAMPING;
+            f->velocity.y *= DAMPING;
+            f->angularVelocity *= 0.99f;
 
-            if (dist < minDist && dist > 0.001f)
+            // Déplacement
+            f->position.x += f->velocity.x * FIXED_DT / (float)COLLISION_PASSES;
+            f->position.y += f->velocity.y * FIXED_DT / (float)COLLISION_PASSES;
+            f->rotation += f->angularVelocity * FIXED_DT / (float)COLLISION_PASSES;
+
+            // Collision avec les murs
+            float minX = SUIKA_CONTAINER_X + f->radius;
+            float maxX = SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH - f->radius;
+            float maxY = SUIKA_CONTAINER_Y + SUIKA_CONTAINER_HEIGHT - f->radius;
+
+            // Mur gauche
+            if (f->position.x < minX)
             {
-                Vector2 normal = Vector2Normalize(Vector2Subtract(other->position, fruit->position));
-                float overlap = minDist - dist;
+                f->position.x = minX;
+                f->velocity.x = -f->velocity.x * WALL_BOUNCE;
+            }
+            // Mur droit
+            else if (f->position.x > maxX)
+            {
+                f->position.x = maxX;
+                f->velocity.x = -f->velocity.x * WALL_BOUNCE;
+            }
+            // Sol
+            if (f->position.y > maxY)
+            {
+                f->position.y = maxY;
+                f->velocity.y = -f->velocity.y * WALL_BOUNCE;
+                f->velocity.x *= FRICTION;
+                
+                // Arrêt si vitesse très faible
+                if (fabsf(f->velocity.y) < 10.0f)
+                    f->velocity.y = 0;
+            }
+        }
+        
+        // Résolution des collisions fruit-fruit (une passe)
+        for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
+        {
+            if (!game->fruits[i].isActive || game->fruits[i].isMerging)
+                continue;
 
-                float totalMass = fruit->radius + other->radius;
-                float ratio1 = other->radius / totalMass;
-                float ratio2 = fruit->radius / totalMass;
+            Fruit_St* a = &game->fruits[i];
 
-                fruit->position = Vector2Subtract(fruit->position, Vector2Scale(normal, overlap * ratio1));
-                other->position = Vector2Add(other->position, Vector2Scale(normal, overlap * ratio2));
+            for (int j = i + 1; j < SUIKA_MAX_FRUITS; j++)
+            {
+                if (!game->fruits[j].isActive || game->fruits[j].isMerging)
+                    continue;
 
-                Vector2 relativeVel = Vector2Subtract(fruit->velocity, other->velocity);
-                float velAlongNormal = Vector2DotProduct(relativeVel, normal);
+                Fruit_St* b = &game->fruits[j];
 
-                if (velAlongNormal < 0)
+                // Collision cercle-cercle
+                float dx = b->position.x - a->position.x;
+                float dy = b->position.y - a->position.y;
+                float dist2 = dx*dx + dy*dy;
+                float minDist = a->radius + b->radius;
+                
+                if (dist2 < minDist * minDist && dist2 > 0.0001f)
                 {
-                    float fruitMass = fruit->radius * fruit->radius;
-                    float otherMass = other->radius * other->radius;
-                    float totalInvMass = 1.0f / fruitMass + 1.0f / otherMass;
+                    float dist = sqrtf(dist2);
+                    float overlap = minDist - dist;
                     
-                    float restitutionFactor = 0.5f;
-                    float j = -(1.0f + restitutionFactor) * velAlongNormal / totalInvMass;
-                    Vector2 impulse = Vector2Scale(normal, j);
+                    // Correction de pénétration stable
+                    float nx = dx / dist;
+                    float ny = dy / dist;
                     
-                    fruit->velocity = Vector2Subtract(fruit->velocity, Vector2Scale(impulse, 1.0f / fruitMass));
-                    other->velocity = Vector2Add(other->velocity, Vector2Scale(impulse, 1.0f / otherMass));
+                    // Séparation égale
+                    float correction = overlap * 0.5f;
+                    a->position.x -= nx * correction;
+                    a->position.y -= ny * correction;
+                    b->position.x += nx * correction;
+                    b->position.y += ny * correction;
                     
-                    Vector2 tangent = Vector2Subtract(relativeVel, Vector2Scale(normal, velAlongNormal));
-                    float tangentLen = Vector2Length(tangent);
-                    if (tangentLen > 0.001f)
+                    // Échange de vélocité (impulsion simple)
+                    float dvx = b->velocity.x - a->velocity.x;
+                    float dvy = b->velocity.y - a->velocity.y;
+                    float velAlongNormal = dvx * nx + dvy * ny;
+                    
+                    if (velAlongNormal < 0)
                     {
-                        tangent = Vector2Scale(tangent, 1.0f / tangentLen);
-                        float frictionImpulse = tangentLen * 0.3f / totalInvMass;
-                        fruit->velocity = Vector2Subtract(fruit->velocity, Vector2Scale(tangent, frictionImpulse / fruitMass));
-                        other->velocity = Vector2Add(other->velocity, Vector2Scale(tangent, frictionImpulse / otherMass));
+                        float impulse = velAlongNormal * 0.5f;
+                        a->velocity.x += impulse * nx;
+                        a->velocity.y += impulse * ny;
+                        b->velocity.x -= impulse * nx;
+                        b->velocity.y -= impulse * ny;
                     }
-                    
-                    float angularImpulse = velAlongNormal * 0.05f;
-                    fruit->angularVelocity += angularImpulse;
-                    other->angularVelocity -= angularImpulse;
                 }
             }
+        }
+    }
+    
+    // Supprimer les fruits inactifs à la fin
+    for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
+    {
+        if (!game->fruits[i].isActive)
+        {
+            // Compacter le tableau si nécessaire
         }
     }
 }
@@ -394,7 +497,10 @@ void suika_checkMerging(SuikaGame_St* game)
                                 {
                                     game->score += props->points;
                                 }
-
+                                
+                                // Effet visuel de particules lors de la fusion
+                                suika_spawnMergeParticles(game, midPos, props->color);
+                                
                                 f1->isActive = false;
                                 f2->isActive = false;
 
@@ -484,19 +590,16 @@ static void suika_drawFruit(const SuikaGame_St* game, const Fruit_St* fruit, flo
 
 static void suika_drawGradientBackground(void)
 {
-    for (int y = 0; y < SUIKA_SCREEN_HEIGHT; y++)
-    {
-        float t = (float)y / SUIKA_SCREEN_HEIGHT;
-        Color top = (Color){25, 25, 50, 255};
-        Color bottom = (Color){60, 40, 80, 255};
-        Color c = {
-            (unsigned char)(top.r + (bottom.r - top.r) * t),
-            (unsigned char)(top.g + (bottom.g - top.g) * t),
-            (unsigned char)(top.b + (bottom.b - top.b) * t),
-            255
-        };
-        DrawLine(0, y, SUIKA_SCREEN_WIDTH, y, c);
-    }
+    // Fond uni sombre avec dégradé subtil (plus performant qu ligne par ligne)
+    Color topColor = (Color){20, 20, 40, 255};
+    Color bottomColor = (Color){50, 30, 70, 255};
+    
+    // Dessiner le fond en deux rectangles pour un effet de dégradé
+    Rectangle topRect = {0, 0, SUIKA_SCREEN_WIDTH, SUIKA_SCREEN_HEIGHT / 2};
+    Rectangle bottomRect = {0, SUIKA_SCREEN_HEIGHT / 2, SUIKA_SCREEN_WIDTH, SUIKA_SCREEN_HEIGHT / 2};
+    
+    DrawRectangleRec(topRect, topColor);
+    DrawRectangleRec(bottomRect, bottomColor);
 }
 
 static void suika_drawContainer(void)
@@ -504,15 +607,23 @@ static void suika_drawContainer(void)
     Rectangle container = {SUIKA_CONTAINER_X, SUIKA_CONTAINER_Y, 
                            SUIKA_CONTAINER_WIDTH, SUIKA_CONTAINER_HEIGHT};
     
-    Color bgColor = (Color){40, 40, 60, 200};
+    // Fond du conteneur avec dégradé léger
+    Color bgColor = (Color){35, 35, 55, 230};
     DrawRectangleRec(container, bgColor);
     
-    Color borderColor = (Color){100, 100, 140, 255};
-    DrawRectangleLinesEx(container, 3.0f, borderColor);
+    // Bordure intérieure sombre
+    Color innerBorder = (Color){50, 50, 70, 255};
+    DrawRectangleLinesEx(container, 2.0f, innerBorder);
     
-    Color dropLineColor = (Color){255, 100, 100, 150};
-    DrawLine(SUIKA_CONTAINER_X + 3, SUIKA_DROP_LINE_Y, 
-             SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH - 3, SUIKA_DROP_LINE_Y, 
+    // Bordure extérieure plus brillante
+    Color outerBorder = (Color){120, 120, 160, 255};
+    Rectangle outerRect = {container.x - 2, container.y - 2, container.width + 4, container.height + 4};
+    DrawRectangleLinesEx(outerRect, 4.0f, outerBorder);
+    
+    // Ligne de dépôt avec effet de glow
+    Color dropLineColor = (Color){255, 120, 120, 180};
+    DrawLine(SUIKA_CONTAINER_X + 5, SUIKA_DROP_LINE_Y, 
+             SUIKA_CONTAINER_X + SUIKA_CONTAINER_WIDTH - 5, SUIKA_DROP_LINE_Y, 
              dropLineColor);
 }
 
@@ -533,7 +644,10 @@ void suika_draw(const SuikaGame_St* game)
     {
         suika_drawFruit(game, &game->nextFruit, 0.5f);
     }
-
+    
+    // Dessiner les particules
+    suika_drawParticles(game);
+    
     suika_drawHUD(game);
 }
 

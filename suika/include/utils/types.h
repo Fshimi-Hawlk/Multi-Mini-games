@@ -82,7 +82,24 @@ typedef struct
     bool isActive;          /**< Whether this fruit is currently in play */
     bool isMerging;         /**< Temporary flag during merge animation */
     int id;                 /**< Unique identifier for this fruit instance */
+    float glowIntensity;   /**< Glow effect intensity for merge animation */
 } Fruit_St;
+
+/**
+    @brief Particle for visual effects (merges, impacts).
+*/
+typedef struct
+{
+    Vector2 position;
+    Vector2 velocity;
+    Color color;
+    float life;
+    float maxLife;
+    float size;
+    bool isActive;
+} Particle_St;
+
+#define SUIKA_MAX_PARTICLES 64
 
 /**
     @brief Main game state structure for Suika.
@@ -115,6 +132,10 @@ struct SuikaGame_St
     bool scoreMultiplierEnabled;    /**< Multiplicateur de score actif (désactivé pendant auto-drop) */
     float boostCooldown;            /**< Temps de recharge du boost */
     float baseDropCooldown;         /**< Temps de base entre les dépôts (1 seconde) */
+    
+    // Système de particules pour les effets visuels
+    Particle_St particles[SUIKA_MAX_PARTICLES];
+    int particleCount;
 };
 
 typedef struct SuikaGame_St SuikaGame_St;
