@@ -1,6 +1,8 @@
 /**
  * @file main.c
- * @brief Noyau du client : Gestion des sockets, Discovery et Dispatcher de modules.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Main entry point for the lobby client, handling networking and module dispatching.
  */
 
 #include "raylib.h"
@@ -17,39 +19,53 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 
+/** @brief Port used for server communication. */
 #define SERVER_PORT 8080
+/** @brief Action code for game data transmission. */
 #define ACTION_GAME_DATA 5 
 
-// --- MACHINE À ÉTATS (FIX : Était manquant) ---
+/**
+ * @brief Enum for different game states in the lobby.
+ */
 typedef enum { 
-    STATE_CONNECTION, 
-    STATE_LOBBY 
+    STATE_CONNECTION, ///< Initial connection state.
+    STATE_LOBBY      ///< Active lobby state.
 } GameState;
 
+/** @brief Current state of the game. */
 static GameState currentState = STATE_CONNECTION;
 
-// --- DÉFINITIONS GLOBALES (Accessibles par les modules via extern) ---
+/** @brief Global network socket for the client. */
 int network_socket = -1;
+/** @brief RUDP connection state for the server. */
 RUDP_Connection server_conn;
+/** @brief Global player structure for the local client. */
 Player_st player = { .position = { 400, 300 }, .radius = 20, .active = true };
+/** @brief Array of other players in the lobby. */
 Player_st otherPlayers[MAX_CLIENTS];
 
-// --- GESTION DES MODULES ---
+/** @brief Registry of available mini-game modules. */
 static MiniGameModule* game_registry[256] = {0};
-uint8_t active_game_id = 0; // FIX : Plus de 'static', on le rend public
+/** @brief ID of the currently active mini-game module. */
+uint8_t active_game_id = 0;
 
 extern MiniGameModule LobbyModule; 
-extern MiniGameModule KingForFourClientModule; // On importe le jeu de cartes
+extern MiniGameModule KingForFourClientModule;
 
-// Fonction publique pour changer de jeu depuis n'importe où
+/**
+ * @brief Switches the active mini-game to the specified ID.
+ * @param game_id The ID of the mini-game to switch to.
+ */
 void switch_minigame(uint8_t game_id) {
     if (game_registry[game_id]) {
         active_game_id = game_id;
     }
 }
 
-// --- FONCTIONS SYSTÈME ---
-
+/**
+ * @brief Registers a mini-game module in the registry and initializes it.
+ * @param module Pointer to the mini-game module structure.
+ */
 void register_minigame(MiniGameModule* module) {
     if (module && module->id < 256) {
         game_registry[module->id] = module;
@@ -58,6 +74,9 @@ void register_minigame(MiniGameModule* module) {
     }
 }
 
+/**
+ * @brief Ensures that the network socket exists, creating it if necessary.
+ */
 void ensure_socket_exists() {
     if (network_socket != -1) return;
     network_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
@@ -68,6 +87,9 @@ void ensure_socket_exists() {
     }
 }
 
+/**
+ * @brief Broadcasts a query to discover available lobby servers.
+ */
 void discover_servers(void) {
     ensure_socket_exists();
     struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(SERVER_PORT), .sin_addr.s_addr = INADDR_BROADCAST };
@@ -75,6 +97,10 @@ void discover_servers(void) {
     sendto(network_socket, &q, sizeof(RUDP_Header), 0, (struct sockaddr*)&addr, sizeof(addr));
 }
 
+/**
+ * @brief Initializes the network connection to a target IP.
+ * @param target_ip The IP address of the server to connect to.
+ */
 void init_network(const char* target_ip) {
     ensure_socket_exists();
     struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(SERVER_PORT) };
@@ -89,6 +115,9 @@ void init_network(const char* target_ip) {
     send(network_socket, buffer, sizeof(buffer), 0);
 }
 
+/**
+ * @brief Receives and processes incoming network data packets.
+ */
 void receive_network_data(void) {
     if (network_socket == -1) return;
     uint8_t buffer[2048];
@@ -123,8 +152,10 @@ void receive_network_data(void) {
     }
 }
 
-// --- BOUCLE PRINCIPALE ---
-
+/**
+ * @brief Main function containing the game loop.
+ * @return Exit status of the application.
+ */
 int main(void) {
     InitWindow(1280, 720, "Multi-Mini-Games");
     SetTargetFPS(60);
@@ -139,12 +170,10 @@ int main(void) {
         float dt = GetFrameTime();
         receive_network_data();
 
-        // Trigger physique ou touche 'K' vers King For Four (ID 1)
         static bool switch_sent = false;
         if (currentState == STATE_LOBBY && active_game_id == 0) {
             bool trigger = (checkGameTrigger(&player) == 1) || IsKeyPressed(KEY_K);
             if (trigger && !switch_sent) {
-                // On prévient les autres qu'on quitte le lobby visuellement
                 RUDP_Header leave_h; RUDP_GenerateHeader(&server_conn, 6 /* LOBBY_LEAVE */, &leave_h);
                 send(network_socket, &leave_h, sizeof(leave_h), 0);
 
@@ -153,13 +182,13 @@ int main(void) {
                 
                 uint8_t buffer[sizeof(RUDP_Header) + 1];
                 memcpy(buffer, &h, sizeof(h));
-                buffer[sizeof(h)] = target_id; // On envoie l'ID DIRECTEMENT après le header RUDP
+                buffer[sizeof(h)] = target_id;
                 
                 send(network_socket, buffer, sizeof(buffer), 0);
                 switch_sent = true;
                 printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", target_id);
             }
-            if (!trigger) switch_sent = false; // Reset quand on sort de la zone
+            if (!trigger) switch_sent = false;
         }
 
         switch (currentState) {

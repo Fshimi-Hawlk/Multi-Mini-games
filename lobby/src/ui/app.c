@@ -1,7 +1,17 @@
+/**
+ * @file app.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of general UI rendering functions for the lobby application.
+ */
+
 #include "ui/app.h"
 #include "utils/globals.h"
 #include "utils/utils.h"
 
+/**
+ * @brief Renders the texture selection menu for player skins.
+ */
 void drawMenuTextures(void) {
     Rectangle destRect = defaultPlayerTextureRect;
 
@@ -19,6 +29,9 @@ void drawMenuTextures(void) {
     }
 }
 
+/**
+ * @brief Renders the button that opens the skin selection menu.
+ */
 void drawSkinButton(void) {
     DrawTexturePro(
         logoSkinButton,

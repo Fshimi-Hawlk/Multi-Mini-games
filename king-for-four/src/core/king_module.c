@@ -1,6 +1,8 @@
 /**
  * @file king_module.c
- * @brief Module serveur pour le jeu King-for-Four (Uno).
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Server-side module for the King-for-Four (Uno) game.
  */
 
 #include <stdlib.h>
@@ -9,39 +11,61 @@
 #include "core/game.h"
 #include "core/card.h"
 #include "core/player.h"
-#include "game_interface.h" // Interface réseau globale
+#include "game_interface.h"
 
+/** @brief Action code for playing a card. */
 #define ACTION_PLAY_CARD 0x10
+/** @brief Action code for drawing a card. */
 #define ACTION_DRAW_CARD 0x11
+/** @brief Action code for synchronizing the game state. */
 #define ACTION_SYNC_GAME 0x12
+/** @brief Action code for joining a game. */
 #define ACTION_JOIN_GAME 0x13
+/** @brief Action code for starting a game. */
 #define ACTION_START_GAME 0x14
+/** @brief Action code for synchronizing a player's hand. */
 #define ACTION_SYNC_HAND 0x15
+/** @brief Action code for acknowledging a join request. */
 #define ACTION_JOIN_ACK  0x16
 
 #pragma pack(push, 1)
+/**
+ * @struct GameTLVHeader
+ * @brief Header for game messages using TLV (Type-Length-Value) format.
+ */
 typedef struct {
-    uint8_t game_id;
-    uint8_t action;
-    uint16_t length;
+    uint8_t game_id;    /**< ID of the game */
+    uint8_t action;     /**< Action type */
+    uint16_t length;    /**< Length of the payload */
 } GameTLVHeader;
 
+/**
+ * @struct GameSyncPayload
+ * @brief Payload for synchronizing game state between server and clients.
+ */
 typedef struct {
-    int current_player;
-    int active_color;
-    Card top_card;
-    int hand_sizes[4];
-    int status; // 0: WAITING, 1: PLAYING
-    int host_id;
+    int current_player;     /**< Index of the current player */
+    int active_color;       /**< Current active color */
+    Card top_card;          /**< Card on top of the discard pile */
+    int hand_sizes[4];      /**< Number of cards in each player's hand */
+    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
+    int host_id;            /**< ID of the host player */
 } GameSyncPayload;
 #pragma pack(pop)
 
+/**
+ * @struct KingServerState
+ * @brief Internal state maintained by the server for a game instance.
+ */
 typedef struct {
-    GameState state;
-    int status; // 0 = WAITING, 1 = PLAYING
+    GameState state;    /**< Core game logic state */
+    int status;         /**< 0 = WAITING, 1 = PLAYING */
 } KingServerState;
 
-/** @brief Initialise une partie sur le serveur. */
+/**
+ * @brief Initializes a game instance on the server.
+ * @return A pointer to the newly created KingServerState.
+ */
 void* king_create_instance() {
     KingServerState* ks = calloc(1, sizeof(KingServerState));
     if (ks) {
@@ -53,7 +77,15 @@ void* king_create_instance() {
     return ks;
 }
 
-/** @brief Traite les clics/actions des clients. */
+/**
+ * @brief Processes client actions and broadcasts updates.
+ * @param state Pointer to the KingServerState.
+ * @param player_id ID of the player performing the action.
+ * @param action Action type (from game interface).
+ * @param payload Pointer to the action data.
+ * @param len Length of the payload.
+ * @param broadcast Callback function to send messages to clients.
+ */
 void king_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
     if (action != 5 /* ACTION_GAME_DATA */) return;
 
@@ -110,13 +142,6 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
     }
 
     // 3. SYNCHRONISATION
-    /*
-     +-----------------------------------------------------------------+
-     | SYNC GLOBALE (Broadcast) : Talon, Couleur, Qui joue, Nb cartes  |
-     +-----------------------------------------------------------------+
-     | SYNC PRIVÉE  (Unicast)   : Liste des cartes de MA main          |
-     +-----------------------------------------------------------------+
-    */
     Card top_card = {CARD_BLACK, ZERO};
     if (g->discard_pile.head != NULL) {
         top_card = g->discard_pile.head->card;
@@ -160,16 +185,22 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
     }
 }
 
+/**
+ * @brief Destroys a game instance and frees memory.
+ * @param state Pointer to the KingServerState.
+ */
 void king_destroy_instance(void *state) {
     free(state);
 }
 
-// Exportation de l'interface pour le Linker
+/**
+ * @brief Global interface for the King-for-Four module.
+ */
 GameInterface king_module = {
     .game_name = "king-for-four",
     .create_instance = king_create_instance,
     .on_action = king_on_action,
-    .on_tick = NULL, // Pas de logique temporelle nécessaire pour un jeu de cartes
+    .on_tick = NULL, 
     .on_player_leave = NULL,
     .destroy_instance = king_destroy_instance
 };

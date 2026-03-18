@@ -1,7 +1,9 @@
 /**
  * @file kingforfourAPI.c
- * @brief Implémentation complète du jeu King-for-Four via API.
- * Encapsule la machine d'état, Raylib, et les règles du Uno.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Full implementation of the King-for-Four game via API.
+ * Encapsulates the state machine, Raylib, and Uno rules.
  */
 
 #include "raylib.h"
@@ -19,28 +21,42 @@
 #include "APIs/generalAPI.h"
 #include "kingforfourAPI.h"
 
-// --- DÉFINITION DES ÉTATS ---
+/**
+ * @enum AppState
+ * @brief Internal states of the application.
+ */
 typedef enum {
-    STATE_MENU,
-    STATE_GAME
+    STATE_MENU, /**< Main menu state */
+    STATE_GAME  /**< Active game state */
 } AppState;
 
 /**
- * @brief État concret complet du jeu King-for-Four.
+ * @struct KingForFourGame_St
+ * @brief Concrete full state of the King-for-Four game.
  */
 struct KingForFourGame_St {
-    BaseGame_St base;       // Obligatoire, permet le cast par le Lobby
+    BaseGame_St base;       /**< Mandatory base, allows casting by the Lobby */
     
-    GameState state;        // Données métier du Uno (pioche, mains, etc.)
-    GameAssets assets;      // Textures Raylib
-    AppState currentState;  // Gestion Menu / Jeu
+    GameState state;        /**< Uno business data (deck, hands, etc.) */
+    GameAssets assets;      /**< Raylib textures */
+    AppState currentState;  /**< Menu / Game management */
 };
 
-// Wrapper pour correspondre à la signature demandée par generalAPI.h
+/**
+ * @brief Wrapper to match the signature required by generalAPI.h.
+ * @param game Pointer to the game instance.
+ * @return Error code.
+ */
 Error_Et kingforfour_freeGameWrapper(void* game) {
     return kingforfour_freeGame((KingForFourGame_St**) game);
 }
 
+/**
+ * @brief Implementation of full game initialization.
+ * @param game Pointer to game instance pointer.
+ * @param configs Configurations.
+ * @return Error code.
+ */
 Error_Et kingforfour_initGame__full(KingForFourGame_St** game, KingForFourConfigs_St configs) {
     (void)configs;
 
@@ -68,6 +84,11 @@ Error_Et kingforfour_initGame__full(KingForFourGame_St** game, KingForFourConfig
     return OK;
 }
 
+/**
+ * @brief Main game loop execution.
+ * @param game Pointer to the game.
+ * @return Error code.
+ */
 Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
     if (game == NULL) return ERROR_NULL_POINTER;
     if (!game->base.running) return OK;
@@ -157,6 +178,11 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
     return OK;
 }
 
+/**
+ * @brief Frees all game resources.
+ * @param game Pointer to game instance pointer.
+ * @return Error code.
+ */
 Error_Et kingforfour_freeGame(KingForFourGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
     KingForFourGame_St* g = *game;

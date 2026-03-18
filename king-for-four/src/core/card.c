@@ -1,6 +1,17 @@
+/**
+ * @file card.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of card and deck management functions.
+ */
+
 #include "../../include/core/card.h"
 
-// Ajout en tête
+/**
+ * @brief Adds a card to the head of the deck's linked list.
+ * @param d Pointer to the deck.
+ * @param c The card to push.
+ */
 void push_card(Deck* d, Card c) {
     Node* newNode = malloc(sizeof(Node));
     if (!newNode) return;
@@ -15,7 +26,12 @@ void push_card(Deck* d, Card c) {
     d->size++;
 }
 
-// Retrait d'une carte
+/**
+ * @brief Removes and returns the card at the specified index.
+ * @param d Pointer to the deck.
+ * @param index Index of the card to remove.
+ * @return The removed card, or a black zero card if the index is invalid or deck is empty.
+ */
 Card remove_at(Deck* d, int index) {
     if (index < 0 || d->head == NULL) 
         return (Card){CARD_BLACK, ZERO};
@@ -36,6 +52,10 @@ Card remove_at(Deck* d, int index) {
     return c;
 }
 
+/**
+ * @brief Clears all cards from the deck and frees memory.
+ * @param d Pointer to the deck.
+ */
 void clear_deck(Deck* d) {
     while (d->head != NULL) {
         Node* tmp = d->head;
@@ -45,11 +65,19 @@ void clear_deck(Deck* d) {
     d->size = 0;
 }
 
+/**
+ * @brief Pops the top card from the deck.
+ * @param d Pointer to the deck.
+ * @return The top card.
+ */
 Card pop_card(Deck* d) {
     return remove_at(d, 0); 
 }
 
-// Mélange Fisher-Yates (chaine -> tableau -> chaine) et ne pas oublier srand(time(NULL)) dans le main
+/**
+ * @brief Shuffles the deck using the Fisher-Yates algorithm.
+ * @param d Pointer to the deck.
+ */
 void shuffle_deck(Deck* d) {
     if (d->head == NULL || d->head->next == NULL) {
         if (d->head == NULL) d->size = 0;
@@ -78,7 +106,10 @@ void shuffle_deck(Deck* d) {
     free(tempArray);
 }
 
-// Initialisation du jeu de 108 cartes
+/**
+ * @brief Initializes a standard 108-card Uno deck.
+ * @param d Pointer to the deck.
+ */
 void init_uno_deck(Deck* d) {
     d->head = NULL;
     d->size = 0;
@@ -100,12 +131,19 @@ void init_uno_deck(Deck* d) {
     }
 }
 
-// Libération de la mémoire
+/**
+ * @brief Frees all resources associated with the deck.
+ * @param d Pointer to the deck.
+ */
 void free_deck(Deck* d) {
     while (d->head) pop_card(d);
 }
 
-// Fonction interne pour effectuer un seul "Riffle Shuffle" sur un tableau
+/**
+ * @brief Internal function to perform a single riffle shuffle on an array of cards.
+ * @param array Array of cards to shuffle.
+ * @param count Number of cards in the array.
+ */
 void _perform_single_riffle(Card* array, int count) {
     // 1. La Coupe (Cut) : On coupe environ au milieu, avec une erreur de +/- 10%
     int variance = count / 10; 
@@ -125,14 +163,11 @@ void _perform_single_riffle(Card* array, int count) {
 
     while (l < sizeL || r < sizeR) {
         // Décision : Est-ce qu'on fait tomber des cartes de Gauche ou de Droite ?
-        // Si un tas est vide, on prend forcément l'autre.
-        // Sinon, probabilité proportionnelle à la taille du tas restant 
         int takeFromLeft;
         
         if (l >= sizeL) takeFromLeft = 0; // Gauche vide
         else if (r >= sizeR) takeFromLeft = 1; // Droite vide
         else {
-            // Probabilité simple
             takeFromLeft = (rand() % 2); 
         }
 
@@ -152,6 +187,10 @@ void _perform_single_riffle(Card* array, int count) {
     free(rightPile);
 }
 
+/**
+ * @brief Shuffles the deck using a human-like riffle shuffle algorithm.
+ * @param d Pointer to the deck.
+ */
 void human_shuffle_deck(Deck* d) {
     if (d->head == NULL || d->head->next == NULL) {
         if (d->head == NULL) d->size = 0;
@@ -170,14 +209,12 @@ void human_shuffle_deck(Deck* d) {
     for (int i = 0; i < count; i++) tempArray[i] = pop_card(d);
 
     // 2. On répète le mélange 5 fois (Standard humain pour un bon mélange)
-    // Moins de fois = mélange très mauvais (cartes qui se suivent encore)
     int numberOfShuffles = 5; 
     for (int k = 0; k < numberOfShuffles; k++) {
         _perform_single_riffle(tempArray, count);
     }
 
     // 3. Conversion Tableau -> Liste
-    // On réempile dans l'ordre du tableau mélangé
     for (int i = 0; i < count; i++) push_card(d, tempArray[i]);
     
     free(tempArray);
