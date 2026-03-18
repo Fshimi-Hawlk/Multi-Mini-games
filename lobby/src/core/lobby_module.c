@@ -23,6 +23,7 @@ extern int network_socket;
 extern RUDP_Connection server_conn;
 extern Player_st player;
 extern Player_st otherPlayers[MAX_CLIENTS];
+extern int my_id;
 
 /** @brief Last sent player position to avoid redundant network updates. */
 static Vector2 lastSentPos = {0};
@@ -30,6 +31,8 @@ static Vector2 lastSentPos = {0};
 static Camera2D camera = { 0 };
 /** @brief Flag for the first frame update. */
 static bool firstFrame = true;
+/** @brief Timer to force a network sync even if stationary. */
+static float syncTimer = 0;
 
 /**
  * @brief Initializes the lobby module (loads textures, sets camera).
@@ -54,6 +57,7 @@ void lobby_init(void) {
     camera.rotation = 0.0f;
     camera.zoom = 1.0f; 
     firstFrame = true;
+    syncTimer = 0;
 }
 
 /**
@@ -65,10 +69,30 @@ void lobby_init(void) {
  */
 void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(Player_st)) {
-            memcpy(&otherPlayers[player_id], data, sizeof(Player_st));
+        // Skip if this is our own data mirrored back
+        if (player_id == my_id) return;
+
+        if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(PlayerNet_st)) {
+            PlayerNet_st net;
+            memcpy(&net, data, sizeof(PlayerNet_st));
+            
+            if (!otherPlayers[player_id].active) {
+                printf("[LOBBY] Nouveau joueur détecté : ID %d\n", player_id);
+            }
+
+            otherPlayers[player_id].position = (Vector2){ net.x, net.y };
+            otherPlayers[player_id].angle = net.angle;
+            otherPlayers[player_id].skin_id = net.skin_id;
             otherPlayers[player_id].active = true;
-            otherPlayers[player_id].texture = &playerTextures[0]; 
+            otherPlayers[player_id].radius = 20.0f; // Force radius for visibility
+            
+            // Assign texture based on synced skin_id
+            int sid = otherPlayers[player_id].skin_id;
+            if (sid >= 0 && sid < playerTextureCount) {
+                otherPlayers[player_id].texture = &playerTextures[sid];
+            } else {
+                otherPlayers[player_id].texture = &playerTextures[0];
+            }
         }
         else if (action == 5 /* LOBBY_CHAT */) {
             AddChatMessage(TextFormat("Player %d", player_id), (char*)data);
@@ -84,7 +108,6 @@ void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
  * @param dt Delta time since the last frame.
  */
 void lobby_update(float dt) {
-    bool chatWasOpen = g_chatState.isOpen;
     UpdateChat();
     
     // If chat is open, we don't move and don't toggle menus
@@ -102,20 +125,33 @@ void lobby_update(float dt) {
         choosePlayerTexture(&player);
     }
 
-    if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y || firstFrame) {
-        GameTLVHeader tlv = { .game_id = 0, .action = 2, .length = sizeof(Player_st) };
-        RUDP_Header h; RUDP_GenerateHeader(&server_conn, 5, &h);
+    syncTimer += dt;
+    // We sync more often (0.5s) to ensure visibility for new joiners
+    bool shouldSync = (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y || firstFrame || syncTimer > 0.5f);
+
+    if (shouldSync) {
+        PlayerNet_st net = {
+            .x = player.position.x,
+            .y = player.position.y,
+            .angle = player.angle,
+            .skin_id = player.skin_id,
+            .active = true
+        };
+
+        GameTLVHeader tlv = { .game_id = 0, .action = 2, .length = sizeof(PlayerNet_st) };
+        RUDP_Header h; RUDP_GenerateHeader(&server_conn, ACTION_GAME_DATA, &h);
         
         uint8_t buffer[1024];
         size_t offset = 0;
         
         memcpy(buffer + offset, &h, sizeof(h)); offset += sizeof(h);
         memcpy(buffer + offset, &tlv, sizeof(tlv)); offset += sizeof(tlv);
-        memcpy(buffer + offset, &player, sizeof(Player_st)); offset += sizeof(Player_st);
+        memcpy(buffer + offset, &net, sizeof(PlayerNet_st)); offset += sizeof(PlayerNet_st);
         
         send(network_socket, buffer, offset, 0);
         lastSentPos = player.position;
         firstFrame = false;
+        syncTimer = 0;
     }
 }
 
@@ -127,7 +163,7 @@ void lobby_draw(void) {
         drawPlatforms(platforms, platformCount);
         drawPlayer(&player);
         for (int i = 0; i < MAX_CLIENTS; i++) {
-            if (otherPlayers[i].active) drawPlayer(&otherPlayers[i]);
+            if (otherPlayers[i].active && i != my_id) drawPlayer(&otherPlayers[i]);
         }
     EndMode2D();
     

@@ -36,7 +36,8 @@ typedef enum {
 typedef struct {
     Vector2 position;     ///< Current position of the player.
     float radius;         ///< Radius of the player for physics.
-    Texture2D* texture;   ///< Current texture applied to the player.
+    Texture2D* texture;   ///< Current texture applied to the player (local only).
+    int skin_id;          ///< ID of the selected skin (synced).
     float angle;          ///< Current rotation angle of the player.
     Vector2 velocity;     ///< Current velocity vector.
     bool onGround;        ///< Flag indicating if the player is touching the ground.
@@ -46,6 +47,18 @@ typedef struct {
     float jumpBuffer;     ///< Timer for jump buffering.
     bool active;          ///< Flag indicating if the player is active.
 } Player_st;
+
+#pragma pack(push, 1)
+/**
+ * @brief Simplified player structure for network transmission.
+ */
+typedef struct {
+    float x, y;
+    float angle;
+    int skin_id;
+    bool active;
+} PlayerNet_st;
+#pragma pack(pop)
 
 /**
  * @brief Structure representing a platform.

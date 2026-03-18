@@ -45,6 +45,7 @@
 #define LOBBY_CHAT       5  /**< Message de chat. */
 #define LOBBY_LEAVE      6   /**< Notification de déconnexion. */
 #define LOBBY_SWITCH_GAME 0x20 /**< Demande de changement de module de jeu. */
+#define ACTION_GAME_DATA  5    /**< Identifiant générique pour les données de jeu (identique au chat car routé par le serveur). */
 /** @} */
 
 /**
