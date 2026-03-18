@@ -42,6 +42,7 @@
 #define LOBBY_MOVE 2      /**< Mise à jour de la position d'un joueur. */
 #define LOBBY_ROOM_QUERY 3 /**< Requête de découverte de salle. */
 #define LOBBY_ROOM_INFO  4  /**< Réponse d'information sur la salle. */
+#define LOBBY_CHAT       5  /**< Message de chat. */
 #define LOBBY_LEAVE      6   /**< Notification de déconnexion. */
 #define LOBBY_SWITCH_GAME 0x20 /**< Demande de changement de module de jeu. */
 /** @} */
