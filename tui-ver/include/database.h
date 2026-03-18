@@ -1,3 +1,11 @@
+
+/**
+ * @file database.h
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Header file for database functionality.
+ */
+
 #ifndef DATABASE_H
 #define DATABASE_H
 

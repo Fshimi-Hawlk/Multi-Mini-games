@@ -1,3 +1,11 @@
+
+/**
+ * @file server.h
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Header file for server functionality.
+ */
+
 #ifndef SERVER_H
 #define SERVER_H
 

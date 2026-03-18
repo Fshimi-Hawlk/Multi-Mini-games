@@ -1,3 +1,12 @@
+
+
+/**
+ * @file menu.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for menu functionality.
+ */
+
 #include "menu.h"
 #include "server.h"
 #include "chat.h"
@@ -5,6 +14,10 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
+
+/**
+ * @brief Draws the header with the application title and current user information.
+ */
 static void drawHeader(void) {
     CRP(1, 1); EDP(2); EDP(3);
     printf(COLOR_GREEN "=== Multiplayer Chat ===" FGRColor "\n\r");
@@ -12,6 +25,15 @@ static void drawHeader(void) {
     fflush(stdout);
 }
 
+/**
+ * @brief Draws the menu with the given title and options.
+ * 
+ * @param title The title of the menu.
+ * @param options The options to display.
+ * @param count The number of options.
+ * @param selected The index of the currently selected option.
+ * @param enabled An array indicating which options are enabled.
+ */
 static void drawMenu(const char *title, const char **options, int count, int selected, const bool *enabled) {
     drawHeader();
     printf(COLOR_YELLOW "  %s\r\n" COLOR_RESET, title);
@@ -33,6 +55,8 @@ static void drawMenu(const char *title, const char **options, int count, int sel
     fflush(stdout);
 }
 
+
+/** */
 static int selectOption(const char *title, const char **options, int count, const bool *enabled) {
     int selected = 0;
 

@@ -1,3 +1,12 @@
+
+
+/**
+ * @file server.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for server functionality.
+ */
+
 #include "server.h"
 #include "utils/utils.h"
 
