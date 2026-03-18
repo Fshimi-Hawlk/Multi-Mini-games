@@ -209,6 +209,56 @@ void RenderHand(Player *p, GameAssets assets) {
 }
 
 /**
+ * @brief Draws card backs for opponent players.
+ * @param g Game state.
+ * @param assets Graphical assets.
+ * @param my_id Local player's internal ID.
+ */
+void RenderOpponents(GameState *g, GameAssets assets, int my_id) {
+    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * 0.5f; // Smaller cards for opponents
+    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * 0.5f;
+    Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
+
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+
+    for (int i = 0; i < g->num_players; i++) {
+        if (i == my_id) continue;
+
+        int handSize = g->players[i].hand.size;
+        if (handSize <= 0) continue;
+
+        // Position based on relative index
+        int relIdx = (i - my_id + g->num_players) % g->num_players;
+        
+        Vector2 startPos = {0};
+        Vector2 step = {0};
+        float rotation = 0;
+
+        if (relIdx == 1) { // Left (vertical)
+            startPos = (Vector2){ 50, (float)sh/2 - (handSize * 15)/2 };
+            step = (Vector2){ 0, 15 };
+            rotation = 90;
+        } else if (relIdx == 2) { // Top (horizontal)
+            startPos = (Vector2){ (float)sw/2 - (handSize * 25)/2, 50 };
+            step = (Vector2){ 25, 0 };
+            rotation = 0;
+        } else if (relIdx == 3) { // Right (vertical)
+            startPos = (Vector2){ (float)sw - 50, (float)sh/2 - (handSize * 15)/2 };
+            step = (Vector2){ 0, 15 };
+            rotation = -90;
+        }
+
+        for (int j = 0; j < handSize; j++) {
+            Rectangle dest = { startPos.x + j * step.x, startPos.y + j * step.y, cardW, cardH };
+            DrawTexturePro(assets.cardBack, sourceBack, dest, (Vector2){cardW/2, cardH/2}, rotation, WHITE);
+        }
+        
+        DrawText(TextFormat("P%d: %d", i, handSize), (int)startPos.x - 20, (int)startPos.y - 30, 20, WHITE);
+    }
+}
+
+/**
  * @brief Returns the index of the card under the mouse cursor.
  */
 int GetHoveredCardIndex(Player *p, GameAssets assets) {

@@ -1,31 +1,30 @@
 /**
  * @file server.c
- * @brief Serveur RUDP autoritaire avec support multi-modules sécurisé.
+ * @brief Authoritative RUDP server with secure multi-module support.
  * 
- * Ce serveur gère les connexions multiples, le routage des paquets vers 
- * les différents modules de jeu et la diffusion des messages.
+ * This server handles multiple connections, packet routing to different
+ * game modules, and message broadcasting.
  * 
- * Schéma de communication :
- * [CLIENT 1] <----RUDP----> [ SERVEUR ] <----RUDP----> [CLIENT 2]
+ * Communication Scheme:
+ * [CLIENT 1] <----RUDP----> [ SERVER ] <----RUDP----> [CLIENT 2]
  *                               |
  *                               v
  *                    +---------------------+
- *                    |   ROUTAGE MODULES   |
+ *                    |   MODULE ROUTING    |
  *                    +---------------------+
  *                    | action = SWITCH?    | ----> Change active_module
  *                    | action = GAME_DATA? | ----> on_action(active_game)
  *                    +---------------------+
  * 
  * @author i-Charlys (CAILLON Charles)
+ * @author Fshimi-Hawlk
  * @date 2026-03-18
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-
 #include <string.h>
-
 #include <unistd.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -36,10 +35,10 @@
 
 #include "networkInterface.h"
 
-#define PORT 8080                                       /**< Port d'écoute du serveur. */
-#define TIMEOUT_US 5000000000                           /**< Timeout de déconnexion en microsecondes (5s). */
-#define SERVER_NAME "CachyOS-KingForFour-Server"        /**< Nom d'affichage du serveur. */
-#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDPHeader_St)) /**< Taille maximale de la charge utile. */
+#define PORT 8080                                       /**< Server listening port. */
+#define TIMEOUT_US 5000000000                           /**< Disconnection timeout in microseconds (5s). */
+#define SERVER_NAME "MMG-Lobby-Server"                  /**< Server display name. */
+#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDPHeader_St)) /**< Maximum payload size. */
 
 enum {
     ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
@@ -49,31 +48,31 @@ enum {
     ACTION_CODE_LOBBY_SWITCH_GAME
 };
 
-// Interfaces de routage
-extern GameServerInterface_St lobby_module; /**< Instance du module lobby. */
-extern GameServerInterface_St king_module;  /**< Instance du module King for Four. */
+// Routing interfaces
+extern GameServerInterface_St lobby_module; /**< Lobby module instance. */
+extern GameServerInterface_St king_module;  /**< King for Four module instance. */
 
 /**
  * @struct UDP_Client
- * @brief Représentation interne d'un client sur le serveur.
+ * @brief Internal representation of a client on the server.
  */
 typedef struct {
-    bool active;                  /**< Si l'emplacement est occupé par un client. */
-    struct sockaddr_in address;   /**< Adresse IP et port du client. */
-    RUDPConnection_St rudp_state;   /**< État RUDP pour ce client spécifique. */
-    struct timeval last_seen;     /**< Horodatage de la dernière activité reçue. */
+    bool active;                  /**< If the slot is occupied by a client. */
+    struct sockaddr_in address;   /**< Client IP address and port. */
+    RUDPConnection_St rudp_state; /**< RUDP state for this specific client. */
+    struct timeval last_seen;     /**< Timestamp of the last activity received. */
 } UDP_Client;
 
-int master_socket = -1; /**< Socket principal du serveur. */
-UDP_Client clients[MAX_CLIENTS]; /**< Liste des clients connectés. */
-GameServerInterface_St *active_module = NULL; /**< Pointeur vers le module de jeu actif. */
-void* active_game_state = NULL;      /**< État interne du module actif. */
+int master_socket = -1; /**< Main server socket. */
+UDP_Client clients[MAX_CLIENTS]; /**< List of connected clients. */
+GameServerInterface_St *active_module = NULL; /**< Pointer to the active game module. */
+void* active_game_state = NULL;      /**< Internal state of the active module. */
 
 /**
- * @brief Trouve l'index d'un client par son adresse ou lui alloue un nouveau slot.
+ * @brief Finds a client index by address or allocates a new slot.
  * 
- * @param addr Adresse source du paquet.
- * @return int L'index du client (0 à MAX_CLIENTS-1), ou -1 si le serveur est plein.
+ * @param addr Source address of the packet.
+ * @return int Client index (0 to MAX_CLIENTS-1), or -1 if the server is full.
  */
 int find_or_create_client(struct sockaddr_in *addr) {
     for(int i = 0; i < MAX_CLIENTS; i++) {
@@ -89,7 +88,7 @@ int find_or_create_client(struct sockaddr_in *addr) {
             clients[i].address = *addr;
             rudpInitConnection(&clients[i].rudp_state);
             gettimeofday(&clients[i].last_seen, NULL);
-            printf("[CONNEXION] Slot %d alloué pour %s:%d\n", i, inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
+            printf("[CONNEXION] Slot %d allocated for %s:%d\n", i, inet_ntoa(addr->sin_addr), ntohs(addr->sin_port));
             return i;
         }
     }
@@ -97,13 +96,13 @@ int find_or_create_client(struct sockaddr_in *addr) {
 }
 
 /**
- * @brief Diffuse ou envoie un message à un client spécifique.
+ * @brief Broadcasts or sends a message to a specific client.
  * 
- * @param room_id Identifiant de la salle (-1 pour UNICAST).
- * @param exclude_id ID du client à exclure (en BROADCAST) ou cible unique (en UNICAST).
- * @param action Type d'action à envoyer.
- * @param payload Pointeur vers les données.
- * @param len Taille des données.
+ * @param room_id Room identifier (-1 for UNICAST).
+ * @param exclude_id Client ID to exclude (in BROADCAST) or unique target (in UNICAST).
+ * @param action Action type to send.
+ * @param payload Pointer to data.
+ * @param len Data size.
  */
 void server_broadcast(int room_id, int exclude_id, u8 action, const void *payload, u16 len) {
     u8 buffer[2048];
@@ -136,9 +135,9 @@ void server_broadcast(int room_id, int exclude_id, u8 action, const void *payloa
 }
 
 /**
- * @brief Répond aux requêtes de découverte de serveur (ACTION_CODE_LOBBY_ROOM_QUERY).
+ * @brief Responds to server discovery queries (ACTION_CODE_LOBBY_ROOM_QUERY).
  * 
- * @param client_addr Adresse du client demandeur.
+ * @param client_addr Requesting client address.
  */
 void handle_discovery_query(struct sockaddr_in *client_addr) {
     RUDPHeader_St response;
@@ -152,30 +151,30 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
     memcpy(buffer, &response, sizeof(RUDPHeader_St));
     
     char info[256];
-    const char *module_name = (active_module && active_module->game_name) ? active_module->game_name : "Inconnu";
+    const char *module_name = (active_module && active_module->game_name) ? active_module->game_name : "Unknown";
     snprintf(info, sizeof(info), "%s [%s]", SERVER_NAME, module_name);
     
-    memcpy(buffer + sizeof(RUDPHeader_St), info, strlen(info) + 1);
+    memcpy(buffer + sizeof(RUDPHeader_St), info, (size_t)strlen(info) + 1);
 
     sendto(master_socket, buffer, sizeof(RUDPHeader_St) + strlen(info) + 1, 0,
            (struct sockaddr *)client_addr, sizeof(struct sockaddr_in));
 }
 
 /**
- * @brief Vérifie les clients inactifs et les déconnecte si nécessaire.
+ * @brief Checks for inactive clients and disconnects them if necessary.
  */
 void check_timeouts(void) {
     struct timeval now;
     gettimeofday(&now, NULL);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
-            long long elapsed = (now.tv_sec - clients[i].last_seen.tv_sec) * 1000000LL +
-                                (now.tv_usec - clients[i].last_seen.tv_usec);
+            long long elapsed = (long long)(now.tv_sec - clients[i].last_seen.tv_sec) * 1000000LL +
+                                (long long)(now.tv_usec - clients[i].last_seen.tv_usec);
             if (elapsed > TIMEOUT_US) {
-                printf("[TIMEOUT] Client %d déconnecté\n", i);
+                printf("[TIMEOUT] Client %d disconnected\n", i);
                 clients[i].active = false;
                 
-                // On prévient les autres clients
+                // Notify other clients
                 server_broadcast(0, i, ACTION_CODE_QUIT_GAME, NULL, 0);
 
                 if (active_module && active_module->on_player_leave) {
@@ -187,11 +186,9 @@ void check_timeouts(void) {
 }
 
 /**
- * @brief Point d'entrée principal du serveur.
+ * @brief Main server entry point.
  * 
- * Initialise le socket, les modules et gère la boucle d'événements principale.
- * 
- * @return int Code de sortie.
+ * @return int Exit code.
  */
 int main(void) {
     struct sockaddr_in server_addr;
@@ -201,7 +198,6 @@ int main(void) {
         perror("Socket fail"); exit(1);
     }
 
-
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = INADDR_ANY;
     server_addr.sin_port = htons(PORT);
@@ -210,18 +206,18 @@ int main(void) {
         perror("Bind fail"); exit(1);
     }
 
-    // Le serveur est forcé de démarrer sur le Lobby
+    // Force server to start on the Lobby
     active_module = &lobby_module;
     
     if (active_module && active_module->create_instance) {
         active_game_state = active_module->create_instance();
     } else {
-        printf("[ERREUR] Le module n'implémente pas l'interface `create_instance`.\n");
+        printf("[ERROR] Module doesn't implement `create_instance`.\n");
         exit(1);
     }
 
-    printf(">>> SERVEUR RUDP DÉMARRÉ SUR LE PORT %d <<<\n", PORT);
-    printf(">>> MODULE ACTIF : %s <<<\n", active_module->game_name ? active_module->game_name : "NULL");
+    printf(">>> RUDP SERVER STARTED ON PORT %d <<<\n", PORT);
+    printf(">>> ACTIVE MODULE : %s <<<\n", active_module->game_name ? active_module->game_name : "NULL");
 
     while (1) {
         fd_set readfds;
@@ -243,16 +239,36 @@ int main(void) {
 
                 if (header.action == ACTION_CODE_LOBBY_ROOM_QUERY) {
                     handle_discovery_query(&client_addr);
-                } else {
+                } 
+                else if (header.action == ACTION_CODE_JOIN_GAME) {
+                    int id = find_or_create_client(&client_addr);
+                    if (id != -1) {
+                        // Reset RUDP state for fresh join
+                        rudpInitConnection(&clients[id].rudp_state);
+                        rudpProcessIncoming(&clients[id].rudp_state, &header);
+                        gettimeofday(&clients[id].last_seen, NULL);
+                        
+                        // Send back the assigned ID to the client
+                        u16 assigned_id = (u16)id;
+                        server_broadcast(-1, id, ACTION_CODE_JOIN_ACK, &assigned_id, sizeof(u16));
+                        printf("[CONNEXION] ID %d sent to new client\n", id);
+
+                        if (active_module && active_module->on_action) {
+                            active_module->on_action(active_game_state, id, header.action, 
+                                buffer + sizeof(RUDPHeader_St), (u16)(len - sizeof(RUDPHeader_St)), server_broadcast);
+                        }
+                    }
+                }
+                else {
                     int id = find_or_create_client(&client_addr);
                     if (id != -1 && rudpProcessIncoming(&clients[id].rudp_state, &header)) {
                         gettimeofday(&clients[id].last_seen, NULL);
                         
                         if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
                             u8 target_game_id = buffer[sizeof(RUDPHeader_St)];
-                            printf("[MODULE] Demande de switch vers ID: %d\n", target_game_id);
+                            printf("[MODULE] Requesting switch to ID: %d\n", target_game_id);
                             
-                            // Pour simplifier, ID 1 = King for Four
+                            // For simplicity, ID 1 = King for Four
                             if (target_game_id == 1) {
                                 if (active_module != &king_module) {
                                     if (active_module && active_module->destroy_instance) {
@@ -260,17 +276,16 @@ int main(void) {
                                     }
                                     active_module = &king_module;
                                     active_game_state = active_module->create_instance();
-                                    printf("[MODULE] Premier switch vers King For Four effectué.\n");
+                                    printf("[MODULE] Switched to King For Four.\n");
                                 }
                                 
-                                // On envoie TOUJOURS la confirmation au joueur qui demande (Unicast)
-                                // Même si le module est déjà actif pour d'autres.
                                 u8 switch_payload = 1;
                                 server_broadcast(-1, id, ACTION_CODE_LOBBY_SWITCH_GAME, &switch_payload, 1);
-                                printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
-                        } else if (header.action == ACTION_CODE_LOBBY_CHAT) {
-                            server_broadcast(0, id, ACTION_CODE_LOBBY_CHAT, buffer + sizeof(RUDPHeader_St), len - sizeof(RUDPHeader_St));
+                                printf("[MODULE] Switch confirmation sent to client %d.\n", id);
                             }
+                        }
+                        else if (header.action == ACTION_CODE_LOBBY_CHAT) {
+                            server_broadcast(0, id, ACTION_CODE_LOBBY_CHAT, buffer + sizeof(RUDPHeader_St), (u16)(len - sizeof(RUDPHeader_St)));
                         }
                         else if (active_module && active_module->on_action && active_game_state) {
                             active_module->on_action(
@@ -278,7 +293,7 @@ int main(void) {
                                 id, 
                                 header.action, 
                                 buffer + sizeof(RUDPHeader_St), 
-                                len - sizeof(RUDPHeader_St), 
+                                (u16)(len - sizeof(RUDPHeader_St)), 
                                 server_broadcast
                             );
                         }

@@ -3,6 +3,11 @@
 #include "core/chat.h"
 #include "APIs/generalAPI.h"
 
+#include <string.h>
+#include <stdio.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+
 s32 networkSocket;
 RUDPConnection_St serverConnection;
 
@@ -35,6 +40,8 @@ void updateChat(void) {
 
     if (!gameChat.isOpen && IsKeyPressed(KEY_T)) {
         gameChat.isOpen = true;
+        // Consume the 'T' key so it doesn't get typed
+        GetCharPressed(); 
     }
 
     if (gameChat.isOpen) {
@@ -77,6 +84,44 @@ void updateChat(void) {
     }
 }
 
+static void drawTextWrapped(Font font, const char* text, Vector2 pos, float width, float fontSize, float spacing, Color color) {
+    int length = strlen(text);
+    char buffer[MAX_CHAT_MSG_LEN + 32];
+    strcpy(buffer, text);
+    
+    int start = 0;
+    int end = 0;
+    float currentY = pos.y;
+
+    while (start < length) {
+        end = start;
+        int lastSpace = -1;
+        while (end < length) {
+            char saved = buffer[end + 1];
+            buffer[end + 1] = '\0';
+            Vector2 size = MeasureTextEx(font, buffer + start, fontSize, spacing);
+            buffer[end + 1] = saved;
+
+            if (size.x > width) break;
+            if (buffer[end] == ' ') lastSpace = end;
+            end++;
+        }
+
+        if (end < length && lastSpace != -1 && lastSpace > start) {
+            end = lastSpace;
+        }
+
+        char saved = buffer[end];
+        buffer[end] = '\0';
+        DrawTextEx(font, buffer + start, (Vector2){pos.x, currentY}, fontSize, spacing, color);
+        buffer[end] = saved;
+
+        start = end;
+        if (buffer[start] == ' ') start++;
+        currentY += fontSize + 2;
+    }
+}
+
 void drawChat(void) {
     // If chat is closed and no recent messages, only show hint
     if (!gameChat.isOpen && msgVisibleTimer <= 0) {
@@ -85,6 +130,7 @@ void drawChat(void) {
     }
 
     u32 width = 400; u32 height = 300; u32 x = 10; u32 y = GetScreenHeight() - height - 40;
+    float spacing = 0.0f;
     
     // Only draw background if open
     if (gameChat.isOpen) {
@@ -111,15 +157,13 @@ void drawChat(void) {
             textColor = Fade(WHITE, alpha);
         }
 
-        Vector2 textSize = MeasureTextEx(fonts[FONT16], fullText, 16.0f, 0.0f);
-        if (textSize.x > width - 10) {
-            DrawTextEx(fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, 16.0f, 0.0f, textColor);
-            currentY += 40;
-        } else {
-            DrawTextEx(fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, 16.0f, 0.0f, textColor);
-            currentY += 20;
-        }
+        drawTextWrapped(fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, (float)width - 10, 16.0f, spacing, textColor);
         
+        // Dynamic Y advance (very approximate wrap count)
+        Vector2 size = MeasureTextEx(fonts[FONT16], fullText, 16.0f, spacing);
+        int lines = (int)(size.x / (width - 10)) + 1;
+        currentY += lines * 18;
+
         if (currentY > y + height - 40) break;
     }
 

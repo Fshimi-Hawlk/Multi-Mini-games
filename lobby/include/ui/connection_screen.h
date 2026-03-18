@@ -9,6 +9,7 @@
 #define CONNECTION_SCREEN_H
 
 #include <stdbool.h>
+#include "rudp_core.h"
 
 /**
  * @brief Gets the IP address entered by the user.

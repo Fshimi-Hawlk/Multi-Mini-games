@@ -55,6 +55,10 @@ static int game_status = 0;
 /** @brief Timer for retrying to join the game. */
 static float join_retry_timer = 0;
 
+// UI effects state
+static float turn_overlay_timer = 0;
+static int winner_id = -1;
+
 // Color selection state
 static bool is_choosing_color = false;
 static int pending_card_index = -1;
@@ -119,9 +123,17 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
         if (len >= (u16) sizeof(GameSyncPayload)) {
             GameSyncPayload sync;
             memcpy(&sync, data, sizeof(GameSyncPayload));
+            
+            if (sync.current_player != local_state.current_player) {
+                if (sync.current_player == my_internal_id) {
+                    turn_overlay_timer = 2.0f; // Show "YOUR TURN" for 2s
+                }
+            }
+
             local_state.current_player = sync.current_player;
             local_state.active_color = sync.active_color;
             game_status = sync.status;
+            local_state.num_players = 4; // Max
             
             if (local_state.discard_pile.head == NULL) {
                 push_card(&local_state.discard_pile, sync.top_card);
@@ -131,6 +143,9 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
             
             for (int i = 0; i < 4; i++) {
                 local_state.players[i].hand.size = sync.hand_sizes[i];
+                if (sync.hand_sizes[i] == 0 && game_status == 1) {
+                    winner_id = i;
+                }
             }
         }
     } else if (action == ACTION_CODE_KFF_SYNC_HAND) {
@@ -157,6 +172,8 @@ static int selected_players = 4;
 void king_client_update(float dt) {
     // UpdateChat();
     // if (g_chatState.isOpen) return; // Ignore input when chatting
+
+    if (turn_overlay_timer > 0) turn_overlay_timer -= dt;
 
     if (!assets_loaded) return;
     if (my_internal_id == -1) {
@@ -251,10 +268,12 @@ void king_client_draw(void) {
     }
 
     RenderTable(&local_state, assets);
+    RenderOpponents(&local_state, assets, my_internal_id);
     RenderHand(&local_state.players[0], assets);
     
     if (local_state.current_player == my_internal_id) {
-        DrawText("C'EST VOTRE TOUR !", 10, 40, 25, GREEN);
+        float pulse = (sinf(GetTime() * 10.0f) + 1.0f) * 0.5f;
+        DrawText("C'EST VOTRE TOUR !", 10, 40, 25, Fade(GREEN, 0.5f + pulse * 0.5f));
     } else {
         DrawText(TextFormat("Tour du Joueur %d", local_state.current_player), 10, 40, 25, YELLOW);
     }
@@ -276,6 +295,25 @@ void king_client_draw(void) {
         DrawRectangle(sw / 2.0f,       sh / 2.0f - 100, 100, 100, YELLOW);
         DrawRectangle(sw / 2.0f - 100, sh / 2.0f,       100, 100, GREEN);
         DrawRectangle(sw / 2.0f,       sh / 2.0f,       100, 100, BLUE);
+    }
+
+    // YOUR TURN Overlay
+    if (turn_overlay_timer > 0) {
+        int sw = GetScreenWidth(); int sh = GetScreenHeight();
+        float alpha = turn_overlay_timer > 1.0f ? 0.8f : turn_overlay_timer * 0.8f;
+        DrawRectangle(0, sh/2 - 60, sw, 120, Fade(GOLD, alpha));
+        const char* turnTxt = "C'EST VOTRE TOUR";
+        DrawText(turnTxt, sw/2 - MeasureText(turnTxt, 60)/2, sh/2 - 30, 60, WHITE);
+    }
+
+    // Victory/Defeat Screen
+    if (winner_id != -1) {
+        int sw = GetScreenWidth(); int sh = GetScreenHeight();
+        DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.8f));
+        const char* txt = (winner_id == my_internal_id) ? "VICTOIRE !" : TextFormat("JOUEUR %d A GAGNÉ !", winner_id);
+        Color c = (winner_id == my_internal_id) ? GREEN : RED;
+        DrawText(txt, sw/2 - MeasureText(txt, 80)/2, sh/2 - 100, 80, c);
+        DrawText("Appuyez sur ESC pour quitter", sw/2 - 150, sh/2 + 50, 20, GRAY);
     }
     
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);

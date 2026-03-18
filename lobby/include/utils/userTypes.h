@@ -64,6 +64,18 @@ typedef struct {
     // Future extension point: Rectangle currentSourceRect; AnimationState animation; etc.
 } PlayerVisuals_St;
 
+#pragma pack(push, 1)
+/**
+ * @brief Simplified player structure for network transmission.
+ */
+typedef struct {
+    float x, y;
+    float angle;
+    u8    textureId;
+    bool  active;
+} PlayerNet_St;
+#pragma pack(pop)
+
 /**
     @brief Physics and movement state of the player character in the lobby (platformer).
 
@@ -86,6 +98,8 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
+    
+    bool    active;                             ///< Flag indicating if the player is active.
 } Player_St;
 
 /**

@@ -33,6 +33,13 @@
 // #include "APIs/kingForFourAPI.h"
 #include "APIs/bingoAPI.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <arpa/inet.h>
+#include <fcntl.h>
+
 enum {
     ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
     ACTION_CODE_LOBBY_ROOM_QUERY,
@@ -41,9 +48,15 @@ enum {
     ACTION_CODE_LOBBY_SWITCH_GAME
 };
 
+/** @brief Port used for server communication. */
+#define SERVER_PORT 8080
+
+/** @brief Assigned player ID from server. */
+int my_id = -1;
+
 Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame) {
     if (nextMiniGame >= __miniGameCount) {
-        // some wanring log
+        // some warning log
         return ERROR_INVALID_ENUM_VAL;
     }
 
@@ -70,7 +83,7 @@ Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame
 
             if (error != OK) {
                 log_fatal("Bingo initialization failed: error %d", error);
-                bingo_freeGame(bingoRef); // in case something was allocated
+                bingo_initGame(bingoRef); // in case something was allocated
             }
         } break;
 
@@ -152,7 +165,7 @@ void initNetwork(const char* targetIp) {
 
     inet_pton(AF_INET, targetIp, &addr.sin_addr);
     if (connect(networkSocket, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        log_error("Couldn't connect to %d:%d", targetIp, SERVER_PORT);
+        log_error("Couldn't connect to %s:%d", targetIp, SERVER_PORT);
     }
     
     rudpInitConnection(&serverConnection);
@@ -160,7 +173,7 @@ void initNetwork(const char* targetIp) {
     GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
     u8 buffer[sizeof(RUDPHeader_St) + sizeof(GameTLVHeader_St)];
     
-    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
+    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, 5 /* ACTION_GAME_DATA */, &h);
     
     memcpy(buffer, &h, sizeof(h)); memcpy(buffer + sizeof(h), &tlv, sizeof(tlv));
     send(networkSocket, buffer, sizeof(buffer), 0);
@@ -168,6 +181,7 @@ void initNetwork(const char* targetIp) {
 
 /**
  * @brief Receives and processes incoming network data packets.
+ * @param game Pointer to the lobby game structure.
  */
 void receiveNetworkData(LobbyGame_St* const game) {
     if (networkSocket == -1) return;
@@ -186,6 +200,12 @@ void receiveNetworkData(LobbyGame_St* const game) {
             continue;
         }
 
+        if (h->action == ACTION_CODE_JOIN_ACK) {
+            my_id = ntohs(h->sender_id);
+            printf("[SYSTEM] Reçu ID de session : %d\n", my_id);
+            continue;
+        }
+
         if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME && rudpProcessIncoming(&serverConnection, h)) {
             u8 targetGameId = *(u8*) (buffer + sizeof(RUDPHeader_St));
             printf("[SYSTEM] Switching to game ID: %d\n", targetGameId);
@@ -193,7 +213,7 @@ void receiveNetworkData(LobbyGame_St* const game) {
             continue;
         }
 
-        if (h->action == ACTION_GAME_DATA && rudpProcessIncoming(&serverConnection, h)) {
+        if (h->action == 5 /* ACTION_GAME_DATA */ && rudpProcessIncoming(&serverConnection, h)) {
             GameTLVHeader_St* g = (GameTLVHeader_St*) (buffer + sizeof(RUDPHeader_St));
             void* payload = (u8*) g + sizeof(GameTLVHeader_St);
             
