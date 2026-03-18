@@ -1,6 +1,22 @@
+
+/**
+ * @file utils.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for utility functions.
+ */
+
 #include "utils/utils.h"
 
 #include <termios.h>
+
+/**
+ * @brief Logs the hexadecimal representation of a buffer.
+ * 
+ * @param prefix The prefix to log before the hex dump.
+ * @param data The data buffer to log.
+ * @param len The length of the data buffer.
+ */
 
 void logHex(const char *prefix, const void *data, u64 len) {
     const u8 *p = (const u8 *)data;
@@ -25,10 +41,25 @@ void logHex(const char *prefix, const void *data, u64 len) {
 // }
 
 
+
+/**
+ * @brief Generates a random integer between min and max (inclusive).
+ * 
+ * @param min The minimum value.
+ * @param max The maximum value.
+ * @return A random integer between min and max.
+ */
 u64 randInt(u64 min, u64 max) {
     return min + (rand() % (max - min + 1));
 }
 
+
+/**
+ * @brief Makes a socket non-blocking.
+ * 
+ * @param socketFd The file descriptor of the socket.
+ * @return 0 on success, -1 on failure.
+ */
 int makeSocketNonBlocking(int socketFd) {
     int currentFlags = fcntl(socketFd, F_GETFL, 0);
     if (currentFlags == -1) {
@@ -44,6 +75,13 @@ int makeSocketNonBlocking(int socketFd) {
     return 0;
 }
 
+/**
+ * @brief Serializes a message into a buffer.
+ * 
+ * @param msg The message to serialize.
+ * @param buf The buffer to write the serialized message into.
+ * @return The number of bytes written to the buffer.
+ */
 u64 serializeMessage(Message_St* msg, char *buf) {
     u64 offset = 0;
     memcpy(buf + offset, &msg->type, sizeof(MessageType_Et)); 
@@ -61,6 +99,12 @@ u64 serializeMessage(Message_St* msg, char *buf) {
     return offset;
 }
 
+/**
+ * @brief Deserializes a message from a buffer.
+ * 
+ * @param buf The buffer containing the serialized message.
+ * @param msg The message structure to populate with the deserialized data.
+ */
 void deserializeMessage(const char *buf, Message_St* msg) {
     u64 offset = 0;
     memcpy(&msg->type, buf + offset, sizeof(MessageType_Et)); 
@@ -75,6 +119,16 @@ void deserializeMessage(const char *buf, Message_St* msg) {
     strcpy(msg->text, buf + offset);
 }
 
+
+
+/**
+ * @brief Sends all bytes from a buffer to a destination socket.
+ * 
+ * @param destinationFd The file descriptor of the destination socket.
+ * @param dataPointer The pointer to the data buffer.
+ * @param dataLength The length of the data buffer.
+ * @return 0 on success, -1 on failure.
+ */
 int sendAllBytes(int destinationFd, const void *dataPointer, u64 dataLength) {
     if (destinationFd < 0) return -1;
 
@@ -119,6 +173,12 @@ int sendAllBytes(int destinationFd, const void *dataPointer, u64 dataLength) {
     return 0;
 }
 
+
+/**
+ * @brief Checks if the local server is running by attempting to connect to it.
+ * 
+ * @return true if the server is running, false otherwise.
+ */
 bool isLocalServerRunning(void) {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) return false;
@@ -151,6 +211,12 @@ bool isLocalServerRunning(void) {
     return false;
 }
 
+/**
+ * @brief Adds a message to the chat history.
+ * 
+ * @param history The chat history structure to update.
+ * @param msg The message to add.
+ */
 void addToHistory(ChatHistory_St* history, Message_St* msg) {
     history->messages[history->head] = *msg;
     history->head = (history->head + 1) % MAX_HISTORY;
@@ -160,10 +226,18 @@ void addToHistory(ChatHistory_St* history, Message_St* msg) {
 
 static struct termios orig_termios;
 
+
+
+/**
+ * @brief Disables raw mode for the terminal.
+ */
 void disableRawMode(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig_termios);
 }
 
+/**
+ * @brief Enables raw mode for the terminal.
+ */
 void enableRawMode(void) {
     tcgetattr(STDIN_FILENO, &orig_termios);
     atexit(disableRawMode);
@@ -179,6 +253,12 @@ void enableRawMode(void) {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
+
+/**
+ * @brief Reads a key from the terminal without blocking.
+ * 
+ * @return The key code, or KEY_NONE if no key was pressed.
+ */
 int readKey(void) {
     char c = '\0';
     s64 nread = read(STDIN_FILENO, &c, 1);
@@ -211,6 +291,13 @@ int readKey(void) {
     return (unsigned char)c;
 }
 
+/**
+ * @brief Gets the current cursor position in the terminal.
+ * 
+ * @param row Pointer to store the row position.
+ * @param col Pointer to store the column position.
+ * @return true if the cursor position was successfully retrieved, false otherwise.
+ */
 bool getCursorPosition(int *row, int *col) {
     struct termios oldt, newt;
     char buf[32];

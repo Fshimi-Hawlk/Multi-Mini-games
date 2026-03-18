@@ -1,6 +1,21 @@
+
+/**
+ * @file client.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for client functionality.
+ */
+
 #include "client.h"
 #include "utils/utils.h"
 
+
+
+/**
+ * @brief Runs the test client, connecting to the server and sending/receiving messages.
+ * 
+ * @return int 0 on success, -1 on failure.
+ */
 int runTestClient(void) {
     int fd = socket(AF_INET, SOCK_STREAM, 0);
     if (fd < 0) { perror("socket"); return -1; }
