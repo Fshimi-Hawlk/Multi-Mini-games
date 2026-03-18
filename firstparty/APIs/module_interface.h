@@ -1,7 +1,8 @@
 /**
  * @file module_interface.h
- * @brief Interface standardisée pour les mini-jeux côté Client (Frontend Raylib).
- * @note Fichier reconstruit suite à la purge du Makefile.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Standardized interface for Client-side mini-games (Raylib Frontend).
  */
 
 #ifndef MODULE_INTERFACE_H
@@ -10,35 +11,50 @@
 #include <stdint.h>
 #include <stddef.h>
 
-// --- STRUCTURE RÉSEAU INTERNE (Payload) ---
-// Désactivation du padding mémoire pour correspondre exactement aux octets réseau (1+1+2 = 4 octets)
+/**
+ * @struct GameTLVHeader
+ * @brief Internal network structure (Payload).
+ * Memory padding is disabled to match network bytes exactly (1+1+2 = 4 bytes).
+ */
 #pragma pack(push, 1)
 typedef struct {
-    uint8_t game_id;     // ID du mini-jeu ciblé (0 pour le Lobby)
-    uint8_t action;      // Action spécifique au jeu (ex: 2 pour LOBBY_MOVE)
-    uint16_t length;     // Taille des données qui suivent cet en-tête
+    uint8_t game_id;     /**< ID of the targeted mini-game (0 for Lobby). */
+    uint8_t action;      /**< Game-specific action (e.g., 2 for LOBBY_MOVE). */
+    uint16_t length;     /**< Size of the data following this header. */
 } GameTLVHeader;
 #pragma pack(pop)
 
-// --- INTERFACE DU MODULE GRAPHIQUE ---
 /**
  * @struct MiniGameModule
- * @brief Contrat d'interface que chaque mini-jeu client doit respecter.
+ * @brief Interface contract that each client mini-game must respect.
  */
 typedef struct MiniGameModule {
-    uint8_t id;          // Identifiant réseau du jeu
-    const char* name;    // Nom d'affichage
+    uint8_t id;          /**< Network identifier of the game. */
+    const char* name;    /**< Display name of the module. */
     
-    /** @brief Allocation et chargement des textures/modèles (Raylib). */
+    /**
+     * @brief Allocation and loading of textures/models (Raylib).
+     */
     void (*init)(void);
     
-    /** @brief Réception d'un paquet réseau routé pour ce jeu. */
+    /**
+     * @brief Reception of a routed network packet for this game.
+     * @param player_id ID of the player who sent the data.
+     * @param action Action code.
+     * @param data Pointer to the received data.
+     * @param len Length of the data.
+     */
     void (*on_data)(int player_id, uint8_t action, void* data, uint16_t len);
     
-    /** @brief Mise à jour de la logique physique locale (Frame par Frame). */
+    /**
+     * @brief Update of local physical logic (Frame by Frame).
+     * @param dt Delta time since last frame.
+     */
     void (*update)(float dt);
     
-    /** @brief Rendu graphique à l'écran (Raylib). */
+    /**
+     * @brief Graphical rendering to the screen (Raylib).
+     */
     void (*draw)(void);
 } MiniGameModule;
 

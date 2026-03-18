@@ -1,7 +1,7 @@
 /**
  * @file utils.h
- * @author 
- * @date 
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
  * @brief General utility macros and helper functions.
  */
 
@@ -52,11 +52,11 @@
  */
 #define alignUpPow2(n, p) (((u64) (n) + (u64) (p) - 1) & (~((u64) (p) - 1)))
 
+/**
+ * @brief Casts a variable to a new type using its address.
+ */
 #define castTo(newType) *(newType*) &
 
-/*
-
-*/
 /**
  * @brief Swaps two variables of the same type using XOR (no temporary needed).
  *
@@ -181,13 +181,25 @@ do { \
     nl \
 } while (0)
 
-/// DOC: TODO
+/**
+ * @brief Gets a source rectangle from a texture.
+ * @param texture Pointer to the texture.
+ * @return A Rectangle covering the entire texture.
+ */
 Rectangle getTextureRec(const Texture* const texture);
 
-/// DOC: TODO
+/**
+ * @brief Gets the collision box for a player.
+ * @param player Pointer to the player structure.
+ * @return A Rectangle representing the player's collision bounds.
+ */
 Rectangle getPlayerCollisionBox(const Player_st* const player);
 
-/// DOC: TODO
+/**
+ * @brief Gets the center position of a player.
+ * @param player Pointer to the player structure.
+ * @return A Vector2 representing the player's center.
+ */
 Vector2 getPlayerCenter(const Player_st* const player);
 
 /**

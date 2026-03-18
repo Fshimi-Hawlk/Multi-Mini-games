@@ -1,10 +1,26 @@
+/**
+ * @file contextArena.h
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Management of arena-based memory allocation with a global context.
+ */
+
 #ifndef CONTEXT_ARENA_H
 #define CONTEXT_ARENA_H
 
 #include "arena.h"
 
+/**
+ * @brief Global memory arena for long-term allocations.
+ */
 static Arena globalArena;
+/**
+ * @brief Temporary memory arena for short-term allocations.
+ */
 static Arena tempArena;
+/**
+ * @brief Current pointer to the active arena used by context functions.
+ */
 static Arena* contextArena;
 
 /**
@@ -64,30 +80,62 @@ char *context_vsprintf(const char *format, va_list args);
 
 #ifdef CONTEXT_ARENA_IMPLEMENTATION
 
+/** @brief Global arena instance. */
 static Arena globalArena = {0};
+/** @brief Temporary arena instance. */
 static Arena tempArena = {0};
+/** @brief Active context arena pointer. Defaults to globalArena. */
 static Arena* contextArena = &globalArena;
 
+/**
+ * @brief Implementation of context_alloc.
+ * @param size_bytes Number of bytes to allocate.
+ * @return Pointer to allocated memory.
+ */
 void *context_alloc(size_t size_bytes) {
     ARENA_ASSERT(contextArena != NULL);
     return arena_alloc(contextArena, size_bytes);
 }
 
+/**
+ * @brief Implementation of context_realloc.
+ * @param oldptr Previous pointer.
+ * @param oldsz  Previous size.
+ * @param newsz  New size.
+ * @return Pointer to reallocated memory.
+ */
 void *context_realloc(void *oldptr, size_t oldsz, size_t newsz) {
     ARENA_ASSERT(contextArena != NULL);
     return arena_realloc(contextArena, oldptr, oldsz, newsz);
 }
 
+/**
+ * @brief Implementation of context_strdup.
+ * @param cstr String to duplicate.
+ * @return Allocated copy.
+ */
 char *context_strdup(const char *cstr) {
     ARENA_ASSERT(contextArena != NULL);
     return arena_strdup(contextArena, cstr);
 }
 
+/**
+ * @brief Implementation of context_memdup.
+ * @param data Data pointer.
+ * @param size Data size.
+ * @return Allocated copy.
+ */
 void *context_memdup(void *data, size_t size) {
     ARENA_ASSERT(contextArena != NULL);
     return arena_memdup(contextArena, data, size);
 }
 
+/**
+ * @brief Implementation of context_sprintf.
+ * @param format format string.
+ * @param ... format arguments.
+ * @return Formatted string.
+ */
 char *context_sprintf(const char *format, ...) {
     ARENA_ASSERT(contextArena != NULL);
 
@@ -99,6 +147,12 @@ char *context_sprintf(const char *format, ...) {
     return result;
 }
 
+/**
+ * @brief Implementation of context_vsprintf.
+ * @param format format string.
+ * @param args va_list arguments.
+ * @return Formatted string.
+ */
 char *context_vsprintf(const char *format, va_list args) {
     ARENA_ASSERT(contextArena != NULL);
     return arena_vsprintf(contextArena, format, args);
@@ -107,4 +161,4 @@ char *context_vsprintf(const char *format, va_list args) {
 #define ARENA_IMPLEMENTATION
 #include "arena.h"
 
-#endif // CONTEXT_ARENA_IMPLEMTATION
+#endif // CONTEXT_ARENA_IMPLEMENTATION

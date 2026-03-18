@@ -1,7 +1,7 @@
 /**
  * @file globals.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
  * @brief Global variables and resources.
  */
 
@@ -14,20 +14,19 @@ extern Rectangle windowRect;            ///< Main window rectangle (set at init)
 extern Font      appFont;               ///< Primary font for UI text.
 extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
+extern Platform_st platforms[];         ///< Array of platforms in the lobby.
+extern int platformCount;               ///< Number of platforms.
 
-extern Platform_st platforms[];
-extern int platformCount;
+extern Texture2D playerTextures[];      ///< Array of available player textures.
+extern int playerTextureCount;          ///< Number of player textures.
 
-extern Texture2D playerTextures[];
-extern int playerTextureCount;
+extern Rectangle defaultPlayerTextureRect; ///< Default source rectangle for player textures.
 
-extern Rectangle defaultPlayerTextureRect;
+extern Rectangle skinButtonRect;        ///< Rectangle for the skin selection button.
 
-extern Rectangle skinButtonRect;
+extern Rectangle kingForFourZone;       ///< Trigger zone for the King For Four game.
+extern bool isTextureMenuOpen;          ///< Flag indicating if the texture selection menu is open.
 
-extern Rectangle kingForFourZone;
-extern bool isTextureMenuOpen;
-
-extern Texture2D logoSkinButton;
+extern Texture2D logoSkinButton;        ///< Texture for the skin button logo.
 
 #endif // UTILS_GLOBALS_H
