@@ -1,7 +1,7 @@
 /**
  * @file userTypes.h
- * @author 
- * @date 
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
  * @brief Core type definitions used throughout the game.
  */
 
@@ -10,6 +10,9 @@
 
 #include "common.h"
 
+/**
+ * @brief Enum for font sizes.
+ */
 typedef enum {
     FONT8,
     FONT10, FONT12, FONT14, FONT16, FONT18,
@@ -19,32 +22,38 @@ typedef enum {
     _fontSizeCount
 } FontSize_Et;
 
+/**
+ * @brief Enum for different game scenes.
+ */
 typedef enum {
     GAME_SCENE_LOBBY,
     GAME_SCENE_GAME_NAME,
-//    __gameSceneCount // can be removed/commented out if not needed
 } GameScene_Et;
 
-// lobby/include/utils/userTypes.h
-
+/**
+ * @brief Structure representing a player.
+ */
 typedef struct {
-    Vector2 position;
-    float radius;
-    Texture2D* texture;
-    float angle;
-    Vector2 velocity;
-    bool onGround;
-    int nbJumps;
-    float coyoteTime;
-    float coyoteTimer;
-    float jumpBuffer;
-    bool active;
+    Vector2 position;     ///< Current position of the player.
+    float radius;         ///< Radius of the player for physics.
+    Texture2D* texture;   ///< Current texture applied to the player.
+    float angle;          ///< Current rotation angle of the player.
+    Vector2 velocity;     ///< Current velocity vector.
+    bool onGround;        ///< Flag indicating if the player is touching the ground.
+    int nbJumps;          ///< Current number of jumps performed.
+    float coyoteTime;     ///< Duration of coyote time.
+    float coyoteTimer;    ///< Timer for coyote time.
+    float jumpBuffer;     ///< Timer for jump buffering.
+    bool active;          ///< Flag indicating if the player is active.
 } Player_st;
 
+/**
+ * @brief Structure representing a platform.
+ */
 typedef struct {
-    Rectangle rect;
-    Color color;
-    float roundness;
+    Rectangle rect;       ///< Rectangle defining the platform bounds.
+    Color color;          ///< Color of the platform.
+    float roundness;      ///< Roundness of the platform corners.
 } Platform_st;
 
 

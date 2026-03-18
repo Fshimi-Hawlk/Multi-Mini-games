@@ -1,6 +1,8 @@
 /**
  * @file connection_screen.c
- * @brief Gestion de la scène "Pré-Lobby" avec découverte de salons.
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of the connection screen for server discovery and IP entry.
  */
 
 #include "raylib.h"
@@ -9,25 +11,38 @@
 #include <stdio.h>
 #include <string.h>
 
+/** @brief Maximum number of discovered rooms to display. */
 #define MAX_ROOMS_DISPLAY 5
 
+/**
+ * @brief Structure representing a discovered room entry in the UI.
+ */
 typedef struct {
-    char ip[16];
-    char name[32];
-    IaC_button button;
-    bool active;
+    char ip[16];           ///< IP address of the room.
+    char name[32];         ///< Name of the room.
+    IaC_button button;     ///< UI button for the room entry.
+    bool active;           ///< Whether this entry is active.
 } RoomEntry;
 
-// État local
+/** @brief UI input for the IP address. */
 static IaC_button ipInput;
+/** @brief UI button to trigger connection. */
 static IaC_button connectButton;
+/** @brief UI button to refresh the server list. */
 static IaC_button refreshButton;
+/** @brief Buffer for the entered IP address. */
 static char ipBuffer[IP_MAX_LENGTH + 1] = {0};
+/** @brief Current character count in the IP buffer. */
 static int letterCount = 0;
 
+/** @brief Array of discovered rooms. */
 static RoomEntry discoveredRooms[MAX_ROOMS_DISPLAY];
+/** @brief Current number of discovered rooms. */
 static int roomsCount = 0;
 
+/**
+ * @brief Allocates and positions UI elements for the connection screen.
+ */
 void InitConnectionScreen(void) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
@@ -43,24 +58,22 @@ void InitConnectionScreen(void) {
 }
 
 /**
- * @brief Simule l'ajout d'une room reçue par le réseau.
- * En production, cette fonction est appelée par le récepteur UDP de main.c.
+ * @brief Adds a discovered server to the internal list for display.
+ * @param ip IP address of the discovered server.
+ * @param name Name of the discovered server.
  */
 void AddDiscoveredRoom(const char* ip, const char* name) {
     if (roomsCount >= MAX_ROOMS_DISPLAY) return;
     
-    // 1. Déclaration de i à l'intérieur du for pour la recherche de doublons
     for (int i = 0; i < roomsCount; i++) {
         if (strcmp(discoveredRooms[i].ip, ip) == 0) return;
     }
 
-    // 2. Utilisation de roomsCount (l'index de la nouvelle entrée)
     strncpy(discoveredRooms[roomsCount].ip, ip, 15);
     strncpy(discoveredRooms[roomsCount].name, name, 31);
     
     float startY = (float)(GetScreenHeight() / 2 + 20);
     
-    // 3. Cast en (char*) pour calmer le compilateur sur le "const"
     discoveredRooms[roomsCount].button = InitIaCElement(
         30, 
         startY + (roomsCount * 50), 
@@ -74,40 +87,33 @@ void AddDiscoveredRoom(const char* ip, const char* name) {
     roomsCount++;
 }
 
-// On déclare que cette fonction est définie dans un autre fichier (main.c)
 extern void discover_servers(void);
 
+/**
+ * @brief Logical update loop for the connection screen.
+ * @return true if connection is triggered (valid IP + click), false otherwise.
+ */
 bool UpdateConnectionScreen(void) {
     UpdateIPInput(&ipInput, ipBuffer, &letterCount);
 
-    // Logique du bouton Rafraîchir
     if (UpdateConnectButton(&refreshButton, true)) {
-        // --- ACTION RÉELLE ---
-        // On vide la liste actuelle pour ne pas accumuler des vieux serveurs
-        // (Optionnel : roomsCount = 0;)
-        
-        // On lance le SONAR (Broadcast UDP)
         discover_servers(); 
-        
-        // --- SUPPRESSION DE LA SIMULATION ---
-        // Plus besoin de AddDiscoveredRoom("127.0.0.1", ...) ici !
     }
 
-    // 3. Gestion du clic sur une room détectée par le réseau
-    // C'est receive_network_data() dans main.c qui remplit ce tableau asynchronement
     for (int i = 0; i < roomsCount; i++) {
         if (UpdateConnectButton(&discoveredRooms[i].button, true)) {
-            // Si on clique sur une room, on injecte son IP dans le champ de saisie
             strncpy(ipBuffer, discoveredRooms[i].ip, IP_MAX_LENGTH);
             letterCount = (int)strlen(ipBuffer);
             ipInput.isIPValid = true;
         }
     }
 
-    // 4. Retourne true si on clique sur "Se Connecter"
     return UpdateConnectButton(&connectButton, ipInput.isIPValid);
 }
 
+/**
+ * @brief Renders the connection screen UI.
+ */
 void DrawConnectionScreen(void) {
     ClearBackground(RAYWHITE);
     int sw = GetScreenWidth();
@@ -123,15 +129,12 @@ void DrawConnectionScreen(void) {
         DrawText("Format attendu : XXX.XXX.XXX.XXX", sw/2 - 100, sh/2 - 150, 15, RED);
     }
 
-    // Zone de liste
     DrawText("Liste des rooms :", 20, sh/2 - 30, 25, DARKBLUE);
     DrawRectangle(20, (float)(sh/2), sw - 40, 275, LIGHTGRAY);
     DrawRectangleLines(20, (float)(sh/2), sw - 40, 275, GRAY);
 
-    // Rendu des items cliquables
     for (int i = 0; i < roomsCount; i++) {
         DrawIaCElement(discoveredRooms[i].button, discoveredRooms[i].name);
-        // On affiche l'IP à droite du bouton pour info
         DrawText(discoveredRooms[i].ip, sw - 180, (int)discoveredRooms[i].button.rect.y + 10, 18, GRAY);
     }
     
@@ -140,4 +143,8 @@ void DrawConnectionScreen(void) {
     }
 }
 
+/**
+ * @brief Gets the IP address entered in the input field.
+ * @return A pointer to the IP buffer string.
+ */
 const char* GetEnteredIP(void) { return ipBuffer; }

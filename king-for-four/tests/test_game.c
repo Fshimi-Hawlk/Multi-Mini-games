@@ -1,15 +1,29 @@
+/**
+ * @file test_game.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Unit tests and debug utilities for the King-for-Four game logic.
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include "../include/core/game.h"
 
-/* Debug : Affiche le nom d'une carte */
+/**
+ * @brief Prints a debug representation of a card to the console.
+ * @param c The card to print.
+ */
 void print_card_debug(Card c) {
     const char *clrs[] = {"ROUGE", "JAUNE", "VERT", "BLEU", "NOIR"};
     const char *vals[] = {"0","1","2","3","4","5","6","7","8","9","SKIP","REVERSE","+2","JOKER","+4"};
     printf("[%s %s]", clrs[c.color], vals[c.value]);
 }
 
+/**
+ * @brief Main entry point for the game logic tests.
+ * @return 0 on completion.
+ */
 int main() {
     srand(time(NULL));
     GameState g = {0};

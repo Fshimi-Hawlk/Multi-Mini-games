@@ -1,8 +1,21 @@
+/**
+ * @file rudp_core.c
+ * @brief Implémentation des mécanismes de base du protocole RUDP.
+ * 
+ * Ce fichier contient les fonctions permettant de gérer le séquencement 
+ * des paquets, les acquittements via bitfield et la détection des doublons.
+ * 
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ */
+
 #include "rudp_core.h"
 #include <string.h>
 
 /**
- * @brief Initialise l'état de la connexion.
+ * @brief Initialise l'état d'une connexion RUDP.
+ * 
+ * @param conn Pointeur vers la structure de connexion à initialiser.
  */
 void RUDP_InitConnection(RUDP_Connection *conn) {
     conn->local_sequence = 0;
@@ -12,14 +25,25 @@ void RUDP_InitConnection(RUDP_Connection *conn) {
 }
 
 /**
- * @brief Calcule si s1 est chronologiquement après s2 sur un cycle de 65536.
+ * @brief Vérifie si un numéro de séquence est chronologiquement après un autre.
+ * 
+ * Gère le bouclage des numéros de séquence (wrapping) sur 16 bits.
+ * 
+ * @param s1 Numéro de séquence à tester.
+ * @param s2 Numéro de séquence de référence (dernier reçu).
+ * @return true Si s1 est plus récent que s2.
+ * @return false Sinon.
  */
 static inline bool SequenceMoreRecent(uint16_t s1, uint16_t s2) {
     return ((s1 > s2) && (s1 - s2 <= 32768)) || ((s1 < s2) && (s2 - s1 > 32768));
 }
 
 /**
- * @brief Remplit l'en-tête pour l'envoi.
+ * @brief Remplit les champs d'un en-tête RUDP avant l'envoi.
+ * 
+ * @param conn Pointeur vers l'état de la connexion.
+ * @param action Type d'action à envoyer.
+ * @param out_header Pointeur vers l'en-tête à remplir.
  */
 void RUDP_GenerateHeader(RUDP_Connection *conn, uint8_t action, RUDP_Header *out_header) {
     out_header->sequence = conn->local_sequence++;
@@ -30,7 +54,14 @@ void RUDP_GenerateHeader(RUDP_Connection *conn, uint8_t action, RUDP_Header *out
 }
 
 /**
- * @brief Filtre les paquets entrants (rejets des vieux ou doublons).
+ * @brief Analyse un en-tête entrant et met à jour l'historique de réception.
+ * 
+ * Implémente une fenêtre glissante d'acquittements via un bitfield de 32 bits.
+ * 
+ * @param conn Pointeur vers l'état de la connexion.
+ * @param in_header En-tête du paquet reçu.
+ * @return true Si le paquet est nouveau ou un retardataire non encore reçu.
+ * @return false Si le paquet est un doublon ou trop ancien (hors fenêtre).
  */
 bool RUDP_ProcessIncoming(RUDP_Connection *conn, const RUDP_Header *in_header) {
     uint16_t seq = in_header->sequence;

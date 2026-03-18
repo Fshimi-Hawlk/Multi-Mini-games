@@ -1,7 +1,18 @@
+/**
+ * @file game.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of UI rendering functions for game elements in the lobby.
+ */
+
 #include "ui/game.h"
 #include "utils/utils.h"
 #include "utils/globals.h"
 
+/**
+ * @brief Renders the player to the screen.
+ * @param player Pointer to the player structure to draw.
+ */
 void drawPlayer(const Player_st* const player) {
     if (player->texture == NULL) {
         DrawCircleV(player->position, player->radius, BLUE);
@@ -18,6 +29,11 @@ void drawPlayer(const Player_st* const player) {
     );
 }
 
+/**
+ * @brief Renders the platforms and trigger zones to the screen.
+ * @param platforms Array of platforms to draw.
+ * @param nbPlatforms Number of platforms in the array.
+ */
 void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
     for (int i = 0; i < nbPlatforms; i++)
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);

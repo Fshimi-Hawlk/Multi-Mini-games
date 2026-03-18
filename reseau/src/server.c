@@ -2,7 +2,11 @@
  * @file server.c
  * @brief Serveur RUDP autoritaire avec support multi-modules sécurisé.
  * 
- *  [CLIENT 1] <----RUDP----> [ SERVEUR ] <----RUDP----> [CLIENT 2]
+ * Ce serveur gère les connexions multiples, le routage des paquets vers 
+ * les différents modules de jeu et la diffusion des messages.
+ * 
+ * Schéma de communication :
+ * [CLIENT 1] <----RUDP----> [ SERVEUR ] <----RUDP----> [CLIENT 2]
  *                               |
  *                               v
  *                    +---------------------+
@@ -11,6 +15,9 @@
  *                    | action = SWITCH?    | ----> Change active_module
  *                    | action = GAME_DATA? | ----> on_action(active_game)
  *                    +---------------------+
+ * 
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
  */
 
 #include <stdio.h>
@@ -30,27 +37,37 @@
 #include "reseauAPI.h"
 #include "game_interface.h"
 
-#define PORT 8080
-#define TIMEOUT_US 5000000000
-#define SERVER_NAME "CachyOS-KingForFour-Server"
-#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDP_Header))
+#define PORT 8080 /**< Port d'écoute du serveur. */
+#define TIMEOUT_US 5000000000 /**< Timeout de déconnexion en microsecondes (5s). */
+#define SERVER_NAME "CachyOS-KingForFour-Server" /**< Nom d'affichage du serveur. */
+#define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDP_Header)) /**< Taille maximale de la charge utile. */
 
 // Interfaces de routage
-extern GameInterface lobby_module; 
-extern GameInterface king_module;
+extern GameInterface lobby_module; /**< Instance du module lobby. */
+extern GameInterface king_module;  /**< Instance du module King for Four. */
 
+/**
+ * @struct UDP_Client
+ * @brief Représentation interne d'un client sur le serveur.
+ */
 typedef struct {
-    bool active;
-    struct sockaddr_in address;
-    RUDP_Connection rudp_state;
-    struct timeval last_seen;
+    bool active;                  /**< Si l'emplacement est occupé par un client. */
+    struct sockaddr_in address;   /**< Adresse IP et port du client. */
+    RUDP_Connection rudp_state;   /**< État RUDP pour ce client spécifique. */
+    struct timeval last_seen;     /**< Horodatage de la dernière activité reçue. */
 } UDP_Client;
 
-int master_socket = -1;
-UDP_Client clients[MAX_CLIENTS];
-GameInterface *active_module = NULL; 
-void* active_game_state = NULL;      
+int master_socket = -1; /**< Socket principal du serveur. */
+UDP_Client clients[MAX_CLIENTS]; /**< Liste des clients connectés. */
+GameInterface *active_module = NULL; /**< Pointeur vers le module de jeu actif. */
+void* active_game_state = NULL;      /**< État interne du module actif. */
 
+/**
+ * @brief Trouve l'index d'un client par son adresse ou lui alloue un nouveau slot.
+ * 
+ * @param addr Adresse source du paquet.
+ * @return int L'index du client (0 à MAX_CLIENTS-1), ou -1 si le serveur est plein.
+ */
 int find_or_create_client(struct sockaddr_in *addr) {
     for(int i = 0; i < MAX_CLIENTS; i++) {
         if(clients[i].active && 
@@ -75,8 +92,11 @@ int find_or_create_client(struct sockaddr_in *addr) {
 /**
  * @brief Diffuse ou envoie un message à un client spécifique.
  * 
- *  BROADCAST (room >= 0): [S] ----> [C1, C2, C3, ...] (Sauf exclude_id)
- *  UNICAST   (room <  0): [S] ----> [exclude_id]      (Cible unique)
+ * @param room_id Identifiant de la salle (-1 pour UNICAST).
+ * @param exclude_id ID du client à exclure (en BROADCAST) ou cible unique (en UNICAST).
+ * @param action Type d'action à envoyer.
+ * @param payload Pointeur vers les données.
+ * @param len Taille des données.
  */
 void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload, uint16_t len) {
     uint8_t buffer[2048];
@@ -108,6 +128,11 @@ void server_broadcast(int room_id, int exclude_id, uint8_t action, void *payload
     }
 }
 
+/**
+ * @brief Répond aux requêtes de découverte de serveur (LOBBY_ROOM_QUERY).
+ * 
+ * @param client_addr Adresse du client demandeur.
+ */
 void handle_discovery_query(struct sockaddr_in *client_addr) {
     RUDP_Header response;
     RUDP_Connection temp_conn;
@@ -129,6 +154,9 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
            (struct sockaddr *)client_addr, sizeof(struct sockaddr_in));
 }
 
+/**
+ * @brief Vérifie les clients inactifs et les déconnecte si nécessaire.
+ */
 void check_timeouts() {
     struct timeval now;
     gettimeofday(&now, NULL);
@@ -151,6 +179,13 @@ void check_timeouts() {
     }
 }
 
+/**
+ * @brief Point d'entrée principal du serveur.
+ * 
+ * Initialise le socket, les modules et gère la boucle d'événements principale.
+ * 
+ * @return int Code de sortie.
+ */
 int main() {
     struct sockaddr_in server_addr;
     for (int i = 0; i < MAX_CLIENTS; i++) clients[i].active = false;
