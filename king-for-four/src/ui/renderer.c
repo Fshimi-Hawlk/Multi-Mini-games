@@ -7,6 +7,7 @@
 
 #include "ui/renderer.h"
 #include <stdio.h>
+#include <math.h>
 
 /** @brief Number of columns in the card texture sheet. */
 #define SHEET_COLS 5
@@ -107,14 +108,17 @@ void RenderTable(GameState *g, GameAssets assets) {
     float centerX = GetScreenWidth() / 2.0f;
     float centerY = GetScreenHeight() / 2.0f;
 
+    // Background decoration
+    DrawCircleGradient(centerX, centerY, 300, (Color){0, 100, 0, 100}, (Color){0, 0, 0, 0});
+
     // --- 1. DESSIN DE LA PIOCHE (Le Dos des cartes) ---
     Rectangle deckPos = { centerX - cardW - 20, centerY - (cardH/2), cardW, cardH };
-    
     Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
     
+    // Shadow
+    DrawRectangleRounded((Rectangle){deckPos.x + 5, deckPos.y + 5, deckPos.width, deckPos.height}, 0.1f, 10, Fade(BLACK, 0.4f));
     DrawTexturePro(assets.cardBack, sourceBack, deckPos, (Vector2){0,0}, 0.0f, WHITE);
-    
-    DrawRectangleLinesEx(deckPos, 1, WHITE); 
+    DrawRectangleLinesEx(deckPos, 2, Fade(WHITE, 0.3f)); 
 
     // --- 2. DESSIN DU TALON (La carte jouée) ---
     if (g->discard_pile.head != NULL) {
@@ -123,10 +127,25 @@ void RenderTable(GameState *g, GameAssets assets) {
         Rectangle source = GetCardSourceRec(topCard, assets.cardSheet);
         Rectangle dest = { centerX + 20, centerY - (cardH/2), cardW, cardH };
         
+        // Glow effect based on color
+        Color glowColor = WHITE;
+        switch(topCard.color) {
+            case CARD_RED:    glowColor = RED; break;
+            case CARD_YELLOW: glowColor = YELLOW; break;
+            case CARD_GREEN:  glowColor = GREEN; break;
+            case CARD_BLUE:   glowColor = BLUE; break;
+            case CARD_BLACK:  glowColor = PURPLE; break;
+        }
+        DrawCircleGradient(dest.x + cardW/2, dest.y + cardH/2, 120, Fade(glowColor, 0.4f), (Color){0,0,0,0});
+
+        // Shadow
+        DrawRectangleRounded((Rectangle){dest.x + 5, dest.y + 5, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.4f));
         DrawTexturePro(assets.cardSheet, source, dest, (Vector2){0,0}, 0.0f, WHITE);
+        DrawRectangleLinesEx(dest, 2, WHITE);
         
         if (topCard.value >= SKIP) {
-            DrawText("EFFET!", dest.x, dest.y - 20, 20, RED);
+            float pulse = (sinf(GetTime() * 5.0f) + 1.0f) * 0.5f;
+            DrawText("! ACTION !", dest.x, dest.y - 30, 20, Fade(glowColor, 0.5f + pulse * 0.5f));
         }
     }
 }
@@ -143,65 +162,45 @@ void RenderHand(Player *p, GameAssets assets) {
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
     int padding = 45; 
-    int startX = 50;  
+    int startX = (GetScreenWidth() - (p->hand.size * padding + cardW)) / 2;
+    if (startX < 50) startX = 50;
     int startY = GetScreenHeight() - cardH - 20;
 
     // --- PASSE 1 : DÉTECTION DE LA CARTE SURVOLÉE ---
-    int hoveredIndex = -1; 
-    
-    Node* current = p->hand.head;
-    int i = 0;
-    Vector2 mouse = GetMousePosition();
-
-    while (current != NULL) {
-        Rectangle hitBox = {
-            startX + (i * padding),
-            startY,
-            cardW,
-            cardH
-        };
-
-        if (CheckCollisionPointRec(mouse, hitBox)) {
-            hoveredIndex = i;
-        }
-
-        current = current->next;
-        i++;
-    }
+    int hoveredIndex = GetHoveredCardIndex(p, assets);
 
     // --- PASSE 2 : DESSIN ---
-    current = p->hand.head; 
-    i = 0;
+    Node* current = p->hand.head; 
+    int i = 0;
 
     while (current != NULL) {
-        Rectangle dest = { startX + (i * padding), startY, cardW, cardH };
+        Rectangle dest = { (float)startX + (i * padding), (float)startY, cardW, cardH };
 
         // Animation de survol
         if (i == hoveredIndex) {
-            dest.y -= 30; 
+            dest.y -= 40;
+            // Hover glow
+            DrawRectangleRounded((Rectangle){dest.x - 5, dest.y - 5, dest.width + 10, dest.height + 10}, 0.1f, 10, Fade(GOLD, 0.5f));
         }
+
+        // Card shadow
+        DrawRectangleRounded((Rectangle){dest.x + 3, dest.y + 3, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.3f));
 
         Rectangle source = GetCardSourceRec(current->card, assets.cardSheet);
         DrawTexturePro(assets.cardSheet, source, dest, (Vector2){0,0}, 0.0f, WHITE);
 
-        // 5. Texte d'aide (UNIQUEMENT AU SURVOL)
+        // Help text
         if (current->card.value >= SKIP && i == hoveredIndex) {
             const char* text = "";
             switch(current->card.value) {
                 case SKIP:      text = "PASSE"; break;
-                case REVERSE:   text = "<--->"; break;
-                case PLUS_TWO:  text = "+2"; break;
-                case PLUS_FOUR: text = "+4"; break;
-                case JOKER:     text = "COLOR"; break;
+                case REVERSE:   text = "REVERSE"; break;
+                case PLUS_TWO:  text = "+2 CARDS"; break;
+                case PLUS_FOUR: text = "+4 CARDS"; break;
+                case JOKER:     text = "CHANGE COLOR"; break;
                 default: break;
             }
-            
-            int textX = dest.x + 150; 
-            int textY = dest.y + 5;
-            
-            DrawText(text, textX+2, textY+2, 20, BLACK); // Ombre
-            DrawText(text, textX, textY, 20, WHITE);     // Texte
-            DrawText(text, textX, textY, 20, WHITE);     // Gras
+            DrawText(text, dest.x, dest.y - 25, 20, GOLD);
         }
 
         current = current->next;
@@ -211,9 +210,6 @@ void RenderHand(Player *p, GameAssets assets) {
 
 /**
  * @brief Returns the index of the card under the mouse cursor.
- * @param p Player.
- * @param assets Assets.
- * @return Index or -1.
  */
 int GetHoveredCardIndex(Player *p, GameAssets assets) {
     if (p->hand.head == NULL) return -1;
@@ -221,22 +217,21 @@ int GetHoveredCardIndex(Player *p, GameAssets assets) {
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
     int padding = 45; 
-    int startX = 50;  
+    int startX = (GetScreenWidth() - (p->hand.size * padding + cardW)) / 2;
+    if (startX < 50) startX = 50;
     int startY = GetScreenHeight() - cardH - 20;
 
-    int hoveredIndex = -1;
-    Node* current = p->hand.head;
-    int i = 0;
     Vector2 mouse = GetMousePosition();
-
-    while (current != NULL) {
-        Rectangle hitBox = { startX + (i * padding), startY, cardW, cardH };
+    Node* current = p->hand.head;
+    int hoveredIndex = -1;
+    for (int i = 0; current; i++, current = current->next) {
+        Rectangle hitBox = { (float)startX + (i * padding), (float)startY - (hoveredIndex == i ? 40 : 0), (float)padding, (float)cardH };
+        // Last card has full width hitBox
+        if (current->next == NULL) hitBox.width = cardW;
         
         if (CheckCollisionPointRec(mouse, hitBox)) {
             hoveredIndex = i;
         }
-        current = current->next;
-        i++;
     }
     return hoveredIndex;
 }

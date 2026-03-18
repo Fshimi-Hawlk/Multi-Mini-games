@@ -30,3 +30,5 @@ extern bool isTextureMenuOpen;          ///< Flag indicating if the texture sele
 extern Texture2D logoSkinButton;        ///< Texture for the skin button logo.
 
 #endif // UTILS_GLOBALS_H
+#include "firstparty/APIs/chatAPI.h"
+extern ChatState_St g_chatState;

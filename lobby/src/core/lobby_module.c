@@ -9,7 +9,8 @@
 #include "core/game.h"       
 #include "ui/game.h"         
 #include "ui/app.h"          
-#include "utils/globals.h"   
+#include "utils/globals.h"
+#include "utils/chat.h"
 #include "rudp_core.h"
 #include "raylib.h"
 
@@ -69,6 +70,9 @@ void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
             otherPlayers[player_id].active = true;
             otherPlayers[player_id].texture = &playerTextures[0]; 
         }
+        else if (action == 5 /* LOBBY_CHAT */) {
+            AddChatMessage(TextFormat("Player %d", player_id), (char*)data);
+        }
         else if (action == 6 /* LOBBY_LEAVE */) {
             otherPlayers[player_id].active = false;
         }
@@ -80,8 +84,17 @@ void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
  * @param dt Delta time since the last frame.
  */
 void lobby_update(float dt) {
-    updatePlayer(&player, platforms, platformCount, dt);
+    bool chatWasOpen = g_chatState.isOpen;
+    UpdateChat();
+    
+    // If chat is open, we don't move and don't toggle menus
+    if (g_chatState.isOpen) {
+        // Still update camera to stay centered but no movement
+        camera.target = player.position;
+        return;
+    }
 
+    updatePlayer(&player, platforms, platformCount, dt);
     camera.target = player.position;
 
     toggleSkinMenu();
@@ -122,6 +135,7 @@ void lobby_draw(void) {
     if (isTextureMenuOpen) {
         drawMenuTextures();
     }
+    DrawChat();
 }
 
 /** @brief Global definition of the Lobby module. */

@@ -16,6 +16,7 @@ BASE_CFLAGS := \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
+	-I../reseau/include \
 	-I..
 
 # Linker base
