@@ -173,6 +173,9 @@ int main(void) {
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
 
+    // Initialize audio device
+    InitAudioDevice();
+
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
 
     playerTextures[0] = LoadTexture(IMAGES_PATH "earth.png"); playerTextureCount++;

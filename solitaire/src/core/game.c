@@ -108,10 +108,19 @@ bool solitaire_isRed(const Card_St* card) {
     return card->suit == SUIT_HEARTS || card->suit == SUIT_DIAMONDS;
 }
 
-bool solitaire_isValidMove(const Card_St* card, const Pile_St* targetPile) {
+bool solitaire_isValidMove(const Card_St* card, const Pile_St* targetPile, const SolitaireGameState* game) {
     if (targetPile->type == PILE_FOUNDATION) {
         if (targetPile->count == 0) {
-            return card->rank == RANK_ACE;
+            // Only allow Ace on foundation if it matches the foundation's assigned suit color
+            // Foundation 0-1: red suits (Hearts, Diamonds)
+            // Foundation 2-3: black suits (Clubs, Spades)
+            if (card->rank != RANK_ACE) return false;
+            
+            int foundationIndex = (int)(targetPile - game->foundation);
+            bool isRedFoundation = (foundationIndex < 2); // First 2 foundations are red
+            bool isCardRed = solitaire_isRed(card);
+            
+            return isRedFoundation == isCardRed;
         } else {
             Card_St* topCard = targetPile->cards[targetPile->count - 1];
             return card->suit == topCard->suit && card->rank == topCard->rank + 1;
@@ -262,7 +271,7 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                                   CARD_WIDTH, CARD_HEIGHT};
             
             if (CheckCollisionPointRec(mousePos, foundRect) && dragCount == 1) {
-                if (solitaire_isValidMove(game->dragState.cards[0], &game->foundation[i])) {
+                if (solitaire_isValidMove(game->dragState.cards[0], &game->foundation[i], game)) {
                     // Move to foundation
                     Pile_St* srcPile = game->dragState.sourcePile;
                     for (int k = sourceIdx; k < srcPile->count - dragCount; k++) {
@@ -296,7 +305,7 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                                     CARD_WIDTH, CARD_HEIGHT + game->tableau[i].count * CARD_OFFSET_Y};
                 
                 if (CheckCollisionPointRec(mousePos, tabRect)) {
-                    if (solitaire_isValidMove(game->dragState.cards[0], &game->tableau[i])) {
+                    if (solitaire_isValidMove(game->dragState.cards[0], &game->tableau[i], game)) {
                         // Move to tableau
                         Pile_St* srcPile = game->dragState.sourcePile;
                         for (int k = sourceIdx; k < srcPile->count - dragCount; k++) {
@@ -366,12 +375,12 @@ void solitaire_checkLose(SolitaireGameState* game) {
             Card_St* topCard = game->tableau[i].cards[game->tableau[i].count - 1];
             if (topCard->isFaceUp) {
                 for (int j = 0; j < NUM_FOUNDATION_PILES; j++) {
-                    if (solitaire_isValidMove(topCard, &game->foundation[j])) {
+                    if (solitaire_isValidMove(topCard, &game->foundation[j], game)) {
                         return;
                     }
                 }
                 for (int j = 0; j < NUM_TABLEAU_PILES; j++) {
-                    if (j != i && solitaire_isValidMove(topCard, &game->tableau[j])) {
+                    if (j != i && solitaire_isValidMove(topCard, &game->tableau[j], game)) {
                         return;
                     }
                 }
@@ -382,12 +391,12 @@ void solitaire_checkLose(SolitaireGameState* game) {
     if (game->waste.count > 0) {
         Card_St* wasteTop = game->waste.cards[game->waste.count - 1];
         for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
-            if (solitaire_isValidMove(wasteTop, &game->foundation[i])) {
+            if (solitaire_isValidMove(wasteTop, &game->foundation[i], game)) {
                 return;
             }
         }
         for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
-            if (solitaire_isValidMove(wasteTop, &game->tableau[i])) {
+            if (solitaire_isValidMove(wasteTop, &game->tableau[i], game)) {
                 return;
             }
         }

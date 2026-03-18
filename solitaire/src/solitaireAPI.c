@@ -12,8 +12,8 @@
 #include <string.h>
 #include <raylib.h>
 
-#define SOLITAIRE_DEFAULT_WIDTH 1200
-#define SOLITAIRE_DEFAULT_HEIGHT 800
+#define SOLITAIRE_DEFAULT_WIDTH 800
+#define SOLITAIRE_DEFAULT_HEIGHT 600
 #define SOLITAIRE_DEFAULT_FPS 60
 
 struct SolitaireGame_St {
@@ -72,6 +72,9 @@ SolitaireGame_St* solitaire_initGame(const GameConfig_St* config) {
     
     game->assets = LoadAssets();
     
+    InitAudioDevice();
+    initAudio();
+    
     if (game->assets.cardSheet.id == 0 || game->assets.cardBack.id == 0) {
         UnloadAssets(game->assets);
         if (game->windowInitialized) CloseWindow();
@@ -121,6 +124,9 @@ void solitaire_freeGame(SolitaireGame_St* game) {
     }
     
     UnloadAssets(game->assets);
+    
+    freeAudio();
+    CloseAudioDevice();
     
     if (game->windowInitialized) {
         CloseWindow();

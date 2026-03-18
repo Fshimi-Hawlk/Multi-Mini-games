@@ -80,15 +80,21 @@ GameAssets LoadAssets(void) {
     GameAssets assets;
     
     const char* assetPaths[] = {
+        "solitaire/assets/playingCards.png",
         "assets/solitaire/playingCards.png",
+        "../solitaire/assets/playingCards.png",
         "../assets/solitaire/playingCards.png",
+        "../../solitaire/assets/playingCards.png",
         "../../assets/solitaire/playingCards.png",
         NULL
     };
     
     const char* backPaths[] = {
+        "solitaire/assets/cardBack_blue3.png",
         "assets/solitaire/cardBack_blue3.png",
+        "../solitaire/assets/cardBack_blue3.png",
         "../assets/solitaire/cardBack_blue3.png",
+        "../../solitaire/assets/cardBack_blue3.png",
         "../../assets/solitaire/cardBack_blue3.png",
         NULL
     };

@@ -13,8 +13,8 @@
 #include <stdint.h>
 
 // Game constants
-#define SCREEN_WIDTH 1200
-#define SCREEN_HEIGHT 800
+#define SCREEN_WIDTH 800
+#define SCREEN_HEIGHT 600
 #define TARGET_FPS 60
 
 #define NUM_SUITS 4
@@ -140,7 +140,7 @@ void solitaire_dealCards(SolitaireGameState* game);
 bool solitaire_isRed(const Card_St* card);
 
 /** @brief Check if move is valid */
-bool solitaire_isValidMove(const Card_St* card, const Pile_St* targetPile);
+bool solitaire_isValidMove(const Card_St* card, const Pile_St* targetPile, const SolitaireGameState* game);
 
 /** @brief Move card(s) between piles */
 void solitaire_moveCards(SolitaireGameState* game, Pile_St* source, Pile_St* target, int numCards);

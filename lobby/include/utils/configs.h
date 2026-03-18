@@ -14,7 +14,7 @@
 
 #define IMAGES_PATH ASSET_PATH "images/"
 
-#define WINDOW_WIDTH    1000
+#define WINDOW_WIDTH    800
 #define WINDOW_HEIGHT   600
 #define WINDOW_TITLE    "Lobby"
 
