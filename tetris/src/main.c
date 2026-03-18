@@ -25,17 +25,17 @@ int main(int argc, char* argv[]) {
     board_t board;
     boardShape_st boardShape, nextBoardShape;
 
-    randomShape(&boardShape);
-    randomShape(&nextBoardShape);
+    tetris_randomShape(&boardShape);
+    tetris_randomShape(&nextBoardShape);
 
     speed_st speed = {.duration = (autoPlay ? 0.01f : 1.0f)};
 
     int lineArray[4], lineNb, lineNbTotal = 0;
     int points[5] = {0, 40, 100, 300, 1200}, score = 0, level = 0;
     int highScore;
-    readHighScore(&highScore);
+    tetris_readHighScore(&highScore);
 
-    initBoard(board);
+    tetris_initBoard(board);
 
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_NAME);
@@ -45,27 +45,27 @@ int main(int argc, char* argv[]) {
     moveAlgoResult_st moveAlgoResult;
 
     while (!WindowShouldClose()) {
-        mouvement(board, &boardShape);
+        tetris_mouvement(board, &boardShape);
 
         if (autoPlay) {
             if (!hasFoundMove) {
-                moveAlgoResult = findBestMove(board, boardShape, nextBoardShape);
+                moveAlgoResult = tetris_findBestMove(board, boardShape, nextBoardShape);
 
-                hasFoundMove = true; //!isOOBAt(boardShape, foundMovePosisition); // Fail guard
+                hasFoundMove = true; //!tetris_tetris_isOOBAt(boardShape, foundMovePosisition); // Fail guard
                 // if (!hasFoundMove) printf("Didn't found any suitable position\n");
             }
             else {
                 // moveShapeAt(board, &boardShape, foundMovePosisition); // place la pièce
-                automaticMovementTo(&speed, &boardShape, moveAlgoResult);
+                tetris_automaticMovementTo(&speed, &boardShape, moveAlgoResult);
                 
-                if (isOOB(boardShape) || isColliding(board, boardShape)) {
+                if (tetris_isOOB(boardShape) || tetris_isColliding(board, boardShape)) {
                     boardShape.position.y--;
-                    putShapeInBoard(board, boardShape);
+                    tetris_putShapeInBoard(board, boardShape);
 
                     boardShape = nextBoardShape;
-                    randomShape(&nextBoardShape);
+                    tetris_randomShape(&nextBoardShape);
 
-                    if (isColliding(board, boardShape)) {
+                    if (tetris_isColliding(board, boardShape)) {
                         break;
                     }
                     
@@ -74,23 +74,23 @@ int main(int argc, char* argv[]) {
             }
         }
         else {
-            automaticDrop(&speed, &boardShape);
-            if (isOOB(boardShape) || isColliding(board, boardShape)) {
+            tetris_automaticDrop(&speed, &boardShape);
+            if (tetris_isOOB(boardShape) || tetris_isColliding(board, boardShape)) {
                 boardShape.position.y--;
-                putShapeInBoard(board, boardShape);
+                tetris_putShapeInBoard(board, boardShape);
 
                 boardShape = nextBoardShape;
-                randomShape(&nextBoardShape);
+                tetris_randomShape(&nextBoardShape);
 
-                if (isColliding(board, boardShape)) {
-                    writeHighScore(highScore, score);
+                if (tetris_isColliding(board, boardShape)) {
+                    tetris_writeHighScore(highScore, score);
                     return 1;
                 }
             }
         }
 
             
-        handleLineClears(board, lineArray, &lineNb);
+        tetris_handleLineClears(board, lineArray, &lineNb);
         lineNbTotal += lineNb;
         level = fminf(29, lineNbTotal / 10.0f);
         score += points[lineNb] * (level + 1);
@@ -102,12 +102,12 @@ int main(int argc, char* argv[]) {
             ClearBackground(BACKGROUND_COLOR);
             DrawFPS(10, 10);
 
-            drawBoard(board);
-            drawPreview(board, boardShape);
-            drawShape(boardShape);
-            drawNextShape(nextBoardShape);
+            tetris_drawBoard(board);
+            tetris_drawPreview(board, boardShape);
+            tetris_drawShape(boardShape);
+            tetris_drawNextShape(nextBoardShape);
 
-            drawInformations(score, level, lineNbTotal, highScore);
+            tetris_drawInformations(score, level, lineNbTotal, highScore);
         EndDrawing();
     }
 

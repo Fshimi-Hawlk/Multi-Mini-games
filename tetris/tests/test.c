@@ -2,59 +2,59 @@
 #include "core/shape.h"
 #include <assert.h>
 
-void test_areCoordinatesOOB(void);
-void test_isCollidingAt(void);
-void test_putShapeInBoard(void);
-void test_detectFullLines(void);
+void test_tetris_areCoordinatesOOB(void);
+void test_tetris_tetris_isCollidingAt(void);
+void test_tetris_putShapeInBoard(void);
+void test_tetris_detectFullLines(void);
 
-void test_rotationCW(void);
-void test_rotationCCW(void);
+void test_tetris_rotationCW(void);
+void test_tetris_rotationCCW(void);
 
 int main(void) {
-    test_areCoordinatesOOB();
-    test_isCollidingAt();
-    test_putShapeInBoard();
-    test_detectFullLines();
+    test_tetris_areCoordinatesOOB();
+    test_tetris_tetris_isCollidingAt();
+    test_tetris_putShapeInBoard();
+    test_tetris_detectFullLines();
 
-    test_rotationCW();
-    test_rotationCCW();
+    test_tetris_rotationCW();
+    test_tetris_rotationCCW();
 
     return 0;
 }
 
-void test_areCoordinatesOOB(void) {
-    printf("=== Test areCoordinatesOOB ===\n");
+void test_tetris_areCoordinatesOOB(void) {
+    printf("=== Test tetris_areCoordinatesOOB ===\n");
     
     // Test coordonnées valides (dans les limites)
-    assert(!areCoordinatesOOB(0, 0));
+    assert(!tetris_areCoordinatesOOB(0, 0));
     printf("✓ Test (0, 0) : valide\n");
     
-    assert(!areCoordinatesOOB(BOARD_WIDTH - 1, BOARD_HEIGHT - 1));
+    assert(!tetris_areCoordinatesOOB(BOARD_WIDTH - 1, BOARD_HEIGHT - 1));
     printf("✓ Test (%d, %d) : valide\n", BOARD_WIDTH - 1, BOARD_HEIGHT - 1);
     
-    assert(!areCoordinatesOOB(5, 5));
+    assert(!tetris_areCoordinatesOOB(5, 5));
     printf("✓ Test (5, 5) : valide\n");
     
     // Test coordonnées invalides (hors limites)
-    assert(areCoordinatesOOB(-1, 5));
+    assert(tetris_areCoordinatesOOB(-1, 5));
     printf("✓ Test (-1, 5) : hors limites (x < 0)\n");
     
-    assert(areCoordinatesOOB(BOARD_WIDTH, 5));
+    assert(tetris_areCoordinatesOOB(BOARD_WIDTH, 5));
     printf("✓ Test (%d, 5) : hors limites (x >= BOARD_WIDTH)\n", BOARD_WIDTH);
     
-    assert(areCoordinatesOOB(5, BOARD_HEIGHT));
+    assert(tetris_areCoordinatesOOB(5, BOARD_HEIGHT));
     printf("✓ Test (5, %d) : hors limites (y >= BOARD_HEIGHT)\n", BOARD_HEIGHT);
     
-    assert(areCoordinatesOOB(-1, BOARD_HEIGHT));
+    assert(tetris_areCoordinatesOOB(-1, BOARD_HEIGHT));
     printf("✓ Test (-1, %d) : hors limites (x < 0 ET y >= BOARD_HEIGHT)\n", BOARD_HEIGHT);
     
     printf("\n=== Tous les tests sont passés! ===\n\n");
 }
 
-void test_isCollidingAt(void) {
-    printf("=== Test isCollidingAt ===\n");
+void test_tetris_tetris_isCollidingAt(void) {
+    printf("=== Test tetris_tetris_isCollidingAt ===\n");
     board_t board;
-    initBoard(board);
+    tetris_initBoard(board);
     
     // Créer une forme simple (carré 2x2)
     boardShape_st shape = {
@@ -64,25 +64,25 @@ void test_isCollidingAt(void) {
     };
     
     // Test 1 : pas de collision sur plateau vide
-    assert(!isCollidingAt(board, shape, (iVector2){0, 0}));
+    assert(!tetris_tetris_isCollidingAt(board, shape, (iVector2){0, 0}));
     printf("✓ Pas de collision sur plateau vide\n");
     
     // Test 2 : placer une forme et vérifier collision
-    putShapeInBoard(board, shape);
-    assert(isCollidingAt(board, shape, (iVector2){0, 0}));
+    tetris_putShapeInBoard(board, shape);
+    assert(tetris_tetris_isCollidingAt(board, shape, (iVector2){0, 0}));
     printf("✓ Collision détectée avec forme placée\n");
     
     // Test 3 : pas de collision si on se décale
-    assert(!isCollidingAt(board, shape, (iVector2){5, 5}));
+    assert(!tetris_tetris_isCollidingAt(board, shape, (iVector2){5, 5}));
     printf("✓ Pas de collision en position décalée\n");
     
-    printf("=== Tous les tests isCollidingAt sont passés! ===\n\n");
+    printf("=== Tous les tests tetris_tetris_isCollidingAt sont passés! ===\n\n");
 }
 
-void test_putShapeInBoard(void) {
-    printf("=== Test putShapeInBoard ===\n");
+void test_tetris_putShapeInBoard(void) {
+    printf("=== Test tetris_putShapeInBoard ===\n");
     board_t board;
-    initBoard(board);
+    tetris_initBoard(board);
     
     boardShape_st shape = {
         .shape = {{0, 0}, {1, 0}, {0, 1}, {1, 1}},
@@ -95,7 +95,7 @@ void test_putShapeInBoard(void) {
     printf("✓ Plateau vide avant insertion\n");
     
     // Insérer la forme
-    putShapeInBoard(board, shape);
+    tetris_putShapeInBoard(board, shape);
     
     // Vérifier que la forme est placée
     assert(!ColorIsEqual(board[5][3], BOARD_BACKGROUND_COLOR));
@@ -108,20 +108,20 @@ void test_putShapeInBoard(void) {
     assert(ColorIsEqual(board[6][4], shape.color));
     printf("✓ Les 4 blocs sont correctement positionnés\n");
     
-    printf("=== Tous les tests putShapeInBoard sont passés! ===\n\n");
+    printf("=== Tous les tests tetris_putShapeInBoard sont passés! ===\n\n");
 }
 
-void test_detectFullLines(void) {
-    printf("=== Test detectFullLines ===\n");
+void test_tetris_detectFullLines(void) {
+    printf("=== Test tetris_detectFullLines ===\n");
     board_t board;
-    initBoard(board);
+    tetris_initBoard(board);
     
     Color testColor = {255, 255, 255, 255};
     
     // Test 1 : plateau vide, aucune ligne complète
     int lineArray[4] = {0};
     int lineNb = 0;
-    detectFullLines(board, lineArray, &lineNb);
+    tetris_detectFullLines(board, lineArray, &lineNb);
     assert(lineNb == 0);
     printf("✓ Plateau vide : 0 ligne complète\n");
     
@@ -130,7 +130,7 @@ void test_detectFullLines(void) {
         board[10][x] = testColor;
     }
     lineNb = 0;
-    detectFullLines(board, lineArray, &lineNb);
+    tetris_detectFullLines(board, lineArray, &lineNb);
     assert(lineNb == 1);
     assert(lineArray[0] == 10);
     printf("✓ Une ligne complète détectée à y=10\n");
@@ -140,15 +140,15 @@ void test_detectFullLines(void) {
         board[15][x] = testColor;
     }
     lineNb = 0;
-    detectFullLines(board, lineArray, &lineNb);
+    tetris_detectFullLines(board, lineArray, &lineNb);
     assert(lineNb == 2);
     printf("✓ Deux lignes complètes détectées\n");
     
-    printf("=== Tous les tests detectFullLines sont passés! ===\n\n");
+    printf("=== Tous les tests tetris_detectFullLines sont passés! ===\n\n");
 }
 
-void test_rotationCW(void) {
-    printf("=== Test rotationCW ===\n");
+void test_tetris_rotationCW(void) {
+    printf("=== Test tetris_rotationCW ===\n");
     
     // Créer une forme en L (pas symétrique pour voir la rotation)
     boardShape_st shape = {
@@ -165,7 +165,7 @@ void test_rotationCW(void) {
     }
     
     // Test 1 : rotation horaire
-    rotationCW(&shape);
+    tetris_rotationCW(&shape);
     assert(shape.rotation == 1);
     printf("✓ Rotation compteur à 1\n");
     
@@ -181,9 +181,9 @@ void test_rotationCW(void) {
     printf("✓ Coordonnées modifiées après rotation\n");
     
     // Test 2 : 4 rotations = retour à l'original
-    rotationCW(&shape);
-    rotationCW(&shape);
-    rotationCW(&shape);
+    tetris_rotationCW(&shape);
+    tetris_rotationCW(&shape);
+    tetris_rotationCW(&shape);
     assert(shape.rotation == 0);
     printf("✓ 4 rotations CW = rotation complète\n");
     
@@ -193,11 +193,11 @@ void test_rotationCW(void) {
     }
     printf("✓ Coordonnées revenues à l'original après 4 rotations\n");
     
-    printf("=== Tous les tests rotationCW sont passés! ===\n\n");
+    printf("=== Tous les tests tetris_rotationCW sont passés! ===\n\n");
 }
 
-void test_rotationCCW(void) {
-    printf("=== Test rotationCCW ===\n");
+void test_tetris_rotationCCW(void) {
+    printf("=== Test tetris_rotationCCW ===\n");
     
     // Créer une forme en L (pas symétrique)
     boardShape_st shape = {
@@ -213,14 +213,14 @@ void test_rotationCCW(void) {
     }
     
     // Test 1 : rotation counter-clockwise
-    rotationCCW(&shape);
+    tetris_rotationCCW(&shape);
     assert(shape.rotation == 3);
     printf("✓ Rotation compteur à 3\n");
     
     // Test 2 : 4 rotations CCW = retour à l'original
-    rotationCCW(&shape);
-    rotationCCW(&shape);
-    rotationCCW(&shape);
+    tetris_rotationCCW(&shape);
+    tetris_rotationCCW(&shape);
+    tetris_rotationCCW(&shape);
     assert(shape.rotation == 0);
     printf("✓ 4 rotations CCW = rotation complète\n");
     
@@ -231,8 +231,8 @@ void test_rotationCCW(void) {
     printf("✓ Coordonnées revenues à l'original après 4 rotations\n");
     
     // Test 3 : CW + CCW = identité
-    rotationCW(&shape);
-    rotationCCW(&shape);
+    tetris_rotationCW(&shape);
+    tetris_rotationCCW(&shape);
     assert(shape.rotation == 0);
     for (int i = 0; i < 4; i++) {
         assert(shape.shape[i].x == original[i].x);
@@ -240,5 +240,5 @@ void test_rotationCCW(void) {
     }
     printf("✓ CW suivi de CCW ramène à l'original\n");
     
-    printf("=== Tous les tests rotationCCW sont passés! ===\n\n");
+    printf("=== Tous les tests tetris_rotationCCW sont passés! ===\n\n");
 }

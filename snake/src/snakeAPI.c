@@ -57,21 +57,21 @@ Error_Et snake_initGame__full(SnakeGame_St** game, SnakeConfigs_St configs) {
     gameRef->base.freeGame = snake_freeGameWrapper;
     gameRef->base.running  = true;
 
-    gameRef->highScore = readRecord();
+    gameRef->highScore = snake_readRecord();
     
     gameRef->direction = (iVector2) {.x = 1, .y = 0}; // Direction initiale : droite
 
     gameRef->nextDirection = gameRef->direction;
 
-    initSnake(&gameRef->snake);
-    snakeAppend(&gameRef->snake, (iVector2) {.x = 5, .y = 10});
-    snakeAppend(&gameRef->snake, (iVector2) {.x = 6, .y = 10});
-    snakeAppend(&gameRef->snake, (iVector2) {.x = 7, .y = 10});
+    snake_initSnake(&gameRef->snake);
+    snake_snakeAppend(&gameRef->snake, (iVector2) {.x = 5, .y = 10});
+    snake_snakeAppend(&gameRef->snake, (iVector2) {.x = 6, .y = 10});
+    snake_snakeAppend(&gameRef->snake, (iVector2) {.x = 7, .y = 10});
 
     gameRef->anim = (SnakeAnimationData_St) {0, 0.2};
 
-    initBoard(gameRef->board, &gameRef->snake);
-    spawnApple(gameRef->board);
+    snake_initBoard(gameRef->board, &gameRef->snake);
+    snake_spawnApple(gameRef->board);
 
     log_debug("Snake initialized successfully");
     return OK;
@@ -88,34 +88,40 @@ Error_Et snake_gameLoop(SnakeGame_St* const game) {
     iVector2 previousTailPos;
 
     if (!game->move) {
-        game->move = mouvement(&game->nextDirection);
+        game->move = snake_mouvement(&game->nextDirection);
     }
     
-    game->nextPos = (iVector2) {.x = game->snake.tail->coord.x + game->direction.x, .y = game->snake.tail->coord.y + game->direction.y};
+    iVector2 nextPos = {
+        .x = game->snake.tail->coord.x + game->direction.x, 
+        .y = game->snake.tail->coord.y + game->direction.y
+    };
     
-    if (selfCollision(&game->snake, game->nextPos) || isOOB(game->nextPos)) {
+    if (snake_selfCollision(&game->snake, nextPos) || snake_isOOB(nextPos)) {
         if (game->nbApple > game->highScore) {
-            writeRecord(game->nbApple);
+            snake_writeRecord(game->nbApple);
         }
 
         game->base.running = false;
+
     } else {
         game->anim.timer += GetFrameTime();
         
         if (game->anim.timer >= game->anim.delay) {
             game->direction = game->nextDirection;
-            snakeAppend(&game->snake, game->nextPos);
-            updateBoard(game->board, &game->snake);
+            snake_snakeAppend(&game->snake, nextPos);
 
-            if (game->board[game->snake.tail->coord.y][game->snake.tail->coord.x] == GAME_TILE_APPLE) {
-                spawnApple(game->board);
+            if (game->board[nextPos.y][nextPos.x] == GAME_TILE_APPLE) {
+                snake_spawnApple(game->board);
                 game->nbApple++;
+
             } else {
-                snakeRemove(&game->snake, &previousTailPos);
+                snake_snakeRemove(&game->snake, &previousTailPos);
                 game->board[previousTailPos.y][previousTailPos.x] = GAME_TILE_GRASS;
             }
 
             game->board[game->snake.tail->coord.y][game->snake.tail->coord.x] = GAME_TILE_HEAD;
+
+            snake_updateBoard(game->board, &game->snake);
 
             game->anim.timer = 0;
             game->move = false;
@@ -130,8 +136,8 @@ Error_Et snake_gameLoop(SnakeGame_St* const game) {
     BeginDrawing();
         ClearBackground(APP_BACKGROUND_COLOR);
         
-        drawBoard(game->board);
-        drawSnake(&game->snake, interpolation, game->direction);
+        snake_drawBoard(game->board);
+        snake_drawSnake(&game->snake, interpolation, game->direction);
         
         DrawText(TextFormat("Score : %d", game->nbApple), CELL_SIZE * SIZE_BOARD + 10, 50, 20, BLACK);
         DrawText(TextFormat("High Score : %d", game->highScore), CELL_SIZE * SIZE_BOARD + 10, 100, 20, BLACK);
@@ -144,7 +150,7 @@ Error_Et snake_freeGame(SnakeGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
     SnakeGame_St* gameRef = *game;
 
-    freeSnake(&gameRef->snake);
+    snake_freeSnake(&gameRef->snake);
 
     free(gameRef);
     *game = NULL;

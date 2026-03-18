@@ -1,21 +1,21 @@
 #include "core/board.h"
 #include "utils/utils.h"
 
-void initBoard(board_t board) {
+void tetris_initBoard(board_t board) {
     for (int y = 0; y < BOARD_HEIGHT; y++)
         for (int x = 0; x < BOARD_WIDTH; x++)
             board[y][x] = BOARD_BACKGROUND_COLOR; 
 }
 
-bool areCoordinatesOOB(int x, int y) {
+bool tetris_areCoordinatesOOB(int x, int y) {
     return (y >= BOARD_HEIGHT) || (x < 0) || (x >= BOARD_WIDTH);
 }
 
-bool isPositonOOB(iVector2 position) {
-    return areCoordinatesOOB(position.x, position.y);
+bool tetris_isPosOOB(iVector2 position) {
+    return tetris_areCoordinatesOOB(position.x, position.y);
 }
 
-bool isOOBAt(boardShape_st boardShape, iVector2 position) {
+bool tetris_tetris_isOOBAt(boardShape_st boardShape, iVector2 position) {
     for (int i = 0; i < 4; i++) {
         int x = boardShape.shape[i].x + position.x;
         int y = boardShape.shape[i].y + position.y;
@@ -27,11 +27,11 @@ bool isOOBAt(boardShape_st boardShape, iVector2 position) {
     return false;
 }
 
-bool isOOB(boardShape_st boardShape) {
-    return isOOBAt(boardShape, boardShape.position);
+bool tetris_isOOB(boardShape_st boardShape) {
+    return tetris_tetris_isOOBAt(boardShape, boardShape.position);
 }
 
-bool isCollidingAt(board_t board, boardShape_st boardShape, iVector2 position) {
+bool tetris_tetris_isCollidingAt(board_t board, boardShape_st boardShape, iVector2 position) {
     for (int i = 0; i < 4; i++) {
         int y = boardShape.shape[i].y + position.y;
         int x = boardShape.shape[i].x + position.x;
@@ -56,11 +56,11 @@ bool isCollidingAt(board_t board, boardShape_st boardShape, iVector2 position) {
     return false;
 }
 
-bool isColliding(board_t board, boardShape_st boardShape) {
-    return isCollidingAt(board, boardShape, boardShape.position);
+bool tetris_isColliding(board_t board, boardShape_st boardShape) {
+    return tetris_tetris_isCollidingAt(board, boardShape, boardShape.position);
 }
 
-void putShapeInBoard(board_t board, boardShape_st boardShape) {
+void tetris_putShapeInBoard(board_t board, boardShape_st boardShape) {
     for (int i = 0; i < 4; i++) {
         int shapeCellY = boardShape.shape[i].y + boardShape.position.y;
         int shapeCellX = boardShape.shape[i].x + boardShape.position.x;
@@ -72,7 +72,7 @@ void putShapeInBoard(board_t board, boardShape_st boardShape) {
     }
 }
 
-void detectFullLines(board_t board, int lineArray[4], int *lineNb) {
+void tetris_detectFullLines(board_t board, int lineArray[4], int *lineNb) {
     int nInLign;
     *lineNb = 0;
 
@@ -87,7 +87,7 @@ void detectFullLines(board_t board, int lineArray[4], int *lineNb) {
     }
 }
 
-void clearLines(board_t board, int lineArray[4], int lineNb) {
+void tetris_clearLines(board_t board, int lineArray[4], int lineNb) {
     for (int i = 0; i < lineNb; i++) {
         for (int y = lineArray[i] - 1; y >= 0; y--) {
             for (int x = 0; x < BOARD_WIDTH; x++) {
@@ -100,7 +100,7 @@ void clearLines(board_t board, int lineArray[4], int lineNb) {
     }
 }
 
-void handleLineClears(board_t board, int lineArray[4], int *lineNb) {
-    detectFullLines(board, lineArray, lineNb);
-    clearLines(board, lineArray, *lineNb);
+void tetris_handleLineClears(board_t board, int lineArray[4], int *lineNb) {
+    tetris_detectFullLines(board, lineArray, lineNb);
+    tetris_clearLines(board, lineArray, *lineNb);
 }

@@ -1,6 +1,6 @@
 #include "ui/board.h"
 
-void drawBoard(board_t board) {
+void tetris_drawBoard(board_t board) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2; 
 

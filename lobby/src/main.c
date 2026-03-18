@@ -23,7 +23,7 @@
 
 #include "lobbyAPI.h"
 #include "APIs/tetrisAPI.h"
-#include "systemSettings.h"
+#include "APIs/snakeAPI.h"
 
 /**
     @brief Program entry point.
@@ -48,6 +48,351 @@ s32 main(void) {
                 lobby_gameLoop(game);
             } break;
 
+            case GAME_SCENE_BATTLESHIP: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_BATTLESHIP];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_BINGO: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_BINGO];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_BLOCK_BLAST: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_BLOCK_BLAST];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_BOWLING: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_BOWLING];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_BRICK_BREAKER: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_BRICK_BREAKER];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_CONNECT_4: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_CONNECT_4];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_KFF: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_KFF];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_MINE_SWEEPER: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_MINE_SWEEPER];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_MINIGOLF: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_MINIGOLF];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_MORPION: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_MORPION];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_OTHELLO: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_OTHELLO];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_RUBIKS_CUBE: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_RUBIKS_CUBE];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_SNAKE: {
+                BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_SNAKE];
+                SnakeGame_St** snakeRef = (SnakeGame_St**) miniRef;
+                if (game->subGameManager.needGameInit) {
+                    error = snake_initGame(snakeRef);
+                    game->subGameManager.needGameInit = false;
+
+                    if (error != OK) {
+                        log_fatal("<Game Name> initialization failed: error %d", error);
+                        snake_freeGame(snakeRef);
+                        game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        break;
+                    }
+                }
+
+                snake_gameLoop(*snakeRef);
+
+                if (!(*miniRef)->running) {
+                    snake_freeGame(snakeRef);
+                    game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                }
+            } break;
+
+            case GAME_SCENE_SOLITAIRE: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_SOLITAIRE];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
+            case GAME_SCENE_SUIKA: {
+                // BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_SUIKA];
+                // <GameName>Game_St** <gameName>Ref = (<GameName>Game_St**) miniRef;
+                // if (game->subGameManager.needGameInit) {
+                    // error = <gameName>_initGame(<gameName>Ref);
+                    // game->subGameManager.needGameInit = false;
+// 
+                    // if (error != OK) {
+                        // log_fatal("<Game Name> initialization failed: error %d", error);
+                        // <gameName>_freeGame(<gameName>Ref);
+                        // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                        // break;
+                    // }
+                // }
+// 
+                // <gameName>_gameLoop(*<gameName>Ref);
+// 
+                // if (!(*miniRef)->running) {
+                    // <gameName>_freeGame(<gameName>Ref);
+                    // game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+                // }
+            } break;
+
             case GAME_SCENE_TETRIS: {
                 BaseGame_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_TETRIS];
                 TetrisGame_St** tetrisRef = (TetrisGame_St**) miniRef;
@@ -61,14 +406,6 @@ s32 main(void) {
                         game->subGameManager.currentScene = GAME_SCENE_LOBBY;
                         break;
                     }
-
-                    systemSettings.video.width = 600;
-                    systemSettings.video.height = 800;
-
-                    error = applySystemSettings();
-                    if (error != OK) {
-                        log_error("System settings couldn't be applied correctly");
-                    }
                 }
 
                 tetris_gameLoop(*tetrisRef);
@@ -76,7 +413,6 @@ s32 main(void) {
                 if (!(*miniRef)->running) {
                     tetris_freeGame(tetrisRef);
                     game->subGameManager.currentScene = GAME_SCENE_LOBBY;
-                    systemSettings = DEFAULT_SYSTEM_SETTING;
                 }
             } break;
 

@@ -1,6 +1,7 @@
 #include "ui/game.h"
+#include "core/board.h"
 
-void drawInformations(int score, int level, int lineNbTotal, int highScore) {
+void tetris_drawInformations(int score, int level, int lineNbTotal, int highScore) {
     char scoreText[30];
     char levelText[30];
     char linesText[30];
@@ -17,12 +18,12 @@ void drawInformations(int score, int level, int lineNbTotal, int highScore) {
     DrawText(highScoreText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 120, 20, WHITE);
 }
 
-void drawPreview(board_t board, boardShape_st boardShape) {
+void tetris_drawPreview(board_t board, boardShape_st boardShape) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
 
-    for (; !isColliding(board, boardShape); (boardShape.position.y)++);
+    for (; !tetris_isColliding(board, boardShape); (boardShape.position.y)++);
     (boardShape.position.y)--;
 
     for (int i = 0; i < 4; i++) {

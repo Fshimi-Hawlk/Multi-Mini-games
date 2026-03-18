@@ -51,7 +51,22 @@ typedef enum {
 */
 typedef enum {
     GAME_SCENE_LOBBY,       ///< Main lobby / hub world with platformer movement
-    GAME_SCENE_TETRIS,      ///< Tetris mini-game
+    GAME_SCENE_BATTLESHIP,
+    GAME_SCENE_BINGO,
+    GAME_SCENE_BLOCK_BLAST,
+    GAME_SCENE_BOWLING,
+    GAME_SCENE_BRICK_BREAKER,
+    GAME_SCENE_CONNECT_4,
+    GAME_SCENE_KFF,
+    GAME_SCENE_MINE_SWEEPER,
+    GAME_SCENE_MINIGOLF,
+    GAME_SCENE_MORPION,
+    GAME_SCENE_OTHELLO,
+    GAME_SCENE_RUBIKS_CUBE,
+    GAME_SCENE_SNAKE,
+    GAME_SCENE_SOLITAIRE,
+    GAME_SCENE_SUIKA,
+    GAME_SCENE_TETRIS,
     __gameSceneCount
 } GameScene_Et;
 
@@ -62,6 +77,22 @@ typedef enum {
     PLAYER_TEXTURE_DEFAULT,
     PLAYER_TEXTURE_EARTH,
     PLAYER_TEXTURE_TROLL_FACE,
+    PLAYER_TEXTURE_BOWLING_BALL,        //< bowling ball iamge
+    PLAYER_TEXTURE_SOLITAIRE_TODO,      //< solitaire card (?) -> not round
+    PLAYER_TEXTURE_KFF_TODO,            //< king for four card (?) -> not round
+    PLAYER_TEXTURE_SUIKA_TODO,          //< suika something (?) -> not round
+    PLAYER_TEXTURE_TETRIS_TODO,         //< tetris shape (?) -> not round
+    PLAYER_TEXTURE_BLOCK_BLAST_TODO,    //< block blast shape (?) -> not round
+    PLAYER_TEXTURE_OTHELLO_TODO,        //< don't know
+    PLAYER_TEXTURE_SNAKE_TODO,          //< snake apple (?) or the litteral snake (?)
+    PLAYER_TEXTURE_CONNECT_4_TODO,      //< don't know
+    PLAYER_TEXTURE_RUBIKS_CUBE_TODO,    //< the cube itself
+    PLAYER_TEXTURE_MINIGOLF_TODO,       //< don't know
+    PLAYER_TEXTURE_BINGO_TODO,          //< bingo card (?) -> not round or the ball (?)
+    PLAYER_TEXTURE_BATTLESHIP_TODO,     //< a ship -> not round
+    PLAYER_TEXTURE_MORPION_TODO,        //< don't know
+    PLAYER_TEXTURE_MINE_SWEEPER_TODO,   //< don't know
+    PLAYER_TEXTURE_BRICK_BREAKER_TODO,  //< don't know
     __playerTextureCount,
 } PlayerTextureId_Et;
 
@@ -99,7 +130,7 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
-} Player_st;
+} Player_St;
 
 /**
     @brief Single rectangular platform / solid surface in the lobby world.
@@ -108,7 +139,7 @@ typedef struct {
     Rectangle rect;         ///< Position and size (world coordinates)
     Color     color;        ///< Debug / placeholder rendering color
     float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-} Platform_st;
+} Platform_St;
 
 /**
     @brief Manages which mini-game is currently active and its integration with the lobby.
@@ -131,7 +162,7 @@ typedef struct {
 typedef struct {
     BaseGame_St base;
 
-    Player_st         player;                     ///< Physics & movement state of the player character
+    Player_St         player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St  playerVisuals;              ///< Rendering and skin selection state
     Camera2D          cam;                        ///< 2D camera following the player
 

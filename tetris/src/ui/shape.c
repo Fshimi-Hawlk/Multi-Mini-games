@@ -1,6 +1,6 @@
 #include "ui/shape.h"
 
-void drawShape(boardShape_st boardShape) {
+void tetris_drawShape(boardShape_st boardShape) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
@@ -17,7 +17,7 @@ void drawShape(boardShape_st boardShape) {
     }
 }
 
-void drawNextShape(boardShape_st boardShape) {
+void tetris_drawNextShape(boardShape_st boardShape) {
     int offsetX = WINDOW_WIDTH * (2.0 / 3);
     int offsetY = WINDOW_HEIGHT * (1.0 / 3);
     int x, y;

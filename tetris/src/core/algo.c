@@ -3,7 +3,7 @@
 #include "core/board.h"
 #include "utils/utils.h"
 
-void copyBoard(board_t src, board_t dest) {
+void tetris_copyBoard(board_t src, board_t dest) {
     for (int y = 0; y < BOARD_HEIGHT; y++) {
         for (int x = 0; x < BOARD_WIDTH; x++) {
             dest[y][x] = src[y][x];
@@ -11,7 +11,7 @@ void copyBoard(board_t src, board_t dest) {
     }
 }
 
-int evaluateBoard(board_t board) {
+int tetris_evaluateBoard(board_t board) {
     int holes = 0;
     int aggregateHeight = 0;
     int bumpiness = 0;
@@ -69,54 +69,54 @@ int evaluateBoard(board_t board) {
     return score;
 }
 
-int simulateDrop(board_t board, boardShape_st piece, int col) {
+int tetris_simulateDrop(board_t board, boardShape_st piece, int col) {
     piece.position = (iVector2) { col, 0 };
 
     // Descente jusqu’à collision
-    while (!isColliding(board, piece)) {
+    while (!tetris_isColliding(board, piece)) {
         piece.position.y++;
     }
 
     return --piece.position.y;
 }
 
-moveAlgoResult_st findBestMove(board_t board, boardShape_st shape, boardShape_st nextShape) {
+moveAlgoResult_st tetris_findBestMove(board_t board, boardShape_st shape, boardShape_st nextShape) {
     board_t temp;
     int bestScore = -100000;
     moveAlgoResult_st result = {.position = {-1, -1}, .rotation = -1};
 
     for (int rot = 0; rot < 4; ++rot) {
         for (int col = 0; col < BOARD_WIDTH; col++) {
-            int row = simulateDrop(board, shape, col);
+            int row = tetris_simulateDrop(board, shape, col);
             if (row < 0) continue;
             iVector2 foundPosition = {col, row};
-            if (isOOBAt(shape, foundPosition)) continue;
+            if (tetris_tetris_isOOBAt(shape, foundPosition)) continue;
             
             for (int rotNext = 0; rotNext < 4; ++rotNext) {
                 for (int colNext = 0; colNext < BOARD_WIDTH; colNext++) {
-                    int rowNext = simulateDrop(board, nextShape, col);
+                    int rowNext = tetris_simulateDrop(board, nextShape, col);
                     if (rowNext < 0) continue;
                     iVector2 foundPositionNext = {colNext, rowNext};
-                    if (isOOBAt(nextShape, foundPositionNext)) continue;
+                    if (tetris_tetris_isOOBAt(nextShape, foundPositionNext)) continue;
             
-                    copyBoard(board, temp);
+                    tetris_copyBoard(board, temp);
                     shape.position = foundPosition;
                     nextShape.position = foundPositionNext;
-                    putShapeInBoard(temp, shape);
-                    putShapeInBoard(temp, nextShape);
+                    tetris_putShapeInBoard(temp, shape);
+                    tetris_putShapeInBoard(temp, nextShape);
 
-                    int score = evaluateBoard(temp);
+                    int score = tetris_evaluateBoard(temp);
                     if (score > bestScore) {
                         bestScore = score;
                         result.position = foundPosition;
                         result.rotation = rot;
                     }
                 }
-                rotationCW(&nextShape);
+                tetris_rotationCW(&nextShape);
             }
         }
 
-        rotationCW(&shape);
+        tetris_rotationCW(&shape);
     }
 
     return result;

@@ -1,7 +1,7 @@
 #include "core/shape.h"
 #include "utils/globals.h"
 
-void randomShape(boardShape_st* boardShape) {
+void tetris_randomShape(boardShape_st* boardShape) {
     int n = rand() % SHAPE_MAX_ID;
     memcpy(boardShape->shape, tetraminosShapes[n], sizeof(tetramino));
     boardShape->color = tetraminosColors[n];
@@ -9,7 +9,7 @@ void randomShape(boardShape_st* boardShape) {
     boardShape->shapeName = n;
 }
 
-void rotationCW(boardShape_st* boardShape) {
+void tetris_rotationCW(boardShape_st* boardShape) {
     int xTemp;
     
     for (int i = 0; i < 4; i++) {
@@ -21,7 +21,7 @@ void rotationCW(boardShape_st* boardShape) {
     boardShape->rotation = (boardShape->rotation + 1) % 4;
 }
 
-void rotationCCW(boardShape_st* boardShape) {
+void tetris_rotationCCW(boardShape_st* boardShape) {
     int xTemp;
     
     for (int i = 0; i < 4; i++) {
@@ -33,7 +33,7 @@ void rotationCCW(boardShape_st* boardShape) {
     boardShape->rotation = (boardShape->rotation + 3) % 4;
 }
 
-void automaticDrop(speed_st* speed, boardShape_st* boardShape) {
+void tetris_automaticDrop(speed_st* speed, boardShape_st* boardShape) {
     speed->t += GetFrameTime();
     speed->tDrop = fminf(speed->t / speed->duration, 1.0f);
     if (speed->tDrop >= 1) {

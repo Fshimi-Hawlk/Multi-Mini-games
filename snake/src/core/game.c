@@ -1,10 +1,11 @@
 #include "core/game.h"
+#include "utils/common.h"
 
-bool isOOB(iVector2 coord) {
+bool snake_isOOB(iVector2 coord) {
     return coord.x < 0 || coord.x >= SIZE_BOARD || coord.y < 0 || coord.y >= SIZE_BOARD;
 }
 
-bool selfCollision(const Snake_St* const snake, iVector2 nextHeadPos) {
+bool snake_selfCollision(const Snake_St* const snake, iVector2 nextHeadPos) {
     SnakeBodyPart_St* temp = snake->head;
     for (int i = 0; i < snake->bodyLength - 1 && temp != NULL; i++) {
         if (nextHeadPos.x == temp->coord.x && nextHeadPos.y == temp->coord.y) {
@@ -15,7 +16,7 @@ bool selfCollision(const Snake_St* const snake, iVector2 nextHeadPos) {
     return false;
 }
 
-int initBoard(Board_t board, const Snake_St* const snake) {
+int snake_initBoard(Board_t board, const Snake_St* const snake) {
     for (int i = 0; i < SIZE_BOARD; i++) {
         for (int j = 0; j < SIZE_BOARD; j++) {
             board[i][j] = GAME_TILE_GRASS;
@@ -33,7 +34,7 @@ int initBoard(Board_t board, const Snake_St* const snake) {
     return 0;
 }
 
-void updateBoard(Board_t board, const Snake_St* const snake) {
+void snake_updateBoard(Board_t board, const Snake_St* const snake) {
     SnakeBodyPart_St* temp = snake->head;
     for (int i = 0; i < snake->bodyLength && temp != NULL; i++) {
         board[temp->coord.y][temp->coord.x] = GAME_TILE_BODY;
@@ -41,7 +42,7 @@ void updateBoard(Board_t board, const Snake_St* const snake) {
     }
 }
 
-void spawnApple(Board_t board) {
+void snake_spawnApple(Board_t board) {
     iVector2 appleCoord = {0};
 
     do {
@@ -56,7 +57,7 @@ void spawnApple(Board_t board) {
     board[appleCoord.y][appleCoord.x] = GAME_TILE_APPLE;
 }
 
-void writeRecord(int highScore) {
+void snake_writeRecord(int highScore) {
     FILE *fd = fopen("assets/highScore.txt", "w");
     if (!fd) {
         return;
@@ -66,7 +67,7 @@ void writeRecord(int highScore) {
     fclose(fd);
 }
 
-int readRecord(void) {
+int snake_readRecord(void) {
     int highScore = 0;
 
     FILE *fd = fopen("assets/highScore.txt", "r");
@@ -80,7 +81,7 @@ int readRecord(void) {
     return highScore;
 }
 
-bool mouvement(iVector2* direction) {
+bool snake_mouvement(iVector2* direction) {
     if (IsKeyDown(KEY_W) && !direction->y) { // Lettre Z
         *direction = (iVector2) {.x = 0, .y = -1};
         return true;
@@ -100,15 +101,15 @@ bool mouvement(iVector2* direction) {
     return false;
 }
 
-void initSnake(Snake_St* snake) {
+void snake_initSnake(Snake_St* snake) {
     memset(snake, 0, sizeof(*snake));
 }
 
-bool isSnakeEmpty(Snake_St* snake) {
+bool snake_isSnakeEmpty(Snake_St* snake) {
     return snake->head == NULL && snake->bodyLength == 0;
 }
 
-void snakeAppend(Snake_St* snake, iVector2 pos) {
+void snake_snakeAppend(Snake_St* snake, iVector2 pos) {
     SnakeBodyPart_St* newPart;
 
     newPart = malloc(sizeof(SnakeBodyPart_St));
@@ -117,7 +118,7 @@ void snakeAppend(Snake_St* snake, iVector2 pos) {
     newPart->renderPos.y = (float)pos.y;
     newPart->suivant = NULL;
 
-    if(isSnakeEmpty(snake)) {
+    if(snake_isSnakeEmpty(snake)) {
         snake->head = newPart;
     } else {
         snake->tail->suivant = newPart;
@@ -128,10 +129,10 @@ void snakeAppend(Snake_St* snake, iVector2 pos) {
     snake->bodyLength++;
 }
 
-void snakeRemove(Snake_St* snake, iVector2* pos) {
+void snake_snakeRemove(Snake_St* snake, iVector2* pos) {
     SnakeBodyPart_St* head;
 
-    if (!isSnakeEmpty(snake)){
+    if (!snake_isSnakeEmpty(snake)){
         head = snake->head;
 
         if (pos != NULL) {
@@ -145,8 +146,8 @@ void snakeRemove(Snake_St* snake, iVector2* pos) {
     }
 }
 
-void freeSnake(Snake_St* snake) {
-    while (!isSnakeEmpty(snake)) {
-        snakeRemove(snake, NULL);
+void snake_freeSnake(Snake_St* snake) {
+    while (!snake_isSnakeEmpty(snake)) {
+        snake_snakeRemove(snake, NULL);
     }
 }

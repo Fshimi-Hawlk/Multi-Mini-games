@@ -52,10 +52,10 @@ struct TetrisGame_St {
 
     speed_st speed;                 // Controls automatic drop timing
 
-    int *clearedLines;              // Temporary buffer for cleared line indices
+    int clearedLines[4];            // Temporary buffer for cleared line indices
     int clearedLineAmount;          // Total lines cleared (used for difficulty)
 
-    int *rewardedPointsPerClearedLineCount; // Points per 0/1/2/3/4 lines cleared
+    int rewardedPointsPerClearedLineCount[5]; // Points per 0/1/2/3/4 lines cleared
     int difficultyMultiplier;       // Increases every 10 lines (affects score & speed)
 
     int highScore;                  // Loaded from file, updated on game over
@@ -87,12 +87,6 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     gameRef->speed.duration = 1.0f;
 
     // Scoring table (classic values)
-    gameRef->rewardedPointsPerClearedLineCount = calloc(sizeof(*gameRef->rewardedPointsPerClearedLineCount), 5);
-    if (gameRef->rewardedPointsPerClearedLineCount == NULL) {
-        tetris_freeGame(game);
-        return ERROR_ALLOC;
-    }
-
     gameRef->rewardedPointsPerClearedLineCount[0] = 0;
     gameRef->rewardedPointsPerClearedLineCount[1] = 40;
     gameRef->rewardedPointsPerClearedLineCount[2] = 100;
@@ -100,17 +94,11 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     gameRef->rewardedPointsPerClearedLineCount[4] = 1200;
 
     // Line clearing buffer
-    gameRef->clearedLines = calloc(4, sizeof(int));
-    if (!gameRef->clearedLines) {
-        tetris_freeGame(game);
-        return ERROR_ALLOC;
-    }
+    tetris_randomShape(&gameRef->boardShape);
+    tetris_randomShape(&gameRef->nextBoardShape);
 
-    randomShape(&gameRef->boardShape);
-    randomShape(&gameRef->nextBoardShape);
-
-    readHighScore(&gameRef->highScore);
-    initBoard(gameRef->board);
+    tetris_readHighScore(&gameRef->highScore);
+    tetris_initBoard(gameRef->board);
 
     log_debug("Tetris initialized successfully");
     return OK;
@@ -124,25 +112,25 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
 
     if (!game->base.running) return OK;
 
-    mouvement(game->board, &game->boardShape);
-    automaticDrop(&game->speed, &game->boardShape);
+    tetris_mouvement(game->board, &game->boardShape);
+    tetris_automaticDrop(&game->speed, &game->boardShape);
 
-    if (isOOB(game->boardShape) || isColliding(game->board, game->boardShape)) {
+    if (tetris_isOOB(game->boardShape) || tetris_isColliding(game->board, game->boardShape)) {
         game->boardShape.position.y--;
-        putShapeInBoard(game->board, game->boardShape);
+        tetris_putShapeInBoard(game->board, game->boardShape);
 
         game->boardShape = game->nextBoardShape;
-        randomShape(&game->nextBoardShape);
+        tetris_randomShape(&game->nextBoardShape);
 
-        if (isColliding(game->board, game->boardShape)) {
-            writeHighScore(game->highScore, game->base.score);
+        if (tetris_isColliding(game->board, game->boardShape)) {
+            tetris_writeHighScore(game->highScore, game->base.score);
             game->base.running = false;
             return OK;
         }
     }
 
     int clearedCount = 0;
-    handleLineClears(game->board, game->clearedLines, &clearedCount);
+    tetris_handleLineClears(game->board, game->clearedLines, &clearedCount);
 
     game->clearedLineAmount += clearedCount;
     game->difficultyMultiplier = (int) fminf(29, game->clearedLineAmount / 10.0f);
@@ -162,12 +150,14 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
         ClearBackground(BACKGROUND_COLOR);
         DrawFPS(10, 10);
 
-        drawBoard(game->board);
-        drawPreview(game->board, game->boardShape);
-        drawShape(game->boardShape);
-        drawNextShape(game->nextBoardShape);
-        drawInformations(game->base.score, game->difficultyMultiplier,
-                         game->clearedLineAmount, game->highScore);
+        tetris_drawBoard(game->board);
+        tetris_drawPreview(game->board, game->boardShape);
+        tetris_drawShape(game->boardShape);
+        tetris_drawNextShape(game->nextBoardShape);
+        tetris_drawInformations(
+            game->base.score, game->difficultyMultiplier,
+            game->clearedLineAmount, game->highScore
+        );
     EndDrawing();
 
     return OK;
@@ -176,16 +166,6 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
 Error_Et tetris_freeGame(TetrisGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
     TetrisGame_St* gameRef = *game;
-
-    if (gameRef->clearedLines != NULL) {
-        free(gameRef->clearedLines);
-        gameRef->clearedLines = NULL;
-    }
-
-    if (gameRef->rewardedPointsPerClearedLineCount != NULL) {
-        free(gameRef->rewardedPointsPerClearedLineCount);
-        gameRef->rewardedPointsPerClearedLineCount = NULL;
-    }
 
     free(gameRef);
     *game = NULL;

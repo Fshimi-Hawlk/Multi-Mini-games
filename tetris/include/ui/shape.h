@@ -3,7 +3,7 @@
 
 #include "utils/types.h"
 
-void drawShape(boardShape_st boardShape);
-void drawNextShape(boardShape_st boardShape);
+void tetris_drawShape(boardShape_st boardShape);
+void tetris_drawNextShape(boardShape_st boardShape);
 
 #endif

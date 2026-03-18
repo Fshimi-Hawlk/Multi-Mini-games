@@ -31,7 +31,7 @@
 #include "core/game.h"
 #include "utils/utils.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
+void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
         DrawCircleV(player->position, player->radius, BLUE);
     }
@@ -47,7 +47,7 @@ void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
     }
 }
 
-void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
+void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms) {
     for (int i = 0; i < nbPlatforms; i++) {
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
     }

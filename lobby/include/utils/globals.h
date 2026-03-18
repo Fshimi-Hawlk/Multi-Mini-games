@@ -27,21 +27,9 @@
 // Window & display
 // ────────────────────────────────────────────────
 
-/**
-    Rectangle describing the full client area of the application window.
-    Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
-
 // ────────────────────────────────────────────────
 // Fonts
 // ────────────────────────────────────────────────
-
-/**
-    @brief Default font used for most UI labels, buttons and in-game text.
-           Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
@@ -59,7 +47,7 @@ extern Font      fonts[_fontSizeCount];
           Size is determined by platformCount.
           @note Consider moving to dynamic allocation or level data file in the future.
 */
-extern Platform_st platforms[];
+extern Platform_St platforms[];
 
 /**
     brief Number of valid entries in the platforms array.

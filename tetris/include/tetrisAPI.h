@@ -34,7 +34,7 @@ typedef struct TetrisGame_St TetrisGame_St;
     Fields have safe defaults when zero-initialized.
 */
 typedef struct {
-    unsigned int fps;           ///< Target frame rate (0 = uncapped; common values: 60, 120, 144)
+    char _;            ///< Avoids warning for initGame macro. @note: Don't touch it!
     // Future: difficulty preset, hold piece enabled, ghost piece visibility, etc.
 } TetrisConfigs_St;
 
@@ -46,7 +46,7 @@ typedef struct {
       tetris_initGame(&game, .fps = 120);
 */
 #define tetris_initGame(game, ...) \
-    tetris_initGame__full((game), (TetrisConfigs_St){ .fps = 60, __VA_ARGS__ })
+    tetris_initGame__full((game), (TetrisConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 // ────────────────────────────────────────────────────────────────────────────
 // Core lifecycle API

@@ -39,9 +39,9 @@
     {0, 1}, {1, 1} \
 }
 
-void randomShape(boardShape_st* boardShape);
-void rotationCW(boardShape_st* boardShape);
-void rotationCCW(boardShape_st* boardShape);
-void automaticDrop(speed_st* speed, boardShape_st* boardShape);
+void tetris_randomShape(boardShape_st* boardShape);
+void tetris_rotationCW(boardShape_st* boardShape);
+void tetris_rotationCCW(boardShape_st* boardShape);
+void tetris_automaticDrop(speed_st* speed, boardShape_st* boardShape);
 
 #endif

@@ -1,6 +1,6 @@
 #include "ui/game.h"
 
-void drawBoard(const Board_t board) {
+void snake_drawBoard(const Board_t board) {
     for (int y = 0; y < SIZE_BOARD; y++) {
         for (int x = 0; x < SIZE_BOARD; x++) {
             int posX = x * CELL_SIZE;
@@ -19,7 +19,7 @@ void drawBoard(const Board_t board) {
     }
 }
 
-void drawSnake(const Snake_St* snake, f32 interpolation, iVector2 direction) {
+void snake_drawSnake(const Snake_St* snake, f32 interpolation, iVector2 direction) {
     SnakeBodyPart_St* current = snake->head;
 
     while (current != NULL) {

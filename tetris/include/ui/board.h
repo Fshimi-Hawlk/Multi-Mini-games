@@ -3,6 +3,6 @@
 
 #include "utils/types.h"
 
-void drawBoard(board_t board);
+void tetris_drawBoard(board_t board);
 
 #endif

@@ -33,7 +33,7 @@
     Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
     by draw routines and assume the player's collision shape is always a circle.
 
-    @see `utils/userTypes.h`     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/userTypes.h`     for `Player_St`, `LobbyGame_St`, `PlayerTexture_Et`
     @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
     @see `utils/globals.h`       for `skinButtonRect`
     @see `core/game.h`           for `resolveCircleRectCollision()` declaration
@@ -44,7 +44,7 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle getPlayerCollisionBox(const Player_st* const player) {
+Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x,
         player->position.y,
@@ -53,11 +53,11 @@ Rectangle getPlayerCollisionBox(const Player_st* const player) {
     };
 }
 
-Vector2 getPlayerCenter(const Player_st* const player) {
+Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const f32 dt) {
+void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
 
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
@@ -133,7 +133,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     }
 }
 
-void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
+void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
     // Search the position that is closest to the circle on the rectangle
     f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
     f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
@@ -177,7 +177,7 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
 }
 
 
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
+void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;

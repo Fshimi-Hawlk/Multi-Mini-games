@@ -41,22 +41,10 @@
 // Window & display
 // ────────────────────────────────────────────────
 
-#define WINDOW_WIDTH    1000        ///< Default client-area width of the application window (pixels).
-#define WINDOW_HEIGHT   600         ///< Default client-area height of the application window (pixels).
-
-#define WINDOW_TITLE    "Lobby"     ///< Window title shown in the title bar / task manager.
-
 /**
     @brief Background clear color used at the start of each frame.
-           Dark gray (#121212).
 */
 #define APP_BACKGROUND_COLOR ((Color){18, 18, 18, 255})
-
-/**
-    @brief Default base font size for most UI text and in-game labels.
-           Other sizes are usually derived from this via the fonts[] array.
-*/
-#define APP_TEXT_FONT_SIZE 32
 
 // ────────────────────────────────────────────────
 // Physics & movement tuning (lobby platformer)

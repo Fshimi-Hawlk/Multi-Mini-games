@@ -26,7 +26,7 @@
     Default values should be sensible for standalone and lobby usage.
  */
 typedef struct {
-    char __useless;             ///< Avoids warning for initGame macro. @note: Don't touch it!
+    char _;            ///< Avoids warning for initGame macro. @note: Don't touch it!
     uint fps;          ///< Target frame rate (0 = uncapped, usually 60 or 120)
     // Add more options here when needed (difficulty, audio volume, window flags, ...)
 } LobbyConfigs_St;
@@ -38,7 +38,7 @@ typedef struct {
       lobby_initGame(&game, .fps = 144);
  */
 #define lobby_initGame(game, ...) \
-    lobby_initGame__full(game, (LobbyConfigs_St){ .__useless = 0, __VA_ARGS__ })
+    lobby_initGame__full(game, (LobbyConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 /* ────────────────────────────────────────────────────────────────────────────
    Core game lifecycle functions

@@ -3,7 +3,7 @@
 #include "core/shape.h"
 #include "utils/configs.h"
 
-void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove) {
+void tetris_automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove) {
     speed->t += GetFrameTime();
     speed->tDrop = fminf(speed->t / speed->duration, 1.0f);
     if (speed->tDrop < 1) return;
@@ -17,17 +17,17 @@ void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoRes
     boardShape->position.x += (boardShape->position.x > targetMove.position.x) * -1;
 
     if (targetMove.rotation != boardShape->rotation)
-        rotationCW(boardShape);
+        tetris_rotationCW(boardShape);
 }
 
-void mouvement(board_t board, boardShape_st* boardShape) {
+void tetris_mouvement(board_t board, boardShape_st* boardShape) {
     float dt = GetFrameTime();
 
     // GAUCHE
     if (IsKeyDown(KEY_LEFT)) {
         if (inputRepeat.leftTimer <= 0.0f) {
             boardShape->position.x--;
-            if (isOOB(*boardShape) || isColliding(board, *boardShape))
+            if (tetris_isOOB(*boardShape) || tetris_isColliding(board, *boardShape))
                 boardShape->position.x++;
             inputRepeat.leftTimer = (inputRepeat.leftTimer == 0.0f) ? inputRepeat.initialDelay : inputRepeat.repeatDelay;
         } else {
@@ -41,7 +41,7 @@ void mouvement(board_t board, boardShape_st* boardShape) {
     if (IsKeyDown(KEY_RIGHT)) {
         if (inputRepeat.rightTimer <= 0.0f) {
             boardShape->position.x++;
-            if (isOOB(*boardShape) || isColliding(board, *boardShape))
+            if (tetris_isOOB(*boardShape) || tetris_isColliding(board, *boardShape))
                 boardShape->position.x--;
             inputRepeat.rightTimer = (inputRepeat.rightTimer == 0.0f) ? inputRepeat.initialDelay : inputRepeat.repeatDelay;
         } else {
@@ -55,7 +55,7 @@ void mouvement(board_t board, boardShape_st* boardShape) {
     if (IsKeyDown(KEY_DOWN)) {
         if (inputRepeat.downTimer <= 0.0f) {
             boardShape->position.y++;
-            if (isOOB(*boardShape) || isColliding(board, *boardShape))
+            if (tetris_isOOB(*boardShape) || tetris_isColliding(board, *boardShape))
                 boardShape->position.y--;
             inputRepeat.downTimer = (inputRepeat.downTimer == 0.0f) ? inputRepeat.initialDelay : inputRepeat.repeatDelay;
         } else {
@@ -67,13 +67,13 @@ void mouvement(board_t board, boardShape_st* boardShape) {
 
     // ROTATION
     if (IsKeyPressed(KEY_UP) && boardShape->shapeName != O_SHAPE_ID) {
-        rotationCW(boardShape);
-        if (isOOB(*boardShape) || isColliding(board, *boardShape))
-            rotationCCW(boardShape);
+        tetris_rotationCW(boardShape);
+        if (tetris_isOOB(*boardShape) || tetris_isColliding(board, *boardShape))
+            tetris_rotationCCW(boardShape);
     }
 }
 
-void readHighScore(int *highScore) {
+void tetris_readHighScore(int *highScore) {
     FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "r");
 
     if (!fd) {
@@ -86,7 +86,7 @@ void readHighScore(int *highScore) {
     fclose(fd);
 }
 
-void writeHighScore(int highScore, int score) {
+void tetris_writeHighScore(int highScore, int score) {
     if (score <= highScore) return;
 
     FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "w");
