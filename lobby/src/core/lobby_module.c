@@ -1,6 +1,8 @@
 /**
  * @file lobby_module.c
- * @brief Le VRAI module du Lobby : Physique, Caméra, Réseau et Fix Pointer !
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of the Lobby mini-game module.
  */
 
 #include "firstparty/APIs/module_interface.h"
@@ -21,10 +23,16 @@ extern RUDP_Connection server_conn;
 extern Player_st player;
 extern Player_st otherPlayers[MAX_CLIENTS];
 
+/** @brief Last sent player position to avoid redundant network updates. */
 static Vector2 lastSentPos = {0};
+/** @brief Camera used to follow the player in the lobby. */
 static Camera2D camera = { 0 };
+/** @brief Flag for the first frame update. */
 static bool firstFrame = true;
 
+/**
+ * @brief Initializes the lobby module (loads textures, sets camera).
+ */
 void lobby_init(void) {
     printf("[LOBBY] Chargement du niveau et de la caméra...\n");
     
@@ -40,7 +48,6 @@ void lobby_init(void) {
     
     player.texture = &playerTextures[0];
 
-    // Initialisation de la Caméra pour voir le monde
     camera.target = player.position;
     camera.offset = (Vector2){ 1280.0f / 2.0f, 720.0f / 2.0f };
     camera.rotation = 0.0f;
@@ -48,6 +55,13 @@ void lobby_init(void) {
     firstFrame = true;
 }
 
+/**
+ * @brief Handles incoming network data for the lobby module.
+ * @param player_id ID of the sender.
+ * @param action Action code received.
+ * @param data Payload of the data packet.
+ * @param len Length of the data payload.
+ */
 void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
         if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(Player_st)) {
@@ -61,20 +75,20 @@ void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
     }
 }
 
+/**
+ * @brief Updates the lobby module logic (physics, camera, network sync).
+ * @param dt Delta time since the last frame.
+ */
 void lobby_update(float dt) {
-    // 1. Physique
     updatePlayer(&player, platforms, platformCount, dt);
 
-    // 2. La caméra suit le joueur
     camera.target = player.position;
 
-    // 3. UI Skin
     toggleSkinMenu();
     if (isTextureMenuOpen) {
         choosePlayerTexture(&player);
     }
 
-    // 4. Réseau : Envoi du TLV
     if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y || firstFrame) {
         GameTLVHeader tlv = { .game_id = 0, .action = 2, .length = sizeof(Player_st) };
         RUDP_Header h; RUDP_GenerateHeader(&server_conn, 5, &h);
@@ -92,8 +106,10 @@ void lobby_update(float dt) {
     }
 }
 
+/**
+ * @brief Renders the lobby module (platforms, players, UI).
+ */
 void lobby_draw(void) {
-    // --- MODE MONDE (Ce qui bouge avec la caméra) ---
     BeginMode2D(camera);
         drawPlatforms(platforms, platformCount);
         drawPlayer(&player);
@@ -102,13 +118,13 @@ void lobby_draw(void) {
         }
     EndMode2D();
     
-    // --- MODE UI (Ce qui est collé à l'écran) ---
     drawSkinButton();
     if (isTextureMenuOpen) {
         drawMenuTextures();
     }
 }
 
+/** @brief Global definition of the Lobby module. */
 MiniGameModule LobbyModule = {
     .id = 0,
     .name = "Lobby Principal",

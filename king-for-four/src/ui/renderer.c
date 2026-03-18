@@ -1,12 +1,24 @@
+/**
+ * @file renderer.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of UI rendering functions using Raylib.
+ */
+
 #include "ui/renderer.h"
 #include <stdio.h>
 
-// Dimensions de ta planche playingCards.png
+/** @brief Number of columns in the card texture sheet. */
 #define SHEET_COLS 5
+/** @brief Number of rows in the card texture sheet. */
 #define SHEET_ROWS 13
+/** @brief Scale factor for rendering cards. */
 #define CARD_SCALE 0.8f
 
-// --- CHARGEMENT DES RESSOURCES ---
+/**
+ * @brief Loads textures for cards from various possible paths.
+ * @return The loaded assets.
+ */
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
@@ -24,12 +36,21 @@ GameAssets LoadAssets(void) {
     return assets;
 }
 
+/**
+ * @brief Frees GPU memory for textures.
+ * @param assets The assets to unload.
+ */
 void UnloadAssets(GameAssets assets) {
     UnloadTexture(assets.cardSheet);
     UnloadTexture(assets.cardBack);
 }
 
-// --- LOGIQUE DE DÉCOUPE ---
+/**
+ * @brief Calculates the source rectangle on the texture sheet for a given card.
+ * @param c The card.
+ * @param sheet The texture sheet.
+ * @return The source rectangle.
+ */
 Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
     float cellWidth = sheet.width / (float)SHEET_COLS;
     float cellHeight = sheet.height / (float)SHEET_ROWS;
@@ -72,12 +93,14 @@ Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
     return (Rectangle){ col * cellWidth, row * cellHeight, cellWidth, cellHeight };
 }
 
-// --- AFFICHAGE DE LA TABLE (Talon + Pioche) ---
-
+/**
+ * @brief Draws the discard pile and draw pile.
+ * @param g Game state.
+ * @param assets Graphical assets.
+ */
 void RenderTable(GameState *g, GameAssets assets) {
     float scale = 1.0f;
     
-    // Calcul de la taille cible (Destination) basé sur ta planche de cartes
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
     
@@ -87,13 +110,10 @@ void RenderTable(GameState *g, GameAssets assets) {
     // --- 1. DESSIN DE LA PIOCHE (Le Dos des cartes) ---
     Rectangle deckPos = { centerX - cardW - 20, centerY - (cardH/2), cardW, cardH };
     
-    // On définit la zone de l'image source (toute l'image du dos)
     Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
     
-    // On dessine le dos en l'étirant pour qu'il rentre exactement dans deckPos
     DrawTexturePro(assets.cardBack, sourceBack, deckPos, (Vector2){0,0}, 0.0f, WHITE);
     
-    // Un petit contour blanc pour faire ressortir la pile
     DrawRectangleLinesEx(deckPos, 1, WHITE); 
 
     // --- 2. DESSIN DU TALON (La carte jouée) ---
@@ -111,7 +131,11 @@ void RenderTable(GameState *g, GameAssets assets) {
     }
 }
 
-// --- AFFICHAGE DE LA MAIN DU JOUEUR ---
+/**
+ * @brief Draws the cards in the player's hand, including hover effects.
+ * @param p Player.
+ * @param assets Graphical assets.
+ */
 void RenderHand(Player *p, GameAssets assets) {
     if (p->hand.head == NULL) return;
 
@@ -123,15 +147,13 @@ void RenderHand(Player *p, GameAssets assets) {
     int startY = GetScreenHeight() - cardH - 20;
 
     // --- PASSE 1 : DÉTECTION DE LA CARTE SURVOLÉE ---
-    // On doit trouver L'UNIQUE carte qui doit réagir (la plus haute dans la pile visuelle)
-    int hoveredIndex = -1; // -1 signifie "aucune carte"
+    int hoveredIndex = -1; 
     
     Node* current = p->hand.head;
     int i = 0;
     Vector2 mouse = GetMousePosition();
 
     while (current != NULL) {
-        // On calcule la zone de collision "théorique" (position au repos)
         Rectangle hitBox = {
             startX + (i * padding),
             startY,
@@ -139,10 +161,6 @@ void RenderHand(Player *p, GameAssets assets) {
             cardH
         };
 
-        // Si la souris touche cette carte, on note son index.
-        // Comme on avance de gauche à droite (i augmente), si la souris est 
-        // sur la superposition de la carte 1 et 2, la carte 2 écrasera la carte 1.
-        // C'est exactement ce qu'on veut !
         if (CheckCollisionPointRec(mouse, hitBox)) {
             hoveredIndex = i;
         }
@@ -152,7 +170,7 @@ void RenderHand(Player *p, GameAssets assets) {
     }
 
     // --- PASSE 2 : DESSIN ---
-    current = p->hand.head; // On rembobine au début de la liste
+    current = p->hand.head; 
     i = 0;
 
     while (current != NULL) {
@@ -178,12 +196,11 @@ void RenderHand(Player *p, GameAssets assets) {
                 default: break;
             }
             
-            // 150 pour que ca s'affiche a cote de la carte 
             int textX = dest.x + 150; 
             int textY = dest.y + 5;
             
             DrawText(text, textX+2, textY+2, 20, BLACK); // Ombre
-            DrawText(text, textX, textY, 20, WHITE);     // Texte (Blanc pour contraste sur carte)
+            DrawText(text, textX, textY, 20, WHITE);     // Texte
             DrawText(text, textX, textY, 20, WHITE);     // Gras
         }
 
@@ -191,6 +208,13 @@ void RenderHand(Player *p, GameAssets assets) {
         i++;
     }
 }
+
+/**
+ * @brief Returns the index of the card under the mouse cursor.
+ * @param p Player.
+ * @param assets Assets.
+ * @return Index or -1.
+ */
 int GetHoveredCardIndex(Player *p, GameAssets assets) {
     if (p->hand.head == NULL) return -1;
 
@@ -208,9 +232,6 @@ int GetHoveredCardIndex(Player *p, GameAssets assets) {
     while (current != NULL) {
         Rectangle hitBox = { startX + (i * padding), startY, cardW, cardH };
         
-        // On vérifie si la souris touche la carte.
-        // Puisque les cartes se superposent vers la droite, 
-        // l'index le plus élevé (le plus à droite) gagne le focus.
         if (CheckCollisionPointRec(mouse, hitBox)) {
             hoveredIndex = i;
         }
@@ -220,19 +241,24 @@ int GetHoveredCardIndex(Player *p, GameAssets assets) {
     return hoveredIndex;
 }
 
+/**
+ * @brief Calculates the rectangle for the deck on screen.
+ * @param assets Assets.
+ * @return The rectangle.
+ */
 Rectangle GetDeckRect(GameAssets assets) {
-    // Note: On utilise scale = 1.0f comme dans RenderTable
     float scale = 1.0f; 
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
     float centerX = GetScreenWidth() / 2.0f;
     float centerY = GetScreenHeight() / 2.0f;
     
-    // Position exacte utilisée dans RenderTable pour la pioche
     return (Rectangle){ centerX - cardW - 20, centerY - (cardH/2), cardW, cardH };
 }
 
-// Dessine le menu principal
+/**
+ * @brief Renders the main menu screen.
+ */
 void RenderMenu(void) {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();

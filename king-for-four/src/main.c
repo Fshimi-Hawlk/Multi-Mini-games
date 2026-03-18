@@ -1,3 +1,10 @@
+/**
+ * @file main.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Standalone entry point for testing the King-for-Four game.
+ */
+
 #define LOGGER_IMPLEMENTATION
 #include <stddef.h>
 #include "raylib.h"
@@ -5,6 +12,10 @@
 #include "logger.h"
 #include "APIs/generalAPI.h"
 
+/**
+ * @brief Main function for the standalone King-for-Four test application.
+ * @return 0 on successful exit, 1 on initialization error.
+ */
 int main(void) {
     // Initialisation Window
     InitWindow(1280, 720, "King For Four - Standalone Test");

@@ -1,7 +1,7 @@
 /**
  * @file common.h
- * @author Fshimi Hawlk
- * @date 2026-01-07
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
  * @brief Common includes, typedefs, and configuration headers.
  */
 
@@ -19,25 +19,29 @@
 #include <math.h>
 #include <assert.h>
 
-// #include "rand.h"
 #include "logger.h"
-// #include "contextArena.h"
-
-// #define REALLOC context_realloc
-// #define FREE
 
 #include "nob/dynamicArray.h"
 #include "nob/stringBuilder.h"
-// #include "stringView.h"
 
 #include "raylib.h"
 #include "raymath.h"
 #include "rlgl.h"
 
+/**
+ * @brief Typedef for Vector2 using f32.
+ */
 typedef Vector2 f32Vector2;
 #define f32Vector2_def
 
+/**
+ * @brief Typedef for Color as ColorRGBA_St.
+ */
 typedef Color ColorRGBA_St;
+
+/**
+ * @brief Alias for ColorRGBA_St.
+ */
 typedef ColorRGBA_St color32;
 
 #include "baseTypes.h"

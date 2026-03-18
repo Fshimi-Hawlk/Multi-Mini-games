@@ -1,9 +1,20 @@
+/**
+ * @file game.c
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Implementation of the main game logic for King for Four.
+ */
+
 #include "core/game.h"
 #include "core/card.h"
 #include <stddef.h>
 #include <stdio.h>
 
-/* Règle des couleurs : [Talon (0-3)][Joué (0-4)] */
+/**
+ * @brief Rule matrix for valid color moves.
+ * [Discard Pile Color (0-3)][Played Card Color (0-4)]
+ * 1 indicates a valid move, 0 indicates an invalid move.
+ */
 int valid_color[4][5] = {
     {1, 0, 0, 0, 1},
     {0, 1, 0, 0, 1},
@@ -11,11 +22,15 @@ int valid_color[4][5] = {
     {0, 0, 0, 1, 1}
 };
 
-/* Règle des symboles : [Talon (0-14)][Joué (0-14)] */
+/**
+ * @brief Rule matrix for valid value moves.
+ * [Discard Pile Value (0-14)][Played Card Value (0-14)]
+ */
 int valid_value[15][15] = {0};
 
 /**
- * Initialisation de la logique et de l'état
+ * @brief Initializes the game logic, rules, and state.
+ * @param g Pointer to the GameState to initialize.
  */
 void init_game_logic(GameState* g) {
     for (int i = 0; i < 15; i++) valid_value[i][i] = 1;
@@ -36,7 +51,11 @@ void init_game_logic(GameState* g) {
 }
 
 /**
- * Validation du coup (Retourne 1 si valide, 0 sinon)
+ * @brief Checks if a move is valid based on color or value matching.
+ * @param active_color The current active color (set by special cards).
+ * @param played The card being played.
+ * @param top The card on top of the discard pile.
+ * @return 1 if the move is valid, 0 otherwise.
  */
 int is_move_valid(int active_color, Card played, Card top) {
     int idx = (active_color >= 0 && active_color < 4) ? active_color : top.color;
@@ -48,7 +67,8 @@ int is_move_valid(int active_color, Card played, Card top) {
 }
 
 /**
- * Distribution initiale et mise en place du talon
+ * @brief Distributes 7 cards to each player and starts the discard pile.
+ * @param g Pointer to the GameState.
  */
 void distribute_cards(GameState* g) {
     if (!g || g->num_players <= 0) return;
@@ -64,11 +84,13 @@ void distribute_cards(GameState* g) {
     g->active_color = (first.color == 4) ? 0 : first.color;
 }
 
-
-// ... (tes tableaux valid_color / valid_value restent ici) ...
-
-// ... (tes fonctions init et is_move_valid restent ici) ...
-
+/**
+ * @brief Processes a player's attempt to play a card.
+ * @param g Pointer to the GameState.
+ * @param playerIndex Index of the player.
+ * @param cardIndex Index of the card in the player's hand.
+ * @return 1 on success, 0 on failure.
+ */
 int try_play_card(GameState *g, int playerIndex, int cardIndex) {
     Player* p = &g->players[playerIndex];
     
@@ -101,8 +123,6 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex) {
             // TODO: Ouvrir un menu pour choisir la couleur
             g->active_color = CARD_RED; // Temporaire pour tester
         } else {
-            // Si on joue une carte de couleur, la couleur active redeviendra 
-            // celle du talon (on reset l'effet d'un éventuel Joker précédent)
             g->active_color = -1;
         }
         
@@ -114,6 +134,12 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex) {
     return 0; // Échec
 }
 
+/**
+ * @brief Handles drawing a card for a player, including recycling the discard pile if needed.
+ * @param g Pointer to the GameState.
+ * @param playerIndex Index of the player drawing.
+ * @return 1 on success, 0 if no cards are available.
+ */
 int player_draw_card(GameState *g, int playerIndex) {
     Player* p = &g->players[playerIndex];
 

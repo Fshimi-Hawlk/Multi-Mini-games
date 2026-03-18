@@ -1,42 +1,48 @@
 /**
  * @file connection_screen.h
- * @brief Déclaration de la scène de connexion pour la saisie IP.
  * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-05
+ * @date 2026-03-18
+ * @brief Declaration of the connection screen scene for IP entry.
  */
 
 #ifndef CONNECTION_SCREEN_H
 #define CONNECTION_SCREEN_H
 
-#define LOBBY_ROOM_QUERY 3  // Client -> Réseau (Où sont les serveurs ?)
-#define LOBBY_ROOM_INFO  4  // Serveur -> Client (Je suis ici : IP + Nom)
+/** @brief Action code to query lobby rooms. */
+#define LOBBY_ROOM_QUERY 3
+/** @brief Action code for receiving lobby room info. */
+#define LOBBY_ROOM_INFO  4
+/** @brief Action code for game data. */
 #define ACTION_GAME_DATA  5  
 
 #include <stdbool.h>
 
-
-
+/**
+ * @brief Gets the IP address entered by the user.
+ * @return A pointer to the entered IP string.
+ */
 const char* GetEnteredIP(void);
 
 /**
- * @brief Alloue et positionne les éléments UI pour l'écran de connexion.
+ * @brief Allocates and positions UI elements for the connection screen.
  */
 void InitConnectionScreen(void);
 
 /**
- * @brief Boucle logique de l'écran de connexion.
- * @return true si la connexion est déclenchée (IP valide + Clic).
+ * @brief Logical update loop for the connection screen.
+ * @return true if connection is triggered (valid IP + click), false otherwise.
  */
 bool UpdateConnectionScreen(void);
 
 /**
- * @brief Moteur de rendu de l'écran de connexion.
+ * @brief Renders the connection screen UI.
  */
 void DrawConnectionScreen(void);
 
 /**
- * @brief Ajoute un serveur découvert à la liste UI.
- * Cette déclaration permet à main.c de l'appeler.
+ * @brief Adds a discovered server to the UI list.
+ * @param ip IP address of the discovered server.
+ * @param name Name of the discovered server.
  */
 void AddDiscoveredRoom(const char* ip, const char* name);
 

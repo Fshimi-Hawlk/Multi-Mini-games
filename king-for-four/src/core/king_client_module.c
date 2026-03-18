@@ -1,11 +1,8 @@
 /**
  * @file king_client_module.c
- * 
- *  BOUCLE CLIENT :
- *  [INPUT] ----> Check Clic? ----> send_to_server(ACTION_PLAY)
- *     ^                                     |
- *     |                                     v
- *  [DRAW]  <---- local_state <---- [ON_DATA] (ACTION_SYNC)
+ * @author i-Charlys (CAILLON Charles)
+ * @date 2026-03-18
+ * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
 
 #include "APIs/module_interface.h"
@@ -17,37 +14,60 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Dépendances externes du lobby
+/** @brief External reference to the network socket. */
 extern int network_socket;
+/** @brief External reference to the server connection. */
 extern RUDP_Connection server_conn;
 
-// Actions
+/** @brief Action code for playing a card. */
 #define ACTION_PLAY_CARD 0x10
+/** @brief Action code for drawing a card. */
 #define ACTION_DRAW_CARD 0x11
+/** @brief Action code for synchronizing the game state. */
 #define ACTION_SYNC_GAME 0x12
+/** @brief Action code for joining a game. */
 #define ACTION_JOIN_GAME 0x13
+/** @brief Action code for starting a game. */
 #define ACTION_START_GAME 0x14
+/** @brief Action code for synchronizing a player's hand. */
 #define ACTION_SYNC_HAND 0x15
+/** @brief Action code for acknowledging a join request. */
 #define ACTION_JOIN_ACK 0x16
 
 #pragma pack(push, 1)
+/**
+ * @struct GameSyncPayload
+ * @brief Payload for synchronizing game state from server to client.
+ */
 typedef struct {
-    int current_player;
-    int active_color;
-    Card top_card;
-    int hand_sizes[4];
-    int status; 
-    int host_id;
+    int current_player;     /**< Index of current player */
+    int active_color;       /**< Current active color */
+    Card top_card;          /**< Card on top of discard pile */
+    int hand_sizes[4];      /**< Card count for each player */
+    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
+    int host_id;            /**< ID of host player */
 } GameSyncPayload;
 #pragma pack(pop)
 
+/** @brief Local copy of the game state. */
 static GameState local_state;
+/** @brief Graphical assets. */
 static GameAssets assets;
+/** @brief Flag indicating if assets are loaded. */
 static bool assets_loaded = false;
+/** @brief This client's internal player ID assigned by server. */
 static int my_internal_id = -1;
+/** @brief Current status of the game. */
 static int game_status = 0; 
+/** @brief Timer for retrying to join the game. */
 static float join_retry_timer = 0;
 
+/**
+ * @brief Sends a game action to the server.
+ * @param action Action code.
+ * @param data Pointer to payload data.
+ * @param len Length of payload.
+ */
 static void send_to_server(uint8_t action, void* data, uint16_t len) {
     GameTLVHeader tlv = { .game_id = 1, .action = action, .length = len };
     RUDP_Header h;
@@ -61,12 +81,14 @@ static void send_to_server(uint8_t action, void* data, uint16_t len) {
     send(network_socket, buffer, sizeof(h) + sizeof(tlv) + len, 0);
 }
 
+/**
+ * @brief Initializes the client module and loads assets.
+ */
 void king_client_init(void) {
     if (!assets_loaded) {
         assets = LoadAssets();
         assets_loaded = true;
     }
-    // Mise à zéro totale pour éviter les pointeurs fantômes
     memset(&local_state, 0, sizeof(GameState));
     init_game_logic(&local_state);
     my_internal_id = -1;
@@ -74,6 +96,13 @@ void king_client_init(void) {
     join_retry_timer = 0;
 }
 
+/**
+ * @brief Callback for processing data received from the server.
+ * @param player_id ID of the sender.
+ * @param action Action code.
+ * @param data Payload data.
+ * @param len Payload length.
+ */
 void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
     (void)player_id;
     if (data == NULL) return;
@@ -107,11 +136,8 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
         int count = len / sizeof(Card);
         uint8_t* ptr = (uint8_t*)data;
         
-        // Sécurité : vider proprement la liste chaînée sans crash
         clear_deck(&local_state.players[0].hand);
         
-        // On parcourt à l'envers pour que le push_card (qui ajoute en tête) 
-        // recrée l'ordre exact du serveur.
         for (int i = count - 1; i >= 0; i--) {
             Card c;
             memcpy(&c, ptr + (i * sizeof(Card)), sizeof(Card));
@@ -120,6 +146,10 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
     }
 }
 
+/**
+ * @brief Updates client logic and processes user input.
+ * @param dt Delta time since last update.
+ */
 void king_client_update(float dt) {
     if (!assets_loaded) return;
     if (my_internal_id == -1) {
@@ -152,6 +182,9 @@ void king_client_update(float dt) {
     }
 }
 
+/**
+ * @brief Renders the client-side UI and game state.
+ */
 void king_client_draw(void) {
     if (!assets_loaded) return;
     ClearBackground((Color){0, 80, 0, 255});
@@ -181,6 +214,7 @@ void king_client_draw(void) {
     }
 }
 
+/** @brief Module interface for the King-for-Four client. */
 MiniGameModule KingForFourClientModule = {
     .id = 1,
     .name = "King For Four",
