@@ -1,9 +1,28 @@
+
+
+/**
+ * @file auth.c
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @brief Source file for authentication functionality.
+ */
+
 // auth.c
 #include "auth.h"
 #include "database.h"
 #include "utils/utils.h"
 #include "utils/globals.h"
 
+
+/**
+ * @brief Draws the authentication screen with the given parameters.
+ * 
+ * @param username The username entered by the user.
+ * @param passwordDots The password entered by the user, displayed as dots.
+ * @param hidePass Whether to hide the password dots or show the actual password.
+ * @param selected The currently selected option (0: username, 1: password, 2: action).
+ * @param error An error message to display, or NULL if there is none.
+ */
 static void drawAuthScreen(const char *username, const char *passwordDots, bool hidePass, int selected, const char *error) {
     CRP(1, 1); EDP(2); EDP(3);
     printf(COLOR_GREEN "=== Multiplayer Chat ===" FGRColor "\n\r");
@@ -23,6 +42,10 @@ static void drawAuthScreen(const char *username, const char *passwordDots, bool 
     fflush(stdout);
 }
 
+
+/**
+ * @brief Runs the authentication screen, allowing the user to log in or register.
+ */
 void runAuth(void) {
     if (!db_init()) {
         log_fatal("Failed to initialize database");
