@@ -195,8 +195,7 @@ void suika_init(SuikaGame_St* game)
     // Initialisation des nouvelles fonctionnalités
     game->autoDropEnabled = false;
     game->scoreMultiplierEnabled = true;
-    game->boostCooldown = 0.0f;
-    game->baseDropCooldown = 1.0f;
+    game->baseDropCooldown = 0.8f;
 
     for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
     {
@@ -267,11 +266,6 @@ void suika_update(SuikaGame_St* game, float deltaTime)
         game->scoreMultiplierEnabled = !game->autoDropEnabled; // Désactive le score en mode auto-drop
     }
 
-    // Mise à jour du cooldown du boost
-    if (game->boostCooldown > 0.0f)
-    {
-        game->boostCooldown -= deltaTime;
-    }
 
     Vector2 mousePos = GetMousePosition();
     float minX = SUIKA_CONTAINER_X + game->nextFruit.radius;
@@ -302,7 +296,7 @@ void suika_update(SuikaGame_St* game, float deltaTime)
     {
         game->dropTimer += deltaTime;
         // En mode auto-drop, le délai est réduit par 3
-        float currentCooldown = game->autoDropEnabled ? game->baseDropCooldown / 3.0f : game->baseDropCooldown;
+        float currentCooldown = game->baseDropCooldown;
         if (game->dropTimer > currentCooldown)
         {
             game->canDrop = true;
@@ -356,6 +350,12 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
             f->position.x += f->velocity.x * FIXED_DT / (float)COLLISION_PASSES;
             f->position.y += f->velocity.y * FIXED_DT / (float)COLLISION_PASSES;
             f->rotation += f->angularVelocity * FIXED_DT / (float)COLLISION_PASSES;
+            
+            // Roulement: convertir la vitesse horizontale en rotation (v = r * omega -> omega = v / r)
+            if (f->velocity.x != 0.0f && f->position.y > SUIKA_CONTAINER_Y + SUIKA_CONTAINER_HEIGHT - f->radius - 5.0f)
+            {
+                f->angularVelocity += (f->velocity.x / f->radius) * 0.05f;
+            }
 
             // Collision avec les murs
             float minX = SUIKA_CONTAINER_X + f->radius;
@@ -566,8 +566,12 @@ static void suika_drawFruit(const SuikaGame_St* game, const Fruit_St* fruit, flo
 {
     const FruitProperties_St* props = suika_getFruitProperties(fruit->type);
 
+    // Fallback: dessiner un cercle de couleur si la texture n'est pas chargée
     if (game->fruitAtlas.id == 0)
     {
+        Color color = props->color;
+        color.a = (unsigned char)(alpha * 255);
+        DrawCircleV(fruit->position, fruit->radius, color);
         return;
     }
 

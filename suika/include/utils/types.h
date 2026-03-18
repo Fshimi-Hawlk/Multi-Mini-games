@@ -130,8 +130,7 @@ struct SuikaGame_St
     // Fonctionnalité capacité 'P' - Auto-drop avec score désactivé
     bool autoDropEnabled;           /**< Mode dépôt automatique activé (touche P) */
     bool scoreMultiplierEnabled;    /**< Multiplicateur de score actif (désactivé pendant auto-drop) */
-    float boostCooldown;            /**< Temps de recharge du boost */
-    float baseDropCooldown;         /**< Temps de base entre les dépôts (1 seconde) */
+    float baseDropCooldown;         /**< Temps de base entre les dépôts (0.8 secondes) */
     
     // Système de particules pour les effets visuels
     Particle_St particles[SUIKA_MAX_PARTICLES];

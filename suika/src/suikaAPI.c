@@ -10,6 +10,7 @@
 #include "utils/configs.h"
 #include "logger.h"
 #include "suikaAPI.h"
+#include "audio.h"
 #include <time.h>
 
 /**
@@ -53,6 +54,8 @@ Error_Et suika_initGame__full(SuikaGame_St** game_ptr, SuikaConfigs_St configs)
     game->base.running = true;
 
     suika_loadAssets(game);
+    InitAudioDevice();
+    initAudio();
     suika_init(game);
 
     log_debug("Suika initialized successfully");
