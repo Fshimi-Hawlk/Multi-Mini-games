@@ -261,6 +261,9 @@ int main() {
                                 uint8_t switch_payload = 1;
                                 server_broadcast(-1, id, LOBBY_SWITCH_GAME, &switch_payload, 1);
                                 printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
+                        }
+                        else if (header.action == LOBBY_CHAT) {
+                            server_broadcast(0, id, LOBBY_CHAT, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header));
                             }
                         }
                         else if (active_module && active_module->on_action && active_game_state) {

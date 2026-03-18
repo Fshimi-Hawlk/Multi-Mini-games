@@ -168,6 +168,7 @@ int main(void) {
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
+        if (dt > 0.1f) dt = 0.1f;
         receive_network_data();
 
         static bool switch_sent = false;

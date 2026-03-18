@@ -1,3 +1,4 @@
+#include "firstparty/APIs/chatAPI.h"
 /**
  * @file globals.c
  * @author i-Charlys (CAILLON Charles)
@@ -67,3 +68,4 @@ bool isTextureMenuOpen = false;
 
 /** @brief Texture for the skin button logo. */
 Texture2D logoSkinButton;
+ChatState_St g_chatState = {0};
