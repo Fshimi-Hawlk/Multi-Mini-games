@@ -41,8 +41,9 @@ void UnloadAssets(GameAssets assets);
  * @brief Renders the game table (draw and discard piles).
  * @param g Pointer to the GameState.
  * @param assets The GameAssets to use for rendering.
+ * @param cardScalePop Additional scale for the top card (animation).
  */
-void RenderTable(GameState *g, GameAssets assets);
+void RenderTable(GameState *g, GameAssets assets, float cardScalePop);
 
 /**
  * @brief Renders a player's hand at the bottom of the screen.

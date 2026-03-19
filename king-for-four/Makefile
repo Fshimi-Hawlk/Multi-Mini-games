@@ -164,3 +164,12 @@ info:
 	@echo "  Core/UI : $(LIB_SOURCES)"
 	@echo "  Objets  : $(LIB_OBJECTS)"
 	@echo "  Lib     : $(STATIC_LIB)"
+
+test: static-lib
+	@mkdir -p $(BUILD_DIR)/tests
+	@echo "COMPILING TESTS..."
+	@$(CC) $(CFLAGS) $(TEST_DIR)/test_game.c $(STATIC_LIB) $(LDFLAGS) -o $(BUILD_DIR)/tests/test_game
+	@$(CC) $(CFLAGS) $(TEST_DIR)/test_bot_ai.c $(STATIC_LIB) $(LDFLAGS) -o $(BUILD_DIR)/tests/test_bot_ai
+	@echo "RUNNING TESTS..."
+	@$(BUILD_DIR)/tests/test_game
+	@$(BUILD_DIR)/tests/test_bot_ai

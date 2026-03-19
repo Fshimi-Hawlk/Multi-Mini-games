@@ -53,6 +53,8 @@ typedef struct {
     int hand_sizes[4];      /**< Number of cards in each player's hand */
     int status;             /**< Game status (0: WAITING, 1: PLAYING) */
     int host_id;            /**< ID of the host player */
+    int last_player_id;     /**< ID of the last player who moved */
+    int last_action;        /**< 0: Play, 1: Draw */
 } GameSyncPayload;
 
 typedef struct {
@@ -69,6 +71,9 @@ typedef struct {
     GameState state;    /**< Core game logic state */
     int status;         /**< 0 = WAITING, 1 = PLAYING */
     float bot_timer;    /**< Timer for bot actions */
+    float bot_target_time; /**< Randomized thinking time */
+    int last_player_id;
+    int last_action;
     broadcast_func_t broadcast; /**< Last used broadcast function */
 } KingServerState;
 
@@ -84,6 +89,9 @@ void* king_create_instance() {
         shuffle_deck(&ks->state.draw_pile);
         ks->status = 0; // WAITING
         ks->bot_timer = 0;
+        ks->bot_target_time = 1.0f + (float)(rand() % 200) / 100.0f; 
+        ks->last_player_id = -1;
+        ks->last_action = -1;
         ks->broadcast = NULL;
     }
     return ks;
@@ -93,8 +101,8 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
     if (!broadcast) return;
     GameState* g = &ks->state;
     Card top_card = {CARD_BLACK, ZERO};
-    if (g->discard_pile.head != NULL) {
-        top_card = g->discard_pile.head->card;
+    if (g->discard_pile.size > 0) {
+        top_card = g->discard_pile.cards[g->discard_pile.size - 1];
     }
 
     GameSyncPayload sync;
@@ -103,6 +111,8 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
     sync.top_card = top_card;
     sync.status = ks->status;
     sync.host_id = (g->num_players > 0) ? g->players[0].id : -1;
+    sync.last_player_id = ks->last_player_id;
+    sync.last_action = ks->last_action;
     for (int i = 0; i < 4; i++) {
         sync.hand_sizes[i] = (i < g->num_players) ? g->players[i].hand.size : 0;
     }
@@ -119,10 +129,8 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
         int hand_count = g->players[i].hand.size;
         
         Card* cards = malloc(hand_count * sizeof(Card));
-        Node* curr = g->players[i].hand.head;
         for (int j = 0; j < hand_count; j++) {
-            cards[j] = curr->card;
-            curr = curr->next;
+            cards[j] = g->players[i].hand.cards[j];
         }
         
         GameTLVHeader tlv_hand = { .game_id = 1, .action = ACTION_SYNC_HAND, .length = hand_count * sizeof(Card) };
@@ -195,11 +203,11 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
             memcpy(&p, real_payload, sizeof(ActionPlayPayload_St));
             
             // On récupère la carte avant de jouer pour savoir si c'est un joker
-            Node* curr = g->players[internal_id].hand.head;
-            for(int i=0; i < p.card_index && curr; i++) curr = curr->next;
-            
-            if (curr && try_play_card(g, internal_id, p.card_index)) {
-                Card played = g->discard_pile.head->card;
+            if (p.card_index >= 0 && p.card_index < g->players[internal_id].hand.size && try_play_card(g, internal_id, p.card_index)) {
+                Card played = g->discard_pile.cards[g->discard_pile.size - 1];
+                
+                ks->last_player_id = internal_id;
+                ks->last_action = 0; // Play
 
                 // Si c'était un joker, on applique la couleur choisie
                 if (played.color == CARD_BLACK) {
@@ -207,26 +215,36 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
                 }
                 
                 // Logique simplifiée des effets :
+                int next_p = (g->current_player + g->game_direction + g->num_players) % g->num_players;
                 int skip = 0;
-                if (played.value == SKIP || played.value == PLUS_TWO || played.value == PLUS_FOUR) skip = 1;
                 
-                if (played.value == REVERSE) {
+                if (played.value == PLUS_TWO) {
+                    for(int i=0; i<2; i++) player_draw_card(g, next_p);
+                    skip = 1;
+                } else if (played.value == PLUS_FOUR) {
+                    for(int i=0; i<4; i++) player_draw_card(g, next_p);
+                    skip = 1;
+                } else if (played.value == SKIP) {
+                    skip = 1;
+                } else if (played.value == REVERSE) {
                     if (g->num_players == 2) skip = 1;
                     else g->game_direction *= -1;
                 }
 
                 int step = g->game_direction * (1 + skip);
                 g->current_player = (g->current_player + step + g->num_players) % g->num_players;
-                
-                // Effets de pioche
-                if (played.value == PLUS_TWO) {
-                    for(int i=0; i<2; i++) player_draw_card(g, g->current_player);
-                } else if (played.value == PLUS_FOUR) {
-                    for(int i=0; i<4; i++) player_draw_card(g, g->current_player);
+            } else {
+                if (p.card_index >= 0 && p.card_index < g->players[internal_id].hand.size) {
+                    Card attempted = g->players[internal_id].hand.cards[p.card_index];
+                    Card top = g->discard_pile.cards[g->discard_pile.size - 1];
+                    printf("[KING SERVER] Coup invalide de P%d: [%d %d] sur [%d %d] (active_color: %d)\n", 
+                           internal_id, attempted.color, attempted.value, top.color, top.value, g->active_color);
                 }
             }
         } else if (real_action == ACTION_DRAW_CARD && ks->status == 1 && internal_id == g->current_player) {
             player_draw_card(g, internal_id);
+            ks->last_player_id = internal_id;
+            ks->last_action = 1; // Draw
             g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
         } else if (real_action == ACTION_QUIT_GAME) {
             printf("[KING] Joueur %d quitte la room.\n", player_id);
@@ -245,39 +263,48 @@ void king_on_tick(void* state) {
 
     if (g->players[cp].id < 0) { // C'est un bot
         ks->bot_timer += 0.016f; // Simulated delta
-        if (ks->bot_timer > 1.5f) { // 1.5 secondes de réflexion pour plus de visibilité
+        if (ks->bot_timer > ks->bot_target_time) { 
             ks->bot_timer = 0;
+            ks->bot_target_time = 1.0f + (float)(rand() % 150) / 100.0f; // 1.0s to 2.5s
+            
             int card_idx = -1;
             calculate_best_move(g, cp, &card_idx);
             
             if (card_idx != -1) {
-                Node* curr = g->players[cp].hand.head;
-                for(int i=0; i<card_idx; i++) curr = curr->next;
-                
-                Card toPlay = curr->card;
+                if (card_idx < g->players[cp].hand.size) {
+                Card toPlay = g->players[cp].hand.cards[card_idx];
                 if (try_play_card(g, cp, card_idx)) {
+                    ks->last_player_id = cp;
+                    ks->last_action = 0; // Play
+
                     if (toPlay.color == CARD_BLACK) {
                         g->active_color = (int)(rand() % 4); // Bot chooses random color
                     }
 
+                    int next_p = (g->current_player + g->game_direction + g->num_players) % g->num_players;
                     int skip = 0;
-                    if (toPlay.value == SKIP || toPlay.value == PLUS_TWO || toPlay.value == PLUS_FOUR) skip = 1;
-                    if (toPlay.value == REVERSE) {
+                    
+                    if (toPlay.value == PLUS_TWO) {
+                        for(int i=0; i<2; i++) player_draw_card(g, next_p);
+                        skip = 1;
+                    } else if (toPlay.value == PLUS_FOUR) {
+                        for(int i=0; i<4; i++) player_draw_card(g, next_p);
+                        skip = 1;
+                    } else if (toPlay.value == SKIP) {
+                        skip = 1;
+                    } else if (toPlay.value == REVERSE) {
                         if (g->num_players == 2) skip = 1;
                         else g->game_direction *= -1;
                     }
 
                     int step = g->game_direction * (1 + skip);
                     g->current_player = (g->current_player + step + g->num_players) % g->num_players;
-
-                    if (toPlay.value == PLUS_TWO) {
-                        for(int i=0; i<2; i++) player_draw_card(g, g->current_player);
-                    } else if (toPlay.value == PLUS_FOUR) {
-                        for(int i=0; i<4; i++) player_draw_card(g, g->current_player);
-                    }
+                }
                 }
             } else {
                 player_draw_card(g, cp);
+                ks->last_player_id = cp;
+                ks->last_action = 1; // Draw
                 g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
             }
             broadcast_sync(ks, ks->broadcast);

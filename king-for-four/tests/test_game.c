@@ -47,18 +47,18 @@ int main() {
 
     /* Vérification de la main */
     printf("Analyse de la main :\n");
-    Node *curr = g.players[0].hand.head;
-    for (int i = 1; curr; i++, curr = curr->next) {
-        printf("%d. ", i);
-        print_card_debug(curr->card);
-        printf(is_move_valid(g.active_color, curr->card, top) ? " -> [ ✅ ]\n" : " -> [ ❌ ]\n");
+    for (int i = 0; i < g.players[0].hand.size; i++) {
+        Card c = g.players[0].hand.cards[i];
+        printf("%d. ", i + 1);
+        print_card_debug(c);
+        printf(is_move_valid(g.active_color, c, top) ? " -> [ ✅ ]\n" : " -> [ ❌ ]\n");
     }
 
     /* Nettoyage */
-    free_deck(&g.players[0].hand);
-    free_deck(&g.draw_pile);
-    free_deck(&g.discard_pile);
-    printf("\nTest fini, memoire libre.\n");
+    clear_deck(&g.players[0].hand);
+    clear_deck(&g.draw_pile);
+    clear_deck(&g.discard_pile);
+    printf("\nTest fini, memoire libre (structures statiques).\n");
 
     return 0;
 }
