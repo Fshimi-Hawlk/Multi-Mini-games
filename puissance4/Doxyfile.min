@@ -1,9 +1,12 @@
-# Minimal Doxyfile
+# Minimal Doxyfile for Puissance4
+# @author Maxime CHAUVEAU
+# @date March 2026
+
 DOXYFILE_ENCODING       = UTF-8
 
-PROJECT_NAME            = "Sub-Project Name"
-PROJECT_NUMBER          = 2026.01.13-1 # <Use the date of the commit>-<commit current count of the day>
-PROJECT_BRIEF           = "Sub-Project Brief..."
+PROJECT_NAME            = "Puissance4"
+PROJECT_NUMBER          = 2026.03.19-1
+PROJECT_BRIEF           = "Connect Four - Two player strategy game"
 
 OUTPUT_DIRECTORY        = ./docs
 CREATE_SUBDIRS          = YES
@@ -15,7 +18,7 @@ STRIP_FROM_INC_PATH     = include ../firstparty ../thirdparty
 
 OPTIMIZE_OUTPUT_FOR_C   = YES
 
-INPUT                   = src include makefile.md
+INPUT                   = README.md src include makefile.md
 RECURSIVE               = YES
 FILE_PATTERNS           = *.c *.h *.md
 

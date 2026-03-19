@@ -1,0 +1,77 @@
+# Full Doxyfile for Puissance4
+# @author Maxime CHAUVEAU
+# @date March 2026
+# @version 1.0.0
+
+DOXYFILE_ENCODING       = UTF-8
+
+# ────────────────────────────────────────────────────────────────
+# Project metadata
+# ────────────────────────────────────────────────────────────────
+
+PROJECT_NAME            = "Puissance4"
+PROJECT_NUMBER          = 2026.03.19-1
+PROJECT_BRIEF           = "Connect Four - Two player strategy game"
+
+# ────────────────────────────────────────────────────────────────
+# Output configuration
+# ────────────────────────────────────────────────────────────────
+
+OUTPUT_DIRECTORY        = ./docs
+HTML_OUTPUT             = html
+GENERATE_LATEX          = NO
+
+CREATE_SUBDIRS         = YES
+CREATE_SUBDIRS_LEVEL   = 2
+
+# ────────────────────────────────────────────────────────────────
+# Path handling and stripping
+# ────────────────────────────────────────────────────────────────
+
+FULL_PATH_NAMES         = YES
+STRIP_FROM_PATH         = ../
+STRIP_FROM_INC_PATH     = include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# Input files and scanning
+# ────────────────────────────────────────────────────────────────
+
+USE_MDFILE_AS_MAINPAGE  = README.md
+INPUT                   = README.md src include makefile.md make/internal-structure.md
+RECURSIVE               = YES
+FILE_PATTERNS           = *.c *.h *.md
+
+EXCLUDE                 = tests docs build ../thirdparty Makefile
+EXCLUDE_SYMLINKS        = YES
+
+SEARCH_INCLUDES         = YES
+INCLUDE_PATH            = include ../firstparty ../thirdparty
+
+# ────────────────────────────────────────────────────────────────
+# C-specific optimization and extraction
+# ────────────────────────────────────────────────────────────────
+
+OPTIMIZE_OUTPUT_FOR_C   = YES
+EXTRACT_ALL             = YES
+EXTRACT_PRIVATE         = YES
+EXTRACT_STATIC         = YES
+
+# ────────────────────────────────────────────────────────────────
+# HTML output
+# ────────────────────────────────────────────────────────────────
+
+GENERATE_HTML           = YES
+HTML_COLORSTYLE_HUE    = 200
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+HTML_TIMESTAMP         = YES
+
+# ────────────────────────────────────────────────────────────────
+# Configuration
+# ────────────────────────────────────────────────────────────────
+
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+STRIP_CODE_COMMENTS    = YES
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
