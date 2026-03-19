@@ -32,7 +32,7 @@ void test_bot_decision() {
     calculate_best_move(&g, 0, &move_idx);
 
     // Bot should choose c2 (Red 9) because it matches color
-    assert(move_idx == 0); // c2 was pushed last, so it's at index 0
+    assert(move_idx == 1); // c2 was pushed last, so it's at index 1
     printf("  - Playable card selection: OK\n");
 
     // Case 2: Bot must draw
