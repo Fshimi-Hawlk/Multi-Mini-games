@@ -34,6 +34,8 @@ typedef struct {
     int hand_sizes[4];      /**< Card count for each player */
     int status;             /**< Game status (0: WAITING, 1: PLAYING) */
     int host_id;            /**< ID of host player */
+    int last_player_id;     /**< ID of last player who moved */
+    int last_action;        /**< 0: Play, 1: Draw */
 } GameSyncPayload;
 
 typedef struct {
@@ -58,6 +60,13 @@ static float join_retry_timer = 0;
 // UI effects state
 static float turn_overlay_timer = 0;
 static int winner_id = -1;
+
+// Last Move Visuals
+static float last_move_timer = 0;
+static int last_player_who_moved = -1;
+static int last_action_type = -1; // 0: Play, 1: Draw
+static Card last_seen_top_card = {CARD_BLACK, ZERO};
+static float card_pop_timer = 0;
 
 // Color selection state
 static bool is_choosing_color = false;
@@ -135,10 +144,22 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
             game_status = sync.status;
             local_state.num_players = 4; // Max
             
-            if (local_state.discard_pile.head == NULL) {
+            // Track last move for visual feedback
+            if (sync.last_player_id != -1) {
+                last_player_who_moved = sync.last_player_id;
+                last_action_type = sync.last_action;
+                last_move_timer = 1.5f; // Show move info for 1.5s
+                
+                if (sync.top_card.color != last_seen_top_card.color || sync.top_card.value != last_seen_top_card.value) {
+                    card_pop_timer = 0.5f; // Pop effect for 0.5s
+                    last_seen_top_card = sync.top_card;
+                }
+            }
+
+            if (local_state.discard_pile.size == 0) {
                 push_card(&local_state.discard_pile, sync.top_card);
             } else {
-                local_state.discard_pile.head->card = sync.top_card;
+                local_state.discard_pile.cards[local_state.discard_pile.size - 1] = sync.top_card;
             }
             
             for (int i = 0; i < 4; i++) {
@@ -154,7 +175,7 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
         
         clear_deck(&local_state.players[0].hand);
         
-        for (int i = count - 1; i >= 0; i--) {
+        for (int i = 0; i < count; i++) {
             Card c;
             memcpy(&c, ptr + (i * sizeof(Card)), sizeof(Card));
             push_card(&local_state.players[0].hand, c);
@@ -174,6 +195,8 @@ void king_client_update(float dt) {
     // if (g_chatState.isOpen) return; // Ignore input when chatting
 
     if (turn_overlay_timer > 0) turn_overlay_timer -= dt;
+    if (last_move_timer > 0) last_move_timer -= dt;
+    if (card_pop_timer > 0) card_pop_timer -= dt;
 
     if (!assets_loaded) return;
     if (my_internal_id == -1) {
@@ -209,10 +232,7 @@ void king_client_update(float dt) {
             int clickedHandIndex = GetHoveredCardIndex(&local_state.players[0], assets);
             if (clickedHandIndex != -1) {
                 // Check if card is black
-                Node* curr = local_state.players[0].hand.head;
-                for (int i = 0; i < clickedHandIndex; i++) curr = curr->next;
-                
-                if (curr->card.color == CARD_BLACK) {
+                if (local_state.players[0].hand.cards[clickedHandIndex].color == CARD_BLACK) {
                     is_choosing_color = true;
                     pending_card_index = clickedHandIndex;
                 } else {
@@ -267,10 +287,19 @@ void king_client_draw(void) {
         return;
     }
 
-    RenderTable(&local_state, assets);
+    RenderTable(&local_state, assets, card_pop_timer > 0 ? (card_pop_timer * 0.2f) : 0);
     RenderOpponents(&local_state, assets, my_internal_id);
     RenderHand(&local_state.players[0], assets);
     
+    // Last Action Notification
+    if (last_move_timer > 0 && last_player_who_moved != -1) {
+        const char* pName = (last_player_who_moved == my_internal_id) ? "VOUS" : TextFormat("JOUEUR %d", last_player_who_moved);
+        const char* actionName = (last_action_type == 0) ? "a JOUÉ une carte" : "a PIOCHÉ une carte";
+        Color c = (last_player_who_moved == my_internal_id) ? GREEN : SKYBLUE;
+        float alpha = last_move_timer > 0.5f ? 1.0f : last_move_timer * 2.0f;
+        DrawText(TextFormat("%s %s", pName, actionName), GetScreenWidth()/2 - 100, GetScreenHeight()/2 + 80, 20, Fade(c, alpha));
+    }
+
     if (local_state.current_player == my_internal_id) {
         float pulse = (sinf(GetTime() * 10.0f) + 1.0f) * 0.5f;
         DrawText("C'EST VOTRE TOUR !", 10, 40, 25, Fade(GREEN, 0.5f + pulse * 0.5f));

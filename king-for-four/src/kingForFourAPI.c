@@ -160,7 +160,7 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
                 break;
 
             case STATE_GAME:
-                RenderTable(&game->state, game->assets);
+                RenderTable(&game->state, game->assets, 0);
                 RenderHand(&game->state.players[0], game->assets);
                 
                 // HUD
@@ -187,10 +187,10 @@ Error_Et kingforfour_freeGame(KingForFourGame_St** game) {
     KingForFourGame_St* g = *game;
 
     // 1. Nettoyage de la mémoire métier
-    free_deck(&g->state.draw_pile);
-    free_deck(&g->state.discard_pile);
+    clear_deck(&g->state.draw_pile);
+    clear_deck(&g->state.discard_pile);
     for(int i = 0; i < g->state.num_players; i++) {
-        free_deck(&g->state.players[i].hand);
+        clear_deck(&g->state.players[i].hand);
     }
 
     // 2. Déchargement de la mémoire graphique (VRAM)

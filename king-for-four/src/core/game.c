@@ -11,42 +11,21 @@
 #include <stdio.h>
 
 /**
- * @brief Rule matrix for valid color moves.
- * [Discard Pile Color (0-3)][Played Card Color (0-4)]
- * 1 indicates a valid move, 0 indicates an invalid move.
- */
-int valid_color[4][5] = {
-    {1, 0, 0, 0, 1},
-    {0, 1, 0, 0, 1},
-    {0, 0, 1, 0, 1},
-    {0, 0, 0, 1, 1}
-};
-
-/**
- * @brief Rule matrix for valid value moves.
- * [Discard Pile Value (0-14)][Played Card Value (0-14)]
- */
-int valid_value[15][15] = {0};
-
-/**
  * @brief Initializes the game logic, rules, and state.
  * @param g Pointer to the GameState to initialize.
  */
 void init_game_logic(GameState* g) {
-    for (int i = 0; i < 15; i++) valid_value[i][i] = 1;
-
     if (!g) return;
     g->current_player = 0;
     g->game_direction = 1;
     g->active_color = -1;
     g->num_players = 0;
-    g->draw_pile = (Deck){NULL, 0};
-    g->discard_pile = (Deck){NULL, 0};
     
-    // INITIALISATION CRITIQUE DES MAINS
+    clear_deck(&g->draw_pile);
+    clear_deck(&g->discard_pile);
+    
     for (int i = 0; i < 4; i++) {
-        g->players[i].hand.head = NULL;
-        g->players[i].hand.size = 0;
+        clear_deck(&g->players[i].hand);
     }
 }
 
@@ -58,12 +37,14 @@ void init_game_logic(GameState* g) {
  * @return 1 if the move is valid, 0 otherwise.
  */
 int is_move_valid(int active_color, Card played, Card top) {
-    int idx = (active_color >= 0 && active_color < 4) ? active_color : top.color;
-    
-    int color_ok = (idx >= 0 && idx < 4) ? valid_color[idx][played.color] : 0;
-    int value_ok = valid_value[top.value][played.value];
+    if (played.color == CARD_BLACK) return 1; // Joker or +4 can always be played
 
-    return color_ok || value_ok;
+    int current_match_color = (active_color >= 0 && active_color < 4) ? active_color : top.color;
+    
+    if (played.color == current_match_color) return 1;
+    if (played.value == top.value) return 1;
+
+    return 0;
 }
 
 /**
@@ -73,15 +54,42 @@ int is_move_valid(int active_color, Card played, Card top) {
 void distribute_cards(GameState* g) {
     if (!g || g->num_players <= 0) return;
 
+    // 1. Distribute 7 cards to each player
     for (int i = 0; i < g->num_players; i++) {
-        for (int j = 0; j < 7; j++) draw_to_hand(&(g->players[i]), &(g->draw_pile));
+        for (int j = 0; j < 7; j++) {
+            if (g->draw_pile.size > 0) {
+                draw_to_hand(&(g->players[i]), &(g->draw_pile));
+            }
+        }
     }
 
-    Card first = pop_card(&(g->draw_pile));
-    push_card(&(g->discard_pile), first);
-    
-    /* Couleur forcée si la première carte est un Joker */
-    g->active_color = (first.color == 4) ? 0 : first.color;
+    // 2. Setup discard pile
+    if (g->draw_pile.size > 0) {
+        Card first = pop_card(&(g->draw_pile));
+        push_card(&(g->discard_pile), first);
+        
+        // Setup initial game state based on first card
+        if (first.color == CARD_BLACK) {
+            g->active_color = CARD_RED; // Default to red
+        } else {
+            g->active_color = -1;
+        }
+
+        // Apply first card effect logic
+        int skip = 0;
+        if (first.value == SKIP) skip = 1;
+        if (first.value == PLUS_TWO) {
+            for(int i=0; i<2; i++) player_draw_card(g, 0);
+            skip = 1;
+        }
+        if (first.value == REVERSE) {
+            if (g->num_players == 2) skip = 1;
+            else g->game_direction *= -1;
+        }
+        
+        // Adjust starting player
+        g->current_player = (skip * g->game_direction + g->num_players) % g->num_players;
+    }
 }
 
 /**
@@ -92,46 +100,34 @@ void distribute_cards(GameState* g) {
  * @return 1 on success, 0 on failure.
  */
 int try_play_card(GameState *g, int playerIndex, int cardIndex) {
+    if (!g || playerIndex < 0 || playerIndex >= g->num_players) return 0;
+    
     Player* p = &g->players[playerIndex];
     
-    // 1. Trouver la carte dans la main sans la retirer 
-    Node* current = p->hand.head;
-    for (int i = 0; i < cardIndex; i++) {
-        if (current) current = current->next;
-    }
-    if (!current) return 0; // Erreur d'index
-
-    Card cardToPlay = current->card;
+    if (cardIndex < 0 || cardIndex >= p->hand.size) return 0;
     
-    // 2. Récupérer la carte du dessus du talon
-    if (g->discard_pile.head == NULL) return 0; // Erreur technique
-    Card topCard = g->discard_pile.head->card;
+    Card cardToPlay = p->hand.cards[cardIndex];
+    
+    if (g->discard_pile.size == 0) return 0;
+    Card topCard = g->discard_pile.cards[g->discard_pile.size - 1];
 
-    // 3. Vérifier les règles
     if (is_move_valid(g->active_color, cardToPlay, topCard)) {
-        
-        // --- LE COUP EST VALIDE ---
-        
-        // A. On retire la carte de la main
         Card played = remove_at(&p->hand, cardIndex);
-        
-        // B. On la met sur le talon
         push_card(&g->discard_pile, played);
         
-        // C. On met à jour la couleur active
         if (played.color == CARD_BLACK) {
-            // TODO: Ouvrir un menu pour choisir la couleur
-            g->active_color = CARD_RED; // Temporaire pour tester
+            // TODO: Open a menu to choose color. For now default to Red.
+            g->active_color = CARD_RED; 
         } else {
             g->active_color = -1;
         }
         
-        printf("Carte jouée ! Reste : %d cartes\n", p->hand.size);
-        return 1; // Succès
+        printf("Carte jouee ! Reste : %d cartes\n", p->hand.size);
+        return 1;
     }
     
     printf("Coup invalide !\n");
-    return 0; // Échec
+    return 0;
 }
 
 /**
@@ -141,33 +137,32 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex) {
  * @return 1 on success, 0 if no cards are available.
  */
 int player_draw_card(GameState *g, int playerIndex) {
+    if (!g || playerIndex < 0 || playerIndex >= g->num_players) return 0;
+
     Player* p = &g->players[playerIndex];
 
-    // 1. Si la pioche est vide, on recycle le talon
     if (g->draw_pile.size == 0) {
         if (g->discard_pile.size <= 1) {
             printf("Plus aucune carte nulle part !\n");
-            return 0; // Vraiment plus de cartes
+            return 0; 
         }
 
-        printf("Pioche vide ! On mélange le talon...\n");
+        printf("Pioche vide ! On melange le talon...\n");
         
-        // On garde la carte du dessus du talon
+        // Keep the top card
         Card topVisible = pop_card(&g->discard_pile);
         
-        // On déplace tout le reste du talon vers la pioche
-        while(g->discard_pile.head != NULL) {
+        // Move rest to draw pile
+        while(g->discard_pile.size > 0) {
             push_card(&g->draw_pile, pop_card(&g->discard_pile));
         }
         
-        // On remet la carte visible sur le talon
+        // Put the visible card back
         push_card(&g->discard_pile, topVisible);
         
-        // On mélange la nouvelle pioche
         shuffle_deck(&g->draw_pile);
     }
 
-    // 2. On pioche
     draw_to_hand(p, &g->draw_pile);
     return 1;
 }
