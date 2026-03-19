@@ -36,6 +36,7 @@
 #include "audio.h"
 #include "utils/globals.h"
 #include "utils/utils.h"
+#include "../../thirdparty/raylib.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
