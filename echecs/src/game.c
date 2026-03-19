@@ -1,3 +1,14 @@
+/**
+ * @file game.c
+ * @author Maxime CHAUVEAU
+ * @brief Game initialization and management functions for Echecs.
+ * @version 1.0
+ * @date 2024
+ *
+ * This file contains functions for initializing the game,
+ * managing the game loop, and cleaning up resources.
+ */
+
 #include "game.h"
 #include "global.h"
 #include "error.h"
@@ -6,6 +17,10 @@
 #include "utils.h"
 #include "rendering.h"
 
+/**
+ * @brief Initialize both players.
+ * @return 0 on success, 1 on failure
+ */
 int initPlayers(void) {
     blackPlayer = initPlayer(COLOR_PIECE_BLACK, 0, 1);
     if (!blackPlayer) {
@@ -26,6 +41,13 @@ int initPlayers(void) {
     return 0;
 }
 
+/**
+ * @brief Initialize a single player.
+ * @param color The color of the player (white or black)
+ * @param mainLineY The y-position for the back rank pieces
+ * @param pawnLineY The y-position for the pawns
+ * @return Pointer to the created player structure, or NULL on failure
+ */
 Player_st* initPlayer(ColorPiece_et color, int mainLineY, int pawnLineY) {
     Player_st* player = calloc(1, sizeof(Player_st));
     if (!player) {
@@ -70,6 +92,10 @@ Player_st* initPlayer(ColorPiece_et color, int mainLineY, int pawnLineY) {
     return player;
 }
 
+/**
+ * @brief Load all piece textures from disk.
+ * @return 0 on success, 1 on failure
+ */
 int initTextures(void) {
     for (int i = 1; i < 7; i++) {
         white_piece_textures[i] = LoadTexture(WHITE_IMAGES_PATHS[i]);
@@ -103,6 +129,9 @@ int initTextures(void) {
     return 0;
 }
 
+/**
+ * @brief Free all loaded textures from memory.
+ */
 void freeTextures(void) {
     for (int i = 1; i < 7; i++) {
         if (IsTextureValid(white_piece_textures[i])) {
@@ -123,6 +152,11 @@ void freeTextures(void) {
     }
 }
 
+/**
+ * @brief Initialize the board with pieces in starting positions.
+ * @param board The board to initialize
+ * @return 0 on success
+ */
 int initBoard(Board_t board) {
     for (int i = 0; i < BOARD_SIZE; i++) {
         for (int j = 0; j < BOARD_SIZE; j++) {
@@ -138,6 +172,11 @@ int initBoard(Board_t board) {
     return 0;
 }
 
+/**
+ * @brief Initialize the entire game (window, textures, players, board).
+ * @param board The board to initialize
+ * @return 0 on success, error code on failure
+ */
 int initGame(Board_t board) {
     int returnCode;
 
@@ -169,11 +208,20 @@ int initGame(Board_t board) {
     return 0;
 }
 
+/**
+ * @brief Reset the game state for a new game.
+ */
 void resetGame() {
     previousMoveCell[0].x = -1;
     nbPositionsPossibles = 0;
 }
 
+/**
+ * @brief Main game loop that handles input and rendering.
+ * @param board The game board
+ * @param predifinedMoves Array of predefined moves (can be NULL)
+ * @param nbMoves Number of predefined moves
+ */
 void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves) {    
     if (nbMoves > 0 && predifinedMoves) {
         applyPredifinedMoves(board, predifinedMoves, nbMoves);
@@ -200,6 +248,10 @@ void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves) {
     }
 }
 
+/**
+ * @brief Free all memory associated with a player.
+ * @param player The player to free
+ */
 void freePlayer(Player_st* player) {
     if (!player) {
         return;
@@ -216,6 +268,9 @@ void freePlayer(Player_st* player) {
     player = NULL;
 }
 
+/**
+ * @brief Clean up all game resources.
+ */
 void freeGame(void) {
     freeTextures();
 

@@ -1,6 +1,23 @@
+/**
+ * @file main.c
+ * @author Maxime CHAUVEAU
+ * @brief Main entry point for the Echecs (Chess) game.
+ * @version 1.0
+ * @date 2024
+ *
+ * This file contains the main function which initializes the game
+ * and starts the game loop.
+ */
+
 #include "types.h"
 #include "game.h"
 
+/**
+ * @brief Main entry point for the chess game.
+ * @param argc Argument count
+ * @param argv Argument vector
+ * @return 0 on successful exit
+ */
 int main(int argc, char* argv[]) {
     int returnCode;
 

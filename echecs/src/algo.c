@@ -1,3 +1,15 @@
+/**
+ * @file algo.c
+ * @author Maxime CHAUVEAU
+ * @brief Game logic and algorithms for Echecs.
+ * @version 1.0
+ * @date 2024
+ *
+ * This file contains all the game logic functions including
+ * piece movement, move validation, check/checkmate detection,
+ * and promotion handling.
+ */
+
 #include "algo.h"
 #include "global.h"
 #include "utils.h"
@@ -5,11 +17,23 @@
 #include "event.h"
 #include "error.h"
 
+/**
+ * @brief Select a piece on the board.
+ * @param board The game board
+ * @param targetPos The position of the piece to select
+ */
 void selectPiece(Board_t board, IVec2_st targetPos) {
     selectionnedPiece = board[targetPos.y][targetPos.x];
     updatePossibleMoves(board);
 } 
 
+/**
+ * @brief Attempt to move a piece to a new position.
+ * @param board The game board
+ * @param selectionnedPiece The piece to move
+ * @param boardPos The target position
+ * @return true if the move was successful, false otherwise
+ */
 bool movement(Board_t board, Piece_st* selectionnedPiece, IVec2_st boardPos) {
     IVec2_st posPIECE_NAME_ROOKDep, posPIECE_NAME_ROOKArr;
     Piece_st* tempPiece = NULL;
@@ -93,6 +117,14 @@ bool movement(Board_t board, Piece_st* selectionnedPiece, IVec2_st boardPos) {
     return false;
 }
 
+/**
+ * @brief Check if a piece can be placed at a specific position.
+ * @param board The game board
+ * @param selectionnedPiece The piece to check
+ * @param col The target column
+ * @param row The target row
+ * @return true if the move is valid, false otherwise
+ */
 bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
     int dx = col - selectionnedPiece->pos.x;
     int dy = row - selectionnedPiece->pos.y;
@@ -221,6 +253,15 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
     return false;
 }
 
+/**
+ * @brief Check if a move would leave the king in check.
+ * @param board The game board
+ * @param selectionnedPiece The piece to move
+ * @param targetColumn The target column
+ * @param targetLine The target row
+ * @param player The player whose turn it is (0 for white, 1 for black)
+ * @return true if the move would result in check, false otherwise
+ */
 bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int targetLine, int player) {
     Player_st* targetPlayer = player ? blackPlayer : whitePlayer;
     Player_st* adversaryPlayer = player ? whitePlayer : blackPlayer;
@@ -276,6 +317,11 @@ bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int
     return res;
 }
 
+/**
+ * @brief Check if the current player is in checkmate.
+ * @param board The game board
+ * @return true if checkmate, false otherwise
+ */
 bool isCheckmate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
 
@@ -299,6 +345,11 @@ bool isCheckmate(Board_t board) {
     return true;
 }
 
+/**
+ * @brief Check if the current player is in stalemate.
+ * @param board The game board
+ * @return true if stalemate, false otherwise
+ */
 bool isStalemate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
     
