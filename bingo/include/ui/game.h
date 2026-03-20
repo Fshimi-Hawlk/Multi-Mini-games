@@ -2,7 +2,7 @@
     @file ui/game.h
     @author Fshimi-Hawlk
     @date 2026-03-03
-    @date 2026-03-05
+    @date 2026-03-19
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.
@@ -18,13 +18,13 @@
 
 #include "utils/userTypes.h"
 
-void bingo_drawChoiceCards(const BingoGame_St* const game);
+void bingo_drawChoiceCards(const Layout_St* layout);
 
 /**
     @brief Draws the player card.
 
     TODO
 */
-void bingo_drawCard(const BingoGame_St* const game);
+void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const player);
 
 #endif // UI_GAME_H

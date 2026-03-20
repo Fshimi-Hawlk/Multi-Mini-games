@@ -51,6 +51,7 @@ typedef enum {
     ERROR_NULL_POINTER,         ///< Required pointer argument was NULL
     ERROR_ALLOC,                ///< Memory allocation failed
     ERROR_INVALID,              ///< Argument value or state is invalid/illegal
+    ERROR_INVALID_ENUM_VAL,     ///< Enum value is invalid
     ERROR_INVALID_SETTING,      ///< Setting parameters is invalid
     ERROR_TEXTURE_LOAD,         ///< Failed to load a required texture
     ERROR_AUDIO_LOAD,           ///< Failed to load audio resource
@@ -58,28 +59,6 @@ typedef enum {
     ERROR_ASSET_LOAD,           ///< Failed to load game assets
     // Future extension point: add more codes here as needed
 } Error_Et;
-
-// ────────────────────────────────────────────────
-// Game interface
-// ────────────────────────────────────────────────
-
-/**
-    @brief Opaque forward declaration of the concrete game state.
-
-    Actual definition lives in the specific mini-game header (.e.g. tetrisGame.h).
- */
-typedef struct BaseGame_St BaseGame_St;
-
-/**
-    @brief Function pointer type for game cleanup.
-
-    Must free the entire game object (including any internal allocations)
-    and return an Error_Et code (usually OK).
-
-    Signature: `Error_Et freeMyGame(void* game);`
- */
-typedef Error_Et (*freeGame_Ft)(void*);
-
 
 /**
     @brief Available font sizes used for in-game UI and text rendering.
@@ -104,6 +83,27 @@ typedef enum {
     __fontSizeCount
 } FontSize_Et;
 
+// ────────────────────────────────────────────────
+// Game interface
+// ────────────────────────────────────────────────
+
+/**
+    @brief Opaque forward declaration of the concrete game state.
+
+    Actual definition lives in the specific mini-game header (.e.g. tetrisGame.h).
+ */
+typedef struct BaseGame_St BaseGame_St;
+
+/**
+    @brief Function pointer type for game cleanup.
+
+    Must free the entire game object (including any internal allocations)
+    and return an Error_Et code (usually OK).
+
+    Signature: `Error_Et freeMyGame(void* game);`
+ */
+typedef Error_Et (*FreeGame_Ft)(void*);
+
 /**
     @brief Common base structure that **every** mini-game state must embed as its first member.
 
@@ -121,7 +121,7 @@ struct BaseGame_St {
     bool        paused;         ///< true = game is paused (no update, optional dimmed render)
     long        score;          ///< Score accumulated during the current/last session
 
-    freeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
+    FreeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
 };
 
 /**

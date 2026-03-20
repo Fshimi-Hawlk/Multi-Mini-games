@@ -1,8 +1,8 @@
 /**
-    @file ui/game.c
+    @file game.c (ui)
     @author Fshimi-Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-19
     @brief Low-level drawing routines for <Game Name> gameplay elements.
 
     Contributors:
@@ -22,21 +22,22 @@
 #include "ui/game.h"
 
 #include "utils/globals.h"
+#include "utils/userTypes.h"
 
-void bingo_drawChoiceCards(const BingoGame_St* game) {
+void bingo_drawChoiceCards(const Layout_St* layout) {
     const char* title = "Choose your bingo card";
     uint titleSize = 32;
     f32Vector2 textSize = MeasureTextEx(fonts[FONT32], title, titleSize, 0);
     f32Vector2 textPos = {
-        game->layout.windowCenter.x - textSize.x / 2.0f,
-        game->layout.choiceCards[0].innerRect.y - 60.0f
+        layout->windowCenter.x - textSize.x / 2.0f,
+        layout->choiceCards[0].innerRect.y - 60.0f
     };
 
     DrawTextEx(fonts[FONT32], title, textPos, titleSize, 0, BLACK);
     f32 roundness = 0.05f;
 
     for (uint idx = 0; idx < 12; ++idx) {
-        const CardUI_St* card = &game->layout.choiceCards[idx];
+        const CardUI_St* card = &layout->choiceCards[idx];
 
         const Rectangle innerCard = card->innerRect;
         const Rectangle cardBackground = card->backgroundRect;
@@ -88,17 +89,17 @@ void bingo_drawChoiceCards(const BingoGame_St* game) {
     }
 }
 
-void bingo_drawCard(const BingoGame_St* const game) {
+void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const player) {
     f32 roundness = 0.05f;
-    DrawRectangleRounded(game->layout.cardRect, roundness, 16, WHITE);
-    DrawRectangleRoundedLinesEx(game->layout.cardRectBorder, roundness - 0.025f, 16, 6.5f, BROWN);
+    DrawRectangleRounded(layout->cardRect, roundness, 16, WHITE);
+    DrawRectangleRoundedLinesEx(layout->cardRectBorder, roundness - 0.025f, 16, 6.5f, BROWN);
 
     // Column letters
     for (u8 i = 0; i < 5; ++i) {
         f32Vector2 textSize = MeasureTextEx(fonts[FONT32], LETTERS[i], 32, 0);
         f32Vector2 pos = {
-            .x = game->layout.cardRectsRect.x + game->layout.cardRectsRect.width * (i + 0.5f) - textSize.x / 2.0f,
-            .y = game->layout.cardRectsRect.y - game->layout.cardRectsRect.height / 1.5f
+            .x = layout->cardRectsRect.x + layout->cardRectsRect.width * (i + 0.5f) - textSize.x / 2.0f,
+            .y = layout->cardRectsRect.y - layout->cardRectsRect.height / 1.5f
         };
 
         DrawTextEx(fonts[FONT32],LETTERS[i], pos, 32, 0, BLACK);
@@ -108,15 +109,15 @@ void bingo_drawCard(const BingoGame_St* const game) {
     for (u8 r = 0; r < 5; ++r) {
         for (u8 c = 0; c < 5; ++c) {
             Rectangle rect = {
-                .x      = game->layout.cardRectsRect.x + game->layout.cardRectsRect.width * c,
-                .y      = game->layout.cardRectsRect.y + game->layout.cardRectsRect.height * r,
-                .width  = game->layout.cardRectsRect.width - 1,
-                .height = game->layout.cardRectsRect.height - 1
+                .x      = layout->cardRectsRect.x + layout->cardRectsRect.width * c,
+                .y      = layout->cardRectsRect.y + layout->cardRectsRect.height * r,
+                .width  = layout->cardRectsRect.width - 1,
+                .height = layout->cardRectsRect.height - 1
             };
 
             DrawRectangleLinesEx(rect, 1, BLACK);
 
-            if (game->player.misclicks[r][c] > 0) {
+            if (player->misclicks[r][c] > 0) {
                 Rectangle innerRect = {
                     .x = rect.x + 1,
                     .y = rect.y + 1,
@@ -124,7 +125,7 @@ void bingo_drawCard(const BingoGame_St* const game) {
                     .height = rect.height - 2,
                 };
 
-                switch (game->player.misclicks[r][c]) {
+                switch (player->misclicks[r][c]) {
                     case 1: DrawRectangleRec(innerRect, YELLOW); break;
                     case 2: DrawRectangleRec(innerRect, ORANGE); break;
                     case 3:
@@ -132,8 +133,8 @@ void bingo_drawCard(const BingoGame_St* const game) {
                         DrawRectangleRec(innerRect, RED);
                         
                         f32Vector2 textPos = {
-                            .x = innerRect.x + game->layout.cardRectsRect.width / 2.0f - 10,
-                            .y = innerRect.y + game->layout.cardRectsRect.height / 2.0f - 16, 
+                            .x = innerRect.x + layout->cardRectsRect.width / 2.0f - 10,
+                            .y = innerRect.y + layout->cardRectsRect.height / 2.0f - 16, 
                         };
 
                         DrawTextEx(fonts[FONT32], "X", textPos, 32, 0, WHITE);
@@ -143,26 +144,26 @@ void bingo_drawCard(const BingoGame_St* const game) {
                 
             }
 
-            if (game->player.daubs[r][c]) {
+            if (player->daubs[r][c]) {
                 DrawCircle(
-                    rect.x + game->layout.cardRectsRect.width / 2.0f,
-                    rect.y + game->layout.cardRectsRect.height / 2.0f,
-                    game->layout.cardRectsRect.width / 2.0f - 5, 
+                    rect.x + layout->cardRectsRect.width / 2.0f,
+                    rect.y + layout->cardRectsRect.height / 2.0f,
+                    layout->cardRectsRect.width / 2.0f - 5, 
                     GREEN
                 );
-            } else if (game->player.misclicks[r][c] < 3) {
+            } else if (player->misclicks[r][c] < 3) {
                 u32 textHeight = 24;
                 const char *text = "Free";
 
                 if (r != 2 || c != 2) {
                     textHeight = 32;
-                    text = TextFormat("%u", game->player.numbers[r][c]);
+                    text = TextFormat("%u", player->numbers[r][c]);
                 }
 
                 f32Vector2 textSize = MeasureTextEx(fonts[FONT32], text, textHeight, 0);
                 f32Vector2 textPos = {
-                    .x = rect.x + (game->layout.cardRectsRect.width - textSize.x) / 2.0f,
-                    .y = rect.y + (game->layout.cardRectsRect.height - textSize.y) / 2.0f,
+                    .x = rect.x + (layout->cardRectsRect.width - textSize.x) / 2.0f,
+                    .y = rect.y + (layout->cardRectsRect.height - textSize.y) / 2.0f,
                 };
                 DrawTextEx(fonts[FONT32], text, textPos, textSize.y, 0, BLACK);
             }

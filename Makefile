@@ -1,134 +1,151 @@
-# ───────────────────────────────────────────────────────────────
-# Top-Level Makefile ─ Project build system
-#
-#     Main targets: see 'make help' for the full list and descriptions
-#     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
-#
-#     Quick usage        ->  make help
-#
-# Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
-# ───────────────────────────────────────────────────────────────
+# ╭────────────────────────────────────────────────────────────────────────╮
+# │                        Project Root Makefile                           │
+# │                                                                        │
+# │  Build system for multi-module C/C++ project with static libraries     │
+# │  and centralized lobby executable                                      │
+# │                                                                        │
+# │  Main entry points:                                                    │
+# │    • make help           ─ show all available targets & options        │
+# │    • make all            ─ build libraries + lobby executable          │
+# │    • make rebuild        ─ full clean then rebuild everything          │
+# │    • make clean-all      ─ deep clean (build dir + modules + headers)  │
+# │                                                                        │
+# │  Build modes: release, debug, strict-debug, clang-debug, valgrind-debug│
+# │  Verbose output: VERBOSE=1                                             │
+# │                                                                        │
+# │  Author:   Fshimi Hawlk                                                │
+# │  GitHub:   https://github.com/Fshimi-Hawlk                             │
+# │  Updated:  March 2025                                                  │
+# ╰────────────────────────────────────────────────────────────────────────╯
+
 
 # ───────────────────────────────────────────────────────────────
 # Configuration
 # ───────────────────────────────────────────────────────────────
 
-MODE ?= release
-VERBOSE ?= 0
-MAIN_NAME ?= main
+MODE          ?= release
+VERBOSE       ?= 0
+MAIN_NAME     ?= main
 
-# Verbose mode (default silent)
+# Verbose control
 ifeq ($(VERBOSE),1)
-	SILENT_PREFIX :=
+    SILENT_PREFIX :=
 else
-	SILENT_PREFIX := @
+    SILENT_PREFIX := @
 endif
 
-# Fait Physique : Fige le chemin absolu de la racine du projet
-# Garantit que les sous-Makefiles (lobby, reseau) trouvent toujours les API
-ROOT_DIR := $(CURDIR)
+ROOT_DIR      := $(CURDIR)
+MAKEFLAGS     += --no-print-directory
 
-# Suppress subdirectory messages
-MAKEFLAGS += --no-print-directory
-
-# Excluded directories
+# Directories to exclude when discovering modules
 EXCLUDED_DIRS := \
-	$(ROOT_DIR)/assets \
-	$(ROOT_DIR)/build \
-	$(ROOT_DIR)/docs \
-	$(ROOT_DIR)/firstparty \
-	$(ROOT_DIR)/lobby \
-	$(ROOT_DIR)/logs \
-	$(ROOT_DIR)/thirdparty
+    assets       \
+    build        \
+    docs         \
+    firstparty   \
+    lobby        \
+    logs         \
+    thirdparty
 
-# Detect modules (normalize by removing trailing /)
+# Discover module directories (exclude listed ones)
 MODULES := $(patsubst %/,%,$(wildcard */))
-MODULES := $(filter-out $(EXCLUDED_DIRS), $(MODULES))
+MODULES := $(filter-out $(EXCLUDED_DIRS),$(MODULES))
 
-SUBDIRS := $(MODULES) $(ROOT_DIR)/lobby
+SUBDIRS       := $(MODULES) lobby
 
 FIRSTPARTY_API_DIR := $(ROOT_DIR)/firstparty/APIs
 
-# Root-level directories
-BUILD_DIR := $(ROOT_DIR)/build
-LIB_DIR   := $(BUILD_DIR)/lib
-BIN_DIR   := $(BUILD_DIR)/bin
+BUILD_DIR     := $(ROOT_DIR)/build
+LIB_DIR       := $(BUILD_DIR)/lib
+BIN_DIR       := $(BUILD_DIR)/bin
 
-# Computed lib names (flattened lowercase, no - or _)
+# ───────────────────────────────────────────────────────────────
+# Computed names & paths
+# ───────────────────────────────────────────────────────────────
+
+# Transform module directory name -> library name (lowercase, no _ or -)
 define compute-lib-name
 $(shell echo '$(1)' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
 endef
 
-define compute-api-name
-$(shell echo '$(1)API.h')
+# Convert directory name (with possible dashes) -> lowerCamelCase for API header
+# bingo          -> bingoAPI.h
+# king-for-four  -> kingForFourAPI.h
+# reseau         -> reseauAPI.h
+define to-lower-camel
+$(shell echo '$(1)' | sed -E 's/[-_]([a-z])/\U\1/g' | sed 's/^[A-Z]/\l&/')
 endef
 
-# Absolute lib paths (used for dependency tracking)
+define compute-api-name
+$(call to-lower-camel,$(1))API.h
+endef
+
+$(LIB_DIR):
+	$(SILENT_PREFIX)mkdir -p $@
+
+# Absolute library paths
 LIBS := $(foreach mod,$(MODULES),$(LIB_DIR)/lib$(call compute-lib-name,$(mod)).a)
 
-# Lib paths for linking (relative from lobby/ -> ../../build/lib/...)
+# Relative paths from lobby/ to libs (for linker -L or -l usage)
 LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 
+define build-module-lib-rule
+$(LIB_DIR)/lib$(call compute-lib-name,$(1)).a : | $(LIB_DIR)
+	@echo "Building static library -> $(1) (lib$(call compute-lib-name,$(1)).a)"
+	$(SILENT_PREFIX)$(MAKE) -C $(1) static-lib \
+		MODE=$(MODE) \
+		VERBOSE=$(VERBOSE) \
+		LIB_NAME=$(call compute-lib-name,$(1)) \
+		EXTRA_CFLAGS="-DASSET_PATH=\\\"$(1)/assets/\\\""
+	$(SILENT_PREFIX)if cmp -s "$(1)/build/lib/lib$(call compute-lib-name,$(1)).a" "$$@" 2>/dev/null; then \
+		echo "  lib$(call compute-lib-name,$(1)).a unchanged"; \
+	else \
+		echo "  Updating lib$(call compute-lib-name,$(1)).a"; \
+		cp "$(1)/build/lib/lib$(call compute-lib-name,$(1)).a" "$$@"; \
+	fi
+	$(SILENT_PREFIX)mkdir -p $(FIRSTPARTY_API_DIR)
+	$(SILENT_PREFIX)if [ -f "$(1)/include/$(call compute-api-name,$(1))" ]; then \
+		echo "  Updating API header -> $(call compute-api-name,$(1))"; \
+		cp "$(1)/include/$(call compute-api-name,$(1))" "$(FIRSTPARTY_API_DIR)/"; \
+	else \
+		echo "  Warning: $(call compute-api-name,$(1)) not found in $(1)/include/"; \
+	fi
+endef
+
+$(foreach mod,$(MODULES),$(eval $(call build-module-lib-rule,$(mod))))
+
 # ───────────────────────────────────────────────────────────────
-# Main Targets
+# Main targets
 # ───────────────────────────────────────────────────────────────
 
 all: bin
 
-# Lazy build of module libraries (only if sources changed)
 libs: $(LIBS)
 
-$(LIB_DIR)/lib%.a:
-	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
-	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
-	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	@echo "Building library for $(MOD_DIR)"
-	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
-		MODE=$(MODE) \
-		VERBOSE=$(VERBOSE) \
-		LIB_NAME=$(LIB_NAME) \
-		EXTRA_CFLAGS="-DASSET_PATH=\\\"$(MOD_DIR)/assets/\\\""
-	$(SILENT_PREFIX)mkdir -p $(LIB_DIR)
-	$(SILENT_PREFIX)if cmp -s $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@ 2>/dev/null; then \
-		echo "  lib$(LIB_NAME).a unchanged"; \
-	else \
-		echo "  Updating lib$(LIB_NAME).a"; \
-		cp $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@; \
-	fi
-	$(SILENT_PREFIX)mkdir -p $(FIRSTPARTY_API_DIR)
-	$(SILENT_PREFIX)if [ -f "$(MOD_DIR)/include/$(API_HEADER)" ]; then \
-		echo "  Updating API header: $(API_HEADER)"; \
-		cp "$(MOD_DIR)/include/$(API_HEADER)" "$(FIRSTPARTY_API_DIR)/"; \
-	else \
-		echo "  Warning: $(API_HEADER) not found in $(MOD_DIR)/include/"; \
-	fi
-
-# Normal incremental build of lobby executable
 bin: libs
-	@echo "Building lobby executable (if needed)..."
+	@echo "Building lobby executable..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
 	$(SILENT_PREFIX)$(MAKE) -C lobby \
-		MODE=$(MODE) \
-		VERBOSE=$(VERBOSE) \
+		MODE=$(MODE) VERBOSE=$(VERBOSE) \
 		BIN_DIR=../$(BIN_DIR) \
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
 run-server: libs
-	$(SILENT_PREFIX)echo "===> Starting Server..."
+	@echo "===> Starting server..."
 	$(SILENT_PREFIX)cd reseau && ./build/bin/server
 
 run-client: bin
-	@if [ -f $(BIN_DIR)/$(MAIN_NAME) ]; then \
-		$(SILENT_PREFIX)echo "===> Starting Client..."
+	@if [ -f "$(BIN_DIR)/$(MAIN_NAME)" ]; then \
+		echo "===> Starting client..."; \
 		$(BIN_DIR)/$(MAIN_NAME); \
 	else \
-		echo "No executable found at $(BIN_DIR)/$(MAIN_NAME)"; \
+		echo "No executable found: $(BIN_DIR)/$(MAIN_NAME)"; \
 		echo "Run 'make rebuild' first."; \
 	fi
 
 # ───────────────────────────────────────────────────────────────
-# Test Targets
+# Testing
 # ───────────────────────────────────────────────────────────────
 
 tests:
@@ -143,30 +160,27 @@ tests:
 
 run-tests: tests
 	@echo ""
-	@echo "Running all tests across modules..."
+	@echo "Running tests across modules..."
 	@echo "───────────────────────────────────────────────"
-	$(SILENT_PREFIX)all_passed=1; \
-	total_modules=0; \
-	failed_modules=0; \
+	$(SILENT_PREFIX)all_passed=1; failed=0; total=0; \
 	for dir in $(SUBDIRS); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-			echo "-> Module: $$dir"; \
+			echo "-> $$dir"; \
 			$(MAKE) -C "$$dir" run-tests MODE=$(MODE) VERBOSE=$(VERBOSE) \
-				|| { all_passed=0; failed_modules=$$((failed_modules+1)); }; \
-			total_modules=$$((total_modules+1)); \
-			echo ""; \
+				|| { all_passed=0; failed=$$((failed+1)); }; \
+			total=$$((total+1)); echo ""; \
 		fi; \
 	done
 	@echo "───────────────────────────────────────────────"
 	$(SILENT_PREFIX)if [ $$all_passed -eq 1 ]; then \
-		echo "ALL TESTS PASSED across $$total_modules module(s)."; \
+		echo "ALL TESTS PASSED ($$total module(s))"; \
 	else \
-		echo "SOME TESTS FAILED ($$failed_modules / $$total_modules modules had failures)."; \
+		echo "SOME TESTS FAILED ($$failed / $$total modules)"; \
 		exit 1; \
 	fi
 
 # ───────────────────────────────────────────────────────────────
-# Clean and Rebuild
+# Clean & rebuild
 # ───────────────────────────────────────────────────────────────
 
 clean-libs:
@@ -183,14 +197,25 @@ clean-bin:
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
-clean-all: clean
-	$(SILENT_PREFIX)echo "===> Cleaning Architecture..."
+clean-api-headers:
 	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-			rm -f $(FIRSTPARTY_API_DIR)/$(dir)API.h
-			echo "Cleaning $$dir ..."; \
-			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
+			module_name=$$(basename "$$dir"); \
+			api_file="$(FIRSTPARTY_API_DIR)/$$(echo "$$module_name" | sed -E 's/[-_]([a-z])/\U\1/g' | sed 's/^[A-Z]/\l&/')API.h"; \
+			if [ -f "$$api_file" ]; then \
+				echo "  Removing generated API header: $$api_file"; \
+				rm -f "$$api_file"; \
+			fi; \
 		fi; \
+	done
+
+clean-all: clean clean-api-headers
+	@echo "===> Full clean (root build + modules + generated API headers)"
+	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	    if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
+	        echo "Cleaning module: $$dir"; \
+	        $(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
+	    fi; \
 	done
 
 rebuild: clean-all all
@@ -201,43 +226,50 @@ rebuild-bin: clean-bin bin
 
 rebuild-tests: clean tests
 
+# ───────────────────────────────────────────────────────────────
+# Documentation & Help
+# ───────────────────────────────────────────────────────────────
+
 docs:
 	@./generate-root-docs.sh
 
-# ───────────────────────────────────────────────────────────────
-# Help
-# ───────────────────────────────────────────────────────────────
-
 help:
-	@echo "Usage: make [OPTIONS] [TARGET]"
+	@echo "Usage: make [TARGET] [OPTIONS]"
 	@echo ""
-	@echo "TARGETS:"
-	@echo "    help             Print this help message"
-	@echo "    all              Build libs + lobby executable"
-	@echo "    rebuild          Clean everything (root + subdirs) and rebuild all"
-	@echo "    clean            Remove root-level build/ folder only"
-	@echo "    clean-all        Remove root build/ + clean every submodule"
-	@echo "    clean-libs       Clean only libraries (root + subdirs)"
-	@echo "    clean-bin        Clean only lobby executable"
-	@echo "    libs             Build module static libs if needed"
-	@echo "    rebuild-libs     Clean libraries and force rebuild"
-	@echo "    bin              Build lobby executable if needed"
-	@echo "    rebuild-bin      Force rebuild lobby executable only"
-	@echo "    run-bin          Run the lobby executable"
-	@echo "    tests            Build all test executables"
-	@echo "    rebuild-tests    Clean and rebuild test executables"
-	@echo "    run-tests        Run all tests"
-	@echo "    docs             Build the root documentation"
+	@echo "Main targets:"
+	@echo "  all             = libs + bin"
+	@echo "  rebuild         = clean-all + all"
+	@echo "  libs            = build static libraries (incremental)"
+	@echo "  bin             = build lobby executable (needs libs)"
+	@echo "  run-client      = build & run lobby/$(MAIN_NAME)"
+	@echo "  run-server      = build libs & run reseau server"
 	@echo ""
-	@echo "OPTIONS:"
-	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
-	@echo "    MAIN_NAME=<str>  Custom executable name (default: main)"
-	@echo "    VERBOSE=1        Show all commands (default: silent)"
+	@echo "Testing:"
+	@echo "  tests           = build all test binaries"
+	@echo "  run-tests       = build + run all tests"
+	@echo "  rebuild-tests   = clean + tests"
+	@echo ""
+	@echo "Cleaning:"
+	@echo "  clean           = remove root build/ only"
+	@echo "  clean-libs      = clean libraries (root + modules)"
+	@echo "  clean-bin       = remove bin/ only"
+	@echo "  clean-all       = full clean (build/ + modules + API headers)"
+	@echo ""
+	@echo "Documentation:"
+	@echo "  docs            = generate root documentation"
+	@echo "  help            = show this message"
+	@echo ""
+	@echo "Options:"
+	@echo "  MODE=release|debug|strict-debug|...    (default: release)"
+	@echo "  VERBOSE=1                              (default: 0 = silent)"
+	@echo "  MAIN_NAME=xxx                          (default: main)"
 	@echo ""
 	@echo "Notes:"
-	@echo "  - libs are built lazily (only when sources change)"
-	@echo "  - rebuild-bin forces relinking of the lobby executable"
-	@echo "  - clean only affects root build/ — use clean-all for full reset"
-	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
+	@echo "  • Libraries are built lazily (only when sources change)"
+	@echo "  • clean-all removes API headers from firstparty/APIs/"
+	@echo "  • Module sub-makefiles are expected to understand: clean, tests, run-tests, static-lib"
 
-.PHONY: all libs bin rebuild-bin run-server run-lobby tests run-tests clean clean-all clean-libs clean-bin rebuild rebuild-libs rebuild-tests docs help
+.PHONY: all libs bin run-client run-server
+.PHONY: tests run-tests rebuild rebuild-libs rebuild-bin rebuild-tests
+.PHONY: clean clean-libs clean-bin clean-all clean-api-headers
+.PHONY: docs help
