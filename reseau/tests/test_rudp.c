@@ -9,18 +9,18 @@
 #include <string.h>
 
 void test_rudp_init() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
     assert(conn.local_sequence == 0);
     assert(conn.remote_sequence == 65535);
     printf("test_rudp_init passed\n");
 }
 
 void test_rudp_header_gen() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
-    RUDP_Header h;
-    RUDP_GenerateHeader(&conn, 5, &h);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
+    RUDPHeader_St h;
+    rudpGenerateHeader(&conn, 5, &h);
     assert(h.sequence == 0);
     assert(h.action == 5);
     assert(conn.local_sequence == 1);
@@ -28,20 +28,20 @@ void test_rudp_header_gen() {
 }
 
 void test_rudp_process_incoming() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
     
-    RUDP_Header h = { .sequence = 0, .ack = 0, .action = 5 };
-    assert(RUDP_ProcessIncoming(&conn, &h) == true);
+    RUDPHeader_St h = { .sequence = 0, .ack = 0, .action = 5 };
+    assert(rudpProcessIncoming(&conn, &h) == true);
     assert(conn.remote_sequence == 0);
     
     // Test duplicate
-    assert(RUDP_ProcessIncoming(&conn, &h) == false);
+    assert(rudpProcessIncoming(&conn, &h) == false);
     assert(conn.remote_sequence == 0);
     
     // Test newer
     h.sequence = 1;
-    assert(RUDP_ProcessIncoming(&conn, &h) == true);
+    assert(rudpProcessIncoming(&conn, &h) == true);
     assert(conn.remote_sequence == 1);
     
     printf("test_rudp_process_incoming passed\n");

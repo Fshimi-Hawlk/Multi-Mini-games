@@ -22,7 +22,7 @@
     } EndMode2D();
 
     @see `ui/game.c`          for implementation
-    @see `utils/userTypes.h`  for LobbyGame_St, Player_st, Platform_st definitions
+    @see `utils/userTypes.h`  for LobbyGame_St, Player_St, Platform_St definitions
 */
 
 #ifndef UI_GAME_H
@@ -47,7 +47,7 @@
     @param game      Pointer to the full lobby game state (provides textures and visuals)
     @param player    Pointer to the player state (position, radius, textureId, angle, etc.)
 */
-void drawPlayer(const LobbyGame_St* const game, const Player_st* const player);
+void drawPlayer(const LobbyGame_St* const game, const Player_St* const player);
 
 /**
     @brief Draws all static platforms in the lobby world.
@@ -57,6 +57,6 @@ void drawPlayer(const LobbyGame_St* const game, const Player_st* const player);
     @param platforms    Array of platform definitions
     @param nbPlatforms  Number of platforms in the array
 */
-void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms);
+void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms);
 
 #endif // UI_GAME_H

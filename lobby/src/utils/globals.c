@@ -41,7 +41,7 @@ Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
 /** @brief Array of platforms in the lobby. */
-Platform_st platforms[] = {
+Platform_St platforms[] = {
     {{-1000, 500, 2000, 1000}, {0, 228, 48, 255}, 0},
     {{-1000, 0, 500, 500}, {0, 0, 0, 255}, 0},
     {{500, 0, 500, 500}, {0, 0, 0, 255}, 0},

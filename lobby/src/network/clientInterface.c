@@ -5,24 +5,18 @@
  * @brief Implementation of the Lobby mini-game module.
  */
 
-#include "firstparty/APIs/module_interface.h"
 #include "core/game.h"       
-#include "ui/game.h"         
-#include "ui/app.h"          
+#include "core/chat.h"
+
+#include "ui/game.h"
+#include "ui/app.h"
+
 #include "utils/globals.h"
-#include "utils/chat.h"
-#include "rudp_core.h"
-#include "raylib.h"
 
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <string.h>
-#include <stdio.h>
-
-extern int network_socket;
-extern RUDP_Connection server_conn;
-extern Player_st player;
-extern Player_st otherPlayers[MAX_CLIENTS];
+extern int networkSocket;
+extern RUDPConnection_St serverConnection;
+extern Player_St player;
+extern Player_St otherPlayers[MAX_CLIENTS];
 
 /** @brief Last sent player position to avoid redundant network updates. */
 static Vector2 lastSentPos = {0};
@@ -63,15 +57,15 @@ void lobby_init(void) {
  * @param data Payload of the data packet.
  * @param len Length of the data payload.
  */
-void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
+void lobby_on_data(int player_id, u8 action, void* data, u16 len) {
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(Player_st)) {
-            memcpy(&otherPlayers[player_id], data, sizeof(Player_st));
+        if (action == 2 /* LOBBY_MOVE */ && len >= sizeof(Player_St)) {
+            memcpy(&otherPlayers[player_id], data, sizeof(Player_St));
             otherPlayers[player_id].active = true;
             otherPlayers[player_id].texture = &playerTextures[0]; 
         }
         else if (action == 5 /* LOBBY_CHAT */) {
-            AddChatMessage(TextFormat("Player %d", player_id), (char*)data);
+            addChatMessage(TextFormat("Player %d", player_id), (char*)data);
         }
         else if (action == 6 /* LOBBY_LEAVE */) {
             otherPlayers[player_id].active = false;
@@ -84,11 +78,11 @@ void lobby_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
  * @param dt Delta time since the last frame.
  */
 void lobby_update(float dt) {
-    bool chatWasOpen = g_chatState.isOpen;
-    UpdateChat();
+    bool chatWasOpen = gameChat.isOpen;
+    updateChat();
     
     // If chat is open, we don't move and don't toggle menus
-    if (g_chatState.isOpen) {
+    if (gameChat.isOpen) {
         // Still update camera to stay centered but no movement
         camera.target = player.position;
         return;
@@ -103,17 +97,17 @@ void lobby_update(float dt) {
     }
 
     if (player.position.x != lastSentPos.x || player.position.y != lastSentPos.y || firstFrame) {
-        GameTLVHeader tlv = { .game_id = 0, .action = 2, .length = sizeof(Player_st) };
-        RUDP_Header h; RUDP_GenerateHeader(&server_conn, 5, &h);
+        GameTLVHeader_St tlv = { .game_id = 0, .action = 2, .length = sizeof(Player_St) };
+        RUDPHeader_St h; rudpGenerateHeader(&serverConnection, 5, &h);
         
-        uint8_t buffer[1024];
+        u8 buffer[1024];
         size_t offset = 0;
         
         memcpy(buffer + offset, &h, sizeof(h)); offset += sizeof(h);
         memcpy(buffer + offset, &tlv, sizeof(tlv)); offset += sizeof(tlv);
-        memcpy(buffer + offset, &player, sizeof(Player_st)); offset += sizeof(Player_st);
+        memcpy(buffer + offset, &player, sizeof(Player_St)); offset += sizeof(Player_St);
         
-        send(network_socket, buffer, offset, 0);
+        send(networkSocket, buffer, offset, 0);
         lastSentPos = player.position;
         firstFrame = false;
     }
@@ -139,7 +133,7 @@ void lobby_draw(void) {
 }
 
 /** @brief Global definition of the Lobby module. */
-MiniGameModule LobbyModule = {
+GameClientInterface_St LobbyModule = {
     .id = 0,
     .name = "Lobby Principal",
     .init = lobby_init,

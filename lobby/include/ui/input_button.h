@@ -8,8 +8,9 @@
 #ifndef INPUT_BUTTON_H
 #define INPUT_BUTTON_H
 
-#include "../../../thirdparty/raylib.h" 
 #include <stdbool.h>
+
+#include "raylib.h" 
 
 /** @brief Maximum length for an IP address string. */
 #define IP_MAX_LENGTH 15
