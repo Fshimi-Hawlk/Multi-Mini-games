@@ -10,6 +10,7 @@
 #include "utils/globals.h"
 #include "utils/types.h"
 #include "utils/utils.h"
+#include "utils/audio.h"
 
 
 int main(int argc, char* argv[]) {
@@ -42,6 +43,8 @@ int main(int argc, char* argv[]) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Tetris");
     SetTargetFPS(60);
 
+    tetris_initAudio();
+
     bool hasFoundMove = false;
     moveAlgoResult_st moveAlgoResult;
 
@@ -60,6 +63,7 @@ int main(int argc, char* argv[]) {
                 automaticMovementTo(&speed, &boardShape, moveAlgoResult);
                 
                 if (isOOB(boardShape) || isColliding(board, boardShape)) {
+                    
                     boardShape.position.y--;
                     putShapeInBoard(board, boardShape);
 
@@ -77,6 +81,7 @@ int main(int argc, char* argv[]) {
         else {
             automaticDrop(&speed, &boardShape);
             if (isOOB(boardShape) || isColliding(board, boardShape)) {
+                PlaySound(sound_shapePlaced);
                 boardShape.position.y--;
                 putShapeInBoard(board, boardShape);
 
@@ -92,6 +97,11 @@ int main(int argc, char* argv[]) {
 
             
         handleLineClears(board, lineArray, &lineNb);
+
+        if (lineNb > 0) {
+            PlaySound(sound_lineClear);
+        }
+
         lineNbTotal += lineNb;
         level = fminf(29, lineNbTotal / 10);
         score += points[lineNb] * (level + 1);
@@ -111,6 +121,8 @@ int main(int argc, char* argv[]) {
             drawInformations(score, level, lineNbTotal, highScore);
         EndDrawing();
     }
+
+    tetris_freeAudio();
 
     CloseWindow();
     return 0;

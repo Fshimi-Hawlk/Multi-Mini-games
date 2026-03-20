@@ -1,5 +1,6 @@
 #include "core/board.h"
 #include "utils/utils.h"
+#include "utils/audio.h"
 
 void initBoard(board_t board) {
     for (int y = 0; y < BOARD_HEIGHT; y++)
@@ -88,6 +89,7 @@ void detectFullLines(board_t board, int lineArray[4], int *lineNb) {
 }
 
 void clearLines(board_t board, int lineArray[4], int lineNb) {
+
     for (int i = 0; i < lineNb; i++) {
         for (int y = lineArray[i] - 1; y >= 0; y--) {
             for (int x = 0; x < BOARD_WIDTH; x++) {
