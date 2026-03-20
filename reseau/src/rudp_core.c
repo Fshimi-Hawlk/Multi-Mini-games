@@ -10,7 +10,6 @@
  */
 
 #include "rudp_core.h"
-#include <string.h>
 
 /**
  * @brief Initialise l'état d'une connexion RUDP.
