@@ -41,7 +41,7 @@ void handleEvents(Board_t board) {
                     Player_st* adversary = (playerTurn == COLOR_PIECE_WHITE) ? blackPlayer : whitePlayer;
                     Piece_st* king = adversary->pieces[PIECE_ORDER_KING];
 
-                    if (isInCheck(board, king, king->pos.x, king->pos.y, !playerTurn)) {
+                    if (isInCheck(board, king, king->pos.x, king->pos.y, playerTurn)) {
                         PlaySound(sound_check);
                     } 
                     else {
