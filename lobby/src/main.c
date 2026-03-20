@@ -2,6 +2,7 @@
 #include "constant.h"
 #include "global.h"
 #include "types.h"
+#include "audio.h"
 
 void UpdatePlayer(Player_st* player, Platform_st* platforms, int nbPlatforms, float dt);
 void ResolveCircleRectCollision(Player_st* player, Rectangle rect);
@@ -18,9 +19,13 @@ void toggleSkinMenu(void);
 Camera2D cam = {0};
 
 int main(void) {
+    srand(time(NULL));
+
     SetTraceLogLevel(LOG_WARNING);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Basic Raylib Window");
+
+    lobby_initAudio();
 
     logoSkinButton = LoadTexture("assets/logoSkin.png");
 
@@ -80,6 +85,8 @@ int main(void) {
         UnloadTexture(playerTextures[i]);
     
     UnloadTexture(logoSkinButton);
+
+    lobby_freeAudio();
 
     CloseWindow();
     return 0;
@@ -148,6 +155,9 @@ void UpdatePlayer(Player_st* player, Platform_st* platforms, int nbPlatforms, fl
         // Jump sol ou coyote
         if (player->onGround || player->coyoteTimer > 0) {
             player->velocity.y = -500;
+
+            PlaySound(sound_jump);
+
             player->onGround = false;
             player->coyoteTimer = 0;
             player->nbJumps = 1;
@@ -156,6 +166,14 @@ void UpdatePlayer(Player_st* player, Platform_st* platforms, int nbPlatforms, fl
         // Double jump
         else if (player->nbJumps >= 1 && player->nbJumps < MAX_JUMPS) {
             player->velocity.y = -500;
+
+            if (rand() % 1000 == 0) {
+                PlaySound(meme);
+            }
+            else {
+                PlaySound(sound_doubleJump);
+            }
+
             player->nbJumps++;
             player->jumpBuffer = 0;
         }
