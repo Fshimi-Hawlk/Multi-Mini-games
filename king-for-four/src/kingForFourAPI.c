@@ -9,17 +9,16 @@
 #include "raylib.h"
 #include <stdlib.h>
 #include <time.h>
-#include <string.h>
-#include <stdio.h>
 
 #include "core/game.h"
 #include "core/card.h"
 #include "core/player.h"
 #include "ui/renderer.h"
 
-#include "logger.h"
 #include "APIs/generalAPI.h"
-#include "kingforfourAPI.h"
+#include "kingForFourAPI.h"
+
+#include "logger.h"
 
 /**
  * @enum AppState

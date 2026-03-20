@@ -8,9 +8,11 @@
 #define LOGGER_IMPLEMENTATION
 #include <stddef.h>
 #include "raylib.h"
-#include "kingforfourAPI.h"
-#include "logger.h"
+
+#include "kingForFourAPI.h"
 #include "APIs/generalAPI.h"
+
+#include "logger.h"
 
 /**
  * @brief Main function for the standalone King-for-Four test application.

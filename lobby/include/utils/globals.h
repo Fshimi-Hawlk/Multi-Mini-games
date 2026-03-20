@@ -23,7 +23,6 @@
 #define UTILS_GLOBALS_H
 
 #include "userTypes.h"
-#include "APIs/chatAPI.h"
 
 // ────────────────────────────────────────────────
 // Window & display
@@ -50,7 +49,7 @@ extern Font      appFont;
            Indexed by FontSize_Et values (FONT8 … FONT48).
            All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[_fontSizeCount];
+extern Font      fonts[__fontSizeCount];
 
 // ────────────────────────────────────────────────
 // Lobby world content
@@ -61,7 +60,7 @@ extern Font      fonts[_fontSizeCount];
           Size is determined by platformCount.
           @note Consider moving to dynamic allocation or level data file in the future.
 */
-extern Platform_st platforms[];
+extern Platform_St platforms[];
 
 /**
     brief Number of valid entries in the platforms array.
@@ -83,7 +82,5 @@ extern Rectangle skinButtonRect;
           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;
-
-extern ChatState_St g_chatState;
 
 #endif // UTILS_GLOBALS_H

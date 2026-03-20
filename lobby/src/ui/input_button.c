@@ -5,7 +5,7 @@
  * @brief Implementation of the IaC (Input and Connect) UI elements.
  */
 
-#include "../../include/ui/input_button.h"
+#include "ui/input_button.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -26,19 +26,18 @@ int confirmation_button = STATE_DISABLED;
  * @return The initialized IaC_button structure.
  */
 IaC_button InitIaCElement(float x, float y, float width, float height, char *text, Color color) {
-    IaC_button element;
-    
-    element.rect = (Rectangle){ x, y, width, height };
-    element.text = malloc(strlen(text) + 1);
+    IaC_button element = {
+        .rect = { x, y, width, height },
+        .text = malloc(strlen(text) + 1),
+        .baseColor = color,
+        .state = STATE_NORMAL,
+        .isIPValid = false,
+    };
     
     if (element.text != NULL) {
         strcpy(element.text, text);
     }
 
-    element.baseColor = color;
-    element.state = STATE_NORMAL;
-    element.isIPValid = false; 
-    
     return element;
 }
 

@@ -33,14 +33,14 @@
 
 #pragma pack(push, 1)
 /**
- * @struct GameTLVHeader
+ * @struct GameTLVHeader_St
  * @brief Header for game messages using TLV (Type-Length-Value) format.
  */
 typedef struct {
-    uint8_t game_id;    /**< ID of the game */
-    uint8_t action;     /**< Action type */
-    uint16_t length;    /**< Length of the payload */
-} GameTLVHeader;
+    u8 game_id;    /**< ID of the game */
+    u8 action;     /**< Action type */
+    u16 length;    /**< Length of the payload */
+} GameTLVHeader_St;
 
 /**
  * @struct GameSyncPayload
@@ -69,14 +69,14 @@ typedef struct {
     GameState state;    /**< Core game logic state */
     int status;         /**< 0 = WAITING, 1 = PLAYING */
     float bot_timer;    /**< Timer for bot actions */
-    broadcast_func_t broadcast; /**< Last used broadcast function */
+    BroadcastMessage_Ft broadcast; /**< Last used broadcast function */
 } KingServerState;
 
 /**
  * @brief Initializes a game instance on the server.
  * @return A pointer to the newly created KingServerState.
  */
-void* king_create_instance() {
+void* king_create_instance(void) {
     KingServerState* ks = calloc(1, sizeof(KingServerState));
     if (ks) {
         init_game_logic(&ks->state);
@@ -89,7 +89,7 @@ void* king_create_instance() {
     return ks;
 }
 
-static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
+static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
     if (!broadcast) return;
     GameState* g = &ks->state;
     Card top_card = {CARD_BLACK, ZERO};
@@ -107,8 +107,8 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
         sync.hand_sizes[i] = (i < g->num_players) ? g->players[i].hand.size : 0;
     }
 
-    uint8_t buf[2048];
-    GameTLVHeader tlv_sync = { .game_id = 1, .action = ACTION_SYNC_GAME, .length = sizeof(GameSyncPayload) };
+    u8 buf[2048];
+    GameTLVHeader_St tlv_sync = { .game_id = 1, .action = ACTION_SYNC_GAME, .length = sizeof(GameSyncPayload) };
     memcpy(buf, &tlv_sync, sizeof(tlv_sync));
     memcpy(buf + sizeof(tlv_sync), &sync, sizeof(sync));
     broadcast(0, -1, 5, buf, sizeof(tlv_sync) + sizeof(sync));
@@ -125,7 +125,7 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
             curr = curr->next;
         }
         
-        GameTLVHeader tlv_hand = { .game_id = 1, .action = ACTION_SYNC_HAND, .length = hand_count * sizeof(Card) };
+        GameTLVHeader_St tlv_hand = { .game_id = 1, .action = ACTION_SYNC_HAND, .length = hand_count * sizeof(Card) };
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, hand_count * sizeof(Card));
         
@@ -137,15 +137,15 @@ static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
 /**
  * @brief Processes client actions and broadcasts updates.
  */
-void king_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
+void king_on_action(void *state, int player_id, u8 action, void *payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != 5 /* ACTION_GAME_DATA */) return;
 
-    if (len < sizeof(GameTLVHeader)) return;
-    GameTLVHeader* tlv = (GameTLVHeader*)payload;
+    if (len < sizeof(GameTLVHeader_St)) return;
+    GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
     if (tlv->game_id != 1) return; 
     
-    uint8_t real_action = tlv->action;
-    void* real_payload = (uint8_t*)payload + sizeof(GameTLVHeader);
+    u8 real_action = tlv->action;
+    void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
 
     KingServerState* ks = (KingServerState*)state;
     ks->broadcast = broadcast; // Store it
@@ -165,8 +165,8 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
             init_player(&g->players[internal_id], player_id, "Joueur");
             printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
             
-            uint8_t buf_ack[1024];
-            GameTLVHeader tlv_ack = { .game_id = 1, .action = ACTION_JOIN_ACK, .length = sizeof(int) };
+            u8 buf_ack[1024];
+            GameTLVHeader_St tlv_ack = { .game_id = 1, .action = ACTION_JOIN_ACK, .length = sizeof(int) };
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
             memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
             broadcast(-1, player_id, 5, buf_ack, sizeof(tlv_ack) + sizeof(int));
@@ -324,7 +324,7 @@ void king_destroy_instance(void *state) {
     free(ks);
 }
 
-GameInterface king_module = {
+GameServerInterface_St king_module = {
     .game_name = "king-for-four",
     .create_instance = king_create_instance,
     .on_action = king_on_action,

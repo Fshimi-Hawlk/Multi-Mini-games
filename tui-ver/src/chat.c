@@ -8,7 +8,7 @@
 
 #include "chat.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h.h"
+#include "utils/userTypes.h"
 #include "utils/utils.h"
 
 

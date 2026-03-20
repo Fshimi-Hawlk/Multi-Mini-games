@@ -8,8 +8,7 @@
 #ifndef CHAT_API_H
 #define CHAT_API_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "baseTypes.h"
 
 #define MAX_CHAT_MSG_LEN 128
 #define MAX_CHAT_HISTORY 10
@@ -21,13 +20,12 @@ typedef struct {
 } ChatMessage_St;
 
 typedef struct {
-    ChatMessage_St messages[MAX_CHAT_HISTORY];
-    int count;
-    int head;
-    
-    bool isOpen;
-    char inputBuffer[MAX_CHAT_MSG_LEN];
-    int inputPos;
-} ChatState_St;
+    ChatMessage_St  messages[MAX_CHAT_HISTORY];
+    u32             count;
+    u32             head;
+    char            inputBuffer[MAX_CHAT_MSG_LEN];
+    u32             inputPos;
+    bool            isOpen;
+} Chat_St;
 
 #endif // CHAT_API_H

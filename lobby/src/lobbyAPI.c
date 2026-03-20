@@ -45,17 +45,17 @@
     @see `APIs/generalAPI.h` for `Error_Et`
 */
 
+#include "APIs/generalAPI.h"
 #include "core/game.h"
 
-#include "raylib.h"
 #include "ui/app.h"
 #include "ui/game.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "lobbyAPI.h"
 #include "systemSettings.h"
+#include "utils/userTypes.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error;
@@ -63,19 +63,15 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     srand(time(NULL));
     SetTraceLogLevel(LOG_WARNING);
 
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
-    SetWindowPosition(100, 100);
-
-    (void) configs; // Configs aren't used yet
-
     systemSettings = DEFAULT_SYSTEM_SETTING;
     systemSettings.video.resizable = true;
     systemSettings.video.title = "Lobby";
-    error = applySystemSettings();
-    if (error != OK) {
-        log_error("System settings couldn't be applied corretly");
-    }
+
+    // ── Initialization ───────────────────────────────────────────────────────
+    InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    SetWindowPosition(100, 50);
+
+    (void) configs; // Configs aren't used yet
 
     (*game) = malloc(sizeof(LobbyGame_St));
     if (*game == NULL) return ERROR_ALLOC;
@@ -84,21 +80,25 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     memset(gameRef, 0, sizeof(*gameRef));
 
     /** Hitbox that triggers the Tetris mini-game when player collides */
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = (Rectangle) {
-        .x      = 600,
-        .y      = -150,
-        .width  = 75,
-        .height = 75
+    Rectangle gameHitboxes[__miniGameCount] = { 
+        [MINI_GAME_BINGO] = {
+            .x      = 600,
+            .y      = -150,
+            .width  = 75,
+            .height = 75
+        },
     };
 
+    memcpy(gameRef->miniGameManager.gameHitboxes, gameHitboxes, sizeof(gameHitboxes));
+
     /** Current active scene (lobby or one of the mini-games) */
-    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
+    gameRef->miniGameManager.currentMiniGame = MINI_GAME_LOBBY;
     
     /** Flag: game needs initialization on next frame */
-    gameRef->subGameManager.needGameInit = false;
+    gameRef->miniGameManager.needGameInit = false;
     
     /** Player controlled by the user in the lobby */
-    gameRef->player = (Player_st) {
+    gameRef->player = (Player_St) {
         .position   = {0, 250},
         .radius     = 20,
         .coyoteTime = 0.1f,
@@ -157,15 +157,14 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     }
 
     // Collision check with game zone
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
-        if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->subGameManager.gameHitboxes[i])) {
-            if (!game->subGameManager.gameHitGracePeriodActive) {
-                game->subGameManager.currentScene = i;
-                game->subGameManager.needGameInit = true;
-                game->subGameManager.gameHitGracePeriodActive = true;
+    for (u8 i = 1; i < __miniGameCount; ++i) {
+        if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->miniGameManager.gameHitboxes[i])) {
+            if (!game->miniGameManager.gameHitGracePeriodActive) {
+                game->miniGameManager.currentMiniGame = i;
+                game->miniGameManager.gameHitGracePeriodActive = true;
             }
-        } else if (game->subGameManager.gameHitGracePeriodActive) {
-            game->subGameManager.gameHitGracePeriodActive = false;
+        } else if (game->miniGameManager.gameHitGracePeriodActive) {
+            game->miniGameManager.gameHitGracePeriodActive = false;
         }
     }
 
@@ -177,8 +176,8 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             drawPlayer(game, &game->player);
             drawPlatforms(platforms, platformCount);
 
-            for (u8 i = 1; i < __gameSceneCount; ++i) {
-                DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
+            for (u8 i = 1; i < __miniGameCount; ++i) {
+                DrawRectangleRec(game->miniGameManager.gameHitboxes[i], RED); // Debug hitbox
             }
         } EndMode2D();
 
@@ -195,24 +194,25 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     return OK;
 }
 
-Error_Et lobby_freeGame(LobbyGame_St** game) {
-    if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
-    LobbyGame_St* gameRef = *game;
+Error_Et lobby_freeGame(LobbyGame_St** gameRef) {
+    if (gameRef == NULL || *gameRef == NULL) return ERROR_NULL_POINTER;
+    LobbyGame_St* game = *gameRef;
 
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
-        if (gameRef->subGameManager.miniGames[i] == NULL) continue;
-        gameRef->subGameManager.miniGames[i]->freeGame(&gameRef->subGameManager.miniGames[i]);
-        gameRef->subGameManager.miniGames[i] = NULL;
+    for (u8 i = 1; i < __miniGameCount; ++i) {
+        if (game->miniGameManager.miniGames[i] == NULL) continue;
+        BaseGame_St** base = &game->miniGameManager.miniGames[i];
+        game->miniGameManager.miniGames[i]->freeGame(base);
+        game->miniGameManager.miniGames[i] = NULL;
     }
 
     for (u32 i = 1; i < __playerTextureCount; ++i) {
-        UnloadTexture(gameRef->playerVisuals.textures[i]);
+        UnloadTexture(game->playerVisuals.textures[i]);
     }
 
     UnloadTexture(logoSkinButton);
 
-    free(gameRef);
-    *game = NULL;
+    free(game);
+    *gameRef = NULL;
 
     CloseWindow();
 

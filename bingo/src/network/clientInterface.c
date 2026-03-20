@@ -5,65 +5,53 @@
  * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
 
-#include <sys/socket.h>
-#include <string.h>
-#include <stdio.h>
-
+#include "APIs/bingoAPI.h"
 #include "core/game.h"
-#include "ui/renderer.h"
 
-#include "rudp_core.h"
+#include "utils/common.h"
+
 #include "networkInterface.h"
 
-#include "APIs/generalAPI.h"
 
-#define ACTION_PLAY_CARD 0x10
-/** @brief Action code for drawing a card. */
-#define ACTION_DRAW_CARD 0x11
-/** @brief Action code for synchronizing the game state. */
-#define ACTION_SYNC_GAME 0x12
-/** @brief Action code for joining a game. */
-#define ACTION_JOIN_GAME 0x13
-/** @brief Action code for starting a game. */
-#define ACTION_START_GAME 0x14
-/** @brief Action code for synchronizing a player's hand. */
-#define ACTION_SYNC_HAND 0x15
-/** @brief Action code for acknowledging a join request. */
-#define ACTION_JOIN_ACK 0x16
-/** @brief Action code for quitting the game. */
-#define ACTION_QUIT_GAME 0x17
+typedef u32 ClientId;
 
 #pragma pack(push, 1)
+
 /**
- * @struct GameSyncPayload
+ * @struct GameSyncPayload_St
  * @brief Payload for synchronizing game state from server to client.
  */
 typedef struct {
-    int current_player;     /**< Index of current player */
-    int active_color;       /**< Current active color */
-    Card top_card;          /**< Card on top of discard pile */
-    int hand_sizes[4];      /**< Card count for each player */
-    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
-    int host_id;            /**< ID of host player */
-} GameSyncPayload;
+    ClientId current_player;    ///< Index of current player
+    int status;                 ///< Game status (0: WAITING, 1: PLAYING)
+    ClientId host_id;           ///< ID of host player
+} GameSyncPayload_St;
 
 typedef struct {
     int card_index;
     int chosen_color; // 0:Red, 1:Yellow, 2:Green, 3:Blue
 } ActionPlayPayload_St;
+
 #pragma pack(pop)
 
-/** @brief Local copy of the game state. */
-static GameState local_state;
-/** @brief Graphical assets. */
-static GameAssets assets;
-/** @brief Flag indicating if assets are loaded. */
-static bool assets_loaded = false;
-/** @brief This client's internal player ID assigned by server. */
-static int my_internal_id = -1;
-/** @brief Current status of the game. */
+/**
+    @brief Local copy of the game state.
+*/
+static BingoGame_St* local_state;
+
+/**
+    @brief This client's internal player ID assigned by server.
+*/
+static int internal_id = -1;
+
+/**
+    @brief Current status of the game.
+*/
 static int game_status = 0; 
-/** @brief Timer for retrying to join the game. */
+
+/**
+    @brief Timer for retrying to join the game.
+*/
 static float join_retry_timer = 0;
 
 // Color selection state
@@ -93,10 +81,6 @@ static void send_to_server(u8 action, void* data, u16 len) {
  * @brief Initializes the client module and loads assets.
  */
 void king_client_init(void) {
-    if (!assets_loaded) {
-        assets = LoadAssets();
-        assets_loaded = true;
-    }
     memset(&local_state, 0, sizeof(GameState));
     init_game_logic(&local_state);
     my_internal_id = -1;
@@ -127,9 +111,9 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
             printf("[KING CLIENT] Mon ID interne: %d\n", my_internal_id);
         }
     } else if (action == ACTION_SYNC_GAME) {
-        if (len >= (u16) sizeof(GameSyncPayload)) {
-            GameSyncPayload sync;
-            memcpy(&sync, data, sizeof(GameSyncPayload));
+        if (len >= (u16) sizeof(GameSyncPayload_St)) {
+            GameSyncPayload_St sync;
+            memcpy(&sync, data, sizeof(GameSyncPayload_St));
             local_state.current_player = sync.current_player;
             local_state.active_color = sync.active_color;
             game_status = sync.status;
@@ -158,7 +142,9 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
     }
 }
 
-/** @brief Currently selected number of players for the next game. */
+/**
+    @brief Currently selected number of players for the next game.
+*/
 static int selected_players = 4;
 
 /**
@@ -292,7 +278,9 @@ void king_client_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 
-/** @brief Module interface for the King-for-Four client. */
+/**
+    @brief Module interface for the King-for-Four client.
+*/
 GameClientInterface_St KingForFourClientModule = {
     .id = 1,
     .name = "King For Four",

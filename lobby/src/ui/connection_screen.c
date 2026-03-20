@@ -5,11 +5,9 @@
  * @brief Implementation of the connection screen for server discovery and IP entry.
  */
 
-#include "raylib.h"
-#include "ui/input_button.h"
-#include "rudp_core.h"
-#include <stdio.h>
 #include <string.h>
+
+#include "ui/input_button.h"
 
 /** @brief Maximum number of discovered rooms to display. */
 #define MAX_ROOMS_DISPLAY 5
@@ -47,11 +45,11 @@ void InitConnectionScreen(void) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    ipInput = InitIaCElement((float)(screenWidth/2 - 150), (float)(screenHeight/2 - 200), 300, 40, "IP (ex: 127.0.0.1)", LIGHTGRAY);
-    connectButton = InitIaCElement((float)(screenWidth/2 - 100), (float)(screenHeight/2 - 125), 200, 40, "Se Connecter", DARKGRAY);
+    ipInput = InitIaCElement(screenWidth / 2.0f - 150,  screenHeight / 2.0f - 200, 300, 40, "IP (ex: 127.0.0.1)", LIGHTGRAY);
+    connectButton = InitIaCElement(screenWidth / 2.0f - 100,  screenHeight / 2.0f - 125, 200, 40, "Se Connecter", DARKGRAY);
     
     // Bouton pour lancer le broadcast de découverte
-    refreshButton = InitIaCElement((float)(screenWidth - 180), (float)(screenHeight/2 - 40), 160, 30, "Rafraichir", SKYBLUE);
+    refreshButton = InitIaCElement((float)(screenWidth - 180), (screenHeight / 2.0f - 40), 160, 30, "Rafraichir", SKYBLUE);
 
     for (int i = 0; i < MAX_ROOMS_DISPLAY; i++) discoveredRooms[i].active = false;
     roomsCount = 0;
@@ -72,7 +70,7 @@ void AddDiscoveredRoom(const char* ip, const char* name) {
     strncpy(discoveredRooms[roomsCount].ip, ip, 15);
     strncpy(discoveredRooms[roomsCount].name, name, 31);
     
-    float startY = (float)(GetScreenHeight() / 2 + 20);
+    float startY = (float)(GetScreenHeight() / 2.0f + 20);
     
     discoveredRooms[roomsCount].button = InitIaCElement(
         30, 
@@ -103,7 +101,7 @@ bool UpdateConnectionScreen(void) {
     for (int i = 0; i < roomsCount; i++) {
         if (UpdateConnectButton(&discoveredRooms[i].button, true)) {
             strncpy(ipBuffer, discoveredRooms[i].ip, IP_MAX_LENGTH);
-            letterCount = (int)strlen(ipBuffer);
+            letterCount = (int) strlen(ipBuffer);
             ipInput.isIPValid = true;
         }
     }
@@ -130,8 +128,8 @@ void DrawConnectionScreen(void) {
     }
 
     DrawText("Liste des rooms :", 20, sh/2 - 30, 25, DARKBLUE);
-    DrawRectangle(20, (float)(sh/2), sw - 40, 275, LIGHTGRAY);
-    DrawRectangleLines(20, (float)(sh/2), sw - 40, 275, GRAY);
+    DrawRectangle(20, sh / 2.0f, sw - 40, 275, LIGHTGRAY);
+    DrawRectangleLines(20, sh / 2.0f, sw - 40, 275, GRAY);
 
     for (int i = 0; i < roomsCount; i++) {
         DrawIaCElement(discoveredRooms[i].button, discoveredRooms[i].name);
