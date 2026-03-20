@@ -31,21 +31,6 @@
 #include "APIs/generalAPI.h"
 
 /**
-    @brief Available font sizes used for in-game UI and text rendering.
-
-    Values are listed in ascending order.  
-    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
-*/
-typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
-} FontSize_Et;
-
-/**
     @brief Identifiers of the different playable scenes / mini-games.
 
     Used both as array indices and as state identifiers.
@@ -60,9 +45,9 @@ typedef enum {
     @brief Enum for different game states in the lobby.
 */
 typedef enum { 
-    GAME_STATE_CONNECTION, ///< Initial connection state.
-    GAME_STATE_LOBBY      ///< Active lobby state.
-} GameState;
+    LOBBY_STATE_CONNECTION, ///< Initial connection state.
+    LOBBY_STATE_LOBBY      ///< Active lobby state.
+} LobbyState_Et;
 
 /**
     @brief Available player avatar/skin textures that can be selected in the lobby.
@@ -92,6 +77,7 @@ typedef struct {
     Most fields are directly used / modified by the player controller system.
 */
 typedef struct {
+    bool    active;                             ///< Whether this player is active/connected
     Vector2 position;                           ///< Center position of the player (world coordinates)
     float   radius;                             ///< Collision radius (circle-based collision)
 
@@ -141,6 +127,7 @@ typedef struct {
     BaseGame_St base;
 
     Player_st         player;                     ///< Physics & movement state of the player character
+    Player_st         otherPlayers[8];            ///< Other players connected to the lobby (MAX_CLIENTS = 8)
     PlayerVisuals_St  playerVisuals;              ///< Rendering and skin selection state
     Camera2D          cam;                        ///< 2D camera following the player
 

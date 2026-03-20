@@ -84,6 +84,16 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs);
 Error_Et lobby_gameLoop(LobbyGame_St* const game);
 
 /**
+ * @brief Returns a pointer to the local player structure.
+ */
+Player_st* lobby_getLocalPlayer(LobbyGame_St* game);
+
+/**
+ * @brief Returns a pointer to the other players array.
+ */
+Player_st* lobby_getOtherPlayers(LobbyGame_St* game);
+
+/**
     @brief Releases all resources associated with the game and frees the handle.
 
     @param[in,out] game      Pointer to the game handle. Will be set to NULL.

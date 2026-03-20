@@ -24,6 +24,7 @@
 
 #include "userTypes.h"
 #include "APIs/chatAPI.h"
+#include "rudp_core.h"
 
 // ────────────────────────────────────────────────
 // Window & display
@@ -50,7 +51,7 @@ extern Font      appFont;
            Indexed by FontSize_Et values (FONT8 … FONT48).
            All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[_fontSizeCount];
+extern Font      fonts[__fontSizeCount];
 
 // ────────────────────────────────────────────────
 // Lobby world content
@@ -77,6 +78,9 @@ extern u32 platformCount;
           Used both for rendering and input detection.
 */
 extern Rectangle skinButtonRect;
+
+/** @brief Trigger zone for the King For Four game. */
+extern Rectangle kingForFourZone;
 
 /**
     brief Texture used for the skin selection menu toggle button.

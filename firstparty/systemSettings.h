@@ -31,7 +31,7 @@
 #define DEFAULT_VIDEO_SETTING_HEIGHT        800
 #define DEFAULT_VIDEO_SETTING_FULLSCREEN    false
 #define DEFAULT_VIDEO_SETTING_VSYNC         true
-#define DEFAULT_VIDEO_SETTING_BORDERLESS    true
+#define DEFAULT_VIDEO_SETTING_BORDERLESS    false
 #define DEFAULT_VIDEO_SETTING_RESIZABLE     false
 
 #define DEFAULT_AUDIO_SETTING_VOLUME        1.0f
@@ -220,7 +220,7 @@ static Error_Et applyVideoSettings(VideoSettings_St settings) {
 
 Error_Et applySystemSettings(void) {
     Error_Et err = OK;
-    
+
     err = applyVideoSettings(systemSettings.video);
     err = applyAudioSettings(systemSettings.audio);
 

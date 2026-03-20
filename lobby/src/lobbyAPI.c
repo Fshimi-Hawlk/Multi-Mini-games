@@ -169,30 +169,41 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         }
     }
 
-    BeginDrawing(); {
-        ClearBackground(RAYWHITE);
-
-        BeginMode2D(game->cam); {
-            DrawCircle(0, 0, 10, RED);          // Debug origin marker
-            drawPlayer(game, &game->player);
-            drawPlatforms(platforms, platformCount);
-
-            for (u8 i = 1; i < __gameSceneCount; ++i) {
-                DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
+    BeginMode2D(game->cam); {
+        DrawCircle(0, 0, 10, RED);          // Debug origin marker
+        drawPlayer(game, &game->player);
+        
+        for (int i = 0; i < 8; i++) {
+            if (game->otherPlayers[i].active) {
+                drawPlayer(game, &game->otherPlayers[i]);
             }
-        } EndMode2D();
-
-        lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
-        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
-
-        drawSkinButton();
-
-        if (game->playerVisuals.isTextureMenuOpen) {
-            drawMenuTextures(game);
         }
-    } EndDrawing();
+
+        drawPlatforms(platforms, platformCount);
+
+        for (u8 i = 1; i < __gameSceneCount; ++i) {
+            DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
+        }
+    } EndMode2D();
+
+    lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+    DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
+
+    drawSkinButton();
+
+    if (game->playerVisuals.isTextureMenuOpen) {
+        drawMenuTextures(game);
+    }
 
     return OK;
+}
+
+Player_st* lobby_getLocalPlayer(LobbyGame_St* game) {
+    return game ? &game->player : NULL;
+}
+
+Player_st* lobby_getOtherPlayers(LobbyGame_St* game) {
+    return game ? game->otherPlayers : NULL;
 }
 
 Error_Et lobby_freeGame(LobbyGame_St** game) {

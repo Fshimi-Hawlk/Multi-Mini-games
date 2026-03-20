@@ -49,7 +49,7 @@ typedef struct GameInterface {
      * @brief Logical update (tick).
      * @param state Pointer to the game state.
      */
-    void  (*on_tick)(void *state);
+    void  (*on_tick)(void *state, broadcast_func_t broadcast);
     
     /**
      * @brief Handles a player leaving the game.

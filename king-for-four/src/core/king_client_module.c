@@ -5,7 +5,8 @@
  * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
 
-#include "APIs/module_interface.h"
+#include "APIs/generalAPI.h"
+#include "core/protocol.h"
 #include "utils/chat.h"
 #include "utils/globals.h"
 #include "core/game.h"
@@ -20,43 +21,6 @@
 extern int network_socket;
 /** @brief External reference to the server connection. */
 extern RUDP_Connection server_conn;
-
-/** @brief Action code for playing a card. */
-#define ACTION_PLAY_CARD 0x10
-/** @brief Action code for drawing a card. */
-#define ACTION_DRAW_CARD 0x11
-/** @brief Action code for synchronizing the game state. */
-#define ACTION_SYNC_GAME 0x12
-/** @brief Action code for joining a game. */
-#define ACTION_JOIN_GAME 0x13
-/** @brief Action code for starting a game. */
-#define ACTION_START_GAME 0x14
-/** @brief Action code for synchronizing a player's hand. */
-#define ACTION_SYNC_HAND 0x15
-/** @brief Action code for acknowledging a join request. */
-#define ACTION_JOIN_ACK 0x16
-/** @brief Action code for quitting the game. */
-#define ACTION_QUIT_GAME 0x17
-
-#pragma pack(push, 1)
-/**
- * @struct GameSyncPayload
- * @brief Payload for synchronizing game state from server to client.
- */
-typedef struct {
-    int current_player;     /**< Index of current player */
-    int active_color;       /**< Current active color */
-    Card top_card;          /**< Card on top of discard pile */
-    int hand_sizes[4];      /**< Card count for each player */
-    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
-    int host_id;            /**< ID of host player */
-} GameSyncPayload;
-
-typedef struct {
-    int card_index;
-    int chosen_color; // 0:Red, 1:Yellow, 2:Green, 3:Blue
-} ActionPlayPayload_St;
-#pragma pack(pop)
 
 /** @brief Local copy of the game state. */
 static GameState local_state;
@@ -84,7 +48,7 @@ static int pending_card_index = -1;
 static void send_to_server(uint8_t action, void* data, uint16_t len) {
     GameTLVHeader tlv = { .game_id = 1, .action = action, .length = len };
     RUDP_Header h;
-    RUDP_GenerateHeader(&server_conn, 5, &h);
+    RUDP_GenerateHeader(&server_conn, ACTION_GAME_DATA, &h);
     
     uint8_t buffer[1024];
     memcpy(buffer, &h, sizeof(h));
@@ -119,9 +83,6 @@ void king_client_init(void) {
  * @param len Payload length.
  */
 void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
-    if (action == 5 /* LOBBY_CHAT */) {
-        AddChatMessage(TextFormat("Player %d", player_id), (char*)data);
-    }
     (void)player_id;
     if (data == NULL) return;
 
@@ -172,7 +133,6 @@ static int selected_players = 4;
  * @param dt Delta time since last update.
  */
 void king_client_update(float dt) {
-    UpdateChat();
     if (g_chatState.isOpen) return; // Ignore input when chatting
 
     if (!assets_loaded) return;
@@ -249,7 +209,6 @@ void king_client_update(float dt) {
  */
 void king_client_draw(void) {
     if (!assets_loaded) return;
-    ClearBackground((Color){0, 80, 0, 255});
     
     if (game_status == 0) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
@@ -264,7 +223,6 @@ void king_client_draw(void) {
         } else {
             DrawText("Connexion au serveur...", 100, 180, 30, GRAY);
         }
-        DrawChat();
         return;
     }
 
@@ -297,7 +255,6 @@ void king_client_draw(void) {
     }
     
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
-    DrawChat();
 }
 
 /** @brief Module interface for the King-for-Four client. */

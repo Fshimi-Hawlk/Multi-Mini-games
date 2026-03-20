@@ -326,7 +326,7 @@ Enum example:
 /**
     @brief All available font sizes - used to index fonts[] array.
 
-    The sentinel _fontSizeCount is not a real size - it's just the array length.
+    The sentinel __fontSizeCount is not a real size - it's just the array length.
 */
 typedef enum {
     FONT8,
@@ -334,7 +334,7 @@ typedef enum {
     FONT20, FONT22, FONT24, FONT26, FONT28,
     FONT30, FONT32, FONT34, FONT36, FONT38,
     FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
+    __fontSizeCount
 } FontSize_Et;
 ```
 

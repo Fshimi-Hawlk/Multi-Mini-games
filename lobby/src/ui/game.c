@@ -32,6 +32,7 @@
 #include "ui/game.h"
 #include "core/game.h"
 #include "utils/utils.h"
+#include "utils/globals.h"
 
 void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {

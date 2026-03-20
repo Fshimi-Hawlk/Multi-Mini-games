@@ -12,133 +12,85 @@
 #include "core/card.h"
 #include "core/player.h"
 #include "core/bot.h"
+#include "core/protocol.h"
 #include "game_interface.h"
-
-/** @brief Action code for playing a card. */
-#define ACTION_PLAY_CARD 0x10
-/** @brief Action code for drawing a card. */
-#define ACTION_DRAW_CARD 0x11
-/** @brief Action code for synchronizing the game state. */
-#define ACTION_SYNC_GAME 0x12
-/** @brief Action code for joining a game. */
-#define ACTION_JOIN_GAME 0x13
-/** @brief Action code for starting a game. */
-#define ACTION_START_GAME 0x14
-/** @brief Action code for synchronizing a player's hand. */
-#define ACTION_SYNC_HAND 0x15
-/** @brief Action code for acknowledging a join request. */
-#define ACTION_JOIN_ACK  0x16
-/** @brief Action code for quitting the game. */
-#define ACTION_QUIT_GAME 0x17
-
-#pragma pack(push, 1)
-/**
- * @struct GameTLVHeader
- * @brief Header for game messages using TLV (Type-Length-Value) format.
- */
-typedef struct {
-    uint8_t game_id;    /**< ID of the game */
-    uint8_t action;     /**< Action type */
-    uint16_t length;    /**< Length of the payload */
-} GameTLVHeader;
-
-/**
- * @struct GameSyncPayload
- * @brief Payload for synchronizing game state between server and clients.
- */
-typedef struct {
-    int current_player;     /**< Index of the current player */
-    int active_color;       /**< Current active color */
-    Card top_card;          /**< Card on top of the discard pile */
-    int hand_sizes[4];      /**< Number of cards in each player's hand */
-    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
-    int host_id;            /**< ID of the host player */
-} GameSyncPayload;
-
-typedef struct {
-    int card_index;
-    int chosen_color;
-} ActionPlayPayload_St;
-#pragma pack(pop)
+#include "APIs/generalAPI.h"
 
 /**
  * @struct KingServerState
- * @brief Internal state maintained by the server for a game instance.
+ * @brief Complete state of a King-for-Four game instance on the server.
  */
 typedef struct {
-    GameState state;    /**< Core game logic state */
-    int status;         /**< 0 = WAITING, 1 = PLAYING */
-    float bot_timer;    /**< Timer for bot actions */
-    broadcast_func_t broadcast; /**< Last used broadcast function */
+    GameState game;         /**< Uno game logic state */
+    int player_count;       /**< Current number of players */
+    int player_ids[4];      /**< Network IDs of connected players */
+    int status;             /**< 0: WAITING, 1: PLAYING */
+    float bot_timer;        /**< Timer for bot actions */
 } KingServerState;
 
 /**
- * @brief Initializes a game instance on the server.
- * @return A pointer to the newly created KingServerState.
+ * @brief Synchronizes the game state with all connected clients.
+ * @param ks Pointer to the server state.
+ * @param broadcast Function pointer for broadcasting data.
  */
-void* king_create_instance() {
-    KingServerState* ks = calloc(1, sizeof(KingServerState));
-    if (ks) {
-        init_game_logic(&ks->state);
-        init_uno_deck(&ks->state.draw_pile);
-        shuffle_deck(&ks->state.draw_pile);
-        ks->status = 0; // WAITING
-        ks->bot_timer = 0;
-        ks->broadcast = NULL;
-    }
-    return ks;
-}
-
 static void broadcast_sync(KingServerState* ks, broadcast_func_t broadcast) {
-    if (!broadcast) return;
-    GameState* g = &ks->state;
-    Card top_card = {CARD_BLACK, ZERO};
-    if (g->discard_pile.head != NULL) {
-        top_card = g->discard_pile.head->card;
-    }
-
-    GameSyncPayload sync;
-    sync.current_player = g->current_player;
-    sync.active_color = g->active_color;
-    sync.top_card = top_card;
-    sync.status = ks->status;
-    sync.host_id = (g->num_players > 0) ? g->players[0].id : -1;
-    for (int i = 0; i < 4; i++) {
-        sync.hand_sizes[i] = (i < g->num_players) ? g->players[i].hand.size : 0;
-    }
-
-    uint8_t buf[2048];
-    GameTLVHeader tlv_sync = { .game_id = 1, .action = ACTION_SYNC_GAME, .length = sizeof(GameSyncPayload) };
-    memcpy(buf, &tlv_sync, sizeof(tlv_sync));
-    memcpy(buf + sizeof(tlv_sync), &sync, sizeof(sync));
-    broadcast(0, -1, 5, buf, sizeof(tlv_sync) + sizeof(sync));
+    GameSyncPayload sync = {
+        .current_player = ks->game.current_player,
+        .active_color = ks->game.active_color,
+        .status = ks->status,
+        .host_id = ks->player_ids[0]
+    };
     
-    for (int i = 0; i < g->num_players; i++) {
-        if (g->players[i].id < 0) continue; // Skip bots for hand sync
-        int target_player_id = g->players[i].id;
-        int hand_count = g->players[i].hand.size;
+    if (ks->game.discard_pile.head) {
+        sync.top_card = ks->game.discard_pile.head->card;
+    }
+    
+    for (int i = 0; i < 4; i++) {
+        sync.hand_sizes[i] = ks->game.players[i].hand.size;
+    }
+    
+    // Broadcast sync to all (target_id = -1, sender_id = 0)
+    broadcast(-1, 0, ACTION_SYNC_GAME, &sync, sizeof(sync));
+
+    for (int i = 0; i < ks->player_count; i++) {
+        int player_id = ks->player_ids[i];
+        if (player_id == -1) continue;
         
-        Card* cards = malloc(hand_count * sizeof(Card));
-        Node* curr = g->players[i].hand.head;
-        for (int j = 0; j < hand_count; j++) {
-            cards[j] = curr->card;
+        int hand_count = ks->game.players[i].hand.size;
+        if (hand_count == 0) continue;
+
+        Card* hand_data = malloc(hand_count * sizeof(Card));
+        Node* curr = ks->game.players[i].hand.head;
+        for (int j = 0; j < hand_count && curr; j++) {
+            hand_data[j] = curr->card;
             curr = curr->next;
         }
         
-        GameTLVHeader tlv_hand = { .game_id = 1, .action = ACTION_SYNC_HAND, .length = hand_count * sizeof(Card) };
-        memcpy(buf, &tlv_hand, sizeof(tlv_hand));
-        memcpy(buf + sizeof(tlv_hand), cards, hand_count * sizeof(Card));
-        
-        broadcast(-1, target_player_id, 5, buf, sizeof(tlv_hand) + hand_count * sizeof(Card));
-        free(cards);
+        // Unicast hand sync to player
+        broadcast(player_id, 0, ACTION_SYNC_HAND, hand_data, hand_count * sizeof(Card));
+        free(hand_data);
     }
 }
 
 /**
- * @brief Processes client actions and broadcasts updates.
+ * @brief Creates a new game instance.
+ * @return Pointer to the allocated state.
+ */
+void* king_create_instance(void) {
+     KingServerState* ks = calloc(1, sizeof(KingServerState));
+    init_game_logic(&ks->game);
+    for (int i = 0; i < 4; i++) ks->player_ids[i] = -1;
+    ks->status = 0;
+    ks->player_count = 0;
+    return ks;
+}
+
+/**
+ * @brief Handles an action from a player.
  */
 void king_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
-    if (action != 5 /* ACTION_GAME_DATA */) return;
+    KingServerState* ks = (KingServerState*)state;
+    (void)action; // Action general is ACTION_GAME_DATA handled by server
 
     if (len < sizeof(GameTLVHeader)) return;
     GameTLVHeader* tlv = (GameTLVHeader*)payload;
@@ -146,184 +98,96 @@ void king_on_action(void *state, int player_id, uint8_t action, void *payload, u
     
     uint8_t real_action = tlv->action;
     void* real_payload = (uint8_t*)payload + sizeof(GameTLVHeader);
+    uint16_t real_len = tlv->length;
 
-    KingServerState* ks = (KingServerState*)state;
-    ks->broadcast = broadcast; // Store it
-    GameState* g = &ks->state;
-
-    int internal_id = -1;
-    for (int i = 0; i < g->num_players; i++) {
-        if (g->players[i].id == player_id) {
-            internal_id = i;
-            break;
-        }
-    }
-
-    if (real_action == ACTION_JOIN_GAME && internal_id == -1) {
-        if (g->num_players < 4 && ks->status == 0) {
-            internal_id = g->num_players++;
-            init_player(&g->players[internal_id], player_id, "Joueur");
-            printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
+    if (real_action == ACTION_JOIN_GAME) {
+        if (ks->player_count < 4 && ks->status == 0) {
+            ks->player_ids[ks->player_count] = player_id;
+            init_player(&ks->game.players[ks->player_count], ks->player_count, "Player");
             
-            uint8_t buf_ack[1024];
-            GameTLVHeader tlv_ack = { .game_id = 1, .action = ACTION_JOIN_ACK, .length = sizeof(int) };
-            memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
-            broadcast(-1, player_id, 5, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            // Unicast ACK to the joining player
+            broadcast(player_id, 0, ACTION_JOIN_ACK, &ks->player_count, sizeof(int));
+            ks->player_count++;
+            broadcast_sync(ks, broadcast);
         }
     }
-
-    if (internal_id != -1) {
-        if (real_action == ACTION_START_GAME && internal_id == 0 && ks->status == 0) {
-            int total_requested = 4;
-            if (tlv->length >= sizeof(int)) memcpy(&total_requested, real_payload, sizeof(int));
-            if (total_requested < g->num_players) total_requested = g->num_players;
-            if (total_requested > 4) total_requested = 4;
-
-            while (g->num_players < total_requested) {
-                int bot_idx = g->num_players++;
-                init_player(&g->players[bot_idx], -(bot_idx + 1), "Bot");
-                printf("[KING] Bot ajouté (Slot %d)\n", bot_idx);
+    else if (real_action == ACTION_START_GAME && ks->status == 0 && player_id == ks->player_ids[0]) {
+        ks->status = 1;
+        init_uno_deck(&ks->game.draw_pile);
+        human_shuffle_deck(&ks->game.draw_pile);
+        distribute_cards(&ks->game);
+        broadcast_sync(ks, broadcast);
+    }
+    else if (real_action == ACTION_PLAY_CARD && ks->status == 1) {
+        int internal_id = -1;
+        for (int i = 0; i < 4; i++) if (ks->player_ids[i] == player_id) internal_id = i;
+        
+        if (internal_id == ks->game.current_player && real_len >= sizeof(ActionPlayPayload_St)) {
+            ActionPlayPayload_St* p = (ActionPlayPayload_St*)real_payload;
+            if (try_play_card(&ks->game, internal_id, p->card_index)) {
+                if (p->chosen_color != -1) ks->game.active_color = p->chosen_color;
+                broadcast_sync(ks, broadcast);
             }
-
-            distribute_cards(g);
-            ks->status = 1; 
-            printf("[KING] Partie démarrée avec %d joueurs.\n", g->num_players);
-        }
-        else if (real_action == ACTION_PLAY_CARD && ks->status == 1 && internal_id == g->current_player) {
-            ActionPlayPayload_St p;
-            memcpy(&p, real_payload, sizeof(ActionPlayPayload_St));
-            
-            // On récupère la carte avant de jouer pour savoir si c'est un joker
-            Node* curr = g->players[internal_id].hand.head;
-            for(int i=0; i < p.card_index && curr; i++) curr = curr->next;
-            
-            if (curr && try_play_card(g, internal_id, p.card_index)) {
-                Card played = g->discard_pile.head->card;
-
-                // Si c'était un joker, on applique la couleur choisie
-                if (played.color == CARD_BLACK) {
-                    g->active_color = p.chosen_color;
-                }
-                
-                // Logique simplifiée des effets :
-                int skip = 0;
-                if (played.value == SKIP || played.value == PLUS_TWO || played.value == PLUS_FOUR) skip = 1;
-                
-                if (played.value == REVERSE) {
-                    if (g->num_players == 2) skip = 1;
-                    else g->game_direction *= -1;
-                }
-
-                int step = g->game_direction * (1 + skip);
-                g->current_player = (g->current_player + step + g->num_players) % g->num_players;
-                
-                // Effets de pioche
-                if (played.value == PLUS_TWO) {
-                    for(int i=0; i<2; i++) player_draw_card(g, g->current_player);
-                } else if (played.value == PLUS_FOUR) {
-                    for(int i=0; i<4; i++) player_draw_card(g, g->current_player);
-                }
-            }
-        } else if (real_action == ACTION_DRAW_CARD && ks->status == 1 && internal_id == g->current_player) {
-            player_draw_card(g, internal_id);
-            g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
-        } else if (real_action == ACTION_QUIT_GAME) {
-            printf("[KING] Joueur %d quitte la room.\n", player_id);
         }
     }
-
-    broadcast_sync(ks, broadcast);
+    else if (real_action == ACTION_DRAW_CARD && ks->status == 1) {
+        int internal_id = -1;
+        for (int i = 0; i < 4; i++) if (ks->player_ids[i] == player_id) internal_id = i;
+        if (internal_id == ks->game.current_player) {
+            player_draw_card(&ks->game, internal_id);
+            broadcast_sync(ks, broadcast);
+        }
+    }
 }
 
-void king_on_tick(void* state) {
+/**
+ * @brief Updates the server logic (bots, timers).
+ */
+void king_on_tick(void *state, broadcast_func_t broadcast) {
     KingServerState* ks = (KingServerState*)state;
-    if (ks->status != 1 || !ks->broadcast) return;
+    if (ks->status != 1) return;
 
-    GameState* g = &ks->state;
-    int cp = g->current_player;
-
-    if (g->players[cp].id < 0) { // C'est un bot
-        ks->bot_timer += 0.016f; // Simulated delta
-        if (ks->bot_timer > 1.0f) { // 1 seconde de réflexion
-            ks->bot_timer = 0;
+    ks->bot_timer += 0.016f;
+    if (ks->bot_timer > 2.0f) {
+        if (ks->game.current_player >= ks->player_count) {
+            int bot_idx = ks->game.current_player;
             int card_idx = -1;
-            calculate_best_move(g, cp, &card_idx);
-            
+            calculate_best_move(&ks->game, bot_idx, &card_idx);
             if (card_idx != -1) {
-                Node* curr = g->players[cp].hand.head;
-                for(int i=0; i<card_idx; i++) curr = curr->next;
-                
-                Card toPlay = curr->card;
-                if (try_play_card(g, cp, card_idx)) {
-                    if (toPlay.color == CARD_BLACK) {
-                        g->active_color = (int)(rand() % 4); // Bot chooses random color
-                    }
-
-                    int skip = 0;
-                    if (toPlay.value == SKIP || toPlay.value == PLUS_TWO || toPlay.value == PLUS_FOUR) skip = 1;
-                    if (toPlay.value == REVERSE) {
-                        if (g->num_players == 2) skip = 1;
-                        else g->game_direction *= -1;
-                    }
-
-                    int step = g->game_direction * (1 + skip);
-                    g->current_player = (g->current_player + step + g->num_players) % g->num_players;
-
-                    if (toPlay.value == PLUS_TWO) {
-                        for(int i=0; i<2; i++) player_draw_card(g, g->current_player);
-                    } else if (toPlay.value == PLUS_FOUR) {
-                        for(int i=0; i<4; i++) player_draw_card(g, g->current_player);
-                    }
-                }
+                try_play_card(&ks->game, bot_idx, card_idx);
             } else {
-                player_draw_card(g, cp);
-                g->current_player = (g->current_player + g->game_direction + g->num_players) % g->num_players;
+                player_draw_card(&ks->game, bot_idx);
             }
-            broadcast_sync(ks, ks->broadcast);
+            broadcast_sync(ks, broadcast);
         }
+        ks->bot_timer = 0;
     }
 }
 
-void king_on_player_leave(void* state, int player_id) {
-    KingServerState* ks = (KingServerState*)state;
-    GameState* g = &ks->state;
-    
-    int internal_id = -1;
-    for (int i = 0; i < g->num_players; i++) {
-        if (g->players[i].id == player_id) {
-            internal_id = i;
-            break;
-        }
-    }
-
-    if (internal_id != -1) {
-        printf("[KING] Joueur %d a quitté.\n", player_id);
-        // Transform into bot if game is running
-        if (ks->status == 1) {
-            g->players[internal_id].id = -(internal_id + 1);
-            strcpy(g->players[internal_id].name, "Bot (ex-humain)");
-        } else {
-            // Remove player if in waiting
-            for (int i = internal_id; i < g->num_players - 1; i++) {
-                g->players[i] = g->players[i+1];
-            }
-            g->num_players--;
-        }
-        if (ks->broadcast) broadcast_sync(ks, ks->broadcast);
-    }
-}
-
-void king_destroy_instance(void *state) {
+/**
+ * @brief Handles player departure.
+ */
+void king_on_player_leave(void *state, int player_id) {
     KingServerState* ks = (KingServerState*)state;
     for (int i = 0; i < 4; i++) {
-        clear_deck(&ks->state.players[i].hand);
+        if (ks->player_ids[i] == player_id) {
+            ks->player_ids[i] = -1;
+        }
     }
-    clear_deck(&ks->state.draw_pile);
-    clear_deck(&ks->state.discard_pile);
+}
+
+/**
+ * @brief Destroys the game instance.
+ */
+void king_destroy_instance(void *state) {
+    KingServerState* ks = (KingServerState*)state;
+    free_deck(&ks->game.draw_pile);
+    free_deck(&ks->game.discard_pile);
+    for (int i = 0; i < 4; i++) free_deck(&ks->game.players[i].hand);
     free(ks);
 }
 
+/** @brief Global definition of the King-for-Four server module. */
 GameInterface king_module = {
     .game_name = "king-for-four",
     .create_instance = king_create_instance,

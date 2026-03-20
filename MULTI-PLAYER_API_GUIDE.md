@@ -33,7 +33,7 @@ broadcast(-1, target_player_id, ACTION_SYNC_HAND, cards, len);
 
 ## 3. Implémentation Côté Client
 
-Le client doit implémenter `MiniGameModule` défini dans `firstparty/APIs/module_interface.h`.
+Le client doit implémenter `MiniGameModule` défini dans `firstparty/APIs/generalAPI.h`.
 
 ### Fonctions Clés :
 - `init()` : Charge les textures/sons.

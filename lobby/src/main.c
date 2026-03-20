@@ -4,41 +4,30 @@
     @author LeandreB8
     @author i-Charlys (CAILLON Charles)
     @date 2026-02-08
-    @date 2026-03-18
+    @date 2026-03-20
     @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
-    
-    Contributors:
-        - LeandreB8:
-            - Implemented basic lobby's logic (initialization, game loop, ...)
-        - Fshimi-Hawlk:
-            - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
-            - Implememted sub-game playablity inside lobby logic via API
-            - Added documentation
-    
-    This file contains the top-level application loop.
-    It initializes the window and shared resources, runs the lobby,
-    and switches to individual games when triggered (e.g. collision with zone).
-    
-    Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
-    in the same process/window. No separate executables are spawned.
 */
 
-#include "core/game.h"              // GameScene_Et, general game types
-
+#include "core/game.h"
 #include "lobbyAPI.h"
-#include "APIs/tetrisAPI.h"
 #include "ui/connection_screen.h"
-
 #include "rudp_core.h"
 #include "utils/globals.h"
-
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 
-#include "APIs/tetrisAPI.h"
+/** @brief Internal state of the client. */
+typedef enum {
+    CLIENT_STATE_DISCONNECTED,
+    CLIENT_STATE_CONNECTING,
+    CLIENT_STATE_LOBBY,
+    CLIENT_STATE_WAITING_SWITCH,
+    CLIENT_STATE_INGAME
+} ClientState_Et;
 
-/** @brief Current state of the game. */
-static GameState currentState = GAME_STATE_CONNECTION;
+static ClientState_Et clientState = CLIENT_STATE_DISCONNECTED;
 
 /** @brief Global network socket for the client. */
 int network_socket = -1;
@@ -46,20 +35,15 @@ int network_socket = -1;
 /** @brief RUDP connection state for the server. */
 RUDP_Connection server_conn;
 
-/** @brief Global player structure for the local client. */
-Player_st player = { .position = { 400, 300 }, .radius = 20, .active = true };
-
-/** @brief Array of other players in the lobby. */
-Player_st otherPlayers[MAX_CLIENTS];
-
 /** @brief Registry of available mini-game modules. */
 static MiniGameModule* game_registry[256] = {0};
 
 /** @brief ID of the currently active mini-game module. */
 uint8_t active_game_id = 0;
 
+/** @brief Local player ID assigned by server. */
+static int my_id = -1;
 
-extern MiniGameModule LobbyModule; 
 extern MiniGameModule KingForFourClientModule;
 
 /**
@@ -67,8 +51,13 @@ extern MiniGameModule KingForFourClientModule;
  * @param game_id The ID of the mini-game to switch to.
  */
 void switch_minigame(uint8_t game_id) {
-    if (game_registry[game_id]) {
+    if (game_id == 0) {
+        active_game_id = 0;
+        clientState = CLIENT_STATE_LOBBY;
+    } else if (game_registry[game_id]) {
         active_game_id = game_id;
+        clientState = CLIENT_STATE_INGAME;
+        printf("[SYSTEM] Switch vers module ID:%d\n", game_id);
     }
 }
 
@@ -102,7 +91,7 @@ void ensure_socket_exists() {
  */
 void discover_servers(void) {
     ensure_socket_exists();
-    struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(SERVER_PORT), .sin_addr.s_addr = INADDR_BROADCAST };
+    struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(8080), .sin_addr.s_addr = INADDR_BROADCAST };
     RUDP_Header q = { .action = LOBBY_ROOM_QUERY };
     sendto(network_socket, &q, sizeof(RUDP_Header), 0, (struct sockaddr*)&addr, sizeof(addr));
 }
@@ -113,26 +102,27 @@ void discover_servers(void) {
  */
 void init_network(const char* target_ip) {
     ensure_socket_exists();
-    struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(SERVER_PORT) };
+    struct sockaddr_in addr = { .sin_family = AF_INET, .sin_port = htons(8080) };
     inet_pton(AF_INET, target_ip, &addr.sin_addr);
     connect(network_socket, (struct sockaddr *)&addr, sizeof(addr));
     RUDP_InitConnection(&server_conn);
     
-    GameTLVHeader tlv = { .game_id = 0, .action = LOBBY_JOIN, .length = 0 };
-    uint8_t buffer[sizeof(RUDP_Header) + sizeof(GameTLVHeader)];
-    RUDP_Header h; RUDP_GenerateHeader(&server_conn, ACTION_GAME_DATA, &h);
-    memcpy(buffer, &h, sizeof(h)); memcpy(buffer+sizeof(h), &tlv, sizeof(tlv));
-    send(network_socket, buffer, sizeof(buffer), 0);
+    // Join Lobby
+    RUDP_Header h; RUDP_GenerateHeader(&server_conn, LOBBY_JOIN, &h);
+    // On ne connaît pas encore notre ID, on laisse 0 ou 999
+    send(network_socket, &h, sizeof(h), 0);
 }
 
 /**
  * @brief Receives and processes incoming network data packets.
  */
-void receive_network_data(void) {
+void receive_network_data(LobbyGame_St* game) {
     if (network_socket == -1) return;
     uint8_t buffer[2048];
     struct sockaddr_in from; socklen_t len = sizeof(from);
     
+    Player_st* others = lobby_getOtherPlayers(game);
+
     while (1) {
         ssize_t r = recvfrom(network_socket, buffer, sizeof(buffer), 0, (struct sockaddr*)&from, &len);
         if (r < (ssize_t)sizeof(RUDP_Header)) break;
@@ -144,17 +134,38 @@ void receive_network_data(void) {
             continue;
         }
 
-        if (h->action == 0x20 /* LOBBY_SWITCH_GAME */ && RUDP_ProcessIncoming(&server_conn, h)) {
-            uint8_t target_game_id = *(uint8_t*)(buffer + sizeof(RUDP_Header));
-            printf("[SYSTEM] Switch réseau vers module ID:%d\n", target_game_id);
-            switch_minigame(target_game_id);
-            continue;
-        }
+        if (!RUDP_ProcessIncoming(&server_conn, h)) continue;
 
-        if (h->action == ACTION_GAME_DATA && RUDP_ProcessIncoming(&server_conn, h)) {
+        int sid = ntohs(h->sender_id);
+        
+        if (h->action == LOBBY_JOIN) {
+            my_id = *(uint16_t*)(buffer + sizeof(RUDP_Header));
+            printf("[SYSTEM] Connecté au lobby. Mon ID: %d\n", my_id);
+            clientState = CLIENT_STATE_LOBBY;
+        }
+        else if (h->action == LOBBY_SWITCH_GAME) {
+            uint8_t target_game_id = *(uint8_t*)(buffer + sizeof(RUDP_Header));
+            switch_minigame(target_game_id);
+        }
+        else if (h->action == LOBBY_MOVE) {
+            if (sid == my_id) continue;
+            if (sid >= 0 && sid < 8 && others) {
+                memcpy(&others[sid], buffer + sizeof(RUDP_Header), sizeof(Player_st));
+                others[sid].active = true;
+            }
+        }
+        else if (h->action == LOBBY_LEAVE) {
+            if (sid >= 0 && sid < 8 && others) others[sid].active = false;
+        }
+        else if (h->action == LOBBY_CHAT) {
+            int pid = ntohs(h->sender_id);
+            if (active_game_id != 0 && game_registry[active_game_id]) {
+                game_registry[active_game_id]->on_data(pid, LOBBY_CHAT, buffer + sizeof(RUDP_Header), r - sizeof(RUDP_Header));
+            }
+        }
+        else if (h->action == 5 /* ACTION_GAME_DATA */) {
             GameTLVHeader* g = (GameTLVHeader*)(buffer + sizeof(RUDP_Header));
             void* payload = (uint8_t*)g + sizeof(GameTLVHeader);
-            
             if (game_registry[g->game_id]) {
                 game_registry[g->game_id]->on_data(ntohs(h->sender_id), g->action, payload, g->length);
             }
@@ -162,187 +173,96 @@ void receive_network_data(void) {
     }
 }
 
-/**
- * @brief Updates and renders the lobby scene (one frame).
- * @param dt  Frame time delta (from GetFrameTime())
- *
- * Handles player movement, camera, UI menus, and game zone collision detection.
- */
-static void lobby_gameLoop(float dt) {
-    static float lobbyTextXPos;
-
-    updatePlayer(&player, platforms, platformCount, dt);
-    cam.target = player.position;
-
-    toggleSkinMenu();
-
-    if (isTextureMenuOpen) {
-        choosePlayerTexture(&player);
-    }
-
-    // Collision check with game zone (tetris example)
-    if (CheckCollisionCircleRec(player.position, player.radius, tetrisHitbox)) {
-        if (!gameHitGracePeriodActive) {
-            currentScene = GAME_SCENE_GAME_NAME;
-            needGameInit = true;
-            gameHitGracePeriodActive = true;
-        }
-    } else if (gameHitGracePeriodActive) {
-        gameHitGracePeriodActive = false;
-    }
-
-    BeginDrawing(); {
-        ClearBackground(RAYWHITE);
-
-        BeginMode2D(cam); {
-            DrawCircle(0, 0, 10, RED);          // Debug origin marker
-            drawPlayer(&player);
-            drawPlatforms(platforms, platformCount);
-            DrawRectangleRec(tetrisHitbox, RED); // Debug hitbox
-        } EndMode2D();
-
-        lobbyTextXPos = (WINDOW_WIDTH - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
-        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
-
-        drawSkinButton();
-
-        if (isTextureMenuOpen) {
-            drawMenuTextures();
-        }
-    } EndDrawing();
-}
-
-/**
-    @brief Program entry point.
-    @return 0 on clean exit, non-zero on early failure
-*/
 int main(void) {
-
-    // ── Initialization ───────────────────────────────────────────────────────
-    Error_Et error = OK;
-
     LobbyGame_St* game = NULL;
     if (lobby_initGame(&game) == ERROR_ALLOC) {
-        log_fatal("Couldn't load the lobby properly.");
+        fprintf(stderr, "Failed to init lobby\n");
         return 1;
     }
 
     InitConnectionScreen();
-    
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        otherPlayers[i].active = false;
+    Player_st* others = lobby_getOtherPlayers(game);
+    if (others) {
+        for (int i = 0; i < 8; i++) others[i].active = false;
     }
 
-    register_minigame(&LobbyModule);
     register_minigame(&KingForFourClientModule);
 
-    InitConnectionScreen();
-    
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        otherPlayers[i].active = false;
-    }
-
-    register_minigame(&LobbyModule);
-    register_minigame(&KingForFourClientModule);
-
-    // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
-        receive_network_data();
+        receive_network_data(game);
 
-        static bool switch_sent = false;
-        if (currentState == GAME_STATE_LOBBY && active_game_id == 0) {
-            bool trigger = (checkGameTrigger(&player) == 1) || IsKeyPressed(KEY_K);
-            if (trigger && !switch_sent) {
-                RUDP_Header leave_h; RUDP_GenerateHeader(&server_conn, 6 /* LOBBY_LEAVE */, &leave_h);
-                send(network_socket, &leave_h, sizeof(leave_h), 0);
+        Player_st* local_p = lobby_getLocalPlayer(game);
 
-                uint8_t target_id = 1;
-                RUDP_Header h; RUDP_GenerateHeader(&server_conn, 0x20 /* LOBBY_SWITCH_GAME */, &h);
-                
-                uint8_t buffer[sizeof(RUDP_Header) + 1];
-                memcpy(buffer, &h, sizeof(h));
-                buffer[sizeof(h)] = target_id;
-                
-                send(network_socket, buffer, sizeof(buffer), 0);
-                switch_sent = true;
-                printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", target_id);
+        if (clientState == CLIENT_STATE_LOBBY && active_game_id == 0 && local_p) {
+            // Lobby network sync (send pos)
+            static Vector2 lastSent = {0};
+            if (local_p->position.x != lastSent.x || local_p->position.y != lastSent.y) {
+                RUDP_Header h; RUDP_GenerateHeader(&server_conn, LOBBY_MOVE, &h);
+                h.sender_id = htons((uint16_t)my_id); // CRITICAL FIX: Send our real ID
+                uint8_t buf[1024];
+                memcpy(buf, &h, sizeof(h));
+                memcpy(buf + sizeof(h), local_p, sizeof(Player_st));
+                send(network_socket, buf, sizeof(h) + sizeof(Player_st), 0);
+                lastSent = local_p->position;
             }
-            if (!trigger) switch_sent = false;
+
+            // Game trigger check
+            if (checkGameTrigger(local_p)) {
+                uint8_t target_id = 1; // King For Four
+                RUDP_Header h; RUDP_GenerateHeader(&server_conn, LOBBY_SWITCH_GAME, &h);
+                h.sender_id = htons((uint16_t)my_id);
+                uint8_t buf[64];
+                memcpy(buf, &h, sizeof(h));
+                buf[sizeof(h)] = target_id;
+                send(network_socket, buf, sizeof(h) + 1, 0);
+                clientState = CLIENT_STATE_WAITING_SWITCH; // Avoid spamming
+                printf("[SYSTEM] Demande de switch envoyée, attente confirmation...\n");
+            }
         }
 
-        switch (currentState) {
-            case STATE_CONNECTION: {
-                static float timer = 0; timer += dt;
-                if (timer > 2.0f) { discover_servers(); timer = 0; }
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        switch (clientState) {
+            case CLIENT_STATE_DISCONNECTED:
                 if (UpdateConnectionScreen()) {
                     init_network(GetEnteredIP());
-                    currentState = GAME_STATE_LOBBY;
+                    clientState = CLIENT_STATE_CONNECTING;
                 }
+                DrawConnectionScreen();
+                break;
 
-                BeginDrawing(); {
-                    ClearBackground(RAYWHITE);
-                    DrawConnectionScreen(); 
-                } EndDrawing();
-            } break;
+            case CLIENT_STATE_CONNECTING:
+                DrawText("CONNEXION EN COURS...", 100, 100, 30, GRAY);
+                break;
 
-            case GAME_STATE_LOBBY: {
+            case CLIENT_STATE_LOBBY:
+            case CLIENT_STATE_WAITING_SWITCH:
+                lobby_gameLoop(game);
+                if (clientState == CLIENT_STATE_WAITING_SWITCH) {
+                    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.3f));
+                    DrawText("CHARGEMENT DU JEU...", GetScreenWidth()/2 - 100, GetScreenHeight()/2, 20, WHITE);
+                }
+                break;
+
+            case CLIENT_STATE_INGAME:
                 if (game_registry[active_game_id]) {
                     game_registry[active_game_id]->update(dt);
-
-                    BeginDrawing(); {
-                        ClearBackground(RAYWHITE);
-                        game_registry[active_game_id]->draw();
-                    } EndDrawing();
+                    game_registry[active_game_id]->draw();
                 }
-            } break;
+                break;
         }
-        /**
-            switch (game->subGameManager.currentScene) {
-                case GAME_SCENE_LOBBY: {
-                    lobby_gameLoop(game);
-                } break;
-
-                case GAME_SCENE_TETRIS: {
-                    Game_St** miniRef = &game->subGameManager.miniGames[GAME_SCENE_TETRIS];
-                    TetrisGame_St** tetrisRef = (TetrisGame_St**) miniRef;
-                    if (game->subGameManager.needGameInit) {
-                        error = tetris_initGame(tetrisRef);
-                        game->subGameManager.needGameInit = false;
-
-                        if (error != OK) {
-                            log_fatal("Tetris initialization failed: error %d", error);
-                            tetris_freeGame(tetrisRef);
-                            game->subGameManager.currentScene = GAME_SCENE_LOBBY;
-                            break;
-                        }
-                    }
-
-                    tetris_gameLoop(*tetrisRef);
-
-                    if (!(*miniRef)->running) {
-                        tetris_freeGame(tetrisRef);
-                        game->subGameManager.currentScene = GAME_SCENE_LOBBY;
-                    }
-                } break;
-
-                default:
-                    log_error("Invalid GameScene_Et value: %d", game->subGameManager.currentScene);
-                    break;
-            }
-        }
-        */
+        
+        EndDrawing();
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────────────
     lobby_freeGame(&game);
-
     return 0;
 }
 
 #define LOGGER_IMPLEMENTATION
 #include "logger.h"
-
 #define SYSTEM_SETTINGS_IMPLEMENTATION
 #include "systemSettings.h"

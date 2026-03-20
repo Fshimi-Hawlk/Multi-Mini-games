@@ -27,7 +27,7 @@
     @brief Available font sizes used for in-game UI and text rendering.
 
     Values are listed in ascending order.  
-    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+    `__fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
 */
 typedef enum {
                       FONT4,   FONT6,   FONT8,
