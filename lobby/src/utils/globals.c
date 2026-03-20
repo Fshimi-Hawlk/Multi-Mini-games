@@ -36,7 +36,7 @@
 /** @brief Main window rectangle (set at init). */
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 /** @brief Array of loaded fonts in increasing sizes. */
-Font      fonts[_fontSizeCount] = {0};
+Font      fonts[__fontSizeCount] = {0};
 /** @brief Primary font for UI text. */
 Font      appFont = {0};
 
