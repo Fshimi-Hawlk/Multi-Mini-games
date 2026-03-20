@@ -39,4 +39,6 @@
 /** @brief Maximum number of moves that can be recorded */
 #define NB_MAX_MOVE 250
 
+#define SOUNDS_PATH "assets/sounds/"
+
 #endif

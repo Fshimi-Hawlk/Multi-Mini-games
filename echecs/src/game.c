@@ -16,6 +16,7 @@
 #include "algo.h"
 #include "utils.h"
 #include "rendering.h"
+#include "audio.h"
 
 /**
  * @brief Initialize both players.
@@ -184,6 +185,8 @@ int initGame(Board_t board) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Echecs");
     SetTargetFPS(60);
 
+    chess_initAudio();
+
     moveMade = calloc(7, sizeof(char));
     if (!moveMade) {
         error("Couldn't allocate memory");
@@ -276,5 +279,8 @@ void freeGame(void) {
 
     freePlayer(blackPlayer);
     freePlayer(whitePlayer);
+
+    chess_freeAudio();
+
     CloseWindow();
 }

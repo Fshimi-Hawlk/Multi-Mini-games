@@ -86,7 +86,7 @@ void updatePossibleMoves(Board_t board);
  * @brief Handle pawn promotion choice.
  * @param board The game board
  */
-void promotionChoice(Board_t board);
+bool promotionChoice(Board_t board);
 
 /**
  * @brief Apply a series of predefined moves (for demo/simulation).

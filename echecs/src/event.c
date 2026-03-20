@@ -13,6 +13,7 @@
 #include "algo.h"
 #include "utils.h"
 #include "board.h"
+#include "audio.h"
 
 /**
  * @brief Handle all input events for the current frame.
@@ -32,7 +33,22 @@ void handleEvents(Board_t board) {
         }
         
         if (waitingForPromotion) {
-            promotionChoice(board);
+            if (promotionChoice(board)) {
+                if (isCheckmate(board)) {
+                    finished = true;
+                } 
+                else {
+                    Player_st* adversary = (playerTurn == COLOR_PIECE_WHITE) ? blackPlayer : whitePlayer;
+                    Piece_st* king = adversary->pieces[PIECE_ORDER_KING];
+
+                    if (isInCheck(board, king, king->pos.x, king->pos.y, !playerTurn)) {
+                        PlaySound(sound_check);
+                    } 
+                    else {
+                        PlaySound(sound_promotion);
+                    }
+                }
+            }
             return;
         }
         
@@ -51,6 +67,23 @@ void handleEvents(Board_t board) {
             }
             selectionnedPiece = NULL;
             playerTurn = !playerTurn;
+
+
+            if (isCheckmate(board)) {
+                finished = true; 
+            }
+            else {
+                Player_st* currentPlayer = (playerTurn == COLOR_PIECE_WHITE) ? whitePlayer : blackPlayer;
+                Piece_st* king = currentPlayer->pieces[PIECE_ORDER_KING];
+
+                if (isInCheck(board, king, king->pos.x, king->pos.y, playerTurn)) {
+                    PlaySound(sound_check);
+                }
+                else {
+                    PlaySound(sound_move);
+                }
+            }
+
         }
     }
 }

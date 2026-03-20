@@ -16,6 +16,7 @@
 #include "rendering.h"
 #include "event.h"
 #include "error.h"
+#include "audio.h"
 
 /**
  * @brief Select a piece on the board.
@@ -313,7 +314,7 @@ bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int
     else {
         board[targetLine][targetColumn] = NULL;
     }
-    
+
     return res;
 }
 
@@ -342,6 +343,8 @@ bool isCheckmate(Board_t board) {
             }
         }
     }
+    
+    PlaySound(sound_checkMate);
     return true;
 }
 
@@ -396,11 +399,11 @@ void updatePossibleMoves(Board_t board) {
     }
 }
 
-void promotionChoice(Board_t board) {
+bool promotionChoice(Board_t board) {
     IVec2_st mousePos = GetMousePositionI();
 
     if (mousePos.y < yPromotion || mousePos.y > yPromotion + CELL_PX_SIZE || mousePos.x < xPromotion || mousePos.x > xPromotion + CELL_PX_SIZE * 4) {
-        return;
+        return false;
     }
 
     Piece_st* piece;
@@ -415,7 +418,7 @@ void promotionChoice(Board_t board) {
             break;
         }
         if (i == 7) {
-            return;
+            return false;
         }
     }
 
@@ -439,7 +442,7 @@ void promotionChoice(Board_t board) {
         promotionVers = PIECE_NAME_QUEEN;
     }
     else
-        return;
+        return false;
 
     piece->name = promotionVers;
     waitingForPromotion = false;
@@ -453,6 +456,9 @@ void promotionChoice(Board_t board) {
     saveMove = true;
 
     free(temp);
+
+    return true;
+
 }
 
 void applyPredifinedMoves(Board_t board, char *coupPredefinis[], int nCoup) {
