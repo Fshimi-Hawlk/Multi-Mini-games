@@ -66,7 +66,7 @@ void switch_minigame(uint8_t game_id) {
  * @param module Pointer to the mini-game module structure.
  */
 void register_minigame(MiniGameModule* module) {
-    if (module && module->id < 256) {
+    if (module) {
         game_registry[module->id] = module;
         if (module->init) module->init();
         printf("[SYSTEM] Module '%s' (ID:%d) enregistré.\n", module->name, module->id);
@@ -76,7 +76,7 @@ void register_minigame(MiniGameModule* module) {
 /**
  * @brief Ensures that the network socket exists, creating it if necessary.
  */
-void ensure_socket_exists() {
+void ensure_socket_exists(void) {
     if (network_socket != -1) return;
     network_socket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (network_socket >= 0) {
