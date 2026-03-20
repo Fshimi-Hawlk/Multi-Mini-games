@@ -10,6 +10,7 @@
 
 #include "setups/app.h"
 #include "setups/game.h"
+#include "utils/audio.h"
 
 bool initFonts(void) {
     u64 fontSize = 8;
@@ -48,6 +49,8 @@ bool initApp(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
+    blockBlast_initAudio();
+
 #ifdef LOGGER_H
     init_logger();
 #endif
@@ -66,6 +69,8 @@ void freeApp(void) {
     arena_free(&tempArena);
 
     freeFonts();
+
+    blockBlast_freeAudio();
 
     CloseWindow();
 }

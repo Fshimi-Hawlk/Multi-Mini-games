@@ -31,4 +31,6 @@
 #define BOARD_WIDTH  8  ///< Grid columns
 #define BOARD_HEIGHT 8  ///< Grid rows
 
+#define SOUNDS_PATH "assets/sounds/"
+
 #endif // CONFIGS_H
