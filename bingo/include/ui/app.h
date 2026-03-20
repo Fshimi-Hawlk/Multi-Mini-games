@@ -2,7 +2,7 @@
     @file core/game.h
     @author Fshimi-Hawlk
     @date 2026-03-03
-    @date 2026-03-16
+    @date 2026-03-19
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.
@@ -23,6 +23,6 @@
 
     TODO
 */
-void bingo_drawUI(const BingoGame_St* game);
+void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const balls, const CallState_St* const currentCall);
 
 #endif // UI_APP_H

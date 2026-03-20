@@ -2,14 +2,15 @@
     @file globals.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-03-16
+    @date 2026-03-19
     @brief Central location for process-wide global variables and pre-loaded resources.
 */
 
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "userTypes.h"
+#include "APIs/generalAPI.h"
+#include "utils/userTypes.h"
 
 // ────────────────────────────────────────────────
 // Fonts

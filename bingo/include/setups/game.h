@@ -2,7 +2,7 @@
     @file game.h (setups)
     @author Fshimi Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-19
     @brief Full game state initialization.
 */
 
@@ -11,9 +11,7 @@
 
 #include "utils/userTypes.h"
 
-/**
-    @brief Initializes the game: states, cards, ...
-*/
-void bingo_initGame(BingoGame_St* game);
+void bingo_computeLayout(Layout_St* layout);
+bool bingo_generateCard(Card_t card, uint *available, uint count);
 
 #endif // SETUPS_GAME_H

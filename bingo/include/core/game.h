@@ -2,7 +2,7 @@
     @file core/game.h
     @author Fshimi-Hawlk
     @date 2026-03-02
-    @date 2026-03-05
+    @date 2026-03-19
     @brief One clear sentence that tells what this file is actually for.
 
     If the file needs more context than fits in @brief, write 2-5 lines here.
@@ -18,6 +18,7 @@
 
 #include "utils/userTypes.h"
 
-void bingo_updateGame(BingoGame_St* const game, f32 dt, f32Vector2 mousePos);
+bool bingo_isValidDaub(const CallState_St* const state, const PlayerCard_St* playerCard, uint row, uint col);
+bool bingo_hasBingo(const PlayerCard_St* const playerCard);
 
 #endif // CORE_GAME_GAME_H
