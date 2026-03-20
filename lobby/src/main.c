@@ -32,8 +32,6 @@
 #include "lobbyAPI.h"
 // #include "APIs/kingForFourAPI.h"
 #include "APIs/bingoAPI.h"
-#include "utils/userTypes.h"
-
 
 enum {
     ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
@@ -230,7 +228,7 @@ int main(void) {
 
     // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
-        float dt = GetFrameTime();
+        f32 dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
         receiveNetworkData(game);
 
@@ -238,8 +236,14 @@ int main(void) {
 
         switch (game->currentState) {
             case GAME_STATE_CONNECTION: {
-                static float timer = 0; timer += dt;
-                if (timer > 2.0f) { discoverServers(); timer = 0; }
+                static f32 timer = 0; 
+                timer += dt;
+                
+                if (timer > 2.0f) {
+                    discoverServers();
+                    timer = 0;
+                }
+                
                 if (updateConnectionScreen()) {
                     initNetwork(getEnteredIP());
                     game->currentState = GAME_STATE_GAMEPLAY;

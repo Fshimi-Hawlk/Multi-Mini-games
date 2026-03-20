@@ -203,7 +203,6 @@ clean-api-headers:
 			module_name=$$(basename "$$dir"); \
 			api_file="$(FIRSTPARTY_API_DIR)/$$(echo "$$module_name" | sed -E 's/[-_]([a-z])/\U\1/g' | sed 's/^[A-Z]/\l&/')API.h"; \
 			if [ -f "$$api_file" ]; then \
-				echo "  Removing generated API header: $$api_file"; \
 				rm -f "$$api_file"; \
 			fi; \
 		fi; \
@@ -212,10 +211,10 @@ clean-api-headers:
 clean-all: clean clean-api-headers
 	@echo "===> Full clean (root build + modules + generated API headers)"
 	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
-	    if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-	        echo "Cleaning module: $$dir"; \
-	        $(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
-	    fi; \
+		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
+			echo "Cleaning module: $$dir"; \
+			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
+		fi; \
 	done
 
 rebuild: clean-all all

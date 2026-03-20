@@ -12,24 +12,14 @@
 #include "utils/userTypes.h"
 
 /**
- * @struct LobbyState
- * @brief État interne d'une instance de lobby.
- * 
- * Contient les données de tous les joueurs connectés.
- */
-typedef struct {
-    Player_St players[MAX_CLIENTS]; /**< Tableau stockant les structures joueurs. */
-} LobbyState;
-
-/**
  * @brief Alloue et initialise une nouvelle instance de lobby.
  * 
  * @return void* Pointeur vers la structure LobbyState créée, ou NULL en cas d'échec.
  */
 void* lobby_create(void) {
-    LobbyState* state = (LobbyState*) malloc(sizeof(LobbyState));
+    LobbyGame_St* state = malloc(sizeof(LobbyGame_St));
     if (state) {
-        memset(state, 0, sizeof(LobbyState));
+        memset(state, 0, sizeof(LobbyGame_St));
     }
 
     return state;

@@ -21,26 +21,33 @@
  */
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <errno.h>
+#include <stdbool.h>
+
+#include <string.h>
+
 #include <unistd.h>
+#include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
 #include <sys/time.h>
-#include <stdbool.h>
 #include <sys/select.h>
 
-#include "rudp_core.h"
-#include "reseauAPI.h"
-#include "game_interface.h"
+#include "networkInterface.h"
 
-#define PORT 42069 /**< Port d'écoute du serveur. */
-#define TIMEOUT_US 5000000000 /**< Timeout de déconnexion en microsecondes (5s). */
-#define SERVER_NAME "CachyOS-KingForFour-Server" /**< Nom d'affichage du serveur. */
+#define PORT 8080                                       /**< Port d'écoute du serveur. */
+#define TIMEOUT_US 5000000000                           /**< Timeout de déconnexion en microsecondes (5s). */
+#define SERVER_NAME "CachyOS-KingForFour-Server"        /**< Nom d'affichage du serveur. */
 #define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDPHeader_St)) /**< Taille maximale de la charge utile. */
+
+enum {
+    ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
+    ACTION_CODE_LOBBY_ROOM_QUERY,
+    ACTION_CODE_LOBBY_ROOM_INFO,
+    ACTION_CODE_LOBBY_CHAT,
+    ACTION_CODE_LOBBY_SWITCH_GAME
+};
 
 // Interfaces de routage
 extern GameServerInterface_St lobby_module; /**< Instance du module lobby. */
@@ -98,7 +105,7 @@ int find_or_create_client(struct sockaddr_in *addr) {
  * @param payload Pointeur vers les données.
  * @param len Taille des données.
  */
-void server_broadcast(int room_id, int exclude_id, u8 action, void *payload, u16 len) {
+void server_broadcast(int room_id, int exclude_id, u8 action, const void *payload, u16 len) {
     u8 buffer[2048];
     if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
 
@@ -129,7 +136,7 @@ void server_broadcast(int room_id, int exclude_id, u8 action, void *payload, u16
 }
 
 /**
- * @brief Répond aux requêtes de découverte de serveur (LOBBY_ROOM_QUERY).
+ * @brief Répond aux requêtes de découverte de serveur (ACTION_CODE_LOBBY_ROOM_QUERY).
  * 
  * @param client_addr Adresse du client demandeur.
  */
@@ -138,7 +145,7 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
     RUDPConnection_St temp_conn;
     rudpInitConnection(&temp_conn);
     
-    rudpGenerateHeader(&temp_conn, LOBBY_ROOM_INFO, &response);
+    rudpGenerateHeader(&temp_conn, ACTION_CODE_LOBBY_ROOM_QUERY, &response);
     response.sender_id = htons(999); 
     
     u8 buffer[512];
@@ -169,7 +176,7 @@ void check_timeouts(void) {
                 clients[i].active = false;
                 
                 // On prévient les autres clients
-                server_broadcast(0, i, LOBBY_LEAVE, NULL, 0);
+                server_broadcast(0, i, ACTION_CODE_QUIT_GAME, NULL, 0);
 
                 if (active_module && active_module->on_player_leave) {
                     active_module->on_player_leave(active_game_state, i);
@@ -234,15 +241,14 @@ int main(void) {
                 RUDPHeader_St header;
                 memcpy(&header, buffer, sizeof(RUDPHeader_St));
 
-                if (header.action == LOBBY_ROOM_QUERY) {
+                if (header.action == ACTION_CODE_LOBBY_ROOM_QUERY) {
                     handle_discovery_query(&client_addr);
-                } 
-                else {
+                } else {
                     int id = find_or_create_client(&client_addr);
                     if (id != -1 && rudpProcessIncoming(&clients[id].rudp_state, &header)) {
                         gettimeofday(&clients[id].last_seen, NULL);
                         
-                        if (header.action == LOBBY_SWITCH_GAME) {
+                        if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
                             u8 target_game_id = buffer[sizeof(RUDPHeader_St)];
                             printf("[MODULE] Demande de switch vers ID: %d\n", target_game_id);
                             
@@ -260,11 +266,10 @@ int main(void) {
                                 // On envoie TOUJOURS la confirmation au joueur qui demande (Unicast)
                                 // Même si le module est déjà actif pour d'autres.
                                 u8 switch_payload = 1;
-                                server_broadcast(-1, id, LOBBY_SWITCH_GAME, &switch_payload, 1);
+                                server_broadcast(-1, id, ACTION_CODE_LOBBY_SWITCH_GAME, &switch_payload, 1);
                                 printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
-                        }
-                        else if (header.action == LOBBY_CHAT) {
-                            server_broadcast(0, id, LOBBY_CHAT, buffer + sizeof(RUDPHeader_St), len - sizeof(RUDPHeader_St));
+                        } else if (header.action == ACTION_CODE_LOBBY_CHAT) {
+                            server_broadcast(0, id, ACTION_CODE_LOBBY_CHAT, buffer + sizeof(RUDPHeader_St), len - sizeof(RUDPHeader_St));
                             }
                         }
                         else if (active_module && active_module->on_action && active_game_state) {
