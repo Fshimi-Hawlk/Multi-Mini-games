@@ -9,7 +9,7 @@
 APP_NAME := king_for_four
 MAIN_NAME := main
 
-# Dossiers du projet
+# DossiersDe plus, tu redefini le concept des structures de jeu individuel (e.g. TetrisGame_St) avec ton MiniGameModule. Je peux comprendre qu'il generalise le concept, mais l'integration pour les jeux individuel m'a l'air tres alambiquee. Faudrait que tu detailles le process parce que ca marche, je l'ai tres bien vu, mais j'ai l'impression que tu as juste redefini le concept meme de la conversion en API avec ta propre implementation. Je ne dis pas qu'elle est mauvaise, c'est juste une autre facon de faire que tu as l'air d'avoir impose sans explique quoi que ce soit. du projet
 SRC_DIR   := src
 TEST_DIR  := tests
 BUILD_DIR := build
@@ -45,7 +45,7 @@ BASE_CFLAGS := \
 
 # Flags de l'éditeur de liens (Linker)
 BASE_LDFLAGS := \
-	-L$(RAYLIB_LIB) \
+	-L$(RADe plus, tu redefini le concept des structures de jeu individuel (e.g. TetrisGame_St) avec ton MiniGameModule. Je peux comprendre qu'il generalise le concept, mais l'integration pour les jeux individuel m'a l'air tres alambiquee. Faudrait que tu detailles le process parce que ca marche, je l'ai tres bien vu, mais j'ai l'impression que tu as juste redefini le concept meme de la conversion en API avec ta propre implementation. Je ne dis pas qu'elle est mauvaise, c'est juste une autre facon de faire que tu as l'air d'avoir impose sans explique quoi que ce soit.YLIB_LIB) \
 	-l:libraylib.a \
 	-lGL -lm -lpthread -ldl -lrt \
 	-Xlinker -zmuldefs
