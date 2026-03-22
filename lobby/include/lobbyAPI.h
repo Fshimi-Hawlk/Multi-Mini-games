@@ -19,6 +19,9 @@
 
 #include "utils/userTypes.h"
 #include "APIs/generalAPI.h"
+#include "firstparty/progress.h"
+
+extern PlayerProgress_St g_progress;
 
 /**
     @brief Configuration options passed to the initialization function.

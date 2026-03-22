@@ -81,9 +81,9 @@ typedef struct { s64 x, y; } s64Vector2;  ///< 64-bit signed
 // ────────────────────────────────────────────────
 
 #ifndef f32Vector2_def
+#define f32Vector2_def
 /**
  * @brief 32-bit float 2D vector - equivalent to Raylib's Vector2.
- *        Defined here only if not already provided (e.g. via common.h).
  */
 typedef struct { f32 x, y; } f32Vector2;
 #endif

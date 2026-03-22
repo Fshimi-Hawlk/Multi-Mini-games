@@ -41,6 +41,7 @@ dkms.conf
 
 # debug information files
 *.dwo
+dev.sh
 
 # TrueType Font
 *.ttf

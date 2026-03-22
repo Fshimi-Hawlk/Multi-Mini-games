@@ -213,6 +213,7 @@ static Error_Et applyVideoSettings(VideoSettings_St settings) {
         |  (settings.vsync      ? FLAG_VSYNC_HINT : 0)
         |  (settings.borderless ? FLAG_WINDOW_UNDECORATED : 0)
         |  (settings.resizable  ? FLAG_WINDOW_RESIZABLE : 0)
+        |  FLAG_WINDOW_ALWAYS_RUN
     );
 
     return err;
