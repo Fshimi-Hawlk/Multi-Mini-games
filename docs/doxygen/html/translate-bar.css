@@ -1,0 +1,22 @@
+#translate-bar {
+    background: #161b22;
+    border-bottom: 1px solid #30363d;
+    padding: 0.4rem 1rem;
+    text-align: right;
+}
+
+#translate-bar a {
+    font-size: 0.8rem;
+    color: #8b949e;
+    text-decoration: none;
+    border: 1px solid #30363d;
+    padding: 0.3rem 0.75rem;
+    border-radius: 6px;
+    background: #21262d;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+#translate-bar a:hover {
+    color: #58a6ff;
+    border-color: #58a6ff;
+}

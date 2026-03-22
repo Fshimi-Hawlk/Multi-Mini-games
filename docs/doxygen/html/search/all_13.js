@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['page_0',['Home page',['../index.html',1,'']]],
+  ['pages_1',['pages',['../sub_project_makefile.html#autotoc_md79',1,'Related Pages'],['../sub_project_internal_makefile_structure.html#autotoc_md72',1,'Related pages']]],
+  ['path_20handling_2',['Asset Path Handling',['../root_makefile.html#autotoc_md45',1,'']]],
+  ['per_20sub_20project_20game_3',['Per sub-project / game',['../readme.html#autotoc_md28',1,'']]],
+  ['planned_20longer_20term_20structure_4',['Planned Longer-Term Structure',['../roadmap.html#autotoc_md30',1,'']]],
+  ['portability_5',['Requirements &amp; Portability',['../sub_project_makefile.html#autotoc_md78',1,'']]],
+  ['portions_20of_20this_20software_20include_20code_20from_3a_6',['Portions of this software include code from:',['../license.html#autotoc_md10',1,'']]],
+  ['pr_7',['Before opening a PR',['../contributing.html#autotoc_md61',1,'']]],
+  ['pr_20branch_20two_20common_20cases_8',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md62',1,'']]],
+  ['preprocessor_9',['Macros &amp; Preprocessor',['../code_style_and_conventions.html#autotoc_md52',1,'']]],
+  ['prerequisites_10',['Prerequisites',['../api_conversion.html#autotoc_md35',1,'']]],
+  ['priority_20do_20these_20quite_20soon_11',['High priority - do these quite soon',['../todo.html#autotoc_md32',1,'']]],
+  ['project_12',['Root-level (whole project)',['../readme.html#autotoc_md27',1,'']]],
+  ['project_20branch_13',['Building &amp; Running (Inside a single sub-project / branch)',['../readme.html#autotoc_md25',1,'']]],
+  ['project_20details_14',['Project Details',['../project_details.html',1,'']]],
+  ['project_20game_15',['Per sub-project / game',['../readme.html#autotoc_md28',1,'']]],
+  ['project_20internal_20makefile_20structure_16',['Sub-Project Internal Makefile Structure',['../sub_project_internal_makefile_structure.html',1,'build_system']]],
+  ['project_20level_20structure_20each_20game_20lobby_17',['Sub-Project-Level Structure (each game / lobby)',['../readme.html#autotoc_md23',1,'']]],
+  ['project_20makefile_20documentation_18',['Sub-Project Makefile Documentation',['../sub_project_makefile.html',1,'build_system']]],
+  ['project_20overview_19',['Project Overview',['../readme.html#autotoc_md18',1,'']]],
+  ['project_20roadmap_20',['Project Roadmap',['../roadmap.html',1,'project_details']]],
+  ['project_20workflow_21',['Project Workflow',['../readme.html#autotoc_md21',1,'']]],
+  ['project_2ddetails_2emd_22',['project-details.md',['../project-details_8md.html',1,'']]],
+  ['public_20api_20header_23',['Step 1 – Create the public API header',['../api_conversion.html#autotoc_md36',1,'']]],
+  ['pull_20requests_24',['pull requests',['../contributing.html#autotoc_md59',1,'Branch Naming for Pull Requests'],['../contributing.html#autotoc_md60',1,'Pull Requests']]]
+];

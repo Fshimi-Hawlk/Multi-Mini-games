@@ -1,0 +1,28 @@
+var searchData=
+[
+  ['cases_0',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md62',1,'']]],
+  ['changed_1',['Changed',['../changelog.html#autotoc_md14',1,'']]],
+  ['changelog_2',['changelog',['../changelog.html',1,'Changelog'],['../changelog.html#autotoc_md11',1,'How we maintain this changelog']]],
+  ['changelog_2emd_3',['changelog.md',['../changelog_8md.html',1,'']]],
+  ['code_20from_3a_4',['Portions of this software include code from:',['../license.html#autotoc_md10',1,'']]],
+  ['code_20style_5',['Code Style',['../contributing.html#autotoc_md66',1,'']]],
+  ['code_20style_20conventions_6',['Code Style &amp; Conventions',['../code_style_and_conventions.html',1,'team_guidelines']]],
+  ['code_2dstyle_2dand_2dconventions_2emd_7',['code-style-and-conventions.md',['../code-style-and-conventions_8md.html',1,'']]],
+  ['commands_20what_20we_20use_20most_8',['Common Commands (what we use most)',['../root_makefile.html#autotoc_md44',1,'']]],
+  ['comments_20doxygen_20documentation_9',['Comments &amp; Doxygen Documentation',['../code_style_and_conventions.html#autotoc_md54',1,'']]],
+  ['commit_20messages_10',['Commit Messages',['../contributing.html#autotoc_md58',1,'']]],
+  ['common_20cases_11',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md62',1,'']]],
+  ['common_20commands_20what_20we_20use_20most_12',['Common Commands (what we use most)',['../root_makefile.html#autotoc_md44',1,'']]],
+  ['common_20issues_20we_20ran_20into_13',['Common issues we ran into',['../api_conversion.html#autotoc_md41',1,'']]],
+  ['contributing_20guidelines_14',['Contributing Guidelines',['../contributing.html',1,'team_guidelines']]],
+  ['contributing_2emd_15',['contributing.md',['../contributing_8md.html',1,'']]],
+  ['convention_16',['Merging rules (team convention)',['../contributing.html#autotoc_md64',1,'']]],
+  ['conventions_17',['conventions',['../code_style_and_conventions.html',1,'Code Style &amp; Conventions'],['../code_style_and_conventions.html#autotoc_md49',1,'Naming Conventions']]],
+  ['conversion_20integration_18',['API Conversion &amp; Integration',['../api_conversion.html',1,'team_guidelines']]],
+  ['copying_19',['API Header Copying',['../root_makefile.html#autotoc_md46',1,'']]],
+  ['create_20the_20public_20api_20header_20',['Step 1 – Create the public API header',['../api_conversion.html#autotoc_md36',1,'']]],
+  ['creating_20the_20pr_20branch_20two_20common_20cases_21',['Creating the PR branch (two common cases)',['../contributing.html#autotoc_md62',1,'']]],
+  ['current_20active_20branches_20workflow_20overview_22',['Current Active Branches &amp; Workflow Overview',['../contributing.html#autotoc_md57',1,'']]],
+  ['current_20modules_23',['Current Modules',['../index.html#autotoc_md3',1,'']]],
+  ['current_20status_20march_202026_24',['Current Status (March 2026)',['../roadmap.html#autotoc_md29',1,'']]]
+];

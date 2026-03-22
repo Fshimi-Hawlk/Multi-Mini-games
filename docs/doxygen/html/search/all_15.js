@@ -1,0 +1,27 @@
+var searchData=
+[
+  ['ran_20into_0',['Common issues we ran into',['../api_conversion.html#autotoc_md41',1,'']]],
+  ['readme_1',['README',['../readme.html',1,'project_details']]],
+  ['readme_2emd_2',['readme.md',['../readme_8md.html',1,'']]],
+  ['refactor_20your_20game_20logic_3',['Step 3 – Refactor your game logic',['../api_conversion.html#autotoc_md38',1,'']]],
+  ['reference_20table_4',['Quick Reference Table',['../sub_project_internal_makefile_structure.html#autotoc_md71',1,'']]],
+  ['related_20pages_5',['related pages',['../sub_project_makefile.html#autotoc_md79',1,'Related Pages'],['../sub_project_internal_makefile_structure.html#autotoc_md72',1,'Related pages']]],
+  ['reminders_6',['Development Workflow &amp; Reminders',['../index.html#autotoc_md6',1,'']]],
+  ['removed_7',['Removed',['../changelog.html#autotoc_md16',1,'']]],
+  ['repository_20structure_8',['repository structure',['../index.html#autotoc_md2',1,'Repository Structure'],['../readme.html#autotoc_md22',1,'Root-Level Repository Structure']]],
+  ['requests_9',['requests',['../contributing.html#autotoc_md59',1,'Branch Naming for Pull Requests'],['../contributing.html#autotoc_md60',1,'Pull Requests']]],
+  ['requirements_20portability_10',['Requirements &amp; Portability',['../sub_project_makefile.html#autotoc_md78',1,'']]],
+  ['reviewing_11',['Opening &amp; reviewing',['../contributing.html#autotoc_md63',1,'']]],
+  ['reviews_20questions_12',['Reviews &amp; Questions',['../contributing.html#autotoc_md67',1,'']]],
+  ['roadmap_13',['Project Roadmap',['../roadmap.html',1,'project_details']]],
+  ['roadmap_20and_20open_20tasks_14',['Roadmap and Open Tasks',['../index.html#autotoc_md7',1,'']]],
+  ['roadmap_2emd_15',['roadmap.md',['../roadmap_8md.html',1,'']]],
+  ['root_20level_20–_20merged_20games_20lobby_16',['Building &amp; Running (Root Level – merged games + lobby)',['../readme.html#autotoc_md24',1,'']]],
+  ['root_20level_20repository_20structure_17',['Root-Level Repository Structure',['../readme.html#autotoc_md22',1,'']]],
+  ['root_20level_20whole_20project_18',['Root-level (whole project)',['../readme.html#autotoc_md27',1,'']]],
+  ['root_20makefile_20documentation_19',['Root Makefile Documentation',['../root_makefile.html',1,'build_system']]],
+  ['root_2dmakefile_2emd_20',['root-makefile.md',['../root-makefile_8md.html',1,'']]],
+  ['rules_20team_20convention_21',['Merging rules (team convention)',['../contributing.html#autotoc_md64',1,'']]],
+  ['running_20inside_20a_20single_20sub_20project_20branch_22',['Building &amp; Running (Inside a single sub-project / branch)',['../readme.html#autotoc_md25',1,'']]],
+  ['running_20root_20level_20–_20merged_20games_20lobby_23',['Building &amp; Running (Root Level – merged games + lobby)',['../readme.html#autotoc_md24',1,'']]]
+];
