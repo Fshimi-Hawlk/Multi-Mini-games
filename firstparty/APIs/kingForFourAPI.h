@@ -1,5 +1,5 @@
 /**
- * @file kingforfourAPI.h
+ * @file kingForFourAPI.h
  * @author i-Charlys (CAILLON Charles)
  * @date 2026-03-18
  * @brief Public interface for the King-for-Four mini-game.

@@ -52,7 +52,7 @@ $(LIB_TARGET): $(LIB_OBJ)
 # --- Serveur ---
 server: $(SERVER_BIN)
 
-$(SERVER_BIN): $(SERVER_OBJ) $(LIB_OBJ)
+$(SERVER_BIN): $(SERVER_OBJ) $(LIB_OBJ) $(filter %.a, $(EXTRA_LDFLAGS))
 	@mkdir -p build/bin
 	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) $^ $(EXTRA_LDFLAGS) $(LDFLAGS) -o $@
 	@echo "[RESEAU] Serveur compilé avec succès : $@"

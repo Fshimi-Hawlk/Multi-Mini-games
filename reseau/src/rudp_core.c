@@ -34,7 +34,7 @@ void RUDP_InitConnection(RUDP_Connection *conn) {
  * @return true Si s1 est plus récent que s2.
  * @return false Sinon.
  */
-static inline bool SequenceMoreRecent(uint16_t s1, uint16_t s2) {
+static inline bool SequenceMoreRecent(u16 s1, u16 s2) {
     return ((s1 > s2) && (s1 - s2 <= 32768)) || ((s1 < s2) && (s2 - s1 > 32768));
 }
 
@@ -45,7 +45,7 @@ static inline bool SequenceMoreRecent(uint16_t s1, uint16_t s2) {
  * @param action Type d'action à envoyer.
  * @param out_header Pointeur vers l'en-tête à remplir.
  */
-void RUDP_GenerateHeader(RUDP_Connection *conn, uint8_t action, RUDP_Header *out_header) {
+void RUDP_GenerateHeader(RUDP_Connection *conn, u8 action, RUDP_Header *out_header) {
     out_header->sequence = conn->local_sequence++;
     out_header->ack = conn->remote_sequence;
     out_header->ack_bitfield = conn->receive_history;
@@ -64,11 +64,11 @@ void RUDP_GenerateHeader(RUDP_Connection *conn, uint8_t action, RUDP_Header *out
  * @return false Si le paquet est un doublon ou trop ancien (hors fenêtre).
  */
 bool RUDP_ProcessIncoming(RUDP_Connection *conn, const RUDP_Header *in_header) {
-    uint16_t seq = in_header->sequence;
+    u16 seq = in_header->sequence;
 
     // Cas 1 : Le paquet est plus récent que tout ce qu'on a vu
     if (SequenceMoreRecent(seq, conn->remote_sequence)) {
-        uint16_t difference = (uint16_t)(seq - conn->remote_sequence);
+        u16 difference = (u16)(seq - conn->remote_sequence);
         
         if (difference >= HISTORY_SIZE) {
             conn->receive_history = 0;
@@ -80,9 +80,9 @@ bool RUDP_ProcessIncoming(RUDP_Connection *conn, const RUDP_Header *in_header) {
     } 
     
     // Cas 2 : Le paquet est arrivé en retard (Jitter) mais n'a pas encore été reçu
-    uint16_t diff_old = (uint16_t)(conn->remote_sequence - seq);
+    u16 diff_old = (u16)(conn->remote_sequence - seq);
     if (diff_old > 0 && diff_old <= HISTORY_SIZE) {
-        uint32_t mask = 1 << (diff_old - 1);
+        u32 mask = 1U << (diff_old - 1);
         if (!(conn->receive_history & mask)) {
             conn->receive_history |= mask;
             return true; // Accepter le retardataire

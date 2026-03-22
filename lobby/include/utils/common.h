@@ -85,8 +85,10 @@
 /**
     @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
  */
+#ifndef f32Vector2_def
 typedef Vector2 f32Vector2;
 #define f32Vector2_def      // marker to indicate the typedef is active
+#endif
 
 #include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
 #include "configs.h"                // tuning constants, paths, physics values

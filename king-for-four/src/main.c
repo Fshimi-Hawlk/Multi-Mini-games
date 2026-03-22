@@ -8,7 +8,7 @@
 #define LOGGER_IMPLEMENTATION
 #include <stddef.h>
 #include "raylib.h"
-#include "kingforfourAPI.h"
+#include "kingForFourAPI.h"
 #include "logger.h"
 #include "APIs/generalAPI.h"
 

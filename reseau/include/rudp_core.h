@@ -12,8 +12,7 @@
 #ifndef RUDP_CORE_H
 #define RUDP_CORE_H
 
-#include <stdint.h>
-#include <stdbool.h>
+#include "baseTypes.h"
 
 /*
  +-----------------------------------------------------------------------+
@@ -64,11 +63,11 @@
  */
 #pragma pack(push, 1)
 typedef struct {
-    uint16_t sequence;     /**< ID unique du paquet. */
-    uint16_t ack;          /**< Dernier numéro de séquence reçu avec succès. */
-    uint32_t ack_bitfield; /**< Historique des 32 précédents paquets (1=reçu). */
-    uint16_t sender_id;    /**< ID de l'émetteur (assigné par le serveur). */
-    uint8_t  action;       /**< Type d'action RUDP ou Jeu. */
+    u16 sequence;     /**< ID unique du paquet. */
+    u16 ack;          /**< Dernier numéro de séquence reçu avec succès. */
+    u32 ack_bitfield; /**< Historique des 32 précédents paquets (1=reçu). */
+    u16 sender_id;    /**< ID de l'émetteur (assigné par le serveur). */
+    u8  action;       /**< Type d'action RUDP ou Jeu. */
 } RUDP_Header;
 #pragma pack(pop)
 
@@ -79,9 +78,9 @@ typedef struct {
  * Gère les numéros de séquence pour un canal de communication spécifique.
  */
 typedef struct {
-    uint16_t local_sequence;       /**< Prochain numéro de séquence à envoyer. */
-    uint16_t remote_sequence;      /**< Dernier numéro de séquence reçu de l'autre côté. */
-    uint32_t receive_history;      /**< Bitfield des paquets reçus. */
+    u16 local_sequence;       /**< Prochain numéro de séquence à envoyer. */
+    u16 remote_sequence;      /**< Dernier numéro de séquence reçu de l'autre côté. */
+    u32 receive_history;      /**< Bitfield des paquets reçus. */
 } RUDP_Connection;
 
 /**
@@ -98,7 +97,7 @@ void RUDP_InitConnection(RUDP_Connection *conn);
  * @param action Type d'action à envoyer.
  * @param out_header Pointeur vers la structure d'en-tête à remplir.
  */
-void RUDP_GenerateHeader(RUDP_Connection *conn, uint8_t action, RUDP_Header *out_header);
+void RUDP_GenerateHeader(RUDP_Connection *conn, u8 action, RUDP_Header *out_header);
 
 /**
  * @brief Traite un paquet entrant et met à jour l'historique.

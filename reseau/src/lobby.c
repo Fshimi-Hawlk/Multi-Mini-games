@@ -17,7 +17,7 @@ typedef struct {
     Player_st players[MAX_CLIENTS];
 } LobbyState;
 
-void* lobby_create() {
+void* lobby_create(void) {
     LobbyState* state = (LobbyState*)malloc(sizeof(LobbyState));
     if (state) {
         memset(state, 0, sizeof(LobbyState));
@@ -25,13 +25,33 @@ void* lobby_create() {
     return state;
 }
 
-void lobby_on_action(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast) {
-    (void)state;
-    // Relay everything back to all clients (target_id = -1, original sender_id = player_id)
-    broadcast(-1, player_id, action, payload, len);
+void lobby_on_action(void *state, s32 player_id, u8 action, void *payload, u16 len, broadcast_func_t broadcast) {
+    LobbyState *s = (LobbyState*)state;
+
+    if (action == LOBBY_JOIN) {
+        // Un client vient de rejoindre, on lui envoie la position de TOUS les autres
+        for (s32 i = 0; i < MAX_CLIENTS; i++) {
+            if (i != player_id && s->players[i].active) {
+                // On simule un message LOBBY_MOVE venant du joueur i vers le nouveau client
+                broadcast(player_id, i, LOBBY_MOVE, &s->players[i], sizeof(Player_st));
+            }
+        }
+    }
+    else if (action == LOBBY_MOVE) {
+        // On enregistre la position du joueur
+        if (player_id >= 0 && player_id < MAX_CLIENTS && len == sizeof(Player_st)) {
+            memcpy(&s->players[player_id], payload, sizeof(Player_st));
+            s->players[player_id].active = true;
+        }
+        // Relay everything back to all clients in same room (target_id = -1, original sender_id = player_id)
+        broadcast(-1, player_id, action, payload, len);
+    }
+    else {
+        broadcast(-1, player_id, action, payload, len);
+    }
 }
 
-void lobby_on_player_leave(void *state, int player_id) {
+void lobby_on_player_leave(void *state, s32 player_id) {
     LobbyState *s = (LobbyState*)state;
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
         memset(&s->players[player_id], 0, sizeof(Player_st));

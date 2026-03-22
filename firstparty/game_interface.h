@@ -8,7 +8,7 @@
 #ifndef GAME_INTERFACE_H
 #define GAME_INTERFACE_H
 
-#include <stdint.h>
+#include "baseTypes.h"
 
 /**
  * @brief Prototype for the broadcast function provided by the server.
@@ -19,7 +19,7 @@
  * @param payload Pointer to the data to be sent.
  * @param len Length of the payload in bytes.
  */
-typedef void (*broadcast_func_t)(int room_id, int exclude_id, uint8_t action, void *payload, uint16_t len);
+typedef void (*broadcast_func_t)(s32 room_id, s32 exclude_id, u8 action, void *payload, u16 len);
 
 /**
  * @struct GameInterface
@@ -32,7 +32,7 @@ typedef struct GameInterface {
      * @brief Initializes a new instance of the game.
      * @return Pointer to the newly created game state.
      */
-    void* (*create_instance)();
+    void* (*create_instance)(void);
     
     /**
      * @brief Processes a received network action.
@@ -43,7 +43,7 @@ typedef struct GameInterface {
      * @param len Length of the payload.
      * @param broadcast Function pointer to broadcast messages to other players.
      */
-    void  (*on_action)(void *state, int player_id, uint8_t action, void *payload, uint16_t len, broadcast_func_t broadcast);
+    void  (*on_action)(void *state, s32 player_id, u8 action, void *payload, u16 len, broadcast_func_t broadcast);
     
     /**
      * @brief Logical update (tick).
@@ -56,7 +56,7 @@ typedef struct GameInterface {
      * @param state Pointer to the game state.
      * @param player_id ID of the player who left.
      */
-    void  (*on_player_leave)(void *state, int player_id);
+    void  (*on_player_leave)(void *state, s32 player_id);
     
     /**
      * @brief Cleans up and frees the game instance.

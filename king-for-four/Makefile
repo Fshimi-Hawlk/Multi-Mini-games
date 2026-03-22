@@ -30,6 +30,8 @@ RAYLIB_LIB  := ../thirdparty/libs/raylib-5.5_linux_amd64
 # ==========================================
 
 # Flags de compilation (C)
+ASSET_PATH ?= assets/
+
 BASE_CFLAGS := \
 	-std=c99 \
 	-D_DEFAULT_SOURCE \

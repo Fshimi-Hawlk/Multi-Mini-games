@@ -32,6 +32,7 @@
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 
+#include "baseTypes.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -131,9 +132,9 @@ struct BaseGame_St {
  */
 #pragma pack(push, 1)
 typedef struct {
-    uint8_t game_id;     /**< ID of the targeted mini-game (0 for Lobby). */
-    uint8_t action;      /**< Game-specific action (e.g., 2 for LOBBY_MOVE). */
-    uint16_t length;     /**< Size of the data following this header. */
+    u8 game_id;     /**< ID of the targeted mini-game (0 for Lobby). */
+    u8 action;      /**< Game-specific action (e.g., 2 for LOBBY_MOVE). */
+    u16 length;     /**< Size of the data following this header. */
 } GameTLVHeader;
 #pragma pack(pop)
 
@@ -142,7 +143,7 @@ typedef struct {
  * @brief Interface contract that each client mini-game must respect.
  */
 typedef struct MiniGameModule {
-    uint8_t id;          /**< Network identifier of the game. */
+    u8 id;               /**< Network identifier of the game. */
     const char* name;    /**< Display name of the module. */
     
     /**
@@ -157,13 +158,13 @@ typedef struct MiniGameModule {
      * @param data Pointer to the received data.
      * @param len Length of the data.
      */
-    void (*on_data)(int player_id, uint8_t action, void* data, uint16_t len);
+    void (*on_data)(s32 player_id, u8 action, void* data, u16 len);
     
     /**
      * @brief Update of local physical logic (Frame by Frame).
      * @param dt Delta time since last frame.
      */
-    void (*update)(float dt);
+    void (*update)(f32 dt);
     
     /**
      * @brief Graphical rendering to the screen (Raylib).

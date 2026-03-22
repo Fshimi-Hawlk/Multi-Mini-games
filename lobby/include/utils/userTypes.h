@@ -94,6 +94,7 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
+    Vector2 targetPosition;                     ///< Network target position for smoothing
 } Player_st;
 
 /**

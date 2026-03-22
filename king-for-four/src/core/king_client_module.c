@@ -12,15 +12,25 @@
 #include "core/game.h"
 #include "ui/renderer.h"
 #include "rudp_core.h"
+#include "firstparty/progress.h"
+#include "firstparty/leaderboard.h"
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
+extern PlayerProgress_St g_progress;
+
 /** @brief External reference to the network socket. */
-extern int network_socket;
+extern s32 network_socket;
 /** @brief External reference to the server connection. */
 extern RUDP_Connection server_conn;
+/** @brief External reference to the client ID. */
+extern s32 my_id;
+
+/** @brief Network action code for game data. */
+#define ACTION_GAME_DATA 5
 
 /** @brief Local copy of the game state. */
 static GameState local_state;
@@ -29,28 +39,28 @@ static GameAssets assets;
 /** @brief Flag indicating if assets are loaded. */
 static bool assets_loaded = false;
 /** @brief This client's internal player ID assigned by server. */
-static int my_internal_id = -1;
+static s32 my_internal_id = -1;
 /** @brief Current status of the game. */
-static int game_status = 0; 
+static s32 game_status = 0; 
+/** @brief Winner of the game. */
+static s32 winner_id = -1; 
 /** @brief Timer for retrying to join the game. */
-static float join_retry_timer = 0;
+static f32 join_retry_timer = 0;
 
 // Color selection state
 static bool is_choosing_color = false;
-static int pending_card_index = -1;
+static s32 pending_card_index = -1;
 
 /**
  * @brief Sends a game action to the server.
- * @param action Action code.
- * @param data Pointer to payload data.
- * @param len Length of payload.
  */
-static void send_to_server(uint8_t action, void* data, uint16_t len) {
+static void send_to_server(u8 action, void* data, u16 len) {
     GameTLVHeader tlv = { .game_id = 1, .action = action, .length = len };
     RUDP_Header h;
     RUDP_GenerateHeader(&server_conn, ACTION_GAME_DATA, &h);
+    h.sender_id = htons((u16)my_id); // Use the global my_id from main.c
     
-    uint8_t buffer[1024];
+    u8 buffer[1024];
     memcpy(buffer, &h, sizeof(h));
     memcpy(buffer + sizeof(h), &tlv, sizeof(tlv));
     if (len > 0 && data) memcpy(buffer + sizeof(h) + sizeof(tlv), data, len);
@@ -77,18 +87,14 @@ void king_client_init(void) {
 
 /**
  * @brief Callback for processing data received from the server.
- * @param player_id ID of the sender.
- * @param action Action code.
- * @param data Payload data.
- * @param len Payload length.
  */
-void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len) {
+void king_client_on_data(s32 player_id, u8 action, void* data, u16 len) {
     (void)player_id;
     if (data == NULL) return;
 
     if (action == ACTION_JOIN_ACK) {
-        if (len >= sizeof(int)) {
-            memcpy(&my_internal_id, data, sizeof(int));
+        if (len >= sizeof(s32)) {
+            memcpy(&my_internal_id, data, sizeof(s32));
             printf("[KING CLIENT] Mon ID interne: %d\n", my_internal_id);
         }
     }
@@ -99,6 +105,32 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
             local_state.current_player = sync.current_player;
             local_state.active_color = sync.active_color;
             game_status = sync.status;
+            winner_id = sync.winner_id;
+
+            // Récompenses de victoire
+            if (game_status == 2 && winner_id == my_internal_id) {
+                u8 game_id = 1; 
+                if (!g_progress.skin_unlocked[game_id][0][0]) {
+                    g_progress.skin_unlocked[game_id][0][0] = true;
+                    printf("[KING] NOUVEAU SKIN DÉBLOQUÉ !\n");
+                }
+                
+                s32 score = 1000; 
+                s32 rank = SubmitScore(game_id, "Joueur", score);
+                g_progress.leaderboard_rank[game_id][0][0] = rank;
+                
+                Leaderboard_St lb = LoadLeaderboard(game_id);
+                g_progress.total_players[game_id][0][0] = lb.count;
+                g_progress.current_ap[game_id] = CalculateAPTier(rank, lb.count);
+                
+                if (rank == 1) {
+                    g_progress.has_crown = true;
+                    g_progress.jewel_unlocked[game_id][0][0] = true;
+                    printf("[KING] JOYAU OBTENU !\n");
+                }
+                
+                SaveProgress(&g_progress);
+            }
             
             if (local_state.discard_pile.head == NULL) {
                 push_card(&local_state.discard_pile, sync.top_card);
@@ -106,33 +138,38 @@ void king_client_on_data(int player_id, uint8_t action, void* data, uint16_t len
                 local_state.discard_pile.head->card = sync.top_card;
             }
             
-            for (int i = 0; i < 4; i++) {
-                local_state.players[i].hand.size = sync.hand_sizes[i];
+            for (s32 i = 0; i < 4; i++) {
+                // Important : On ne met à jour la taille des mains QUE pour les autres joueurs.
+                // Notre propre taille de main est gérée par ACTION_SYNC_HAND.
+                if (i != my_internal_id) {
+                    local_state.players[i].hand.size = sync.hand_sizes[i];
+                }
             }
         }
     }
     else if (action == ACTION_SYNC_HAND) {
-        int count = len / sizeof(Card);
-        uint8_t* ptr = (uint8_t*)data;
+        if (my_internal_id < 0) return;
+        s32 count = len / sizeof(Card);
+        u8* ptr = (u8*)data;
         
-        clear_deck(&local_state.players[0].hand);
+        clear_deck(&local_state.players[my_internal_id].hand);
         
-        for (int i = count - 1; i >= 0; i--) {
+        for (s32 i = count - 1; i >= 0; i--) {
             Card c;
             memcpy(&c, ptr + (i * sizeof(Card)), sizeof(Card));
-            push_card(&local_state.players[0].hand, c);
+            push_card(&local_state.players[my_internal_id].hand, c);
         }
     }
 }
 
 /** @brief Currently selected number of players for the next game. */
-static int selected_players = 4;
+static s32 selected_players = 4;
 
 /**
  * @brief Updates client logic and processes user input.
  * @param dt Delta time since last update.
  */
-void king_client_update(float dt) {
+void king_client_update(f32 dt) {
     if (g_chatState.isOpen) return; // Ignore input when chatting
 
     if (!assets_loaded) return;
@@ -148,14 +185,14 @@ void king_client_update(float dt) {
         if (is_choosing_color) {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 Vector2 m = GetMousePosition();
-                int sw = GetScreenWidth(); int sh = GetScreenHeight();
+                s32 sw = GetScreenWidth(); s32 sh = GetScreenHeight();
                 Rectangle colors[4] = {
-                    { sw/2 - 100, sh/2 - 100, 100, 100 }, // Red
-                    { sw/2,       sh/2 - 100, 100, 100 }, // Yellow
-                    { sw/2 - 100, sh/2,       100, 100 }, // Green
-                    { sw/2,       sh/2,       100, 100 }  // Blue
+                    { sw/2.0f - 100, sh/2.0f - 100, 100, 100 }, // Red
+                    { sw/2.0f,       sh/2.0f - 100, 100, 100 }, // Yellow
+                    { sw/2.0f - 100, sh/2.0f,       100, 100 }, // Green
+                    { sw/2.0f,       sh/2.0f,       100, 100 }  // Blue
                 };
-                for (int i = 0; i < 4; i++) {
+                for (s32 i = 0; i < 4; i++) {
                     if (CheckCollisionPointRec(m, colors[i])) {
                         ActionPlayPayload_St payload = { .card_index = pending_card_index, .chosen_color = i };
                         send_to_server(ACTION_PLAY_CARD, &payload, sizeof(payload));
@@ -166,16 +203,17 @@ void king_client_update(float dt) {
             }
         }
         else if (local_state.current_player == my_internal_id && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int clickedHandIndex = GetHoveredCardIndex(&local_state.players[0], assets);
+            if (my_internal_id < 0) return;
+            s32 clickedHandIndex = GetHoveredCardIndex(&local_state.players[my_internal_id], assets);
             if (clickedHandIndex != -1) {
                 // Check if card is black
-                Node* curr = local_state.players[0].hand.head;
-                for (int i = 0; i < clickedHandIndex; i++) curr = curr->next;
+                Node* curr = local_state.players[my_internal_id].hand.head;
+                for (s32 i = 0; i < clickedHandIndex && curr; i++) curr = curr->next;
                 
-                if (curr->card.color == CARD_BLACK) {
+                if (curr && curr->card.color == CARD_BLACK) {
                     is_choosing_color = true;
                     pending_card_index = clickedHandIndex;
-                } else {
+                } else if (curr) {
                     ActionPlayPayload_St payload = { .card_index = clickedHandIndex, .chosen_color = -1 };
                     send_to_server(ACTION_PLAY_CARD, &payload, sizeof(payload));
                 }
@@ -193,13 +231,13 @@ void king_client_update(float dt) {
         if (IsKeyPressed(KEY_DOWN) && selected_players > 2) selected_players--;
         
         if (IsKeyPressed(KEY_ENTER)) {
-            send_to_server(ACTION_START_GAME, &selected_players, sizeof(int));
+            send_to_server(ACTION_START_GAME, &selected_players, sizeof(s32));
         }
     }
     
     if (IsKeyPressed(KEY_ESCAPE)) {
         send_to_server(ACTION_QUIT_GAME, NULL, 0);
-        extern void switch_minigame(uint8_t game_id);
+        extern void switch_minigame(u8 game_id);
         switch_minigame(0);
     }
 }
@@ -226,8 +264,21 @@ void king_client_draw(void) {
         return;
     }
 
+    if (game_status == 2) {
+        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
+        const char* text = (winner_id == my_internal_id) ? "VICTOIRE !" : "DÉFAITE...";
+        Color color = (winner_id == my_internal_id) ? GOLD : RED;
+        DrawText(text, GetScreenWidth()/2 - MeasureText(text, 60)/2, GetScreenHeight()/2 - 100, 60, color);
+        
+        const char* sub = TextFormat("Le Joueur %d a gagné la partie.", winner_id);
+        DrawText(sub, GetScreenWidth()/2 - MeasureText(sub, 25)/2, GetScreenHeight()/2, 25, WHITE);
+        
+        DrawText("Appuyez sur ESC pour quitter", GetScreenWidth()/2 - MeasureText("Appuyez sur ESC pour quitter", 20)/2, GetScreenHeight()/2 + 100, 20, GRAY);
+        return;
+    }
+
     RenderTable(&local_state, assets);
-    RenderHand(&local_state.players[0], assets);
+    if (my_internal_id >= 0) RenderHand(&local_state.players[my_internal_id], assets);
     
     if (local_state.current_player == my_internal_id) {
         DrawText("C'EST VOTRE TOUR !", 10, 40, 25, GREEN);
@@ -245,7 +296,7 @@ void king_client_draw(void) {
     }
 
     if (is_choosing_color) {
-        int sw = GetScreenWidth(); int sh = GetScreenHeight();
+        s32 sw = GetScreenWidth(); s32 sh = GetScreenHeight();
         DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.7f));
         DrawText("CHOISISSEZ UNE COULEUR", sw/2 - 150, sh/2 - 150, 25, WHITE);
         DrawRectangle(sw/2 - 100, sh/2 - 100, 100, 100, RED);

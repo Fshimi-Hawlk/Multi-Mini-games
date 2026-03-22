@@ -9,23 +9,25 @@
 #define KING_PROTOCOL_H
 
 #include "core/card.h"
+#include "baseTypes.h"
 
 #pragma pack(push, 1)
 
 /** @brief Payload for synchronizing game state from server to client. */
 typedef struct {
-    int current_player;     /**< Index of the current player (0-3) */
-    int active_color;       /**< Current active color (-1:None, 0:Red, 1:Yellow, 2:Green, 3:Blue) */
+    s32 current_player;     /**< Index of the current player (0-3) */
+    s32 active_color;       /**< Current active color (-1:None, 0:Red, 1:Yellow, 2:Green, 3:Blue) */
     Card top_card;          /**< Card currently on top of the discard pile */
-    int hand_sizes[4];      /**< Card count in each player's hand */
-    int status;             /**< Game status (0: WAITING, 1: PLAYING) */
-    int host_id;            /**< ID of the host player (id 0) */
+    s32 hand_sizes[4];      /**< Card count in each player's hand */
+    s32 status;             /**< Game status (0: WAITING, 1: PLAYING, 2: GAME_OVER) */
+    s32 host_id;            /**< ID of the host player (id 0) */
+    s32 winner_id;          /**< ID of the winning player (-1 if none) */
 } GameSyncPayload;
 
 /** @brief Payload for an action to play a card. */
 typedef struct {
-    int card_index;         /**< Index of the card in the player's hand */
-    int chosen_color;       /**< Color chosen if playing a black card */
+    s32 card_index;         /**< Index of the card in the player's hand */
+    s32 chosen_color;       /**< Color chosen if playing a black card */
 } ActionPlayPayload_St;
 
 #pragma pack(pop)
@@ -46,5 +48,7 @@ typedef struct {
 #define ACTION_JOIN_ACK 0x16
 /** @brief Action code for quitting the game. */
 #define ACTION_QUIT_GAME 0x17
+/** @brief Action code for game over. */
+#define ACTION_GAME_OVER 0x18
 
 #endif // KING_PROTOCOL_H

@@ -65,12 +65,14 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     // ── Initialization ───────────────────────────────────────────────────────
     InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
+    SetExitKey(KEY_NULL); // Prevent ESC from closing the game
     SetWindowPosition(100, 100);
 
     (void) configs; // Configs aren't used yet
 
     systemSettings = DEFAULT_SYSTEM_SETTING;
     systemSettings.video.resizable = true;
+    systemSettings.video.borderless = false;
     systemSettings.video.title = "Lobby";
     error = applySystemSettings();
     if (error != OK) {
@@ -175,6 +177,10 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         
         for (int i = 0; i < 8; i++) {
             if (game->otherPlayers[i].active) {
+                // Smoothing interpolation (Lerp)
+                game->otherPlayers[i].position.x += (game->otherPlayers[i].targetPosition.x - game->otherPlayers[i].position.x) * dt * 10.0f;
+                game->otherPlayers[i].position.y += (game->otherPlayers[i].targetPosition.y - game->otherPlayers[i].position.y) * dt * 10.0f;
+                
                 drawPlayer(game, &game->otherPlayers[i]);
             }
         }
@@ -189,11 +195,35 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
     DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
+    // --- PROGRESS UI ---
+    if (g_progress.has_crown) {
+        DrawText("CROWN", 10, 10, 20, GOLD);
+        // Drawing jewels if #1
+        int jewelX = 100;
+        for (int i=0; i<MAX_GAMES_PROGRESS; i++) {
+            if (g_progress.jewel_unlocked[i][0][0]) {
+                DrawCircle(jewelX, 20, 10, (i == 1) ? RED : BLUE);
+                jewelX += 25;
+            }
+        }
+    }
+
+    // Display AP Tier for current game (if we are in its zone or just general)
+    const char* apTexts[] = {"Common", "Uncommon", "Rare", "Legendary", "Mystical", "Plus Ultra"};
+    Color apColors[] = {GRAY, GREEN, BLUE, GOLD, PURPLE, PINK};
+    AP_Tier_Et tier = g_progress.current_ap[1]; // King for four as example
+    DrawText(TextFormat("KING AP: %s", apTexts[tier]), 10, 40, 20, apColors[tier]);
+
     drawSkinButton();
 
     if (game->playerVisuals.isTextureMenuOpen) {
         drawMenuTextures(game);
     }
+    
+    /* Transition désactivée temporairement
+    static float fadeAlpha = 0.0f;
+    ... (code de transition)
+    */
 
     return OK;
 }

@@ -19,11 +19,12 @@
 #include "rudp_core.h"
 #include "game_interface.h"
 #include "reseauAPI.h"
+#include "APIs/generalAPI.h"
 
 #define PORT 8080
 #define MAX_PAYLOAD_SIZE 1024
 #define SERVER_NAME "MMG-Official-Server"
-#define TIMEOUT_US 5000000 /**< Timeout de déconnexion en microsecondes (5s). */
+#define TIMEOUT_US 120000000 /**< Timeout de déconnexion en microsecondes (120s). */
 
 /**
  * @struct UDP_Client
@@ -33,36 +34,36 @@ typedef struct {
     struct sockaddr_in address;   /**< Adresse réseau du client. */
     RUDP_Connection rudp_state;   /**< État du protocole RUDP pour ce client. */
     struct timeval last_seen;     /**< Horodatage du dernier paquet reçu. */
+    u8 current_game_id;           /**< ID du jeu/salon actuel (0: Lobby). */
     bool active;                  /**< Indicateur d'activité de l'emplacement. */
 } UDP_Client;
 
 // --- Variables Globales ---
-int master_socket;
+s32 master_socket;
 UDP_Client clients[MAX_CLIENTS];
 GameInterface* active_module = NULL;
 void* active_game_state = NULL;
 
 extern GameInterface king_module;
+extern GameInterface lobby_module;
 
 /**
  * @brief Trouve l'index d'un client par son adresse, ou en crée un nouveau.
- * 
- * @param addr Adresse du client à chercher.
- * @return int L'index du client (0 à MAX_CLIENTS-1), ou -1 si le serveur est plein.
  */
-int find_or_create_client(struct sockaddr_in *addr) {
-    for(int i = 0; i < MAX_CLIENTS; i++) {
+s32 find_or_create_client(struct sockaddr_in *addr) {
+    for(s32 i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active && 
             clients[i].address.sin_addr.s_addr == addr->sin_addr.s_addr &&
             clients[i].address.sin_port == addr->sin_port) {
             return i;
         }
     }
-    for(int i = 0; i < MAX_CLIENTS; i++) {
+    for(s32 i = 0; i < MAX_CLIENTS; i++) {
         if (!clients[i].active) {
             clients[i].address = *addr;
             RUDP_InitConnection(&clients[i].rudp_state);
             gettimeofday(&clients[i].last_seen, NULL);
+            clients[i].current_game_id = 0; // Par défaut dans le lobby
             clients[i].active = true;
             return i;
         }
@@ -71,32 +72,46 @@ int find_or_create_client(struct sockaddr_in *addr) {
 }
 
 /**
- * @brief Diffuse un message à un ou plusieurs clients.
+ * @brief Diffuse un message à un ou plusieurs clients avec isolation de room.
  * 
- * @param target_id ID du client cible, ou -1 pour tous.
- * @param sender_id ID de l'émetteur original (mis dans l'en-tête RUDP).
+ * @param target_id ID du client cible (Unicast), ou -1 pour broadcast room, ou -2 pour global.
+ * @param sender_id ID de l'émetteur original (999 pour le serveur).
  * @param action Code d'action RUDP.
  * @param payload Données à envoyer.
  * @param len Taille des données.
  */
-void server_broadcast(int target_id, int sender_id, uint8_t action, void *payload, uint16_t len) {
-    uint8_t buffer[2048];
+void server_broadcast(s32 target_id, s32 sender_id, u8 action, void *payload, u16 len) {
+    u8 buffer[2048];
     if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
 
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    // Déterminer la room de l'émetteur pour le filtrage
+    u8 room_id = 0;
+    if (sender_id == 999) {
+        // Le serveur parle : on utilise la room du module actif
+        room_id = (active_module == &king_module) ? 1 : 0;
+    } else if (sender_id >= 0 && sender_id < MAX_CLIENTS && clients[sender_id].active) {
+        room_id = clients[sender_id].current_game_id;
+    }
+
+    for (s32 i = 0; i < MAX_CLIENTS; i++) {
         if (!clients[i].active) continue;
 
         bool should_send = false;
         if (target_id == -1) {
-            should_send = true; // Broadcast
+            // Broadcast Room : uniquement aux joueurs dans la MÊME room SAUF l'émetteur
+            if (clients[i].current_game_id == room_id && i != sender_id) should_send = true;
+        } else if (target_id == -2) {
+            // Broadcast Global : à TOUT LE MONDE
+            should_send = true;
         } else {
-            if (i == target_id) should_send = true; // Unicast
+            // Unicast : uniquement à la cible
+            if (i == target_id) should_send = true;
         }
 
         if (should_send) {
             RUDP_Header header;
             RUDP_GenerateHeader(&clients[i].rudp_state, action, &header);
-            header.sender_id = htons((uint16_t)sender_id); 
+            header.sender_id = htons((u16)sender_id); 
             
             memcpy(buffer, &header, sizeof(RUDP_Header));
             if (len > 0 && payload != NULL) {
@@ -119,7 +134,7 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
     RUDP_GenerateHeader(&temp_conn, LOBBY_ROOM_INFO, &response);
     response.sender_id = htons(999); 
     
-    uint8_t buffer[512];
+    u8 buffer[512];
     memcpy(buffer, &response, sizeof(RUDP_Header));
     
     char info[256];
@@ -134,10 +149,10 @@ void handle_discovery_query(struct sockaddr_in *client_addr) {
 /**
  * @brief Vérifie les clients inactifs et les déconnecte après un délai.
  */
-void check_timeouts() {
+void check_timeouts(void) {
     struct timeval now;
     gettimeofday(&now, NULL);
-    for (int i = 0; i < MAX_CLIENTS; i++) {
+    for (s32 i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
             long long elapsed = (now.tv_sec - clients[i].last_seen.tv_sec) * 1000000LL +
                                 (now.tv_usec - clients[i].last_seen.tv_usec);
@@ -153,15 +168,15 @@ void check_timeouts() {
     }
 }
 
-int main() {
+s32 main(void) {
     struct sockaddr_in server_addr;
-    for (int i = 0; i < MAX_CLIENTS; i++) clients[i].active = false;
+    for (s32 i = 0; i < MAX_CLIENTS; i++) clients[i].active = false;
 
     if ((master_socket = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
         perror("Socket fail"); exit(1);
     }
 
-    int opt = 1;
+    s32 opt = 1;
     setsockopt(master_socket, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
 
     server_addr.sin_family = AF_INET;
@@ -177,21 +192,28 @@ int main() {
 
     printf(">>> SERVEUR RUDP DÉMARRÉ SUR LE PORT %d <<<\n", PORT);
 
+    struct timeval last_tick;
+    gettimeofday(&last_tick, NULL);
+
     while (1) {
         fd_set readfds;
         FD_ZERO(&readfds);
         FD_SET(master_socket, &readfds);
 
-        struct timeval tv = {0, 16666}; 
-        int activity = select(master_socket + 1, &readfds, NULL, NULL, &tv);
+        struct timeval tv = {0, 1000}; // Attente courte (1ms)
+        s32 activity = select(master_socket + 1, &readfds, NULL, NULL, &tv);
 
         if (activity > 0 && FD_ISSET(master_socket, &readfds)) {
-            struct sockaddr_in client_addr;
-            socklen_t addr_len = sizeof(client_addr);
-            uint8_t buffer[2048];
-            ssize_t len = recvfrom(master_socket, buffer, sizeof(buffer), 0, (struct sockaddr*)&client_addr, &addr_len);
+            while (1) {
+                struct sockaddr_in client_addr;
+                socklen_t addr_len = sizeof(client_addr);
+                u8 buffer[2048];
+                // Utilise MSG_DONTWAIT pour vider le buffer sans bloquer
+                ssize_t len = recvfrom(master_socket, buffer, sizeof(buffer), MSG_DONTWAIT, (struct sockaddr*)&client_addr, &addr_len);
+                
+                if (len < 0) break; // Plus de données à lire
+                if (len < (ssize_t)sizeof(RUDP_Header)) continue;
 
-            if (len >= (ssize_t)sizeof(RUDP_Header)) {
                 RUDP_Header header;
                 memcpy(&header, buffer, sizeof(RUDP_Header));
 
@@ -199,21 +221,29 @@ int main() {
                     handle_discovery_query(&client_addr);
                 } 
                 else {
-                    int id = find_or_create_client(&client_addr);
+                    s32 id = find_or_create_client(&client_addr);
                     if (id != -1 && RUDP_ProcessIncoming(&clients[id].rudp_state, &header)) {
                         gettimeofday(&clients[id].last_seen, NULL);
                         
-                        // L'ID utilisé pour l'en-tête retourné est l'ID du serveur (999 ou 0)
-                        // mais on peut utiliser id pour my_id du client.
-                        int sid = ntohs(header.sender_id);
+                        s32 sid = ntohs(header.sender_id);
 
                         if (header.action == LOBBY_JOIN) {
                             printf("[LOBBY] Client %d a rejoint.\n", id);
-                            uint16_t assigned_id = (uint16_t)id;
-                            server_broadcast(id, id, LOBBY_JOIN, &assigned_id, sizeof(uint16_t));
+                            clients[id].current_game_id = 0;
+                            u16 assigned_id = (u16)id;
+                            server_broadcast(id, id, LOBBY_JOIN, &assigned_id, sizeof(u16));
+                            
+                            // Notifier le module actif pour qu'il synchronise les données initiales
+                            if (active_module && active_module->on_action && active_game_state) {
+                                active_module->on_action(active_game_state, id, header.action, NULL, 0, server_broadcast);
+                            }
                         }
                         else if (header.action == LOBBY_SWITCH_GAME) {
-                            uint8_t target_game_id = buffer[sizeof(RUDP_Header)];
+                            u8 target_game_id = buffer[sizeof(RUDP_Header)];
+                            printf("[SYSTEM] Client %d demande switch vers jeu %d\n", id, target_game_id);
+                            
+                            clients[id].current_game_id = target_game_id;
+
                             if (target_game_id == 1) {
                                 if (active_module != &king_module) {
                                     if (active_module && active_module->destroy_instance) {
@@ -222,28 +252,45 @@ int main() {
                                     active_module = &king_module;
                                     active_game_state = active_module->create_instance();
                                 }
-                                uint8_t switch_payload = 1;
-                                server_broadcast(id, 0, LOBBY_SWITCH_GAME, &switch_payload, 1);
+                                u8 switch_payload = 1;
+                                server_broadcast(id, 999, LOBBY_SWITCH_GAME, &switch_payload, 1);
                             }
                         }
                         else if (header.action == LOBBY_MOVE || header.action == LOBBY_LEAVE) {
-                            // Relay with original sender ID
-                            server_broadcast(-1, sid, header.action, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header));
+                            // Relais immédiat aux autres dans la room
+                            server_broadcast(-1, id, header.action, buffer + sizeof(RUDP_Header), (u16)(len - sizeof(RUDP_Header)));
                         }
-                        else if (header.action == LOBBY_CHAT) {
-                            server_broadcast(-1, sid, LOBBY_CHAT, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header));
+                        else if (header.action == 5 /* LOBBY_CHAT / ACTION_GAME_DATA */) {
+                            if (len >= (ssize_t)(sizeof(RUDP_Header) + sizeof(GameTLVHeader))) {
+                                GameTLVHeader* tlv = (GameTLVHeader*)(buffer + sizeof(RUDP_Header));
+                                
+                                if (tlv->action == LOBBY_CHAT) {
+                                    server_broadcast(-1, id, 5, buffer + sizeof(RUDP_Header), (u16)(len - sizeof(RUDP_Header)));
+                                } 
+                                else if (active_module && active_module->on_action && active_game_state) {
+                                    active_module->on_action(active_game_state, id, header.action, buffer + sizeof(RUDP_Header), (u16)(len - sizeof(RUDP_Header)), server_broadcast);
+                                }
+                            }
                         }
                         else if (active_module && active_module->on_action && active_game_state) {
-                            active_module->on_action(active_game_state, id, header.action, buffer + sizeof(RUDP_Header), len - sizeof(RUDP_Header), server_broadcast);
+                            active_module->on_action(active_game_state, id, header.action, buffer + sizeof(RUDP_Header), (u16)(len - sizeof(RUDP_Header)), server_broadcast);
                         }
                     }
                 }
             }
         }
 
-        check_timeouts();
-        if (active_module && active_module->on_tick) {
-            active_module->on_tick(active_game_state, server_broadcast);
+        struct timeval now;
+        gettimeofday(&now, NULL);
+        long long elapsed = (now.tv_sec - last_tick.tv_sec) * 1000000LL + (now.tv_usec - last_tick.tv_usec);
+        
+        // Tick à 60Hz (16666 us)
+        if (elapsed >= 16666) {
+            check_timeouts();
+            if (active_module && active_module->on_tick) {
+                active_module->on_tick(active_game_state, server_broadcast);
+            }
+            last_tick = now;
         }
     }
 

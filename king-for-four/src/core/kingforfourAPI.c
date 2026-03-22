@@ -19,7 +19,7 @@
 
 #include "logger.h"
 #include "APIs/generalAPI.h"
-#include "kingforfourAPI.h"
+#include "kingForFourAPI.h"
 
 /**
  * @enum AppState
