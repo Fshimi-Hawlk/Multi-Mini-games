@@ -1,0 +1,192 @@
+/**
+    @page suika_module Module Suika (Watermelon Game)
+
+    @section suika_overview Vue d'ensemble
+
+    **Suika** (jeu de la pasteque) est un clone du celebre jeu japonais où vous
+    combinez des fruits identiques pour creer des fruits plus gros, jusqu'a obtenir
+    une pasteque. C'est le premier mini-jeu integre au projet Multi-Mini-Games.
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+
+    @section suika_rules Regles du jeu
+
+    @subsection suika_rules_basic Regles de base
+
+    - Des fruits tombent du haut de l'ecran
+    - Deux fruits identiques qui se touchent fusionnent en un fruit plus gros
+    - Le score augmente a chaque fusion
+    - La partie se termine si un fruit depasse la ligne rouge
+
+    @subsection suika_rules_fruits Types de fruits
+
+    | Ordre | Fruit | Taille | Points de fusion |
+    |-------|-------|--------|------------------|
+    | 1 | Cerise | Minuscule | 10 |
+    | 2 | Raisin | Petite | 30 |
+    | 3 | Fraise | Petite | 20 |
+    | 4 | Clementine | Moyenne | 50 |
+    | 5 | Orange | Moyenne | 40 |
+    | 6 | Pomme | Grande | 60 |
+    | 7 | Poire | Grande | 70 |
+    | 8 | Peche | Grande | 80 |
+    | 9 | Ananas | Tres grande | 90 |
+    | 10 | Melon | Enorme | 100 |
+    | 11 | Pasteque | Maximale | 150 |
+
+    @section suika_arch Architecture du code
+
+    @subsection suika_arch_modules Modules
+
+    - **core/game.c**: Logique principale du jeu
+    - **suikaAPI.c**: API publique pour l'integration lobby
+    - **utils/**: Utilitaires (types, configs, globals)
+
+    @subsection suika_arch_flow Flux de donnees
+
+    @verbatim
+    +------------------+
+    |   suikaAPI.c     |
+    |  (API publique)  |
+    +--------+---------+
+             |
+             v
+    +------------------+
+    |   core/game.c    |
+    | (logique jeu)    |
+    +--------+---------+
+             |
+    +--------+--------+--------+
+    |        |        |        |
+    v        v        v        v
+    +------+ +------+ +------+ +----------+
+    |init  | |update| |draw  | |collision |
+    +------+ +------+ +------+ +----------+
+    @endverbatim
+
+    @section suika_physics Systeme de physique
+
+    @subsection suika_physics_impl Implementation
+
+    Le jeu utilise une physique 2D simplifiee pour:
+    - La gravite appliquee aux fruits
+    - Les collisions entre fruits
+    - Les collisions avec les murs du conteneur
+    - La detection de fusion
+
+    @subsection suika_physics_collision Detection de collision
+
+    Les fruits sont representes comme des cercles avec rayon variable:
+
+    @code{.c}
+    typedef struct {
+        Vector2     position;       // Position du centre
+        Vector2     velocity;       // Vitesse actuelle
+        float       radius;         // Rayon (depend du type)
+        float       rotation;       // Angle de rotation
+        float       angularVelocity;// Vitesse angulaire
+        FruitType_Et type;          // Type de fruit
+        bool        isActive;       // Fruit actif dans le jeu
+        bool        isMerging;      // En cours de fusion
+        int         id;             // Identifiant unique
+    } Fruit_St;
+    @endcode
+
+    @subsection suika_physics_merge Systeme de fusion
+
+    La fusion se produit quand:
+    1. Deux fruits du meme type se touchent
+    2. La distance entre leurs centres < somme des rayons
+    3. Les deux fruits sont "dropped" (pas en chute libre)
+
+    @code{.c}
+    void suika_checkMerging(SuikaGame_St* game);
+    @endcode
+
+    @section suika_assets Chargement des assets
+
+    @subsection suika_assets_textures Textures
+
+    Les textures des fruits sont chargees depuis un spritesheet:
+
+    @code{.c}
+    void suika_loadAssets(SuikaGame_St* game);
+    void suika_unloadAssets(SuikaGame_St* game);
+    @endcode
+
+    Le fichier `assets_suika.png` contient tous les sprites des fruits
+    alignes horizontalement.
+
+    @subsection suika_assets_sounds Sons (prevu)
+
+    - Son de drop
+ - Son de fusion
+    - Son de game over
+
+    @section suika_api API publique
+
+    @subsection suika_api_struct Structure du jeu
+
+    @code{.c}
+    typedef struct SuikaGame_St SuikaGame_St;  // Opaque
+
+    typedef struct {
+        unsigned int fps;
+    } SuikaConfigs_St;
+    @endcode
+
+    @subsection suika_api_functions Fonctions
+
+    @code{.c}
+    // Initialisation avec configuration
+    #define suika_initGame(game, ...) \
+        suika_initGame__full((game), (SuikaConfigs_St){ .fps = 60, __VA_ARGS__ })
+
+    Error_Et suika_initGame__full(SuikaGame_St** game_ptr, SuikaConfigs_St configs);
+    Error_Et suika_gameLoop(SuikaGame_St* const game);
+    Error_Et suika_freeGame(SuikaGame_St** game);
+    @endcode
+
+    @section suika_controls Controles
+
+    | Touche | Action |
+    |--------|--------|
+    | Souris G/D | Deplacer le fruit |
+    | Clic gauche | Lacher le fruit |
+    | R | Recommencer |
+    | ESC | Retour au lobby |
+
+    @section suika_files Fichiers importants
+
+    | Fichier | Description |
+    |---------|-------------|
+    | `suika/src/suikaAPI.c` | Implementation de l'API |
+    | `suika/src/core/game.c` | Logique du jeu |
+    | `suika/include/suikaAPI.h` | Header API publique |
+    | `suika/include/core/game.h` | Header logique jeu |
+    | `suika/include/utils/types.h` | Types specifiques Suika |
+    | `suika/assets/assets_suika.png` | Spritesheet des fruits |
+
+    @section suika_internal Structure interne
+
+    @code{.c}
+    struct SuikaGame_St {
+        BaseGame_St     base;               // Base commune (OBLIGATOIRE)
+        Fruit_St        fruits[SUIKA_MAX_FRUITS]; // Liste des fruits actifs
+        int             nextFruitId;        // Compteur ID unique
+        Fruit_St        nextFruit;          // Prochain fruit a spawn
+        float           nextFruitX;         // Position X de drop
+        bool            canDrop;            // Peut lacher un fruit
+        float           dropTimer;          // Temps depuis dernier drop
+        long            score;              // Score actuel
+        long            highScore;          // Meilleur score
+        bool            isGameOver;         // Fin de partie
+        float           gameOverTimer;      // Temps depuis game over
+        float           gravity;            // Acceleration gravite
+    };
+    @endcode
+
+    @author Maxime CHAUVEAU
+    @date Fevrier 2026
+*/

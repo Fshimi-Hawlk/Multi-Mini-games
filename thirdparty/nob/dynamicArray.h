@@ -6,7 +6,7 @@
  * https://github.com/tsoding/nob.h/blob/master/nob.h
  *
  * This is a modified version split into separate headers for personal use.
- * No restrictions apply — you can use, modify, and distribute freely.
+ * No restrictions apply - you can use, modify, and distribute freely.
  */
 
 #ifndef DYNAMIC_ARRAY_H_
@@ -85,6 +85,10 @@ typedef struct { \
     } while (0)
 
 #define da_last(da) (da)->items[(ASSERT((da)->count > 0), (da)->count-1)]
+
+/**
+  *  Remove the i-th item of the dynamic array without conserving order.
+  */
 #define da_remove_unordered(da, i)               \
     do {                                             \
         size_t j = (i);                              \

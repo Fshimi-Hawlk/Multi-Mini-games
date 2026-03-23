@@ -58,5 +58,10 @@ main
 .clangd/
 
 # Other
-template.h
-compile_flags.txt
+docs/doxygen/html
+docs/doxygen/html-*/
+docs/doxygen/src-*/
+docs/doxygen/Doxyfile.*
+
+# Windows Zone Identifier files
+*:Zone.Identifier

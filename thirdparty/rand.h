@@ -145,7 +145,7 @@ void plat_get_entropy(void* data, u32 size) {
 #include <unistd.h>
 
 void plat_get_entropy(void* data, u32 size) {
-    u32 fd = open("/dev/urandom", O_RDONLY);
+    s32 fd = open("/dev/urandom", O_RDONLY);
     if (fd < 0) {
         perror("open");
         exit(EXIT_FAILURE);

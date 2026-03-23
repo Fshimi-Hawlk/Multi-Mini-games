@@ -1,0 +1,30 @@
+/**
+    @page solitaire Solitaire Module
+
+    @section solitaire_overview Overview
+
+    Classic Klondike Solitaire implemented in C with raylib.
+
+    Features:
+    - Standard Klondike rules (draw 1 from stock)
+    - Card drag-and-drop
+    - Auto-complete detection (win condition)
+    - Sound effects on card moves
+    - Returns to lobby via ESC
+
+    @section solitaire_api Public API
+
+    @ref solitaire_initGame__full — allocate and initialize a game instance  
+    @ref solitaire_gameLoop — run one frame (update + render)  
+    @ref solitaire_freeGame — free resources and set pointer to NULL  
+    @ref solitaire_isRunning — check if the game is still active
+
+    @section solitaire_assets Assets
+
+    Card images are in `jeux/solitaire/assets/solitaire/`:
+    - `playingCards.png` — full 52-card sprite sheet
+    - `cardBack_blue3.png` — card back texture
+
+    Sound in `jeux/solitaire/assets/sounds/`:
+    - `solitaire_cardTurn.wav`
+*/
