@@ -23,51 +23,24 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
-// ────────────────────────────────────────────────
-// Asset paths
-// ────────────────────────────────────────────────
+#define WINDOW_TITLE "Template"
+#define WINDOW_WIDTH 1000
+#define WINDOW_HEIGHT 600
 
-#ifndef ASSET_PATH
-/**
-    @brief Root directory for all game assets (textures, sounds, fonts, etc.).
-           Can be overridden at compile time (e.g. -DASSET_PATH="/custom/assets/").
-*/
-#define ASSET_PATH "assets/"
-#endif
+#define APP_BACKGROUND_COLOR (color32) {.r = 18, .g = 18, .b = 18, .a = 255}
 
-#define IMAGES_PATH ASSET_PATH "images/"            ///< Subdirectory containing all image files.
+#define APP_TEXT_FONT_SIZE 32       ///< Base text size
 
-// ────────────────────────────────────────────────
-// Window & display
-// ────────────────────────────────────────────────
+// Game Constants
+#define GRAVITY 1200.0f
+#define MOVE_SPEED 300.0f
+#define JUMP_FORCE 500.0f
+#define GROUND_Y 50
 
-/**
-    @brief Background clear color used at the start of each frame.
-           Dark gray (#121212).
-*/
-#define APP_BACKGROUND_COLOR ((Color){18, 18, 18, 255})
+#define COYOTE_TIME 0.1f
+#define JUMP_BUFFER_TIME 0.1f
+#define MAX_JUMPS 2
 
-/**
-    @brief Port used for server communication.
-*/
-#define SERVER_PORT 8080
-
-/**
-    @brief Action code for game data transmission.
-*/
-#define ACTION_GAME_DATA 5
-
-// ────────────────────────────────────────────────
-// Physics & movement tuning (lobby platformer)
-// ────────────────────────────────────────────────
-
-#define GRAVITY         1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
-#define MOVE_SPEED      300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).
-#define JUMP_FORCE      500.0f      ///< Upward velocity applied on jump (pixels/second).
-#define GROUND_Y        50.0f       ///< Y-position considered "ground level" for initial spawn / debug.
-#define COYOTE_TIME     0.1f        ///< Time window (seconds) after leaving ground where jump is still allowed.
-#define JUMP_BUFFER_TIME 0.1f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
-#define MAX_JUMPS       2           ///< Maximum number of jumps allowed without touching ground (includes ground jump).
-#define FRICTION        2000.0f     ///< Horizontal deceleration rate when no input is given (pixels/second²).
+#define FRICTION 2000
 
 #endif // CONFIGS_H

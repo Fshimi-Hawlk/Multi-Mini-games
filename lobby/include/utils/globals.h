@@ -23,64 +23,25 @@
 #define UTILS_GLOBALS_H
 
 #include "userTypes.h"
+#include "configs.h"
 
-// ────────────────────────────────────────────────
-// Window & display
-// ────────────────────────────────────────────────
+extern Rectangle windowRect;            ///< Main window rectangle (set at init).
+extern Font      appFont;               ///< Primary font for UI text.
+extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
-/**
-    Rectangle describing the full client area of the application window.
-    Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
 
-// ────────────────────────────────────────────────
-// Fonts
-// ────────────────────────────────────────────────
+extern Platform_st platforms[];
+extern int platformCount;
 
-/**
-    @brief Default font used for most UI labels, buttons and in-game text.
-           Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
+extern Texture2D playerTextures[];
+extern int playerTextureCount;
 
-/**
-    @brief Array of pre-loaded fonts at different sizes.
-           Indexed by FontSize_Et values (FONT8 … FONT48).
-           All fonts should use the same typeface for visual consistency.
-*/
-extern Font      fonts[__fontSizeCount];
+extern Rectangle defaultPlayerTextureRect;
 
-// ────────────────────────────────────────────────
-// Lobby world content
-// ────────────────────────────────────────────────
-
-/**
-    brief Static array of platform definitions for the lobby scene.
-          Size is determined by platformCount.
-          @note Consider moving to dynamic allocation or level data file in the future.
-*/
-extern Platform_St platforms[];
-
-/**
-    brief Number of valid entries in the platforms array.
-*/
-extern u32 platformCount;
-
-// ────────────────────────────────────────────────
-// Skin selection UI
-// ────────────────────────────────────────────────
-
-/**
-    brief Screen-space rectangle where the "change skin" button is drawn and clickable.
-          Used both for rendering and input detection.
-*/
 extern Rectangle skinButtonRect;
 
-/**
-    brief Texture used for the skin selection menu toggle button.
-          Usually a gear icon, palette symbol or similar.
-*/
+extern bool isTextureMenuOpen;
+
 extern Texture2D logoSkinButton;
 
 #endif // UTILS_GLOBALS_H

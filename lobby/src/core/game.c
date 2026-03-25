@@ -42,7 +42,6 @@
 */
 
 #include "core/game.h"
-
 #include "utils/utils.h"
 #include "utils/globals.h"
 
@@ -59,7 +58,9 @@ Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
+
+//besion de comprendre les changements entre les deux fonctions a la suite du rebase
+/*void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
 
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
@@ -71,29 +72,53 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
             player->velocity.x -= FRICTION * dt;
             if (player->velocity.x < 0) player->velocity.x = 0;
         } else if (player->velocity.x < 0) {
+        player->velocity.x += FRICTION * dt;
+        if (player->velocity.x > 0) player->velocity.x = 0;
+    }
+}
+
+        
+*/
+
+void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const float dt) {
+
+    // INPUT HORIZONTAL
+    if (IsKeyDown(KEY_A))
+        player->velocity.x = -300;
+    else if (IsKeyDown(KEY_D))
+        player->velocity.x = 300;
+    else {
+        // friction quand aucune touche n'est pressée
+        if (player->velocity.x > 0) {
+            player->velocity.x -= FRICTION * dt;
+            if (player->velocity.x < 0) player->velocity.x = 0;
+        } 
+        else if (player->velocity.x < 0) {
             player->velocity.x += FRICTION * dt;
             if (player->velocity.x > 0) player->velocity.x = 0;
         }
     }
 
-    // Rotate depending on the player's direction
+    // Rotation en fonction de la direction
     if (player->velocity.x > 0) {
-        player->angle += 360 * dt; // Clockwise
-    } else if (player->velocity.x < 0) {
-        player->angle -= 360 * dt; // Anti-clockwise
+        player->angle += 360 * dt; // tourner dans le sens horaire
+    } 
+    else if (player->velocity.x < 0) {
+        player->angle -= 360 * dt; // tourner dans le sens anti-horaire
     }
 
-    // Buffered jump input
+    // INPUT JUMP -> buffer
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    } else if (player->jumpBuffer > 0) {
+    } 
+    else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
 
-    // Gravity
+    // GRAVITÉ
     player->velocity.y += 1200 * dt;
 
-    // Collision
+    // COLLISIONS
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
     player->onGround = false;
@@ -102,26 +127,32 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
         resolveCircleRectCollision(player, platforms[i].rect);
     }
 
-    // Coyote time
+    // COYOTE TIME
     if (player->onGround) {
         player->coyoteTimer = COYOTE_TIME;
         player->nbJumps = 0;
-    } else {
+    }
+    else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0)
             player->coyoteTimer = 0;
     }
 
-    // Jump => buffer + coyote + air jump(s)
+    // JUMP (buffer + coyote + double jump)
     if (player->jumpBuffer > 0) {
-        // Ground/Coyote Jump/Double jump
-        if (player->onGround || player->coyoteTimer > 0 || player->nbJumps < MAX_JUMPS) {
-            // adding: `player->nbJumps >= 1` to the cond makes that player can't
-            // air jump if they haven't already jump previously
-
+        // Jump sol ou coyote
+        if (player->onGround || player->coyoteTimer > 0) {
             player->velocity.y = -500;
             player->onGround = false;
             player->coyoteTimer = 0;
+            player->nbJumps = 1;
+            player->jumpBuffer = 0;
+        }
+        // Double jump
+        // adding: `player->nbJumps >= 1` to the below cond makes that player can't 
+        // air jump if they haven't already jump previously
+        else if (player->nbJumps < MAX_JUMPS) {
+            player->velocity.y = -500;
             player->nbJumps++;
             player->jumpBuffer = 0;
         }
@@ -147,26 +178,27 @@ void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
     if (distSq >= r * r)
         return;
 
-    f32 dist = sqrtf(distSq);
+    float dist = sqrtf(distSq);
     if (dist == 0)
         return;
 
-    f32 penetration = r - dist;
+    float penetration = r - dist;
 
-    f32 nx = dx / dist;
-    f32 ny = dy / dist;
+    float nx = dx / dist;
+    float ny = dy / dist;
 
-    // Position correction
+    // correction position
     player->position.x += nx * penetration;
     player->position.y += ny * penetration;
 
-    // Speed resolution along the dominant axis
+    // résolution vitesse selon l’axe dominant
     if (fabsf(nx) > fabsf(ny)) {
         player->velocity.x = 0;
-    } else {
+    }
+    else {
         player->velocity.y = 0;
 
-        // Ground
+        // sol
         if (ny < 0) {
             player->onGround = true;
             player->nbJumps = 0;
