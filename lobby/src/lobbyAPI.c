@@ -156,18 +156,6 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         choosePlayerTexture(game);
     }
 
-    // Collision check with game zone
-    for (u8 i = 1; i < __miniGameCount; ++i) {
-        if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->miniGameManager.gameHitboxes[i])) {
-            if (!game->miniGameManager.gameHitGracePeriodActive) {
-                game->miniGameManager.currentMiniGame = i;
-                game->miniGameManager.gameHitGracePeriodActive = true;
-            }
-        } else if (game->miniGameManager.gameHitGracePeriodActive) {
-            game->miniGameManager.gameHitGracePeriodActive = false;
-        }
-    }
-
     BeginDrawing(); {
         ClearBackground(RAYWHITE);
 
