@@ -25,7 +25,7 @@ int confirmation_button = STATE_DISABLED;
  * @param color Base color of the element.
  * @return The initialized IaC_button structure.
  */
-IaC_button InitIaCElement(float x, float y, float width, float height, char *text, Color color) {
+IaC_button initIaCElement(float x, float y, float width, float height, char *text, Color color) {
     IaC_button element = {
         .rect = { x, y, width, height },
         .text = malloc(strlen(text) + 1),
@@ -49,7 +49,7 @@ IaC_button InitIaCElement(float x, float y, float width, float height, char *tex
  * @param letterCount Pointer to the current number of characters in the buffer.
  * @return true if the text has been modified during this frame.
  */
-bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount) {
+bool updateIPInput(IaC_button *input, char *buffer, int *letterCount) {
     bool isModified = false;
     Vector2 mousePoint = GetMousePosition();
 
@@ -103,7 +103,7 @@ bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount) {
  * @param canClick Flag indicating if the button can be clicked.
  * @return true if the click is confirmed (button released over the element).
  */
-bool UpdateConnectButton(IaC_button *button, bool canClick) {
+bool updateConnectButton(IaC_button *button, bool canClick) {
     if (!canClick) {
         button->state = STATE_DISABLED;
         return false;
@@ -132,7 +132,7 @@ bool UpdateConnectButton(IaC_button *button, bool canClick) {
  * @param element The IaC_button element to draw.
  * @param currentText The current text to display inside the element.
  */
-void DrawIaCElement(IaC_button element, const char *currentText) {
+void drawIaCElement(IaC_button element, const char *currentText) {
     Color drawColor = element.baseColor;
     Color textColor = BLACK;
     

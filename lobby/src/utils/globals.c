@@ -31,14 +31,9 @@
 */
 
 #include "utils/globals.h"
-#include "APIs/chatAPI.h"
 
-/** @brief Main window rectangle (set at init). */
-Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 /** @brief Array of loaded fonts in increasing sizes. */
-Font      fonts[_fontSizeCount] = {0};
-/** @brief Primary font for UI text. */
-Font      appFont = {0};
+Font lobby_fonts[__fontSizeCount] = {0};
 
 /** @brief Array of platforms in the lobby. */
 Platform_St platforms[] = {
@@ -56,21 +51,7 @@ Platform_St platforms[] = {
 /** @brief Number of platforms in the lobby. */
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-Rectangle skinButtonRect = {
-    .x = WINDOW_WIDTH - 70,
-    .y = WINDOW_HEIGHT / 2.0f - 25,
-    .width = 50,
-    .height = 50
-};
-
-/** @brief Trigger zone for the King For Four game. */
-Rectangle kingForFourZone = {
-    -350, 400 - 60, 100, 60
-};
-
-/** @brief Flag indicating if the texture selection menu is open. */
-bool isTextureMenuOpen = false;
+Rectangle skinButtonRect = {0};
 
 /** @brief Texture for the skin button logo. */
 Texture2D logoSkinButton;
-ChatState_St g_chatState = {0};

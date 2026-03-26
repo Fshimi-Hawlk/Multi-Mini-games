@@ -23,23 +23,16 @@
     in the same process/window. No separate executables are spawned.
 */
 
-#include "APIs/generalAPI.h"
 #include "core/game.h"              // GameScene_Et, general game types
 
-#include "networkInterface.h"
 #include "ui/connection_screen.h"
 
-#include "lobbyAPI.h"
-// #include "APIs/kingForFourAPI.h"
+#include "APIs/kingForFourAPI.h"
 #include "APIs/bingoAPI.h"
+#include "APIs/generalAPI.h"
 
-enum {
-    ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
-    ACTION_CODE_LOBBY_ROOM_QUERY,
-    ACTION_CODE_LOBBY_ROOM_INFO,
-    ACTION_CODE_LOBBY_CHAT,
-    ACTION_CODE_LOBBY_SWITCH_GAME
-};
+s32 networkSocket = 0;
+RUDPConnection_St serverConnection = {0};
 
 Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame) {
     if (nextMiniGame >= __miniGameCount) {
@@ -224,8 +217,6 @@ int main(void) {
 
     initConnectionScreen();
     
-    memset(game->otherPlayers, 0, sizeof(game->otherPlayers));
-
     // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
         f32 dt = GetFrameTime();
@@ -257,22 +248,26 @@ int main(void) {
 
             case GAME_STATE_GAMEPLAY: {
                 if (game->miniGameManager.currentMiniGame == MINI_GAME_LOBBY) {
-                    bool trigger = (checkGameTrigger(&game->player) == 1) || IsKeyPressed(KEY_K);
+                    MiniGame_Et miniGameId = checkGameTrigger(game);
+                    bool trigger = miniGameId != MINI_GAME_LOBBY;
+                    
                     if (trigger && !switch_sent) {
                         RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
                         send(networkSocket, &leave_h, sizeof(leave_h), 0);
 
-                        u8 target_id = 1;
                         RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
                         
                         u8 buffer[sizeof(RUDPHeader_St) + 1];
                         memcpy(buffer, &h, sizeof(h));
-                        buffer[sizeof(h)] = target_id;
+                        buffer[sizeof(h)] = miniGameId;
                         
                         send(networkSocket, buffer, sizeof(buffer), 0);
                         switch_sent = true;
-                        printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", target_id);
+                        printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", miniGameId);
+
+                        switchMinigame(game, miniGameId);
                     }
+
                     if (!trigger) switch_sent = false;
                 }
 

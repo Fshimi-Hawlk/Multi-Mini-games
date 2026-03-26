@@ -111,7 +111,7 @@ void resolveCircleRectCollision(Player_St* player, const Rectangle rect);
     @param player  Player whose textureId will be updated
     @param game    Lobby game state (to close the menu via playerVisuals)
  */
-void choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
+void choosePlayerTexture(LobbyGame_St* const game);
 
 /**
     @brief Toggles the skin selection menu visibility.
@@ -129,6 +129,6 @@ void toggleSkinMenu(LobbyGame_St* const game);
  * @param player Pointer to the player structure.
  * @return 1 if a trigger is activated, 0 otherwise.
  */
-int checkGameTrigger(Player_St* player);
+MiniGame_Et checkGameTrigger(const LobbyGame_St* const game);
 
 #endif // CORE_GAME_H

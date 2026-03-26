@@ -10,19 +10,15 @@
  */
 
 #include "utils/userTypes.h"
+#include "utils/utils.h"
 
 /**
  * @brief Alloue et initialise une nouvelle instance de lobby.
  * 
- * @return void* Pointeur vers la structure LobbyState créée, ou NULL en cas d'échec.
+ * @return void* Pointeur vers la structure LobbyGame_St créée, ou NULL en cas d'échec.
  */
 void* lobby_create(void) {
-    LobbyGame_St* state = malloc(sizeof(LobbyGame_St));
-    if (state) {
-        memset(state, 0, sizeof(LobbyGame_St));
-    }
-
-    return state;
+    return calloc(1, sizeof(LobbyGame_St));
 }
 
 /**
@@ -30,7 +26,7 @@ void* lobby_create(void) {
  * 
  * Dans le lobby, les actions sont généralement diffusées à tous les autres clients.
  * 
- * @param state Pointeur vers l'état du lobby (LobbyState).
+ * @param state Pointeur vers l'état du lobby (LobbyGame_St).
  * @param player_id Index du joueur émetteur.
  * @param action Type d'action reçu.
  * @param payload Pointeur vers les données brutes.
@@ -38,7 +34,7 @@ void* lobby_create(void) {
  * @param broadcast Fonction de rappel pour diffuser le message.
  */
 void lobby_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    (void)state;
+    UNUSED(state);
     // On ne regarde même pas ce qu'il y a dedans. On diffuse.
     broadcast(0, player_id, action, payload, len);
 }
@@ -50,9 +46,9 @@ void lobby_on_action(void *state, int player_id, u8 action, const void *payload,
  * @param player_id Index du joueur qui se déconnecte.
  */
 void lobby_on_player_leave(void *state, int player_id) {
-    LobbyState *s = (LobbyState*)state;
+    LobbyGame_St* game = (LobbyGame_St*) state;
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        memset(&s->players[player_id], 0, sizeof(Player_St));
+        memset(&game->otherPlayers[player_id], 0, sizeof(Player_St));
     }
 }
 
@@ -62,7 +58,7 @@ void lobby_on_player_leave(void *state, int player_id) {
  * @param state Pointeur vers l'état du lobby.
  */
 void lobby_tick(void *state) {
-    (void)state; 
+    UNUSED(state); 
 }
 
 /**
@@ -82,10 +78,10 @@ void lobby_destroy(void *state) {
  * Expose les fonctions de gestion du cycle de vie et de traitement des messages.
  */
 GameServerInterface_St lobby_module = {
-    .game_name = "lobby",
-    .create_instance = lobby_create,
-    .on_action = lobby_on_action,
-    .on_tick = lobby_tick,
-    .destroy_instance = lobby_destroy,
-    .on_player_leave = lobby_on_player_leave 
+    .game_name          = "lobby",
+    .create_instance    = lobby_create,
+    .on_action          = lobby_on_action,
+    .on_tick            = lobby_tick,
+    .destroy_instance   = lobby_destroy,
+    .on_player_leave    = lobby_on_player_leave 
 };

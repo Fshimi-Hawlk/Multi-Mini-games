@@ -47,7 +47,7 @@
     @param game      Pointer to the full lobby game state (provides textures and visuals)
     @param player    Pointer to the player state (position, radius, textureId, angle, etc.)
 */
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player);
+void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player);
 
 /**
     @brief Draws all static platforms in the lobby world.

@@ -17,8 +17,13 @@
 #ifndef LOBBY_API_H
 #define LOBBY_API_H
 
-#include "utils/userTypes.h"
 #include "APIs/generalAPI.h"
+
+/**
+    @struct LobbyGame_St
+    @brief Opaque forward declaration. The internal definition is private.
+*/
+typedef struct LobbyGame_St LobbyGame_St;
 
 /**
     @brief Configuration options passed to the initialization function.
