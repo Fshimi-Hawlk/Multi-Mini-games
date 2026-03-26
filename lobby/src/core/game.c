@@ -176,16 +176,16 @@ void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
 }
 
 
-void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
+void choosePlayerTexture(LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
 
         for (int i = 0; i < __playerTextureCount; i++) {
             destRect.x = 20 + i * 60;
-            if (!player->unlockedTextures[i]) continue;
+            if (!game->player.unlockedTextures[i]) continue;
             if (CheckCollisionPointRec(mousePos, destRect)) {
-                player->textureId = i;
+                game->player.textureId = i;
                 game->playerVisuals.isTextureMenuOpen = false;
                 break;
             }
@@ -219,12 +219,12 @@ void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
         return;
     }
 
-    if (!player->unlockedTextures[selectedId]) {
+    if (!game->player.unlockedTextures[selectedId]) {
         /// TODO: Display Warning Message that the texture is locked
         return;
     }
 
-    player->textureId = selectedId;
+    game->player.textureId = selectedId;
     game->playerVisuals.isTextureMenuOpen = false;
 }
 
@@ -247,9 +247,13 @@ void toggleSkinMenu(LobbyGame_St* const game) {
  * @param player Pointer to the player structure.
  * @return 1 if King For Four is triggered, 0 otherwise.
  */
-int checkGameTrigger(Player_St* player) {
-    if (CheckCollisionCircleRec(player->position, player->radius, kingForFourZone)) {
-        return 1; 
+MiniGame_Et checkGameTrigger(const LobbyGame_St* const game) {
+    for (u8 i = 1; i < __miniGameCount; ++i) {
+        bool hasCollided = CheckCollisionCircleRec(game->player.position, game->player.radius, game->miniGameManager.gameHitboxes[i]);
+        if (hasCollided && IsKeyPressed(KEY_E)) {
+            return i;
+        }
     }
-    return 0; 
+
+    return MINI_GAME_LOBBY;
 }

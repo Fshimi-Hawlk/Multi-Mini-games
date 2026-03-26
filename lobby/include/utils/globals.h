@@ -24,32 +24,14 @@
 
 #include "userTypes.h"
 
-// ────────────────────────────────────────────────
-// Window & display
-// ────────────────────────────────────────────────
-
-/**
-    Rectangle describing the full client area of the application window.
-    Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
-
-// ────────────────────────────────────────────────
-// Fonts
-// ────────────────────────────────────────────────
-
-/**
-    @brief Default font used for most UI labels, buttons and in-game text.
-           Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
-
 /**
     @brief Array of pre-loaded fonts at different sizes.
            Indexed by FontSize_Et values (FONT8 … FONT48).
            All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[__fontSizeCount];
+extern Font lobby_fonts[__fontSizeCount];
+
+extern LobbyGame_St lobby_game;
 
 // ────────────────────────────────────────────────
 // Lobby world content

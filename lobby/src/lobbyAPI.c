@@ -45,7 +45,6 @@
     @see `APIs/generalAPI.h` for `Error_Et`
 */
 
-#include "APIs/generalAPI.h"
 #include "core/game.h"
 
 #include "ui/app.h"
@@ -55,7 +54,6 @@
 
 #include "lobbyAPI.h"
 #include "systemSettings.h"
-#include "utils/userTypes.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error;
@@ -79,6 +77,11 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     LobbyGame_St* gameRef = *game;
     memset(gameRef, 0, sizeof(*gameRef));
 
+    skinButtonRect.x = systemSettings.video.width - 70;
+    skinButtonRect.y = systemSettings.video.height / 2.0f - 25;
+    skinButtonRect.width = 50;
+    skinButtonRect.height = 50;
+
     /** Hitbox that triggers the Tetris mini-game when player collides */
     Rectangle gameHitboxes[__miniGameCount] = { 
         [MINI_GAME_BINGO] = {
@@ -93,9 +96,6 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     /** Current active scene (lobby or one of the mini-games) */
     gameRef->miniGameManager.currentMiniGame = MINI_GAME_LOBBY;
-    
-    /** Flag: game needs initialization on next frame */
-    gameRef->miniGameManager.needGameInit = false;
     
     /** Player controlled by the user in the lobby */
     gameRef->player = (Player_St) {
@@ -153,7 +153,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     toggleSkinMenu(game);
 
     if (game->playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&game->player, game);
+        choosePlayerTexture(game);
     }
 
     // Collision check with game zone
@@ -173,7 +173,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
 
         BeginMode2D(game->cam); {
             DrawCircle(0, 0, 10, RED);          // Debug origin marker
-            drawPlayer(game, &game->player);
+            drawPlayer(&game->playerVisuals, &game->player);
             drawPlatforms(platforms, platformCount);
 
             for (u8 i = 1; i < __miniGameCount; ++i) {
@@ -199,10 +199,8 @@ Error_Et lobby_freeGame(LobbyGame_St** gameRef) {
     LobbyGame_St* game = *gameRef;
 
     for (u8 i = 1; i < __miniGameCount; ++i) {
-        if (game->miniGameManager.miniGames[i] == NULL) continue;
-        BaseGame_St** base = &game->miniGameManager.miniGames[i];
-        game->miniGameManager.miniGames[i]->freeGame(base);
-        game->miniGameManager.miniGames[i] = NULL;
+        BaseGame_St* base = &game->miniGameManager.miniGames[i];
+        game->miniGameManager.miniGames[i].freeGame(base);
     }
 
     for (u32 i = 1; i < __playerTextureCount; ++i) {

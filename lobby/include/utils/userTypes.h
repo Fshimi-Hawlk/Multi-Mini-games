@@ -27,8 +27,11 @@
 #define USER_TYPES_H
 
 #include "common.h"
+
 #include "APIs/generalAPI.h"
+#include "APIs/chatAPI.h"
 #include "networkInterface.h"
+#include "lobbyAPI.h"
 
 typedef enum {
     GAME_STATE_GAMEPLAY,
@@ -52,6 +55,14 @@ typedef enum {
     __playerTextureCount,
 } PlayerTextureId_Et;
 
+enum {
+    ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
+    ACTION_CODE_LOBBY_ROOM_QUERY,
+    ACTION_CODE_LOBBY_ROOM_INFO,
+    ACTION_CODE_LOBBY_CHAT,
+    ACTION_CODE_LOBBY_SWITCH_GAME
+};
+
 /**
     @brief Visual / rendering related state of the player character.
 
@@ -70,6 +81,8 @@ typedef struct {
     Most fields are directly used / modified by the player controller system.
 */
 typedef struct {
+    bool    active;
+
     Vector2 position;                           ///< Center position of the player (world coordinates)
     float   radius;                             ///< Collision radius (circle-based collision)
 
@@ -107,21 +120,21 @@ typedef struct {
     BaseGame_St             miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
     Rectangle               gameHitboxes[__miniGameCount];          ///< Screen-space rectangles where touching/standing activates a mini-game
     MiniGame_Et             currentMiniGame;                        ///< Which mini-game / view is currently active
-    bool                    gameHitGracePeriodActive;               ///< Prevents instant re-triggering when leaving/entering hitbox
 } MiniGameManager_St;
 
 /**
     @brief Complete state of the lobby / main hub world.
 */
-typedef struct {
+struct LobbyGame_St{
     BaseGame_St         base;
     GameState_Et        currentState;               ///< Current state of the game.
     MiniGameManager_St  miniGameManager;            ///< Manages transitions to/from mini-games
 
+    Chat_St             chat;                       ///< Game chat
     Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.
     Player_St           player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state
     Camera2D            cam;                        ///< 2D camera following the player
-} LobbyGame_St;
+};
 
 #endif // USER_TYPES_H

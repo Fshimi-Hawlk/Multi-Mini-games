@@ -33,15 +33,15 @@
 #include "core/game.h"
 #include "utils/utils.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
+void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
         DrawCircleV(player->position, player->radius, BLUE);
     } else {
         DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            getPlayerCollisionBox(&game->player),
-            getPlayerCenter(&game->player),
+            playerVisuals->textures[player->textureId],
+            getTextureRec(playerVisuals->textures[player->textureId]),
+            getPlayerCollisionBox(player),
+            getPlayerCenter(player),
             player->angle,
             WHITE
         );
@@ -57,8 +57,4 @@ void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms) {
     for (int i = 0; i < nbPlatforms; i++) {
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
     }
-    
-    // Zone de trigger pour le jeu
-    DrawRectangleLinesEx(kingForFourZone, 2, GOLD);
-    DrawText("KING FOR FOUR", kingForFourZone.x + 5, kingForFourZone.y + 20, 10, GOLD);
 }

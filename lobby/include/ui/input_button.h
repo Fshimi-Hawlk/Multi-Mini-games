@@ -47,7 +47,7 @@ typedef struct {
  * @param color Base color of the element.
  * @return The initialized IaC_button structure.
  */
-IaC_button InitIaCElement(float x, float y, float width, float height, char *text, Color color);
+IaC_button initIaCElement(float x, float y, float width, float height, char *text, Color color);
 
 /**
  * @brief Handles text input for the IP field.
@@ -56,7 +56,7 @@ IaC_button InitIaCElement(float x, float y, float width, float height, char *tex
  * @param letterCount Pointer to the current number of characters in the buffer.
  * @return true if the text has been modified, false otherwise.
  */
-bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount);
+bool updateIPInput(IaC_button *input, char *buffer, int *letterCount);
 
 /**
  * @brief Handles interaction with the connect button.
@@ -64,13 +64,13 @@ bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount);
  * @param canClick Flag indicating if the button can be clicked.
  * @return true if the button is clicked and the IP is valid.
  */
-bool UpdateConnectButton(IaC_button *button, bool canClick);
+bool updateConnectButton(IaC_button *button, bool canClick);
 
 /**
  * @brief Renders the IaC element to the screen.
  * @param element The IaC_button element to draw.
  * @param currentText The current text to display inside the element.
  */
-void DrawIaCElement(IaC_button element, const char *currentText);
+void drawIaCElement(IaC_button element, const char *currentText);
 
 #endif
