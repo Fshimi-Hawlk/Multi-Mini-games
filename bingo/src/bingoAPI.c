@@ -253,10 +253,10 @@ Error_Et bingo_gameLoop(BingoGame_St* const game) {
 
                 char text[2] = {0};
                 sprintf(text, "%.0f", game->currentCall.timer / 2);
-                f32Vector2 textSize = MeasureTextEx(fonts[FONT48], text, 128, 0);
+                f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
 
                 DrawTextEx(
-                    fonts[FONT48], text,
+                    bingo_fonts[FONT48], text,
                     Vector2Subtract(game->layout.windowCenter, Vector2Scale(textSize, 0.5)), 
                     128, 0, BLACK
                 );
@@ -277,7 +277,7 @@ Error_Et bingo_gameLoop(BingoGame_St* const game) {
                     .y = game->layout.windowCenter.y - fontSize / 2.0f,
                 };
 
-                DrawTextEx(fonts[FONT48], game->progress.resultMessage, textPos, fontSize, 0, col);
+                DrawTextEx(bingo_fonts[FONT48], game->progress.resultMessage, textPos, fontSize, 0, col);
             } break;
         }
 

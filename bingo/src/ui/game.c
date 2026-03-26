@@ -27,13 +27,13 @@
 void bingo_drawChoiceCards(const Layout_St* layout) {
     const char* title = "Choose your bingo card";
     uint titleSize = 32;
-    f32Vector2 textSize = MeasureTextEx(fonts[FONT32], title, titleSize, 0);
+    f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], title, titleSize, 0);
     f32Vector2 textPos = {
         layout->windowCenter.x - textSize.x / 2.0f,
         layout->choiceCards[0].innerRect.y - 60.0f
     };
 
-    DrawTextEx(fonts[FONT32], title, textPos, titleSize, 0, BLACK);
+    DrawTextEx(bingo_fonts[FONT32], title, textPos, titleSize, 0, BLACK);
     f32 roundness = 0.05f;
 
     for (uint idx = 0; idx < 12; ++idx) {
@@ -50,10 +50,10 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
         f32 cellW = innerCard.width / 5.0f;
 
         for (u8 i = 0; i < 5; ++i) {
-            f32Vector2 textSize = MeasureTextEx(fonts[FONT14], LETTERS[i], 14, 0);
+            f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT14], LETTERS[i], 14, 0);
             f32 lx = innerCard.x + cellW * (i + 0.5f) - textSize.x / 2.0f;
             f32 ly = innerCard.y + cellW / 7.5;
-            DrawTextEx(fonts[FONT14], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
+            DrawTextEx(bingo_fonts[FONT14], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
         }
 
         for (u8 row = 0; row < 5; ++row) {
@@ -75,10 +75,10 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
                     text = TextFormat("%u", card->values[row][col]);
                 }
 
-                f32Vector2 textSize = MeasureTextEx(fonts[FONT32], text, textHeight, 0);
+                f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
 
                 DrawTextEx(
-                    fonts[FONT32], text, 
+                    bingo_fonts[FONT32], text, 
                     (Vector2) {
                         .x = cell.x + (cell.width - textSize.x) / 2.0f, 
                         .y = cell.y + (cell.height - textSize.y) / 2.0f
@@ -96,13 +96,13 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
 
     // Column letters
     for (u8 i = 0; i < 5; ++i) {
-        f32Vector2 textSize = MeasureTextEx(fonts[FONT32], LETTERS[i], 32, 0);
+        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], LETTERS[i], 32, 0);
         f32Vector2 pos = {
             .x = layout->cardRectsRect.x + layout->cardRectsRect.width * (i + 0.5f) - textSize.x / 2.0f,
             .y = layout->cardRectsRect.y - layout->cardRectsRect.height / 1.5f
         };
 
-        DrawTextEx(fonts[FONT32],LETTERS[i], pos, 32, 0, BLACK);
+        DrawTextEx(bingo_fonts[FONT32],LETTERS[i], pos, 32, 0, BLACK);
     }
 
     // Squares
@@ -137,7 +137,7 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
                             .y = innerRect.y + layout->cardRectsRect.height / 2.0f - 16, 
                         };
 
-                        DrawTextEx(fonts[FONT32], "X", textPos, 32, 0, WHITE);
+                        DrawTextEx(bingo_fonts[FONT32], "X", textPos, 32, 0, WHITE);
                     }
                 }
 
@@ -160,12 +160,12 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
                     text = TextFormat("%u", player->numbers[r][c]);
                 }
 
-                f32Vector2 textSize = MeasureTextEx(fonts[FONT32], text, textHeight, 0);
+                f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
                 f32Vector2 textPos = {
                     .x = rect.x + (layout->cardRectsRect.width - textSize.x) / 2.0f,
                     .y = rect.y + (layout->cardRectsRect.height - textSize.y) / 2.0f,
                 };
-                DrawTextEx(fonts[FONT32], text, textPos, textSize.y, 0, BLACK);
+                DrawTextEx(bingo_fonts[FONT32], text, textPos, textSize.y, 0, BLACK);
             }
         }
     }

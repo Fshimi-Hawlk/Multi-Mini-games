@@ -27,27 +27,27 @@ void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const ball
         f32 fontSize = 32;
         char buf[16];
         sprintf(buf, "%.2f", balls->graceDelay * ((balls->showDelay + balls->graceDelay) - currentCall->timer));
-        f32Vector2 textSize = MeasureTextEx(fonts[FONT48], buf, fontSize, 0);
+        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], buf, fontSize, 0);
         f32Vector2 textPos = {
             .x = layout->windowCenter.x - textSize.x / 2.0f,
             .y = layout->cardRect.y + layout->cardRect.height + fontSize * 1.5f,
         };
 
-        DrawTextEx(fonts[FONT48], buf, textPos, fontSize, 0, BLACK);
+        DrawTextEx(bingo_fonts[FONT48], buf, textPos, fontSize, 0, BLACK);
     }
 
     // Fading ball call
     if (currentCall->timer <= balls->showDelay) {
         f32 fontSize = 48;
         
-        f32Vector2 textSize = MeasureTextEx(fonts[FONT48], currentCall->displayedText, 0, fontSize);
+        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], currentCall->displayedText, 0, fontSize);
         f32Vector2 textPos = {
             .x = layout->windowCenter.x - textSize.x / 4.0f,
             .y = layout->cardRect.y - fontSize * 1.5f,
         };
 
         DrawTextEx(
-            fonts[FONT48],
+            bingo_fonts[FONT48],
             currentCall->displayedText,
             textPos, fontSize, 0,
             Fade(BLACK, 
