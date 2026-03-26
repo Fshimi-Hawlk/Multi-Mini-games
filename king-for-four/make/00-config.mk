@@ -151,7 +151,7 @@ CFLAGS += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
 MAIN_NAME ?= main
-LIB_NAME := lobby
+LIB_NAME := kingforfour
 
 SRC_DIR := src
 TEST_DIR := tests
