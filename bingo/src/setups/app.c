@@ -11,8 +11,8 @@
 #include "setups/app.h"
 
 bool loadFontIdForSize(u64 fontId, f32 fontSize) {
-    fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
-        if (!IsFontValid(fonts[fontId])) {
+    bingo_fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
+        if (!IsFontValid(bingo_fonts[fontId])) {
             log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
             return false;
         }
@@ -34,7 +34,7 @@ bool initFonts(void) {
 
 void freeFonts(void) {
     for (u64 fontId = 0; fontId < __fontSizeCount; fontId++) {
-        UnloadFont(fonts[fontId]);
+        UnloadFont(bingo_fonts[fontId]);
     }
 }
 
@@ -49,7 +49,7 @@ bool initApp(void) {
 #endif
 
     if (!initFonts()) {
-        log_warn("Couldn't initialize every fonts");
+        log_warn("Couldn't initialize every bingo_fonts");
     };
 
     return true;
