@@ -1,6 +1,6 @@
 /**
     @file ui/editor.h
-    @author Grok (assisted)
+    @author Fshimi-Hawlk
     @date 2026-03-27
     @brief Public interface for the lobby level editor overlay.
 
