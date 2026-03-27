@@ -1,6 +1,6 @@
 /**
     @file ui/editorUtils.h
-    @author Grok (assisted)
+    @author Fshimi-Hawlk
     @date 2026-03-27
     @brief Pure logic utilities used only by the level editor.
 
