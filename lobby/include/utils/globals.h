@@ -38,16 +38,13 @@ extern LobbyGame_St lobby_game;
 // ────────────────────────────────────────────────
 
 /**
-    brief Static array of platform definitions for the lobby scene.
+    @brief Static array of platform definitions for the lobby scene.
           Size is determined by platformCount.
           @note Consider moving to dynamic allocation or level data file in the future.
 */
-extern Platform_St platforms[];
+extern TerrainVec_St terrains;
 
-/**
-    brief Number of valid entries in the platforms array.
-*/
-extern u32 platformCount;
+extern GameInteractionZone_St gameInteractionZones[__miniGameCount];
 
 // ────────────────────────────────────────────────
 // Skin selection UI

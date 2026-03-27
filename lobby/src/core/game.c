@@ -59,131 +59,178 @@ Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
+/**
+    @brief Returns whether a terrain type should participate in collision.
+*/
+static bool isTerrainSolid(TerrainType_Et type) {
+    switch (type) {
+        case TERRAIN_NORMAL:
+        case TERRAIN_WOOD:
+        case TERRAIN_STONE:
+        case TERRAIN_ICE:
+        case TERRAIN_BOUNCY:
+        case TERRAIN_MOVING_H:
+        case TERRAIN_MOVING_V:
+            return true;
 
-    // Horizontal Input
-    if (IsKeyDown(KEY_A)) {
-        player->velocity.x = -300;
-    } else if (IsKeyDown(KEY_D)) {
-        player->velocity.x = 300;
+        default:
+            return false;
+    }
+}
+
+/**
+    @brief Resolves collision between the circular player and one rectangular terrain piece.
+           Also applies special effects for certain terrain types on landing.
+*/
+static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain)
+{
+    if (!isTerrainSolid(currentTerrain->type)) {
+        return;
+    }
+
+    // Find closest point on the rectangle to the circle center
+    f32 closestX = Clamp(player->position.x, currentTerrain->rect.x, currentTerrain->rect.x + currentTerrain->rect.width);
+    f32 closestY = Clamp(player->position.y, currentTerrain->rect.y, currentTerrain->rect.y + currentTerrain->rect.height);
+
+    f32 horizontalDelta = player->position.x - closestX;
+    f32 verticalDelta   = player->position.y - closestY;
+
+    f32 distanceSquared = horizontalDelta * horizontalDelta + verticalDelta * verticalDelta;
+    f32 radius          = player->radius;
+
+    if (distanceSquared >= radius * radius) {
+        return;
+    }
+
+    f32 distance = sqrtf(distanceSquared);
+    if (distance == 0.0f) {
+        return;
+    }
+
+    f32 penetration = radius - distance;
+
+    f32 normalX = horizontalDelta / distance;
+    f32 normalY = verticalDelta   / distance;
+
+    // Position correction
+    player->position.x += normalX * penetration;
+    player->position.y += normalY * penetration;
+
+    // Velocity resolution
+    if (fabsf(normalX) > fabsf(normalY)) {
+        player->velocity.x = 0.0f;
     } else {
-        if (player->velocity.x > 0) {
-            player->velocity.x -= FRICTION * dt;
-            if (player->velocity.x < 0) player->velocity.x = 0;
-        } else if (player->velocity.x < 0) {
-            player->velocity.x += FRICTION * dt;
-            if (player->velocity.x > 0) player->velocity.x = 0;
-        }
-    }
+        player->velocity.y = 0.0f;
 
-    // Rotate depending on the player's direction
-    if (player->velocity.x > 0) {
-        player->angle += 360 * dt; // Clockwise
-    } else if (player->velocity.x < 0) {
-        player->angle -= 360 * dt; // Anti-clockwise
-    }
+        // Landing on ground
+        if (normalY < 0.0f) {
+            player->onGround = true;
+            player->nbJumps  = 0;
+            player->coyoteTimer = COYOTE_TIME;
 
-    // Buffered jump input
-    if (IsKeyPressed(KEY_SPACE)) {
-        player->jumpBuffer = JUMP_BUFFER_TIME;
-    } else if (player->jumpBuffer > 0) {
-        player->jumpBuffer = max(0, player->jumpBuffer - dt);
-    }
+            // Special terrain effects on landing
+            switch (currentTerrain->type) {
+                case TERRAIN_BOUNCY:
+                    player->velocity.y = -700.0f;
+                    player->onGround   = false;
+                    break;
 
-    // Gravity
-    player->velocity.y += 1200 * dt;
+                case TERRAIN_ICE:
+                    // TODO: reduce friction (can be done via player state)
+                    break;
 
-    // Collision
-    player->position.x += player->velocity.x * dt;
-    player->position.y += player->velocity.y * dt;
-    player->onGround = false;
-
-    for (int i = 0; i < nbPlatforms; i++) {
-        resolveCircleRectCollision(player, platforms[i].rect);
-    }
-
-    // Coyote time
-    if (player->onGround) {
-        player->coyoteTimer = COYOTE_TIME;
-        player->nbJumps = 0;
-    } else {
-        player->coyoteTimer -= dt;
-        if (player->coyoteTimer < 0)
-            player->coyoteTimer = 0;
-    }
-
-    // Jump => buffer + coyote + air jump(s)
-    if (player->jumpBuffer > 0) {
-        // Ground/Coyote Jump/Double jump
-        if (player->onGround || player->coyoteTimer > 0 || player->nbJumps < MAX_JUMPS) {
-            // adding: `player->nbJumps >= 1` to the cond makes that player can't
-            // air jump if they haven't already jump previously
-
-            player->velocity.y = -500;
-            player->onGround = false;
-            player->coyoteTimer = 0;
-            player->nbJumps++;
-            player->jumpBuffer = 0;
+                default:
+                    break;
+            }
         }
     }
 }
 
 /**
- * @brief Resolves collision between a circular player and a rectangular obstacle.
- * @param player Pointer to the player structure.
- * @param rect The rectangle to check collision against.
- */
-void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
-    // Search the position that is closest to the circle on the rectangle
-    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
-
-    f32 dx = player->position.x - closestX;
-    f32 dy = player->position.y - closestY;
-
-    f32 distSq = dx*dx + dy*dy;
-    f32 r = player->radius;
-
-    if (distSq >= r * r)
-        return;
-
-    f32 dist = sqrtf(distSq);
-    if (dist == 0)
-        return;
-
-    f32 penetration = r - dist;
-
-    f32 nx = dx / dist;
-    f32 ny = dy / dist;
-
-    // Position correction
-    player->position.x += nx * penetration;
-    player->position.y += ny * penetration;
-
-    // Speed resolution along the dominant axis
-    if (fabsf(nx) > fabsf(ny)) {
-        player->velocity.x = 0;
-    } else {
-        player->velocity.y = 0;
-
-        // Ground
-        if (ny < 0) {
-            player->onGround = true;
-            player->nbJumps = 0;
-            player->coyoteTimer = COYOTE_TIME;
-        }
+    @brief Resolves all collisions between player and lobby terrains using circle collision.
+*/
+static void resolvePlayerVsAllTerrains(Player_St* player)
+{
+    for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
+        const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
+        resolvePlayerCircleVsTerrain(player, currentTerrain);
     }
 }
 
+void updatePlayer(Player_St* const player, const f32 dt) {
+    // Horizontal input + friction
+    if (IsKeyDown(KEY_A)) {
+        player->velocity.x = -300.0f;
+    } else if (IsKeyDown(KEY_D)) {
+        player->velocity.x = 300.0f;
+    } else {
+        f32 friction = FRICTION;
+
+        if (player->velocity.x > 0.0f) {
+            player->velocity.x -= friction * dt;
+            if (player->velocity.x < 0.0f) player->velocity.x = 0.0f;
+        } else if (player->velocity.x < 0.0f) {
+            player->velocity.x += friction * dt;
+            if (player->velocity.x > 0.0f) player->velocity.x = 0.0f;
+        }
+    }
+
+    // Rotation based on horizontal speed
+    if (player->velocity.x > 0.0f) {
+        player->angle += 360.0f * dt;
+    } else if (player->velocity.x < 0.0f) {
+        player->angle -= 360.0f * dt;
+    }
+
+    // Jump buffering
+    if (IsKeyPressed(KEY_SPACE)) {
+        player->jumpBuffer = JUMP_BUFFER_TIME;
+    } else if (player->jumpBuffer > 0.0f) {
+        player->jumpBuffer = max(0.0f, player->jumpBuffer - dt);
+    }
+
+    // Gravity
+    player->velocity.y += 1200.0f * dt;
+
+    // Apply movement
+    player->position.x += player->velocity.x * dt;
+    player->position.y += player->velocity.y * dt;
+
+    player->onGround = false;
+
+    // Collision resolution (circle vs all solid terrains)
+    resolvePlayerVsAllTerrains(player);
+
+    // Coyote time & jump reset
+    if (player->onGround) {
+        player->coyoteTimer = COYOTE_TIME;
+        player->nbJumps     = 0;
+    } else {
+        player->coyoteTimer -= dt;
+        if (player->coyoteTimer < 0.0f) player->coyoteTimer = 0.0f;
+    }
+
+    // Jump logic
+    if (player->jumpBuffer > 0.0f) {
+        bool canJump = player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < MAX_JUMPS;
+
+        if (canJump) {
+            player->velocity.y  = -500.0f;
+            player->onGround    = false;
+            player->coyoteTimer = 0.0f;
+            player->nbJumps++;
+            player->jumpBuffer  = 0.0f;
+        }
+    }
+}
 
 void choosePlayerTexture(LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
-
-        for (int i = 0; i < __playerTextureCount; i++) {
+        for (u32 i = 0; i < __playerTextureCount; ++i) {
             destRect.x = 20 + i * 60;
-            if (!game->player.unlockedTextures[i]) continue;
+            if (!game->player.unlockedTextures[i]) continue ;
             if (CheckCollisionPointRec(mousePos, destRect)) {
                 game->player.textureId = i;
                 game->playerVisuals.isTextureMenuOpen = false;
@@ -215,12 +262,12 @@ void choosePlayerTexture(LobbyGame_St* const game) {
     }
 
     if (selectedId == __playerTextureCount) {
-        /// TODO: Display Error Message if necessary
+        // TODO: Display Error Message if necessary
         return;
     }
 
     if (!game->player.unlockedTextures[selectedId]) {
-        /// TODO: Display Warning Message that the texture is locked
+        // TODO: Display Warning Message that the texture is locked
         return;
     }
 
@@ -247,9 +294,14 @@ void toggleSkinMenu(LobbyGame_St* const game) {
  * @param player Pointer to the player structure.
  * @return 1 if King For Four is triggered, 0 otherwise.
  */
-MiniGame_Et checkGameTrigger(const LobbyGame_St* const game) {
+MiniGame_Et checkGameTrigger(void) {
     for (u8 i = 1; i < __miniGameCount; ++i) {
-        bool hasCollided = CheckCollisionCircleRec(game->player.position, game->player.radius, game->miniGameManager.gameHitboxes[i]);
+        bool hasCollided = CheckCollisionCircleRec(
+            lobby_game.player.position, 
+            lobby_game.player.radius, 
+            gameInteractionZones[i].hitbox
+        );
+        
         if (hasCollided && IsKeyPressed(KEY_E)) {
             return i;
         }

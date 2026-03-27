@@ -8,15 +8,12 @@
 #include "core/game.h"
 #include "core/chat.h"
 
-#include "networkInterface.h"
 #include "ui/game.h"
 #include "ui/app.h"
 
 #include "utils/globals.h"
 
 #include "systemSettings.h"
-#include "lobbyAPI.h"
-#include "APIs/generalAPI.h"
 
 LobbyGame_St lobby_game = {0};
 
@@ -29,31 +26,16 @@ bool firstFrame = true;
 void lobby_init(void) {
     log_debug("[LOBBY]: Initializing client lobby");
     
-    Error_Et error;
+    Error_Et error = OK;
     memset(&lobby_game, 0, sizeof(lobby_game));
 
     systemSettings.video.height = DEFAULT_VIDEO_SETTING_HEIGHT;
     systemSettings.video.width = DEFAULT_VIDEO_SETTING_WIDTH;
     applySystemSettings();
 
-    /** Hitbox that triggers the Tetris mini-lobby_game when player collides */
-    Rectangle gameHitboxes[__miniGameCount] = { 
-        [MINI_GAME_BINGO] = {
-            .x      = 600,
-            .y      = -150,
-            .width  = 75,
-            .height = 75
-        },
-    };
-
-    memcpy(lobby_game.miniGameManager.gameHitboxes, gameHitboxes, sizeof(gameHitboxes));
-
-    /** Current active scene (lobby or one of the mini-games) */
-    lobby_game.miniGameManager.currentMiniGame = MINI_GAME_LOBBY;
-    
     /** Player controlled by the user in the lobby */
     lobby_game.player = (Player_St) {
-        .position   = {0, 250},
+        .position   = {0, 0},
         .radius     = 20,
         .coyoteTime = 0.1f,
         .coyoteTimer= 0.1f,
@@ -222,16 +204,15 @@ void lobby_update(float dt) {
  * @brief Renders the lobby module (platforms, players, UI).
  */
 void lobby_draw(void) {
-    static f32 lobbyTextXPos;
-
-    BeginMode2D(lobby_game.cam);
-        drawPlatforms(platforms, platformCount);
+    BeginMode2D(lobby_game.cam); {
+        drawLobbyTerrains();
         drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
-
+        
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (!lobby_game.otherPlayers[i].active) continue;
             drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
         }
+    } EndMode2D();
 
         for (u8 i = 1; i < __miniGameCount; ++i) {
             DrawRectangleRec(lobby_game.miniGameManager.gameHitboxes[i], RED); // Debug hitbox
@@ -250,7 +231,7 @@ void lobby_draw(void) {
 }
 
 /** @brief Global definition of the Lobby module. */
-GameClientInterface_St LobbyModule = {
+GameClientInterface_St lobbyClientInterface = {
     .id         = MINI_GAME_LOBBY,
     .name       = "Lobby",
     .init       = lobby_init,

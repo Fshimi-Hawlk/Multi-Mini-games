@@ -31,7 +31,6 @@
 #include "APIs/generalAPI.h"
 #include "APIs/chatAPI.h"
 #include "networkInterface.h"
-#include "lobbyAPI.h"
 
 typedef enum {
     GAME_STATE_GAMEPLAY,
@@ -102,33 +101,52 @@ typedef struct {
 } Player_St;
 
 /**
-    @brief Single rectangular platform / solid surface in the lobby world.
+    @brief Terrain/platform types in the lobby world.
+    Each type can trigger different gameplay effects (movement, friction, hazards, visuals).
+    @note Effects are implemented in the lobby update/render functions – this struct only stores the data.
 */
-typedef struct {
-    Rectangle rect;         ///< Position and size (world coordinates)
-    Color     color;        ///< Debug / placeholder rendering color
-    float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-} Platform_St;
+typedef enum {
+    TERRAIN_NORMAL,      ///< Standard solid ground – no special effect
+    TERRAIN_WOOD,        ///< Wooden aesthetic (slight sound variation)
+    TERRAIN_STONE,       ///< Stone/rock look (hard surface)
+    TERRAIN_ICE,         ///< Slippery – reduce player friction
+    TERRAIN_BOUNCY,      ///< Jump pad – gives extra upward impulse on contact
+    TERRAIN_MOVING_H,    ///< Moves horizontally (ping-pong within moveDistance)
+    TERRAIN_MOVING_V,    ///< Moves vertically (ping-pong within moveDistance)
+    TERRAIN_WATER,       ///< Shallow water zone – visual splash, optional slow-down
+    TERRAIN_DECORATIVE,  ///< Visual only (trees, bushes, signs) – no collision
+    TERRAIN_PORTAL,      ///< Teleport zone (destination stored in portalTargetPosition)
+    __terrainTypeCount
+} TerrainType_Et;
 
 /**
-    @brief Manages which mini-game is currently active and its integration with the lobby.
-
-    Acts as a mini-game router.
+    @brief One piece of terrain in the lobby world.
+    Extended from the original Platform_St to support the different zone types you requested.
 */
 typedef struct {
-    GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
-    BaseGame_St             miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
-    Rectangle               gameHitboxes[__miniGameCount];          ///< Screen-space rectangles where touching/standing activates a mini-game
-    MiniGame_Et             currentMiniGame;                        ///< Which mini-game / view is currently active
-} MiniGameManager_St;
+    Rectangle      rect;                  ///< World position and size
+    Color          color;                 ///< Debug / base rendering color
+    float          roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
+    TerrainType_Et type;                  ///< Determines collision, movement, and effects
+    Vector2        velocity;              ///< Speed/direction for moving types (0 otherwise)
+    float          moveDistance;          ///< Oscillation distance for moving types (0 otherwise)
+    Vector2        portalTargetPosition;  ///< Where the player is teleported to
+    bool           isTwoWayPortal;        ///< True = bidirectional, false = one-way
+} LobbyTerrain_St;
+
+typeDA(LobbyTerrain_St, TerrainVec_St);
+
+typedef struct {
+    Rectangle hitbox;
+    const char name[256];
+} GameInteractionZone_St;
 
 /**
     @brief Complete state of the lobby / main hub world.
 */
-struct LobbyGame_St{
+typedef struct{
     BaseGame_St         base;
     GameState_Et        currentState;               ///< Current state of the game.
-    MiniGameManager_St  miniGameManager;            ///< Manages transitions to/from mini-games
 
     Chat_St             chat;                       ///< Game chat
     Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.
