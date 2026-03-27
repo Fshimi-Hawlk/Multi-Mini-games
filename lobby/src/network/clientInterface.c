@@ -10,6 +10,7 @@
 
 #include "ui/game.h"
 #include "ui/app.h"
+#include "ui/editor.h"
 
 #include "utils/globals.h"
 
@@ -73,6 +74,12 @@ void lobby_init(void) {
         log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
         error =  ERROR_TEXTURE_LOAD;
     }
+
+    lobby_game.currentState = GAME_STATE_GAMEPLAY;
+
+    lobby_game.selectedTerrainIndex = -1;
+    lobby_game.isDragging = false;
+    lobby_game.gridStep = 25.0f;
 
     // TODO: To be made as a printError fn
     switch (error) {
@@ -159,6 +166,8 @@ void lobby_on_data(int player_id, u8 action, const void* data, u16 len) {
 void lobby_update(float dt) {
     updateChat();
     
+    toggleEditorMode(&lobby_game);
+
     // If chat is open, we don't move and don't toggle menus
     if (lobby_game.chat.isOpen) {
         // Still update camera to stay centered but no movement
@@ -166,7 +175,14 @@ void lobby_update(float dt) {
         return;
     }
 
-    updatePlayer(&lobby_game.player, platforms, platformCount, dt);
+    // Editor takes full control this frame
+    // skip normal physics & normal draw
+    if (lobby_game.editorMode) {
+        updateEditor(&lobby_game, dt);
+        return;
+    }
+
+    updatePlayer(&lobby_game.player, dt);
     lobby_game.cam.target = lobby_game.player.position;
 
     toggleSkinMenu(&lobby_game);
@@ -214,11 +230,12 @@ void lobby_draw(void) {
         }
     } EndMode2D();
 
-        for (u8 i = 1; i < __miniGameCount; ++i) {
-            DrawRectangleRec(lobby_game.miniGameManager.gameHitboxes[i], RED); // Debug hitbox
-        }
-    EndMode2D();
-    
+    if (lobby_game.editorMode) {
+        drawEditor(&lobby_game);
+        return;
+    }
+
+    static f32 lobbyTextXPos;
     lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
     DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 

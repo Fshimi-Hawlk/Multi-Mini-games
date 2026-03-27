@@ -153,6 +153,21 @@ typedef struct{
     Player_St           player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state
     Camera2D            cam;                        ///< 2D camera following the player
-};
+
+    // ── Editor mode ─────────────────────────────────────────────────────────
+    /**
+        @brief Editor-specific state. Only used when editorMode is active.
+    */
+    bool                editorMode;                 ///< True = editor active, game paused
+    bool                showLeftPalette;            ///< Show left terrain palette sidebar
+    bool                showPropertiesPanel;        ///< Show right properties panel
+
+    s32                 selectedTerrainIndex;       ///< -1 = nothing selected
+    bool                isDragging;                 ///< Currently dragging a selection
+    Vector2             dragStartWorld;             ///< World position where drag started
+
+    bool                showGrid;                   ///< Toggle grid visibility (future)
+    f32                 gridStep;                   ///< Grid size in world units (future)
+} LobbyGame_St;
 
 #endif // USER_TYPES_H
