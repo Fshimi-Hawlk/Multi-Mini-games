@@ -24,79 +24,27 @@
 */
 
 #include "core/game.h"              // GameScene_Et, general game types
-
 #include "ui/connection_screen.h"
+#include "setups/app.h"
+#include "utils/globals.h"
 
-#include "APIs/kingForFourAPI.h"
-#include "APIs/bingoAPI.h"
 #include "APIs/generalAPI.h"
 
 s32 networkSocket = 0;
 RUDPConnection_St serverConnection = {0};
 
-Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame) {
+static GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
+static MiniGame_Et currentMiniGameID = MINI_GAME_LOBBY;
+static GameClientInterface_St* currentMiniGame = NULL;
+
+Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
     if (nextMiniGame >= __miniGameCount) {
-        // some wanring log
+        // some warning log
         return ERROR_INVALID_ENUM_VAL;
     }
 
     Error_Et error = OK;
-
-    BaseGame_St* base = &game->miniGameManager.miniGames[nextMiniGame];
-
-    switch (nextMiniGame) {
-        case MINI_GAME_LOBBY: {
-            if (game->miniGameManager.currentMiniGame == MINI_GAME_LOBBY) break;
-
-            // free the ressource of the last loaded game
-            BaseGame_St* base = &game->miniGameManager.miniGames[game->miniGameManager.currentMiniGame];
-            base->freeGame(&base);
-        } break;
-
-        case MINI_GAME_BATTLESHIP: {
-
-        } break;
-
-        case MINI_GAME_BINGO: {
-            BingoGame_St** bingoRef = (BingoGame_St**) base;
-            error = bingo_initGame(bingoRef);
-
-            if (error != OK) {
-                log_fatal("Bingo initialization failed: error %d", error);
-                bingo_freeGame(bingoRef); // in case something was allocated
-            }
-        } break;
-
-        case MINI_GAME_CONNECT_4: {
-
-        } break;
-
-        case MINI_GAME_KFF: {
-
-        } break;
-
-        case MINI_GAME_MINIGOLF: {
-
-        } break;
-
-        case MINI_GAME_MORPION: {
-
-        } break;
-
-        case MINI_GAME_OTHELLO: {
-
-        } break;
-
-        default: {
-            log_error("MiniGame_Et");
-            error = ERROR_INVALID_ENUM_VAL;
-        }
-
-    }
-
-    game->miniGameManager.currentMiniGame = error == OK 
-                                         ? nextMiniGame 
-                                         : MINI_GAME_LOBBY;
+    miniGameInterfaces[nextMiniGame]->init();
 
     return error;
 }
@@ -162,8 +110,9 @@ void initNetwork(const char* targetIp) {
 /**
  * @brief Receives and processes incoming network data packets.
  */
-void receiveNetworkData(LobbyGame_St* const game) {
+void receiveNetworkData(void) {
     if (networkSocket == -1) return;
+
     u8 buffer[2048];
     struct sockaddr_in from;
     socklen_t len = sizeof(from);
@@ -182,7 +131,7 @@ void receiveNetworkData(LobbyGame_St* const game) {
         if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME && rudpProcessIncoming(&serverConnection, h)) {
             u8 targetGameId = *(u8*) (buffer + sizeof(RUDPHeader_St));
             printf("[SYSTEM] Switching to game ID: %d\n", targetGameId);
-            switchMinigame(game, targetGameId);
+            switchMinigame(targetGameId);
             continue;
         }
 
@@ -190,18 +139,19 @@ void receiveNetworkData(LobbyGame_St* const game) {
             GameTLVHeader_St* g = (GameTLVHeader_St*) (buffer + sizeof(RUDPHeader_St));
             void* payload = (u8*) g + sizeof(GameTLVHeader_St);
             
-            if (game->miniGameManager.miniGameInterfaces[g->game_id]) {
-                game->miniGameManager
-                    .miniGameInterfaces[g->game_id]
-                        ->on_data(
-                            ntohs(h->sender_id),
-                            g->action, payload,
-                            g->length
-                        );
+            if (miniGameInterfaces[g->game_id]) {
+                miniGameInterfaces[g->game_id]->on_data(
+                    ntohs(h->sender_id),
+                    g->action, payload,
+                    g->length
+                );
             }
         }
     }
 }
+
+extern GameClientInterface_St lobbyClientInterface;
+extern GameClientInterface_St kingForFourClientInterface;
 
 /**
     @brief Program entry point.
@@ -209,23 +159,28 @@ void receiveNetworkData(LobbyGame_St* const game) {
 */
 int main(void) {
     // ── Initialization ───────────────────────────────────────────────────────
-    LobbyGame_St* game = NULL;
-    if (lobby_initGame(&game) != OK) {
+    if (initApp() != OK) {
         log_fatal("Couldn't load the lobby properly.");
         return 1;
     }
 
+    miniGameInterfaces[MINI_GAME_LOBBY] = &lobbyClientInterface;
+    lobbyClientInterface.init();
+    miniGameInterfaces[MINI_GAME_KFF] = &kingForFourClientInterface;
+
+    currentMiniGame = miniGameInterfaces[MINI_GAME_LOBBY];
+
     initConnectionScreen();
-    
+
     // ── Main loop ────────────────────────────────────────────────────────────
     while (!WindowShouldClose()) {
         f32 dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
-        receiveNetworkData(game);
+        receiveNetworkData();
 
         static bool switch_sent = false;
 
-        switch (game->currentState) {
+        switch (lobby_game.currentState) {
             case GAME_STATE_CONNECTION: {
                 static f32 timer = 0; 
                 timer += dt;
@@ -237,7 +192,7 @@ int main(void) {
                 
                 if (updateConnectionScreen()) {
                     initNetwork(getEnteredIP());
-                    game->currentState = GAME_STATE_GAMEPLAY;
+                    lobby_game.currentState = GAME_STATE_GAMEPLAY;
                 }
 
                 BeginDrawing(); {
@@ -247,8 +202,8 @@ int main(void) {
             } break;
 
             case GAME_STATE_GAMEPLAY: {
-                if (game->miniGameManager.currentMiniGame == MINI_GAME_LOBBY) {
-                    MiniGame_Et miniGameId = checkGameTrigger(game);
+                if (currentMiniGameID == MINI_GAME_LOBBY) {
+                    MiniGame_Et miniGameId = checkGameTrigger();
                     bool trigger = miniGameId != MINI_GAME_LOBBY;
                     
                     if (trigger && !switch_sent) {
@@ -264,27 +219,24 @@ int main(void) {
                         send(networkSocket, buffer, sizeof(buffer), 0);
                         switch_sent = true;
                         printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", miniGameId);
-
-                        switchMinigame(game, miniGameId);
                     }
 
                     if (!trigger) switch_sent = false;
                 }
 
-                if (game->miniGameManager.miniGameInterfaces[game->miniGameManager.currentMiniGame]) {
-                    game->miniGameManager.miniGameInterfaces[game->miniGameManager.currentMiniGame]->update(dt);
+                if (currentMiniGame) {
+                    currentMiniGame->update(dt);
 
                     BeginDrawing(); {
-                        ClearBackground(RAYWHITE);
-                        game->miniGameManager.miniGameInterfaces[game->miniGameManager.currentMiniGame]->draw();
+                        ClearBackground(ColorBrightness(BLUE, 0.5));
+                        currentMiniGame->draw();
                     } EndDrawing();
                 }
             } break;
         }
     }
 
-    // ── Cleanup ──────────────────────────────────────────────────────────────
-    lobby_freeGame(&game);
+    freeApp();
 
     return 0;
 }
@@ -294,3 +246,6 @@ int main(void) {
 
 #define SYSTEM_SETTINGS_IMPLEMENTATION
 #include "systemSettings.h"
+
+#define CONTEXT_ARENA_IMPLEMENTATION
+#include "contextArena.h"

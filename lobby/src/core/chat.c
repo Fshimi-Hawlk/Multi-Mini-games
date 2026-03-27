@@ -2,11 +2,6 @@
 
 #include "core/chat.h"
 
-#include "lobbyAPI.h"
-
-#include "networkInterface.h"
-#include "APIs/generalAPI.h"
-
 static float msgVisibleTimer = 0.0f;
 
 void addChatMessage(const char* sender, const char* text) {

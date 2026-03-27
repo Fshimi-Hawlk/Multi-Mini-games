@@ -66,36 +66,11 @@ Vector2 getPlayerCenter(const Player_St* const player);
 // ────────────────────────────────────────────────
 
 /**
-    @brief Updates player position, velocity, angle, jump state, and performs collisions.
-
-    Handles:
-        - horizontal input + friction
-        - gravity
-        - rotation based on movement direction
-        - jump buffering + coyote time + limited air jumps
-        - collision resolution against all platforms
-
-    @param player       Player state to modify
-    @param platforms    Array of static platforms
-    @param nbPlatforms  Number of platforms
-    @param dt           Delta time in seconds
- */
-void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt);
-
-/**
-    @brief Resolves collision between player's circle and a single axis-aligned rectangle.
-
-    Performs:
-        - closest-point calculation
-        - penetration depth computation
-        - position correction (push out)
-        - velocity nulling along dominant axis
-        - ground detection (sets onGround, resets jumps/coyote when landing from above)
-
-    @param player  Player state (position and velocity are modified)
-    @param rect    Rectangle to collide against
- */
-void resolveCircleRectCollision(Player_St* player, const Rectangle rect);
+    @brief Updates player physics and resolves collisions against lobby terrain only.
+    @param player       Player state (modified in place)
+    @param dt           Delta time
+*/
+void updatePlayer(Player_St* const player, const f32 dt);
 
 // ────────────────────────────────────────────────
 // Skin / texture selection
@@ -129,6 +104,6 @@ void toggleSkinMenu(LobbyGame_St* const game);
  * @param player Pointer to the player structure.
  * @return 1 if a trigger is activated, 0 otherwise.
  */
-MiniGame_Et checkGameTrigger(const LobbyGame_St* const game);
+MiniGame_Et checkGameTrigger(void);
 
 #endif // CORE_GAME_H

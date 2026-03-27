@@ -301,11 +301,11 @@ void king_destroy_instance(void *state) {
     free(ks);
 }
 
-GameServerInterface_St king_module = {
-    .game_name = "king-for-four",
-    .create_instance = king_create_instance,
-    .on_action = king_on_action,
-    .on_tick = king_on_tick, 
-    .on_player_leave = king_on_player_leave,
-    .destroy_instance = king_destroy_instance
+GameServerInterface_St kingServerInterface = {
+    .game_name          = "king-for-four",
+    .create_instance    = king_create_instance,
+    .on_action          = king_on_action,
+    .on_tick            = king_on_tick, 
+    .on_player_leave    = king_on_player_leave,
+    .destroy_instance   = king_destroy_instance
 };

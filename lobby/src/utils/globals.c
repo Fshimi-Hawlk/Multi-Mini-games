@@ -35,21 +35,29 @@
 /** @brief Array of loaded fonts in increasing sizes. */
 Font lobby_fonts[__fontSizeCount] = {0};
 
-/** @brief Array of platforms in the lobby. */
-Platform_St platforms[] = {
-    {{-1000, 500, 2000, 1000}, {0, 228, 48, 255}, 0},
-    {{-1000, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{500, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{-350, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-200, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{100, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-50, 200, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-350, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
+/**
+    @brief Complete lobby terrain layout.
+    - Left side: isolated test levels (one wide platform per terrain type, stacked vertically).
+    - Bottom level on left = water pool as requested.
+    - Center/main ground connects left test area to right side.
+    - Right side: all interaction zones in a tight horizontal line (200-unit spacing).
+    - Large solid platform directly under the interaction zones.
+    - Three example portals placed for future teleport testing.
+    @note Player starts at (0.0f, 0.0f). Raylib coordinates: negative Y = up, positive Y = down.
+*/
+TerrainVec_St terrains = {0};
+
+GameInteractionZone_St gameInteractionZones[__miniGameCount] = {
+    // All interaction zones now in a tight horizontal line (exactly 200-unit spacing)
+    // Placed above the large stone platform for easy access
+    [MINI_GAME_BATTLESHIP] = { .hitbox = { .x = 700.0f,  .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Battleship" },
+    [MINI_GAME_BINGO]      = { .hitbox = { .x = 900.0f,  .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Bingo" },
+    [MINI_GAME_CONNECT_4]  = { .hitbox = { .x = 1100.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Connect 4" },
+    [MINI_GAME_KFF]        = { .hitbox = { .x = 1300.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "King For Four" },
+    [MINI_GAME_MINIGOLF]   = { .hitbox = { .x = 1500.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Mini Golf" },
+    [MINI_GAME_MORPION]    = { .hitbox = { .x = 1700.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Morpion" },
+    [MINI_GAME_OTHELLO]    = { .hitbox = { .x = 1900.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Othello" }
 };
-/** @brief Number of platforms in the lobby. */
-u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
 Rectangle skinButtonRect = {0};
 

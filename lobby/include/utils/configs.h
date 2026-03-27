@@ -28,12 +28,15 @@
 // ────────────────────────────────────────────────
 
 #ifndef ASSET_PATH
+
 /**
     @brief Root directory for all game assets (textures, sounds, fonts, etc.).
            Can be overridden at compile time (e.g. -DASSET_PATH="/custom/assets/").
 */
 #define ASSET_PATH "assets/"
 #endif
+
+#define FONT_PATH "assets/fonts/"
 
 #define IMAGES_PATH ASSET_PATH "images/"            ///< Subdirectory containing all image files.
 

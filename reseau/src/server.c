@@ -34,6 +34,7 @@
 #include <sys/time.h>
 #include <sys/select.h>
 
+#include "APIs/generalAPI.h"
 #include "networkInterface.h"
 
 #define PORT 8080                                       /**< Port d'écoute du serveur. */
@@ -50,8 +51,8 @@ enum {
 };
 
 // Interfaces de routage
-extern GameServerInterface_St lobby_module; /**< Instance du module lobby. */
-extern GameServerInterface_St king_module;  /**< Instance du module King for Four. */
+extern GameServerInterface_St lobbyServerInterface; /**< Instance du module lobby. */
+extern GameServerInterface_St kingServerInterface;  /**< Instance du module King for Four. */
 
 /**
  * @struct UDP_Client
@@ -211,7 +212,7 @@ int main(void) {
     }
 
     // Le serveur est forcé de démarrer sur le Lobby
-    active_module = &lobby_module;
+    active_module = &lobbyServerInterface;
     
     if (active_module && active_module->create_instance) {
         active_game_state = active_module->create_instance();
@@ -252,20 +253,19 @@ int main(void) {
                             u8 target_game_id = buffer[sizeof(RUDPHeader_St)];
                             printf("[MODULE] Demande de switch vers ID: %d\n", target_game_id);
                             
-                            // Pour simplifier, ID 1 = King for Four
-                            if (target_game_id == 1) {
-                                if (active_module != &king_module) {
+                            if (target_game_id == MINI_GAME_KFF) {
+                                if (active_module != &kingServerInterface) {
                                     if (active_module && active_module->destroy_instance) {
                                         active_module->destroy_instance(active_game_state);
                                     }
-                                    active_module = &king_module;
+                                    active_module = &kingServerInterface;
                                     active_game_state = active_module->create_instance();
                                     printf("[MODULE] Premier switch vers King For Four effectué.\n");
                                 }
                                 
                                 // On envoie TOUJOURS la confirmation au joueur qui demande (Unicast)
                                 // Même si le module est déjà actif pour d'autres.
-                                u8 switch_payload = 1;
+                                u8 switch_payload = MINI_GAME_KFF;
                                 server_broadcast(-1, id, ACTION_CODE_LOBBY_SWITCH_GAME, &switch_payload, 1);
                                 printf("[MODULE] Confirmation de switch vers King For Four envoyée au client %d.\n", id);
                         } else if (header.action == ACTION_CODE_LOBBY_CHAT) {

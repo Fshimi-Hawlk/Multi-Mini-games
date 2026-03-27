@@ -29,9 +29,12 @@
     @see `utils/utils.h` for `getTextureRec`
 */
 
-#include "ui/game.h"
 #include "core/game.h"
+
+#include "ui/game.h"
+
 #include "utils/utils.h"
+#include "utils/globals.h"
 
 void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
@@ -49,12 +52,46 @@ void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* co
 }
 
 /**
- * @brief Renders the platforms and trigger zones to the screen.
- * @param platforms Array of platforms to draw.
- * @param nbPlatforms Number of platforms in the array.
- */
-void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms) {
-    for (int i = 0; i < nbPlatforms; i++) {
-        DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
+    @brief Renders all lobby terrains and game interaction zones.
+    Different terrain types can have custom visuals later (textures, particles, etc.).
+*/
+void drawLobbyTerrains(void) {
+    // Terrains
+    for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
+        const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
+
+        if (currentTerrain->type == TERRAIN_DECORATIVE) {
+            Color drawColor = currentTerrain->color;
+            drawColor.a = 180;
+            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, drawColor);
+        } else if (currentTerrain->type == TERRAIN_WATER) {
+            Color drawColor = currentTerrain->color;
+            drawColor.a = 200;
+            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, drawColor);
+        } else {
+            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, currentTerrain->color);
+        }
+    }
+
+    // Draw interaction zones
+    for (u32 zoneIndex = 0; zoneIndex < __miniGameCount; zoneIndex++) {
+        if (zoneIndex == MINI_GAME_LOBBY) continue;
+
+        GameInteractionZone_St currentZone = gameInteractionZones[zoneIndex];
+
+        DrawRectangleRounded(currentZone.hitbox, 0.4f, 0, (Color){255, 215, 0, 120});
+
+        // Debug hitbox
+        DrawRectangleRec(currentZone.hitbox, RED);
+
+        // Game name text
+        const char* gameName   = currentZone.name;
+        f32Vector2  textSize   = MeasureTextEx(lobby_fonts[FONT32], gameName, 32, 0);
+        f32Vector2  textPosition = {
+            .x = currentZone.hitbox.x + (currentZone.hitbox.width - textSize.x) / 2.0f,
+            .y = currentZone.hitbox.y - 15.0f - textSize.y / 2.0f
+        };
+
+        DrawTextEx(lobby_fonts[FONT32], gameName, textPosition, 32, 0, BLACK);
     }
 }

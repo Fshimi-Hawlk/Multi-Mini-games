@@ -77,7 +77,7 @@ void lobby_destroy(void *state) {
  * 
  * Expose les fonctions de gestion du cycle de vie et de traitement des messages.
  */
-GameServerInterface_St lobby_module = {
+GameServerInterface_St lobbyServerInterface = {
     .game_name          = "lobby",
     .create_instance    = lobby_create,
     .on_action          = lobby_on_action,

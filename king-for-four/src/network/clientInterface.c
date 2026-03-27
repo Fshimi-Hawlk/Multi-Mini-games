@@ -222,8 +222,6 @@ void king_client_update(float dt) {
     
     if (IsKeyPressed(KEY_ESCAPE)) {
         send_to_server(ACTION_CODE_QUIT_GAME, NULL, 0);
-        extern void switch_minigame(u8 game_id);
-        switch_minigame(0);
     }
 }
 
@@ -282,11 +280,11 @@ void king_client_draw(void) {
 }
 
 /** @brief Module interface for the King-for-Four client. */
-GameClientInterface_St KingForFourClientModule = {
-    .id = 1,
-    .name = "King For Four",
-    .init = king_client_init,
-    .on_data = king_client_on_data,
-    .update = king_client_update,
-    .draw = king_client_draw
+GameClientInterface_St kingForFourClientInterface = {
+    .id         = MINI_GAME_KFF,
+    .name       = "King For Four",
+    .init       = king_client_init,
+    .on_data    = king_client_on_data,
+    .update     = king_client_update,
+    .draw       = king_client_draw
 };
