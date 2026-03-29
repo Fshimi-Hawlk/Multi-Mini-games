@@ -64,13 +64,32 @@
 // Physics & movement tuning (lobby platformer)
 // ────────────────────────────────────────────────
 
-#define GRAVITY         1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
-#define MOVE_SPEED      300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).
-#define JUMP_FORCE      500.0f      ///< Upward velocity applied on jump (pixels/second).
-#define GROUND_Y        50.0f       ///< Y-position considered "ground level" for initial spawn / debug.
-#define COYOTE_TIME     0.1f        ///< Time window (seconds) after leaving ground where jump is still allowed.
-#define JUMP_BUFFER_TIME 0.1f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
-#define MAX_JUMPS       2           ///< Maximum number of jumps allowed without touching ground (includes ground jump).
-#define FRICTION        2000.0f     ///< Horizontal deceleration rate when no input is given (pixels/second²).
+#define GRAVITY             1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
+#define MOVE_SPEED          300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).
+#define JUMP_FORCE         -500.0f      ///< Upward velocity applied on jump (pixels/second).
+#define GROUND_Y            50.0f       ///< Y-position considered "ground level" for initial spawn / debug.
+#define COYOTE_TIME         0.1f        ///< Time window (seconds) after leaving ground where jump is still allowed.
+#define JUMP_BUFFER_TIME    0.1f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
+#define MAX_JUMPS           2           ///< Maximum number of jumps allowed without touching ground (includes ground jump).
+#define FRICTION            2000.0f     ///< Horizontal deceleration rate when no input is given (pixels/second²).
+
+// ────────────────────────────────────────────────
+// Water terrain physics (new)
+// ────────────────────────────────────────────────
+
+#define WATER_BUOYANCY      -320.0f     ///< Upward force applied every frame while floating in water (default behavior).
+#define WATER_HORIZ_DRAG     0.82f      ///< Horizontal/vertical drag factor applied every frame while in water.
+#define WATER_VERT_DRAG      0.88f      ///< Y drag in water
+#define WATER_JUMP_FORCE    -320.0f     ///< Base reduced jump in water for normal skins
+
+// ────────────────────────────────────────────────
+// Ice terrain physics (new)
+// ────────────────────────────────────────────────
+
+/**
+    @brief Very low friction value used while standing on ice.
+           Normal FRICTION is 2000.0f; this makes the player keep sliding.
+*/
+#define ICE_FRICTION        120.0f
 
 #endif // CONFIGS_H

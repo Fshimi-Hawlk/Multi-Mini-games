@@ -69,4 +69,26 @@ void drawMenuTextures(const LobbyGame_St* const game);
 */
 void drawSkinButton(void);
 
+/**
+    @brief Draws the real-time physics debug panel (toggle with F2).
+*/
+void drawPhysicsDebugPanel(LobbyGame_St* const game);
+
+/**
+    @brief Handles keyboard input for live editing of physics constants in the debug panel.
+*/
+void updatePhysicsDebugPanel(LobbyGame_St* const game);
+
+/**
+    @brief Recomputes all screen-space UI rectangles when the window is resized.
+
+    Call this whenever the window size changes (in the main loop after WindowShouldClose check).
+    It updates:
+      - skinButtonRect
+      - defaultTextureRect (for the skin menu)
+      - physics debug panel position
+      - (future: connection screen elements, editor panels, etc.)
+*/
+void updateUIOnResize(void);
+
 #endif // UI_APP_H

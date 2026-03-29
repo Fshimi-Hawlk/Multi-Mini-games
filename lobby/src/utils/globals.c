@@ -63,3 +63,5 @@ Rectangle skinButtonRect = {0};
 
 /** @brief Texture for the skin button logo. */
 Texture2D logoSkinButton;
+
+bool showPhysicsDebugPanel = false;

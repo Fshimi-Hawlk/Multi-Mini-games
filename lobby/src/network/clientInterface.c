@@ -1,9 +1,18 @@
 /**
- * @file lobby_module.c
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-18
- * @brief Implementation of the Lobby mini-game module.
- */
+    @file clientInterface.c
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-03-18
+    @date 2026-03-27
+    @brief Implementation of the Lobby mini-game module.
+
+    Contributors:
+        - i-Charlys (CAILLON Charles):
+            - Original implementation
+        - Fshimi-Hawlk:
+            - Refactored the whole code
+            - Added level editor logic
+            - Added initialization of new water/ice physics fields in `lobby_init`
+*/
 
 #include "core/game.h"
 #include "core/chat.h"
@@ -47,6 +56,9 @@ void lobby_init(void) {
             [PLAYER_TEXTURE_TROLL_FACE] = true,
             [PLAYER_TEXTURE_BATTLESHIP_TODO] = true,
         },
+        .isInWater        = false,
+        .waterFastDescent = false,
+        .onIce            = false
     };
 
     /** Camera following the player in 2D mode */
@@ -87,6 +99,105 @@ void lobby_init(void) {
     lobby_game.selectedTerrainIndex = -1;
     lobby_game.isDragging = false;
     lobby_game.gridStep = 25.0f;
+
+    PhysicsConstants_St physics[__playerTextureCount] = {
+        [PLAYER_TEXTURE_DEFAULT] = {
+            .gravity        = GRAVITY,
+            .moveSpeed      = MOVE_SPEED,
+            .jumpForce      = JUMP_FORCE,
+            .coyoteTime     = COYOTE_TIME,
+            .jumpBufferTime = JUMP_BUFFER_TIME,
+            .maxJumps       = MAX_JUMPS,
+            .friction       = FRICTION,
+            .iceFriction    = ICE_FRICTION,
+
+            .waterBuoyancy          = 0.0f,
+            .waterDefaultSink       = -320.0f,
+            .waterSinkWithS         = -820.0f,
+            .waterHorizDrag         = WATER_HORIZ_DRAG,
+            .waterVertDrag          = WATER_VERT_DRAG,
+            .waterJumpForce         = WATER_JUMP_FORCE,
+            .waterTargetSubmersion  = 1.0f,
+            .waterMaxSubmersion     = 1.0f,
+            .waterCanJump           = true,
+            .waterInfiniteJump      = true,
+            .waterAlwaysFloat       = false,
+        },
+        [PLAYER_TEXTURE_EARTH] = {
+            .gravity        = 0.0f,
+            .moveSpeed      = MOVE_SPEED,
+            .jumpForce      = JUMP_FORCE,
+            .coyoteTime     = COYOTE_TIME,
+            .jumpBufferTime = JUMP_BUFFER_TIME,
+            .maxJumps       = MAX_JUMPS,
+            .friction       = FRICTION,
+            .iceFriction    = ICE_FRICTION,
+
+            .waterBuoyancy          = WATER_BUOYANCY,
+            .waterDefaultSink       = 0.0f,
+            .waterSinkWithS         = 0.0f,
+            .waterHorizDrag         = WATER_HORIZ_DRAG,
+            .waterVertDrag          = WATER_VERT_DRAG,
+            .waterJumpForce         = WATER_JUMP_FORCE * 1.25f,
+            .waterTargetSubmersion  = 0.0f,
+            .waterMaxSubmersion     = 1.0f,
+            .waterCanJump           = true,
+            .waterInfiniteJump      = true,
+            .waterAlwaysFloat       = true,
+        },
+        [PLAYER_TEXTURE_TROLL_FACE] = {
+            .gravity        = GRAVITY * 0.5f,
+            .moveSpeed      = MOVE_SPEED,
+            .jumpForce      = JUMP_FORCE,
+            .coyoteTime     = COYOTE_TIME,
+            .jumpBufferTime = JUMP_BUFFER_TIME,
+            .maxJumps       = MAX_JUMPS,
+            .friction       = FRICTION,
+            .iceFriction    = ICE_FRICTION,
+
+            .waterBuoyancy          = 0.0f,
+            .waterDefaultSink       = -5745.0f,
+            .waterSinkWithS         = -8565.0f,
+            .waterHorizDrag         = WATER_HORIZ_DRAG * 0.85f,
+            .waterVertDrag          = WATER_VERT_DRAG * 0.75f,
+            .waterJumpForce         = -2000.0f,
+            .waterTargetSubmersion  = 1.0f,
+            .waterMaxSubmersion     = 1.0f,
+            .waterCanJump           = true,
+            .waterInfiniteJump      = false,
+            .waterAlwaysFloat       = false,
+        },
+        [PLAYER_TEXTURE_BATTLESHIP_TODO] = {
+            .gravity        = GRAVITY,
+            .moveSpeed      = MOVE_SPEED,
+            .jumpForce      = 0.0f,
+            .coyoteTime     = 0.0f,
+            .jumpBufferTime = 0.0f,
+            .maxJumps       = 0.0f,
+            .friction       = FRICTION,
+            .iceFriction    = ICE_FRICTION,
+
+            .waterBuoyancy          = 0.0f,
+            .waterDefaultSink       = 0.0f,
+            .waterSinkWithS         = 0.0f,
+            .waterHorizDrag         = WATER_HORIZ_DRAG * 0.45f,
+            .waterVertDrag          = WATER_VERT_DRAG * 0.65f,
+            .waterJumpForce         = 0.0f,
+            .waterTargetSubmersion  = 0.35,
+            .waterMaxSubmersion     = 0.7,
+            .waterCanJump           = false,
+            .waterInfiniteJump      = false,
+            .waterAlwaysFloat       = false,
+        },
+    };
+
+    // ── Runtime physics constants (live editable via F2 panel) ─────────────
+    memcpy(lobby_game.physics, physics, sizeof(physics));
+
+    // Debug panel editing state
+    lobby_game.physicsPanelEditIndex  = -1;
+    lobby_game.physicsPanelEditBuffer[0] = '\0';
+    lobby_game.physicsPanelEditCursor = 0;
 
     // TODO: To be made as a printError fn
     switch (error) {
@@ -193,6 +304,25 @@ void lobby_update(float dt) {
         lobby_game.player.position = (f32Vector2) {0};
     }
 
+    if (IsKeyPressed(KEY_F2)) {
+        showPhysicsDebugPanel = !showPhysicsDebugPanel;
+    }
+
+    if (showPhysicsDebugPanel) {
+        updatePhysicsDebugPanel(&lobby_game);
+
+        f32 wheel = GetMouseWheelMove();
+        if (wheel != 0.0f) {
+            // Only scroll when mouse is over the panel
+            Vector2 mouse = GetMousePosition();
+            if (mouse.x > systemSettings.video.width - 400.0f && 
+                mouse.y > 20.0f && mouse.y < 460.0f) {
+                panelScrollY -= wheel * 35.0f;   // adjust speed to taste
+                panelScrollY = clamp(panelScrollY, 0.0f, 800.0f);
+            }
+        }
+    }
+
     updatePlayer(&lobby_game, dt);
     lobby_game.cam.target = lobby_game.player.position;
 
@@ -254,6 +384,8 @@ void lobby_draw(void) {
     if (lobby_game.playerVisuals.isTextureMenuOpen) {
         drawMenuTextures(&lobby_game);
     }
+
+    drawPhysicsDebugPanel(&lobby_game);
 
     drawChat();
 }

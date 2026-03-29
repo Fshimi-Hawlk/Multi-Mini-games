@@ -13,6 +13,7 @@
         - Added `GameScene_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
           `MiniGameManager_St` and `LobbyGame_St` to centralize logic and 
           previously global variables and make everything as straight forward.
+        - Added `isInWater`, `waterFastDescent` and `onIce` to `Player_St` for the new terrain physics.
 
     This header contains the central enumerated types and data structures that describe:
         - visual appearance and state of the player in the lobby
@@ -63,6 +64,36 @@ enum {
 };
 
 /**
+    @brief Runtime-editable physics & water parameters for the lobby.
+           All values can be live-tuned via the F2 debug panel.
+           Changes take effect immediately on the player.
+*/
+typedef struct {
+    // ── Land / general ─────────────────────────────────────────────────────
+    f32 gravity;            ///< Downward acceleration (pixels/second²)
+    f32 moveSpeed;          ///< Horizontal speed when holding A/D
+    f32 jumpForce;          ///< Upward impulse on land jump
+    f32 coyoteTime;         ///< Coyote-time window (seconds)
+    f32 jumpBufferTime;     ///< Jump-buffer window (seconds)
+    s32 maxJumps;           ///< Maximum air jumps allowed
+    f32 friction;           ///< Horizontal deceleration on normal ground
+    f32 iceFriction;        ///< Horizontal deceleration on ice
+
+    // ── Water base ─────────────────────────────────────────────────────────
+    f32  waterBuoyancy;         ///< Base upward force when submerged
+    f32  waterDefaultSink;      ///< Gentle auto-sink force
+    f32  waterSinkWithS;        ///< Sink force when holding S
+    f32  waterHorizDrag;        ///< X drag multiplier in water
+    f32  waterVertDrag;         ///< Y drag multiplier in water
+    f32  waterJumpForce;        ///< Reduced jump force while in water
+    f32  waterTargetSubmersion; ///< Desired submersion ratio for floating skins (0–1)
+    f32  waterMaxSubmersion;    ///< If exceeded, buoyancy is disabled (battleship)
+    bool waterCanJump;          ///< Can the player jump at all in water?
+    bool waterInfiniteJump;     ///< Can the player keep jumping indefinitely in water?
+    bool waterAlwaysFloat;      ///< Strong buoyancy even when fully submerged (e.g. EARTH)
+} PhysicsConstants_St;
+
+/**
     @brief Visual / rendering related state of the player character.
 
     Keeps texture handles and UI-related flags separate from physics state.
@@ -98,6 +129,10 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
+
+    bool    isInWater;                          ///< True when player circle overlaps any TERRAIN_WATER rect this frame
+    bool    waterFastDescent;                   ///< Ctrl+S toggle: fast descent + no buoyancy (cannot float back up)
+    bool    onIce;                              ///< True when currently standing on TERRAIN_ICE (enables slippery friction)
 } Player_St;
 
 /**
@@ -168,6 +203,18 @@ typedef struct{
 
     bool                showGrid;                   ///< Toggle grid visibility (future)
     f32                 gridStep;                   ///< Grid size in world units (future)
+
+    // ── Live physics constants (F2 debug panel) ─────────────────────────────
+    /**
+        @brief Physics constants for each player skin.
+               Indexed by `PlayerTextureId_Et`.
+               Initialized in `lobby_init()` from the old `getWaterBehaviour()` logic.
+    */
+    PhysicsConstants_St physics[__playerTextureCount];
+
+    s32                 physicsPanelEditIndex;      ///< -1 = not editing, else index of edited constant
+    char                physicsPanelEditBuffer[64]; ///< Temporary buffer for live editing
+    u32                 physicsPanelEditCursor;     ///< Cursor position in edit buffer
 } LobbyGame_St;
 
 #endif // USER_TYPES_H
