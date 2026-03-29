@@ -247,9 +247,16 @@ void choosePlayerTexture(LobbyGame_St* const game) {
         u32 keybind;
         u32 textureId;
     } keybindTextureIdAssociations[__playerTextureCount] = {
-        {KEY_ONE, PLAYER_TEXTURE_DEFAULT},
-        {KEY_TWO, PLAYER_TEXTURE_EARTH},
+        {KEY_ONE,   PLAYER_TEXTURE_DEFAULT},
+        {KEY_TWO,   PLAYER_TEXTURE_EARTH},
         {KEY_THREE, PLAYER_TEXTURE_TROLL_FACE},
+        {KEY_FOUR,  PLAYER_TEXTURE_BATTLESHIP_TODO},
+        {KEY_FIVE,  PLAYER_TEXTURE_BINGO_TODO},
+        {KEY_SIX,   PLAYER_TEXTURE_CONNECT_4_TODO},
+        {KEY_SEVEN, PLAYER_TEXTURE_KFF_TODO},
+        {KEY_EIGHT, PLAYER_TEXTURE_MINIGOLF_TODO},
+        {KEY_NINE,  PLAYER_TEXTURE_MORPION_TODO},
+        {KEY_ZERO,  PLAYER_TEXTURE_OTHELLO_TODO},
     };
 
     u32 pressedKey = GetKeyPressed();
