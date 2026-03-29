@@ -24,10 +24,15 @@
 */
 
 #include "core/game.h"              // GameScene_Et, general game types
+
 #include "ui/connection_screen.h"
+#include "ui/app.h"
+
 #include "setups/app.h"
+
 #include "utils/globals.h"
 
+#include "systemSettings.h"
 #include "APIs/generalAPI.h"
 
 s32 networkSocket = 0;
@@ -176,6 +181,14 @@ int main(void) {
     while (!WindowShouldClose()) {
         f32 dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
+
+        if (IsWindowResized()) {
+            systemSettings.video.width  = GetScreenWidth();
+            systemSettings.video.height = GetScreenHeight();
+            
+            updateUIOnResize();           // <--- This updates ALL UI positions
+        }
+
         receiveNetworkData();
 
         static bool switch_sent = false;
