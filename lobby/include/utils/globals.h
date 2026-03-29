@@ -62,4 +62,12 @@ extern Rectangle skinButtonRect;
 */
 extern Texture2D logoSkinButton;
 
+/**
+    @brief Whether the physics debug panel is visible (toggle with F2).
+*/
+extern bool showPhysicsDebugPanel;
+
+
+extern f32 panelScrollY;
+
 #endif // UTILS_GLOBALS_H

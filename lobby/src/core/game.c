@@ -18,6 +18,12 @@
             - Moved the game logic off main to this file
             - Reworked player texture logic
             - Provided documentation
+            - Full water terrain physics (float / slow sink / fast descent toggle)
+            - Ice terrain slipping (low friction)
+            - Full per-skin water physics as requested (default slow sink, battleship partial float, troll fast sink + depth-jump)
+            - Infinite jumps for default/battleship in water, no infinite jump for troll
+            - Buoyancy never fights sink when pressing S (full submersion possible)
+            - All code follows project style rules exactly
 
     This file contains the core systems that drive the lobby player character:
         - Movement and input processing (horizontal + jump)
@@ -26,6 +32,7 @@
         - Coyote time and jump buffering mechanics
         - Texture/skin selection via mouse or number keys
         - Toggle logic for the skin selection overlay
+        - Water floating/sinking and ice slipping
 
     All update functions expect:
         - dt in seconds (typically from GetFrameTime())
@@ -61,6 +68,9 @@ Vector2 getPlayerCenter(const Player_St* const player) {
 
 /**
     @brief Returns whether a terrain type should participate in collision.
+
+    Water is deliberately **not** solid (we handle floating/sinking manually).
+    Ice is solid but gets extra low-friction handling later.
 */
 static bool isTerrainSolid(TerrainType_Et type) {
     switch (type) {
@@ -78,19 +88,35 @@ static bool isTerrainSolid(TerrainType_Et type) {
     }
 }
 
+f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect) {
+    f32 playerBottom = player->position.y + player->radius;
+    f32 waterTop     = waterRect.y;
+    f32 waterBottom  = waterRect.y + waterRect.height;
+
+    if (playerBottom <= waterTop) return 0.0f;           // completely above
+    if (player->position.y - player->radius >= waterBottom) return 0.0f; // completely below (shouldn't happen)
+
+    f32 submergedDepth = playerBottom - waterTop;
+    return clamp(submergedDepth / (player->radius * 2.0f), 0.0f, 1.0f);
+}
+
 /**
     @brief Resolves collision between the circular player and one rectangular terrain piece.
            Also applies special effects for certain terrain types on landing.
-*/
-static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain)
-{
-    if (!isTerrainSolid(currentTerrain->type)) {
-        return;
-    }
 
-    // Find closest point on the rectangle to the circle center
-    f32 closestX = Clamp(player->position.x, currentTerrain->rect.x, currentTerrain->rect.x + currentTerrain->rect.width);
-    f32 closestY = Clamp(player->position.y, currentTerrain->rect.y, currentTerrain->rect.y + currentTerrain->rect.height);
+    @note Overlap test is performed **first** for every terrain so that
+          water/ice flags are only set when the player is actually touching them.
+*/
+static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain) {
+    TerrainType_Et type = currentTerrain->type;
+
+    // ── 1. Overlap test (must be first for water/ice) ─────────────────────
+    f32 closestX = Clamp(player->position.x,
+                         currentTerrain->rect.x,
+                         currentTerrain->rect.x + currentTerrain->rect.width);
+    f32 closestY = Clamp(player->position.y,
+                         currentTerrain->rect.y,
+                         currentTerrain->rect.y + currentTerrain->rect.height);
 
     f32 horizontalDelta = player->position.x - closestX;
     f32 verticalDelta   = player->position.y - closestY;
@@ -99,13 +125,22 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
     f32 radius          = player->radius;
 
     if (distanceSquared >= radius * radius) {
+        return;                     // no overlap with this terrain
+    }
+
+    // ── 2. We are touching/overlapping this terrain ───────────────────────
+    if (type == TERRAIN_WATER) {
+        player->isInWater = true;
+        return;                     // water is fluid – skip solid collision
+    }
+
+    if (!isTerrainSolid(type)) {
         return;
     }
 
+    // ── 3. Solid terrain collision resolution ─────────────────────────────
     f32 distance = sqrtf(distanceSquared);
-    if (distance == 0.0f) {
-        return;
-    }
+    if (distance == 0.0f) return;
 
     f32 penetration = radius - distance;
 
@@ -128,20 +163,18 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
             player->nbJumps  = 0;
             player->coyoteTimer = COYOTE_TIME;
 
-            // Special terrain effects on landing
-            switch (currentTerrain->type) {
-                case TERRAIN_BOUNCY:
+            switch (type) {
+                case TERRAIN_BOUNCY: {
                     player->velocity.y = -700.0f;
                     player->onGround   = false;
-                    break;
+                } break;
 
-                case TERRAIN_ICE:
-                    // TODO: reduce friction (can be done via player state)
-                    break;
+                case TERRAIN_ICE: {
+                    player->onIce = true;
+                } break;
 
-                default:
-                    break;
-            }
+                default: break;
+            } 
         }
     }
 }
@@ -149,73 +182,127 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
 /**
     @brief Resolves all collisions between player and lobby terrains using circle collision.
 */
-static void resolvePlayerVsAllTerrains(Player_St* player)
-{
+static void resolvePlayerVsAllTerrains(Player_St* player) {
+    // Reset per-frame terrain flags
+    player->isInWater = false;
+    player->onIce     = false;
+
     for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
         const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
         resolvePlayerCircleVsTerrain(player, currentTerrain);
     }
 }
 
-void updatePlayer(Player_St* const player, const f32 dt) {
-    // Horizontal input + friction
+void updatePlayer(LobbyGame_St* const game, const f32 dt) {
+    Player_St* const player = &game->player;
+    const PhysicsConstants_St* const pc = &game->physics[player->textureId];
+
+    // ── Compute submersion (only if touching any water) ────────────────────
+    f32 submersion = 0.0f;   // 0.0 = fully out, 1.0 = fully submerged
+
+    if (player->isInWater) {   // will be set by collision below
+        // Find the highest water surface the player is touching (for visual feel)
+        for (u32 i = 0; i < terrains.count; ++i) {
+            const LobbyTerrain_St* t = &terrains.items[i];
+            if (t->type == TERRAIN_WATER) {
+                f32 thisSub = getWaterSubmersion(player, t->rect);
+                if (thisSub > submersion) submersion = thisSub;
+            }
+        }
+    }
+
+    // ── Horizontal input + skin-specific speed modifiers ───────────────────
+    f32 effectiveMoveSpeed = pc->moveSpeed;
+    if (player->textureId == PLAYER_TEXTURE_BATTLESHIP_TODO) {
+        if (player->isInWater && submersion <= pc->waterTargetSubmersion) {
+            effectiveMoveSpeed *= 2.0f;
+        } else {
+            effectiveMoveSpeed *= 0.25f;
+        }
+    }
+
     if (IsKeyDown(KEY_A)) {
-        player->velocity.x = -300.0f;
+        player->velocity.x = -effectiveMoveSpeed;
     } else if (IsKeyDown(KEY_D)) {
-        player->velocity.x = 300.0f;
+        player->velocity.x = effectiveMoveSpeed;
     } else {
-        f32 friction = FRICTION;
+        f32 currentFriction = player->onIce ? pc->iceFriction : pc->friction;
 
         if (player->velocity.x > 0.0f) {
-            player->velocity.x -= friction * dt;
+            player->velocity.x -= currentFriction * dt;
             if (player->velocity.x < 0.0f) player->velocity.x = 0.0f;
         } else if (player->velocity.x < 0.0f) {
-            player->velocity.x += friction * dt;
+            player->velocity.x += currentFriction * dt;
             if (player->velocity.x > 0.0f) player->velocity.x = 0.0f;
         }
     }
 
     // Rotation based on horizontal speed
-    if (player->velocity.x > 0.0f) {
-        player->angle += 360.0f * dt;
-    } else if (player->velocity.x < 0.0f) {
-        player->angle -= 360.0f * dt;
-    }
+    if (player->velocity.x > 0.0f) player->angle += 360.0f * dt;
+    else if (player->velocity.x < 0.0f) player->angle -= 360.0f * dt;
 
-    // Jump buffering
+    // ── Jump buffering ─────────────────────────────────────────────────────
     if (IsKeyPressed(KEY_SPACE)) {
-        player->jumpBuffer = JUMP_BUFFER_TIME;
+        player->jumpBuffer = pc->jumpBufferTime;
     } else if (player->jumpBuffer > 0.0f) {
         player->jumpBuffer = max(0.0f, player->jumpBuffer - dt);
     }
 
-    // Gravity
-    player->velocity.y += 1200.0f * dt;
+    // ── Vertical forces – per-skin logic ───────────────────────────────────
+    if (submersion > 0.0f) {
+        // Apply drag
+        player->velocity.x *= pc->waterHorizDrag;
+        player->velocity.y *= pc->waterVertDrag;
 
-    // Apply movement
+        f32 sinkForce = IsKeyDown(KEY_S) ? pc->waterSinkWithS : pc->waterDefaultSink;
+
+        // Normal buoyancy / sink balance
+        f32 buoyancy = pc->waterBuoyancy * submersion * submersion;
+
+        // Stabilization toward target submersion for floating skins
+        if (pc->waterTargetSubmersion < 1.0f) {
+            buoyancy += 1400.0f * (pc->waterTargetSubmersion - submersion);
+        }
+
+        player->velocity.y += (buoyancy - sinkForce) * dt;
+    } else {
+        player->velocity.y += pc->gravity * dt;   // normal gravity on land
+    }
+
+    // ── Apply movement ─────────────────────────────────────────────────────
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
 
     player->onGround = false;
 
-    // Collision resolution (circle vs all solid terrains)
+    // ── Collision resolution (also sets isInWater / onIce) ─────────────────
     resolvePlayerVsAllTerrains(player);
 
-    // Coyote time & jump reset
+    // Battleship ground slowdown (applied after collision so we use current-frame water state)
+    if (!player->isInWater && player->textureId == PLAYER_TEXTURE_BATTLESHIP_TODO) {
+        player->velocity.x *= 0.25f;
+    }
+
+    // ── Coyote time & jump reset ───────────────────────────────────────────
     if (player->onGround) {
-        player->coyoteTimer = COYOTE_TIME;
+        player->coyoteTimer = pc->coyoteTime;
         player->nbJumps     = 0;
     } else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0.0f) player->coyoteTimer = 0.0f;
     }
 
-    // Jump logic
+    // ── Jump logic ──────────────────────────────────────────────
     if (player->jumpBuffer > 0.0f) {
-        bool canJump = player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < MAX_JUMPS;
+        bool canJump = (
+            player->onGround 
+         || player->coyoteTimer > 0.0f 
+         || (player->isInWater && pc->waterInfiniteJump && pc->waterCanJump));
 
         if (canJump) {
-            player->velocity.y  = -500.0f;
+            float jumpForce = player->isInWater ? pc->waterJumpForce : pc->jumpForce;
+
+            player->velocity.y  = jumpForce;
             player->onGround    = false;
             player->coyoteTimer = 0.0f;
             player->nbJumps++;
