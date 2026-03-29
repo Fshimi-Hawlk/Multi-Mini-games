@@ -19,7 +19,7 @@
 
 #include "ui/game.h"
 #include "ui/app.h"
-#include "ui/editor.h"
+#include "editor/editor.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"

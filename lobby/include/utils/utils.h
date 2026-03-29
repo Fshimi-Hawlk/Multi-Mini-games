@@ -199,6 +199,10 @@ do { \
     nl \
 } while (0)
 
+#define getRectPos(rect) (Vector2) {(rect).x, (rect).y}
+#define getRectSize(rect) (Vector2) {(rect).width, (rect).height}
+#define getRectCenterPos(rect) (Vector2) {(rect).x + (rect).width / 2.0f, (rect).y + (rect).height / 2.0f}
+
 /**
     @brief Returns the full source rectangle of a texture ({0, 0, w, h}).
 
