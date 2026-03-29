@@ -53,7 +53,7 @@ Error_Et initApp(void) {
 
     // ── Initialization ───────────────────────────────────────────────────────
     InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
-    SetWindowPosition(100, 50);
+    // SetWindowPosition(100, 50);
 
 #ifdef LOGGER_H
     init_logger();

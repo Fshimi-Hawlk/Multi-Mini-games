@@ -94,7 +94,7 @@ void lobby_init(void) {
         error =  ERROR_TEXTURE_LOAD;
     }
 
-    lobby_game.currentState = GAME_STATE_GAMEPLAY;
+    lobby_game.currentState = GAME_STATE_CONNECTION;
 
     lobby_game.selectedTerrainIndex = -1;
     lobby_game.isDragging = false;
