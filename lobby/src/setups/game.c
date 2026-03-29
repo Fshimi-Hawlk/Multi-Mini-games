@@ -6,6 +6,7 @@
 */
 
 #include "setups/game.h"
+#include "editor/io.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"
@@ -78,10 +79,14 @@ Error_Et gameInit(void) {
     // Initialize dynamic array with reasonable starting capacity
     da_reserve(&terrains, 64);
 
-    // Copy initial hardcoded terrains into dynamic array
-    for (u32 i = 0; i < ARRAY_LEN(_oldTerrainContent); ++i) {
-        da_append(&terrains, _oldTerrainContent[i]);
+    bool ok = editorLoadLevel(ASSET_PATH "levels/lobby.dat");
+    if (!ok) {
+        // Copy initial hardcoded terrains into dynamic array
+        for (u32 i = 0; i < ARRAY_LEN(_oldTerrainContent); ++i) {
+            da_append(&terrains, _oldTerrainContent[i]);
+        }
     }
+
 
     log_info("Game initialized with %zu dynamic terrains", terrains.count);
 
