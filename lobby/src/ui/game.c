@@ -37,40 +37,28 @@
 #include "utils/globals.h"
 
 void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
-    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
+    Texture2D texture = playerVisuals->textures[player->textureId];
+
+    if (!IsTextureValid(texture)) {
         DrawCircleV(player->position, player->radius, BLUE);
-    } else {
-        DrawTexturePro(
-            playerVisuals->textures[player->textureId],
-            getTextureRec(playerVisuals->textures[player->textureId]),
-            getPlayerCollisionBox(player),
-            getPlayerCenter(player),
-            player->angle,
-            WHITE
-        );
+        return;
     }
+
+    DrawTexturePro(
+        playerVisuals->textures[player->textureId],
+        getTextureRec(playerVisuals->textures[player->textureId]),
+        getPlayerCollisionBox(player),
+        getPlayerCenter(player),
+        player->angle,
+        WHITE
+    );
 }
 
-/**
-    @brief Renders all lobby terrains and game interaction zones.
-    Different terrain types can have custom visuals later (textures, particles, etc.).
-*/
 void drawLobbyTerrains(void) {
     // Terrains
     for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
         const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
-
-        if (currentTerrain->type == TERRAIN_DECORATIVE) {
-            Color drawColor = currentTerrain->color;
-            drawColor.a = 180;
-            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, drawColor);
-        } else if (currentTerrain->type == TERRAIN_WATER) {
-            Color drawColor = currentTerrain->color;
-            drawColor.a = 200;
-            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, drawColor);
-        } else {
-            DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, currentTerrain->color);
-        }
+        DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, currentTerrain->color);
     }
 
     // Draw interaction zones

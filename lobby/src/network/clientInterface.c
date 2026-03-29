@@ -13,13 +13,14 @@
 #include "ui/editor.h"
 
 #include "utils/globals.h"
+#include "utils/utils.h"
 
 #include "systemSettings.h"
 
 LobbyGame_St lobby_game = {0};
 
-f32Vector2 lastSentPos = {0};
-bool firstFrame = true;
+static f32Vector2 lastSentPos = {0};
+static bool firstFrame = true;
 
 /**
  * @brief Initializes the lobby module (loads textures, sets camera).
@@ -36,15 +37,17 @@ void lobby_init(void) {
 
     /** Player controlled by the user in the lobby */
     lobby_game.player = (Player_St) {
-        .position   = {0, 0},
-        .radius     = 20,
-        .coyoteTime = 0.1f,
-        .coyoteTimer= 0.1f,
-        .jumpBuffer = 0.2f
+        .position         = {0, 0},
+        .radius           = 20,
+        .coyoteTime       = 0.1f,
+        .coyoteTimer      = 0.1f,
+        .unlockedTextures = {
+            [PLAYER_TEXTURE_DEFAULT] = true,
+            [PLAYER_TEXTURE_EARTH] = true,
+            [PLAYER_TEXTURE_TROLL_FACE] = true,
+            [PLAYER_TEXTURE_BATTLESHIP_TODO] = true,
+        },
     };
-
-    lobby_game.player.unlockedTextures[PLAYER_TEXTURE_DEFAULT] = 1;
-    lobby_game.player.unlockedTextures[PLAYER_TEXTURE_EARTH] = 1;
 
     /** Camera following the player in 2D mode */
     lobby_game.cam = (Camera2D) {
@@ -57,18 +60,22 @@ void lobby_init(void) {
     };
 
     // Load shared UI textures
-    lobby_game.playerVisuals.textures[PLAYER_TEXTURE_EARTH] = LoadTexture(IMAGES_PATH "earth.png");
-    if (!IsTextureValid(lobby_game.playerVisuals.textures[PLAYER_TEXTURE_EARTH])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "earth.png");
-        error =  ERROR_TEXTURE_LOAD;
+    const char* playerTextureImagePaths[__playerTextureCount] = {
+        [PLAYER_TEXTURE_EARTH]      = IMAGES_PATH "earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+    };
+
+    for (u8 i = 0; i < __playerTextureCount; ++i) {
+        const char* path = playerTextureImagePaths[i];
+        if (path == NULL) continue;
+
+        lobby_game.playerVisuals.textures[i] = LoadTexture(path);
+        if (!IsTextureValid(lobby_game.playerVisuals.textures[i])) {
+            log_warn("%s couldn't be loaded proprely.", path);
+            error =  ERROR_TEXTURE_LOAD;
+        }
     }
-    
-    lobby_game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(IMAGES_PATH "trollFace.png");
-    if (!IsTextureValid(lobby_game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "trollFace.png");
-        error =  ERROR_TEXTURE_LOAD;
-    }
-    
+
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
     if (!IsTextureValid(logoSkinButton)) {
         log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
@@ -182,7 +189,11 @@ void lobby_update(float dt) {
         return;
     }
 
-    updatePlayer(&lobby_game.player, dt);
+    if (IsKeyPressed(KEY_R)) {
+        lobby_game.player.position = (f32Vector2) {0};
+    }
+
+    updatePlayer(&lobby_game, dt);
     lobby_game.cam.target = lobby_game.player.position;
 
     toggleSkinMenu(&lobby_game);

@@ -12,6 +12,8 @@
 
 #include "systemSettings.h"
 
+#include "APIs/generalAPI.h"
+
 // Dynamic terrain array (replaces static terrains[])
 static LobbyTerrain_St _oldTerrainContent[] = {
     // ==================================================================
