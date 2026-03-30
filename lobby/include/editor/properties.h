@@ -22,6 +22,7 @@ extern DropDown_St  dropdownType;
 extern TextButton_St btnExitFocus;
 extern TextButton_St btnPickTarget;
 extern CheckBox_St   cbTwoWay;
+extern CheckBox_St   cbOnlyReceiver;
 
 extern bool propertiesGridSnapEnabled;
 extern f32  propertiesGridStep;

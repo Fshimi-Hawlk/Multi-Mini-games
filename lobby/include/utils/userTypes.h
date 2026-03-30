@@ -133,6 +133,9 @@ typedef struct {
     bool    isInWater;                          ///< True when player circle overlaps any TERRAIN_WATER rect this frame
     bool    waterFastDescent;                   ///< Ctrl+S toggle: fast descent + no buoyancy (cannot float back up)
     bool    onIce;                              ///< True when currently standing on TERRAIN_ICE (enables slippery friction)
+
+    // ── Portal teleportation safety ────────────────────────────────────────
+    float   portalTeleportCooldown;             ///< Seconds remaining before the player can be teleported again (prevents loops)
 } Player_St;
 
 /**
@@ -159,14 +162,20 @@ typedef enum {
     Extended from the original Platform_St to support the different zone types you requested.
 */
 typedef struct {
-    Rectangle      rect;                  ///< World position and size
-    Color          color;                 ///< Debug / base rendering color
-    float          roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
-    TerrainType_Et type;                  ///< Determines collision, movement, and effects
-    Vector2        velocity;              ///< Speed/direction for moving types (0 otherwise)
-    float          moveDistance;          ///< Oscillation distance for moving types (0 otherwise)
-    Vector2        portalTargetPosition;  ///< Where the player is teleported to
-    bool           isTwoWayPortal;        ///< True = bidirectional, false = one-way
+    // general properties
+    Rectangle      rect;                    ///< World position and size
+    Color          color;                   ///< Debug / base rendering color
+    float          roundness;               ///< 0.0f = sharp corners, 1.0f = fully rounded
+    TerrainType_Et type;                    ///< Determines collision, movement, and effects
+
+    // moving platform properties
+    Vector2        velocity;                ///< Speed/direction for moving types (0 otherwise)
+    float          moveDistance;            ///< Oscillation distance for moving types (0 otherwise)
+
+    // portal properties
+    Vector2        portalTargetPosition;    ///< Where the player is teleported to
+    bool           isTwoWayPortal;          ///< True = bidirectional, false = one-way
+    bool           isOnlyReceiverPortal;    ///< True = this portal never teleports the player (receiver only)
 } LobbyTerrain_St;
 
 typeDA(LobbyTerrain_St, TerrainVec_St);

@@ -47,6 +47,7 @@ TextButton_St btnExitFocus;
 
 TextButton_St btnPickTarget;
 CheckBox_St   cbTwoWay;
+CheckBox_St   cbOnlyReceiver;
 
 bool propertiesGridSnapEnabled = true;
 f32  propertiesGridStep        = 25.0f;
@@ -85,6 +86,8 @@ static void refreshSingleTerrainBuffers(s32 idx) {
     if (t->type == TERRAIN_PORTAL) {
         snprintf(tbTargetX.buffer, sizeof(tbTargetX.buffer), "%.1f", t->portalTargetPosition.x);
         snprintf(tbTargetY.buffer, sizeof(tbTargetY.buffer), "%.1f", t->portalTargetPosition.y);
+        cbTwoWay.checked = t->isTwoWayPortal;
+        cbOnlyReceiver.checked = t->isOnlyReceiverPortal;
     } else {
         tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
     }
@@ -109,6 +112,8 @@ static void applyPropertyChanges(LobbyTerrain_St* t) {
     if (t->type == TERRAIN_PORTAL) {
         if (tbTargetX.buffer[0]) t->portalTargetPosition.x = atof(tbTargetX.buffer);
         if (tbTargetY.buffer[0]) t->portalTargetPosition.y = atof(tbTargetY.buffer);
+        t->isTwoWayPortal = cbTwoWay.checked;
+        t->isOnlyReceiverPortal = cbOnlyReceiver.checked;
     }
 }
 
@@ -127,6 +132,8 @@ void refreshPropertyBuffers(const LobbyGame_St* const game) {
         tbRoundness.buffer[0] = tbVelX.buffer[0] = tbVelY.buffer[0] = tbMoveDist.buffer[0] = '\0';
         tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
         sliderRoundness.value = 0.0f;
+        cbTwoWay.checked = false;
+        cbOnlyReceiver.checked = false;
     }
 }
 
@@ -244,9 +251,16 @@ void updatePropertiesPanel(LobbyGame_St* const game) {
 
             // Two-way checkbox
             if (checkBoxUpdate(&cbTwoWay, mouse)) {
-                // If we just enabled two-way, try to make the link mutual
-                if (cbTwoWay.checked) {
-                    // (logic in input.c will handle on next click)
+                applyPropertyChanges(t);   // sync immediately
+            }
+
+            // Only-receiver checkbox
+            if (checkBoxUpdate(&cbOnlyReceiver, mouse)) {
+                applyPropertyChanges(t);
+                // When "only receiver" is enabled, we disable target editing
+                if (cbOnlyReceiver.checked) {
+                    tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
+                    t->portalTargetPosition = getRectCenterPos(t->rect);
                 }
             }
         }
@@ -319,4 +333,10 @@ void propertiesInit(void) {
     cbTwoWay.checked = false;
     cbTwoWay.label = "Two-way";
     cbTwoWay.state = WIDGET_STATE_NORMAL;
+
+    // Only-receiver checkbox
+    cbOnlyReceiver.bounds = (Rectangle){0,0,24,24};
+    cbOnlyReceiver.checked = false;
+    cbOnlyReceiver.label = "Only Receiver";
+    cbOnlyReceiver.state = WIDGET_STATE_NORMAL;
 }

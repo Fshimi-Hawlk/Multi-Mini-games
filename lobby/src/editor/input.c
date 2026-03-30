@@ -44,6 +44,7 @@
 #include "editor/utils.h"
 #include "editor/properties.h"
 #include "editor/io.h"
+#include "editor/codegen.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"
