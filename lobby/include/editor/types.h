@@ -77,6 +77,6 @@ extern s32 pasteAnchorIndex;
 
 extern TextButton_St btnLoad;
 extern TextButton_St btnSave;
-extern TextBox_St    tbFileName;
+extern TextButton_St btnGenerate;
 
 #endif // EDITOR_TYPES_H

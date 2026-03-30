@@ -145,12 +145,13 @@ char* editorShowOpenDialog(const char* defaultPath) {
     return strdup(path);   // caller must free()
 }
 
-char* editorShowSaveDialog(const char* defaultName) {
+char* editorShowSaveDialog(const char* defaultName, const char* ext) {
     char cmd[1024];
     snprintf(cmd, sizeof(cmd),
         "zenity --file-selection --save --confirm-overwrite --title=\"Save Level\" "
-        "--file-filter=\"Level files (*.dat)|*.dat\" --filename=\"" ASSET_PATH "levels/%s.dat\" 2>/dev/null",
-        defaultName ? defaultName : "untitledLevel");
+        "--file-filter=\"Level files (*%s)|*%s\" --filename=\"" ASSET_PATH "levels/%s%s\" 2>/dev/null",
+        ext, ext, defaultName ? defaultName : "untitledLevel", ext
+    );
 
     FILE* pipe = popen(cmd, "r");
     if (!pipe) return NULL;
