@@ -54,6 +54,6 @@ void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* co
 
     Renders each platform as a rounded rectangle using its stored rect, color and roundness.
 */
-void drawLobbyTerrains(void);
+void drawLobbyTerrains(TerrainVec_St terrains, const GameInteractionZone_St gameInteractionZones[__miniGameCount]);
 
 #endif // UI_GAME_H

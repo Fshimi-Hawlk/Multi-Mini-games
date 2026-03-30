@@ -101,25 +101,6 @@ typedef struct {
 } Player_St;
 
 /**
-    @brief Terrain/platform types in the lobby world.
-    Each type can trigger different gameplay effects (movement, friction, hazards, visuals).
-    @note Effects are implemented in the lobby update/render functions – this struct only stores the data.
-*/
-typedef enum {
-    TERRAIN_NORMAL,      ///< Standard solid ground – no special effect
-    TERRAIN_WOOD,        ///< Wooden aesthetic (slight sound variation)
-    TERRAIN_STONE,       ///< Stone/rock look (hard surface)
-    TERRAIN_ICE,         ///< Slippery – reduce player friction
-    TERRAIN_BOUNCY,      ///< Jump pad – gives extra upward impulse on contact
-    TERRAIN_MOVING_H,    ///< Moves horizontally (ping-pong within moveDistance)
-    TERRAIN_MOVING_V,    ///< Moves vertically (ping-pong within moveDistance)
-    TERRAIN_WATER,       ///< Shallow water zone – visual splash, optional slow-down
-    TERRAIN_DECORATIVE,  ///< Visual only (trees, bushes, signs) – no collision
-    TERRAIN_PORTAL,      ///< Teleport zone (destination stored in portalTargetPosition)
-    __terrainTypeCount
-} TerrainType_Et;
-
-/**
     @brief One piece of terrain in the lobby world.
     Extended from the original Platform_St to support the different zone types you requested.
 */
@@ -127,11 +108,6 @@ typedef struct {
     Rectangle      rect;                  ///< World position and size
     Color          color;                 ///< Debug / base rendering color
     float          roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
-    TerrainType_Et type;                  ///< Determines collision, movement, and effects
-    Vector2        velocity;              ///< Speed/direction for moving types (0 otherwise)
-    float          moveDistance;          ///< Oscillation distance for moving types (0 otherwise)
-    Vector2        portalTargetPosition;  ///< Where the player is teleported to
-    bool           isTwoWayPortal;        ///< True = bidirectional, false = one-way
 } LobbyTerrain_St;
 
 typeDA(LobbyTerrain_St, TerrainVec_St);
@@ -153,6 +129,6 @@ typedef struct{
     Player_St           player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state
     Camera2D            cam;                        ///< 2D camera following the player
-};
+} LobbyGame_St;
 
 #endif // USER_TYPES_H
