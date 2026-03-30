@@ -50,7 +50,6 @@
 
 #include "widgets/scrollFrame.h"
 #include "widgets/button.h"
-#include "widgets/textBox.h"
 
 #include "systemSettings.h"
 
@@ -93,16 +92,20 @@ void updateEditor(LobbyGame_St* const game, f32 dt) {
     }
 
     if (textButtonUpdate(&btnSave, mouseScreen)) {
-        char* selected = editorShowSaveDialog(tbFileName.buffer);
+        char* selected = editorShowSaveDialog("LevelName", ".dat");
         if (selected) {
-            // extract base name for backup if needed
-            editorCreateBackup(tbFileName.buffer);   // optional: always backup before overwrite
             editorSaveLevel(selected);
             free(selected);
         }
     }
 
-    textBoxUpdate(&tbFileName, mouseScreen);
+    if (textButtonUpdate(&btnGenerate, mouseScreen)) {
+        char* selected = editorShowSaveDialog("generated-levelName", ".c");
+        if (selected) {
+            editorGenerateCode(game, selected);
+            free(selected);
+        }
+    }
 
     // Palette selection (scroll-aware)
     if (game->showLeftPalette && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {

@@ -221,7 +221,7 @@ void drawEditor(const LobbyGame_St* const game) {
 
     textButtonDraw(&btnLoad, lobby_fonts[FONT18], 18);
     textButtonDraw(&btnSave, lobby_fonts[FONT18], 18);
-    textBoxDraw(&tbFileName, lobby_fonts[FONT18], 18);
+    textButtonDraw(&btnGenerate, lobby_fonts[FONT18], 18);
 
     // Left palette
     if (game->showLeftPalette) {
@@ -350,6 +350,11 @@ void drawEditor(const LobbyGame_St* const game) {
                     // Two-way checkbox
                     cbTwoWay.bounds = (Rectangle){propertiesArea.x + 20, y, 24, 24};
                     checkBoxDraw(&cbTwoWay, lobby_fonts[FONT18], 18);
+                    y += 40;
+
+                    // Only-receiver checkbox
+                    cbOnlyReceiver.bounds = (Rectangle){propertiesArea.x + 20, y, 24, 24};
+                    checkBoxDraw(&cbOnlyReceiver, lobby_fonts[FONT18], 18);
                     y += 40;
                 }
 

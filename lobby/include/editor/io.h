@@ -43,6 +43,6 @@ char* editorShowOpenDialog(const char* defaultPath);
     @param defaultName Suggested filename (e.g. "myLevel")
     @return Allocated path string or NULL if cancelled
 */
-char* editorShowSaveDialog(const char* defaultName);
+char* editorShowSaveDialog(const char* defaultName, const char* ext);
 
 #endif // EDITOR_IO_H
