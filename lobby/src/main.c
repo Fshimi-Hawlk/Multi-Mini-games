@@ -203,7 +203,7 @@ int main(void) {
 
             case GAME_STATE_GAMEPLAY: {
                 if (currentMiniGameID == MINI_GAME_LOBBY) {
-                    MiniGame_Et miniGameId = checkGameTrigger();
+                    MiniGame_Et miniGameId = checkGameTrigger(&lobby_game.player);
                     bool trigger = miniGameId != MINI_GAME_LOBBY;
                     
                     if (trigger && !switch_sent) {

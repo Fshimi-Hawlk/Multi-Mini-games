@@ -1,9 +1,19 @@
 /**
- * @file lobby_module.c
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-18
- * @brief Implementation of the Lobby mini-game module.
- */
+    @file clientInterface.c
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-03-18
+    @date 2026-03-27
+    @brief Implementation of the Lobby mini-game module.
+
+    Contributors:
+        - i-Charlys (CAILLON Charles):
+            - Original implementation
+        - Fshimi-Hawlk:
+            - Refactored the whole code
+            - Added level editor logic
+            - Added initialization of new water/ice physics fields in `lobby_init`
+*/
+
 
 #include "core/game.h"
 #include "core/chat.h"
@@ -12,13 +22,14 @@
 #include "ui/app.h"
 
 #include "utils/globals.h"
+#include "utils/utils.h"
 
 #include "systemSettings.h"
 
 LobbyGame_St lobby_game = {0};
 
-f32Vector2 lastSentPos = {0};
-bool firstFrame = true;
+static f32Vector2 lastSentPos = {0};
+static bool firstFrame = true;
 
 /**
  * @brief Initializes the lobby module (loads textures, sets camera).
@@ -35,15 +46,18 @@ void lobby_init(void) {
 
     /** Player controlled by the user in the lobby */
     lobby_game.player = (Player_St) {
-        .position   = {0, 0},
-        .radius     = 20,
-        .coyoteTime = 0.1f,
-        .coyoteTimer= 0.1f,
-        .jumpBuffer = 0.2f
-    };
+        .position           = {0, 0},
+        .radius             = 20,
+        .coyoteTime         = 0.1f,
+        .coyoteTimer        = 0.1f,
 
-    lobby_game.player.unlockedTextures[PLAYER_TEXTURE_DEFAULT] = 1;
-    lobby_game.player.unlockedTextures[PLAYER_TEXTURE_EARTH] = 1;
+        .unlockedTextures   = {
+            [PLAYER_TEXTURE_DEFAULT] = true,
+            [PLAYER_TEXTURE_EARTH] = true,
+            [PLAYER_TEXTURE_TROLL_FACE] = true,
+            [PLAYER_TEXTURE_BATTLESHIP_TODO] = true,
+        },
+    };
 
     /** Camera following the player in 2D mode */
     lobby_game.cam = (Camera2D) {
@@ -56,16 +70,20 @@ void lobby_init(void) {
     };
 
     // Load shared UI textures
-    lobby_game.playerVisuals.textures[PLAYER_TEXTURE_EARTH] = LoadTexture(IMAGES_PATH "earth.png");
-    if (!IsTextureValid(lobby_game.playerVisuals.textures[PLAYER_TEXTURE_EARTH])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "earth.png");
-        error =  ERROR_TEXTURE_LOAD;
-    }
-    
-    lobby_game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(IMAGES_PATH "trollFace.png");
-    if (!IsTextureValid(lobby_game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "trollFace.png");
-        error =  ERROR_TEXTURE_LOAD;
+    const char* playerTextureImagePaths[__playerTextureCount] = {
+        [PLAYER_TEXTURE_EARTH]      = IMAGES_PATH "earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+    };
+
+    for (u8 i = 0; i < __playerTextureCount; ++i) {
+        const char* path = playerTextureImagePaths[i];
+        if (path == NULL) continue;
+
+        lobby_game.playerVisuals.textures[i] = LoadTexture(path);
+        if (!IsTextureValid(lobby_game.playerVisuals.textures[i])) {
+            log_warn("%s couldn't be loaded proprely.", path);
+            error =  ERROR_TEXTURE_LOAD;
+        }
     }
     
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
@@ -73,6 +91,8 @@ void lobby_init(void) {
         log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
         error =  ERROR_TEXTURE_LOAD;
     }
+
+    lobby_game.currentState = GAME_STATE_CONNECTION;
 
     // TODO: To be made as a printError fn
     switch (error) {
@@ -166,12 +186,16 @@ void lobby_update(float dt) {
         return;
     }
 
-    updatePlayer(&lobby_game.player, platforms, platformCount, dt);
+    if (IsKeyPressed(KEY_R)) {
+        lobby_game.player.position = (f32Vector2) {0};
+    }
+
+    updatePlayer(&lobby_game.player, dt);
     lobby_game.cam.target = lobby_game.player.position;
 
-    toggleSkinMenu(&lobby_game);
+    toggleSkinMenu(&lobby_game.playerVisuals);
     if (lobby_game.playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&lobby_game);
+        choosePlayerTexture(&lobby_game.player, &lobby_game.playerVisuals);
     }
 
     bool doSendNewPos = lobby_game.player.position.x != lastSentPos.x 
@@ -205,7 +229,7 @@ void lobby_update(float dt) {
  */
 void lobby_draw(void) {
     BeginMode2D(lobby_game.cam); {
-        drawLobbyTerrains();
+        drawLobbyTerrains(terrains, gameInteractionZones);
         drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
         
         for (int i = 0; i < MAX_CLIENTS; i++) {
@@ -213,14 +237,20 @@ void lobby_draw(void) {
             drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
         }
     } EndMode2D();
-
-        for (u8 i = 1; i < __miniGameCount; ++i) {
-            DrawRectangleRec(lobby_game.miniGameManager.gameHitboxes[i], RED); // Debug hitbox
-        }
-    EndMode2D();
     
+    static f32 lobbyTextXPos;
     lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
     DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
+
+    const char *playerPosText = TextFormat(vec2fStr, vec2Fmt(lobby_game.player.position));
+    static f32Vector2 playerPosTextSize, playerPosTextPos;
+    playerPosTextSize = MeasureTextEx(lobby_fonts[FONT18], playerPosText, 18, 0);
+    playerPosTextPos = (f32Vector2) {
+        .x = systemSettings.video.width - 100 - playerPosTextSize.x / 2.0f,
+        .y = 25 + playerPosTextSize.y / 2.0f
+    };
+
+    DrawTextEx(lobby_fonts[FONT18], playerPosText, playerPosTextPos, 18, 0, WHITE);
 
     drawSkinButton();
     if (lobby_game.playerVisuals.isTextureMenuOpen) {

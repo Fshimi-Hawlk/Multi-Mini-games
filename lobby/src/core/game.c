@@ -60,34 +60,10 @@ Vector2 getPlayerCenter(const Player_St* const player) {
 }
 
 /**
-    @brief Returns whether a terrain type should participate in collision.
-*/
-static bool isTerrainSolid(TerrainType_Et type) {
-    switch (type) {
-        case TERRAIN_NORMAL:
-        case TERRAIN_WOOD:
-        case TERRAIN_STONE:
-        case TERRAIN_ICE:
-        case TERRAIN_BOUNCY:
-        case TERRAIN_MOVING_H:
-        case TERRAIN_MOVING_V:
-            return true;
-
-        default:
-            return false;
-    }
-}
-
-/**
     @brief Resolves collision between the circular player and one rectangular terrain piece.
            Also applies special effects for certain terrain types on landing.
 */
-static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain)
-{
-    if (!isTerrainSolid(currentTerrain->type)) {
-        return;
-    }
-
+static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain) {
     // Find closest point on the rectangle to the circle center
     f32 closestX = Clamp(player->position.x, currentTerrain->rect.x, currentTerrain->rect.x + currentTerrain->rect.width);
     f32 closestY = Clamp(player->position.y, currentTerrain->rect.y, currentTerrain->rect.y + currentTerrain->rect.height);
@@ -127,21 +103,6 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
             player->onGround = true;
             player->nbJumps  = 0;
             player->coyoteTimer = COYOTE_TIME;
-
-            // Special terrain effects on landing
-            switch (currentTerrain->type) {
-                case TERRAIN_BOUNCY:
-                    player->velocity.y = -700.0f;
-                    player->onGround   = false;
-                    break;
-
-                case TERRAIN_ICE:
-                    // TODO: reduce friction (can be done via player state)
-                    break;
-
-                default:
-                    break;
-            }
         }
     }
 }
@@ -149,8 +110,7 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
 /**
     @brief Resolves all collisions between player and lobby terrains using circle collision.
 */
-static void resolvePlayerVsAllTerrains(Player_St* player)
-{
+static void resolvePlayerVsAllTerrains(Player_St* player, const TerrainVec_St terrains) {
     for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
         const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
         resolvePlayerCircleVsTerrain(player, currentTerrain);
@@ -199,7 +159,7 @@ void updatePlayer(Player_St* const player, const f32 dt) {
     player->onGround = false;
 
     // Collision resolution (circle vs all solid terrains)
-    resolvePlayerVsAllTerrains(player);
+    resolvePlayerVsAllTerrains(player, terrains);
 
     // Coyote time & jump reset
     if (player->onGround) {
@@ -224,21 +184,22 @@ void updatePlayer(Player_St* const player, const f32 dt) {
     }
 }
 
-void choosePlayerTexture(LobbyGame_St* const game) {
+void choosePlayerTexture(Player_St* const player, PlayerVisuals_St* const visuals) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
-        Rectangle destRect = game->playerVisuals.defaultTextureRect;
+        Rectangle destRect = visuals->defaultTextureRect;
         for (u32 i = 0; i < __playerTextureCount; ++i) {
             destRect.x = 20 + i * 60;
-            if (!game->player.unlockedTextures[i]) continue ;
+            if (!player->unlockedTextures[i]) continue;
+
             if (CheckCollisionPointRec(mousePos, destRect)) {
-                game->player.textureId = i;
-                game->playerVisuals.isTextureMenuOpen = false;
+                player->textureId = i;
+                visuals->isTextureMenuOpen = false;
                 break;
             }
         }
 
-        if (!game->playerVisuals.isTextureMenuOpen) return;
+        if (!visuals->isTextureMenuOpen) return;
     }
 
     PlayerTextureId_Et selectedId = __playerTextureCount;
@@ -247,9 +208,16 @@ void choosePlayerTexture(LobbyGame_St* const game) {
         u32 keybind;
         u32 textureId;
     } keybindTextureIdAssociations[__playerTextureCount] = {
-        {KEY_ONE, PLAYER_TEXTURE_DEFAULT},
-        {KEY_TWO, PLAYER_TEXTURE_EARTH},
+        {KEY_ONE,   PLAYER_TEXTURE_DEFAULT},
+        {KEY_TWO,   PLAYER_TEXTURE_EARTH},
         {KEY_THREE, PLAYER_TEXTURE_TROLL_FACE},
+        {KEY_FOUR,  PLAYER_TEXTURE_BATTLESHIP_TODO},
+        {KEY_FIVE,  PLAYER_TEXTURE_BINGO_TODO},
+        {KEY_SIX,   PLAYER_TEXTURE_CONNECT_4_TODO},
+        {KEY_SEVEN, PLAYER_TEXTURE_KFF_TODO},
+        {KEY_EIGHT, PLAYER_TEXTURE_MINIGOLF_TODO},
+        {KEY_NINE,  PLAYER_TEXTURE_MORPION_TODO},
+        {KEY_ZERO,  PLAYER_TEXTURE_OTHELLO_TODO},
     };
 
     u32 pressedKey = GetKeyPressed();
@@ -266,39 +234,36 @@ void choosePlayerTexture(LobbyGame_St* const game) {
         return;
     }
 
-    if (!game->player.unlockedTextures[selectedId]) {
+    if (!player->unlockedTextures[selectedId]) {
         // TODO: Display Warning Message that the texture is locked
         return;
     }
 
-    game->player.textureId = selectedId;
-    game->playerVisuals.isTextureMenuOpen = false;
+    player->textureId = selectedId;
+    visuals->isTextureMenuOpen = false;
 }
 
 /**
  * @brief Toggles the skin selection menu visibility.
  */
-void toggleSkinMenu(LobbyGame_St* const game) {
+void toggleSkinMenu(PlayerVisuals_St* const visuals) {
     bool cond = (
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)
     ) || IsKeyPressed(KEY_P);
 
     if (cond) {
-        game->playerVisuals.isTextureMenuOpen = !game->playerVisuals.isTextureMenuOpen;
+        visuals->isTextureMenuOpen = !visuals->isTextureMenuOpen;
     }
 }
 
-/**
- * @brief Checks if the player has triggered a game transition zone.
- * @param player Pointer to the player structure.
- * @return 1 if King For Four is triggered, 0 otherwise.
- */
-MiniGame_Et checkGameTrigger(void) {
-    for (u8 i = 1; i < __miniGameCount; ++i) {
+MiniGame_Et checkGameTrigger(const Player_St* const player) {
+    for (u8 i = 0; i < __miniGameCount; ++i) {
+        if (i == MINI_GAME_LOBBY) continue;
+
         bool hasCollided = CheckCollisionCircleRec(
-            lobby_game.player.position, 
-            lobby_game.player.radius, 
+            player->position, 
+            player->radius, 
             gameInteractionZones[i].hitbox
         );
         

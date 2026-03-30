@@ -86,7 +86,7 @@ void updatePlayer(Player_St* const player, const f32 dt);
     @param player  Player whose textureId will be updated
     @param game    Lobby game state (to close the menu via playerVisuals)
  */
-void choosePlayerTexture(LobbyGame_St* const game);
+void choosePlayerTexture(Player_St* const player, PlayerVisuals_St* const visuals);
 
 /**
     @brief Toggles the skin selection menu visibility.
@@ -97,13 +97,13 @@ void choosePlayerTexture(LobbyGame_St* const game);
 
     @param game  Lobby game state (modifies playerVisuals.isTextureMenuOpen)
  */
-void toggleSkinMenu(LobbyGame_St* const game);
+void toggleSkinMenu(PlayerVisuals_St* const visuals);
 
 /**
  * @brief Checks if the player has triggered a game transition zone.
  * @param player Pointer to the player structure.
- * @return 1 if a trigger is activated, 0 otherwise.
+ * @return MiniGame_Et, the idx of the corresponding game
  */
-MiniGame_Et checkGameTrigger(void);
+MiniGame_Et checkGameTrigger(const Player_St* const player);
 
 #endif // CORE_GAME_H
