@@ -197,6 +197,12 @@ void updatePlayer(LobbyGame_St* const game, const f32 dt) {
     Player_St* const player = &game->player;
     const PhysicsConstants_St* const pc = &game->physics[player->textureId];
 
+    // ── Portal teleport cooldown countdown ─────────────────────────────────
+    if (player->portalTeleportCooldown > 0.0f) {
+        player->portalTeleportCooldown -= dt;
+        if (player->portalTeleportCooldown < 0.0f) player->portalTeleportCooldown = 0.0f;
+    }
+
     // ── Compute submersion (only if touching any water) ────────────────────
     f32 submersion = 0.0f;   // 0.0 = fully out, 1.0 = fully submerged
 
@@ -281,6 +287,27 @@ void updatePlayer(LobbyGame_St* const game, const f32 dt) {
     // Battleship ground slowdown (applied after collision so we use current-frame water state)
     if (!player->isInWater && player->textureId == PLAYER_TEXTURE_BATTLESHIP_TODO) {
         player->velocity.x *= 0.25f;
+    }
+
+    // ── Portal teleportation ───────────────────────────────────────────────
+    if (player->portalTeleportCooldown <= 0.0f) {
+        for (u32 i = 0; i < terrains.count; ++i) {
+            const LobbyTerrain_St* p = &terrains.items[i];
+            if (p->type != TERRAIN_PORTAL) continue;
+            if (p->isOnlyReceiverPortal) continue;
+
+            if (CheckCollisionCircleRec(player->position, player->radius, p->rect)) {
+                player->position = p->portalTargetPosition;
+
+                // Optional: small velocity reset to avoid instant re-collision
+                player->velocity.x *= 0.3f;
+                player->velocity.y *= 0.3f;
+
+                player->portalTeleportCooldown = 0.4f;
+
+                break;   // only teleport once per frame
+            }
+        }
     }
 
     // ── Coyote time & jump reset ───────────────────────────────────────────

@@ -53,7 +53,7 @@ s32 pasteAnchorIndex = 4;   // default = center (index 4 in 3x3 grid)
 
 TextButton_St btnLoad  = { .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, .text = "Load",  .baseColor = BLUE };
 TextButton_St btnSave  = { .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, .text = "Save",  .baseColor = GREEN };
-TextBox_St    tbFileName = { .bounds = {460.0f, 8.0f, 220.0f, 34.0f}, .buffer = "defaultLevel" };   // default name
+TextButton_St btnGenerate  = { .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, .text = "Code",  .baseColor = PURPLE };
 
 void initEditor(LobbyGame_St* const game) {
     // Reset drag & selection state
