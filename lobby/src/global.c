@@ -2,57 +2,47 @@
 #include "constant.h"
 #include "config.h"
 
-// --- CONFIGURATION DU LOBBY ---
-#define PLAT_W        120
-#define PLAT_H         30
-#define DOOR_H        200  // Hauteur de l'ouverture pour les jeux
-#define SCREEN_H      800  // Distance entre chaque étage de jeu
-#define STEP_Y         70  // Écart vertical entre deux plateformes (facile à monter)
-#define WALL_W        500
-#define GROUND_Y      500
-
 Platform_st platforms[] = {
     // --- SOL ---
-    {{-1000, GROUND_Y, 2000, 1000}, GREEN, 0},
+    {{-X_LIMIT, GROUND_Y, X_LIMIT * 2, 1000}, PLATFORM_TEXTURE_GRASS_ID},
 
-    // =========================================================
-    // ÉTAGE 1 (Y = 100 environ)
-    // =========================================================
-    // Murs avec ouverture de DOOR_H
-    {{-1000, 200, WALL_W, 300}, BLACK, 0}, 
-    {{500,   200, WALL_W, 300}, BLACK, 0},   
-    {{-1000, 200 - DOOR_H - 600, WALL_W, 600}, BLACK, 0}, 
-    {{500,   200 - DOOR_H - 600, WALL_W, 600}, BLACK, 0},   
+    // --- BAS DU TRONC (Fini l'escalier droit, on zigzag) ---
+    {{ -100, GROUND_Y - 100, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre
+    {{  100, GROUND_Y - 220, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Décalé droite
+    {{ -280, GROUND_Y - 340, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Décalé gauche
 
-    // Plateformes d'ascension (Calculées sur STEP_Y)
-    {{-100, GROUND_Y - (1*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ 150, GROUND_Y - (2*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{-200, GROUND_Y - (3*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{  50, GROUND_Y - (4*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ 280, GROUND_Y - (5*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{-320, GROUND_Y - (6*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ -50, GROUND_Y - (7*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
+    // --- PREMIER GROS ÉCARTEMENT (Les grosses branches du bas) ---
+    {{  -50, GROUND_Y - 450, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-droit
+    {{ -480, GROUND_Y - 440, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Extrême gauche (sur les feuilles)
+    {{  280, GROUND_Y - 460, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Extrême droite (sur les feuilles)
 
-    // =========================================================
-    // ÉTAGE 2 (Y = -700 environ)
-    // =========================================================
-    // Murs avec ouverture
-    {{-1000, -600, WALL_W, 600}, BLACK, 0}, 
-    {{500,   -600, WALL_W, 600}, BLACK, 0},
-    {{-1000, -600 - DOOR_H - 600, WALL_W, 600}, BLACK, 0}, 
-    {{500,   -600 - DOOR_H - 600, WALL_W, 600}, BLACK, 0},
+    // --- MILIEU DE L'ARBRE (On remonte sur les côtés) ---
+    {{ -350, GROUND_Y - 560, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Gauche
+    {{  150, GROUND_Y - 580, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Droite
+    {{ -150, GROUND_Y - 670, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Retour vers le centre
 
-    // Suite de l'ascension
-    {{ 100, GROUND_Y - (8*STEP_Y),  PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ 320, GROUND_Y - (9*STEP_Y),  PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ -80, GROUND_Y - (10*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{-300, GROUND_Y - (11*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{  50, GROUND_Y - (12*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ 250, GROUND_Y - (13*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{-120, GROUND_Y - (14*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{ 180, GROUND_Y - (15*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{-250, GROUND_Y - (16*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5},
-    {{  20, GROUND_Y - (17*STEP_Y), PLAT_W, PLAT_H}, BROWN, 0.5}
+    // --- EXTÉRIEURS HAUTS (On exploite vraiment la largeur) ---
+    {{ -520, GROUND_Y - 720, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Tout au bout à gauche
+    {{  350, GROUND_Y - 740, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Tout au bout à droite
+
+    // --- ON GRIMPE VERS LA CANOPÉE ---
+    {{ -280, GROUND_Y - 840, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Gauche
+    {{   80, GROUND_Y - 860, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Droite
+    {{ -100, GROUND_Y - 960, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Jonction centrale
+
+    // --- LES BRANCHES SUPÉRIEURES ---
+    {{ -380, GROUND_Y - 1020, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Haut gauche
+    {{  250, GROUND_Y - 1050, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Haut droite
+    {{ -220, GROUND_Y - 1140, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-gauche
+    {{   50, GROUND_Y - 1160, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-droit
+
+    // --- LE SOMMET DU FEUILLAGE ---
+    {{ -320, GROUND_Y - 1260, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID},
+    {{  180, GROUND_Y - 1280, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID},
+    {{  -80, GROUND_Y - 1380, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}, // Juste sous la pointe
+
+    // --- LA CIME ABSOLUE ---
+    {{ -100, GROUND_Y - 1500, 200, PLAT_H}, PLATFORM_TEXTURE_WOODPLANK_ID}
 };
 int platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
@@ -76,3 +66,16 @@ Rectangle skinButtonRect = {
 bool isTextureMenuOpen = false;
 
 Texture2D logoSkinButton;
+
+Texture2D platformTextures[] = {
+    [PLATFORM_TEXTURE_GRASS_ID]     = {0},
+    [PLATFORM_TEXTURE_WOODPLANK_ID] = {0},
+};
+int platformTexturesCount;
+
+Texture2D texTree;
+
+float gameTime = 0.0f;
+
+GrassBlade_st grassBlades[MAX_GRASS_BLADES];
+int grassCount = 0;
