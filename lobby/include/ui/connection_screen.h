@@ -1,6 +1,6 @@
 /**
  * @file connection_screen.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Declaration of the connection screen scene for IP entry.
  */
@@ -8,42 +8,42 @@
 #ifndef CONNECTION_SCREEN_H
 #define CONNECTION_SCREEN_H
 
-/** @brief Action code to query lobby rooms. */
-#define LOBBY_ROOM_QUERY 3
-/** @brief Action code for receiving lobby room info. */
-#define LOBBY_ROOM_INFO  4
-/** @brief Action code for game data. */
-#define ACTION_GAME_DATA  5  
-
 #include <stdbool.h>
+#include "rudp_core.h"
 
 /**
  * @brief Gets the IP address entered by the user.
  * @return A pointer to the entered IP string.
  */
-const char* GetEnteredIP(void);
+const char* getEnteredIP(void);
+
+/**
+ * @brief Gets the nickname entered by the user.
+ * @return A pointer to the entered nickname string.
+ */
+const char* getEnteredPseudo(void);
 
 /**
  * @brief Allocates and positions UI elements for the connection screen.
  */
-void InitConnectionScreen(void);
+void initConnectionScreen(void);
 
 /**
  * @brief Logical update loop for the connection screen.
  * @return true if connection is triggered (valid IP + click), false otherwise.
  */
-bool UpdateConnectionScreen(void);
+bool updateConnectionScreen(void);
 
 /**
  * @brief Renders the connection screen UI.
  */
-void DrawConnectionScreen(void);
+void drawConnectionScreen(void);
 
 /**
  * @brief Adds a discovered server to the UI list.
  * @param ip IP address of the discovered server.
  * @param name Name of the discovered server.
  */
-void AddDiscoveredRoom(const char* ip, const char* name);
+void addDiscoveredRoom(const char* ip, const char* name);
 
 #endif // CONNECTION_SCREEN_H

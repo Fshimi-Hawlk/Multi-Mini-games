@@ -1,7 +1,7 @@
 /**
     @file generalAPI.h
     @author Fshimi Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @author Maxime-CHAUVEAU
     @date 2026-01-08
     @date 2026-03-23
@@ -32,7 +32,6 @@
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 
-#include "baseTypes.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -52,6 +51,7 @@ typedef enum {
     ERROR_NULL_POINTER,         ///< Required pointer argument was NULL
     ERROR_ALLOC,                ///< Memory allocation failed
     ERROR_INVALID,              ///< Argument value or state is invalid/illegal
+    ERROR_INVALID_ENUM_VAL,     ///< Enum value is invalid
     ERROR_INVALID_SETTING,      ///< Setting parameters is invalid
     ERROR_TEXTURE_LOAD,         ///< Failed to load a required texture
     ERROR_AUDIO_LOAD,           ///< Failed to load audio resource
@@ -59,28 +59,6 @@ typedef enum {
     ERROR_ASSET_LOAD,           ///< Failed to load game assets
     // Future extension point: add more codes here as needed
 } Error_Et;
-
-// ────────────────────────────────────────────────
-// Game interface
-// ────────────────────────────────────────────────
-
-/**
-    @brief Opaque forward declaration of the concrete game state.
-
-    Actual definition lives in the specific mini-game header (.e.g. tetrisGame.h).
- */
-typedef struct BaseGame_St BaseGame_St;
-
-/**
-    @brief Function pointer type for game cleanup.
-
-    Must free the entire game object (including any internal allocations)
-    and return an Error_Et code (usually OK).
-
-    Signature: `Error_Et freeMyGame(void* game);`
- */
-typedef Error_Et (*freeGame_Ft)(void*);
-
 
 /**
     @brief Available font sizes used for in-game UI and text rendering.
@@ -105,6 +83,46 @@ typedef enum {
     __fontSizeCount
 } FontSize_Et;
 
+// ────────────────────────────────────────────────
+// Game interface
+// ────────────────────────────────────────────────
+
+/**
+    @brief Identifiers of the different playable scenes / mini-games.
+
+    Used both as array indices and as state identifiers.
+*/
+typedef enum {
+    MINI_GAME_LOBBY,       ///< Main lobby / hub world with platformer movement
+    MINI_GAME_BATTLESHIP,
+    MINI_GAME_BINGO,
+    MINI_GAME_CONNECT_4,
+    MINI_GAME_KFF,
+    MINI_GAME_MINIGOLF,
+    MINI_GAME_MORPION,
+    MINI_GAME_OTHELLO,
+    MINI_GAME_CHESS,
+    MINI_GAME_CUBE,
+    __miniGameCount
+} MiniGame_Et;
+
+/**
+    @brief Opaque forward declaration of the concrete game state.
+
+    Actual definition lives in the specific mini-game header (.e.g. tetrisGame.h).
+ */
+typedef struct BaseGame_St BaseGame_St;
+
+/**
+    @brief Function pointer type for game cleanup.
+
+    Must free the entire game object (including any internal allocations)
+    and return an Error_Et code (usually OK).
+
+    Signature: `Error_Et freeMyGame(void* game);`
+ */
+typedef Error_Et (*FreeGame_Ft)(void*);
+
 /**
     @brief Common base structure that **every** mini-game state must embed as its first member.
 
@@ -122,54 +140,7 @@ struct BaseGame_St {
     bool        paused;         ///< true = game is paused (no update, optional dimmed render)
     long        score;          ///< Score accumulated during the current/last session
 
-    freeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
+    FreeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
 };
-
-/**
- * @struct GameTLVHeader
- * @brief Internal network structure (Payload).
- * Memory padding is disabled to match network bytes exactly (1+1+2 = 4 bytes).
- */
-#pragma pack(push, 1)
-typedef struct {
-    u8 game_id;     /**< ID of the targeted mini-game (0 for Lobby). */
-    u8 action;      /**< Game-specific action (e.g., 2 for LOBBY_MOVE). */
-    u16 length;     /**< Size of the data following this header. */
-} GameTLVHeader;
-#pragma pack(pop)
-
-/**
- * @struct MiniGameModule
- * @brief Interface contract that each client mini-game must respect.
- */
-typedef struct MiniGameModule {
-    u8 id;               /**< Network identifier of the game. */
-    const char* name;    /**< Display name of the module. */
-    
-    /**
-     * @brief Allocation and loading of textures/models (Raylib).
-     */
-    void (*init)(void);
-    
-    /**
-     * @brief Reception of a routed network packet for this game.
-     * @param player_id ID of the player who sent the data.
-     * @param action Action code.
-     * @param data Pointer to the received data.
-     * @param len Length of the data.
-     */
-    void (*on_data)(s32 player_id, u8 action, void* data, u16 len);
-    
-    /**
-     * @brief Update of local physical logic (Frame by Frame).
-     * @param dt Delta time since last frame.
-     */
-    void (*update)(f32 dt);
-    
-    /**
-     * @brief Graphical rendering to the screen (Raylib).
-     */
-    void (*draw)(void);
-} MiniGameModule;
 
 #endif // GENERAL_API_H

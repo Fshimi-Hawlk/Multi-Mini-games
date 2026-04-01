@@ -1,15 +1,13 @@
 /**
  * @file connection_screen.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of the connection screen for server discovery and IP entry.
  */
 
-#include "raylib.h"
-#include "ui/input_button.h"
-#include "rudp_core.h"
-#include <stdio.h>
 #include <string.h>
+
+#include "ui/input_button.h"
 
 /** @brief Maximum number of discovered rooms to display. */
 #define MAX_ROOMS_DISPLAY 5
@@ -26,6 +24,8 @@ typedef struct {
 
 /** @brief UI input for the IP address. */
 static IaC_button ipInput;
+/** @brief UI input for the nickname. */
+static IaC_button pseudoInput;
 /** @brief UI button to trigger connection. */
 static IaC_button connectButton;
 /** @brief UI button to refresh the server list. */
@@ -34,6 +34,10 @@ static IaC_button refreshButton;
 static char ipBuffer[IP_MAX_LENGTH + 1] = {0};
 /** @brief Current character count in the IP buffer. */
 static int letterCount = 0;
+/** @brief Buffer for the entered nickname. */
+static char pseudoBuffer[32] = "Joueur";
+/** @brief Current character count in the nickname buffer. */
+static int pseudoLetterCount = 6;
 
 /** @brief Array of discovered rooms. */
 static RoomEntry discoveredRooms[MAX_ROOMS_DISPLAY];
@@ -43,15 +47,16 @@ static int roomsCount = 0;
 /**
  * @brief Allocates and positions UI elements for the connection screen.
  */
-void InitConnectionScreen(void) {
+void initConnectionScreen(void) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
-    ipInput = InitIaCElement((float)(screenWidth/2 - 150), (float)(screenHeight/2 - 200), 300, 40, "IP (ex: 127.0.0.1)", LIGHTGRAY);
-    connectButton = InitIaCElement((float)(screenWidth/2 - 100), (float)(screenHeight/2 - 125), 200, 40, "Se Connecter", DARKGRAY);
+    ipInput = InitIaCElement(screenWidth / 2.0f - 150,  screenHeight / 2.0f - 200, 300, 40, "IP (ex: 127.0.0.1)", LIGHTGRAY);
+    pseudoInput = InitIaCElement(screenWidth / 2.0f - 150, screenHeight / 2.0f - 260, 300, 40, "Pseudo", LIGHTGRAY);
+    connectButton = InitIaCElement(screenWidth / 2.0f - 100,  screenHeight / 2.0f - 125, 200, 40, "Se Connecter", DARKGRAY);
     
     // Bouton pour lancer le broadcast de découverte
-    refreshButton = InitIaCElement((float)(screenWidth - 180), (float)(screenHeight/2 - 40), 160, 30, "Rafraichir", SKYBLUE);
+    refreshButton = InitIaCElement((float)(screenWidth - 180), (screenHeight / 2.0f - 40), 160, 30, "Rafraichir", SKYBLUE);
 
     for (int i = 0; i < MAX_ROOMS_DISPLAY; i++) discoveredRooms[i].active = false;
     roomsCount = 0;
@@ -62,7 +67,7 @@ void InitConnectionScreen(void) {
  * @param ip IP address of the discovered server.
  * @param name Name of the discovered server.
  */
-void AddDiscoveredRoom(const char* ip, const char* name) {
+void addDiscoveredRoom(const char* ip, const char* name) {
     if (roomsCount >= MAX_ROOMS_DISPLAY) return;
     
     for (int i = 0; i < roomsCount; i++) {
@@ -70,9 +75,11 @@ void AddDiscoveredRoom(const char* ip, const char* name) {
     }
 
     strncpy(discoveredRooms[roomsCount].ip, ip, 15);
+    discoveredRooms[roomsCount].ip[15] = '\0';
     strncpy(discoveredRooms[roomsCount].name, name, 31);
+    discoveredRooms[roomsCount].name[31] = '\0';
     
-    float startY = (float)(GetScreenHeight() / 2 + 20);
+    float startY = (float)(GetScreenHeight() / 2.0f + 20);
     
     discoveredRooms[roomsCount].button = InitIaCElement(
         30, 
@@ -93,8 +100,9 @@ extern void discover_servers(void);
  * @brief Logical update loop for the connection screen.
  * @return true if connection is triggered (valid IP + click), false otherwise.
  */
-bool UpdateConnectionScreen(void) {
+bool updateConnectionScreen(void) {
     UpdateIPInput(&ipInput, ipBuffer, &letterCount);
+    UpdateTextInput(&pseudoInput, pseudoBuffer, &pseudoLetterCount, 31);
 
     if (UpdateConnectButton(&refreshButton, true)) {
         discover_servers(); 
@@ -103,7 +111,7 @@ bool UpdateConnectionScreen(void) {
     for (int i = 0; i < roomsCount; i++) {
         if (UpdateConnectButton(&discoveredRooms[i].button, true)) {
             strncpy(ipBuffer, discoveredRooms[i].ip, IP_MAX_LENGTH);
-            letterCount = (int)strlen(ipBuffer);
+            letterCount = (int) strlen(ipBuffer);
             ipInput.isIPValid = true;
         }
     }
@@ -114,13 +122,14 @@ bool UpdateConnectionScreen(void) {
 /**
  * @brief Renders the connection screen UI.
  */
-void DrawConnectionScreen(void) {
+void drawConnectionScreen(void) {
     ClearBackground(RAYWHITE);
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
 
-    DrawText("CONNEXION AU SERVEUR", sw/2 - MeasureText("CONNEXION AU SERVEUR", 30)/2, sh/2 - 250, 30, DARKGRAY);
+    DrawText("CONNEXION AU SERVEUR", sw/2 - MeasureText("CONNEXION AU SERVEUR", 30)/2, sh/2 - 320, 30, DARKGRAY);
 
+    DrawIaCElement(pseudoInput, pseudoBuffer);
     DrawIaCElement(ipInput, ipBuffer);
     DrawIaCElement(connectButton, "");
     DrawIaCElement(refreshButton, "");
@@ -130,8 +139,8 @@ void DrawConnectionScreen(void) {
     }
 
     DrawText("Liste des rooms :", 20, sh/2 - 30, 25, DARKBLUE);
-    DrawRectangle(20, (float)(sh/2), sw - 40, 275, LIGHTGRAY);
-    DrawRectangleLines(20, (float)(sh/2), sw - 40, 275, GRAY);
+    DrawRectangle(20, sh / 2.0f, sw - 40, 275, LIGHTGRAY);
+    DrawRectangleLines(20, sh / 2.0f, sw - 40, 275, GRAY);
 
     for (int i = 0; i < roomsCount; i++) {
         DrawIaCElement(discoveredRooms[i].button, discoveredRooms[i].name);
@@ -147,4 +156,10 @@ void DrawConnectionScreen(void) {
  * @brief Gets the IP address entered in the input field.
  * @return A pointer to the IP buffer string.
  */
-const char* GetEnteredIP(void) { return ipBuffer; }
+const char* getEnteredIP(void) { return ipBuffer; }
+
+/**
+ * @brief Gets the nickname entered in the input field.
+ * @return A pointer to the nickname buffer string.
+ */
+const char* getEnteredPseudo(void) { return pseudoBuffer; }

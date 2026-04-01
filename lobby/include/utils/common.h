@@ -2,7 +2,7 @@
     @file utils/common.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-03-20
     @brief Central inclusion point for standard library headers, Raylib, foundational typedefs,
            and most commonly needed project headers.
 
@@ -43,22 +43,17 @@
 #include <stdbool.h>
 
 #include <string.h>
-#include <ctype.h>
 #include <time.h>
 #include <math.h>
 #include <assert.h>
-
-// ────────────────────────────────────────────────
-// Project utilities (currently used / active)
-// ────────────────────────────────────────────────
-
-#include "logger.h"                 // logging macros and functions (log_info, log_warn, etc.)
+#include <ctype.h>
+#include <fcntl.h>
 
 // ────────────────────────────────────────────────
 // Third-party / single-header libraries
 // ────────────────────────────────────────────────
 
-// #include "rand.h"                // custom PRNG - not currently used in lobby
+#include "rand.h"                // custom PRNG - used in lobby
 
 // #include "contextArena.h"
 
@@ -92,5 +87,13 @@ typedef Vector2 f32Vector2;
 
 #include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
 #include "configs.h"                // tuning constants, paths, physics values
+
+// ────────────────────────────────────────────────
+// Project utilities (currently used / active)
+// ────────────────────────────────────────────────
+
+#include "logger.h"                 // logging macros and functions (log_info, log_warn, etc.)
+#include "networkInterface.h"
+
 
 #endif // COMMON_H

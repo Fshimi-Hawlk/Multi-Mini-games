@@ -1,6 +1,6 @@
 /**
  * @file progressAPI.h
- * @author Gemini CLI
+ * @author i-Charlys
  * @date 2026-03-22
  * @brief API for handling player progression, skins, AP, and rewards.
  */

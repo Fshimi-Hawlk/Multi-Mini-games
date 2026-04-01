@@ -32,17 +32,25 @@ Rectangle getTextureRec(const Texture texture) {
 }
 
 u64 randint(u64 min, u64 max) {
-    return min + (rand() % (max - min + 1));
+    if (max <= min) return min;
+    u64 range = max - min + 1;
+    // Use 32-bit random for ranges up to 2^32, or combine for larger
+    if (range <= 0xFFFFFFFF) {
+        return min + (prng_rand() % range);
+    } else {
+        u64 large_rand = ((u64)prng_rand() << 32) | (u64)prng_rand();
+        return min + (large_rand % range);
+    }
 }
 
 #ifdef RAND_H
 
 u64 prng_randint(u64 min, u64 max) {
-    return min + (prng_rand() % (max - min + 1));
+    return randint(min, max);
 }
 
 #endif
 
 f64 randfloat(void) {
-    return (f64) rand() / RAND_MAX;
+    return (f64) prng_randf();
 }

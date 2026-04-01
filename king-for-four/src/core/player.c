@@ -1,11 +1,11 @@
 /**
  * @file player.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of player management functions.
  */
 
-#include "../../include/core/player.h"
+#include "core/player.h"
 #include <string.h>
 
 /**
@@ -15,14 +15,13 @@
  * @param name Nickname.
  */
 void init_player(Player* p, int id, const char* name) {
-
     if (p == NULL) return; 
 
-    //élimine les déchets mémoire (pour eviter les failles reseaux)
+    // Eliminate memory garbage
     memset(p, 0, sizeof(Player));
 
     p->id = id;
-    p->is_local = 1; // Valeur par défaut
+    p->is_local = 1; // Default value
 
     if (name != NULL) {
         strncpy(p->name, name, sizeof(p->name) - 1);
@@ -35,7 +34,9 @@ void init_player(Player* p, int id, const char* name) {
  * @param draw_pile Pointer to the draw pile.
  */
 void draw_to_hand(Player* p, Deck* draw_pile) {
-    if (draw_pile->head != NULL) {
+    if (!p || !draw_pile) return;
+    
+    if (draw_pile->size > 0) {
         Card c = pop_card(draw_pile);
         push_card(&(p->hand), c);
     } else {

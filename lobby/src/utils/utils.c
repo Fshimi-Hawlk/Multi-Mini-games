@@ -40,7 +40,16 @@ Rectangle getTextureRec(const Texture texture) {
  * @return A random value in [min, max].
  */
 u64 randint(u64 min, u64 max) {
-    return min + (rand() % (max - min + 1));
+    if (max <= min) return min;
+    u64 range = max - min + 1;
+    u64 large_rand;
+    u64 limit = 0xFFFFFFFFFFFFFFFFULL - (0xFFFFFFFFFFFFFFFFULL % range);
+
+    do {
+        large_rand = ((u64)prng_rand() << 32) | (u64)prng_rand();
+    } while (large_rand >= limit);
+
+    return min + (large_rand % range);
 }
 
 #ifdef RAND_H
@@ -52,7 +61,7 @@ u64 randint(u64 min, u64 max) {
  * @return A random value in [min, max].
  */
 u64 prng_randint(u64 min, u64 max) {
-    return min + (prng_rand() % (max - min + 1));
+    return randint(min, max);
 }
 
 #endif
@@ -62,5 +71,5 @@ u64 prng_randint(u64 min, u64 max) {
  * @return A random float value.
  */
 f64 randfloat(void) {
-    return (f64) rand() / RAND_MAX;
+    return (f64) prng_randf();
 }

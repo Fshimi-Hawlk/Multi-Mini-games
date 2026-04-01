@@ -1,6 +1,7 @@
 /**
     @file lobbyAPI.c
     @author Fshimi-Hawlk
+    @author i-Charlys
     @date 2026-02-08
     @date 2026-02-23
     @brief Lobby / hub scene - entry point and central navigation area
@@ -45,39 +46,41 @@
     @see `APIs/generalAPI.h` for `Error_Et`
 */
 
+#include "APIs/generalAPI.h"
 #include "core/game.h"
+#include "rand.h"
 
-#include "raylib.h"
 #include "ui/app.h"
 #include "ui/game.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "lobbyAPI.h"
 #include "systemSettings.h"
+#include "utils/userTypes.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
-    Error_Et error;
+    Error_Et error = OK;
 
-    srand(time(NULL));
-    SetTraceLogLevel(LOG_WARNING);
-
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
-    SetExitKey(KEY_NULL); // Prevent ESC from closing the game
-    SetWindowPosition(100, 100);
-
-    (void) configs; // Configs aren't used yet
+    u64 seeds[2] = { 0 };
+    plat_get_entropy(seeds, sizeof(seeds));
+    prng_seed(seeds[0], seeds[1]);
 
     systemSettings = DEFAULT_SYSTEM_SETTING;
     systemSettings.video.resizable = true;
-    systemSettings.video.borderless = false;
     systemSettings.video.title = "Lobby";
-    error = applySystemSettings();
-    if (error != OK) {
-        log_error("System settings couldn't be applied corretly");
+
+    // ── Initialization ───────────────────────────────────────────────────────
+    InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    if (!IsWindowReady()) {
+        log_fatal("Failed to initialize Raylib window.");
+        return ERROR_WINDOW_INIT;
     }
+    SetExitKey(0); // Ne pas fermer sur ECHAP
+    SetWindowPosition(100, 50);
+    InitAudioDevice();
+
+    (void) configs; // Configs aren't used yet
 
     (*game) = malloc(sizeof(LobbyGame_St));
     if (*game == NULL) return ERROR_ALLOC;
@@ -85,22 +88,38 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     LobbyGame_St* gameRef = *game;
     memset(gameRef, 0, sizeof(*gameRef));
 
-    /** Hitbox that triggers the Tetris mini-game when player collides */
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = (Rectangle) {
-        .x      = 600,
-        .y      = -150,
-        .width  = 75,
-        .height = 75
+    /** Hitbox that triggers the mini-games when player collides */
+    Rectangle gameHitboxes[__miniGameCount] = { 
+        [MINI_GAME_KFF] = {
+            .x      = -350,
+            .y      = 400 - 60,
+            .width  = 100,
+            .height = 60
+        },
+        [MINI_GAME_CHESS] = {
+            .x      = 250,
+            .y      = 400 - 60,
+            .width  = 100,
+            .height = 60
+        },
+        [MINI_GAME_CUBE] = {
+            .x      = -200,
+            .y      = 300 - 60,
+            .width  = 100,
+            .height = 60
+        }
     };
 
+    memcpy(gameRef->miniGameManager.gameHitboxes, gameHitboxes, sizeof(gameHitboxes));
+
     /** Current active scene (lobby or one of the mini-games) */
-    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
+    gameRef->miniGameManager.currentMiniGame = MINI_GAME_LOBBY;
     
     /** Flag: game needs initialization on next frame */
-    gameRef->subGameManager.needGameInit = false;
+    gameRef->miniGameManager.needGameInit = false;
     
     /** Player controlled by the user in the lobby */
-    gameRef->player = (Player_st) {
+    gameRef->player = (Player_St) {
         .position   = {0, 250},
         .radius     = 20,
         .coyoteTime = 0.1f,
@@ -110,6 +129,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     gameRef->player.unlockedTextures[PLAYER_TEXTURE_DEFAULT] = 1;
     gameRef->player.unlockedTextures[PLAYER_TEXTURE_EARTH] = 1;
+    gameRef->player.unlockedTextures[PLAYER_TEXTURE_TROLL_FACE] = 1;
 
     /** Camera following the player in 2D mode */
     gameRef->cam = (Camera2D) {
@@ -140,6 +160,17 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         error =  ERROR_TEXTURE_LOAD;
     }
 
+    // Load fonts
+    u32 fontSize = 4;
+    for (u32 fontId = 0; fontId < __fontSizeCount; fontId++) {
+        // Use the root assets path for fonts
+        lobby_fonts[fontId] = LoadFontEx("assets/fonts/Noto/static/NotoSansMono-Bold.ttf", (int)fontSize, NULL, 0);
+        if (!IsFontValid(lobby_fonts[fontId])) {
+            log_warn("Lobby font size %d couldn't be loaded.", fontSize);
+        }
+        fontSize += 2;
+    }
+
     return error;
 }
 
@@ -149,7 +180,9 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     f32 dt = GetFrameTime();
     static f32 lobbyTextXPos;
 
-    updatePlayer(&game->player, platforms, platformCount, dt);
+    if (!gameChat.isOpen) {
+        updatePlayer(&game->player, platforms, platformCount, dt);
+    }
     game->cam.target = game->player.position;
 
     toggleSkinMenu(game);
@@ -159,103 +192,73 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     }
 
     // Collision check with game zone
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
-        if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->subGameManager.gameHitboxes[i])) {
-            if (!game->subGameManager.gameHitGracePeriodActive) {
-                game->subGameManager.currentScene = i;
-                game->subGameManager.needGameInit = true;
-                game->subGameManager.gameHitGracePeriodActive = true;
+    for (u8 i = 1; i < __miniGameCount; ++i) {
+        if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->miniGameManager.gameHitboxes[i])) {
+            if (!game->miniGameManager.gameHitGracePeriodActive) {
+                game->miniGameManager.currentMiniGame = i;
+                game->miniGameManager.gameHitGracePeriodActive = true;
             }
-        } else if (game->subGameManager.gameHitGracePeriodActive) {
-            game->subGameManager.gameHitGracePeriodActive = false;
+        } else if (game->miniGameManager.gameHitGracePeriodActive) {
+            game->miniGameManager.gameHitGracePeriodActive = false;
         }
     }
 
     BeginMode2D(game->cam); {
-        DrawCircle(0, 0, 10, RED);          // Debug origin marker
-        drawPlayer(game, &game->player);
-        
-        for (int i = 0; i < 8; i++) {
+        // Draw other players with simple interpolation
+        for (int i = 0; i < MAX_CLIENTS; i++) {
             if (game->otherPlayers[i].active) {
-                // Smoothing interpolation (Lerp)
+                // Smooth interpolation towards targetPosition
                 game->otherPlayers[i].position.x += (game->otherPlayers[i].targetPosition.x - game->otherPlayers[i].position.x) * dt * 10.0f;
                 game->otherPlayers[i].position.y += (game->otherPlayers[i].targetPosition.y - game->otherPlayers[i].position.y) * dt * 10.0f;
                 
                 drawPlayer(game, &game->otherPlayers[i]);
+                const char* displayName = (game->otherPlayers[i].name[0] != '\0') ? game->otherPlayers[i].name : TextFormat("Player %d", i);
+                Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT16], displayName, 16, 0);
+                DrawTextEx(lobby_fonts[FONT16], displayName, (Vector2){ game->otherPlayers[i].position.x - nameSize.x/2, game->otherPlayers[i].position.y - 40 }, 16, 0, DARKGRAY);
             }
         }
 
+        drawPlayer(game, &game->player);
+        const char* myName = (game->player.name[0] != '\0') ? game->player.name : "Moi";
+        Vector2 myNameSize = MeasureTextEx(lobby_fonts[FONT16], myName, 16, 0);
+        DrawTextEx(lobby_fonts[FONT16], myName, (Vector2){ game->player.position.x - myNameSize.x/2, game->player.position.y - 40 }, 16, 0, MAROON);
         drawPlatforms(platforms, platformCount);
-
-        for (u8 i = 1; i < __gameSceneCount; ++i) {
-            DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
-        }
     } EndMode2D();
 
     lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
     DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
-
-    // --- PROGRESS UI ---
-    if (g_progress.has_crown) {
-        DrawText("CROWN", 10, 10, 20, GOLD);
-        // Drawing jewels if #1
-        int jewelX = 100;
-        for (int i=0; i<MAX_GAMES_PROGRESS; i++) {
-            if (g_progress.jewel_unlocked[i][0][0]) {
-                DrawCircle(jewelX, 20, 10, (i == 1) ? RED : BLUE);
-                jewelX += 25;
-            }
-        }
-    }
-
-    // Display AP Tier for current game (if we are in its zone or just general)
-    const char* apTexts[] = {"Common", "Uncommon", "Rare", "Legendary", "Mystical", "Plus Ultra"};
-    Color apColors[] = {GRAY, GREEN, BLUE, GOLD, PURPLE, PINK};
-    AP_Tier_Et tier = g_progress.current_ap[1]; // King for four as example
-    DrawText(TextFormat("KING AP: %s", apTexts[tier]), 10, 40, 20, apColors[tier]);
 
     drawSkinButton();
 
     if (game->playerVisuals.isTextureMenuOpen) {
         drawMenuTextures(game);
     }
-    
-    /* Transition désactivée temporairement
-    static float fadeAlpha = 0.0f;
-    ... (code de transition)
-    */
 
     return OK;
 }
 
-Player_st* lobby_getLocalPlayer(LobbyGame_St* game) {
-    return game ? &game->player : NULL;
-}
+Error_Et lobby_freeGame(LobbyGame_St** gameRef) {
+    if (gameRef == NULL || *gameRef == NULL) return ERROR_NULL_POINTER;
+    LobbyGame_St* game = *gameRef;
 
-Player_st* lobby_getOtherPlayers(LobbyGame_St* game) {
-    return game ? game->otherPlayers : NULL;
-}
-
-Error_Et lobby_freeGame(LobbyGame_St** game) {
-    if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
-    LobbyGame_St* gameRef = *game;
-
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
-        if (gameRef->subGameManager.miniGames[i] == NULL) continue;
-        gameRef->subGameManager.miniGames[i]->freeGame(&gameRef->subGameManager.miniGames[i]);
-        gameRef->subGameManager.miniGames[i] = NULL;
+    for (u8 i = 1; i < __miniGameCount; ++i) {
+        if (game->miniGameManager.miniGames[i] == NULL) continue;
+        BaseGame_St** base = &game->miniGameManager.miniGames[i];
+        game->miniGameManager.miniGames[i]->freeGame(base);
+        game->miniGameManager.miniGames[i] = NULL;
     }
 
     for (u32 i = 1; i < __playerTextureCount; ++i) {
-        UnloadTexture(gameRef->playerVisuals.textures[i]);
+        UnloadTexture(game->playerVisuals.textures[i]);
     }
 
     UnloadTexture(logoSkinButton);
 
-    free(gameRef);
-    *game = NULL;
-
+    CloseAudioDevice();
     CloseWindow();
+
+    free(game);
+    *gameRef = NULL;
 
     return OK;
 }

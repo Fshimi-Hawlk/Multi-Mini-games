@@ -9,7 +9,7 @@ Development period: January 2026 – April 2026
 
 - BAUDET Léandre:  Leandre.Baudet.Etu@univ-lemans.fr  
 - BERGE Kimi:      Kimi.Berge.Etu@univ-lemans.fr  
-- CAILLON Charles: Charles_Caillon.Etu@univ-lemans.fr  
+- i-Charlys: Charles_Caillon.Etu@univ-lemans.fr  
 - CHAUVEAU Maxime: Maxime.Chauveau.Etu@univ-lemans.fr  
 
 ### Goal

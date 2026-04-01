@@ -1,9 +1,8 @@
 /**
     @file utils/userTypes.h
-    @author Fshimi Hawlk
     @author LeandreB8
     @date 2026-01-12
-    @date 2026-03-18
+    @date 2026-03-20
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
 
     Contributors:
@@ -12,7 +11,7 @@
     - Fshimi-Hawlk:
         - Added documentation
         - Added `GameScene_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
-          `SubGameManager_St` and `LobbyGame_St` to centralize logic and 
+          `MiniGameManager_St` and `LobbyGame_St` to centralize logic and 
           previously global variables and make everything as straight forward.
 
     This header contains the central enumerated types and data structures that describe:
@@ -29,25 +28,17 @@
 
 #include "common.h"
 #include "APIs/generalAPI.h"
+#include "networkInterface.h"
 
-/**
-    @brief Identifiers of the different playable scenes / mini-games.
-
-    Used both as array indices and as state identifiers.
-*/
 typedef enum {
-    GAME_SCENE_LOBBY,       ///< Main lobby / hub world with platformer movement
-    GAME_SCENE_TETRIS,      ///< Tetris mini-game
-    __gameSceneCount
-} GameScene_Et;
-
-/**
-    @brief Enum for different game states in the lobby.
-*/
-typedef enum { 
-    LOBBY_STATE_CONNECTION, ///< Initial connection state.
-    LOBBY_STATE_LOBBY      ///< Active lobby state.
-} LobbyState_Et;
+    GAME_STATE_GAMEPLAY,
+    GAME_STATE_CONNECTION,
+    GAME_STATE_DISCONNECTED,
+    GAME_STATE_CONNECTING,
+    GAME_STATE_LOBBY,
+    GAME_STATE_WAITING_SWITCH,
+    GAME_STATE_INGAME,
+} GameState_Et;
 
 /**
     @brief Available player avatar/skin textures that can be selected in the lobby.
@@ -56,6 +47,13 @@ typedef enum {
     PLAYER_TEXTURE_DEFAULT,
     PLAYER_TEXTURE_EARTH,
     PLAYER_TEXTURE_TROLL_FACE,
+    PLAYER_TEXTURE_BATTLESHIP_TODO,     //< a ship -> not round
+    PLAYER_TEXTURE_BINGO_TODO,          //< bingo card (?) -> not round or the ball (?)
+    PLAYER_TEXTURE_CONNECT_4_TODO,      //< don't know
+    PLAYER_TEXTURE_KFF_TODO,            //< king for four card (?) -> not round
+    PLAYER_TEXTURE_MINIGOLF_TODO,       //< don't know
+    PLAYER_TEXTURE_MORPION_TODO,        //< don't know
+    PLAYER_TEXTURE_OTHELLO_TODO,        //< don't know
     __playerTextureCount,
 } PlayerTextureId_Et;
 
@@ -71,14 +69,27 @@ typedef struct {
     // Future extension point: Rectangle currentSourceRect; AnimationState animation; etc.
 } PlayerVisuals_St;
 
+#pragma pack(push, 1)
+/**
+ * @brief Simplified player structure for network transmission.
+ */
+typedef struct {
+    float x, y;
+    float angle;
+    u8    textureId;
+    bool  active;
+    char  name[32];
+} PlayerNet_St;
+#pragma pack(pop)
+
 /**
     @brief Physics and movement state of the player character in the lobby (platformer).
 
     Most fields are directly used / modified by the player controller system.
 */
 typedef struct {
-    bool    active;                             ///< Whether this player is active/connected
     Vector2 position;                           ///< Center position of the player (world coordinates)
+    Vector2 targetPosition;                     ///< Target position for network interpolation.
     float   radius;                             ///< Collision radius (circle-based collision)
 
     float   angle;                              ///< Visual rotation in radians (usually 0 unless doing tricks/rotations)
@@ -94,8 +105,10 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
-    Vector2 targetPosition;                     ///< Network target position for smoothing
-} Player_st;
+    
+    bool    active;                             ///< Flag indicating if the player is active.
+    char    name[32];                           ///< Player nickname.
+} Player_St;
 
 /**
     @brief Single rectangular platform / solid surface in the lobby world.
@@ -104,35 +117,34 @@ typedef struct {
     Rectangle rect;         ///< Position and size (world coordinates)
     Color     color;        ///< Debug / placeholder rendering color
     float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-} Platform_st;
+} Platform_St;
 
 /**
     @brief Manages which mini-game is currently active and its integration with the lobby.
 
-    Acts as a lightweight scene manager / sub-game router.
+    Acts as a mini-game router.
 */
 typedef struct {
-    Rectangle     gameHitboxes[__gameSceneCount];   ///< Screen-space rectangles where touching/standing activates a mini-game
-    BaseGame_St*  miniGames[__gameSceneCount];      ///< Pointers to the actual mini-game state objects (may be NULL)
-
-    GameScene_Et  currentScene;                     ///< Which mini-game / view is currently active
-
-    bool          needGameInit;                     ///< Flag: newly selected mini-game needs initialization on next frame
-    bool          gameHitGracePeriodActive;         ///< Prevents instant re-triggering when leaving/entering hitbox
-} SubGameManager_St;
+    GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
+    BaseGame_St*            miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
+    Rectangle               gameHitboxes[__miniGameCount];          ///< Screen-space rectangles where touching/standing activates a mini-game
+    MiniGame_Et             currentMiniGame;                        ///< Which mini-game / view is currently active
+    bool                    gameHitGracePeriodActive;               ///< Prevents instant re-triggering when leaving/entering hitbox
+    bool                    needGameInit;                           ///< Flag: game needs initialization on next frame
+} MiniGameManager_St;
 
 /**
     @brief Complete state of the lobby / main hub world.
 */
 typedef struct {
-    BaseGame_St base;
+    BaseGame_St         base;
+    GameState_Et        currentState;               ///< Current state of the game.
+    MiniGameManager_St  miniGameManager;            ///< Manages transitions to/from mini-games
 
-    Player_st         player;                     ///< Physics & movement state of the player character
-    Player_st         otherPlayers[8];            ///< Other players connected to the lobby (MAX_CLIENTS = 8)
-    PlayerVisuals_St  playerVisuals;              ///< Rendering and skin selection state
-    Camera2D          cam;                        ///< 2D camera following the player
-
-    SubGameManager_St subGameManager;           ///< Manages transitions to/from mini-games
+    Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.
+    Player_St           player;                     ///< Physics & movement state of the player character
+    PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state
+    Camera2D            cam;                        ///< 2D camera following the player
 } LobbyGame_St;
 
 #endif // USER_TYPES_H

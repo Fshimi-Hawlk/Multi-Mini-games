@@ -62,6 +62,7 @@ static inline s32 SubmitScore(u8 game_id, const char* name, s32 score) {
                 lb.entries[j] = lb.entries[j-1];
             }
             strncpy(lb.entries[i].name, name, 31);
+            lb.entries[i].name[31] = '\0';
             lb.entries[i].score = score;
             if (lb.count < MAX_LEADERBOARD_ENTRIES) lb.count++;
             break;
@@ -71,6 +72,7 @@ static inline s32 SubmitScore(u8 game_id, const char* name, s32 score) {
     if (rank > lb.count && lb.count < MAX_LEADERBOARD_ENTRIES) {
         rank = lb.count + 1;
         strncpy(lb.entries[lb.count].name, name, 31);
+        lb.entries[lb.count].name[31] = '\0';
         lb.entries[lb.count].score = score;
         lb.count++;
     }

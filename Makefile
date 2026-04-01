@@ -34,7 +34,7 @@ else
     SILENT_PREFIX := @
 endif
 
-ROOT_DIR      := $(CURDIR)
+ROOT_DIR      := .
 MAKEFLAGS     += --no-print-directory
 
 # Directories to exclude when discovering modules
@@ -42,22 +42,18 @@ EXCLUDED_DIRS := \
     assets       \
     build        \
     docs         \
-    firstparty   \
-    lobby        \
     logs         \
-    tempStorage  \
-    thirdparty   \
-    tui-ver
+    thirdparty
 
 # Discover module directories (exclude listed ones)
 MODULES := $(patsubst %/,%,$(wildcard */))
 MODULES := $(filter-out $(EXCLUDED_DIRS),$(MODULES))
 
-SUBDIRS       := $(MODULES) lobby
+SUBDIRS       := $(MODULES)
 
-FIRSTPARTY_API_DIR := firstparty/APIs
+FIRSTPARTY_API_DIR := $(ROOT_DIR)/firstparty/APIs
 
-BUILD_DIR     := build
+BUILD_DIR     := $(ROOT_DIR)/build
 LIB_DIR       := $(BUILD_DIR)/lib
 BIN_DIR       := $(BUILD_DIR)/bin
 
@@ -85,11 +81,11 @@ endef
 $(LIB_DIR):
 	$(SILENT_PREFIX)mkdir -p $@
 
-# Static library paths (relative to root)
+# Absolute library paths
 LIBS := $(foreach mod,$(MODULES),$(LIB_DIR)/lib$(call compute-lib-name,$(mod)).a)
 
-# Absolute paths for linker usage
-LIBS_LINK := $(foreach lib,$(LIBS),$(ROOT_DIR)/$(lib))
+# Relative paths from lobby/ to libs (for linker -L or -l usage)
+LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 
 define build-module-lib-rule
 $(LIB_DIR)/lib$(call compute-lib-name,$(1)).a : | $(LIB_DIR)
@@ -120,7 +116,7 @@ $(foreach mod,$(MODULES),$(eval $(call build-module-lib-rule,$(mod))))
 # Main targets
 # ───────────────────────────────────────────────────────────────
 
-all: bin
+all: bin server
 
 libs: $(LIBS)
 
@@ -131,13 +127,13 @@ bin: libs
 		MODE=$(MODE) VERBOSE=$(VERBOSE) \
 		BIN_DIR=../$(BIN_DIR) \
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
-		EXTRA_LDFLAGS="$(LIBS_LINK)"
+		EXTRA_LDFLAGS="$(LIBS_REL)"
 
 server: libs
-	@echo "Building reseau server..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau server \
+	@echo "Building server executable..."
+	$(SILENT_PREFIX)$(MAKE) -C reseau \
 		MODE=$(MODE) VERBOSE=$(VERBOSE) \
-		EXTRA_LDFLAGS="$(LIBS_LINK)"
+		EXTRA_LDFLAGS="$(LIBS_REL)"
 
 run-server: server
 	@echo "===> Starting server..."
@@ -211,7 +207,6 @@ clean-api-headers:
 			module_name=$$(basename "$$dir"); \
 			api_file="$(FIRSTPARTY_API_DIR)/$$(echo "$$module_name" | sed -E 's/[-_]([a-z])/\U\1/g' | sed 's/^[A-Z]/\l&/')API.h"; \
 			if [ -f "$$api_file" ]; then \
-				echo "  Removing generated API header: $$api_file"; \
 				rm -f "$$api_file"; \
 			fi; \
 		fi; \
@@ -220,10 +215,10 @@ clean-api-headers:
 clean-all: clean clean-api-headers
 	@echo "===> Full clean (root build + modules + generated API headers)"
 	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
-	    if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
-	        echo "Cleaning module: $$dir"; \
-	        $(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
-	    fi; \
+		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
+			echo "Cleaning module: $$dir"; \
+			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
+		fi; \
 	done
 
 rebuild: clean-all all

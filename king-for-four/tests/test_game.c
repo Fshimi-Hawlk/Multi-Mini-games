@@ -1,6 +1,6 @@
 /**
  * @file test_game.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Unit tests and debug utilities for the King-for-Four game logic.
  */
@@ -40,25 +40,25 @@ int main() {
     
     Card top = pop_card(&g.draw_pile);
     push_card(&g.discard_pile, top);
-    g.active_color = (top.color == 4) ? 0 : top.color;
+    g.active_color = -1; // Initialize correctly
 
     printf("=== ETAT DU JEU ===\nTalon : "); print_card_debug(top);
     printf("\nCouleur demandee : %d\n\n", g.active_color);
 
     /* Vérification de la main */
     printf("Analyse de la main :\n");
-    Node *curr = g.players[0].hand.head;
-    for (int i = 1; curr; i++, curr = curr->next) {
-        printf("%d. ", i);
-        print_card_debug(curr->card);
-        printf(is_move_valid(g.active_color, curr->card, top) ? " -> [ ✅ ]\n" : " -> [ ❌ ]\n");
+    for (int i = 0; i < g.players[0].hand.size; i++) {
+        Card c = g.players[0].hand.cards[i];
+        printf("%d. ", i + 1);
+        print_card_debug(c);
+        printf(is_move_valid(g.active_color, c, top) ? " -> [ ✅ ]\n" : " -> [ ❌ ]\n");
     }
 
     /* Nettoyage */
-    free_deck(&g.players[0].hand);
-    free_deck(&g.draw_pile);
-    free_deck(&g.discard_pile);
-    printf("\nTest fini, memoire libre.\n");
+    clear_deck(&g.players[0].hand);
+    clear_deck(&g.draw_pile);
+    clear_deck(&g.discard_pile);
+    printf("\nTest fini, memoire libre (structures statiques).\n");
 
     return 0;
 }

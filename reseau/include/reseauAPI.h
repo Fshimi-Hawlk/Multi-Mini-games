@@ -3,16 +3,16 @@
  * @brief Interface d'abstraction pour l'API de réseau.
  * 
  * Permet au serveur de manipuler différents modules de jeu via 
- * une structure GameInterface générique.
+ * une structure GameServerInterface_St générique.
  * 
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  */
 
 #ifndef RESEAU_API_H
 #define RESEAU_API_H
 
-#include "game_interface.h"
+#include "networkInterface.h"
 
 /*
 Fichier .H                                 Fichier .C 
@@ -21,7 +21,7 @@ Fichier .H                                 Fichier .C
      |                        |            |                        |
      |                        |            |                        |
      |                        |            |                        |
-     |                        |            | GameInterface          |
+     |                        |            | GameServerInterface_St          |
      | extern lobby_module;   | ---------> | lobby_module = {       |
      |           ^            |   Linker   |    .init = ...,        |
      |           |            |            |    .tick = ...         |
@@ -46,6 +46,6 @@ Fichier .H                                 Fichier .C
  * @brief Instance externe du module lobby.
  * * Cette variable est définie dans lobby.c et liée lors de la compilation.
  */
-extern GameInterface lobby_module; 
+extern GameServerInterface_St lobby_module; 
 
 #endif

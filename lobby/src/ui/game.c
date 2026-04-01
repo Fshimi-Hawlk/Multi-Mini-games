@@ -2,7 +2,7 @@
     @file ui/game.c
     @author Fshimi-Hawlk
     @author LeandreB8
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-01-30
     @date 2026-03-23
     @brief Low-level drawing routines for lobby gameplay elements.
@@ -34,15 +34,23 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
+void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
         DrawCircleV(player->position, player->radius, BLUE);
     } else {
+        Rectangle dest = {
+            player->position.x,
+            player->position.y,
+            player->radius * 2,
+            player->radius * 2
+        };
+        Vector2 origin = { player->radius, player->radius };
+        
         DrawTexturePro(
             game->playerVisuals.textures[player->textureId],
             getTextureRec(game->playerVisuals.textures[player->textureId]),
-            getPlayerCollisionBox(&game->player),
-            getPlayerCenter(&game->player),
+            dest,
+            origin,
             player->angle,
             WHITE
         );
@@ -54,12 +62,18 @@ void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
  * @param platforms Array of platforms to draw.
  * @param nbPlatforms Number of platforms in the array.
  */
-void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
+void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms) {
     for (int i = 0; i < nbPlatforms; i++) {
         DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
     }
     
-    // Zone de trigger pour le jeu
+    // Zones de trigger pour les jeux
     DrawRectangleLinesEx(kingForFourZone, 2, GOLD);
     DrawText("KING FOR FOUR", kingForFourZone.x + 5, kingForFourZone.y + 20, 10, GOLD);
+
+    DrawRectangleLinesEx(chessZone, 2, GOLD);
+    DrawText("CHESS", chessZone.x + 25, chessZone.y + 20, 10, GOLD);
+
+    DrawRectangleLinesEx(rubikZone, 2, GOLD);
+    DrawText("RUBIK CUBE", rubikZone.x + 15, rubikZone.y + 20, 10, GOLD);
 }

@@ -1,6 +1,6 @@
 /**
  * @file renderer.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for the UI rendering of the King for Four game using Raylib.
  */
@@ -10,6 +10,10 @@
 
 #include "raylib.h"
 #include "../core/game.h" 
+
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
 
 /**
  * @struct GameAssets
@@ -41,8 +45,9 @@ void UnloadAssets(GameAssets assets);
  * @brief Renders the game table (draw and discard piles).
  * @param g Pointer to the GameState.
  * @param assets The GameAssets to use for rendering.
+ * @param cardScalePop Additional scale for the top card (animation).
  */
-void RenderTable(GameState *g, GameAssets assets);
+void RenderTable(GameState *g, GameAssets assets, float cardScalePop);
 
 /**
  * @brief Renders a player's hand at the bottom of the screen.
@@ -50,6 +55,11 @@ void RenderTable(GameState *g, GameAssets assets);
  * @param assets The GameAssets to use for rendering.
  */
 void RenderHand(Player *p, GameAssets assets);
+
+/**
+ * @brief Renders opponent hands (card backs) around the table.
+ */
+void RenderOpponents(GameState *g, GameAssets assets, int my_id);
 
 // --- FONCTIONS D'INTERACTION ---
 

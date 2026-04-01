@@ -1,8 +1,8 @@
 /**
-    @file ui/app.c
+    @file app.c (ui)
     @author Fshimi-Hawlk
     @date 2026-03-02
-    @date 2026-03-16
+    @date 2026-03-19
     @brief One clear sentence that tells what this file is actually for.
 
     Contributors:
@@ -19,38 +19,39 @@
 
 #include "ui/app.h"
 #include "utils/globals.h"
+#include "utils/userTypes.h"
 
-void bingo_drawUI(const BingoGame_St* game) {
+void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const balls, const CallState_St* const currentCall) {
     // Timer during grace
-    if (game->balls.showDelay <= game->currentCall.timer && game->currentCall.timer <= (game->balls.showDelay + game->balls.graceDelay)) {
+    if (balls->showDelay <= currentCall->timer && currentCall->timer <= (balls->showDelay + balls->graceDelay)) {
         f32 fontSize = 32;
         char buf[16];
-        sprintf(buf, "%.2f", game->balls.graceDelay * ((game->balls.showDelay + game->balls.graceDelay) - game->currentCall.timer));
-        f32Vector2 textSize = MeasureTextEx(fonts[FONT48], buf, fontSize, 0);
+        sprintf(buf, "%.2f", balls->graceDelay * ((balls->showDelay + balls->graceDelay) - currentCall->timer));
+        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], buf, fontSize, 0);
         f32Vector2 textPos = {
-            .x = game->layout.windowCenter.x - textSize.x / 2.0f,
-            .y = game->layout.cardRect.y + game->layout.cardRect.height + fontSize * 1.5f,
+            .x = layout->windowCenter.x - textSize.x / 2.0f,
+            .y = layout->cardRect.y + layout->cardRect.height + fontSize * 1.5f,
         };
 
-        DrawTextEx(fonts[FONT48], buf, textPos, fontSize, 0, BLACK);
+        DrawTextEx(bingo_fonts[FONT48], buf, textPos, fontSize, 0, BLACK);
     }
 
     // Fading ball call
-    if (game->currentCall.timer <= game->balls.showDelay) {
+    if (currentCall->timer <= balls->showDelay) {
         f32 fontSize = 48;
         
-        f32Vector2 textSize = MeasureTextEx(fonts[FONT48], game->currentCall.displayedText, 0, fontSize);
+        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], currentCall->displayedText, 0, fontSize);
         f32Vector2 textPos = {
-            .x = game->layout.windowCenter.x - textSize.x / 4.0f,
-            .y = game->layout.cardRect.y - fontSize * 1.5f,
+            .x = layout->windowCenter.x - textSize.x / 4.0f,
+            .y = layout->cardRect.y - fontSize * 1.5f,
         };
 
         DrawTextEx(
-            fonts[FONT48],
-            game->currentCall.displayedText,
+            bingo_fonts[FONT48],
+            currentCall->displayedText,
             textPos, fontSize, 0,
             Fade(BLACK, 
-                1.0f - (game->currentCall.timer / game->balls.showDelay)
+                1.0f - (currentCall->timer / balls->showDelay)
             )
         );
     }

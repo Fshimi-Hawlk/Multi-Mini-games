@@ -1,6 +1,6 @@
 /**
  * @file card.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for card and deck management in the King for Four game.
  */
@@ -13,16 +13,19 @@
 #include <time.h>
 #include <string.h>
 
+/** Maximum number of cards in a standard Uno game. */
+#define MAX_UNO_CARDS 108
+
 /**
  * @enum Card_Color
  * @brief Represents the possible colors of a card.
  */
 typedef enum { 
-    CARD_RED,    /**< Red color */
-    CARD_YELLOW, /**< Yellow color */
-    CARD_GREEN,  /**< Green color */
-    CARD_BLUE,   /**< Blue color */
-    CARD_BLACK   /**< Black color (for special cards) */
+    CARD_RED = 0,    /**< Red color */
+    CARD_YELLOW,     /**< Yellow color */
+    CARD_GREEN,      /**< Green color */
+    CARD_BLUE,       /**< Blue color */
+    CARD_BLACK       /**< Black color (for special cards) */
 } Card_Color;
 
 /**
@@ -48,23 +51,15 @@ typedef struct {
 } Card;
 
 /**
- * @struct Node
- * @brief A node in a linked list representing a card in a deck.
- */
-typedef struct Node {
-    Card card;          /**< The card stored in this node */
-    struct Node* next;  /**< Pointer to the next node in the list */
-} Node;
-
-/**
  * @struct Deck
  * @brief Represents a collection of cards (a deck or a hand).
+ * Uses a fixed-size array to ensure cache-locality, zero fragmentation,
+ * and completely eliminate memory leaks.
  */
 typedef struct {
-    Node* head; /**< Pointer to the first card in the deck */
-    int size;   /**< Number of cards currently in the deck */
+    Card cards[MAX_UNO_CARDS]; /**< Array of cards in the deck */
+    int size;                  /**< Number of cards currently in the deck */
 } Deck;
-
 
 // --- PROTOTYPES ---
 
@@ -72,13 +67,14 @@ typedef struct {
  * @brief Adds a card to the top of the deck.
  * @param d Pointer to the deck.
  * @param c The card to add.
+ * @return 1 on success, 0 if deck is full.
  */
-void push_card(Deck* d, Card c);
+int push_card(Deck* d, Card c);
 
 /**
  * @brief Removes and returns the top card from the deck.
  * @param d Pointer to the deck.
- * @return The card that was removed.
+ * @return The card that was removed. Returns a {CARD_BLACK, ZERO} card if empty.
  */
 Card pop_card(Deck* d);
 
@@ -86,12 +82,12 @@ Card pop_card(Deck* d);
  * @brief Removes and returns a card at a specific index in the deck.
  * @param d Pointer to the deck.
  * @param index The index of the card to remove.
- * @return The card that was removed.
+ * @return The card that was removed. Returns a {CARD_BLACK, ZERO} card if invalid index.
  */
 Card remove_at(Deck* d, int index);
 
 /**
- * @brief Clears all cards from the deck, freeing associated memory.
+ * @brief Clears all cards from the deck.
  * @param d Pointer to the deck to clear.
  */
 void clear_deck(Deck* d);
@@ -114,10 +110,4 @@ void human_shuffle_deck(Deck* d);
  */
 void init_uno_deck(Deck* d);
 
-/**
- * @brief Frees the memory allocated for the deck.
- * @param d Pointer to the deck to free.
- */
-void free_deck(Deck* d);
-
-#endif
+#endif // CARD_H

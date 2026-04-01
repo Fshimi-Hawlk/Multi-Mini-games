@@ -1,6 +1,6 @@
 /**
  * @file renderer.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of UI rendering functions using Raylib.
  */
@@ -17,33 +17,23 @@
 #define CARD_SCALE 0.8f
 
 /**
- * @brief Paths for assets, can be overridden by ASSET_PATH macro.
- */
-#ifndef ASSET_PATH
-    #define ASSET_PATH "assets/"
-#endif
-
-/**
  * @brief Loads textures for cards from various possible paths.
  * @return The loaded assets.
  */
 GameAssets LoadAssets(void) {
     GameAssets assets;
-
-    // Chargement via le chemin défini à la compilation (Monorepo ou Standalone)
+    
+    // Chargement via ASSET_PATH (défini par le Makefile pour la compatibilité Monorepo)
     assets.cardSheet = LoadTexture(ASSET_PATH "textures/playingCards.png");
-    assets.cardBack  = LoadTexture(ASSET_PATH "textures/cardBack_blue5.png");
-
+    assets.cardBack = LoadTexture(ASSET_PATH "textures/cardBack_blue5.png");
+    
     // Vérifications de sécurité
-    if (assets.cardSheet.id == 0) {
-        printf("ERREUR CRITIQUE: Texture playingCards.png introuvable à : %stextures/playingCards.png\n", ASSET_PATH);
-    }
-    if (assets.cardBack.id == 0) {
-        printf("ERREUR CRITIQUE: Texture cardBack_blue5.png introuvable à : %stextures/cardBack_blue5.png\n", ASSET_PATH);
-    }
+    if (assets.cardSheet.id == 0) printf("ERREUR: Texture playingCards.png introuvable à %s\n", ASSET_PATH);
+    if (assets.cardBack.id == 0)  printf("ERREUR: Texture cardBack_blue5.png introuvable à %s\n", ASSET_PATH);
 
     return assets;
 }
+
 /**
  * @brief Frees GPU memory for textures.
  * @param assets The assets to unload.
@@ -105,8 +95,9 @@ Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
  * @brief Draws the discard pile and draw pile.
  * @param g Game state.
  * @param assets Graphical assets.
+ * @param cardScalePop Additional scale for animation.
  */
-void RenderTable(GameState *g, GameAssets assets) {
+void RenderTable(GameState *g, GameAssets assets, float cardScalePop) {
     float scale = 1.0f;
     
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
@@ -115,30 +106,29 @@ void RenderTable(GameState *g, GameAssets assets) {
     float centerX = GetScreenWidth() / 2.0f;
     float centerY = GetScreenHeight() / 2.0f;
 
-    // --- DECORATION DE LA TABLE ---
-    // Fond avec un léger dégradé circulaire
-    DrawCircleGradient(centerX, centerY, 450, (Color){30, 80, 40, 255}, (Color){15, 40, 20, 255});
-    DrawCircleLines(centerX, centerY, 305, Fade(GOLD, 0.3f));
-    DrawCircleLines(centerX, centerY, 300, Fade(GOLD, 0.6f));
+    // Background decoration
+    DrawCircleGradient(centerX, centerY, 300, (Color){0, 100, 0, 100}, (Color){0, 0, 0, 0});
 
     // --- 1. DESSIN DE LA PIOCHE (Le Dos des cartes) ---
-    Rectangle deckPos = { centerX - cardW - 30, centerY - (cardH/2), cardW, cardH };
+    Rectangle deckPos = { centerX - cardW - 20, centerY - (cardH/2), cardW, cardH };
     Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
     
-    // Multi-layered shadow for depth
-    for (int i=1; i<=5; i++) {
-        DrawRectangleRounded((Rectangle){deckPos.x + i, deckPos.y + i, deckPos.width, deckPos.height}, 0.1f, 10, Fade(BLACK, 0.15f));
-    }
-    
+    // Shadow
+    DrawRectangleRounded((Rectangle){deckPos.x + 5, deckPos.y + 5, deckPos.width, deckPos.height}, 0.1f, 10, Fade(BLACK, 0.4f));
     DrawTexturePro(assets.cardBack, sourceBack, deckPos, (Vector2){0,0}, 0.0f, WHITE);
-    DrawRectangleLinesEx(deckPos, 2, Fade(WHITE, 0.5f)); 
+    DrawRectangleLinesEx(deckPos, 2, Fade(WHITE, 0.3f)); 
 
     // --- 2. DESSIN DU TALON (La carte jouée) ---
-    if (g->discard_pile.head != NULL) {
-        Card topCard = g->discard_pile.head->card; 
+    if (g->discard_pile.size > 0) {
+        Card topCard = g->discard_pile.cards[g->discard_pile.size - 1]; 
 
         Rectangle source = GetCardSourceRec(topCard, assets.cardSheet);
-        Rectangle dest = { centerX + 30, centerY - (cardH/2), cardW, cardH };
+        
+        float finalScale = 1.0f + cardScalePop;
+        float finalW = cardW * finalScale;
+        float finalH = cardH * finalScale;
+        
+        Rectangle dest = { centerX + 20 - (finalW - cardW)/2, centerY - (finalH/2), finalW, finalH };
         
         // Glow effect based on color
         Color glowColor = WHITE;
@@ -149,56 +139,16 @@ void RenderTable(GameState *g, GameAssets assets) {
             case CARD_BLUE:   glowColor = BLUE; break;
             case CARD_BLACK:  glowColor = PURPLE; break;
         }
-        DrawCircleGradient(dest.x + cardW/2, dest.y + cardH/2, 150, Fade(glowColor, 0.3f), (Color){0,0,0,0});
+        DrawCircleGradient(dest.x + cardW/2, dest.y + cardH/2, 120, Fade(glowColor, 0.4f), (Color){0,0,0,0});
 
         // Shadow
-        for (int i=1; i<=5; i++) {
-            DrawRectangleRounded((Rectangle){dest.x + i, dest.y + i, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.15f));
-        }
-
+        DrawRectangleRounded((Rectangle){dest.x + 5, dest.y + 5, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.4f));
         DrawTexturePro(assets.cardSheet, source, dest, (Vector2){0,0}, 0.0f, WHITE);
-        DrawRectangleLinesEx(dest, 3, WHITE);
+        DrawRectangleLinesEx(dest, 2, WHITE);
         
         if (topCard.value >= SKIP) {
-            float pulse = (sinf(GetTime() * 6.0f) + 1.0f) * 0.5f;
-            const char* actionText = "!! ACTION !!";
-            int tw = MeasureText(actionText, 25);
-            DrawText(actionText, dest.x + cardW/2 - tw/2, dest.y - 40, 25, Fade(glowColor, 0.4f + pulse * 0.6f));
-        }
-    }
-
-    // --- 3. DESSIN DES MAINS ADVERSES (Dos des cartes) ---
-    // Positions relatives pour les 3 autres joueurs (Top, Left, Right)
-    // On suppose que le joueur local est à l'index my_internal_id (voir king_client_module.c)
-    
-    // Joueur Haut
-    float opponentCardW = cardW * 0.6f;
-    float opponentCardH = cardH * 0.6f;
-    
-    // Exemple : Dessiner quelques dos de cartes en haut pour l'ambiance
-    // (Une implémentation complète utiliserait g->players[i].hand.size)
-    for (int i = 0; i < 4; i++) {
-        if (g->players[i].hand.size > 0) {
-            // Calcul de position selon l'index relatif au joueur local
-            // (Ici on fait un affichage générique pour le test)
-            Vector2 pos = {0};
-            float angle = 0;
-            
-            if (i == 1) { pos = (Vector2){ 100, centerY }; angle = 90; } // Gauche
-            else if (i == 2) { pos = (Vector2){ centerX, 100 }; angle = 0; } // Haut
-            else if (i == 3) { pos = (Vector2){ GetScreenWidth() - 100, centerY }; angle = -90; } // Droite
-            else continue; // Local player
-            
-            int count = g->players[i].hand.size;
-            if (count > 10) count = 10; // Limite visuelle
-            
-            for (int j = 0; j < count; j++) {
-                Rectangle dest = { pos.x + (angle == 0 ? (j-count/2.0f)*20 : 0), 
-                                   pos.y + (angle != 0 ? (j-count/2.0f)*20 : 0), 
-                                   opponentCardW, opponentCardH };
-                DrawTexturePro(assets.cardBack, sourceBack, dest, (Vector2){opponentCardW/2, opponentCardH/2}, angle, WHITE);
-            }
-            DrawText(TextFormat("P%d: %d", i, g->players[i].hand.size), pos.x - 20, pos.y + (angle == 0 ? 50 : 80), 20, BLACK);
+            float pulse = (sinf(GetTime() * 5.0f) + 1.0f) * 0.5f;
+            DrawText("! ACTION !", dest.x, dest.y - 30, 20, Fade(glowColor, 0.5f + pulse * 0.5f));
         }
     }
 }
@@ -209,50 +159,41 @@ void RenderTable(GameState *g, GameAssets assets) {
  * @param assets Graphical assets.
  */
 void RenderHand(Player *p, GameAssets assets) {
-    if (p->hand.head == NULL) return;
+    if (p->hand.size == 0) return;
 
     // --- CONFIGURATION ---
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
-    int padding = 55; 
-    int startX = (GetScreenWidth() - (p->hand.size * padding + (cardW-padding))) / 2;
+    int padding = 45; 
+    int startX = (GetScreenWidth() - (p->hand.size * padding + cardW)) / 2;
     if (startX < 50) startX = 50;
-    int startY = GetScreenHeight() - cardH - 30;
+    int startY = GetScreenHeight() - cardH - 20;
 
     // --- PASSE 1 : DÉTECTION DE LA CARTE SURVOLÉE ---
     int hoveredIndex = GetHoveredCardIndex(p, assets);
 
     // --- PASSE 2 : DESSIN ---
-    Node* current = p->hand.head; 
-    int i = 0;
-
-    while (current != NULL) {
+    for (int i = 0; i < p->hand.size; i++) {
+        Card current = p->hand.cards[i];
         Rectangle dest = { (float)startX + (i * padding), (float)startY, cardW, cardH };
 
         // Animation de survol
         if (i == hoveredIndex) {
-            dest.y -= 50;
+            dest.y -= 40;
             // Hover glow
-            DrawRectangleRounded((Rectangle){dest.x - 7, dest.y - 7, dest.width + 14, dest.height + 14}, 0.15f, 10, Fade(GOLD, 0.4f));
-            DrawRectangleRoundedLines((Rectangle){dest.x - 7, dest.y - 7, dest.width + 14, dest.height + 14}, 0.15f, 10, GOLD);
+            DrawRectangleRounded((Rectangle){dest.x - 5, dest.y - 5, dest.width + 10, dest.height + 10}, 0.1f, 10, Fade(GOLD, 0.5f));
         }
 
-        // Card shadow with depth
-        DrawRectangleRounded((Rectangle){dest.x + 4, dest.y + 4, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.3f));
+        // Card shadow
+        DrawRectangleRounded((Rectangle){dest.x + 3, dest.y + 3, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.3f));
 
-        Rectangle source = GetCardSourceRec(current->card, assets.cardSheet);
+        Rectangle source = GetCardSourceRec(current, assets.cardSheet);
         DrawTexturePro(assets.cardSheet, source, dest, (Vector2){0,0}, 0.0f, WHITE);
-        
-        if (i == hoveredIndex) {
-            DrawRectangleLinesEx(dest, 3, WHITE);
-        } else {
-            DrawRectangleLinesEx(dest, 1, Fade(WHITE, 0.3f));
-        }
 
         // Help text
-        if (current->card.value >= SKIP && i == hoveredIndex) {
+        if (current.value >= SKIP && i == hoveredIndex) {
             const char* text = "";
-            switch(current->card.value) {
+            switch(current.value) {
                 case SKIP:      text = "PASSE"; break;
                 case REVERSE:   text = "REVERSE"; break;
                 case PLUS_TWO:  text = "+2 CARDS"; break;
@@ -263,8 +204,57 @@ void RenderHand(Player *p, GameAssets assets) {
             DrawText(text, dest.x, dest.y - 25, 20, GOLD);
         }
 
-        current = current->next;
-        i++;
+        
+    }
+}
+
+/**
+ * @brief Draws card backs for opponent players.
+ * @param g Game state.
+ * @param assets Graphical assets.
+ * @param my_id Local player's internal ID.
+ */
+void RenderOpponents(GameState *g, GameAssets assets, int my_id) {
+    float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * 0.5f; // Smaller cards for opponents
+    float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * 0.5f;
+    Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
+
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+
+    for (int i = 0; i < g->num_players; i++) {
+        if (i == my_id) continue;
+
+        int handSize = g->players[i].hand.size;
+        if (handSize <= 0) continue;
+
+        // Position based on relative index
+        int relIdx = (i - my_id + g->num_players) % g->num_players;
+        
+        Vector2 startPos = {0};
+        Vector2 step = {0};
+        float rotation = 0;
+
+        if (relIdx == 1) { // Left (vertical)
+            startPos = (Vector2){ 50, (float)sh/2 - (handSize * 15)/2 };
+            step = (Vector2){ 0, 15 };
+            rotation = 90;
+        } else if (relIdx == 2) { // Top (horizontal)
+            startPos = (Vector2){ (float)sw/2 - (handSize * 25)/2, 50 };
+            step = (Vector2){ 25, 0 };
+            rotation = 0;
+        } else if (relIdx == 3) { // Right (vertical)
+            startPos = (Vector2){ (float)sw - 50, (float)sh/2 - (handSize * 15)/2 };
+            step = (Vector2){ 0, 15 };
+            rotation = -90;
+        }
+
+        for (int j = 0; j < handSize; j++) {
+            Rectangle dest = { startPos.x + j * step.x, startPos.y + j * step.y, cardW, cardH };
+            DrawTexturePro(assets.cardBack, sourceBack, dest, (Vector2){cardW/2, cardH/2}, rotation, WHITE);
+        }
+        
+        DrawText(TextFormat("P%d: %d", i, handSize), (int)startPos.x - 20, (int)startPos.y - 30, 20, WHITE);
     }
 }
 
@@ -272,28 +262,26 @@ void RenderHand(Player *p, GameAssets assets) {
  * @brief Returns the index of the card under the mouse cursor.
  */
 int GetHoveredCardIndex(Player *p, GameAssets assets) {
-    if (p->hand.head == NULL) return -1;
+    if (p->hand.size == 0) return -1;
 
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * CARD_SCALE;
-    int padding = 55; 
-    int startX = (GetScreenWidth() - (p->hand.size * padding + (cardW-padding))) / 2;
+    int padding = 45; 
+    int startX = (GetScreenWidth() - (p->hand.size * padding + cardW)) / 2;
     if (startX < 50) startX = 50;
-    int startY = GetScreenHeight() - cardH - 30;
+    int startY = GetScreenHeight() - cardH - 20;
 
     Vector2 mouse = GetMousePosition();
-    Node* current = p->hand.head;
-    int hoveredIndex = -1;
-    for (int i = 0; current; i++, current = current->next) {
-        Rectangle hitBox = { (float)startX + (i * padding), (float)startY - 40, (float)padding, (float)cardH + 40 };
-        // Last card has full width hitBox
-        if (current->next == NULL) hitBox.width = cardW;
+    
+    // We iterate BACKWARDS (from right to left) to pick the topmost card first
+    for (int i = p->hand.size - 1; i >= 0; i--) {
+        Rectangle hitBox = { (float)startX + (i * padding), (float)startY, (float)cardW, (float)cardH };
         
         if (CheckCollisionPointRec(mouse, hitBox)) {
-            hoveredIndex = i;
+            return i;
         }
     }
-    return hoveredIndex;
+    return -1;
 }
 
 /**

@@ -2,7 +2,7 @@
     @file utils/globals.c
     @author LeandreB8
     @author Fshimi-Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-01-12
     @date 2026-03-18
     @brief Definitions of program-wide global variables used in the lobby.
@@ -36,12 +36,12 @@
 /** @brief Main window rectangle (set at init). */
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 /** @brief Array of loaded fonts in increasing sizes. */
-Font      fonts[__fontSizeCount] = {0};
+Font      lobby_fonts[__fontSizeCount] = {0};
 /** @brief Primary font for UI text. */
 Font      appFont = {0};
 
 /** @brief Array of platforms in the lobby. */
-Platform_st platforms[] = {
+Platform_St platforms[] = {
     {{-1000, 500, 2000, 1000}, {0, 228, 48, 255}, 0},
     {{-1000, 0, 500, 500}, {0, 0, 0, 255}, 0},
     {{500, 0, 500, 500}, {0, 0, 0, 255}, 0},
@@ -68,9 +68,19 @@ Rectangle kingForFourZone = {
     -350, 400 - 60, 100, 60
 };
 
+/** @brief Trigger zone for the Chess game. */
+Rectangle chessZone = {
+    250, 400 - 60, 100, 60
+};
+
+/** @brief Trigger zone for the Rubik's Cube game. */
+Rectangle rubikZone = {
+    -200, 300 - 60, 100, 60
+};
+
 /** @brief Flag indicating if the texture selection menu is open. */
 bool isTextureMenuOpen = false;
 
 /** @brief Texture for the skin button logo. */
 Texture2D logoSkinButton;
-ChatState_St g_chatState = {0};
+Chat_St gameChat = {0};

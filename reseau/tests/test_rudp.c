@@ -1,52 +1,90 @@
 /**
  * @file test_rudp.c
  * @brief Unit tests for RUDP implementation.
+ * @author i-Charlys
  */
 
 #include "rudp_core.h"
+#include "networkInterface.h"
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <arpa/inet.h>
 
+
+
+/** 
+ * Test rudpInitConnection initializes a connection struct correctly.
+ */
 void test_rudp_init() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
     assert(conn.local_sequence == 0);
     assert(conn.remote_sequence == 65535);
     printf("test_rudp_init passed\n");
 }
 
+/**
+ * Test rudpGenerateHeader generates a header with the correct sequence and action.
+ */
 void test_rudp_header_gen() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
-    RUDP_Header h;
-    RUDP_GenerateHeader(&conn, 5, &h);
-    assert(h.sequence == 0);
-    assert(h.action == 5);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
+    RUDPHeader_St h;
+    rudpGenerateHeader(&conn, ACTION_GAME_DATA, &h);
+    assert(ntohs(h.sequence) == 0);
+    assert(h.action == ACTION_GAME_DATA);
     assert(conn.local_sequence == 1);
     printf("test_rudp_header_gen passed\n");
 }
 
+/**
+ * Test rudpProcessIncoming processes incoming packets correctly.
+ */
 void test_rudp_process_incoming() {
-    RUDP_Connection conn;
-    RUDP_InitConnection(&conn);
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
     
-    RUDP_Header h = { .sequence = 0, .ack = 0, .action = 5 };
-    assert(RUDP_ProcessIncoming(&conn, &h) == true);
+    RUDPHeader_St h;
+    memset(&h, 0, sizeof(h));
+    h.sequence = htons(0);
+    h.action = ACTION_GAME_DATA;
+
+    assert(rudpProcessIncoming(&conn, &h) == true);
     assert(conn.remote_sequence == 0);
     
     // Test duplicate
-    assert(RUDP_ProcessIncoming(&conn, &h) == false);
+    assert(rudpProcessIncoming(&conn, &h) == false);
     assert(conn.remote_sequence == 0);
     
     // Test newer
-    h.sequence = 1;
-    assert(RUDP_ProcessIncoming(&conn, &h) == true);
+    h.sequence = htons(1);
+    assert(rudpProcessIncoming(&conn, &h) == true);
     assert(conn.remote_sequence == 1);
     
     printf("test_rudp_process_incoming passed\n");
 }
 
+/**
+ * Test rudpSendPacket sends a packet with the correct sequence and action.
+ */
+void test_rudp_send_packet() {
+    RUDPConnection_St conn;
+    rudpInitConnection(&conn);
+    
+    RUDPHeader_St h;
+    memset(&h, 0, sizeof(h));
+    h.sequence = htons(0);
+    h.action = ACTION_GAME_DATA;
+
+    rudpSendPacket(&conn, &h, NULL, 0);
+    assert(conn.local_sequence == 1);
+    printf("test_rudp_send_packet passed\n");
+}
+
+/**
+ * Test rudpSendPacket sends a packet with the correct sequence and action.
+ */
 int main() {
     test_rudp_init();
     test_rudp_header_gen();

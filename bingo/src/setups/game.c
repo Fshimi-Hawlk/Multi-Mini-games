@@ -2,7 +2,7 @@
     @file game.h (setups)
     @author Fshimi Hawlk
     @date 2026-03-02
-    @date 2026-03-16
+    @date 2026-03-19
     @brief Full game state initialization implementation.
 */
 
@@ -10,7 +10,7 @@
 
 #include "utils/utils.h"
 
-static void computeLayout(Layout_St* layout) {
+void bingo_computeLayout(Layout_St* layout) {
     layout->windowCenter = (f32Vector2) {
         WINDOW_WIDTH / 2.0f,
         WINDOW_HEIGHT / 2.0f
@@ -98,9 +98,9 @@ static void computeLayout(Layout_St* layout) {
     }
 }
 
-bool generateCard(Card_t card, uint *available, uint count) {
+bool bingo_generateCard(Card_t card, uint *available, uint count) {
     if (available == NULL || count == 0) return false;
-    shuffleArrayT(uint, available, count, rand);
+    shuffleArray(uint, available, count, rand);
     
     uint idx = 0;
 
@@ -112,57 +112,4 @@ bool generateCard(Card_t card, uint *available, uint count) {
     }
 
     return true;
-}
-
-void bingo_initGame(BingoGame_St* game) {
-    // Player card
-    memset(game->player.numbers,   0, sizeof(game->player.numbers));
-    memset(game->player.daubs,     0, sizeof(game->player.daubs));
-    memset(game->player.misclicks, 0, sizeof(game->player.misclicks));
-
-    // Free space (center)
-    game->player.daubs[2][2] = true;
-    game->player.numbers[2][2] = UINT32_MAX;  // or keep 0 and rely on daubs check
-
-    // Fill card numbers (random from 0..99 without replacement)
-    uint available[100];
-    for (uint i = 0; i < 100; ++i) {
-        available[i] = i;
-    }
-    
-    for (uint i = 0; i < 12; ++i) {
-        generateCard(game->layout.choiceCards[i].values, available, 100);
-    }
-
-    // generateCard(game->player.numbers, available, 100);
-
-    // Ball system
-    game->balls.remainingCount = 500;
-
-    uint b = 0;
-    for (uint n = 0; n < 100; ++n) {
-        for (uint col = 1; col <= 5; ++col) {
-            game->balls.encodedBalls[b++] = 100 * col + n;
-        }
-    }
-    shuffleArrayT(uint, game->balls.encodedBalls, 500, rand);
-
-    game->balls.choiceDelay = 3.5f;
-    game->balls.showDelay = 1.5f;
-    game->balls.graceDelay = 1.0f;
-
-    // Current call
-    game->currentCall.encodedValue = 0;
-    game->currentCall.column       = 0;
-    game->currentCall.number       = 0;
-    game->currentCall.timer        = game->balls.showDelay;
-    game->currentCall.displayedText[0] = '\0';
-
-
-    // Game progress
-    game->progress.scene         = GAME_SCENE_CARD_CHOICE;
-    game->progress.resultMessage = NULL;
-
-    // Game layout
-    computeLayout(&game->layout);
 }

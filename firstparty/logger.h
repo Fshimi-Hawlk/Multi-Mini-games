@@ -158,14 +158,6 @@ extern ColorString_t getLevelString(LoggingLevel_Et level);
 
 extern ColorString_t getLevelColor(LoggingLevel_Et level);
 
-// ────────────────────────────────────────────────
-// Core API
-// ────────────────────────────────────────────────
-
-extern ColorString_t getLevelString(LoggingLevel_Et level);
-
-extern ColorString_t getLevelColor(LoggingLevel_Et level);
-
 /**
  * @brief Initialize logger: create/open log file (debug builds) + symbol handler.
  * @return 0 on success, negative on failure
@@ -224,9 +216,9 @@ int get_caller_info(char *out, size_t outSize, unsigned int depth);
     do {                                               \
         char __buf[512];                               \
         if (get_caller_info(__buf, sizeof __buf, depth) == 0) \
-            puts(__buf);                               \
+            fprintf(stderr, "\033[92m%s\033[0m%s\n", depth == 1 ? "CALLER: " : "", __buf); \
         else                                           \
-            puts("Error getting caller info");         \
+            fprintf(stderr, "Error getting caller info\n"); \
     } while(0)
 
 /** @brief Macro to print info of the immediate caller. */
@@ -237,7 +229,7 @@ int get_caller_info(char *out, size_t outSize, unsigned int depth);
 #ifdef LOGGER_IMPLEMENTATION
 
 /** @brief ANSI Black color string implementation. */
-ColorString_t black = "\033[38;2;255;255;255m";
+ColorString_t black = "\033[38;2;0;0;0m";
 /** @brief ANSI White color string implementation. */
 ColorString_t white = "\033[38;2;255;255;255m";
 /** @brief ANSI Yellow color string implementation. */
@@ -396,7 +388,7 @@ void log_message(LoggingLevel_Et level, const char *file, int line, const char *
 
     if (!_logExtraInfoOptions.hideLineId) {
         char lineLocationString[2048] = {0};
-        snprintf(lineLocationString, sizeof(logExtraInfoString), "%s%s\033[0m:%s%d %s(%s%s%s)\033[0m: ", fileColor, file, lineColor, line, yellow, functionColor, func, yellow);
+        snprintf(lineLocationString, sizeof(lineLocationString), "%s%s\033[0m:%s%d %s(%s%s%s)\033[0m: ", fileColor, file, lineColor, line, yellow, functionColor, func, yellow);
         strcat(logExtraInfoString, lineLocationString);
     }
 

@@ -1,6 +1,6 @@
 /**
  * @file game.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for the main game logic and state management of King for Four.
  */
@@ -9,18 +9,6 @@
 #define GAME_H
 
 #include "player.h"
-
-/**
- * @brief Rule matrix for valid color moves.
- * [Discard Pile Color (0-3)][Played Card Color (0-4)]
- */
-extern int valid_color[4][5];
-
-/**
- * @brief Rule matrix for valid value moves.
- * [Discard Pile Value (0-14)][Played Card Value (0-14)]
- */
-extern int valid_value[15][15];
 
 /**
  * @struct GameState
@@ -76,4 +64,4 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex);
  */
 int player_draw_card(GameState *g, int playerIndex);
 
-#endif
+#endif // GAME_H

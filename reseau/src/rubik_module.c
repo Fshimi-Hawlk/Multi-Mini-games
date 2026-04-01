@@ -1,0 +1,99 @@
+#include "networkInterface.h"
+#include "APIs/generalAPI.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+typedef struct {
+    int id;
+    float progress;
+    bool active;
+    bool eliminated;
+} RubikPlayer;
+
+typedef struct {
+    RubikPlayer players[MAX_CLIENTS];
+    int status; // 0: WAITING, 1: PLAYING
+    float elimination_timer;
+    int seed;
+} RubikServerState;
+
+void* rubik_create_instance(void) {
+    RubikServerState* rs = calloc(1, sizeof(RubikServerState));
+    if (rs) {
+        rs->status = 0;
+        rs->seed = (int)time(NULL);
+        rs->elimination_timer = 0;
+    }
+    return rs;
+}
+
+void rubik_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+    if (action != ACTION_GAME_DATA) return;
+    if (len < sizeof(GameTLVHeader_St)) return;
+    
+    GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
+    if (tlv->game_id != MINI_GAME_CUBE) return;
+    
+    RubikServerState* rs = (RubikServerState*)state;
+    u8 real_action = tlv->action;
+    void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
+    (void)real_payload;
+
+    if (real_action == ACTION_CODE_JOIN_GAME) {
+        rs->players[player_id].active = true;
+        rs->players[player_id].id = player_id;
+        rs->players[player_id].progress = 0;
+        rs->players[player_id].eliminated = false;
+        
+        int internal_id = player_id; // Simple mapping
+        u8 buf_ack[64];
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+        memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
+        memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
+        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+    }
+    else if (real_action == ACTION_CODE_START_GAME) {
+        rs->status = 1;
+        rs->elimination_timer = 30.0f;
+        rs->seed = (int)time(NULL);
+        
+        u8 buf[64];
+        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = sizeof(int) };
+        memcpy(buf, &tlv_scr, sizeof(tlv_scr));
+        memcpy(buf + sizeof(tlv_scr), &rs->seed, sizeof(int));
+        broadcast(0, -1, ACTION_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(int));
+    }
+    else if (real_action == ACTION_CODE_RUBIK_PROGRESS) {
+        if (len >= sizeof(GameTLVHeader_St) + sizeof(float)) {
+            memcpy(&rs->players[player_id].progress, real_payload, sizeof(float));
+        }
+    }
+}
+
+void rubik_on_tick(void* state) {
+    RubikServerState* rs = (RubikServerState*)state;
+    if (rs->status != 1) return;
+    
+    // Battle Royale Logic: Eliminate weakest every 30s
+    // Simplified for now: just a placeholder logic
+}
+
+void rubik_on_player_leave(void* state, int player_id) {
+    RubikServerState* rs = (RubikServerState*)state;
+    rs->players[player_id].active = false;
+}
+
+void rubik_destroy_instance(void *state) {
+    free(state);
+}
+
+GameServerInterface_St rubik_module = {
+    .game_name = "rubik",
+    .create_instance = rubik_create_instance,
+    .on_action = rubik_on_action,
+    .on_tick = rubik_on_tick,
+    .on_player_leave = rubik_on_player_leave,
+    .destroy_instance = rubik_destroy_instance
+};

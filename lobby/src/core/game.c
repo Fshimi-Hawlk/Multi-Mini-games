@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @author LeandreB8
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-02-08
     @date 2026-03-18
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
@@ -35,18 +35,17 @@
     Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
     by draw routines and assume the player's collision shape is always a circle.
 
-    @see `utils/userTypes.h`     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/userTypes.h`     for `Player_St`, `LobbyGame_St`, `PlayerTexture_Et`
     @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
     @see `utils/globals.h`       for `skinButtonRect`
     @see `core/game.h`           for `resolveCircleRectCollision()` declaration
 */
 
 #include "core/game.h"
-
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle getPlayerCollisionBox(const Player_st* const player) {
+Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x,
         player->position.y,
@@ -55,11 +54,13 @@ Rectangle getPlayerCollisionBox(const Player_st* const player) {
     };
 }
 
-Vector2 getPlayerCenter(const Player_st* const player) {
+Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const f32 dt) {
+
+//besion de comprendre les changements entre les deux fonctions a la suite du rebase
+/*void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
 
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
@@ -71,29 +72,53 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
             player->velocity.x -= FRICTION * dt;
             if (player->velocity.x < 0) player->velocity.x = 0;
         } else if (player->velocity.x < 0) {
+        player->velocity.x += FRICTION * dt;
+        if (player->velocity.x > 0) player->velocity.x = 0;
+    }
+}
+
+        
+*/
+
+void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt) {
+
+    // INPUT HORIZONTAL
+    if (IsKeyDown(KEY_A))
+        player->velocity.x = -300;
+    else if (IsKeyDown(KEY_D))
+        player->velocity.x = 300;
+    else {
+        // friction quand aucune touche n'est pressée
+        if (player->velocity.x > 0) {
+            player->velocity.x -= FRICTION * dt;
+            if (player->velocity.x < 0) player->velocity.x = 0;
+        } 
+        else if (player->velocity.x < 0) {
             player->velocity.x += FRICTION * dt;
             if (player->velocity.x > 0) player->velocity.x = 0;
         }
     }
 
-    // Rotate depending on the player's direction
+    // Rotation en fonction de la direction
     if (player->velocity.x > 0) {
-        player->angle += 360 * dt; // Clockwise
-    } else if (player->velocity.x < 0) {
-        player->angle -= 360 * dt; // Anti-clockwise
+        player->angle += 360 * dt; // tourner dans le sens horaire
+    } 
+    else if (player->velocity.x < 0) {
+        player->angle -= 360 * dt; // tourner dans le sens anti-horaire
     }
 
-    // Buffered jump input
+    // INPUT JUMP -> buffer
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    } else if (player->jumpBuffer > 0) {
+    } 
+    else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
 
-    // Gravity
+    // GRAVITÉ
     player->velocity.y += 1200 * dt;
 
-    // Collision
+    // COLLISIONS
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
     player->onGround = false;
@@ -102,26 +127,32 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
         resolveCircleRectCollision(player, platforms[i].rect);
     }
 
-    // Coyote time
+    // COYOTE TIME
     if (player->onGround) {
         player->coyoteTimer = COYOTE_TIME;
         player->nbJumps = 0;
-    } else {
+    }
+    else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0)
             player->coyoteTimer = 0;
     }
 
-    // Jump => buffer + coyote + air jump(s)
+    // JUMP (buffer + coyote + double jump)
     if (player->jumpBuffer > 0) {
-        // Ground/Coyote Jump/Double jump
-        if (player->onGround || player->coyoteTimer > 0 || player->nbJumps < MAX_JUMPS) {
-            // adding: `player->nbJumps >= 1` to the cond makes that player can't
-            // air jump if they haven't already jump previously
-
+        // Jump sol ou coyote
+        if (player->onGround || player->coyoteTimer > 0) {
             player->velocity.y = -500;
             player->onGround = false;
             player->coyoteTimer = 0;
+            player->nbJumps = 1;
+            player->jumpBuffer = 0;
+        }
+        // Double jump
+        // adding: `player->nbJumps >= 1` to the below cond makes that player can't 
+        // air jump if they haven't already jump previously
+        else if (player->nbJumps < MAX_JUMPS) {
+            player->velocity.y = -500;
             player->nbJumps++;
             player->jumpBuffer = 0;
         }
@@ -133,7 +164,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
  * @param player Pointer to the player structure.
  * @param rect The rectangle to check collision against.
  */
-void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
+void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
     // Search the position that is closest to the circle on the rectangle
     f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
     f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
@@ -147,26 +178,27 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
     if (distSq >= r * r)
         return;
 
-    f32 dist = sqrtf(distSq);
+    float dist = sqrtf(distSq);
     if (dist == 0)
         return;
 
-    f32 penetration = r - dist;
+    float penetration = r - dist;
 
-    f32 nx = dx / dist;
-    f32 ny = dy / dist;
+    float nx = dx / dist;
+    float ny = dy / dist;
 
-    // Position correction
+    // correction position
     player->position.x += nx * penetration;
     player->position.y += ny * penetration;
 
-    // Speed resolution along the dominant axis
+    // résolution vitesse selon l’axe dominant
     if (fabsf(nx) > fabsf(ny)) {
         player->velocity.x = 0;
-    } else {
+    }
+    else {
         player->velocity.y = 0;
 
-        // Ground
+        // sol
         if (ny < 0) {
             player->onGround = true;
             player->nbJumps = 0;
@@ -176,7 +208,7 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
 }
 
 
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
+void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
@@ -247,8 +279,8 @@ void toggleSkinMenu(LobbyGame_St* const game) {
  * @param player Pointer to the player structure.
  * @return 1 if King For Four is triggered, 0 otherwise.
  */
-int checkGameTrigger(Player_st* player) {
-    if (CheckCollisionCircleRec(player->position, player->radius, kingForFourZone)) {
+int checkGameTrigger(Player_St* player, LobbyGame_St* const game) {
+    if (CheckCollisionCircleRec(player->position, player->radius, game->miniGameManager.gameHitboxes[MINI_GAME_KFF])) {
         return 1; 
     }
     return 0; 
