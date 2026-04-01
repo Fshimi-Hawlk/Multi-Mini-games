@@ -19,7 +19,7 @@
 
 // General Variables
 
-Font      fonts[__fontSizeCount] = {0};
+// Font      fonts[__fontSizeCount] = {0};
 
 // Game's Variables
 const char* const LETTERS[5] = {"B", "I", "N", "G", "O"};

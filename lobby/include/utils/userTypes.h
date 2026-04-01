@@ -33,6 +33,11 @@
 typedef enum {
     GAME_STATE_GAMEPLAY,
     GAME_STATE_CONNECTION,
+    GAME_STATE_DISCONNECTED,
+    GAME_STATE_CONNECTING,
+    GAME_STATE_LOBBY,
+    GAME_STATE_WAITING_SWITCH,
+    GAME_STATE_INGAME,
 } GameState_Et;
 
 /**
@@ -83,6 +88,7 @@ typedef struct {
 */
 typedef struct {
     Vector2 position;                           ///< Center position of the player (world coordinates)
+    Vector2 targetPosition;                     ///< Target position for network interpolation.
     float   radius;                             ///< Collision radius (circle-based collision)
 
     float   angle;                              ///< Visual rotation in radians (usually 0 unless doing tricks/rotations)
@@ -118,10 +124,11 @@ typedef struct {
 */
 typedef struct {
     GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
-    BaseGame_St             miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
+    BaseGame_St*            miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
     Rectangle               gameHitboxes[__miniGameCount];          ///< Screen-space rectangles where touching/standing activates a mini-game
     MiniGame_Et             currentMiniGame;                        ///< Which mini-game / view is currently active
     bool                    gameHitGracePeriodActive;               ///< Prevents instant re-triggering when leaving/entering hitbox
+    bool                    needGameInit;                           ///< Flag: game needs initialization on next frame
 } MiniGameManager_St;
 
 /**

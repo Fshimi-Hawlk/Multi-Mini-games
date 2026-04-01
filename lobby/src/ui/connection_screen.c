@@ -41,7 +41,7 @@ static int roomsCount = 0;
 /**
  * @brief Allocates and positions UI elements for the connection screen.
  */
-void InitConnectionScreen(void) {
+void initConnectionScreen(void) {
     int screenWidth = GetScreenWidth();
     int screenHeight = GetScreenHeight();
 
@@ -60,7 +60,7 @@ void InitConnectionScreen(void) {
  * @param ip IP address of the discovered server.
  * @param name Name of the discovered server.
  */
-void AddDiscoveredRoom(const char* ip, const char* name) {
+void addDiscoveredRoom(const char* ip, const char* name) {
     if (roomsCount >= MAX_ROOMS_DISPLAY) return;
     
     for (int i = 0; i < roomsCount; i++) {
@@ -91,7 +91,7 @@ extern void discover_servers(void);
  * @brief Logical update loop for the connection screen.
  * @return true if connection is triggered (valid IP + click), false otherwise.
  */
-bool UpdateConnectionScreen(void) {
+bool updateConnectionScreen(void) {
     UpdateIPInput(&ipInput, ipBuffer, &letterCount);
 
     if (UpdateConnectButton(&refreshButton, true)) {
@@ -112,7 +112,7 @@ bool UpdateConnectionScreen(void) {
 /**
  * @brief Renders the connection screen UI.
  */
-void DrawConnectionScreen(void) {
+void drawConnectionScreen(void) {
     ClearBackground(RAYWHITE);
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
@@ -145,4 +145,4 @@ void DrawConnectionScreen(void) {
  * @brief Gets the IP address entered in the input field.
  * @return A pointer to the IP buffer string.
  */
-const char* GetEnteredIP(void) { return ipBuffer; }
+const char* getEnteredIP(void) { return ipBuffer; }

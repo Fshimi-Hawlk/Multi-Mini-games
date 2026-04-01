@@ -29,6 +29,11 @@ enum BaseActionCodes_e {
     ACTION_CODE_START_GAME   = 0x03,    ///< Starting a game.
     ACTION_CODE_SYNC_GAME    = 0x04,    ///< Synchronizing the game state.
     ACTION_CODE_QUIT_GAME    = 0x05,    ///< quitting the game.
+    ACTION_CODE_LOBBY_MOVE,             ///< Player movement in the lobby.
+    ACTION_CODE_LOBBY_ROOM_QUERY,       ///< Querying room information.
+    ACTION_CODE_LOBBY_ROOM_INFO,        ///< Receiving room information.
+    ACTION_CODE_LOBBY_CHAT,             ///< Lobby chat message.
+    ACTION_CODE_LOBBY_SWITCH_GAME,      ///< Switching to a mini-game.
     firstAvailableActionCode            ///< First action code usable by the codes specific to each sub-game
 };
 

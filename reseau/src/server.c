@@ -40,14 +40,6 @@
 #define SERVER_NAME "MMG-Lobby-Server"                  /**< Server display name. */
 #define MAX_PAYLOAD_SIZE (2048 - sizeof(RUDPHeader_St)) /**< Maximum payload size. */
 
-enum {
-    ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
-    ACTION_CODE_LOBBY_ROOM_QUERY,
-    ACTION_CODE_LOBBY_ROOM_INFO,
-    ACTION_CODE_LOBBY_CHAT,
-    ACTION_CODE_LOBBY_SWITCH_GAME
-};
-
 // Routing interfaces
 extern GameServerInterface_St lobby_module; /**< Lobby module instance. */
 extern GameServerInterface_St king_module;  /**< King for Four module instance. */

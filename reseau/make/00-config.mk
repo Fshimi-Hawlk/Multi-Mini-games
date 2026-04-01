@@ -150,8 +150,8 @@ LDFLAGS += $(BASE_LDFLAGS)
 CFLAGS += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
-MAIN_NAME ?= main
-LIB_NAME := lobby
+MAIN_NAME ?= server
+LIB_NAME := reseau
 
 SRC_DIR := src
 TEST_DIR := tests

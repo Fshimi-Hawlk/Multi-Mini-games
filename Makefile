@@ -34,7 +34,7 @@ else
     SILENT_PREFIX := @
 endif
 
-ROOT_DIR      := $(CURDIR)
+ROOT_DIR      := .
 MAKEFLAGS     += --no-print-directory
 
 # Directories to exclude when discovering modules
@@ -43,7 +43,6 @@ EXCLUDED_DIRS := \
     build        \
     docs         \
     firstparty   \
-    lobby        \
     logs         \
     thirdparty
 
@@ -51,7 +50,7 @@ EXCLUDED_DIRS := \
 MODULES := $(patsubst %/,%,$(wildcard */))
 MODULES := $(filter-out $(EXCLUDED_DIRS),$(MODULES))
 
-SUBDIRS       := $(MODULES) lobby
+SUBDIRS       := $(MODULES)
 
 FIRSTPARTY_API_DIR := $(ROOT_DIR)/firstparty/APIs
 
@@ -118,7 +117,7 @@ $(foreach mod,$(MODULES),$(eval $(call build-module-lib-rule,$(mod))))
 # Main targets
 # ───────────────────────────────────────────────────────────────
 
-all: bin
+all: bin server
 
 libs: $(LIBS)
 
@@ -131,7 +130,13 @@ bin: libs
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
-run-server: libs
+server: libs
+	@echo "Building server executable..."
+	$(SILENT_PREFIX)$(MAKE) -C reseau \
+		MODE=$(MODE) VERBOSE=$(VERBOSE) \
+		EXTRA_LDFLAGS="$(LIBS_REL)"
+
+run-server: server
 	@echo "===> Starting server..."
 	$(SILENT_PREFIX)cd reseau && ./build/bin/server
 

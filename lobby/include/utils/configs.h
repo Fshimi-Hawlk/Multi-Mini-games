@@ -23,6 +23,12 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
+
+#define IMAGES_PATH ASSET_PATH "images/"
+
 #define WINDOW_TITLE "Template"
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 600

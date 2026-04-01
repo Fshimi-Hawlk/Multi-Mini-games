@@ -80,7 +80,7 @@ Vector2 getPlayerCenter(const Player_St* const player) {
         
 */
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const float dt) {
+void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt) {
 
     // INPUT HORIZONTAL
     if (IsKeyDown(KEY_A))
@@ -279,8 +279,8 @@ void toggleSkinMenu(LobbyGame_St* const game) {
  * @param player Pointer to the player structure.
  * @return 1 if King For Four is triggered, 0 otherwise.
  */
-int checkGameTrigger(Player_St* player) {
-    if (CheckCollisionCircleRec(player->position, player->radius, kingForFourZone)) {
+int checkGameTrigger(Player_St* player, LobbyGame_St* const game) {
+    if (CheckCollisionCircleRec(player->position, player->radius, game->miniGameManager.gameHitboxes[MINI_GAME_KFF])) {
         return 1; 
     }
     return 0; 

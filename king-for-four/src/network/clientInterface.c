@@ -8,6 +8,7 @@
 #include <sys/socket.h>
 #include <string.h>
 #include <stdio.h>
+#include <math.h>
 
 #include "core/game.h"
 #include "ui/renderer.h"

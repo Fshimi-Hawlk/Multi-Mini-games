@@ -27,11 +27,14 @@
 
 extern Rectangle windowRect;            ///< Main window rectangle (set at init).
 extern Font      appFont;               ///< Primary font for UI text.
-extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
+extern Font      fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 
-extern Platform_st platforms[];
-extern int platformCount;
+extern Platform_St platforms[];
+extern u32 platformCount;
+
+#include "APIs/chatAPI.h"
+extern Chat_St gameChat;
 
 extern Texture2D playerTextures[];
 extern int playerTextureCount;
@@ -43,5 +46,7 @@ extern Rectangle skinButtonRect;
 extern bool isTextureMenuOpen;
 
 extern Texture2D logoSkinButton;
+
+extern Rectangle kingForFourZone;
 
 #endif // UTILS_GLOBALS_H

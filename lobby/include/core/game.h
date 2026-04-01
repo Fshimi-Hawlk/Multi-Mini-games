@@ -127,8 +127,9 @@ void toggleSkinMenu(LobbyGame_St* const game);
 /**
  * @brief Checks if the player has triggered a game transition zone.
  * @param player Pointer to the player structure.
+ * @param game   Pointer to the lobby game state.
  * @return 1 if a trigger is activated, 0 otherwise.
  */
-int checkGameTrigger(Player_St* player);
+int checkGameTrigger(Player_St* player, LobbyGame_St* const game);
 
 #endif // CORE_GAME_H

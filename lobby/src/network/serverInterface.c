@@ -50,9 +50,9 @@ void lobby_on_action(void *state, int player_id, u8 action, const void *payload,
  * @param player_id Index du joueur qui se déconnecte.
  */
 void lobby_on_player_leave(void *state, int player_id) {
-    LobbyState *s = (LobbyState*)state;
+    LobbyGame_St *s = (LobbyGame_St*)state;
     if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        memset(&s->players[player_id], 0, sizeof(Player_St));
+        memset(&s->otherPlayers[player_id], 0, sizeof(Player_St));
     }
 }
 

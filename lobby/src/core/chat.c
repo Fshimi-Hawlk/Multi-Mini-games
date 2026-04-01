@@ -1,4 +1,5 @@
 #include "utils/globals.h"
+#include "networkInterface.h"
 
 #include "core/chat.h"
 #include "APIs/generalAPI.h"
@@ -7,9 +8,6 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-
-s32 networkSocket;
-RUDPConnection_St serverConnection;
 
 static float msgVisibleTimer = 0.0f;
 
@@ -63,8 +61,8 @@ void updateChat(void) {
 
         if (IsKeyPressed(KEY_ENTER)) {
             if (gameChat.inputPos > 0 && networkSocket != -1) {
-                GameTLVHeader_St tlv = { .game_id = 0, .action = LOBBY_CHAT, .length = (u16)strlen(gameChat.inputBuffer) + 1 };
-                RUDPHeader_St h; rudpGenerateHeader(&serverConnection, LOBBY_CHAT, &h);
+                GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = (u16)strlen(gameChat.inputBuffer) + 1 };
+                RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_CHAT, &h);
                 
                 u8 buffer[2048];
                 size_t offset = 0;

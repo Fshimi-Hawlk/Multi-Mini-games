@@ -29,7 +29,7 @@
 #include "networkInterface.h"
 #include "ui/connection_screen.h"
 #include "ui/menus.h"
-#include "utils/chat.h"
+#include "core/chat.h"
 #include "utils/globals.h"
 #include "firstparty/progress.h"
 #include "firstparty/leaderboard.h"
@@ -47,21 +47,13 @@
 /** @brief Global player progress. */
 PlayerProgress_St g_progress;
 
-enum {
-    ACTION_CODE_LOBBY_MOVE = firstAvailableActionCode,
-    ACTION_CODE_LOBBY_ROOM_QUERY,
-    ACTION_CODE_LOBBY_ROOM_INFO,
-    ACTION_CODE_LOBBY_CHAT,
-    ACTION_CODE_LOBBY_SWITCH_GAME
-};
-
 /** @brief Registry of available mini-game modules. */
-static MiniGameModule* game_registry[256] = {0};
+static GameClientInterface_St* game_registry[256] = {0};
 
 /** @brief ID of the currently active mini-game module. */
 u8 active_game_id = 0;
 
-extern MiniGameModule KingForFourClientModule;
+extern GameClientInterface_St KingForFourClientModule;
 
 /** @brief Port used for server communication. */
 #define SERVER_PORT 8080
@@ -75,7 +67,22 @@ RUDPConnection_St serverConnection;
 /** @brief Assigned player ID from server. */
 int my_id = -1;
 
-void register_minigame(MiniGameModule* module) {
+static LobbyGame_St* g_lobbyGame = NULL;
+
+Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame);
+
+void discover_servers(void) {
+    void discoverServers(void);
+    discoverServers();
+}
+
+void switch_minigame(u8 game_id) {
+    if (g_lobbyGame) {
+        switchMinigame(g_lobbyGame, (MiniGame_Et)game_id);
+    }
+}
+
+void register_minigame(GameClientInterface_St* module) {
     if (module && module->id < 256) {
         game_registry[module->id] = module;
         if (module->init) module->init();
@@ -91,15 +98,15 @@ Error_Et switchMinigame(LobbyGame_St* const game, const MiniGame_Et nextMiniGame
 
     Error_Et error = OK;
 
-    BaseGame_St* base = &game->miniGameManager.miniGames[nextMiniGame];
+    BaseGame_St** base = &game->miniGameManager.miniGames[nextMiniGame];
 
     switch (nextMiniGame) {
         case MINI_GAME_LOBBY: {
             if (game->miniGameManager.currentMiniGame == MINI_GAME_LOBBY) break;
 
             // free the ressource of the last loaded game
-            BaseGame_St* base = &game->miniGameManager.miniGames[game->miniGameManager.currentMiniGame];
-            base->freeGame(&base);
+            BaseGame_St** lastBase = &game->miniGameManager.miniGames[game->miniGameManager.currentMiniGame];
+            if (*lastBase && (*lastBase)->freeGame) (*lastBase)->freeGame(lastBase);
         } break;
 
         case MINI_GAME_BATTLESHIP: {
@@ -282,7 +289,7 @@ void receiveNetworkData(LobbyGame_St* game) {
             if (g->action == ACTION_CODE_LOBBY_CHAT && g->game_id == active_game_id) {
                 if (sid != my_id) {
                     const char* sender_name = (sid == 999) ? "SERVEUR" : TextFormat("Joueur %d", sid);
-                    AddChatMessage(sender_name, (char*) payload);
+                    addChatMessage(sender_name, (char*) payload);
                 }
             }
 
@@ -306,15 +313,14 @@ int main(void) {
     
     InitMenus();
 
-    LobbyGame_St* game = NULL;
-    if (lobby_initGame(&game) != OK) {
+    if (lobby_initGame(&g_lobbyGame) != OK) {
         log_fatal("Couldn't load the lobby properly.");
         return 1;
     }
 
-    InitConnectionScreen();
+    initConnectionScreen();
     
-    for (int i = 0; i < MAX_CLIENTS; i++) game->otherPlayers[i].active = false;
+    for (int i = 0; i < MAX_CLIENTS; i++) g_lobbyGame->otherPlayers[i].active = false;
 
     register_minigame(&KingForFourClientModule);
 
@@ -324,7 +330,7 @@ int main(void) {
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
-        receiveNetworkData(game);
+        receiveNetworkData(g_lobbyGame);
 
         UpdateMenu();
         if (g_currentMenu != MENU_NONE) {
@@ -332,11 +338,11 @@ int main(void) {
         }
 
         if (g_currentMenu == MENU_NONE) {
-            UpdateChat();
+            updateChat();
 
-            Player_St* local_p = &game->player;
+            Player_St* local_p = &g_lobbyGame->player;
 
-            if (game->currentState == GAME_STATE_LOBBY && active_game_id == 0) {
+            if (g_lobbyGame->currentState == GAME_STATE_LOBBY && active_game_id == 0) {
                 // Lobby network sync (send pos) - Throttled at 60Hz
                 move_timer += dt;
                 static Vector2 lastSent = {0};
@@ -352,7 +358,7 @@ int main(void) {
                 }
 
                 // Game trigger check
-                if (checkGameTrigger(local_p)) {
+                if (checkGameTrigger(local_p, g_lobbyGame)) {
                     DrawText("APPUYEZ SUR ENTRÉE POUR JOUER", GetScreenWidth()/2 - MeasureText("APPUYEZ SUR ENTRÉE POUR JOUER", 20)/2, GetScreenHeight() - 100, 20, GOLD);
                     
                     if (IsKeyPressed(KEY_ENTER)) {
@@ -363,7 +369,7 @@ int main(void) {
                         memcpy(buf, &h, sizeof(h));
                         buf[sizeof(h)] = target_id;
                         send(networkSocket, buf, sizeof(h) + 1, 0);
-                        game->currentState = GAME_STATE_WAITING_SWITCH; 
+                        g_lobbyGame->currentState = GAME_STATE_WAITING_SWITCH; 
                         printf("[SYSTEM] Demande de switch envoyée, attente confirmation...\n");
                     }
                 }
@@ -376,13 +382,13 @@ int main(void) {
         if (g_currentMenu != MENU_NONE && g_currentMenu != MENU_PAUSE) {
             DrawMenu();
         } else {
-            switch (game->currentState) {
+            switch (g_lobbyGame->currentState) {
                 case GAME_STATE_DISCONNECTED:
-                    if (UpdateConnectionScreen()) {
-                        initNetwork(GetEnteredIP());
-                        game->currentState = GAME_STATE_CONNECTING;
+                    if (updateConnectionScreen()) {
+                        initNetwork(getEnteredIP());
+                        g_lobbyGame->currentState = GAME_STATE_CONNECTING;
                     }
-                    DrawConnectionScreen();
+                    drawConnectionScreen();
                     break;
 
                 case GAME_STATE_CONNECTING:
@@ -391,8 +397,8 @@ int main(void) {
 
                 case GAME_STATE_LOBBY:
                 case GAME_STATE_WAITING_SWITCH:
-                    lobby_gameLoop(game);
-                    if (game->currentState == GAME_STATE_WAITING_SWITCH) {
+                    lobby_gameLoop(g_lobbyGame);
+                    if (g_lobbyGame->currentState == GAME_STATE_WAITING_SWITCH) {
                         DrawText("CHARGEMENT DU JEU...", GetScreenWidth()/2 - 100, GetScreenHeight()/2, 20, WHITE);
                     }
                     break;
@@ -400,23 +406,24 @@ int main(void) {
                 case GAME_STATE_INGAME:
                     if (game_registry[active_game_id]) {
                         game_registry[active_game_id]->update(dt);
-                        if (game->currentState == GAME_STATE_INGAME && game_registry[active_game_id]) {
+                        if (g_lobbyGame->currentState == GAME_STATE_INGAME && game_registry[active_game_id]) {
                             game_registry[active_game_id]->draw();
                         }
                     }
                     break;
+                default: break;
             }
 
             if (g_currentMenu == MENU_PAUSE) DrawMenu();
 
-            DrawChat();
+            drawChat();
         }
         
         EndDrawing();
     }
 
     SaveProgress(&g_progress);
-    lobby_freeGame(&game);
+    lobby_freeGame(&g_lobbyGame);
 
     return 0;
 }

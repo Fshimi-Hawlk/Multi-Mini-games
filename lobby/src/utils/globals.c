@@ -73,4 +73,4 @@ bool isTextureMenuOpen = false;
 
 /** @brief Texture for the skin button logo. */
 Texture2D logoSkinButton;
-ChatState_St g_chatState = {0};
+Chat_St gameChat = {0};

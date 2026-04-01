@@ -209,13 +209,13 @@ do { \
 } while (0)
 
 /// DOC: TODO
-Rectangle getTextureRec(const Texture* const texture);
+Rectangle getTextureRec(const Texture texture);
 
 /// DOC: TODO
-Rectangle getPlayerCollisionBox(const Player_st* const player);
+Rectangle getPlayerCollisionBox(const Player_St* const player);
 
 /// DOC: TODO
-Vector2 getPlayerCenter(const Player_st* const player);
+Vector2 getPlayerCenter(const Player_St* const player);
 
 /**
  * @brief Generates a random unsigned 64-bit integer between min and max (inclusive).
