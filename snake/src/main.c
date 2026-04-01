@@ -1,33 +1,5 @@
-#include <stdio.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <time.h>
-#include <math.h>
-
-#include "raylib.h"
-
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
-
-#define SIZE_BOARD 20
-#define MAX_LENGTH 400
-
-#define CELL_SIZE (WINDOW_HEIGHT / SIZE_BOARD)
-
-#define BACKGROUND_COLOR WHITE
-
-enum {
-    GRASS, HEAD, BODY, APPLE
-};
-
-typedef struct {
-    int x, y;
-} iVector2_st;
-
-typedef struct {
-    float timer;
-    float delay;
-} speed_st;
+#include "common.h"
+#include "audio.h"
 
 bool isOOB(void);
 bool selfCollision(int bodyLength, iVector2_st headCoord);
@@ -60,6 +32,8 @@ int main(void) {
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Snake");
     SetTargetFPS(60);
+
+    snake_initAudio();
     
     int board[SIZE_BOARD][SIZE_BOARD];
     
@@ -113,6 +87,7 @@ int main(void) {
                     updateBody(board, bodyLength);
 
                     if (board[tail->coord.y][tail->coord.x] == APPLE) {
+                        PlaySound(sound_appleCrunch);
                         bodyLength++;
                         spawnApple(board, &appleCoord);
                         nbApple++;
@@ -146,6 +121,7 @@ int main(void) {
     }
 
     freeQueue();
+    snake_freeAudio();
     CloseWindow();
     return 0;
 }
