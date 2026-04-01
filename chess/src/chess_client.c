@@ -56,14 +56,14 @@ void chess_client_on_data(int player_id, u8 action, const void* data, u16 len) {
 
     if (action == ACTION_CODE_JOIN_ACK) {
         if (len >= sizeof(s32)) {
-            my_id_internal = *(s32*)data;
+            memcpy(&my_id_internal, data, sizeof(s32));
             my_color = (my_id_internal == 0) ? 0 : 1; // 0: White, 1: Black
             printf("[CHESS] Assigned internal ID: %d, color: %s\n", (int)my_id_internal, my_color == 0 ? "White" : "Black");
         }
     }
     else if (action == ACTION_CODE_START_GAME) {
         if (len >= sizeof(s32)) {
-            selected_bot_level = *(s32*)data;
+            memcpy(&selected_bot_level, data, sizeof(s32));
         }
         game_status = 1;
         game_started = true;

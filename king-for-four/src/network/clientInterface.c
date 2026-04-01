@@ -171,10 +171,17 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
                 local_state.discard_pile.cards[local_state.discard_pile.size - 1] = sync.top_card;
             }
             
+            bool has_cards = false;
             for (int i = 0; i < 4; i++) {
+                if (sync.hand_sizes[i] > 0) has_cards = true;
                 local_state.players[i].hand.size = sync.hand_sizes[i];
-                if (sync.hand_sizes[i] == 0 && game_status == 1) {
-                    winner_id = i;
+            }
+
+            if (has_cards && game_status == 1) {
+                for (int i = 0; i < 4; i++) {
+                    if (sync.hand_sizes[i] == 0) {
+                        winner_id = i;
+                    }
                 }
             }
         }

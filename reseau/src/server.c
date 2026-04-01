@@ -302,7 +302,13 @@ int main(void) {
                             /** Routage centralisé pour les actions globales */
                             if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME) {
                                 u8 target = buf[sizeof(RUDPHeader_St)];
-                                if (target == MINI_GAME_KFF && active_module != &king_module) {
+                                if (target == 0 /* MINI_GAME_LOBBY */ && active_module != &lobby_module) {
+                                    active_module->destroy_instance(active_game_state);
+                                    active_module = &lobby_module;
+                                    active_game_state = active_module->create_instance();
+                                    printf("[SERVER] Retour au Lobby\n");
+                                }
+                                else if (target == MINI_GAME_KFF && active_module != &king_module) {
                                     active_module->destroy_instance(active_game_state);
                                     active_module = &king_module; 
                                     active_game_state = active_module->create_instance();
