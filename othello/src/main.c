@@ -1,30 +1,5 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-
-#include "raylib.h"
-
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
-
-#define BOARD_SIZE 8
-#define CELL_SIZE (WINDOW_HEIGHT / (BOARD_SIZE + 2))
-
-typedef int board_t[BOARD_SIZE][BOARD_SIZE];
-
-enum {
-    EMPTY, PLAYER, COMPUTER
-};
-
-typedef struct {
-    int x, y;
-} pos_st;
-
-typedef struct {
-    pos_st pos;
-    int score;
-} validCells_st;
+#include "common.h"
+#include "audio.h"
 
 Vector2 offset = {CELL_SIZE, CELL_SIZE};
 
@@ -66,11 +41,13 @@ int main() {
     pos_st boardPos;
     Vector2 mousePos;
 
-    pos_st lastMove;
+    pos_st lastMove = {.x = -1, .y = -1};
     pos_st flippedCells[BOARD_SIZE * BOARD_SIZE];
     int flippedCount = 0;
 
     bool finito = false;
+
+    othello_initAudio();
 
     while (!WindowShouldClose()) {
         if (!finito && isPlayerTurn && (!checkDown || playerCanPlay)) {
@@ -86,6 +63,7 @@ int main() {
                 mousePos = GetMousePosition();
                 boardPos = getBoardPosFromMousePos(mousePos);
                 if (isBoardPosValid(board, boardPos, isPlayerTurn)) {
+                    PlaySound(sound_piecePutDown);
                     updateBoard(board, boardPos, isPlayerTurn);
                     isPlayerTurn = false;
                     checkDown = false;
@@ -133,6 +111,7 @@ int main() {
         EndDrawing();
     }
 
+    othello_freeAudio();
     CloseWindow();
     return 0;
 }
@@ -342,8 +321,10 @@ void DrawBoard(board_t board, pos_st flippedCells[BOARD_SIZE * BOARD_SIZE], int 
         }
     }
 
-    DrawCircle(lastMove.x * CELL_SIZE + CELL_SIZE / 2 + offset.x, lastMove.y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 2, RED);
-    DrawCircle(lastMove.x * CELL_SIZE + CELL_SIZE / 2 + offset.x, lastMove.y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 5, BLACK);
+    if (!isOOB(lastMove)) {
+        DrawCircle(lastMove.x * CELL_SIZE + CELL_SIZE / 2 + offset.x, lastMove.y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 2, RED);
+        DrawCircle(lastMove.x * CELL_SIZE + CELL_SIZE / 2 + offset.x, lastMove.y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 5, BLACK);
+    }
     for (int i = 0; i < flippedCount; i++) {
         DrawCircle(flippedCells[i].x * CELL_SIZE + CELL_SIZE / 2 + offset.x, flippedCells[i].y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 2, ORANGE);
         DrawCircle(flippedCells[i].x * CELL_SIZE + CELL_SIZE / 2 + offset.x, flippedCells[i].y * CELL_SIZE + CELL_SIZE / 2 + offset.y, CELL_SIZE / 2 - 5, BLACK);
