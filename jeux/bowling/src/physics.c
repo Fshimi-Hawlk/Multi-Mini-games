@@ -228,12 +228,25 @@ void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
     Vector3 friction = Vector3Scale(ball->velocity, -0.4f);
     ball->velocity   = Vector3Add(ball->velocity, Vector3Scale(friction, deltaTime));
 
+<<<<<<< HEAD
     if (bumpers) {
         float edge = laneWidth / 2.0f;
         if (ball->position.x < -edge || ball->position.x > edge) {
             ball->velocity.x *= -0.55f;
             ball->position.x  = (ball->position.x < 0) ? -edge : edge;
         }
+=======
+    // Invisible barrier along gutter edges - always active (prevents ball leaving lane)
+    float edge = laneWidth / 2.0f;
+    if (ball->position.x < -edge || ball->position.x > edge) {
+        // Only apply bumper bounce if bumpers enabled, otherwise just block
+        if (bumpers) {
+            ball->velocity.x *= -0.55f;
+        } else {
+            ball->velocity.x *= -0.3f; // Simple bounce back
+        }
+        ball->position.x = (ball->position.x < 0) ? -edge + ball->radius : edge - ball->radius;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     }
 
     ball->position = Vector3Add(ball->position, Vector3Scale(ball->velocity, deltaTime));

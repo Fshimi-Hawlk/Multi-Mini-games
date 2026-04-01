@@ -26,7 +26,13 @@
 #include "APIs/solitaireAPI.h"
 #include "APIs/suikaAPI.h"
 #include "APIs/bowlingAPI.h"
+<<<<<<< HEAD
 #include "systemSettings.h"
+=======
+#include "APIs/golfAPI.h"
+#include "systemSettings.h"
+#include "utils/configs.h"
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
 // ─────────────────────────────────────────────────────────────────
 // Generic game dispatch table
@@ -62,7 +68,11 @@ static Error_Et tetris_loop_shim(BaseGame_St*  p)   { return tetris_gameLoop((Te
 static Error_Et tetris_free_shim(BaseGame_St** p)   { return tetris_freeGame((TetrisGame_St**)p);       }
 
 static Error_Et solitaire_init_shim(BaseGame_St** p){ return solitaire_initGame((SolitaireGame_St**)p); }
+<<<<<<< HEAD
 static Error_Et solitaire_loop_shim(BaseGame_St*  p){ return solitaire_gameLoop((SolitaireGame_St*)p), OK; }
+=======
+static Error_Et solitaire_loop_shim(BaseGame_St*  p){ solitaire_gameLoop((SolitaireGame_St*)p); return OK; }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 static Error_Et solitaire_free_shim(BaseGame_St** p){ return solitaire_freeGame((SolitaireGame_St**)p); }
 
 static Error_Et suika_init_shim(BaseGame_St** p)    { return suika_initGame((SuikaGame_St**)p);         }
@@ -73,6 +83,13 @@ static Error_Et bowling_init_shim(BaseGame_St** p)  { return bowling_initGame((B
 static Error_Et bowling_loop_shim(BaseGame_St*  p)  { return bowling_gameLoop((BowlingGame_St*)p);      }
 static Error_Et bowling_free_shim(BaseGame_St** p)  { return bowling_freeGame((BowlingGame_St**)p);     }
 
+<<<<<<< HEAD
+=======
+static Error_Et golf_init_shim(BaseGame_St** p)     { return golf_initGame((GolfGame_St**)p);           }
+static Error_Et golf_loop_shim(BaseGame_St*  p)     { return golf_gameLoop((GolfGame_St*)p);            }
+static Error_Et golf_free_shim(BaseGame_St** p)     { return golf_freeGame((GolfGame_St**)p);           }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 /**
     @brief Scene dispatch table.
 
@@ -85,6 +102,10 @@ static const SceneDesc_St scenes[__gameSceneCount] = {
     [GAME_SCENE_SOLITAIRE]= { "Solitaire",solitaire_init_shim,solitaire_loop_shim,solitaire_free_shim,0,    0   },
     [GAME_SCENE_SUIKA]    = { "Suika",    suika_init_shim,    suika_loop_shim,    suika_free_shim,    800,  900 },
     [GAME_SCENE_BOWLING]  = { "Bowling",  bowling_init_shim,  bowling_loop_shim,  bowling_free_shim,  1200, 800 },
+<<<<<<< HEAD
+=======
+    [GAME_SCENE_GOLF]     = { "Golf 3D",  golf_init_shim,     golf_loop_shim,     golf_free_shim,     1280, 720 },
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 };
 
 // ─────────────────────────────────────────────────────────────────
@@ -93,7 +114,19 @@ static const SceneDesc_St scenes[__gameSceneCount] = {
 
 static void returnToLobby(LobbyGame_St* game) {
     game->subGameManager.currentScene = GAME_SCENE_LOBBY;
+<<<<<<< HEAD
     systemSettings = DEFAULT_SYSTEM_SETTING;
+=======
+    game->player.position = (Vector2){ 0, 440 };  // Teleport to center on lobby re-entry
+    game->player.velocity = (Vector2){ 0, 0 };   // Reset velocity to prevent momentum carryover
+    game->player.coyoteTimer = COYOTE_TIME;       // Reset jump states
+    game->player.jumpBuffer = 0.0f;
+    // Restore lobby window size (1200x800 is standard for lobby)
+    systemSettings.video.width = 1200;
+    systemSettings.video.height = 800;
+    systemSettings.video.fps = 60;
+    systemSettings.video.title = "Lobby";
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     applySystemSettings();
 }
 
@@ -120,15 +153,39 @@ s32 main(void) {
         return 1;
     }
 
+<<<<<<< HEAD
     while (!WindowShouldClose()) {
+=======
+    // Disable ESC to close window by default - games handle ESC to return to lobby
+    SetExitKey(KEY_NULL);
+
+    bool skipWindowClose = false;
+    while (!WindowShouldClose() || skipWindowClose) {
+        // Reset skip flag at start of each iteration
+        if (skipWindowClose) skipWindowClose = false;
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         GameScene_Et scene = game->subGameManager.currentScene;
 
         // ── Lobby ────────────────────────────────────────────────
         if (scene == GAME_SCENE_LOBBY) {
+<<<<<<< HEAD
+=======
+            // In lobby, ESC closes the game
+            if (IsKeyPressed(KEY_ESCAPE) && WindowShouldClose()) {
+                break;
+            }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
             lobby_gameLoop(game);
             continue;
         }
 
+<<<<<<< HEAD
+=======
+        // Re-disable ESC for games (in case we returned from lobby)
+        SetExitKey(KEY_NULL);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         // ── Mini-game generic dispatch ───────────────────────────
         if (scene >= __gameSceneCount || scenes[scene].init == NULL) {
             log_error("Invalid or unregistered GameScene_Et value: %d", scene);
@@ -159,7 +216,13 @@ s32 main(void) {
         // Detect end
         if (!*miniRef || !(*miniRef)->running) {
             if (*miniRef) desc->free(miniRef);
+<<<<<<< HEAD
             returnToLobby(game);
+=======
+            game->subGameManager.needGameInit = true;  // Force reinit for next game
+            returnToLobby(game);
+            continue;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         }
     }
 

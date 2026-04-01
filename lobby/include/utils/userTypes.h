@@ -27,6 +27,10 @@ typedef enum {
     GAME_SCENE_SOLITAIRE,
     GAME_SCENE_SUIKA,
     GAME_SCENE_BOWLING,
+<<<<<<< HEAD
+=======
+    GAME_SCENE_GOLF,
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     __gameSceneCount
 } GameScene_Et;
 
@@ -44,7 +48,15 @@ typedef struct {
 } PlayerVisuals_St;
 
 typedef struct {
+<<<<<<< HEAD
     Vector2 position;                           ///< Player center (world coordinates)
+=======
+    /* FIX: removed `cercle playerHitBox` — the type `cercle` was never defined
+     * anywhere in the project (causing a compile error) and the field was never
+     * read or written. Collision is handled via `position` + `radius` through
+     * getPlayerCollisionBox() / resolveCircleRectCollision(). */
+    Vector2 position;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     float   radius;
 
     float   angle;

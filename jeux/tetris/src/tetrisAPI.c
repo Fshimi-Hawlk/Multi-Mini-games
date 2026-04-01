@@ -22,10 +22,24 @@
 #include "APIs/generalAPI.h"
 #include "tetrisAPI.h"
 
+<<<<<<< HEAD
+=======
+#include <raylib.h>
+
+// Include params menu header for type definition (not implementation)
+#include "../../../firstparty/include/ui/paramsMenu.h"
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 /* FIX: score table as static constant — removes unnecessary calloc/free for
  * an array of 5 integers known at compile time. */
 static const int SCORE_TABLE[5] = { 0, 40, 100, 300, 1200 };
 
+<<<<<<< HEAD
+=======
+// Global params menu state for tetris
+static ParamsMenu_St tetrisParamsMenu = {0};
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 /**
  * @brief Concrete Tetris game state
  */
@@ -79,6 +93,12 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     readHighScore(&gameRef->highScore);
     initBoard(gameRef->board);
 
+<<<<<<< HEAD
+=======
+    // Initialize params menu (settings button)
+    paramsMenu_init(&tetrisParamsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     log_debug("Tetris initialized successfully");
     return OK;
 }
@@ -91,6 +111,18 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
 
     if (!game->base.running) return OK;
 
+<<<<<<< HEAD
+=======
+    // ESC key returns to lobby
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        game->base.running = false;
+        return OK;
+    }
+
+    // Update params menu (settings button clicks)
+    paramsMenu_update(&tetrisParamsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     mouvement(game->board, &game->boardShape);
     automaticDrop(&game->speed, &game->boardShape);
 
@@ -118,8 +150,15 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
         game->base.score += SCORE_TABLE[clearedCount] * (game->difficultyMultiplier + 1);
     }
 
+<<<<<<< HEAD
     // Speed updated every 10-line threshold
     if (game->clearedLineAmount % 10 == 0) {
+=======
+    /* FIX: guard with clearedCount > 0 — without it, the condition
+     * (clearedLineAmount % 10 == 0) is true at startup (0 % 10 == 0) and on
+     * every frame until the first line is cleared, needlessly rewriting speed. */
+    if (clearedCount > 0 && game->clearedLineAmount % 10 == 0) {
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         game->speed.duration = fmaxf(0.3f, 1.0f - 0.025f * game->difficultyMultiplier);
     }
 
@@ -133,6 +172,12 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
         drawNextShape(game->nextBoardShape);
         drawInformations(game->base.score, game->difficultyMultiplier,
                          game->clearedLineAmount, game->highScore);
+<<<<<<< HEAD
+=======
+
+        // Draw params menu (settings button)
+        paramsMenu_draw(&tetrisParamsMenu);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     EndDrawing();
 
     return OK;
@@ -141,6 +186,12 @@ Error_Et tetris_gameLoop(TetrisGame_St* const game) {
 Error_Et tetris_freeGame(TetrisGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
 
+<<<<<<< HEAD
+=======
+    // Cleanup params menu
+    paramsMenu_free(&tetrisParamsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     free(*game);
     *game = NULL;
 

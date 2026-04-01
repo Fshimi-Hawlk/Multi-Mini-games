@@ -23,6 +23,12 @@
 
 #include "userTypes.h"
 
+<<<<<<< HEAD
+=======
+// Params menu - include the header for the type definition
+#include "../../firstparty/include/ui/paramsMenu.h"
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 // ------------------------------------------------
 // Window & display
 // ------------------------------------------------
@@ -82,4 +88,16 @@ extern Rectangle skinButtonRect;
 */
 extern Texture2D logoSkinButton;
 
+<<<<<<< HEAD
+=======
+// ------------------------------------------------
+// Parameters menu (settings/resolution)
+// ------------------------------------------------
+
+/**
+    @brief Global parameters menu state (settings button + resolution selector).
+*/
+extern ParamsMenu_St paramsMenu;
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 #endif // UTILS_GLOBALS_H

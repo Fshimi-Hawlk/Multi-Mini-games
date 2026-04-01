@@ -7,6 +7,10 @@ Sound sound_pinFall;
 Sound sound_strike;
 
 static char g_soundsPath[512] = {0};
+<<<<<<< HEAD
+=======
+static bool g_audioInitialized = false;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
 static const char* bowling_getSoundsPath(void) {
     if (g_soundsPath[0] != '\0') return g_soundsPath;
@@ -22,16 +26,32 @@ static const char* bowling_getSoundsPath(void) {
 }
 
 void bowling_initAudio(void) {
+<<<<<<< HEAD
+=======
+    if (g_audioInitialized) return;  // Prevent double initialization
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (!IsAudioDeviceReady()) InitAudioDevice();
     const char* sp = bowling_getSoundsPath();
     char p[600];
     snprintf(p, sizeof(p), "%sbowling_ballFall.wav", sp); sound_ballFall = LoadSound(p);
     snprintf(p, sizeof(p), "%sbowling_pinFall.wav",  sp); sound_pinFall  = LoadSound(p);
     snprintf(p, sizeof(p), "%sbowling_strike.wav",   sp); sound_strike   = LoadSound(p);
+<<<<<<< HEAD
 }
 
 void bowling_freeAudio(void) {
     UnloadSound(sound_ballFall);
     UnloadSound(sound_pinFall);
     UnloadSound(sound_strike);
+=======
+    g_audioInitialized = true;
+}
+
+void bowling_freeAudio(void) {
+    if (!g_audioInitialized) return;  // Prevent double free
+    UnloadSound(sound_ballFall);
+    UnloadSound(sound_pinFall);
+    UnloadSound(sound_strike);
+    g_audioInitialized = false;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 }

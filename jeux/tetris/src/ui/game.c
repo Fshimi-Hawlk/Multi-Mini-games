@@ -6,10 +6,17 @@ void drawInformations(int score, int level, int lineNbTotal, int highScore) {
     char linesText[30];
     char highScoreText[30];
 
+<<<<<<< HEAD
     sprintf(scoreText, "Score: %d", score);
     sprintf(levelText, "Level: %d", level);
     sprintf(linesText, "Lines: %d", lineNbTotal);
     sprintf(highScoreText, "High score: %d", highScore);
+=======
+    snprintf(scoreText,     sizeof(scoreText),     "Score: %d",      score);
+    snprintf(levelText,     sizeof(levelText),      "Level: %d",      level);
+    snprintf(linesText,     sizeof(linesText),      "Lines: %d",      lineNbTotal);
+    snprintf(highScoreText, sizeof(highScoreText),  "High score: %d", highScore);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
     DrawText(scoreText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2, 20, WHITE);
     DrawText(levelText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 30, 20, WHITE);

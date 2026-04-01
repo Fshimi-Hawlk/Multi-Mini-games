@@ -6,7 +6,11 @@ rebuild-obj: clean $(LIB_OBJECTS)
 
 rebuild-tests: clean tests
 
+<<<<<<< HEAD
 static-lib: rebuild-obj $(STATIC_LIB)
+=======
+static-lib: $(STATIC_LIB)
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
 run-main:
 	@if [ -f $(BIN) ]; then \

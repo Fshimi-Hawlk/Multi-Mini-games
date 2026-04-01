@@ -21,6 +21,12 @@
 #include <string.h>
 #include <math.h>
 
+<<<<<<< HEAD
+=======
+// Include params menu header for type definition (not implementation)
+#include "../../../firstparty/include/ui/paramsMenu.h"
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 // 
 // Constants – mesures officielles World Bowling / USBC
 // 1 unité = 1 mètre
@@ -34,6 +40,12 @@
 #define MAX_CONFETTI  200
 #define RESULTS_STEPS 7
 
+<<<<<<< HEAD
+=======
+// Global params menu state for bowling
+static ParamsMenu_St bowlingParamsMenu = {0};
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 #if defined(__GNUC__) || defined(__clang__)
     #define FORCE_INLINE __attribute__((always_inline)) inline
     #define LIKELY(x)   __builtin_expect(!!(x), 1)
@@ -272,8 +284,19 @@ static void bowling_updateTotalScore(BowlingGame_St* game) {
                 s = 10;
                 Frame_St* n = &game->frames[i + 1];
                 if (n->numRolls >= 1) s += n->rolls[0];
+<<<<<<< HEAD
                 if (n->numRolls >= 2) s += n->rolls[1];
                 else if (n->isStrike && i + 2 < BOWLING_MAX_FRAMES) s += game->frames[i+2].rolls[0];
+=======
+                /* FIX: when frame i+1 is also a strike (numRolls == 1, no roll[1]
+                 * yet), the bonus second ball comes from frames[i+2].rolls[0].
+                 * Guard with numRolls >= 1 to avoid reading an unplayed frame
+                 * (rolls[0] == 0) which would silently undercount the score. */
+                if (n->numRolls >= 2) s += n->rolls[1];
+                else if (n->isStrike && i + 2 < BOWLING_MAX_FRAMES
+                         && game->frames[i+2].numRolls >= 1)
+                    s += game->frames[i+2].rolls[0];
+>>>>>>> 3777fd6 (- add : new 3D golf game)
             } else if (f->isSpare) {
                 s = 10;
                 if (i + 1 < BOWLING_MAX_FRAMES && game->frames[i+1].numRolls >= 1)
@@ -435,7 +458,37 @@ static void bowling_handleBallStopped(BowlingGame_St* game) {
     game->stats.totalPinsKnocked += knockedPins;
 
     Frame_St* frame = &game->frames[game->currentFrame];
+<<<<<<< HEAD
     int pinsThisRoll = (frame->numRolls == 0) ? knockedPins : knockedPins - frame->rolls[0];
+=======
+    bool isTenthFrame = (game->currentFrame == BOWLING_MAX_FRAMES - 1);
+
+    /* FIX: pinsThisRoll calculation for the 10th frame bonus balls.
+     *
+     * The original formula `knockedPins - frame->rolls[0]` is correct for
+     * roll 2 of a normal frame (cumulative count since roll 1, same set of pins).
+     * But in the 10th frame, physics_setupPins() is called before roll 2 (after
+     * a strike) and before roll 3 (after a strike or spare on our fix), resetting
+     * all 10 pins. After a reset, bowling_countKnockedPins() returns the count
+     * from the fresh set — subtracting rolls[0] from a previous set gives a
+     * wrong (potentially negative) result.
+     *
+     * Rule: use knockedPins directly whenever pins were freshly reset, i.e.:
+     *   - roll 2 of 10th frame after a strike (numRolls == 1 && isStrike)
+     *   - roll 3 of 10th frame (numRolls == 2, always after a reset)
+     * In all other cases (including normal roll 2), subtract rolls[0]. */
+    int pinsThisRoll;
+    if (isTenthFrame && frame->numRolls == 1 && frame->isStrike) {
+        /* Roll 2 of 10th frame after strike: pins were reset, fresh count. */
+        pinsThisRoll = knockedPins;
+    } else if (isTenthFrame && frame->numRolls == 2) {
+        /* Roll 3 of 10th frame: pins were always reset before this roll. */
+        pinsThisRoll = knockedPins;
+    } else {
+        /* Normal case: roll 2 of a non-reset frame (cumulative since roll 1). */
+        pinsThisRoll = (frame->numRolls == 0) ? knockedPins : knockedPins - frame->rolls[0];
+    }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (frame->numRolls == 0 && wasGutter && knockedPins == 0) game->stats.gutterBalls++;
 
     if (frame->numRolls < 3) {
@@ -464,7 +517,22 @@ static void bowling_handleBallStopped(BowlingGame_St* game) {
         game->audienceReactionTimer = 2.5f;
         game->audienceReactionType  = 2;
         PlaySound(sound_strike);
+<<<<<<< HEAD
 
+=======
+    /* FIX: 10th frame bonus strikes (roll 2 after a strike, or roll 3) were never
+     * detected — they fell through to the generic "N pins" branch. After a pin reset
+     * pinsThisRoll == NUM_PINS correctly means a new strike. */
+    } else if (isTenthFrame && (frame->numRolls == 2 || frame->numRolls == 3)
+               && pinsThisRoll == NUM_PINS) {
+        game->stats.totalStrikes++;
+        physics_spawnParticles(game->particles, &game->particleCount, (Vector3){0,1,-54}, 25, (Color){255,215,0,255});
+        bowling_spawnConfetti(game, 180);
+        bowling_triggerScoreAnim(game, "STRIKE!", (Color){255,70,30,255});
+        game->audienceReactionTimer = 3.5f;
+        game->audienceReactionType  = 1;
+        PlaySound(sound_strike);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     } else if (frame->numRolls >= 2) {
         frame->score = pinsThisRoll;
         if (pinsThisRoll == 0 && wasGutter) {
@@ -497,9 +565,20 @@ static void bowling_processResetTimer(BowlingGame_St* game, float deltaTime) {
 
     if (isTenthFrame && (frame->isStrike || frame->isSpare) && frame->numRolls < 3) {
         needsThirdRoll = true;
+<<<<<<< HEAD
         // Reset pins for bonus roll after a strike
         if (frame->numRolls == 1 && frame->isStrike) physics_setupPins(game->pins);
         if (frame->numRolls == 2 && frame->isStrike) physics_setupPins(game->pins);
+=======
+        // Reset pins for bonus roll after a strike (each consecutive strike gets fresh pins)
+        if (frame->numRolls == 1 && frame->isStrike) physics_setupPins(game->pins);
+        if (frame->numRolls == 2 && frame->isStrike) physics_setupPins(game->pins);
+        /* FIX: after a spare on the 10th frame the player earns one bonus ball
+         * on a fresh set of pins, but the old code only reset pins for strikes.
+         * Add the symmetric reset for spare so the bonus ball is not bowled into
+         * an already-cleared lane. */
+        if (frame->numRolls == 2 && frame->isSpare) physics_setupPins(game->pins);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     }
 
     // Only advance to next frame when all required rolls are done
@@ -527,10 +606,17 @@ static void bowling_drawEnvironment(BowlingGame_St* game) {
     DrawPlane((Vector3){ 5.5f, 0.0f, envCenZ}, (Vector2){7.0f, 60.0f},
               (Color){62, 52, 42, 255});
 
+<<<<<<< HEAD
     //  Mur arrière (arrêt visuel de la piste) 
     DrawCube((Vector3){0.0f, 0.6f, BOWLING_WALL_Z - 0.2f},
              8.0f, 1.2f, 0.3f, (Color){52, 43, 33, 255});
     DrawPlane((Vector3){0.0f, 0.0f, BOWLING_WALL_Z - 0.5f},
+=======
+    //  Mur arrière (arrêt visuel de la piste) – Position ajustée pour éviter z-fighting
+    DrawCube((Vector3){0.0f, 0.6f, BOWLING_WALL_Z - 0.5f},
+             8.0f, 1.2f, 0.3f, (Color){52, 43, 33, 255});
+    DrawPlane((Vector3){0.0f, -0.02f, BOWLING_WALL_Z - 0.8f},
+>>>>>>> 3777fd6 (- add : new 3D golf game)
               (Vector2){8.0f, 1.0f}, (Color){42, 34, 26, 255});
 
     //  Spectateurs (cones + tete) 
@@ -577,6 +663,7 @@ static void bowling_drawEnvironment(BowlingGame_St* game) {
         }
     }
 
+<<<<<<< HEAD
     // Rangee arriere derriere le mur
     for (int p = -6; p <= 6; p++) {
         float x     = (float)p * 0.80f;
@@ -593,6 +680,8 @@ static void bowling_drawEnvironment(BowlingGame_St* game) {
             headR, HEAD_COLORS[hi]);
     }
 
+=======
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     //  Colonnes de soutien 
     float colZs[4] = {2.5f, -5.0f, -12.0f, -18.0f};
     for (int i = 0; i < 4; i++) {
@@ -980,12 +1069,21 @@ static void bowling_drawStatsPanel(BowlingGame_St* game) {
 static void bowling_drawControls(BowlingGame_St* game) {
     (void)game;
     int y = SCREEN_HEIGHT - 80;
+<<<<<<< HEAD
     DrawRectangle(10, y-5, 360, 75, (Color){20,15,10,200});
     DrawRectangleLines(10, y-5, 360, 75, (Color){100,70,40,255});
     DrawText("Controls:", 20, y, 14, (Color){255,215,0,255});   y+=18;
     DrawText("Click & Drag: Aim and throw",                20, y, 12, (Color){180,160,140,255}); y+=15;
     DrawText("A/D: Spin  |  Scroll: Power  |  Arrows: Aim", 20, y, 12, (Color){180,160,140,255}); y+=15;
     DrawText("R: Reset ball  |  SPACE: Skip  |  ESC: Quit",  20, y, 12, (Color){180,160,140,255});
+=======
+    DrawRectangle(10, y-5, 370, 75, (Color){20,15,10,200});
+    DrawRectangleLines(10, y-5, 370, 75, (Color){100,70,40,255});
+    DrawText("Controls:", 20, y, 14, (Color){255,215,0,255});   y+=18;
+    DrawText("Click & Drag: Aim and throw",                20, y, 12, (Color){180,160,140,255}); y+=15;
+    DrawText("A/D: Spin  |  Scroll: Power  |  Arrows: Aim", 20, y, 12, (Color){180,160,140,255}); y+=15;
+    DrawText("R: Reset  |  ENTER/SPACE: Launch/Skip  |  ESC: Quit", 20, y, 12, (Color){180,160,140,255});
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 }
 
 // 
@@ -1092,6 +1190,16 @@ static void bowling_drawEndScreen(BowlingGame_St* game) {
 // 
 static void bowling_handleInput(BowlingGame_St* game) {
     if (game->ball.isRolling || game->waitingForReset) return;
+<<<<<<< HEAD
+=======
+
+    // ESC key returns to lobby
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        game->base.running = false;
+        return;
+    }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     float wm = GetMouseWheelMove();
     if (wm != 0) game->power = fmaxf(0.1f, fminf(1.0f, game->power + wm * 0.1f));
     if (IsKeyDown(KEY_A))     game->spin     = fmaxf(-1.0f, game->spin - 0.05f);
@@ -1103,6 +1211,16 @@ static void bowling_handleInput(BowlingGame_St* game) {
 
 static void bowling_handleEndScreenInput(BowlingGame_St* game) {
     if (!game->endScreen.showEndScreen) return;
+<<<<<<< HEAD
+=======
+
+    // ESC key returns to lobby
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        game->base.running = false;
+        return;
+    }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (game->resultsRevealTimer < 3.5f) return; // don't allow clicks until buttons shown
     if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) return;
     Vector2 mp = GetMousePosition();
@@ -1117,6 +1235,16 @@ static void bowling_handleEndScreenInput(BowlingGame_St* game) {
         for (int i = 0; i < BOWLING_MAX_FRAMES; i++) {
             game->frames[i] = (Frame_St){0};
         }
+<<<<<<< HEAD
+=======
+        /* FIX: reset particles, score animation, and audience reaction — they were
+         * not cleared on play-again, causing leftover particles and stale audience
+         * state to bleed into the new game. */
+        physics_initParticles(game->particles, &game->particleCount);
+        game->scoreAnim              = (ScoreAnim_St){0};
+        game->audienceReactionTimer  = 0.0f;
+        game->audienceReactionType   = 0;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         physics_setupPins(game->pins);
         bowling_resetBallState(game);
         bowling_initCamera(game);
@@ -1336,6 +1464,13 @@ Error_Et bowling_initGame__full(BowlingGame_St** game, BowlingConfigs_St configs
     g->bumpers      = configs.bumpers;
     g->selectedSkin = (configs.ballSkin >= 0 && configs.ballSkin < NUM_BALL_SKINS) ? configs.ballSkin : 0;
     bowling_initTitleScreen(&g->titleScreen);
+<<<<<<< HEAD
+=======
+    bowling_initAudio();
+
+    // Initialize params menu (settings button)
+    paramsMenu_init(&bowlingParamsMenu);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
     log_debug("Bowling initialized successfully");
     return OK;
@@ -1351,6 +1486,12 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
     float dt = GetFrameTime();
     game->timeAccum += dt;
 
+<<<<<<< HEAD
+=======
+    // Update params menu (settings button clicks)
+    paramsMenu_update(&bowlingParamsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     //  Title screen 
     if (game->titleScreen.showTitle) {
         if (IsKeyPressed(KEY_ESCAPE)) { game->base.running = false; return OK; }
@@ -1438,12 +1579,37 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
     bowling_updateScoreAnim(game, dt);
     bowling_updateConfetti(game, dt);
 
+<<<<<<< HEAD
     if (IsKeyPressed(KEY_SPACE)) {
         Frame_St* f   = &game->frames[game->currentFrame];
         bool is10th   = (game->currentFrame == BOWLING_MAX_FRAMES - 1);
         bool needs3rd = is10th && (f->isStrike || f->isSpare) && f->numRolls < 3;
         if (f->isStrike || (f->numRolls >= 2 && !needs3rd)) bowling_nextFrame(game);
         else bowling_resetBallState(game);
+=======
+    if (IsKeyPressed(KEY_SPACE) || IsKeyPressed(KEY_ENTER)) {
+        Frame_St* f   = &game->frames[game->currentFrame];
+        bool is10th   = (game->currentFrame == BOWLING_MAX_FRAMES - 1);
+        bool needs3rd = is10th && (f->isStrike || f->isSpare) && f->numRolls < 3;
+
+        if (!game->ball.isRolling && !game->waitingForReset) {
+            // Launch ball with Enter or Space
+            float angle    = game->aimAngle * DEG2RAD;
+            Vector3 dir    = Vector3Normalize((Vector3){-sinf(angle), 0, -cosf(angle)});
+            float launchPower = game->power * 10.0f + 4.0f;
+            physics_launchBall(&game->ball, dir, launchPower, game->spin);
+        /* FIX: the "skip reset timer" branches were reachable while the ball was
+         * still rolling (ball.isRolling == true), causing the frame to advance
+         * without recording the roll through handleBallStopped. Guard with
+         * !game->ball.isRolling so they only apply once the ball has stopped
+         * and we are merely waiting out the reset countdown. */
+        } else if (!game->ball.isRolling
+                   && (f->isStrike || (f->numRolls >= 2 && !needs3rd))) {
+            bowling_nextFrame(game);
+        } else if (!game->ball.isRolling) {
+            bowling_resetBallState(game);
+        }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     }
     if (IsKeyPressed(KEY_ESCAPE)) game->base.running = false;
 
@@ -1471,6 +1637,12 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
         bowling_drawConfetti(game);
         bowling_drawEndScreen(game);
 
+<<<<<<< HEAD
+=======
+        // Draw params menu (settings button)
+        paramsMenu_draw(&bowlingParamsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         if (game->waitingForReset && !game->endScreen.showEndScreen)
             DrawText(TextFormat("Reset in %.1f...", game->resetTimer),
                      SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, (Color){255,200,50,255});
@@ -1484,7 +1656,16 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
 // 
 Error_Et bowling_freeGame(BowlingGame_St** game) {
     if (!game || !*game) return ERROR_NULL_POINTER;
+<<<<<<< HEAD
     bowling_unloadTextures(&(*game)->textures);
+=======
+    bowling_freeAudio();
+    bowling_unloadTextures(&(*game)->textures);
+    
+    // Cleanup params menu
+    paramsMenu_free(&bowlingParamsMenu);
+    
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     free(*game);
     *game = NULL;
     return OK;

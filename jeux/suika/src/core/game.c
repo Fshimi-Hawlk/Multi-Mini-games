@@ -301,12 +301,38 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
     // Constants fixes pour la stabilité
     const float FIXED_DT = 0.016f;          // ~60 FPS fixes
     const int COLLISION_PASSES = 8;          // 8 itérations pour stabilité
+<<<<<<< HEAD
     const float GRAVITY = 900.0f;            // Gravité
+=======
+    /* FIX: use game->gravity (set to 800.0f in suika_init) instead of a local
+     * constant of 900.0f that was silently overriding it and causing the physics
+     * to run with a different gravity than configured. The struct field was written
+     * but never read, making the tunable gravity value ineffective. */
+    const float GRAVITY = game->gravity;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     const float DAMPING = 0.999f;            // Évite les tremblements
     const float MAX_VELOCITY = 2000.0f;      // Limite de vitesse
     const float WALL_BOUNCE = 0.3f;           // Rebond sur les murs
     const float FRICTION = 0.95f;            // Friction au sol (réduite pour plus de glissement)
+<<<<<<< HEAD
     
+=======
+
+    /* FIX: apply velocity damping once per frame BEFORE the passes loop.
+     * Previously DAMPING (0.999) and angular damping (0.99) were multiplied
+     * inside the loop, making them execute COLLISION_PASSES (8) times per frame.
+     * Effective per-frame damping was 0.999^8 ≈ 0.992 and 0.99^8 ≈ 0.923 —
+     * far stronger than intended and making fruits stop unnaturally fast. */
+    for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
+    {
+        if (!game->fruits[i].isActive || game->fruits[i].isMerging) continue;
+        Fruit_St* f = &game->fruits[i];
+        f->velocity.x      *= DAMPING;
+        f->velocity.y      *= DAMPING;
+        f->angularVelocity *= 0.99f;
+    }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     // Appliquer plusieurs passes de physique pour la stabilité
     for (int pass = 0; pass < COLLISION_PASSES; pass++)
     {
@@ -326,11 +352,14 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
             if (f->velocity.y < -MAX_VELOCITY) f->velocity.y = -MAX_VELOCITY;
             if (f->velocity.x > MAX_VELOCITY) f->velocity.x = MAX_VELOCITY;
             if (f->velocity.x < -MAX_VELOCITY) f->velocity.x = -MAX_VELOCITY;
+<<<<<<< HEAD
             
             // Damping
             f->velocity.x *= DAMPING;
             f->velocity.y *= DAMPING;
             f->angularVelocity *= 0.99f;
+=======
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
             // Déplacement
             f->position.x += f->velocity.x * FIXED_DT / (float)COLLISION_PASSES;
@@ -359,10 +388,22 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
             {
                 f->position.y = maxY;
                 f->velocity.y = -f->velocity.y * WALL_BOUNCE;
+<<<<<<< HEAD
                 f->velocity.x *= FRICTION;
                 
                 // Roulement sur le sol : v = r * omega
                 f->angularVelocity = f->velocity.x / f->radius;
+=======
+                /* FIX: floor friction was applied every collision pass (up to 8x per frame),
+                 * giving an effective per-frame FRICTION of 0.95^8 ≈ 0.66 instead of 0.95.
+                 * Guard with pass == 0 so it is applied only once per physics frame. */
+                if (pass == 0)
+                {
+                    f->velocity.x *= FRICTION;
+                    // Roulement sur le sol : v = r * omega
+                    f->angularVelocity = f->velocity.x / f->radius;
+                }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
                 // Arrêt si vitesse très faible
                 if (fabsf(f->velocity.y) < 10.0f)
@@ -470,6 +511,19 @@ void suika_checkMerging(SuikaGame_St* game)
                         FruitType_Et newType = (FruitType_Et)(f1->type + 1);
                         const FruitProperties_St* props = suika_getFruitProperties(newType);
 
+<<<<<<< HEAD
+=======
+                        /* FIX: mark both fruits as isMerging BEFORE searching for a free
+                         * slot. Without this, if the pool is full the merge silently fails
+                         * and the two fruits remain active and overlapping — re-triggering
+                         * this collision check every frame until a slot becomes free, which
+                         * could duplicate score events. Flagging them here excludes them
+                         * from further collision checks this frame regardless of outcome. */
+                        f1->isMerging = true;
+                        f2->isMerging = true;
+
+                        bool slotFound = false;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
                         for (int k = 0; k < SUIKA_MAX_FRUITS; k++)
                         {
                             if (!game->fruits[k].isActive)
@@ -491,11 +545,16 @@ void suika_checkMerging(SuikaGame_St* game)
                                 {
                                     game->score += props->points;
                                 }
+<<<<<<< HEAD
                                 
+=======
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
                                 // Effet visuel de particules lors de la fusion
                                 suika_spawnMergeParticles(game, midPos, props->color);
 
                                 PlaySound(sound_merge);
+<<<<<<< HEAD
                                 
                                 f1->isActive = false;
                                 f2->isActive = false;
@@ -503,6 +562,25 @@ void suika_checkMerging(SuikaGame_St* game)
                                 return;
                             }
                         }
+=======
+
+                                f1->isActive = false;
+                                f2->isActive = false;
+
+                                slotFound = true;
+                                return;
+                            }
+                        }
+
+                        /* FIX: pool was full — reset isMerging so the fruits are still
+                         * considered for physics and can be merged next frame once a slot
+                         * frees up (e.g. a watermelon merge clears two slots). */
+                        if (!slotFound)
+                        {
+                            f1->isMerging = false;
+                            f2->isMerging = false;
+                        }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
                     }
                 }
             }
@@ -541,6 +619,12 @@ void suika_reset(SuikaGame_St* game)
     game->dropTimer = 0.0f;
     game->nextFruitId = 0;
     game->base.running = true;
+<<<<<<< HEAD
+=======
+    /* FIX: clear particles — without this, particles spawned during the previous
+     * game (merges, etc.) stay alive after reset and render over the new game. */
+    game->particleCount = 0;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
     for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
     {

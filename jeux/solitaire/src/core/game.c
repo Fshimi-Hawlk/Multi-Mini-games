@@ -18,10 +18,27 @@
 
 
 void solitaire_init(SolitaireGameState* game) {
+<<<<<<< HEAD
     memset(game, 0, sizeof(SolitaireGameState));
     
     srand((unsigned int)time(NULL));
     
+=======
+    /* FIX: free existing assets before memset wipes the pointer.
+     * When called via KEY_N "new game", game->assets is already allocated
+     * and textures are GPU-resident. memset would silently lose the pointer,
+     * leaking both the heap block and the GPU textures on every new game. */
+    if (game->assets) {
+        UnloadAssets(*game->assets);
+        free(game->assets);
+        game->assets = NULL;
+    }
+
+    memset(game, 0, sizeof(SolitaireGameState));
+
+    srand((unsigned int)time(NULL));
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     game->assets = malloc(sizeof(GameAssets));
     if (game->assets) {
         *game->assets = LoadAssets();
@@ -285,12 +302,22 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
                     }
                     
                     game->score += 10;
+<<<<<<< HEAD
+=======
+                    /* FIX: PlaySound moved inside the successful-move block — it was
+                     * previously after the closing brace of the outer if, causing it
+                     * to play NUM_FOUNDATION_PILES times on every drag release. */
+                    PlaySound(sound_cardTurn);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
                     moved = true;
                     break;
                 }
                 
             }
+<<<<<<< HEAD
             PlaySound(sound_cardTurn);
+=======
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         }
         
         // Try tableau piles
@@ -360,12 +387,26 @@ void solitaire_checkWin(SolitaireGameState* game) {
 
 void solitaire_checkLose(SolitaireGameState* game) {
     if (game->isWon) return;
+<<<<<<< HEAD
     
+=======
+
+    /* FIX: if the stock still has cards the player can draw, it is never a
+     * loss — we do not know what those cards will unlock. Only evaluate
+     * movability when both stock and waste are exhausted (no more draws). */
+    if (game->stock.count > 0) return;
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (game->stock.count == 0 && game->waste.count == 0) {
         game->isLost = true;
         return;
     }
+<<<<<<< HEAD
     
+=======
+
+    /* Check whether any visible tableau top card has a legal move. */
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     for (int i = 0; i < NUM_TABLEAU_PILES; i++) {
         if (game->tableau[i].count > 0) {
             Card_St* topCard = game->tableau[i].cards[game->tableau[i].count - 1];
@@ -383,7 +424,13 @@ void solitaire_checkLose(SolitaireGameState* game) {
             }
         }
     }
+<<<<<<< HEAD
     
+=======
+
+    /* FIX: also test the top card of the waste pile — it is playable and was
+     * previously ignored, causing premature loss detection. */
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (game->waste.count > 0) {
         Card_St* wasteTop = game->waste.cards[game->waste.count - 1];
         for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
@@ -397,7 +444,11 @@ void solitaire_checkLose(SolitaireGameState* game) {
             }
         }
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     game->isLost = true;
 }
 

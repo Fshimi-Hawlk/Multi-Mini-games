@@ -30,6 +30,12 @@
 
 #include "utils/globals.h"
 
+<<<<<<< HEAD
+=======
+#define PARAMS_MENU_IMPLEMENTATION
+#include "../../firstparty/include/ui/paramsMenu.h"
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
@@ -53,6 +59,13 @@ Platform_st platforms[] = {
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
 Rectangle skinButtonRect = {
+<<<<<<< HEAD
+=======
+    /* FIX: This initial value uses WINDOW_WIDTH/HEIGHT (800/600) but the lobby
+     * actually runs at 1200×800 and can be resized. The rect is recalculated
+     * dynamically every frame via skinButtonRect_get() in ui/app.c and
+     * core/game.c; this static value is only used before the first frame. */
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     .x = WINDOW_WIDTH - 70,
     .y = WINDOW_HEIGHT / 2.0f - 25,
     .width = 50,
@@ -60,3 +73,9 @@ Rectangle skinButtonRect = {
 };
 
 Texture2D logoSkinButton;
+<<<<<<< HEAD
+=======
+
+// Parameters menu state
+ParamsMenu_St paramsMenu = {0};
+>>>>>>> 3777fd6 (- add : new 3D golf game)

@@ -667,6 +667,15 @@ foreach ($doxyLines as $line) {
         continue;
     }
 
+<<<<<<< HEAD
+=======
+    // Change RECURSIVE to YES for translations (scan subdirectories like project-details/, build-system-details/, team-guidelines/)
+    if (preg_match('/^\s*RECURSIVE\s*=\s*NO/', $line)) {
+        $doxyOutput[] = 'RECURSIVE               = YES' . "\n";
+        continue;
+    }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     // Point mainpage to the copied version (not translated but with directives intact)
     if (preg_match('/^\s*USE_MDFILE_AS_MAINPAGE\s*=/', $line)) {
         $doxyOutput[] = 'USE_MDFILE_AS_MAINPAGE  = src-' . $lang . '/mainpage.md' . "\n";

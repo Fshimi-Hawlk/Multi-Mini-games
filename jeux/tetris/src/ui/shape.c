@@ -24,6 +24,15 @@ void drawNextShape(boardShape_st boardShape) {
 
     DrawText("Next shape:", offsetX + 60, offsetY - 60, 20, WHITE);
 
+<<<<<<< HEAD
+=======
+    /* FIX: boardShape.position is {4, 0} (the spawn column) from randomShape().
+     * Drawing at offsetX + (shape[i].x + 4) * CELL_SIZE pushed I-piece cells
+     * (x up to 6) to pixel 266+150=416, outside WINDOW_WIDTH=400.
+     * Reset position to {0, 0} so cells render centered on offsetX. */
+    boardShape.position = (iVector2){0, 0};
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     for (int i = 0; i < 4; i++) {
         x = boardShape.shape[i].x + boardShape.position.x;
         y = boardShape.shape[i].y + boardShape.position.y;

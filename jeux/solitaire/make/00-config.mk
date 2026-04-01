@@ -115,7 +115,13 @@ else ifeq ($(MODE),clang-debug)
 	endif
 else ifeq ($(MODE),valgrind-debug)
 	ifneq ($(OS),linux)
+<<<<<<< HEAD
         $(error valgrind-debug mode is only supported on Linux (native Valgrind unavailable on $(OS)))
+=======
+	ifneq ($(OS),wsl)
+        $(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
+    endif
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc

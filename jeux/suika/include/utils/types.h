@@ -11,6 +11,12 @@
 #ifndef SUIKA_UTILS_TYPES_H
 #define SUIKA_UTILS_TYPES_H
 
+<<<<<<< HEAD
+=======
+// Include raylib before the struct definition
+#include <raylib.h>
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 #include "common.h"
 #include "APIs/generalAPI.h"
 #include "suika_atlas.h"

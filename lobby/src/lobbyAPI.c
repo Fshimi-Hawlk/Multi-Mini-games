@@ -24,6 +24,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     srand(time(NULL));
     SetTraceLogLevel(LOG_WARNING);
 
+<<<<<<< HEAD
     InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
     SetWindowPosition(100, 100);
 
@@ -32,6 +33,19 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     systemSettings = DEFAULT_SYSTEM_SETTING;
     systemSettings.video.resizable = true;
     systemSettings.video.title = "Lobby";
+=======
+    (void) configs;
+
+    /* FIX: systemSettings must be initialized BEFORE InitWindow so the window
+     * is created with the correct dimensions (not uninitialized zeroes). */
+    systemSettings = DEFAULT_SYSTEM_SETTING;
+    systemSettings.video.resizable = true;
+    systemSettings.video.title = "Lobby";
+
+    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
+    SetWindowPosition(100, 100);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     error = applySystemSettings();
     if (error != OK) {
         log_error("System settings couldn't be applied correctly");
@@ -73,13 +87,27 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         .height = 75
     };
 
+<<<<<<< HEAD
+=======
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_GOLF] = (Rectangle) {
+        .x      = 550,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
     gameRef->subGameManager.needGameInit = false;
 
     /* FIX: coyoteTime removed from struct — we now only initialize coyoteTimer.
      * jumpBuffer initialized to 0: the buffer should not be active at spawn. */
     gameRef->player = (Player_st) {
+<<<<<<< HEAD
         .position    = { 0, 440 },  /* spawn above floor: floor_y(500) - radius(20) - margin(40) */
+=======
+        .position    = { 0, 540 },  /* spawn above floor: floor_y(500) - radius(20) - margin(40) */
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         .radius      = 20,
         .coyoteTimer = COYOTE_TIME,
         .jumpBuffer  = 0.0f
@@ -100,21 +128,40 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH] = LoadTexture(IMAGES_PATH "earth.png");
     if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH])) {
         log_warn("%s couldn't be loaded properly.", IMAGES_PATH "earth.png");
+<<<<<<< HEAD
         error = ERROR_TEXTURE_LOAD;
+=======
+        /* FIX: use |= so that a previous error is never silently lost when a
+         * subsequent texture loads successfully and would overwrite 'error'. */
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     }
 
     gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(IMAGES_PATH "trollFace.png");
     if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE])) {
         log_warn("%s couldn't be loaded properly.", IMAGES_PATH "trollFace.png");
+<<<<<<< HEAD
         error = ERROR_TEXTURE_LOAD;
+=======
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     }
 
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
     if (!IsTextureValid(logoSkinButton)) {
         log_warn("%s couldn't be loaded properly.", IMAGES_PATH "logoSkin.png");
+<<<<<<< HEAD
         error = ERROR_TEXTURE_LOAD;
     }
 
+=======
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
+    }
+
+    // Initialize parameters menu (settings button)
+    paramsMenu_init(&paramsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     return error;
 }
 
@@ -123,6 +170,16 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
 
     f32 dt = GetFrameTime();
 
+<<<<<<< HEAD
+=======
+    /* FIX: skinButtonRect is a global initialized with compile-time constants
+     * (WINDOW_WIDTH/HEIGHT = 800/600) but the lobby runs at 1200×800 and can be
+     * resized at any time. Recalculate here every frame so hit-testing and
+     * rendering always match the actual window size. */
+    skinButtonRect.x = GetScreenWidth()  - 70;
+    skinButtonRect.y = GetScreenHeight() / 2.0f - 25;
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     updatePlayer(&game->player, platforms, platformCount, dt);
     game->cam.target = game->player.position;
     /* Recalculate offset each frame — window may have been resized by a mini-game */
@@ -130,6 +187,12 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
 
     toggleSkinMenu(game);
 
+<<<<<<< HEAD
+=======
+    // Update params menu (settings button clicks)
+    paramsMenu_update(&paramsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     if (game->playerVisuals.isTextureMenuOpen) {
         choosePlayerTexture(&game->player, game);
     }
@@ -146,6 +209,15 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         }
     }
 
+<<<<<<< HEAD
+=======
+    // Teleport to center when ENTER is pressed
+    if (IsKeyPressed(KEY_ENTER)) {
+        game->player.position = (Vector2){ 0, 440 };
+        game->player.velocity = (Vector2){ 0, 0 };
+    }
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     BeginDrawing(); {
         ClearBackground((Color){135, 206, 235, 255}); /* ciel bleu */
 
@@ -169,6 +241,10 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
                     case GAME_SCENE_SOLITAIRE: gameName = "Solitaire"; portalColor = (Color){0, 160, 80,  200}; break;
                     case GAME_SCENE_SUIKA:     gameName = "Suika";     portalColor = (Color){220, 80, 0,  200}; break;
                     case GAME_SCENE_BOWLING:   gameName = "Bowling";   portalColor = (Color){140, 0, 200, 200}; break;
+<<<<<<< HEAD
+=======
+                    case GAME_SCENE_GOLF:      gameName = "Golf 3D";   portalColor = (Color){ 20, 160,  50, 200}; break;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
                 }
 
                 bool playerNear = CheckCollisionCircleRec(
@@ -205,14 +281,26 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             }
         } EndMode2D();
 
+<<<<<<< HEAD
         /* FIX: lobbyTextXPos — local variable, not static. It is recalculated every
          * frame (position depends on window width), keeping it static serves no purpose
          * and keeps an obsolete value if the window is resized. */
         f32 lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+=======
+        /* FIX: use GetScreenWidth() — systemSettings.video.width may lag behind
+         * the actual window size if the user resized the window manually. */
+        f32 lobbyTextXPos = (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
         drawSkinButton();
 
+<<<<<<< HEAD
+=======
+        // Draw params menu (settings button)
+        paramsMenu_draw(&paramsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         if (game->playerVisuals.isTextureMenuOpen) {
             drawMenuTextures(game);
         }
@@ -237,6 +325,12 @@ Error_Et lobby_freeGame(LobbyGame_St** game) {
 
     UnloadTexture(logoSkinButton);
 
+<<<<<<< HEAD
+=======
+    // Cleanup params menu
+    paramsMenu_free(&paramsMenu);
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     free(gameRef);
     *game = NULL;
 

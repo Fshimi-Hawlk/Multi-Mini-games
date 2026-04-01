@@ -11,6 +11,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only *important* changes go here (new game started, big shared code added, lobby progress, big refactor, etc.)
 - We write in the **[Unreleased]** section until we decide it's time for a version (for example 0.1.0 when lobby + first few games work together)
 
+<<<<<<< HEAD
+=======
+## [v6.0.0] - 2026-03-28
+
+### Added
+- Fusion de `full_fixed/sgit_v5/` et `sgit_v5/` pour créer la version v6.0.0
+- Nouveau dossier thirdpartyvide (à remplir manuellement avec les libs)
+
+### Changed
+- (none)
+
+### Fixed
+- (none)
+
+### Removed
+- (none)
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 ## [Unreleased]
 
 ### Added

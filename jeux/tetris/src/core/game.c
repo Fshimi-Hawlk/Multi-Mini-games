@@ -13,8 +13,13 @@ void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoRes
 
     boardShape->position.y++;
 
+<<<<<<< HEAD
     boardShape->position.x += (boardShape->position.x < targetMove.position.x) *  1; // move left 
     boardShape->position.x += (boardShape->position.x > targetMove.position.x) * -1;
+=======
+    boardShape->position.x += (boardShape->position.x < targetMove.position.x) *  1; // move right
+    boardShape->position.x += (boardShape->position.x > targetMove.position.x) * -1; // move left
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
     if (targetMove.rotation != boardShape->rotation)
         rotationCW(boardShape);
@@ -81,7 +86,16 @@ void readHighScore(int *highScore) {
         return;
     }
     
+<<<<<<< HEAD
     fscanf(fd, "%d", highScore);
+=======
+    /* FIX: check fscanf return value — if the file is empty or malformed,
+     * fscanf returns 0 or EOF and *highScore stays uninitialized (UB).
+     * Default to 0 on any parse failure. */
+    if (fscanf(fd, "%d", highScore) != 1) {
+        *highScore = 0;
+    }
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 
     fclose(fd);
 }

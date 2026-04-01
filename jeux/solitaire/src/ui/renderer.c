@@ -13,6 +13,14 @@
 #include "solitaire.h"
 #include "raymath.h"
 
+<<<<<<< HEAD
+=======
+/* Define ASSET_PATH if not set by Makefile */
+#ifndef ASSET_PATH
+#define ASSET_PATH ""
+#endif
+
+>>>>>>> 3777fd6 (- add : new 3D golf game)
 #define CARD_TEX_WIDTH 140
 #define CARD_TEX_HEIGHT 190
 #define WASTE_SPREAD_WIDTH 150
@@ -232,8 +240,18 @@ void RenderGame(const SolitaireGameState *game, GameAssets assets) {
         }
     }
     
+<<<<<<< HEAD
     char scoreText[64];
     sprintf(scoreText, "Score: %d  |  Temps: %.0fs  |  N: Nouvelle partie", game->score, game->gameTime);
+=======
+    /* FIX: buffer was 64 bytes but the format string alone is 50 chars;
+     * adding a large score or elapsed time could overflow. Increased to 96
+     * and switched to snprintf for safety. */
+    char scoreText[96];
+    snprintf(scoreText, sizeof(scoreText),
+             "Score: %d  |  Temps: %.0fs  |  N: Nouvelle partie",
+             game->score, game->gameTime);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
     DrawText(scoreText, 10, SCREEN_HEIGHT - 30, 20, WHITE);
 }
 
@@ -245,7 +263,11 @@ void RenderMenu(const SolitaireGameState *game, GameAssets assets) {
         DrawRectangle(SCREEN_WIDTH/2 - 200, SCREEN_HEIGHT/2 - 60, 400, 120, (Color){0, 100, 0, 200});
         DrawText("FELICITATIONS !", SCREEN_WIDTH/2 - 90, SCREEN_HEIGHT/2 - 40, 30, GOLD);
         char winText[64];
+<<<<<<< HEAD
         sprintf(winText, "Score: %d  Temps: %.0fs", game->score, game->gameTime);
+=======
+        snprintf(winText, sizeof(winText), "Score: %d  Temps: %.0fs", game->score, game->gameTime);
+>>>>>>> 3777fd6 (- add : new 3D golf game)
         DrawText(winText, SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, WHITE);
         DrawText("Appuyez sur N pour rejouer", SCREEN_WIDTH/2 - 110, SCREEN_HEIGHT/2 + 30, 18, LIGHTGRAY);
     } else if (game->isLost) {
