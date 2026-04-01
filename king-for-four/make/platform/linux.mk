@@ -5,6 +5,7 @@ BASE_CFLAGS := \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
+	-I../lobby/include \
 
 # Linker base
 BASE_LDFLAGS := \

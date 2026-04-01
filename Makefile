@@ -43,7 +43,8 @@ EXCLUDED_DIRS := \
     build        \
     docs         \
     logs         \
-    thirdparty
+    thirdparty   \
+    tui-ver
 
 # Discover module directories (exclude listed ones)
 MODULES := $(patsubst %/,%,$(wildcard */))
