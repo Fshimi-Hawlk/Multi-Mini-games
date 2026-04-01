@@ -6,12 +6,12 @@
     @brief Application setup and teardown.
 */
 
-#include "utils/globals.h"
-
 #include "setups/app.h"
 
-bool loadFontIdForSize(u64 fontId, f32 fontSize) {
-    bingo_fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
+#include "utils/globals.h"
+
+static bool loadFontIdForSize(u64 fontId, f32 fontSize) {
+    bingo_fonts[fontId] = LoadFontEx(FONT_PATH "Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
         if (!IsFontValid(bingo_fonts[fontId])) {
             log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
             return false;
@@ -20,7 +20,7 @@ bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     return true;
 }
 
-bool initFonts(void) {
+bool bingo_initFonts(void) {
     u64 fontSize = 4;
     bool allFontLoaded = true;
     
@@ -32,13 +32,13 @@ bool initFonts(void) {
     return allFontLoaded;
 }
 
-void freeFonts(void) {
+void bingo_freeFonts(void) {
     for (u64 fontId = 0; fontId < __fontSizeCount; fontId++) {
         UnloadFont(bingo_fonts[fontId]);
     }
 }
 
-bool initApp(void) {
+bool bingo_initApp(void) {
     srand(time(NULL));
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
@@ -48,18 +48,18 @@ bool initApp(void) {
     init_logger();
 #endif
 
-    if (!initFonts()) {
+    if (!bingo_initFonts()) {
         log_warn("Couldn't initialize every bingo_fonts");
     };
 
     return true;
 }
 
-void freeApp(void) {
+void bingo_freeApp(void) {
     // arena_free(&globalArena);
     // arena_free(&tempArena);
 
-    freeFonts();
+    bingo_freeFonts();
 
     CloseWindow();
 }

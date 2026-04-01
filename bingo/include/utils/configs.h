@@ -40,6 +40,8 @@
 #define ASSET_PATH "../assets/"
 #endif
 
+#define FONT_PATH "assets/fonts/"
+
 /**
     @brief Subdirectory containing all image files.
 */
@@ -74,6 +76,7 @@
 // Game Configs
 // ────────────────────────────────────────────────
 
+#define MAX_PLAYER 4
 
 
 #endif // CONFIGS_H
