@@ -301,7 +301,11 @@ int main(void) {
                             
                             /** Routage centralisé pour les actions globales */
                             if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME) {
-                                u8 target = buf[sizeof(RUDPHeader_St)];
+                                u8 target = 0xFF;
+                                if (len >= (ssize_t)(sizeof(RUDPHeader_St) + 1)) {
+                                    memcpy(&target, buf + sizeof(RUDPHeader_St), 1);
+                                }
+                                
                                 if (target == 0 /* MINI_GAME_LOBBY */ && active_module != &lobby_module) {
                                     active_module->destroy_instance(active_game_state);
                                     active_module = &lobby_module;

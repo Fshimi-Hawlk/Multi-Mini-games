@@ -64,8 +64,10 @@ void chess_on_action(void *state, int player_id, u8 action, const void *payload,
         }
     }
     else if (real_action == ACTION_CODE_START_GAME) {
-        // Broadcast game start to everyone
+        // Broadcast game start to everyone else
         broadcast(0, player_id, ACTION_GAME_DATA, payload, len);
+        // Also send back to host so they start the game too
+        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, payload, len);
     }
     else if (real_action == ACTION_CODE_CHESS_MOVE) {
         // Broadcast move to all (including sender for simplicity or excluding)

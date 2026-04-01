@@ -114,6 +114,7 @@ void chess_client_update(float dt) {
             if (IsKeyPressed(KEY_LEFT)) selected_bot_level = (selected_bot_level + 3) % 4;
             
             if (IsKeyPressed(KEY_ENTER)) {
+                printf("[CHESS] Host sending START_GAME...\n");
                 GameTLVHeader_St tlv = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_START_GAME, .length = sizeof(s32) };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
@@ -123,6 +124,10 @@ void chess_client_update(float dt) {
                 memcpy(ptr, &tlv, sizeof(tlv)); ptr += sizeof(tlv);
                 memcpy(ptr, &selected_bot_level, sizeof(s32)); ptr += sizeof(s32);
                 send(networkSocket, buf, (size_t)(ptr - buf), 0);
+                
+                // Local backup: start game immediately for host
+                game_status = 1;
+                game_started = true;
             }
         }
     } else {
