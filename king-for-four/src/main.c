@@ -5,7 +5,6 @@
  * @brief Standalone entry point for testing the King-for-Four game.
  */
 
-#define LOGGER_IMPLEMENTATION
 #include <stddef.h>
 #include "raylib.h"
 
@@ -47,3 +46,6 @@ int main(void) {
     
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"

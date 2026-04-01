@@ -5,6 +5,7 @@
  * @brief Server-side module for the King-for-Four (Uno) game.
  */
 
+#include "APIs/generalAPI.h"
 #include "core/game.h"
 #include "core/card.h"
 #include "core/player.h"
@@ -85,7 +86,7 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
     }
 
     u8 buf[2048];
-    GameTLVHeader_St tlv_sync = { .game_id = 1, .action = ACTION_CODE_SYNC_GAME, .length = sizeof(GameSyncPayload) };
+    GameTLVHeader_St tlv_sync = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_SYNC_GAME, .length = sizeof(GameSyncPayload) };
     memcpy(buf, &tlv_sync, sizeof(tlv_sync));
     memcpy(buf + sizeof(tlv_sync), &sync, sizeof(sync));
     broadcast(0, -1, 5, buf, sizeof(tlv_sync) + sizeof(sync));
@@ -102,11 +103,11 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
             curr = curr->next;
         }
         
-        GameTLVHeader_St tlv_hand = { .game_id = 1, .action = ACTION_CODE_KFF_SYNC_HAND, .length = hand_count * sizeof(Card) };
+        GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_KFF_SYNC_HAND, .length = hand_count * sizeof(Card) };
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, hand_count * sizeof(Card));
         
-        broadcast(-1, target_player_id, 5, buf, sizeof(tlv_hand) + hand_count * sizeof(Card));
+        broadcast(UNICAST, target_player_id, 5, buf, sizeof(tlv_hand) + hand_count * sizeof(Card));
         free(cards);
     }
 }
@@ -115,11 +116,11 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
  * @brief Processes client actions and broadcasts updates.
  */
 void king_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    if (action != 5 /* ACTION_GAME_DATA */) return;
+    if (action != ACTION_CODE_GAME_DATA) return;
 
     if (len < sizeof(GameTLVHeader_St)) return;
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != 1) return; 
+    if (tlv->game_id != MINI_GAME_KFF) return; 
     
     u8 real_action = tlv->action;
     void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
@@ -143,10 +144,10 @@ void king_on_action(void *state, int player_id, u8 action, const void *payload, 
             printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
             
             u8 buf_ack[1024];
-            GameTLVHeader_St tlv_ack = { .game_id = 1, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
             memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
-            broadcast(-1, player_id, 5, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
         }
     }
 

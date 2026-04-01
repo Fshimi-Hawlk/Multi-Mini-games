@@ -5,14 +5,12 @@
  * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
 
-#include <sys/socket.h>
-#include <string.h>
-#include <stdio.h>
 
 #include "core/game.h"
 #include "ui/renderer.h"
 
 #include "networkInterface.h"
+#include "logger.h"
 
 #include "APIs/generalAPI.h"
 
@@ -42,18 +40,13 @@ typedef struct {
 } ActionPlayPayload_St;
 #pragma pack(pop)
 
-/** @brief Local copy of the game state. */
-static GameState local_state;
-/** @brief Graphical assets. */
-static GameAssets assets;
-/** @brief Flag indicating if assets are loaded. */
-static bool assets_loaded = false;
-/** @brief This client's internal player ID assigned by server. */
-static int my_internal_id = -1;
-/** @brief Current status of the game. */
-static int game_status = 0; 
-/** @brief Timer for retrying to join the game. */
-static float join_retry_timer = 0;
+
+static GameState local_state; ///< Local copy of the game state.
+static GameAssets assets; ///< Graphical assets.
+static bool assets_loaded = false; ///< Flag indicating if assets are loaded.
+static int my_internal_id = -1; ///< This client's internal player ID assigned by server.
+static int game_status = 0;  ///< Current status of the game.
+static float join_retry_timer = 0; ///< Timer for retrying to join the game.
 
 // Color selection state
 static bool is_choosing_color = false;
@@ -66,9 +59,8 @@ static int pending_card_index = -1;
  * @param len Length of payload.
  */
 static void send_to_server(u8 action, void* data, u16 len) {
-    GameTLVHeader_St tlv = { .game_id = 1, .action = action, .length = len };
-    RUDPHeader_St h;
-    rudpGenerateHeader(&serverConnection, 5, &h);
+    GameTLVHeader_St tlv = { .game_id = MINI_GAME_KFF, .action = action, .length = len };
+    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
     
     u8 buffer[1024];
     memcpy(buffer, &h, sizeof(h));
@@ -113,7 +105,7 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
     if (action == ACTION_CODE_JOIN_ACK) {
         if (len >= (u16) sizeof(int)) {
             memcpy(&my_internal_id, data, sizeof(int));
-            printf("[KING CLIENT] Mon ID interne: %d\n", my_internal_id);
+            log_info("[KING] Mon ID interne: %d\n", my_internal_id);
         }
     } else if (action == ACTION_CODE_SYNC_GAME) {
         if (len >= (u16) sizeof(GameSyncPayload)) {
@@ -147,8 +139,8 @@ void king_client_on_data(int player_id, u8 action, const void* data, u16 len) {
     }
 }
 
-/** @brief Currently selected number of players for the next game. */
-static int selected_players = 4;
+
+static int selected_players = 4; ///< Currently selected number of players for the next game.
 
 /**
  * @brief Updates client logic and processes user input.
@@ -279,8 +271,8 @@ void king_client_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 
-/** @brief Module interface for the King-for-Four client. */
-GameClientInterface_St kingForFourClientInterface = {
+
+GameClientInterface_St kingForFourClientInterface = { ///< Module interface for the King-for-Four client.
     .id         = MINI_GAME_KFF,
     .name       = "King For Four",
     .init       = king_client_init,
