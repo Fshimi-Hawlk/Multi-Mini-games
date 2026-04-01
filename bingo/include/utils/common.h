@@ -49,15 +49,11 @@
 #include <ctype.h>
 #include <fcntl.h>
 
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netinet/in.h>
-
 // ────────────────────────────────────────────────
 // Third-party / single-header libraries
 // ────────────────────────────────────────────────
 
-// #include "rand.h"                // custom PRNG - not currently used in lobby
+#include "rand.h"                // custom PRNG - used in bingo
 
 // #include "contextArena.h"
 

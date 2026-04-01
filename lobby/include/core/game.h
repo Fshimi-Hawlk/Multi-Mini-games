@@ -1,7 +1,7 @@
 /**
     @file core/game.h
     @author Fshimi-Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-01-30
     @date 2026-03-18
     @brief Core logic and helper functions for the lobby gameplay (player update, collision, skin selection).

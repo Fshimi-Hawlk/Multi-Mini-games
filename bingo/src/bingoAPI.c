@@ -56,7 +56,7 @@ struct BingoGame_St{
 
 /// @note: that wrapper serve as an interface to avoid any annoying warning
 Error_Et bingo_freeGameWrapper(void* game) {
-    return bingo_freeGame((BingoGame_St**) game);
+    return bingo_freeGame((BingoGame_St*) game);
 }
 
 Error_Et bingo_initGame__full(BingoGame_St** gameRef, BingoConfigs_St configs) {
@@ -109,7 +109,7 @@ Error_Et bingo_initGame__full(BingoGame_St** gameRef, BingoConfigs_St configs) {
             game->balls.encodedBalls[b++] = 100 * col + n;
         }
     }
-    shuffleArrayT(uint, game->balls.encodedBalls, 500, rand);
+    shuffleArray(uint, game->balls.encodedBalls, 500, rand);
 
     game->balls.choiceDelay = 3.5f;
     game->balls.showDelay = 1.5f;
@@ -240,66 +240,56 @@ Error_Et bingo_gameLoop(BingoGame_St* const game) {
         }
     }
 
-    BeginDrawing(); {
-        ClearBackground(APP_BACKGROUND_COLOR);
+    switch (game->progress.scene) {
+        case GAME_SCENE_CARD_CHOICE: {
+            bingo_drawChoiceCards(&game->layout);
+        } break;
 
-        switch (game->progress.scene) {
-            case GAME_SCENE_CARD_CHOICE: {
-                bingo_drawChoiceCards(&game->layout);
-            } break;
+        case GAME_SCENE_LAUNCHING: {
+            bingo_drawChoiceCards(&game->layout);
 
-            case GAME_SCENE_LAUNCHING: {
-                bingo_drawChoiceCards(&game->layout);
+            char text[2] = {0};
+            sprintf(text, "%.0f", game->currentCall.timer / 2);
+            f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
 
-                char text[2] = {0};
-                sprintf(text, "%.0f", game->currentCall.timer / 2);
-                f32Vector2 textSize = MeasureTextEx(fonts[FONT48], text, 128, 0);
+            DrawTextEx(
+                bingo_fonts[FONT48], text,
+                Vector2Subtract(game->layout.windowCenter, Vector2Scale(textSize, 0.5)), 
+                128, 0, BLACK
+            );
+        } break;
 
-                DrawTextEx(
-                    fonts[FONT48], text,
-                    Vector2Subtract(game->layout.windowCenter, Vector2Scale(textSize, 0.5)), 
-                    128, 0, BLACK
-                );
-            } break;
+        case GAME_SCENE_PLAYING: {
+            bingo_drawCard(&game->layout, &game->player);
+            bingo_drawUI(&game->layout, &game->balls, &game->currentCall);
+        } break;
 
-            case GAME_SCENE_PLAYING: {
-                bingo_drawCard(&game->layout, &game->player);
-                bingo_drawUI(&game->layout, &game->balls, &game->currentCall);
-            } break;
+        case GAME_SCENE_END: {
+            f32 fontSize = 64;
+            u32 w = MeasureText(game->progress.resultMessage, fontSize);
+            Color col = (game->progress.resultMessage[0] == 'B') ? GREEN : RED;
 
-            case GAME_SCENE_END: {
-                f32 fontSize = 64;
-                u32 w = MeasureText(game->progress.resultMessage, fontSize);
-                Color col = (game->progress.resultMessage[0] == 'B') ? GREEN : RED;
+            f32Vector2 textPos = {
+                .x = game->layout.windowCenter.x - w / 2.0f,
+                .y = game->layout.windowCenter.y - fontSize / 2.0f,
+            };
 
-                f32Vector2 textPos = {
-                    .x = game->layout.windowCenter.x - w / 2.0f,
-                    .y = game->layout.windowCenter.y - fontSize / 2.0f,
-                };
-
-                DrawTextEx(fonts[FONT48], game->progress.resultMessage, textPos, fontSize, 0, col);
-            } break;
-        }
-
-        // Debug timer (remove later)
-        // DrawText(TextFormat("%.2f", game->currentCall.timer), 10, 10, 16, BLACK);
-    } EndDrawing();
+            DrawTextEx(bingo_fonts[FONT48], game->progress.resultMessage, textPos, fontSize, 0, col);
+        } break;
+    }
 
     return OK;
 }
 
-Error_Et bingo_freeGame(BingoGame_St** game) {
-    if (game == NULL || *game == NULL) {
+Error_Et bingo_freeGame(BingoGame_St* game) {
+    if (game == NULL) {
         return ERROR_NULL_POINTER;
     }
-
-    BingoGame_St* gameRef = *game;
 
     // Unload game-specific resources
     // e.g. UnloadTexture(gameRef->playerSprite);
 
-    free(gameRef);
-    *game = NULL;
+    free(game);
 
     log_debug("Bingo resources freed");
     return OK;

@@ -14,7 +14,8 @@ typedef enum {
     MENU_MAIN,
     MENU_PAUSE,
     MENU_SETTINGS,
-    MENU_LEADERBOARD
+    MENU_LEADERBOARD,
+    MENU_PLAY_CHOICE
 } MenuType_Et;
 
 extern MenuType_Et g_currentMenu;
@@ -28,11 +29,13 @@ void DrawMainMenu(void);
 void DrawPauseMenu(void);
 void DrawSettingsMenu(void);
 void DrawLeaderboardMenu(void);
+void DrawPlayChoiceMenu(void);
 
 // Logique
 void UpdateMainMenu(void);
 void UpdatePauseMenu(void);
 void UpdateSettingsMenu(void);
 void UpdateLeaderboardMenu(void);
+void UpdatePlayChoiceMenu(void);
 
 #endif

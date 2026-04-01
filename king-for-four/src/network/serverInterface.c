@@ -1,6 +1,6 @@
 /**
  * @file king_module.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Server-side module for the King-for-Four (Uno) game.
  */
@@ -11,6 +11,8 @@
 #include "core/bot.h"
 
 #include "networkInterface.h"
+#include "rand.h"
+#include "APIs/generalAPI.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,7 +72,7 @@ void* king_create_instance(void) {
         shuffle_deck(&ks->state.draw_pile);
         ks->status = 0; // WAITING
         ks->bot_timer = 0;
-        ks->bot_target_time = 1.0f + (float)(rand() % 200) / 100.0f; 
+        ks->bot_target_time = 1.0f + prng_randf() * 2.0f; 
         ks->last_player_id = -1;
         ks->last_action = -1;
         ks->broadcast = NULL;
@@ -99,10 +101,10 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
     }
 
     u8 buf[2048];
-    GameTLVHeader_St tlv_sync = { .game_id = 1, .action = ACTION_CODE_SYNC_GAME, .length = sizeof(GameSyncPayload) };
+    GameTLVHeader_St tlv_sync = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_SYNC_GAME, .length = sizeof(GameSyncPayload) };
     memcpy(buf, &tlv_sync, sizeof(tlv_sync));
     memcpy(buf + sizeof(tlv_sync), &sync, sizeof(sync));
-    broadcast(0, -1, 5 /* ACTION_GAME_DATA */, buf, (u16)(sizeof(tlv_sync) + sizeof(sync)));
+    broadcast(0, -1, ACTION_GAME_DATA, buf, (u16)(sizeof(tlv_sync) + sizeof(sync)));
     
     for (int i = 0; i < g->num_players; i++) {
         if (g->players[i].id < 0) continue; // Skip bots for hand sync
@@ -114,11 +116,11 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
             cards[j] = g->players[i].hand.cards[j];
         }
         
-        GameTLVHeader_St tlv_hand = { .game_id = 1, .action = ACTION_CODE_KFF_SYNC_HAND, .length = (u16)(hand_count * sizeof(Card)) };
+        GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_KFF_SYNC_HAND, .length = (u16)(hand_count * sizeof(Card)) };
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, (size_t)hand_count * sizeof(Card));
         
-        broadcast(-1, target_player_id, 5 /* ACTION_GAME_DATA */, buf, (u16)(sizeof(tlv_hand) + hand_count * sizeof(Card)));
+        broadcast(-(target_player_id + 1), 999, ACTION_GAME_DATA, buf, (u16)(sizeof(tlv_hand) + hand_count * sizeof(Card)));
         free(cards);
     }
 }
@@ -127,11 +129,11 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
  * @brief Processes client actions and broadcasts updates.
  */
 void king_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    if (action != 5 /* ACTION_GAME_DATA */) return;
+    if (action != ACTION_GAME_DATA) return;
 
     if (len < sizeof(GameTLVHeader_St)) return;
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != 1) return; 
+    if (tlv->game_id != MINI_GAME_KFF) return; 
     
     u8 real_action = tlv->action;
     void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
@@ -148,18 +150,30 @@ void king_on_action(void *state, int player_id, u8 action, const void *payload, 
         }
     }
 
-    if (real_action == ACTION_CODE_JOIN_GAME && internal_id == -1) {
-        if (g->num_players < 4 && ks->status == 0) {
-            internal_id = g->num_players++;
-            init_player(&g->players[internal_id], player_id, "Joueur");
-            printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
-            
-            u8 buf_ack[1024];
-            GameTLVHeader_St tlv_ack = { .game_id = 1, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
-            memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
-            broadcast(-1, player_id, 5 /* ACTION_GAME_DATA */, buf_ack, sizeof(tlv_ack) + sizeof(int));
-        }
+    // Si le joueur n'est pas dans la liste mais envoie une action, on essaie de le JOIN automatiquement
+    // (Utile si le serveur a redémarré ou si le joueur a été déco/reco silencieusement)
+    if (internal_id == -1 && ks->status == 0 && g->num_players < 4) {
+        internal_id = g->num_players++;
+        init_player(&g->players[internal_id], player_id, "Joueur");
+        printf("[KING] Auto-Join du joueur: %d (Slot %d)\n", player_id, internal_id);
+        
+        // On envoie quand même l'ACK pour que le client sache son ID
+        u8 buf_ack[1024];
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+        memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
+        memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
+        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+    }
+
+    printf("[KING] Action reçue: 0x%02X de P%d (internal_id: %d)\n", real_action, player_id, internal_id);
+
+    if (real_action == ACTION_CODE_JOIN_GAME && internal_id != -1) {
+        // Déjà géré par l'auto-join ou existant, on renvoie juste l'ACK si demandé explicitement
+        u8 buf_ack[1024];
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+        memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
+        memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
+        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
     }
 
     if (internal_id != -1) {
@@ -178,6 +192,10 @@ void king_on_action(void *state, int player_id, u8 action, const void *payload, 
             distribute_cards(g);
             ks->status = 1; 
             printf("[KING] Partie démarrée avec %d joueurs.\n", g->num_players);
+            
+            // On force une synchro immédiate pour tout le monde
+            broadcast_sync(ks, broadcast);
+            return; // On évite le broadcast_sync final en double
         }
         else if (real_action == ACTION_CODE_KFF_PLAY_CARD && ks->status == 1 && internal_id == g->current_player) {
             ActionPlayPayload_St p;
@@ -246,7 +264,7 @@ void king_on_tick(void* state) {
         ks->bot_timer += 0.016f; // Simulated delta
         if (ks->bot_timer > ks->bot_target_time) { 
             ks->bot_timer = 0;
-            ks->bot_target_time = 1.0f + (float)(rand() % 150) / 100.0f; // 1.0s to 2.5s
+            ks->bot_target_time = 1.0f + prng_randf() * 1.5f; // 1.0s to 2.5s
             
             int card_idx = -1;
             calculate_best_move(g, cp, &card_idx);
@@ -259,7 +277,7 @@ void king_on_tick(void* state) {
                         ks->last_action = 0; // Play
 
                         if (toPlay.color == CARD_BLACK) {
-                            g->active_color = (int)(rand() % 4); // Bot chooses random color
+                            g->active_color = (int)(prng_rand() % 4); // Bot chooses random color
                         }
 
                         int next_p = (g->current_player + g->game_direction + g->num_players) % g->num_players;

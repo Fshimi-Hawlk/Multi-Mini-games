@@ -35,7 +35,7 @@ typedef struct BingoGame_St BingoGame_St;
     Fields have safe defaults when zero-initialized.
 */
 typedef struct {
-    u8 _;             ///< Avoids warning for initGame macro. @note: Don't touch it!
+    char _;             ///< Unused field to allow empty literals.
     // other configs for the game
 } BingoConfigs_St;
 
@@ -94,20 +94,10 @@ Error_Et bingo_initGame__full(BingoGame_St** game, BingoConfigs_St configs);
 Error_Et bingo_gameLoop(BingoGame_St* const game);
 
 /**
-    @brief Frees all resources owned by the game and releases the handle.
-
-    @param[in,out] game  Pointer to the game handle (set to NULL after cleanup)
-
-    @return OK on success
-    @return ERROR_NULL_POINTER if *game is invalid (still sets to NULL)
-
-    @pre  game may be NULL or point to a valid game
-    @post *game == NULL
-    @post All game-owned resources are freed
-
-    @note Idempotent - safe to call multiple times.
-    @note Does **not** close the Raylib window or call CloseWindow().
+    @brief Frees all resources allocated for a Bingo game.
+    @param game Pointer to the BingoGame structure to free.
+    @return Error code (OK if successful).
 */
-Error_Et bingo_freeGame(BingoGame_St** game);
+Error_Et bingo_freeGame(BingoGame_St* game);
 
 #endif // BINGO_API_H

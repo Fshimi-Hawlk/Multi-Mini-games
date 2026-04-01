@@ -100,7 +100,7 @@ void bingo_computeLayout(Layout_St* layout) {
 
 bool bingo_generateCard(Card_t card, uint *available, uint count) {
     if (available == NULL || count == 0) return false;
-    shuffleArrayT(uint, available, count, rand);
+    shuffleArray(uint, available, count, rand);
     
     uint idx = 0;
 

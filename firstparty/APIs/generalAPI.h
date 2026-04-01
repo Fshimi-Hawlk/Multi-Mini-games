@@ -1,7 +1,7 @@
 /**
     @file generalAPI.h
     @author Fshimi Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @author Maxime-CHAUVEAU
     @date 2026-01-08
     @date 2026-03-23
@@ -101,6 +101,8 @@ typedef enum {
     MINI_GAME_MINIGOLF,
     MINI_GAME_MORPION,
     MINI_GAME_OTHELLO,
+    MINI_GAME_CHESS,
+    MINI_GAME_CUBE,
     __miniGameCount
 } MiniGame_Et;
 

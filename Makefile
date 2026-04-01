@@ -42,7 +42,6 @@ EXCLUDED_DIRS := \
     assets       \
     build        \
     docs         \
-    firstparty   \
     logs         \
     thirdparty
 

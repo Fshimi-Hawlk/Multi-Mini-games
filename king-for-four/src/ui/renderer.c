@@ -1,6 +1,6 @@
 /**
  * @file renderer.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of UI rendering functions using Raylib.
  */
@@ -23,16 +23,13 @@
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
-    // Tentative de chargement depuis plusieurs chemins possibles (Monorepo compat)
-    assets.cardSheet = LoadTexture("assets/textures/playingCards.png");
-    if (assets.cardSheet.id == 0) assets.cardSheet = LoadTexture("lobby/assets/textures/playingCards.png");
-
-    assets.cardBack = LoadTexture("assets/textures/cardBack_blue5.png");
-    if (assets.cardBack.id == 0) assets.cardBack = LoadTexture("lobby/assets/textures/cardBack_blue5.png");
+    // Chargement via ASSET_PATH (défini par le Makefile pour la compatibilité Monorepo)
+    assets.cardSheet = LoadTexture(ASSET_PATH "textures/playingCards.png");
+    assets.cardBack = LoadTexture(ASSET_PATH "textures/cardBack_blue5.png");
     
     // Vérifications de sécurité
-    if (assets.cardSheet.id == 0) printf("ERREUR CRITIQUE: Texture playingCards.png introuvable !\n");
-    if (assets.cardBack.id == 0)  printf("ERREUR CRITIQUE: Texture cardBack_blue5.png introuvable !\n");
+    if (assets.cardSheet.id == 0) printf("ERREUR: Texture playingCards.png introuvable à %s\n", ASSET_PATH);
+    if (assets.cardBack.id == 0)  printf("ERREUR: Texture cardBack_blue5.png introuvable à %s\n", ASSET_PATH);
 
     return assets;
 }

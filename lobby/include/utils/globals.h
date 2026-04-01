@@ -1,7 +1,7 @@
 /**
     @file utils/globals.h
     @author Fshimi-Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-01-07
     @date 2026-03-18
     @brief Central location for process-wide global variables and pre-loaded resources.
@@ -27,7 +27,7 @@
 
 extern Rectangle windowRect;            ///< Main window rectangle (set at init).
 extern Font      appFont;               ///< Primary font for UI text.
-extern Font      fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
+extern Font      lobby_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 
 extern Platform_St platforms[];
@@ -48,5 +48,7 @@ extern bool isTextureMenuOpen;
 extern Texture2D logoSkinButton;
 
 extern Rectangle kingForFourZone;
+extern Rectangle chessZone;
+extern Rectangle rubikZone;
 
 #endif // UTILS_GLOBALS_H

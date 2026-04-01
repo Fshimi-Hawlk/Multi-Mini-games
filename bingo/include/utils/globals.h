@@ -21,7 +21,7 @@
             Indexed by FontSize_Et values (FONT8 … FONT48).
             All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[__fontSizeCount];
+extern Font      bingo_fonts[__fontSizeCount];
 
 // ────────────────────────────────────────────────
 // Game's Globals

@@ -1,6 +1,6 @@
 /**
  * @file card.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for card and deck management in the King for Four game.
  */

@@ -9,18 +9,16 @@
 
 // Mock of the logic used in renderer.c for hitboxes
 int simulate_get_hovered_index(int hand_size, int clicked_x, int start_x, int padding, int card_w) {
-    int hovered_index = -1;
-    // Current bug: loop from 0 to size-1 picks the bottom-most card first
-    for (int i = 0; i < hand_size; i++) {
+    // Correct logic: loop from hand_size - 1 down to 0 to pick the topmost card first
+    for (int i = hand_size - 1; i >= 0; i--) {
         int card_left = start_x + (i * padding);
         int card_right = card_left + ((i == hand_size - 1) ? card_w : padding);
         
         if (clicked_x >= card_left && clicked_x <= card_right) {
-            hovered_index = i;
-            // Bug: we should return the LAST match (topmost), but here we continue or stop early
+            return i; // Return the first match (topmost)
         }
     }
-    return hovered_index;
+    return -1;
 }
 
 void test_topmost_card_selection() {

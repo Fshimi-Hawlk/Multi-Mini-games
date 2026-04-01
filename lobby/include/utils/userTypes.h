@@ -78,6 +78,7 @@ typedef struct {
     float angle;
     u8    textureId;
     bool  active;
+    char  name[32];
 } PlayerNet_St;
 #pragma pack(pop)
 
@@ -106,6 +107,7 @@ typedef struct {
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
     
     bool    active;                             ///< Flag indicating if the player is active.
+    char    name[32];                           ///< Player nickname.
 } Player_St;
 
 /**

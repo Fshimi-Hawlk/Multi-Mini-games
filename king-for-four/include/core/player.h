@@ -1,6 +1,6 @@
 /**
  * @file player.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for player management in King for Four.
  */

@@ -1,6 +1,6 @@
 /**
     @file rudpCore.h
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-03-18              // Creation date
     @date 2026-03-20              // Last meaningful change: applied project code style
     @brief Core structures and functions of the simplified Reliable UDP (RUDP) protocol
@@ -27,17 +27,22 @@
 
 /**
     @brief Fixed-size reliable UDP header (exactly 9 bytes on wire)
-    @note Layout is packed — do not reorder fields without updating size checks
 */
+#if defined(_MSC_VER)
 #pragma pack(push, 1)
-typedef struct {
+#endif
+
+typedef struct __attribute__((packed)) {
     u16 sequence;       ///< This packet's unique sequence number
     u16 ack;            ///< Highest sequence number received in-order
     u32 ack_bitfield;   ///< Bitfield of the previous 32 packets (1 = received)
     u16 sender_id;      ///< Unique sender identifier (assigned by server)
     u8  action;         ///< RUDP control action or game-specific command
 } RUDPHeader_St;
+
+#if defined(_MSC_VER)
 #pragma pack(pop)
+#endif
 
 /**
     @brief Per-connection reliable UDP state (sender + receiver side)

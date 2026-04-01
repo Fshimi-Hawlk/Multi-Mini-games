@@ -1,11 +1,10 @@
 /**
  * @file main.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Standalone entry point for testing the King-for-Four game.
  */
 
-#define LOGGER_IMPLEMENTATION
 #include <stddef.h>
 #include "raylib.h"
 

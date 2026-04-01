@@ -1,6 +1,6 @@
 /**
  * @file game.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of the main game logic for King for Four.
  */
@@ -39,7 +39,7 @@ void init_game_logic(GameState* g) {
 int is_move_valid(int active_color, Card played, Card top) {
     if (played.color == CARD_BLACK) return 1; // Joker or +4 can always be played
 
-    int current_match_color = (active_color >= 0 && active_color < 4) ? active_color : top.color;
+    Card_Color current_match_color = (active_color >= 0 && active_color < 4) ? (Card_Color)active_color : top.color;
     
     if (played.color == current_match_color) return 1;
     if (played.value == top.value) return 1;
@@ -70,7 +70,7 @@ void distribute_cards(GameState* g) {
         
         // Setup initial game state based on first card
         if (first.color == CARD_BLACK) {
-            g->active_color = CARD_RED; // Default to red
+            g->active_color = -1; // No color chosen yet
         } else {
             g->active_color = -1;
         }
@@ -115,12 +115,8 @@ int try_play_card(GameState *g, int playerIndex, int cardIndex) {
         Card played = remove_at(&p->hand, cardIndex);
         push_card(&g->discard_pile, played);
         
-        if (played.color == CARD_BLACK) {
-            // TODO: Open a menu to choose color. For now default to Red.
-            g->active_color = CARD_RED; 
-        } else {
-            g->active_color = -1;
-        }
+        // Let the caller set active_color if necessary (Joker/PlusFour)
+        g->active_color = -1;
         
         printf("Carte jouee ! Reste : %d cartes\n", p->hand.size);
         return 1;

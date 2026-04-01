@@ -1,6 +1,6 @@
 /**
  * @file game.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for the main game logic and state management of King for Four.
  */

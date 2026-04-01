@@ -1,6 +1,6 @@
 /**
  * @file king_client_module.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
@@ -80,9 +80,9 @@ static int pending_card_index = -1;
  * @param len Length of payload.
  */
 static void send_to_server(u8 action, void* data, u16 len) {
-    GameTLVHeader_St tlv = { .game_id = 1, .action = action, .length = len };
+    GameTLVHeader_St tlv = { .game_id = MINI_GAME_KFF, .action = action, .length = len };
     RUDPHeader_St h;
-    rudpGenerateHeader(&serverConnection, 5, &h);
+    rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
     
     u8 buffer[1024];
     memcpy(buffer, &h, sizeof(h));
@@ -102,8 +102,16 @@ void king_client_init(void) {
     }
     memset(&local_state, 0, sizeof(GameState));
     init_game_logic(&local_state);
-    my_internal_id = -1;
+    
+    if (networkSocket == -1) {
+        my_internal_id = 0;
+        printf("[KING CLIENT] Mode Solo: ID interne fixé à 0\n");
+    } else {
+        my_internal_id = -1;
+    }
+
     game_status = 0;
+    winner_id = -1;
     join_retry_timer = 0;
     is_choosing_color = false;
     pending_card_index = -1;
@@ -192,6 +200,16 @@ static int selected_players = 4;
  * @param dt Delta time since last update.
  */
 void king_client_update(float dt) {
+    if (!assets_loaded) return;
+
+    if (networkSocket != -1 && my_internal_id == -1) {
+        join_retry_timer += dt;
+        if (join_retry_timer > 1.0f) {
+            send_to_server(ACTION_CODE_JOIN_GAME, NULL, 0);
+            join_retry_timer = 0;
+        }
+    }
+
     // UpdateChat();
     // if (g_chatState.isOpen) return; // Ignore input when chatting
 
@@ -253,7 +271,7 @@ void king_client_update(float dt) {
         if (IsKeyPressed(KEY_UP) && selected_players < 4) selected_players++;
         if (IsKeyPressed(KEY_DOWN) && selected_players > 2) selected_players--;
         
-        if (IsKeyPressed(KEY_ENTER)) {
+        if (IsKeyPressed(KEY_ENTER) || (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && CheckCollisionPointRec(GetMousePosition(), (Rectangle){100, 280, 400, 50}))) {
             send_to_server(ACTION_CODE_START_GAME, &selected_players, sizeof(int));
         }
     }
@@ -270,7 +288,6 @@ void king_client_update(float dt) {
  */
 void king_client_draw(void) {
     if (!assets_loaded) return;
-    ClearBackground((Color){0, 80, 0, 255});
     
     if (game_status == 0) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
@@ -351,7 +368,7 @@ void king_client_draw(void) {
 
 /** @brief Module interface for the King-for-Four client. */
 GameClientInterface_St KingForFourClientModule = {
-    .id = 1,
+    .id = MINI_GAME_KFF,
     .name = "King For Four",
     .init = king_client_init,
     .on_data = king_client_on_data,

@@ -1,6 +1,6 @@
 /**
  * @file input_button.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of the IaC (Input and Connect) UI elements.
  */
@@ -92,6 +92,51 @@ bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount) {
     }
     
     input->isIPValid = (*letterCount >= 7); 
+
+    return isModified;
+}
+
+bool UpdateTextInput(IaC_button *input, char *buffer, int *letterCount, int maxLen) {
+    bool isModified = false;
+    Vector2 mousePoint = GetMousePosition();
+
+    if (CheckCollisionPointRec(mousePoint, input->rect)) {
+        if (input->state != STATE_ACTIVE) input->state = STATE_HOVER;
+        
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            input->state = STATE_ACTIVE;
+        }
+    } else {
+        if (input->state == STATE_HOVER) input->state = STATE_NORMAL;
+        
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            input->state = STATE_NORMAL;
+        }
+    }
+
+    if (input->state == STATE_ACTIVE) {
+        int key = GetCharPressed();
+        
+        while (key > 0) {
+            if (key >= 32 && key <= 125) { // Visible ASCII characters
+                if (*letterCount < maxLen) {
+                    buffer[*letterCount] = (char)key;
+                    buffer[*letterCount + 1] = '\0';
+                    (*letterCount)++;
+                    isModified = true;
+                }
+            }
+            key = GetCharPressed();
+        }
+
+        if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
+            if (*letterCount > 0) {
+                (*letterCount)--;
+                buffer[*letterCount] = '\0';
+                isModified = true;
+            }
+        }
+    }
 
     return isModified;
 }

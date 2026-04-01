@@ -5,7 +5,7 @@
  * Gère les états des joueurs, les déplacements et les déconnexions 
  * au sein de l'espace de rencontre initial.
  * 
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  */
 
@@ -38,8 +38,38 @@ void* lobby_create(void) {
  * @param broadcast Fonction de rappel pour diffuser le message.
  */
 void lobby_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    (void)state;
-    // On ne regarde même pas ce qu'il y a dedans. On diffuse.
+    LobbyGame_St *s = (LobbyGame_St*)state;
+    
+    if (action == ACTION_CODE_LOBBY_MOVE && len >= sizeof(PlayerNet_St)) {
+        PlayerNet_St net;
+        memcpy(&net, payload, sizeof(PlayerNet_St));
+        s->otherPlayers[player_id].position = (Vector2){ net.x, net.y };
+        s->otherPlayers[player_id].angle = net.angle;
+        s->otherPlayers[player_id].textureId = net.textureId;
+        strncpy(s->otherPlayers[player_id].name, net.name, 31);
+        s->otherPlayers[player_id].active = true;
+    }
+
+    if (action == ACTION_CODE_JOIN_GAME) {
+        // Un nouveau joueur arrive, on lui envoie la position de tous les autres
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (s->otherPlayers[i].active && i != player_id) {
+                PlayerNet_St other;
+                other.x = s->otherPlayers[i].position.x;
+                other.y = s->otherPlayers[i].position.y;
+                other.angle = s->otherPlayers[i].angle;
+                other.textureId = s->otherPlayers[i].textureId;
+                other.active = true;
+                strncpy(other.name, s->otherPlayers[i].name, 31);
+                
+                // Envoi ciblé au nouveau venu. 
+                // On fait passer le message comme venant de 'i' (le joueur déjà là)
+                broadcast(-(player_id + 1), i, ACTION_CODE_LOBBY_MOVE, &other, sizeof(PlayerNet_St));
+            }
+        }
+    }
+
+    // Diffusion standard
     broadcast(0, player_id, action, payload, len);
 }
 

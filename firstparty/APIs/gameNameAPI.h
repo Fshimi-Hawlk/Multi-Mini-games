@@ -63,7 +63,7 @@ typedef struct {
         gameName_initGame(&game, .gameDifficulty = 144);
 */
 #define gameName_initGame(game, ...) \
-    gameName_initGame__full((game), (GameNameConfigs_St){ _ = 0, __VA_ARGS__ })
+    gameName_initGame__full((game), (GameNameConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 /**
     @brief Allocates and initializes a new instance of the GameName mini-game.

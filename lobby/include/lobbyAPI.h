@@ -29,7 +29,7 @@ extern PlayerProgress_St g_progress;
     Default values should be sensible for standalone and lobby usage.
  */
 typedef struct {
-    char _;             ///< Avoids warning for initGame macro. @note: Don't touch it!
+    u32 flags;          ///< Configuration flags.
     // Add more options here when needed (difficulty, audio volume, window flags, ...)
 } LobbyConfigs_St;
 
@@ -40,7 +40,7 @@ typedef struct {
       lobby_initGame(&game, .fps = 144);
  */
 #define lobby_initGame(game, ...) \
-    lobby_initGame__full(game, (LobbyConfigs_St){ ._ = 0, __VA_ARGS__ })
+    lobby_initGame__full(game, (LobbyConfigs_St){ .flags = 0, __VA_ARGS__ })
 
 /* ────────────────────────────────────────────────────────────────────────────
    Core game lifecycle functions

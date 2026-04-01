@@ -21,6 +21,8 @@
 
 #include "baseTypes.h"
 #include "APIs/generalAPI.h"
+#include "raylib.h"
+#include "logger.h"
 
 // ────────────────────────────────────────────────────────────────────────────
 // Default values

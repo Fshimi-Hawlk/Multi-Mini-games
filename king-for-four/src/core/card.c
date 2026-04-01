@@ -1,11 +1,12 @@
 /**
  * @file card.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of card and deck management functions using O(1)/O(N) array operations.
  */
 
 #include "core/card.h"
+#include "rand.h"
 #include <string.h>
 
 /**
@@ -68,7 +69,7 @@ void shuffle_deck(Deck* d) {
     if (!d || d->size <= 1) return;
 
     for (int i = d->size - 1; i > 0; i--) {
-        int j = rand() % (i + 1);
+        int j = prng_rand() % (i + 1);
         Card temp = d->cards[i];
         d->cards[i] = d->cards[j];
         d->cards[j] = temp;
@@ -85,7 +86,7 @@ static void _perform_single_riffle(Card* array, int count) {
 
     // Cut roughly in the middle, +/- 10%
     int variance = count / 10; 
-    int cutPoint = (count / 2) + (variance > 0 ? (rand() % (variance * 2 + 1)) - variance : 0);
+    int cutPoint = (count / 2) + (variance > 0 ? (prng_rand() % (variance * 2 + 1)) - variance : 0);
 
     // Bounds safety
     if (cutPoint < 0) cutPoint = 0;
@@ -105,9 +106,9 @@ static void _perform_single_riffle(Card* array, int count) {
         int takeFromLeft;
         if (l >= sizeL) takeFromLeft = 0;
         else if (r >= sizeR) takeFromLeft = 1;
-        else takeFromLeft = (rand() % 2); 
+        else takeFromLeft = (prng_rand() % 2); 
 
-        int clumpSize = (rand() % 3) + 1; // Drop 1 to 3 cards at once
+        int clumpSize = (prng_rand() % 3) + 1; // Drop 1 to 3 cards at once
 
         for (int i = 0; i < clumpSize; i++) {
             if (takeFromLeft && l < sizeL) {

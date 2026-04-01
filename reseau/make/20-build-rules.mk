@@ -2,7 +2,7 @@
 .SECONDARY: $(LIB_OBJECTS) $(MAIN_OBJECT) $(TEST_OBJECTS)
 
 # Rules
-$(BIN): $(LIB_OBJECTS) $(MAIN_OBJECT)
+$(BIN): $(LIB_OBJECTS) $(MAIN_OBJECT) $(filter %.a, $(EXTRA_LDFLAGS))
 	$(SILENT_PREFIX)mkdir -p $(@D)
 	$(SILENT_PREFIX)$(CC) $^ $(LDFLAGS) -o $@
 

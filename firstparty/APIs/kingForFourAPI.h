@@ -1,6 +1,6 @@
 /**
  * @file kingForFourAPI.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Public interface for the King-for-Four mini-game.
  * Integration compliant with the Lobby standard (API Conversion).

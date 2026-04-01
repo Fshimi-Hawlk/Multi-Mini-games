@@ -1,6 +1,6 @@
 /**
  * @file connection_screen.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of the connection screen for server discovery and IP entry.
  */
@@ -24,6 +24,8 @@ typedef struct {
 
 /** @brief UI input for the IP address. */
 static IaC_button ipInput;
+/** @brief UI input for the nickname. */
+static IaC_button pseudoInput;
 /** @brief UI button to trigger connection. */
 static IaC_button connectButton;
 /** @brief UI button to refresh the server list. */
@@ -32,6 +34,10 @@ static IaC_button refreshButton;
 static char ipBuffer[IP_MAX_LENGTH + 1] = {0};
 /** @brief Current character count in the IP buffer. */
 static int letterCount = 0;
+/** @brief Buffer for the entered nickname. */
+static char pseudoBuffer[32] = "Joueur";
+/** @brief Current character count in the nickname buffer. */
+static int pseudoLetterCount = 6;
 
 /** @brief Array of discovered rooms. */
 static RoomEntry discoveredRooms[MAX_ROOMS_DISPLAY];
@@ -46,6 +52,7 @@ void initConnectionScreen(void) {
     int screenHeight = GetScreenHeight();
 
     ipInput = InitIaCElement(screenWidth / 2.0f - 150,  screenHeight / 2.0f - 200, 300, 40, "IP (ex: 127.0.0.1)", LIGHTGRAY);
+    pseudoInput = InitIaCElement(screenWidth / 2.0f - 150, screenHeight / 2.0f - 260, 300, 40, "Pseudo", LIGHTGRAY);
     connectButton = InitIaCElement(screenWidth / 2.0f - 100,  screenHeight / 2.0f - 125, 200, 40, "Se Connecter", DARKGRAY);
     
     // Bouton pour lancer le broadcast de découverte
@@ -68,7 +75,9 @@ void addDiscoveredRoom(const char* ip, const char* name) {
     }
 
     strncpy(discoveredRooms[roomsCount].ip, ip, 15);
+    discoveredRooms[roomsCount].ip[15] = '\0';
     strncpy(discoveredRooms[roomsCount].name, name, 31);
+    discoveredRooms[roomsCount].name[31] = '\0';
     
     float startY = (float)(GetScreenHeight() / 2.0f + 20);
     
@@ -93,6 +102,7 @@ extern void discover_servers(void);
  */
 bool updateConnectionScreen(void) {
     UpdateIPInput(&ipInput, ipBuffer, &letterCount);
+    UpdateTextInput(&pseudoInput, pseudoBuffer, &pseudoLetterCount, 31);
 
     if (UpdateConnectButton(&refreshButton, true)) {
         discover_servers(); 
@@ -117,8 +127,9 @@ void drawConnectionScreen(void) {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
 
-    DrawText("CONNEXION AU SERVEUR", sw/2 - MeasureText("CONNEXION AU SERVEUR", 30)/2, sh/2 - 250, 30, DARKGRAY);
+    DrawText("CONNEXION AU SERVEUR", sw/2 - MeasureText("CONNEXION AU SERVEUR", 30)/2, sh/2 - 320, 30, DARKGRAY);
 
+    DrawIaCElement(pseudoInput, pseudoBuffer);
     DrawIaCElement(ipInput, ipBuffer);
     DrawIaCElement(connectButton, "");
     DrawIaCElement(refreshButton, "");
@@ -146,3 +157,9 @@ void drawConnectionScreen(void) {
  * @return A pointer to the IP buffer string.
  */
 const char* getEnteredIP(void) { return ipBuffer; }
+
+/**
+ * @brief Gets the nickname entered in the input field.
+ * @return A pointer to the nickname buffer string.
+ */
+const char* getEnteredPseudo(void) { return pseudoBuffer; }

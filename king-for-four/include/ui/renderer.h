@@ -1,6 +1,6 @@
 /**
  * @file renderer.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Header file for the UI rendering of the King for Four game using Raylib.
  */
@@ -10,6 +10,10 @@
 
 #include "raylib.h"
 #include "../core/game.h" 
+
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
 
 /**
  * @struct GameAssets

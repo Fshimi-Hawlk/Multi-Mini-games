@@ -1,6 +1,6 @@
 /**
  * @file kingforfourAPI.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Full implementation of the King-for-Four game via API.
  * Encapsulates the state machine, Raylib, and Uno rules.
@@ -19,6 +19,7 @@
 #include "kingForFourAPI.h"
 
 #include "logger.h"
+#include "rand.h"
 
 /**
  * @enum AppState
@@ -73,7 +74,9 @@ Error_Et kingforfour_initGame__full(KingForFourGame_St** game, KingForFourConfig
     g->base.score    = 0;
 
     // 2. Initialisation Environnement
-    srand(time(NULL));
+    u64 seeds[2] = { 0 };
+    plat_get_entropy(seeds, sizeof(seeds));
+    prng_seed(seeds[0], seeds[1]);
     
     // Le Lobby a déjà appelé InitWindow(), on peut donc charger les assets en sécurité
     g->assets = LoadAssets();
@@ -150,9 +153,7 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
     // ============================
     //      DESSIN (DRAW)
     // ============================
-    BeginDrawing();
-        ClearBackground((Color){0, 100, 0, 255}); // Fond vert tapis
-
+    {
         switch (game->currentState) {
             case STATE_MENU:
                 RenderMenu(); // Affiche le titre
@@ -164,7 +165,6 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
                 RenderHand(&game->state.players[0], game->assets);
                 
                 // HUD
-                DrawFPS(10, 10);
                 DrawText("ECHAP pour Menu Principal", 10, 30, 20, WHITE);
                 
                 const char* cColors[] = {"ROUGE", "JAUNE", "VERT", "BLEU", "NOIR"};
@@ -172,7 +172,7 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
                 DrawText(TextFormat("Couleur Active: %s", activeColor), 10, 60, 20, WHITE);
                 break;
         }
-    EndDrawing();
+    }
 
     return OK;
 }

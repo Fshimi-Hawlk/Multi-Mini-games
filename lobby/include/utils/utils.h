@@ -77,17 +77,13 @@
 
 */
 /**
- * @brief Swaps two variables of the same type using XOR (no temporary needed).
+ * @brief Swaps two variables of the same type using a temporary variable.
  *
- * Xor proprety:
- * V(x), x ^ x = 0
- *
- * a ^= b; // a ^ b
- * b ^= a; // b ^ (a ^ b) = b ^ b ^ a = 0 ^ a = a
- * a ^= b; // (a ^ b) ^ a = b ^ a ^ a = b ^ 0 = b
- * Works only if a and b are not the same variable and are integer types.
+ * @param T The type of the variables.
+ * @param a First variable.
+ * @param b Second variable.
  */
-#define swap(a, b) do { a ^= b; b ^= a; a ^= b; } while (0)
+#define swap(T, a, b) do { T __tmp = (a); (a) = (b); (b) = __tmp; } while (0)
 
 /**
  * @brief Clamps a value between min and max.
@@ -134,11 +130,7 @@
 #endif
 
 /**
-<<<<<<< HEAD
-    @brief Set a variable to an unused state making the compiler stop complaining while developing.
-=======
  * @brief Set a variable to an unused state making the compiler stop complaining while developing.
->>>>>>> 457c54a (- refactor: decomposed monolithoc main.c into dedicated files, following similar structure as what is find in `blockBlast` branch)
  */
 #define UNUSED(value) (void)(value)
 
@@ -176,24 +168,26 @@
  * @brief Shuffles an array in-place using Fisher-Yates algorithm.
  *
  * Requires prng_rand() to be available.
+ *
+ * @param T The type of the elements.
  */
-#define shuffleArray(array, size) \
+#define shuffleArray(T, array, size) \
 do { \
-    for (u32 i = size - 1; i > 0; --i) { \
-        u32 r = prng_rand() % (i + 1); \
-        if (r == i) continue; \
-        swap(array[i], array[r]); \
+    if ((size) > 1) { \
+        for (u32 i = (u32)(size) - 1; i > 0; --i) { \
+            u32 r = prng_rand() % (i + 1); \
+            if (r == i) continue; \
+            swap(T, array[i], array[r]); \
+        } \
     } \
 } while (0)
 
 /**
-<<<<<<< HEAD
-    @brief Shuffles a dynamic array's items.
-=======
  * @brief Shuffles a dynamic array's items.
->>>>>>> 457c54a (- refactor: decomposed monolithoc main.c into dedicated files, following similar structure as what is find in `blockBlast` branch)
+ *
+ * @param T The type of the elements.
  */
-#define da_shuffle(da) shuffleArray((da)->items, (da)->count)
+#define da_shuffle(T, da) shuffleArray(T, (da)->items, (da)->count)
 
 /**
  * @brief Prints all items in a dynamic array using a printf format.

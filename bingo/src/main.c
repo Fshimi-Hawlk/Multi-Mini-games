@@ -48,9 +48,6 @@ s32 main(void) {
     return 0;
 }
 
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
 // Required when contextArena.h is used for custom allocators
 // #define CONTEXT_ARENA_IMPLEMENTATION
 // #include "contextArena.h"

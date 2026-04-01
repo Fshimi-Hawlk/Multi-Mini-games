@@ -1,6 +1,6 @@
 /**
  * @file connection_screen.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Declaration of the connection screen scene for IP entry.
  */
@@ -16,6 +16,12 @@
  * @return A pointer to the entered IP string.
  */
 const char* getEnteredIP(void);
+
+/**
+ * @brief Gets the nickname entered by the user.
+ * @return A pointer to the entered nickname string.
+ */
+const char* getEnteredPseudo(void);
 
 /**
  * @brief Allocates and positions UI elements for the connection screen.

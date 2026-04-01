@@ -1,6 +1,6 @@
 /**
  * @file input_button.h
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Definition of the IaC (Input and Connect) UI elements.
  */
@@ -57,6 +57,16 @@ IaC_button InitIaCElement(float x, float y, float width, float height, char *tex
  * @return true if the text has been modified, false otherwise.
  */
 bool UpdateIPInput(IaC_button *input, char *buffer, int *letterCount);
+
+/**
+ * @brief Handles general text input (e.g. for nicknames).
+ * @param input Pointer to the IaC_button input element.
+ * @param buffer Buffer to store the entered text.
+ * @param letterCount Pointer to the current number of characters in the buffer.
+ * @param maxLen Maximum allowed characters.
+ * @return true if the text has been modified, false otherwise.
+ */
+bool UpdateTextInput(IaC_button *input, char *buffer, int *letterCount, int maxLen);
 
 /**
  * @brief Handles interaction with the connect button.

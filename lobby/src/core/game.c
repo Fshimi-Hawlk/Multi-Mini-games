@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @author LeandreB8
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @date 2026-02-08
     @date 2026-03-18
     @brief Player physics, collision, input handling and skin selection logic in the lobby.

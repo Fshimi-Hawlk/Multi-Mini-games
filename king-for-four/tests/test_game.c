@@ -1,6 +1,6 @@
 /**
  * @file test_game.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Unit tests and debug utilities for the King-for-Four game logic.
  */
@@ -40,7 +40,7 @@ int main() {
     
     Card top = pop_card(&g.draw_pile);
     push_card(&g.discard_pile, top);
-    g.active_color = (top.color == 4) ? 0 : top.color;
+    g.active_color = -1; // Initialize correctly
 
     printf("=== ETAT DU JEU ===\nTalon : "); print_card_debug(top);
     printf("\nCouleur demandee : %d\n\n", g.active_color);

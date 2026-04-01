@@ -1,6 +1,6 @@
 /**
  * @file player.c
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Implementation of player management functions.
  */

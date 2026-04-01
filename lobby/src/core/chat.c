@@ -121,19 +121,27 @@ static void drawTextWrapped(Font font, const char* text, Vector2 pos, float widt
 }
 
 void drawChat(void) {
-    // If chat is closed and no recent messages, only show hint
-    if (!gameChat.isOpen && msgVisibleTimer <= 0) {
-        DrawTextEx(fonts[FONT16], "Press T to chat", (Vector2){10, (float)GetScreenHeight() - 30}, 16.0f, 0.0f, Fade(GRAY, 0.5f));
+    // Safety check for fonts
+    if (!IsFontValid(lobby_fonts[FONT16])) {
+        // Fallback to default font if lobby_fonts failed to load
+        if (!gameChat.isOpen && msgVisibleTimer <= 0) {
+            DrawText("Press T to chat", 10, GetScreenHeight() - 30, 16, Fade(GRAY, 0.5f));
+            return;
+        }
+        // ... more complex fallback would be needed for full chat, but this prevents Segfault
         return;
     }
+
+    // If chat is closed and no recent messages, only show hint
 
     u32 width = 400; u32 height = 300; u32 x = 10; u32 y = GetScreenHeight() - height - 40;
     float spacing = 0.0f;
     
-    // Only draw background if open
-    if (gameChat.isOpen) {
-        DrawRectangle(x, y, width, height, Fade(BLACK, 0.1f));
-        DrawRectangleLines(x, y, width, height, Fade(WHITE, 0.5f));
+    // Draw background 'voilage' if chat is open or there are recent messages
+    if (gameChat.isOpen || msgVisibleTimer > 0) {
+        float alpha = gameChat.isOpen ? 0.4f : (msgVisibleTimer > 1.0f ? 0.4f : msgVisibleTimer * 0.4f);
+        DrawRectangle(x, y, width, height, Fade(BLACK, alpha));
+        if (gameChat.isOpen) DrawRectangleLines(x, y, width, height, Fade(WHITE, 0.5f));
     }
 
     u32 start = (gameChat.count < MAX_CHAT_HISTORY) ? 0 : gameChat.head;
@@ -155,10 +163,10 @@ void drawChat(void) {
             textColor = Fade(WHITE, alpha);
         }
 
-        drawTextWrapped(fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, (float)width - 10, 16.0f, spacing, textColor);
+        drawTextWrapped(lobby_fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, (float)width - 10, 16.0f, spacing, textColor);
         
         // Dynamic Y advance (very approximate wrap count)
-        Vector2 size = MeasureTextEx(fonts[FONT16], fullText, 16.0f, spacing);
+        Vector2 size = MeasureTextEx(lobby_fonts[FONT16], fullText, 16.0f, spacing);
         int lines = (int)(size.x / (width - 10)) + 1;
         currentY += lines * 18;
 
@@ -168,8 +176,8 @@ void drawChat(void) {
     if (gameChat.isOpen) {
         DrawRectangle(x, y + height - 30, width, 30, Fade(BLACK, 0.3f));
         DrawRectangleLines(x, y + height - 30, width, 30, Fade(WHITE, 0.5f));
-        DrawTextEx(fonts[FONT16], gameChat.inputBuffer, (Vector2){(float)x + 5, (float)y + height - 25}, 16.0f, 0.0f, WHITE);
+        DrawTextEx(lobby_fonts[FONT16], gameChat.inputBuffer, (Vector2){(float)x + 5, (float)y + height - 25}, 16.0f, 0.0f, WHITE);
     } else {
-        DrawTextEx(fonts[FONT16], "Press T to chat", (Vector2){10, (float)GetScreenHeight() - 30}, 16.0f, 0.0f, Fade(GRAY, 0.4f));
+        DrawTextEx(lobby_fonts[FONT16], "Press T to chat", (Vector2){10, (float)GetScreenHeight() - 30}, 16.0f, 0.0f, Fade(GRAY, 0.4f));
     }
 }

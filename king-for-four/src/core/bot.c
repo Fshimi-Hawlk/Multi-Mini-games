@@ -1,6 +1,6 @@
 /**
  * @file bot.c
- * @author Gemini CLI
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Bot logic for King-for-Four (Uno).
  */
@@ -8,6 +8,13 @@
 #include "core/bot.h"
 #include "core/card.h"
 #include <limits.h>
+
+typedef enum {
+    SCORE_BASIC_CARD  = 10,
+    SCORE_ACTION_CARD = 30,
+    SCORE_WILD_CARD   = 50,
+    SCORE_WIN_BONUS   = 500
+} AIScore_Et;
 
 int evaluate_state(GameState* g, int player_id) {
     if (!g || player_id < 0 || player_id >= g->num_players) return -1000;
@@ -19,7 +26,7 @@ int evaluate_state(GameState* g, int player_id) {
     for (int i = 0; i < p->hand.size; i++) {
         Card c = p->hand.cards[i];
         if (c.value >= SKIP && c.value <= PLUS_TWO) score -= 20;
-        else if (c.value >= JOKER) score -= 50;
+        else if (c.value >= JOKER) score -= SCORE_WILD_CARD;
         else score -= (int)c.value;
     }
 
@@ -31,7 +38,7 @@ int evaluate_state(GameState* g, int player_id) {
     }
 
     // Huge bonus if we have 0 cards
-    if (p->hand.size == 0) score += 500;
+    if (p->hand.size == 0) score += SCORE_WIN_BONUS;
 
     return score;
 }
@@ -55,8 +62,8 @@ int calculate_best_move(GameState* g, int player_id, int* out_card_index) {
             // Try this move (hypothetically)
             // Since we don't have a full copy_game_state, we evaluate the card itself
             int move_score = 0;
-            if (c.value >= JOKER) move_score += 50;
-            else if (c.value >= SKIP) move_score += 30; // Prioritize actions
+            if (c.value >= JOKER) move_score += SCORE_WILD_CARD;
+            else if (c.value >= SKIP) move_score += SCORE_ACTION_CARD; // Prioritize actions
             else move_score += (int)c.value;
 
             if (move_score > best_score) {

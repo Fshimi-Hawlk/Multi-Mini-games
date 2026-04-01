@@ -1,6 +1,6 @@
 /**
  * @file bot.h
- * @author Gemini CLI
+ * @author i-Charlys
  * @date 2026-03-18
  * @brief Bot logic for King-for-Four (Uno).
  */

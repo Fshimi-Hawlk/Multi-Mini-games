@@ -1,6 +1,6 @@
 /**
     @file networkInterface.h
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @author Fshimi Hawlk
     @date 2025-03-20
     @brief Defines the network message format and per-game module interfaces for client and server sides
@@ -29,11 +29,22 @@ enum BaseActionCodes_e {
     ACTION_CODE_START_GAME   = 0x03,    ///< Starting a game.
     ACTION_CODE_SYNC_GAME    = 0x04,    ///< Synchronizing the game state.
     ACTION_CODE_QUIT_GAME    = 0x05,    ///< quitting the game.
-    ACTION_CODE_LOBBY_MOVE,             ///< Player movement in the lobby.
+    ACTION_GAME_DATA         = 0x06,    ///< Multi-Mini-Games specific game data
+    ACTION_CODE_LOBBY_MOVE   = 0x07,    ///< Player movement in the lobby.
     ACTION_CODE_LOBBY_ROOM_QUERY,       ///< Querying room information.
     ACTION_CODE_LOBBY_ROOM_INFO,        ///< Receiving room information.
     ACTION_CODE_LOBBY_CHAT,             ///< Lobby chat message.
     ACTION_CODE_LOBBY_SWITCH_GAME,      ///< Switching to a mini-game.
+    
+    // Chess specific actions (0x20 range)
+    ACTION_CODE_CHESS_MOVE = 0x20,
+    ACTION_CODE_CHESS_SYNC = 0x21,
+    
+    // Rubik specific actions (0x30 range)
+    ACTION_CODE_RUBIK_SCRAMBLE = 0x30,
+    ACTION_CODE_RUBIK_PROGRESS = 0x31,
+    ACTION_CODE_RUBIK_ELIMINATE = 0x32,
+
     firstAvailableActionCode            ///< First action code usable by the codes specific to each sub-game
 };
 

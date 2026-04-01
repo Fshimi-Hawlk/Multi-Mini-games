@@ -5,14 +5,14 @@
  * Permet au serveur de manipuler différents modules de jeu via 
  * une structure GameServerInterface_St générique.
  * 
- * @author i-Charlys (CAILLON Charles)
+ * @author i-Charlys
  * @date 2026-03-18
  */
 
 #ifndef RESEAU_API_H
 #define RESEAU_API_H
 
-#include "game_interface.h"
+#include "networkInterface.h"
 
 /*
 Fichier .H                                 Fichier .C 
