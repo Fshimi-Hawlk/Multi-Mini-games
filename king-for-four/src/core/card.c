@@ -5,7 +5,7 @@
  * @brief Implementation of card and deck management functions.
  */
 
-#include "../../include/core/card.h"
+#include "core/card.h"
 
 /**
  * @brief Adds a card to the head of the deck's linked list.
