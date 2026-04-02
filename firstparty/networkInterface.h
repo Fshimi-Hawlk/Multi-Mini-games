@@ -23,13 +23,15 @@ extern s32 networkSocket;
 */
 extern RUDPConnection_St serverConnection;
 
+#define UNICAST -1
+
 enum BaseActionCodes_e {
     ACTION_CODE_JOIN_ACK     = 0x01,    ///< Acknowledging a join request.
     ACTION_CODE_JOIN_GAME    = 0x02,    ///< Joining a game.
     ACTION_CODE_START_GAME   = 0x03,    ///< Starting a game.
     ACTION_CODE_SYNC_GAME    = 0x04,    ///< Synchronizing the game state.
     ACTION_CODE_QUIT_GAME    = 0x05,    ///< quitting the game.
-    ACTION_GAME_DATA         = 0x06,    ///< Multi-Mini-Games specific game data
+    ACTION_CODE_GAME_DATA    = 0x06,    ///< Multi-Mini-Games specific game data
     ACTION_CODE_LOBBY_MOVE   = 0x07,    ///< Player movement in the lobby.
     ACTION_CODE_LOBBY_ROOM_QUERY,       ///< Querying room information.
     ACTION_CODE_LOBBY_ROOM_INFO,        ///< Receiving room information.
@@ -47,6 +49,11 @@ enum BaseActionCodes_e {
 
     firstAvailableActionCode            ///< First action code usable by the codes specific to each sub-game
 };
+
+/**
+    @brief Port used for server communication.
+*/
+#define SERVER_PORT 8080
 
 #pragma pack(push, 1)
 

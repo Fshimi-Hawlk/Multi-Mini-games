@@ -5,6 +5,7 @@
  * @brief Server-side module for the King-for-Four (Uno) game.
  */
 
+#include "APIs/generalAPI.h"
 #include "core/game.h"
 #include "core/card.h"
 #include "core/player.h"
@@ -116,11 +117,19 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
             cards[j] = g->players[i].hand.cards[j];
         }
         
+<<<<<<< HEAD
         GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_KFF_SYNC_HAND, .length = (u16)(hand_count * sizeof(Card)) };
+=======
+        GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_KFF_SYNC_HAND, .length = hand_count * sizeof(Card) };
+>>>>>>> origin/mgit-PR1-20-03
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, (size_t)hand_count * sizeof(Card));
         
+<<<<<<< HEAD
         broadcast(-(target_player_id + 1), 999, ACTION_GAME_DATA, buf, (u16)(sizeof(tlv_hand) + hand_count * sizeof(Card)));
+=======
+        broadcast(UNICAST, target_player_id, 5, buf, sizeof(tlv_hand) + hand_count * sizeof(Card));
+>>>>>>> origin/mgit-PR1-20-03
         free(cards);
     }
 }
@@ -129,7 +138,11 @@ static void broadcast_sync(KingServerState* ks, BroadcastMessage_Ft broadcast) {
  * @brief Processes client actions and broadcasts updates.
  */
 void king_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+<<<<<<< HEAD
     if (action != ACTION_GAME_DATA) return;
+=======
+    if (action != ACTION_CODE_GAME_DATA) return;
+>>>>>>> origin/mgit-PR1-20-03
 
     if (len < sizeof(GameTLVHeader_St)) return;
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
@@ -150,6 +163,7 @@ void king_on_action(void *state, int player_id, u8 action, const void *payload, 
         }
     }
 
+<<<<<<< HEAD
     // Si le joueur n'est pas dans la liste mais envoie une action, on essaie de le JOIN automatiquement
     // (Utile si le serveur a redémarré ou si le joueur a été déco/reco silencieusement)
     if (internal_id == -1 && ks->status == 0 && g->num_players < 4) {
@@ -174,6 +188,20 @@ void king_on_action(void *state, int player_id, u8 action, const void *payload, 
         memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
         memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
         broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+=======
+    if (real_action == ACTION_CODE_JOIN_GAME && internal_id == -1) {
+        if (g->num_players < 4 && ks->status == 0) {
+            internal_id = g->num_players++;
+            init_player(&g->players[internal_id], player_id, "Joueur");
+            printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
+            
+            u8 buf_ack[1024];
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+            memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
+            memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+        }
+>>>>>>> origin/mgit-PR1-20-03
     }
 
     if (internal_id != -1) {
@@ -350,11 +378,11 @@ void king_destroy_instance(void *state) {
     free(ks);
 }
 
-GameServerInterface_St king_module = {
-    .game_name = "king-for-four",
-    .create_instance = king_create_instance,
-    .on_action = king_on_action,
-    .on_tick = king_on_tick, 
-    .on_player_leave = king_on_player_leave,
-    .destroy_instance = king_destroy_instance
+GameServerInterface_St kingServerInterface = {
+    .game_name          = "king-for-four",
+    .create_instance    = king_create_instance,
+    .on_action          = king_on_action,
+    .on_tick            = king_on_tick, 
+    .on_player_leave    = king_on_player_leave,
+    .destroy_instance   = king_destroy_instance
 };

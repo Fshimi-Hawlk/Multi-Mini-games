@@ -66,36 +66,11 @@ Vector2 getPlayerCenter(const Player_St* const player);
 // ────────────────────────────────────────────────
 
 /**
-    @brief Updates player position, velocity, angle, jump state, and performs collisions.
-
-    Handles:
-        - horizontal input + friction
-        - gravity
-        - rotation based on movement direction
-        - jump buffering + coyote time + limited air jumps
-        - collision resolution against all platforms
-
-    @param player       Player state to modify
-    @param platforms    Array of static platforms
-    @param nbPlatforms  Number of platforms
-    @param dt           Delta time in seconds
- */
-void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt);
-
-/**
-    @brief Resolves collision between player's circle and a single axis-aligned rectangle.
-
-    Performs:
-        - closest-point calculation
-        - penetration depth computation
-        - position correction (push out)
-        - velocity nulling along dominant axis
-        - ground detection (sets onGround, resets jumps/coyote when landing from above)
-
-    @param player  Player state (position and velocity are modified)
-    @param rect    Rectangle to collide against
- */
-void resolveCircleRectCollision(Player_St* player, const Rectangle rect);
+    @brief Updates player physics and resolves collisions against lobby terrain only.
+    @param player       Player state (modified in place)
+    @param dt           Delta time
+*/
+void updatePlayer(Player_St* const player, const f32 dt);
 
 // ────────────────────────────────────────────────
 // Skin / texture selection
@@ -111,7 +86,7 @@ void resolveCircleRectCollision(Player_St* player, const Rectangle rect);
     @param player  Player whose textureId will be updated
     @param game    Lobby game state (to close the menu via playerVisuals)
  */
-void choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
+void choosePlayerTexture(Player_St* const player, PlayerVisuals_St* const visuals);
 
 /**
     @brief Toggles the skin selection menu visibility.
@@ -122,14 +97,20 @@ void choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
 
     @param game  Lobby game state (modifies playerVisuals.isTextureMenuOpen)
  */
-void toggleSkinMenu(LobbyGame_St* const game);
+void toggleSkinMenu(PlayerVisuals_St* const visuals);
 
 /**
  * @brief Checks if the player has triggered a game transition zone.
  * @param player Pointer to the player structure.
+<<<<<<< HEAD
  * @param game   Pointer to the lobby game state.
  * @return 1 if a trigger is activated, 0 otherwise.
  */
 int checkGameTrigger(Player_St* player, LobbyGame_St* const game);
+=======
+ * @return MiniGame_Et, the idx of the corresponding game
+ */
+MiniGame_Et checkGameTrigger(const Player_St* const player);
+>>>>>>> origin/mgit-PR1-20-03
 
 #endif // CORE_GAME_H

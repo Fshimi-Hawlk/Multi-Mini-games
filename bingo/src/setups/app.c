@@ -6,6 +6,7 @@
     @brief Application setup and teardown.
 */
 
+<<<<<<< HEAD
 #include "utils/globals.h"
 #include "utils/common.h"
 
@@ -13,6 +14,14 @@
 
 bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     bingo_fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
+=======
+#include "setups/app.h"
+
+#include "utils/globals.h"
+
+static bool loadFontIdForSize(u64 fontId, f32 fontSize) {
+    bingo_fonts[fontId] = LoadFontEx(FONT_PATH "Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
+>>>>>>> origin/mgit-PR1-20-03
         if (!IsFontValid(bingo_fonts[fontId])) {
             log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
             return false;
@@ -21,7 +30,7 @@ bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     return true;
 }
 
-bool initFonts(void) {
+bool bingo_initFonts(void) {
     u64 fontSize = 4;
     bool allFontLoaded = true;
     
@@ -33,17 +42,22 @@ bool initFonts(void) {
     return allFontLoaded;
 }
 
-void freeFonts(void) {
+void bingo_freeFonts(void) {
     for (u64 fontId = 0; fontId < __fontSizeCount; fontId++) {
         UnloadFont(bingo_fonts[fontId]);
     }
 }
 
+<<<<<<< HEAD
 bool initApp(void) {
     u64 seeds[2] = { 0 };
     plat_get_entropy(seeds, sizeof(seeds));
     prng_seed(seeds[0], seeds[1]);
 
+=======
+bool bingo_initApp(void) {
+    srand(time(NULL));
+>>>>>>> origin/mgit-PR1-20-03
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
@@ -52,18 +66,18 @@ bool initApp(void) {
     init_logger();
 #endif
 
-    if (!initFonts()) {
-        log_warn("Couldn't initialize every fonts");
+    if (!bingo_initFonts()) {
+        log_warn("Couldn't initialize every bingo_fonts");
     };
 
     return true;
 }
 
-void freeApp(void) {
+void bingo_freeApp(void) {
     // arena_free(&globalArena);
     // arena_free(&tempArena);
 
-    freeFonts();
+    bingo_freeFonts();
 
     CloseWindow();
 }

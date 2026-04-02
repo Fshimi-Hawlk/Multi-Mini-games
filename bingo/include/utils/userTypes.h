@@ -1,61 +1,55 @@
 /**
-    @file userTypes.h
+    @file utils/userTypes.h
     @author Fshimi-Hawlk
     @date 2026-01-25
-    @date 2026-03-19
-    @brief Core type definitions used throughout the game.
+    @date 2026-03-31
+    @brief Core type definitions used throughout the Bingo mini-game (networked).
 
     Contributors:
         - Fshimi-Hawlk:
-            - Added documentation start-up
-            - Added `FontSize_Et`
-
-    If the file needs more context than fits in @brief, write 2-5 lines here.
-    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
-
-    // Try to align the `for` for better readability
-    // Try to keep the same order of the includes
-    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+            - Moved BingoGame_St here (bingoAPI.c will be removed)
+            - Added BingoStatus_Et and per-player support for networked play
+  
+    @see core/game.h for shared helper declarations (bingo_isValidDaub, bingo_hasBingo)
 */
 
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
 
 #include "common.h"
+#include "APIs/generalAPI.h"
 
 typedef uint Card_t[5][5];
 
 /**
     @brief All data related to one player's bingo card.
-    @note Currently fixed to PLAYER_COUNT = 1; designed to become array later.
 */
 typedef struct {
-    Card_t          numbers;      // 0..99, free space usually UINT32_MAX or 0
+    Card_t          numbers;      ///< 0..99, free space usually UINT32_MAX
     bool            daubs[5][5];
-    Card_t          misclicks;    // 0-2 ok, >=3 = penalized / lost square
+    Card_t          misclicks;    ///< 0-2 ok, >=3 = penalized square
 } PlayerCard_St;
 
 /**
-    @brief Ball pool and draw history management.
+    @brief Ball pool and draw history management (shared on server).
 */
 typedef struct {
-    uint encodedBalls[500];  // pre-shuffled 100*col+num values
-    uint remainingCount;     // starts at 500, decrements
-    // uint drawnHistory[500];  // optional: for replay / statistics
-    f32 showDelay;
-    f32 choiceDelay;
-    f32 graceDelay;
+    uint encodedBalls[500];
+    uint remainingCount;
+    f32  showDelay;
+    f32  choiceDelay;
+    f32  graceDelay;
 } BallSystem_St;
 
 /**
     @brief Current active call being displayed / available for daubing.
 */
 typedef struct {
-    uint            encodedValue;       // full encoded ball (100*col+1 + num)
-    uint            column;             // 0..4  (B/I/N/G/O)
-    uint            number;             // 0..99
-    char            displayedText[16];  // "B-42", "N-17", etc.
-    f32             timer;              // time since this call started
+    uint            encodedValue;
+    uint            column;             ///< 0..4 (B/I/N/G/O)
+    uint            number;
+    char            displayedText[16];
+    f32             timer;
 } CallState_St;
 
 typedef enum {
@@ -70,15 +64,15 @@ typedef enum {
 */
 typedef struct {
     GameScene_Et    scene;
-    const char*     resultMessage;      // "BINGO! You win!", "No more balls - Game Over", etc.
+    const char     *resultMessage;
     f32             gameDuration;
     uint            ballsDrawnTotal;
 } GameProgress_St;
 
 typedef struct {
-    Rectangle   innerRect;        // final positioned rectangles for the 12 previews
-    Rectangle   bordersRect;      // optional: positioned borders
-    Rectangle   backgroundRect;   // optional: positioned background
+    Rectangle   innerRect;
+    Rectangle   bordersRect;
+    Rectangle   backgroundRect;
     Card_t      values;
     bool        selected;
 } CardUI_St;
@@ -88,11 +82,28 @@ typedef struct {
 */
 typedef struct {
     f32Vector2  windowCenter;
-    Rectangle   cardRectsRect;          // main game card area (if still needed)
-    Rectangle   cardRect;               // main card frame
-    Rectangle   cardRectBorder;         // main card border
-    Rectangle   choiceCardProto;        // prototype small card (unpositioned)
+    Rectangle   cardRectsRect;
+    Rectangle   cardRect;
+    Rectangle   cardRectBorder;
+    Rectangle   choiceCardProto;
     CardUI_St   choiceCards[12];
 } Layout_St;
+
+/**
+    @brief Complete Bingo game state used by both client and server interfaces.
+           Server uses extra fields (playerCards, numPlayers). Client uses the local `player` and layout.
+           bingoAPI.c will be removed after this change.
+*/
+typedef struct {
+    BaseGame_St     base;
+
+    s32             clientID;
+    CardUI_St*      previouslySelectedCard;     ///< Only relevant during card choice phase (client)
+    PlayerCard_St   player;
+    BallSystem_St   balls;
+    CallState_St    currentCall;
+    GameProgress_St progress;
+    Layout_St       layout;
+} BingoGame_St;
 
 #endif // USER_TYPES_H

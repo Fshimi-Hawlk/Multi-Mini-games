@@ -40,7 +40,7 @@ void rudpInitConnection(RUDPConnection_St *conn) {
  * @param s2 Séquence de référence (dernier paquet reçu).
  * @return true si s1 est chronologiquement après s2.
  */
-static inline bool SequenceMoreRecent(u16 s1, u16 s2) {
+static inline bool sequenceMoreRecent(u16 s1, u16 s2) {
     return ((s1 > s2) && (s1 - s2 <= 32768)) || ((s1 < s2) && (s2 - s1 > 32768));
 }
 
@@ -84,7 +84,7 @@ bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
     */
 
     // Cas 1 : Le paquet est plus récent que tout ce qu'on a vu
-    if (SequenceMoreRecent(seq, conn->remote_sequence)) {
+    if (sequenceMoreRecent(seq, conn->remote_sequence)) {
         u16 difference = (u16)(seq - conn->remote_sequence);
         
         if (difference >= HISTORY_SIZE) {

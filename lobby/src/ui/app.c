@@ -33,31 +33,34 @@
     @see `utils/globals.h`     for `logoSkinButton`, `skinButtonRect`
     @see `utils/userTypes.h`   for `LobbyGame_St`, `PlayerVisuals_St`, `__playerTextureCount`
     @see `utils/utils.h`       for `getTextureRec()`
- */
+*/
 
 #include "ui/app.h"
 
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-/**
- * @brief Renders the texture selection menu for player skins.
- */
 void drawMenuTextures(const LobbyGame_St* const game) {
     Rectangle destRect = game->playerVisuals.defaultTextureRect;
 
     // Default texture
     f32 radius = destRect.width / 2.0f;
-    DrawCircleV((Vector2) {destRect.x + radius, destRect.y + radius}, radius, BLUE);
-
     
     DrawText("choose your skin :", 20, 40, 20, DARKGRAY);
-    for (u32 i = 1; i < __playerTextureCount; i++) {
-        Color textureTint = game->player.unlockedTextures[i] ? WHITE : GRAY;
+    for (u32 i = 0; i < __playerTextureCount; i++) {
         destRect.x = 20 + i * 60;
+
+        Texture2D texture = game->playerVisuals.textures[i];
+        Color textureTint = game->player.unlockedTextures[i] ? WHITE : GRAY;
+
+        if (!IsTextureValid(texture)) {
+            DrawCircleV((Vector2) {destRect.x + radius, destRect.y + radius}, radius, ColorTint(BLUE, textureTint));
+            continue;
+        }
+
         DrawTexturePro(
-            game->playerVisuals.textures[i],
-            getTextureRec(game->playerVisuals.textures[i]), // source
+            texture,
+            getTextureRec(texture), // source
             destRect, // destination
             Vector2Zero(),
             0,
@@ -66,9 +69,6 @@ void drawMenuTextures(const LobbyGame_St* const game) {
     }
 }
 
-/**
- * @brief Renders the button that opens the skin selection menu.
- */
 void drawSkinButton(void) {
     DrawTexturePro(
         logoSkinButton,

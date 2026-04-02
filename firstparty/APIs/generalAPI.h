@@ -53,10 +53,11 @@ typedef enum {
     ERROR_INVALID,              ///< Argument value or state is invalid/illegal
     ERROR_INVALID_ENUM_VAL,     ///< Enum value is invalid
     ERROR_INVALID_SETTING,      ///< Setting parameters is invalid
-    ERROR_TEXTURE_LOAD,         ///< Failed to load a required texture
-    ERROR_AUDIO_LOAD,           ///< Failed to load audio resource
     ERROR_WINDOW_INIT,          ///< Failed to initialize window/display
-    ERROR_ASSET_LOAD,           ///< Failed to load game assets
+    ERROR_ASSET_LOAD,           ///< Failed to load any kind of asset
+    ERROR_TEXTURE_LOAD,         ///< Failed to load a texture
+    ERROR_AUDIO_LOAD,           ///< Failed to load an audio
+    ERROR_FONT_LOAD,            ///< Failed to load a font
     // Future extension point: add more codes here as needed
 } Error_Et;
 

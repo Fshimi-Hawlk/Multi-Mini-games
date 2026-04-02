@@ -9,19 +9,18 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "APIs/generalAPI.h"
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
-// Fonts
-// ────────────────────────────────────────────────
-
 /**
-     @brief Array of pre-loaded fonts at different sizes.
-            Indexed by FontSize_Et values (FONT8 … FONT48).
-            All fonts should use the same typeface for visual consistency.
+    @brief Array of pre-loaded fonts at different sizes.
+           Indexed by FontSize_Et values (FONT8 … FONT48).
+           All fonts should use the same typeface for visual consistency.
 */
+<<<<<<< HEAD
 extern Font      bingo_fonts[__fontSizeCount];
+=======
+extern Font bingo_fonts[__fontSizeCount];
+>>>>>>> origin/mgit-PR1-20-03
 
 // ────────────────────────────────────────────────
 // Game's Globals

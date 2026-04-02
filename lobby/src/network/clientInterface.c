@@ -1,132 +1,179 @@
 /**
-    @file network/clientInterface.c
-    @author i-Charlys
+    @file clientInterface.c
+    @author i-Charlys (CAILLON Charles)
     @author Fshimi-Hawlk
     @date 2026-03-18
-    @brief Implementation of the Lobby mini-game client module (networking and scene bridge).
+    @date 2026-03-27
+    @brief Implementation of the Lobby mini-game module.
 */
 
-#include "core/game.h"       
+#include "core/game.h"
 #include "core/chat.h"
-
 #include "ui/game.h"
 #include "ui/app.h"
-
 #include "utils/globals.h"
-
-#include <sys/socket.h>
-#include <netinet/in.h>
+#include "utils/utils.h"
+#include "systemSettings.h"
 #include <string.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 
-extern int my_id;
-#include "lobbyAPI.h"
-extern LobbyGame_St* g_lobbyGame;
-
-/** @brief Last sent player position to avoid redundant network updates. */
-static Vector2 lastSentPos = {0};
-/** @brief Flag for the first frame update. */
+static f32Vector2 lastSentPos = {0};
 static bool firstFrame = true;
-/** @brief Timer to force a network sync even if stationary. */
-static float syncTimer = 0;
 
-/**
- * @brief Handles incoming network data for the lobby module.
- * @param player_id ID of the sender.
- * @param action Action code received.
- * @param data Payload of the data packet.
- * @param len Length of the data payload.
- */
-void lobby_on_data(int player_id, u8 action, const void* data, u16 len) {
-    if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        // Skip if this is our own data mirrored back
-        if (player_id == my_id) return;
+void lobby_init(void) {
+    log_debug("[LOBBY]: Initializing client lobby");
+    
+    memset(&lobby_game, 0, sizeof(lobby_game));
 
-        LobbyGame_St* game = g_lobbyGame;
-        if (!game) return;
-        
-        if (action == ACTION_CODE_LOBBY_MOVE && len >= sizeof(PlayerNet_St)) {
+    systemSettings.video.height = DEFAULT_VIDEO_SETTING_HEIGHT;
+    systemSettings.video.width = DEFAULT_VIDEO_SETTING_WIDTH;
+    applySystemSettings();
+
+    lobby_game.player = (Player_St) {
+        .position           = {0, 0},
+        .radius             = 20,
+        .coyoteTime         = 0.1f,
+        .coyoteTimer        = 0.1f,
+        .active             = true,
+        .unlockedTextures   = {
+            [PLAYER_TEXTURE_DEFAULT] = true,
+            [PLAYER_TEXTURE_EARTH] = true,
+            [PLAYER_TEXTURE_TROLL_FACE] = true,
+            [PLAYER_TEXTURE_KFF] = true,
+            [PLAYER_TEXTURE_BINGO] = true,
+        },
+    };
+    strncpy(lobby_game.player.name, "Moi", 31);
+
+    lobby_game.cam = (Camera2D) {
+        .offset = {systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f},
+        .zoom   = 1.0f,
+    };
+    
+    lobby_game.playerVisuals.defaultTextureRect = (Rectangle) {
+        .x = 20, .y = 60, .width = 50, .height = 50
+    };
+
+    const char* playerTextureImagePaths[__playerTextureCount] = {
+        [PLAYER_TEXTURE_EARTH]      = IMAGES_PATH "earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+        [PLAYER_TEXTURE_BINGO]      = IMAGES_PATH "bingo69.png",
+        [PLAYER_TEXTURE_KFF]        = IMAGES_PATH "king67.png",
+    };
+
+    for (u8 i = 0; i < __playerTextureCount; ++i) {
+        if (playerTextureImagePaths[i]) {
+            lobby_game.playerVisuals.textures[i] = LoadTexture(playerTextureImagePaths[i]);
+        }
+    }
+    
+    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
+    lobby_game.currentState = GAME_STATE_CONNECTION;
+}
+
+void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
+    if (playerID < 0 || playerID >= MAX_CLIENTS) return;
+    if (playerID == lobby_game.id) return;
+
+    switch (action) {
+        case ACTION_CODE_JOIN_ACK: {
+            u16 tempID;
+            memcpy(&tempID, data, sizeof(u16)); 
+            lobby_game.id = ntohs(tempID);
+            log_info("[LOBBY] My network ID is now %d", lobby_game.id);
+        } break;
+
+        case ACTION_CODE_LOBBY_MOVE: {
+            if (len < sizeof(PlayerNet_St)) break;
             PlayerNet_St net;
             memcpy(&net, data, sizeof(PlayerNet_St));
             
-            if (!game->otherPlayers[player_id].active) {
-                printf("[LOBBY] Nouveau joueur détecté : ID %d\n", player_id);
-                game->otherPlayers[player_id].position = (Vector2){ net.x, net.y };
-                game->otherPlayers[player_id].targetPosition = (Vector2){ net.x, net.y };
+            Player_St* p = &lobby_game.otherPlayers[playerID];
+            if (!p->active) {
+                p->position = (Vector2){ net.x, net.y };
+                p->targetPosition = p->position;
+            } else {
+                p->targetPosition = (Vector2){ net.x, net.y };
             }
+            p->angle = net.angle;
+            p->textureId = (PlayerTextureId_Et)net.textureId;
+            p->active = net.active;
+            p->radius = 20.0f;
+            strncpy(p->name, net.name, 31);
+        } break;
 
-            game->otherPlayers[player_id].targetPosition = (Vector2){ net.x, net.y };
-            game->otherPlayers[player_id].angle    = net.angle;
-            game->otherPlayers[player_id].textureId = net.textureId;
-            strncpy(game->otherPlayers[player_id].name, net.name, 31);
-            game->otherPlayers[player_id].name[31] = '\0';
-            game->otherPlayers[player_id].active    = true;
-            game->otherPlayers[player_id].radius    = 20.0f; // Force radius for visibility
-        }
-        else if (action == ACTION_CODE_LOBBY_CHAT) {
-            addChatMessage(TextFormat("Player %d", player_id), (char*)data);
-        }
-        else if (action == ACTION_CODE_QUIT_GAME) {
-            game->otherPlayers[player_id].active = false;
-        }
+        case ACTION_CODE_LOBBY_CHAT: {
+            addChatMessage(TextFormat("Joueur %d", playerID), (char*)data);
+        } break;
+
+        case ACTION_CODE_QUIT_GAME: {
+            lobby_game.otherPlayers[playerID].active = false;
+        } break;
     }
 }
 
-/**
- * @brief Updates the lobby module logic (network sync).
- * @param dt Delta time since the last frame.
- */
 void lobby_update(float dt) {
-    LobbyGame_St* game = g_lobbyGame;
-    if (!game) return;
-    
-    // updateChat() is called in main.c
-    
-    syncTimer += dt;
-    // We sync more often (0.5s) to ensure visibility for new joiners
-    bool shouldSync = (game->player.position.x != lastSentPos.x || game->player.position.y != lastSentPos.y || firstFrame || syncTimer > 0.5f);
+    if (lobby_game.chat.isOpen) {
+        lobby_game.cam.target = lobby_game.player.position;
+        return;
+    }
 
-    if (shouldSync) {
+    if (IsKeyPressed(KEY_R)) lobby_game.player.position = (Vector2) {0, 0};
+
+    updatePlayer(&lobby_game.player, dt);
+    lobby_game.cam.target = lobby_game.player.position;
+
+    toggleSkinMenu(&lobby_game.playerVisuals);
+    if (lobby_game.playerVisuals.isTextureMenuOpen) {
+        choosePlayerTexture(&lobby_game.player, &lobby_game.playerVisuals);
+    }
+
+    if (lobby_game.player.position.x != lastSentPos.x || lobby_game.player.position.y != lastSentPos.y || firstFrame) {
         PlayerNet_St net = {
-            .x = game->player.position.x,
-            .y = game->player.position.y,
-            .angle = game->player.angle,
-            .textureId = (u8)game->player.textureId,
+            .x = lobby_game.player.position.x,
+            .y = lobby_game.player.position.y,
+            .angle = lobby_game.player.angle,
+            .textureId = (u8)lobby_game.player.textureId,
             .active = true
         };
-        strncpy(net.name, game->player.name, 31);
-        net.name[31] = '\0';
+        strncpy(net.name, lobby_game.player.name, 31);
 
-        GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_MOVE, .length = sizeof(PlayerNet_St) };
-        RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
+        GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = sizeof(PlayerNet_St) };
+        RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
         
         u8 buffer[1024];
-        size_t offset = 0;
+        memcpy(buffer, &h, sizeof(h));
+        memcpy(buffer + sizeof(h), &tlv, sizeof(tlv));
+        memcpy(buffer + sizeof(h) + sizeof(tlv), &net, sizeof(net));
         
-        memcpy(buffer + offset, &h, sizeof(h)); offset += sizeof(h);
-        memcpy(buffer + offset, &tlv, sizeof(tlv)); offset += sizeof(tlv);
-        memcpy(buffer + offset, &net, sizeof(PlayerNet_St)); offset += sizeof(PlayerNet_St);
-        
-        send(networkSocket, buffer, offset, 0);
-        lastSentPos = game->player.position;
+        send(networkSocket, buffer, sizeof(h) + sizeof(tlv) + sizeof(net), 0);
+        lastSentPos = (f32Vector2){lobby_game.player.position.x, lobby_game.player.position.y};
         firstFrame = false;
-        syncTimer = 0;
     }
 }
 
-/**
- * @brief Renders the lobby module (already handled in lobbyAPI.c for now, but keeping for interface).
- */
 void lobby_draw(void) {
-    // Handled in lobbyAPI.c
+    BeginMode2D(lobby_game.cam); {
+        drawLobbyTerrains(terrains, gameInteractionZones);
+        drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
+        for (int i = 0; i < MAX_CLIENTS; i++) {
+            if (lobby_game.otherPlayers[i].active)
+                drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
+        }
+    } EndMode2D();
+    
+    DrawText("Multi-Mini-Games", (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2, 20, 20, PURPLE);
+    drawSkinButton();
+    if (lobby_game.playerVisuals.isTextureMenuOpen) drawMenuTextures(&lobby_game);
+    drawChat();
 }
 
-/** @brief Global definition of the Lobby module interface. */
-GameClientInterface_St LobbyModule = {
-    .id = 0,
-    .name = "Lobby Principal",
-    .init = NULL, // Handled in lobbyAPI.c
-    .on_data = lobby_on_data,
-    .update = lobby_update,
-    .draw = lobby_draw
+GameClientInterface_St lobbyClientInterface = {
+    .id         = MINI_GAME_LOBBY,
+    .name       = "Lobby",
+    .init       = lobby_init,
+    .on_data    = lobby_on_data,
+    .update     = lobby_update,
+    .draw       = lobby_draw
 };

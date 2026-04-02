@@ -47,16 +47,13 @@
     @param game      Pointer to the full lobby game state (provides textures and visuals)
     @param player    Pointer to the player state (position, radius, textureId, angle, etc.)
 */
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player);
+void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player);
 
 /**
     @brief Draws all static platforms in the lobby world.
 
     Renders each platform as a rounded rectangle using its stored rect, color and roundness.
-
-    @param platforms    Array of platform definitions
-    @param nbPlatforms  Number of platforms in the array
 */
-void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms);
+void drawLobbyTerrains(TerrainVec_St terrains, const GameInteractionZone_St gameInteractionZones[__miniGameCount]);
 
 #endif // UI_GAME_H

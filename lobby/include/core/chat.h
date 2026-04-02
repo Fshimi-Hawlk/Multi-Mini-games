@@ -10,14 +10,6 @@
 #ifndef LOBBY_CHAT_H
 #define LOBBY_CHAT_H
 
-#include "rudp_core.h"
-#include "APIs/chatAPI.h"
-
-extern s32 networkSocket;
-extern RUDPConnection_St serverConn;
-
-extern Chat_St gameChat;
-
 void addChatMessage(const char* sender, const char* text);
 void updateChat(void);
 

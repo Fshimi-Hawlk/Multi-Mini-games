@@ -55,10 +55,10 @@
 
 #include "rand.h"                // custom PRNG - used in lobby
 
-// #include "contextArena.h"
+#include "contextArena.h"
 
-// #define REALLOC context_realloc     // future arena-aware realloc (disabled for now)
-// #define FREE                        // future arena-aware free       (disabled for now)
+#define REALLOC context_realloc     // future arena-aware realloc (disabled for now)
+#define FREE                        // future arena-aware free       (disabled for now)
 
 #include "nob/dynamicArray.h"       // type-safe dynamic array macros (da_* family)
 

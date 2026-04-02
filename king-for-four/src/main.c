@@ -46,3 +46,6 @@ int main(void) {
     
     return 0;
 }
+
+#define LOGGER_IMPLEMENTATION
+#include "logger.h"

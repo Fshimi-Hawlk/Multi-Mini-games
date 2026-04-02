@@ -6,74 +6,61 @@
     @date 2026-01-30
     @date 2026-03-23
     @brief Low-level drawing routines for lobby gameplay elements.
-
-    Contributors:
-        - LeandreB8:
-            - Provided the initial drawing logic
-        - Fshimi-Hawlk:
-            - Provided documentation
-            - Reworked the texture logic
-
-    This file contains primitive rendering functions used to visualize:
-        - the player character (either debug circle or textured sprite)
-        - static platforms in the lobby world
-
-    These functions are meant to be called during the main render pass after
-    the camera has been set up. They operate directly on Raylib drawing primitives
-    and expect world-space coordinates.
-
-    All functions in this file are stateless with respect to side-effects outside
-    of Raylib's drawing context - they only read game state and issue draw calls.
-
-    @see `core/game.h` for `getPlayerCollisionBox` and `getPlayerCenter`
-    @see `utils/utils.h` for `getTextureRec`
 */
 
-#include "ui/game.h"
 #include "core/game.h"
+#include "ui/game.h"
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
-    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
+void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
+    if (!player->active) return;
+
+    Texture2D texture = playerVisuals->textures[player->textureId];
+
+    if (!IsTextureValid(texture)) {
         DrawCircleV(player->position, player->radius, BLUE);
     } else {
-        Rectangle dest = {
-            player->position.x,
-            player->position.y,
-            player->radius * 2,
-            player->radius * 2
-        };
-        Vector2 origin = { player->radius, player->radius };
-        
         DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            dest,
-            origin,
+            texture,
+            getTextureRec(texture),
+            getPlayerCollisionBox(player),
+            getPlayerCenter(player),
             player->angle,
             WHITE
         );
     }
+
+    // Draw player name above head
+    int fontSize = 16;
+    float textX = player->position.x - MeasureText(player->name, fontSize) / 2.0f;
+    float textY = player->position.y - player->radius - 20.0f;
+    DrawText(player->name, (int)textX, (int)textY, fontSize, DARKGRAY);
 }
 
-/**
- * @brief Renders the platforms and trigger zones to the screen.
- * @param platforms Array of platforms to draw.
- * @param nbPlatforms Number of platforms in the array.
- */
-void drawPlatforms(const Platform_St* const platforms, const int nbPlatforms) {
-    for (int i = 0; i < nbPlatforms; i++) {
-        DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
+void drawLobbyTerrains(TerrainVec_St terrains, const GameInteractionZone_St gameInteractionZones[__miniGameCount]) {
+    // Terrains
+    for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
+        const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
+        DrawRectangleRounded(currentTerrain->rect, currentTerrain->roundness, 0, currentTerrain->color);
     }
-    
-    // Zones de trigger pour les jeux
-    DrawRectangleLinesEx(kingForFourZone, 2, GOLD);
-    DrawText("KING FOR FOUR", kingForFourZone.x + 5, kingForFourZone.y + 20, 10, GOLD);
 
-    DrawRectangleLinesEx(chessZone, 2, GOLD);
-    DrawText("CHESS", chessZone.x + 25, chessZone.y + 20, 10, GOLD);
+    // Interaction zones
+    for (u32 zoneIndex = 0; zoneIndex < __miniGameCount; zoneIndex++) {
+        if (zoneIndex == MINI_GAME_LOBBY) continue;
 
-    DrawRectangleLinesEx(rubikZone, 2, GOLD);
-    DrawText("RUBIK CUBE", rubikZone.x + 15, rubikZone.y + 20, 10, GOLD);
+        GameInteractionZone_St currentZone = gameInteractionZones[zoneIndex];
+        if (currentZone.hitbox.width == 0) continue; // Skip unused zones
+
+        // Base visual for the zone
+        DrawRectangleRounded(currentZone.hitbox, 0.4f, 0, (Color){255, 215, 0, 120});
+        DrawRectangleLinesEx(currentZone.hitbox, 2, GOLD);
+
+        // Game name text
+        const char* gameName = currentZone.name;
+        int fontSize = 20;
+        float textX = currentZone.hitbox.x + (currentZone.hitbox.width - MeasureText(gameName, fontSize)) / 2.0f;
+        float textY = currentZone.hitbox.y - 25.0f;
+        DrawText(gameName, (int)textX, (int)textY, fontSize, GOLD);
+    }
 }

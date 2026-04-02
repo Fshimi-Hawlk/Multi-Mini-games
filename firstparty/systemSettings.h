@@ -29,8 +29,8 @@
 // ────────────────────────────────────────────────────────────────────────────
 
 #define DEFAULT_VIDEO_SETTING_FPS           60
-#define DEFAULT_VIDEO_SETTING_WIDTH         1200
-#define DEFAULT_VIDEO_SETTING_HEIGHT        800
+#define DEFAULT_VIDEO_SETTING_WIDTH         800
+#define DEFAULT_VIDEO_SETTING_HEIGHT        600
 #define DEFAULT_VIDEO_SETTING_FULLSCREEN    false
 #define DEFAULT_VIDEO_SETTING_VSYNC         true
 #define DEFAULT_VIDEO_SETTING_BORDERLESS    false

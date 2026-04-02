@@ -5,9 +5,13 @@
  * @brief Implementation of UI rendering functions using Raylib.
  */
 
-#include "ui/renderer.h"
-#include <stdio.h>
 #include <math.h>
+
+#include "raylib.h"
+
+#include "ui/renderer.h"
+
+#include "logger.h"
 
 /** @brief Number of columns in the card texture sheet. */
 #define SHEET_COLS 5
@@ -16,6 +20,12 @@
 /** @brief Scale factor for rendering cards. */
 #define CARD_SCALE 0.8f
 
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
+
+#define TEXTURES_PATH ASSET_PATH "textures/"
+
 /**
  * @brief Loads textures for cards from various possible paths.
  * @return The loaded assets.
@@ -23,6 +33,7 @@
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
+<<<<<<< HEAD
     // Chargement via ASSET_PATH (défini par le Makefile pour la compatibilité Monorepo)
     assets.cardSheet = LoadTexture(ASSET_PATH "textures/playingCards.png");
     assets.cardBack = LoadTexture(ASSET_PATH "textures/cardBack_blue5.png");
@@ -31,6 +42,20 @@ GameAssets LoadAssets(void) {
     if (assets.cardSheet.id == 0) printf("ERREUR: Texture playingCards.png introuvable à %s\n", ASSET_PATH);
     if (assets.cardBack.id == 0)  printf("ERREUR: Texture cardBack_blue5.png introuvable à %s\n", ASSET_PATH);
 
+=======
+    const char *cardsTexturePath = TEXTURES_PATH "playingCards.png";
+    assets.cardSheet = LoadTexture(cardsTexturePath);
+    if (!IsTextureValid(assets.cardSheet)) {
+        log_error("Can't load %s", cardsTexturePath);
+    }
+
+    const char *cardBackTexturePath = TEXTURES_PATH "cardBack_blue5.png";
+    assets.cardBack = LoadTexture(cardBackTexturePath);
+    if (!IsTextureValid(assets.cardSheet)) {
+        log_error("Can't load %s", cardBackTexturePath);
+    }
+    
+>>>>>>> origin/mgit-PR1-20-03
     return assets;
 }
 

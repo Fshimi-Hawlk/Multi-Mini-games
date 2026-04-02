@@ -42,6 +42,10 @@ EXCLUDED_DIRS := \
     assets       \
     build        \
     docs         \
+<<<<<<< HEAD
+=======
+    firstparty   \
+>>>>>>> origin/mgit-PR1-20-03
     logs         \
     thirdparty   \
     tui-ver
@@ -50,11 +54,14 @@ EXCLUDED_DIRS := \
 MODULES := $(patsubst %/,%,$(wildcard */))
 MODULES := $(filter-out $(EXCLUDED_DIRS),$(MODULES))
 
+<<<<<<< HEAD
 SUBDIRS       := $(MODULES)
 
+=======
+>>>>>>> origin/mgit-PR1-20-03
 FIRSTPARTY_API_DIR := $(ROOT_DIR)/firstparty/APIs
 
-BUILD_DIR     := $(ROOT_DIR)/build
+BUILD_DIR     := build
 LIB_DIR       := $(BUILD_DIR)/lib
 BIN_DIR       := $(BUILD_DIR)/bin
 
@@ -117,11 +124,15 @@ $(foreach mod,$(MODULES),$(eval $(call build-module-lib-rule,$(mod))))
 # Main targets
 # ───────────────────────────────────────────────────────────────
 
+<<<<<<< HEAD
 all: bin server
+=======
+all: server client
+>>>>>>> origin/mgit-PR1-20-03
 
 libs: $(LIBS)
 
-bin: libs
+client: libs
 	@echo "Building lobby executable..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
 	$(SILENT_PREFIX)$(MAKE) -C lobby \
@@ -132,6 +143,7 @@ bin: libs
 
 server: libs
 	@echo "Building server executable..."
+<<<<<<< HEAD
 	$(SILENT_PREFIX)$(MAKE) -C reseau \
 		MODE=$(MODE) VERBOSE=$(VERBOSE) \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
@@ -139,8 +151,24 @@ server: libs
 run-server: server
 	@echo "===> Starting server..."
 	$(SILENT_PREFIX)cd reseau && ./build/bin/server
+=======
+	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
+	$(SILENT_PREFIX)$(MAKE) -C reseau \
+		MODE=$(MODE) VERBOSE=$(VERBOSE) \
+		BIN_DIR=../$(BIN_DIR) \
+		EXTRA_LDFLAGS="$(LIBS_REL)"
+>>>>>>> origin/mgit-PR1-20-03
 
-run-client: bin
+run-server: server
+	@if [ -f "$(BIN_DIR)/server" ]; then \
+		echo "===> Starting server..."; \
+		$(BIN_DIR)/server; \
+	else \
+		echo "No executable found: $(BIN_DIR)/server"; \
+		echo "Run 'make rebuild' first."; \
+	fi
+
+run-client: client
 	@if [ -f "$(BIN_DIR)/$(MAIN_NAME)" ]; then \
 		echo "===> Starting client..."; \
 		$(BIN_DIR)/$(MAIN_NAME); \
@@ -154,7 +182,7 @@ run-client: bin
 # ───────────────────────────────────────────────────────────────
 
 tests:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Building tests in $$dir ..."; \
 			$(MAKE) -C "$$dir" tests MODE=$(MODE) VERBOSE=$(VERBOSE) || exit 1; \
@@ -168,7 +196,7 @@ run-tests: tests
 	@echo "Running tests across modules..."
 	@echo "───────────────────────────────────────────────"
 	$(SILENT_PREFIX)all_passed=1; failed=0; total=0; \
-	for dir in $(SUBDIRS); do \
+	for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "-> $$dir"; \
 			$(MAKE) -C "$$dir" run-tests MODE=$(MODE) VERBOSE=$(VERBOSE) \
@@ -189,7 +217,7 @@ run-tests: tests
 # ───────────────────────────────────────────────────────────────
 
 clean-libs:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
 		fi; \
@@ -203,7 +231,7 @@ clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
 clean-api-headers:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			module_name=$$(basename "$$dir"); \
 			api_file="$(FIRSTPARTY_API_DIR)/$$(echo "$$module_name" | sed -E 's/[-_]([a-z])/\U\1/g' | sed 's/^[A-Z]/\l&/')API.h"; \
@@ -215,7 +243,7 @@ clean-api-headers:
 
 clean-all: clean clean-api-headers
 	@echo "===> Full clean (root build + modules + generated API headers)"
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Cleaning module: $$dir"; \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
@@ -226,7 +254,8 @@ rebuild: clean-all all
 
 rebuild-libs: clean-libs libs
 
-rebuild-bin: clean-bin bin
+rebuild-client: clean-bin client
+rebuild-server: clean-bin server
 
 rebuild-tests: clean tests
 
@@ -241,10 +270,12 @@ help:
 	@echo "Usage: make [TARGET] [OPTIONS]"
 	@echo ""
 	@echo "Main targets:"
-	@echo "  all             = libs + bin"
+	@echo "  all             = libs + client + server"
 	@echo "  rebuild         = clean-all + all"
+	@echo "  rebuild-server  = clean-libs + server"
+	@echo "  rebuild-client  = clean-libs + client"
 	@echo "  libs            = build static libraries (incremental)"
-	@echo "  bin             = build lobby executable (needs libs)"
+	@echo "  client          = build lobby executable (needs libs)"
 	@echo "  run-client      = build & run lobby/$(MAIN_NAME)"
 	@echo "  run-server      = build libs & run reseau server"
 	@echo ""
@@ -273,7 +304,7 @@ help:
 	@echo "  • clean-all removes API headers from firstparty/APIs/"
 	@echo "  • Module sub-makefiles are expected to understand: clean, tests, run-tests, static-lib"
 
-.PHONY: all libs bin run-client run-server
-.PHONY: tests run-tests rebuild rebuild-libs rebuild-bin rebuild-tests
-.PHONY: clean clean-libs clean-bin clean-all clean-api-headers
+.PHONY: all libs client run-client run-server
+.PHONY: tests run-tests rebuild rebuild-libs rebuild-client rebuild-tests
+.PHONY: clean clean-libs clean-client clean-all clean-api-headers
 .PHONY: docs help

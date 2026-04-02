@@ -174,7 +174,7 @@ TEST_DIR := tests
 BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
-BIN_DIR := $(BUILD_DIR)/bin
+BIN_DIR ?= $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
 
 STATIC_LIB  ?= $(LIB_DIR)/lib$(LIB_NAME).a

@@ -58,6 +58,7 @@ Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
+<<<<<<< HEAD
 
 //besion de comprendre les changements entre les deux fonctions a la suite du rebase
 /*void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
@@ -159,29 +160,38 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
     }
 }
 
+=======
+>>>>>>> origin/mgit-PR1-20-03
 /**
- * @brief Resolves collision between a circular player and a rectangular obstacle.
- * @param player Pointer to the player structure.
- * @param rect The rectangle to check collision against.
- */
-void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
-    // Search the position that is closest to the circle on the rectangle
-    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
+    @brief Resolves collision between the circular player and one rectangular terrain piece.
+           Also applies special effects for certain terrain types on landing.
+*/
+static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* currentTerrain) {
+    // Find closest point on the rectangle to the circle center
+    f32 closestX = Clamp(player->position.x, currentTerrain->rect.x, currentTerrain->rect.x + currentTerrain->rect.width);
+    f32 closestY = Clamp(player->position.y, currentTerrain->rect.y, currentTerrain->rect.y + currentTerrain->rect.height);
 
-    f32 dx = player->position.x - closestX;
-    f32 dy = player->position.y - closestY;
+    f32 horizontalDelta = player->position.x - closestX;
+    f32 verticalDelta   = player->position.y - closestY;
 
-    f32 distSq = dx*dx + dy*dy;
-    f32 r = player->radius;
+    f32 distanceSquared = horizontalDelta * horizontalDelta + verticalDelta * verticalDelta;
+    f32 radius          = player->radius;
 
-    if (distSq >= r * r)
+    if (distanceSquared >= radius * radius) {
         return;
+    }
 
+<<<<<<< HEAD
     float dist = sqrtf(distSq);
     if (dist == 0)
+=======
+    f32 distance = sqrtf(distanceSquared);
+    if (distance == 0.0f) {
+>>>>>>> origin/mgit-PR1-20-03
         return;
+    }
 
+<<<<<<< HEAD
     float penetration = r - dist;
 
     float nx = dx / dist;
@@ -200,30 +210,125 @@ void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
 
         // sol
         if (ny < 0) {
+=======
+    f32 penetration = radius - distance;
+
+    f32 normalX = horizontalDelta / distance;
+    f32 normalY = verticalDelta   / distance;
+
+    // Position correction
+    player->position.x += normalX * penetration;
+    player->position.y += normalY * penetration;
+
+    // Velocity resolution
+    if (fabsf(normalX) > fabsf(normalY)) {
+        player->velocity.x = 0.0f;
+    } else {
+        player->velocity.y = 0.0f;
+
+        // Landing on ground
+        if (normalY < 0.0f) {
+>>>>>>> origin/mgit-PR1-20-03
             player->onGround = true;
-            player->nbJumps = 0;
+            player->nbJumps  = 0;
             player->coyoteTimer = COYOTE_TIME;
         }
     }
 }
 
+/**
+    @brief Resolves all collisions between player and lobby terrains using circle collision.
+*/
+static void resolvePlayerVsAllTerrains(Player_St* player, const TerrainVec_St terrains) {
+    for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
+        const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];
+        resolvePlayerCircleVsTerrain(player, currentTerrain);
+    }
+}
 
-void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
+void updatePlayer(Player_St* const player, const f32 dt) {
+    // Horizontal input + friction
+    if (IsKeyDown(KEY_A)) {
+        player->velocity.x = -300.0f;
+    } else if (IsKeyDown(KEY_D)) {
+        player->velocity.x = 300.0f;
+    } else {
+        f32 friction = FRICTION;
+
+        if (player->velocity.x > 0.0f) {
+            player->velocity.x -= friction * dt;
+            if (player->velocity.x < 0.0f) player->velocity.x = 0.0f;
+        } else if (player->velocity.x < 0.0f) {
+            player->velocity.x += friction * dt;
+            if (player->velocity.x > 0.0f) player->velocity.x = 0.0f;
+        }
+    }
+
+    // Rotation based on horizontal speed
+    if (player->velocity.x > 0.0f) {
+        player->angle += 360.0f * dt;
+    } else if (player->velocity.x < 0.0f) {
+        player->angle -= 360.0f * dt;
+    }
+
+    // Jump buffering
+    if (IsKeyPressed(KEY_SPACE)) {
+        player->jumpBuffer = JUMP_BUFFER_TIME;
+    } else if (player->jumpBuffer > 0.0f) {
+        player->jumpBuffer = max(0.0f, player->jumpBuffer - dt);
+    }
+
+    // Gravity
+    player->velocity.y += 1200.0f * dt;
+
+    // Apply movement
+    player->position.x += player->velocity.x * dt;
+    player->position.y += player->velocity.y * dt;
+
+    player->onGround = false;
+
+    // Collision resolution (circle vs all solid terrains)
+    resolvePlayerVsAllTerrains(player, terrains);
+
+    // Coyote time & jump reset
+    if (player->onGround) {
+        player->coyoteTimer = COYOTE_TIME;
+        player->nbJumps     = 0;
+    } else {
+        player->coyoteTimer -= dt;
+        if (player->coyoteTimer < 0.0f) player->coyoteTimer = 0.0f;
+    }
+
+    // Jump logic
+    if (player->jumpBuffer > 0.0f) {
+        bool canJump = player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < MAX_JUMPS;
+
+        if (canJump) {
+            player->velocity.y  = -500.0f;
+            player->onGround    = false;
+            player->coyoteTimer = 0.0f;
+            player->nbJumps++;
+            player->jumpBuffer  = 0.0f;
+        }
+    }
+}
+
+void choosePlayerTexture(Player_St* const player, PlayerVisuals_St* const visuals) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
-        Rectangle destRect = game->playerVisuals.defaultTextureRect;
-
-        for (int i = 0; i < __playerTextureCount; i++) {
+        Rectangle destRect = visuals->defaultTextureRect;
+        for (u32 i = 0; i < __playerTextureCount; ++i) {
             destRect.x = 20 + i * 60;
             if (!player->unlockedTextures[i]) continue;
+
             if (CheckCollisionPointRec(mousePos, destRect)) {
                 player->textureId = i;
-                game->playerVisuals.isTextureMenuOpen = false;
+                visuals->isTextureMenuOpen = false;
                 break;
             }
         }
 
-        if (!game->playerVisuals.isTextureMenuOpen) return;
+        if (!visuals->isTextureMenuOpen) return;
     }
 
     PlayerTextureId_Et selectedId = __playerTextureCount;
@@ -232,9 +337,16 @@ void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
         u32 keybind;
         u32 textureId;
     } keybindTextureIdAssociations[__playerTextureCount] = {
-        {KEY_ONE, PLAYER_TEXTURE_DEFAULT},
-        {KEY_TWO, PLAYER_TEXTURE_EARTH},
+        {KEY_ONE,   PLAYER_TEXTURE_DEFAULT},
+        {KEY_TWO,   PLAYER_TEXTURE_EARTH},
         {KEY_THREE, PLAYER_TEXTURE_TROLL_FACE},
+        {KEY_FOUR,  PLAYER_TEXTURE_BATTLESHIP_TODO},
+        {KEY_FIVE,  PLAYER_TEXTURE_BINGO},
+        {KEY_SIX,   PLAYER_TEXTURE_CONNECT_4_TODO},
+        {KEY_SEVEN, PLAYER_TEXTURE_KFF},
+        {KEY_EIGHT, PLAYER_TEXTURE_MINIGOLF_TODO},
+        {KEY_NINE,  PLAYER_TEXTURE_MORPION_TODO},
+        {KEY_ZERO,  PLAYER_TEXTURE_OTHELLO_TODO},
     };
 
     u32 pressedKey = GetKeyPressed();
@@ -247,33 +359,34 @@ void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     }
 
     if (selectedId == __playerTextureCount) {
-        /// TODO: Display Error Message if necessary
+        // TODO: Display Error Message if necessary
         return;
     }
 
     if (!player->unlockedTextures[selectedId]) {
-        /// TODO: Display Warning Message that the texture is locked
+        // TODO: Display Warning Message that the texture is locked
         return;
     }
 
     player->textureId = selectedId;
-    game->playerVisuals.isTextureMenuOpen = false;
+    visuals->isTextureMenuOpen = false;
 }
 
 /**
  * @brief Toggles the skin selection menu visibility.
  */
-void toggleSkinMenu(LobbyGame_St* const game) {
+void toggleSkinMenu(PlayerVisuals_St* const visuals) {
     bool cond = (
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)
     ) || IsKeyPressed(KEY_P);
 
     if (cond) {
-        game->playerVisuals.isTextureMenuOpen = !game->playerVisuals.isTextureMenuOpen;
+        visuals->isTextureMenuOpen = !visuals->isTextureMenuOpen;
     }
 }
 
+<<<<<<< HEAD
 /**
  * @brief Checks if the player has triggered a game transition zone.
  * @param player Pointer to the player structure.
@@ -282,6 +395,22 @@ void toggleSkinMenu(LobbyGame_St* const game) {
 int checkGameTrigger(Player_St* player, LobbyGame_St* const game) {
     if (CheckCollisionCircleRec(player->position, player->radius, game->miniGameManager.gameHitboxes[MINI_GAME_KFF])) {
         return 1; 
+=======
+MiniGame_Et checkGameTrigger(const Player_St* const player) {
+    for (u8 i = 0; i < __miniGameCount; ++i) {
+        if (i == MINI_GAME_LOBBY) continue;
+
+        bool hasCollided = CheckCollisionCircleRec(
+            player->position, 
+            player->radius, 
+            gameInteractionZones[i].hitbox
+        );
+        
+        if (hasCollided && IsKeyPressed(KEY_E)) {
+            return i;
+        }
+>>>>>>> origin/mgit-PR1-20-03
     }
-    return 0; 
+
+    return MINI_GAME_LOBBY;
 }

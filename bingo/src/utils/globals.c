@@ -19,7 +19,11 @@
 
 // General Variables
 
+<<<<<<< HEAD
 Font      bingo_fonts[__fontSizeCount] = {0};
+=======
+Font bingo_fonts[__fontSizeCount] = {0};
+>>>>>>> origin/mgit-PR1-20-03
 
 // Game's Variables
 const char* const LETTERS[5] = {"B", "I", "N", "G", "O"};

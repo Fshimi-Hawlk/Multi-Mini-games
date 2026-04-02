@@ -4,23 +4,6 @@
     @date 2026-01-12
     @date 2026-03-20
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
-
-    Contributors:
-    - LeandreB8:
-        - Moved `Player_St` and `Platform_St` here
-    - Fshimi-Hawlk:
-        - Added documentation
-        - Added `GameScene_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
-          `MiniGameManager_St` and `LobbyGame_St` to centralize logic and 
-          previously global variables and make everything as straight forward.
-
-    This header contains the central enumerated types and data structures that describe:
-        - visual appearance and state of the player in the lobby
-        - platformer physics state of the lobby player
-        - currently active mini-game / sub-scene
-        - overall lobby game state
-
-    Most gameplay systems in the lobby directly or indirectly depend on types defined here.
 */
 
 #ifndef USER_TYPES_H
@@ -28,7 +11,7 @@
 
 #include "common.h"
 #include "APIs/generalAPI.h"
-#include "networkInterface.h"
+#include "APIs/chatAPI.h"
 
 typedef enum {
     GAME_STATE_GAMEPLAY,
@@ -47,26 +30,23 @@ typedef enum {
     PLAYER_TEXTURE_DEFAULT,
     PLAYER_TEXTURE_EARTH,
     PLAYER_TEXTURE_TROLL_FACE,
-    PLAYER_TEXTURE_BATTLESHIP_TODO,     //< a ship -> not round
-    PLAYER_TEXTURE_BINGO_TODO,          //< bingo card (?) -> not round or the ball (?)
-    PLAYER_TEXTURE_CONNECT_4_TODO,      //< don't know
-    PLAYER_TEXTURE_KFF_TODO,            //< king for four card (?) -> not round
-    PLAYER_TEXTURE_MINIGOLF_TODO,       //< don't know
-    PLAYER_TEXTURE_MORPION_TODO,        //< don't know
-    PLAYER_TEXTURE_OTHELLO_TODO,        //< don't know
+    PLAYER_TEXTURE_BATTLESHIP_TODO,
+    PLAYER_TEXTURE_BINGO,
+    PLAYER_TEXTURE_CONNECT_4_TODO,
+    PLAYER_TEXTURE_KFF,
+    PLAYER_TEXTURE_MINIGOLF_TODO,
+    PLAYER_TEXTURE_MORPION_TODO,
+    PLAYER_TEXTURE_OTHELLO_TODO,
     __playerTextureCount,
 } PlayerTextureId_Et;
 
 /**
     @brief Visual / rendering related state of the player character.
-
-    Keeps texture handles and UI-related flags separate from physics state.
 */
 typedef struct {
     Rectangle defaultTextureRect;               ///< Source rectangle used when no special animation/state is active
     bool      isTextureMenuOpen;                ///< Whether the skin/character selection overlay is currently visible
     Texture   textures[__playerTextureCount];   ///< Preloaded textures for each available player skin
-    // Future extension point: Rectangle currentSourceRect; AnimationState animation; etc.
 } PlayerVisuals_St;
 
 #pragma pack(push, 1)
@@ -74,8 +54,8 @@ typedef struct {
  * @brief Simplified player structure for network transmission.
  */
 typedef struct {
-    float x, y;
-    float angle;
+    f32   x, y;
+    f32   angle;
     u8    textureId;
     bool  active;
     char  name[32];
@@ -84,54 +64,43 @@ typedef struct {
 
 /**
     @brief Physics and movement state of the player character in the lobby (platformer).
-
-    Most fields are directly used / modified by the player controller system.
 */
 typedef struct {
-    Vector2 position;                           ///< Center position of the player (world coordinates)
-    Vector2 targetPosition;                     ///< Target position for network interpolation.
-    float   radius;                             ///< Collision radius (circle-based collision)
+    bool    active;
+    char    name[32];
 
-    float   angle;                              ///< Visual rotation in radians (usually 0 unless doing tricks/rotations)
-    PlayerTextureId_Et textureId;               ///< Currently selected / active skin
+    Vector2 position;           ///< Center position of the player (world coordinates)
+    f32     radius;             ///< Collision radius (circle-based collision)
+    f32     angle;              ///< Visual rotation in radians
+
+    PlayerTextureId_Et textureId;                   ///< Currently selected / active skin
     bool    unlockedTextures[__playerTextureCount]; ///< Which skins the player has already unlocked
 
-    Vector2 velocity;                           ///< Current movement speed (pixels per second)
+    Vector2 velocity;           ///< Current movement speed
+    bool    onGround;           ///< True when player is standing on a platform
+    s32     nbJumps;            ///< Number of jumps performed
 
-    bool    onGround;                           ///< True when player is standing on a platform (affects jump eligibility)
-    int     nbJumps;                            ///< Number of jumps performed since last grounded state (multi-jump tracking)
-
-    float   coyoteTime;                         ///< How many seconds player can still jump after leaving ground (coyote time)
-    float   coyoteTimer;                        ///< Countdown timer for coyote time
-
-    float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
-    
-    bool    active;                             ///< Flag indicating if the player is active.
-    char    name[32];                           ///< Player nickname.
+    f32     coyoteTime;         ///< Coyote time duration
+    f32     coyoteTimer;        ///< Coyote time countdown
+    f32     jumpBuffer;         ///< Jump buffer window
+    Vector2 targetPosition;     ///< Network target position for smoothing
 } Player_St;
 
 /**
-    @brief Single rectangular platform / solid surface in the lobby world.
+    @brief One piece of terrain in the lobby world.
 */
 typedef struct {
-    Rectangle rect;         ///< Position and size (world coordinates)
-    Color     color;        ///< Debug / placeholder rendering color
-    float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-} Platform_St;
+    Rectangle      rect;                  ///< World position and size
+    Color          color;                 ///< Debug / base rendering color
+    f32            roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
+} LobbyTerrain_St;
 
-/**
-    @brief Manages which mini-game is currently active and its integration with the lobby.
+typeDA(LobbyTerrain_St, TerrainVec_St);
 
-    Acts as a mini-game router.
-*/
 typedef struct {
-    GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
-    BaseGame_St*            miniGames[__miniGameCount];             ///< Pointers to the actual mini-game state objects
-    Rectangle               gameHitboxes[__miniGameCount];          ///< Screen-space rectangles where touching/standing activates a mini-game
-    MiniGame_Et             currentMiniGame;                        ///< Which mini-game / view is currently active
-    bool                    gameHitGracePeriodActive;               ///< Prevents instant re-triggering when leaving/entering hitbox
-    bool                    needGameInit;                           ///< Flag: game needs initialization on next frame
-} MiniGameManager_St;
+    Rectangle hitbox;
+    char      name[256];
+} GameInteractionZone_St;
 
 /**
     @brief Complete state of the lobby / main hub world.
@@ -139,8 +108,10 @@ typedef struct {
 typedef struct {
     BaseGame_St         base;
     GameState_Et        currentState;               ///< Current state of the game.
-    MiniGameManager_St  miniGameManager;            ///< Manages transitions to/from mini-games
 
+    s32                 id;                         ///< Internal ID (s32 for consistency)
+
+    Chat_St             chat;                       ///< Game chat
     Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.
     Player_St           player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state

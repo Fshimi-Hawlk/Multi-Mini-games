@@ -5,18 +5,6 @@
     @date 2026-01-07
     @date 2026-03-18
     @brief Central location for process-wide global variables and pre-loaded resources.
-
-    This header declares variables that are:
-        - initialized once during program startup (usually in main() or init function)
-        - read (and sometimes modified) from many different parts of the codebase
-        - representing fundamental state or resources shared across systems
-
-    Guidelines for usage:
-        - Prefer passing context structs (LobbyGame_St, etc.) through function parameters
-          whenever reasonable - reduce usage of these globals over time.
-        - Only declare truly global / singleton-like items here.
-        - Initialization order and thread-safety (currently single-threaded) must be
-          carefully managed in the startup sequence.
 */
 
 #ifndef UTILS_GLOBALS_H
@@ -25,30 +13,30 @@
 #include "userTypes.h"
 #include "configs.h"
 
-extern Rectangle windowRect;            ///< Main window rectangle (set at init).
-extern Font      appFont;               ///< Primary font for UI text.
-extern Font      lobby_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
+/**
+    @brief Array of pre-loaded fonts at different sizes.
+*/
+extern Font lobby_fonts[__fontSizeCount];
 
+/** @brief Main lobby game state. */
+extern LobbyGame_St lobby_game;
 
-extern Platform_St platforms[];
-extern u32 platformCount;
+/** @brief Global player progress. */
+extern PlayerProgress_St g_progress;
 
-#include "APIs/chatAPI.h"
+/** @brief List of terrains in the lobby. */
+extern TerrainVec_St terrains;
+
+/** @brief Interaction zones for mini-games. */
+extern GameInteractionZone_St gameInteractionZones[__miniGameCount];
+
+/** @brief Global chat state. */
 extern Chat_St gameChat;
 
-extern Texture2D playerTextures[];
-extern int playerTextureCount;
-
-extern Rectangle defaultPlayerTextureRect;
-
-extern Rectangle skinButtonRect;
-
-extern bool isTextureMenuOpen;
-
+/** @brief Skin selection button texture. */
 extern Texture2D logoSkinButton;
 
-extern Rectangle kingForFourZone;
-extern Rectangle chessZone;
-extern Rectangle rubikZone;
+/** @brief Skin button screen rectangle. */
+extern Rectangle skinButtonRect;
 
 #endif // UTILS_GLOBALS_H

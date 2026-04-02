@@ -40,6 +40,8 @@
 #define ASSET_PATH "../assets/"
 #endif
 
+#define FONT_PATH "assets/fonts/"
+
 /**
     @brief Subdirectory containing all image files.
 */
@@ -70,16 +72,11 @@
 */
 #define APP_BACKGROUND_COLOR ((Color) {196, 215, 165, 255})
 
-/**
-    @brief Default base font size for most UI text and in-game labels.
-           Other sizes are usually derived from this via the fonts[] array.
-*/
-#define APP_TEXT_FONT_SIZE 32
-
 // ────────────────────────────────────────────────
 // Game Configs
 // ────────────────────────────────────────────────
 
+#define MAX_PLAYER 4
 
 
 #endif // CONFIGS_H

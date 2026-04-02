@@ -6,81 +6,41 @@
     @date 2026-01-12
     @date 2026-03-18
     @brief Definitions of program-wide global variables used in the lobby.
-
-    Contributors:
-        - LeandreB8:
-            - Provided the initial variables and harcoded platform
-        - Fshimi-Hawlk:
-            - Provided documentation
-            - Moved some of the variables to dedicated struct.
-
-    Contains shared state and constants used across the application:
-        - Window rectangle and UI button placement
-        - Font handles
-        - Mini-game instance pointers (games[])
-        - Lobby platform definitions (platforms[] + platformCount)
-        - Default player sprite rectangle
-        - Shared player texture array
-        - Skin menu toggle and button texture
-
-    The lobby level geometry (platforms) is hard-coded here.
-    Mini-game registration happens via the games[] array.
-    Skin menu visibility is controlled by isTextureMenuOpen.
-
-    @see `utils/globals.h` for type definitions and extern declarations
 */
 
 #include "utils/globals.h"
-#include "APIs/chatAPI.h"
+#include "firstparty/progress.h"
 
-/** @brief Main window rectangle (set at init). */
-Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-/** @brief Array of loaded fonts in increasing sizes. */
-Font      lobby_fonts[__fontSizeCount] = {0};
-/** @brief Primary font for UI text. */
-Font      appFont = {0};
+/** @brief Array of loaded fonts. */
+Font lobby_fonts[__fontSizeCount] = {0};
 
-/** @brief Array of platforms in the lobby. */
-Platform_St platforms[] = {
-    {{-1000, 500, 2000, 1000}, {0, 228, 48, 255}, 0},
-    {{-1000, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{500, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{-350, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-200, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{100, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-50, 200, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-350, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
-};
-/** @brief Number of platforms in the lobby. */
-u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
+/** @brief Main lobby game state instance. */
+LobbyGame_St lobby_game = {0};
 
-Rectangle skinButtonRect = {
-    .x = WINDOW_WIDTH - 70,
-    .y = WINDOW_HEIGHT / 2.0f - 25,
-    .width = 50,
-    .height = 50
+/** @brief Global player progress. */
+PlayerProgress_St g_progress = {0};
+
+/** @brief Dynamic array of terrains. */
+TerrainVec_St terrains = {0};
+
+/** @brief Predefined interaction zones for each mini-game. */
+GameInteractionZone_St gameInteractionZones[__miniGameCount] = {
+    [MINI_GAME_BATTLESHIP] = { .hitbox = { .x = 700.0f,  .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Battleship" },
+    [MINI_GAME_BINGO]      = { .hitbox = { .x = 900.0f,  .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Bingo" },
+    [MINI_GAME_CONNECT_4]  = { .hitbox = { .x = 1100.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Connect 4" },
+    [MINI_GAME_KFF]        = { .hitbox = { .x = 1300.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "King For Four" },
+    [MINI_GAME_MINIGOLF]   = { .hitbox = { .x = 1500.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Mini Golf" },
+    [MINI_GAME_MORPION]    = { .hitbox = { .x = 1700.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Morpion" },
+    [MINI_GAME_OTHELLO]    = { .hitbox = { .x = 1900.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Othello" },
+    [MINI_GAME_CHESS]      = { .hitbox = { .x = 2100.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Chess" },
+    [MINI_GAME_CUBE]       = { .hitbox = { .x = 2300.0f, .y = 175.0f, .width = 75.0f, .height = 75.0f }, .name = "Rubik Cube" }
 };
 
-/** @brief Trigger zone for the King For Four game. */
-Rectangle kingForFourZone = {
-    -350, 400 - 60, 100, 60
-};
-
-/** @brief Trigger zone for the Chess game. */
-Rectangle chessZone = {
-    250, 400 - 60, 100, 60
-};
-
-/** @brief Trigger zone for the Rubik's Cube game. */
-Rectangle rubikZone = {
-    -200, 300 - 60, 100, 60
-};
-
-/** @brief Flag indicating if the texture selection menu is open. */
-bool isTextureMenuOpen = false;
-
-/** @brief Texture for the skin button logo. */
-Texture2D logoSkinButton;
+/** @brief Global chat state. */
 Chat_St gameChat = {0};
+
+/** @brief Screen area for skin selection button. */
+Rectangle skinButtonRect = { 10, 10, 50, 50 };
+
+/** @brief Texture for skin button. */
+Texture2D logoSkinButton;
