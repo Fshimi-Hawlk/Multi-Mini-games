@@ -55,7 +55,8 @@ void lobby_init(void) {
             [PLAYER_TEXTURE_DEFAULT] = true,
             [PLAYER_TEXTURE_EARTH] = true,
             [PLAYER_TEXTURE_TROLL_FACE] = true,
-            [PLAYER_TEXTURE_BATTLESHIP_TODO] = true,
+            [PLAYER_TEXTURE_KFF] = true,
+            [PLAYER_TEXTURE_BINGO] = true,
         },
     };
 
@@ -73,6 +74,8 @@ void lobby_init(void) {
     const char* playerTextureImagePaths[__playerTextureCount] = {
         [PLAYER_TEXTURE_EARTH]      = IMAGES_PATH "earth.png",
         [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+        [PLAYER_TEXTURE_BINGO]      = IMAGES_PATH "bingo69.png",
+        [PLAYER_TEXTURE_KFF]        = IMAGES_PATH "king67.png",
     };
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {
@@ -142,32 +145,54 @@ void lobby_init(void) {
 
 /**
  * @brief Handles incoming network data for the lobby module.
- * @param player_id ID of the sender.
+ * @param playerID ID of the sender.
  * @param action Action code received.
  * @param data Payload of the data packet.
  * @param len Length of the data payload.
  */
-void lobby_on_data(int player_id, u8 action, const void* data, u16 len) {
-    if (player_id < 0 || player_id >= MAX_CLIENTS) return;
+void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
+    if (playerID < 0 || playerID >= MAX_CLIENTS) return;
 
     switch (action) {
+        case ACTION_CODE_JOIN_GAME: {
+            u16 tempID;
+            memcpy(&tempID, (u8*) data + sizeof(RUDPHeader_St), sizeof(u16)); 
+            lobby_game.id = tempID;
+        } break;
+
         case ACTION_CODE_LOBBY_MOVE: {
             if (len < sizeof(Player_St)) break;
+            if (playerID == lobby_game.id) break;
 
-            memcpy(&lobby_game.otherPlayers[player_id], data, sizeof(Player_St));
-            lobby_game.otherPlayers[player_id].active = true;
+            Player_St incoming;
+            memcpy(&incoming, (u8*) data + sizeof(RUDPHeader_St), sizeof(Player_St));
+            
+            // If it's the first time we see this player, teleport them
+            if (!lobby_game.otherPlayers[playerID].active) {
+                lobby_game.otherPlayers[playerID] = incoming;
+                lobby_game.otherPlayers[playerID].targetPosition = incoming.position;
+            } else { // Update all fields EXCEPT current position
+                Vector2 currentPos = lobby_game.otherPlayers[playerID].position;
+                lobby_game.otherPlayers[playerID] = incoming;
+                lobby_game.otherPlayers[playerID].position = currentPos;
+                lobby_game.otherPlayers[playerID].targetPosition = incoming.position;
+            }
+            
+            lobby_game.otherPlayers[playerID].active = true;
+
+            // memcpy(&lobby_game.otherPlayers[playerID], data, sizeof(Player_St));
         } break;
 
         case ACTION_CODE_LOBBY_CHAT: {
-            addChatMessage(TextFormat("Player %d", player_id), (char*)data);
+            addChatMessage(TextFormat("Player %d", playerID), (char*)data);
         } break;
 
         case ACTION_CODE_QUIT_GAME: {
-            lobby_game.otherPlayers[player_id].active = false;
+            lobby_game.otherPlayers[playerID].active = false;
         } break;
 
         default: {
-            log_error("Unexpected [ACTION_CODE_Et] value: %d", action);
+            log_error("Unexpected [ActionCode_Et] value: %d", action);
         }
     }
 }
