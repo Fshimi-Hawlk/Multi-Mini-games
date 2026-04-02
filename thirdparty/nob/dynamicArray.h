@@ -61,6 +61,8 @@ typedef struct { \
         }                                                                                   \
     } while (0)
 
+#define da_clear(da) (da)->count = 0;
+
 // Append an item to a dynamic array
 #define da_append(da, item)                \
     do {                                       \
