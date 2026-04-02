@@ -14,12 +14,16 @@
 #include "utils/globals.h"
 
 void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
+<<<<<<< HEAD
     if (!player->active) return;
 
+=======
+>>>>>>> origin/mgit-PR1-30-03
     Texture2D texture = playerVisuals->textures[player->textureId];
 
     if (!IsTextureValid(texture)) {
         DrawCircleV(player->position, player->radius, BLUE);
+<<<<<<< HEAD
     } else {
         DrawTexturePro(
             texture,
@@ -39,6 +43,22 @@ void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* co
 }
 
 void drawLobbyTerrains(TerrainVec_St terrains, const GameInteractionZone_St gameInteractionZones[__miniGameCount]) {
+=======
+        return;
+    }
+
+    DrawTexturePro(
+        playerVisuals->textures[player->textureId],
+        getTextureRec(playerVisuals->textures[player->textureId]),
+        getPlayerCollisionBox(player),
+        getPlayerCenter(player),
+        player->angle,
+        WHITE
+    );
+}
+
+void drawLobbyTerrains(void) {
+>>>>>>> origin/mgit-PR1-30-03
     // Terrains
     for (u32 terrainIndex = 0; terrainIndex < terrains.count; terrainIndex++) {
         const LobbyTerrain_St* currentTerrain = &terrains.items[terrainIndex];

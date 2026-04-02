@@ -3,14 +3,15 @@
     @author i-Charlys (CAILLON Charles)
     @author Fshimi-Hawlk
     @date 2026-03-18
-    @date 2026-03-27
-    @brief Implementation of the Lobby mini-game module.
+    @date 2026-03-30
+    @brief Implementation of the Lobby mini-game module with Editor and Advanced Physics.
 */
 
 #include "core/game.h"
 #include "core/chat.h"
 #include "ui/game.h"
 #include "ui/app.h"
+#include "editor/editor.h"
 #include "utils/globals.h"
 #include "utils/utils.h"
 #include "systemSettings.h"
@@ -43,6 +44,9 @@ void lobby_init(void) {
             [PLAYER_TEXTURE_KFF] = true,
             [PLAYER_TEXTURE_BINGO] = true,
         },
+        .isInWater        = false,
+        .waterFastDescent = false,
+        .onIce            = false
     };
     strncpy(lobby_game.player.name, "Moi", 31);
 
@@ -70,6 +74,22 @@ void lobby_init(void) {
     
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
     lobby_game.currentState = GAME_STATE_CONNECTION;
+
+    // Physics constants for each skin
+    PhysicsConstants_St physics[__playerTextureCount];
+    for(int i=0; i<__playerTextureCount; i++) {
+        physics[i] = (PhysicsConstants_St){
+            .gravity = GRAVITY, .moveSpeed = MOVE_SPEED, .jumpForce = JUMP_FORCE,
+            .coyoteTime = COYOTE_TIME, .jumpBufferTime = JUMP_BUFFER_TIME,
+            .maxJumps = MAX_JUMPS, .friction = FRICTION, .iceFriction = 500.0f,
+            .waterHorizDrag = 0.8f, .waterVertDrag = 0.5f, .waterJumpForce = 300.0f,
+            .waterMaxSubmersion = 1.0f, .waterCanJump = true
+        };
+    }
+    memcpy(lobby_game.physics, physics, sizeof(physics));
+
+    lobby_game.selectedTerrainIndex = -1;
+    lobby_game.gridStep = 25.0f;
 }
 
 void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
@@ -81,14 +101,12 @@ void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
             u16 tempID;
             memcpy(&tempID, data, sizeof(u16)); 
             lobby_game.id = ntohs(tempID);
-            log_info("[LOBBY] My network ID is now %d", lobby_game.id);
         } break;
 
         case ACTION_CODE_LOBBY_MOVE: {
             if (len < sizeof(PlayerNet_St)) break;
             PlayerNet_St net;
             memcpy(&net, data, sizeof(PlayerNet_St));
-            
             Player_St* p = &lobby_game.otherPlayers[playerID];
             if (!p->active) {
                 p->position = (Vector2){ net.x, net.y };
@@ -114,14 +132,22 @@ void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
 }
 
 void lobby_update(float dt) {
+    updateChat();
+    toggleEditorMode(&lobby_game);
+
     if (lobby_game.chat.isOpen) {
         lobby_game.cam.target = lobby_game.player.position;
         return;
     }
 
+    if (lobby_game.editorMode) {
+        updateEditor(&lobby_game, dt);
+        return;
+    }
+
     if (IsKeyPressed(KEY_R)) lobby_game.player.position = (Vector2) {0, 0};
 
-    updatePlayer(&lobby_game.player, dt);
+    updatePlayer(&lobby_game, dt);
     lobby_game.cam.target = lobby_game.player.position;
 
     toggleSkinMenu(&lobby_game.playerVisuals);
@@ -131,10 +157,8 @@ void lobby_update(float dt) {
 
     if (lobby_game.player.position.x != lastSentPos.x || lobby_game.player.position.y != lastSentPos.y || firstFrame) {
         PlayerNet_St net = {
-            .x = lobby_game.player.position.x,
-            .y = lobby_game.player.position.y,
-            .angle = lobby_game.player.angle,
-            .textureId = (u8)lobby_game.player.textureId,
+            .x = lobby_game.player.position.x, .y = lobby_game.player.position.y,
+            .angle = lobby_game.player.angle, .textureId = (u8)lobby_game.player.textureId,
             .active = true
         };
         strncpy(net.name, lobby_game.player.name, 31);
@@ -163,6 +187,11 @@ void lobby_draw(void) {
         }
     } EndMode2D();
     
+    if (lobby_game.editorMode) {
+        drawEditor(&lobby_game);
+        return;
+    }
+
     DrawText("Multi-Mini-Games", (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2, 20, 20, PURPLE);
     drawSkinButton();
     if (lobby_game.playerVisuals.isTextureMenuOpen) drawMenuTextures(&lobby_game);

@@ -65,12 +65,14 @@ Vector2 getPlayerCenter(const Player_St* const player);
 // Player physics & update
 // ────────────────────────────────────────────────
 
+f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect);
+
 /**
     @brief Updates player physics and resolves collisions against lobby terrain only.
-    @param player       Player state (modified in place)
-    @param dt           Delta time
+    @param game  Full lobby context (provides live-tunable physics constants)
+    @param dt    Delta time
 */
-void updatePlayer(Player_St* const player, const f32 dt);
+void updatePlayer(LobbyGame_St* const game, const f32 dt);
 
 // ────────────────────────────────────────────────
 // Skin / texture selection

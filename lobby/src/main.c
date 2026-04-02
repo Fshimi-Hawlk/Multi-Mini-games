@@ -18,6 +18,7 @@
 #include "setups/app.h"
 #include "systemSettings.h"
 #include "APIs/generalAPI.h"
+#include "editor/editor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,10 +90,6 @@ Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
         return ERROR_INVALID_ENUM_VAL;
     }
 
-    if (currentMiniGame && currentMiniGame->id != MINI_GAME_LOBBY) {
-        // Optionnel: logic pour liberer le jeu precedent si necessaire
-    }
-
     interface->init();
     currentMiniGame = interface;
     currentMiniGameID = nextMiniGame;
@@ -103,7 +100,6 @@ Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
     return OK;
 }
 
-// Wrapper for modules that need to call switch_minigame
 void switch_minigame(u8 game_id) {
     switchMinigame((MiniGame_Et)game_id);
 }
@@ -227,7 +223,7 @@ int main(void) {
 
             case GAME_STATE_GAMEPLAY:
             case GAME_STATE_INGAME:
-                if (currentMiniGameID == MINI_GAME_LOBBY && g_currentMenu == MENU_NONE) {
+                if (currentMiniGameID == MINI_GAME_LOBBY && g_currentMenu == MENU_NONE && !lobby_game.editorMode) {
                     MiniGame_Et triggerID = MINI_GAME_LOBBY;
                     for (int i = 1; i < __miniGameCount; i++) {
                         if (CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameInteractionZones[i].hitbox)) {

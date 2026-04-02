@@ -4,7 +4,7 @@
     @author Fshimi-Hawlk
     @author i-Charlys
     @date 2026-01-12
-    @date 2026-03-18
+    @date 2026-03-30
     @brief Definitions of program-wide global variables used in the lobby.
 */
 
@@ -44,3 +44,7 @@ Rectangle skinButtonRect = { 10, 10, 50, 50 };
 
 /** @brief Texture for skin button. */
 Texture2D logoSkinButton;
+
+/** @brief Debug flags. */
+bool showPhysicsDebugPanel = false;
+f32 panelScrollY = 0.0f;

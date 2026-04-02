@@ -3,38 +3,27 @@
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Implementation of text and image button widgets.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Clean state machine for hover/active/click/disabled
-            - Consistent visual feedback
 */
 
 #include "widgets/button.h"
 #include "utils/common.h"
 #include "widgets/types.h"
 
-#include "systemSettings.h"
-
-// ─────────────────────────────────────────────────────────────────────────────
-
 bool textButtonUpdate(TextButton_St* btn, Vector2 mouseScreen) {
-    if (btn->state == WIDGET_STATE_DISABLED) {
-        return false;
-    }
+    if (btn->state == WIDGET_STATE_DISABLED) return false;
 
     bool hovered = CheckCollisionPointRec(mouseScreen, btn->bounds);
 
     if (hovered) {
         if (btn->state == WIDGET_STATE_CLICK && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            btn->state = WIDGET_STATE_HOVER;
+            btn->state = WIDGET_STATE_HOVERED;
             return true;
         }
 
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             btn->state = WIDGET_STATE_CLICK;
         } else {
-            btn->state = WIDGET_STATE_HOVER;
+            btn->state = WIDGET_STATE_HOVERED;
         }
     } else {
         btn->state = WIDGET_STATE_NORMAL;
@@ -48,8 +37,8 @@ void textButtonDraw(const TextButton_St* btn, Font font, f32 fontSize) {
     Color textColor = WHITE;
 
     switch (btn->state) {
-        case WIDGET_STATE_HOVER:  bgColor = Fade(btn->baseColor, 0.85f); break;
-        case WIDGET_STATE_CLICK:  bgColor = Fade(btn->baseColor, 0.65f); break;
+        case WIDGET_STATE_HOVERED: bgColor = Fade(btn->baseColor, 0.85f); break;
+        case WIDGET_STATE_CLICK:   bgColor = Fade(btn->baseColor, 0.65f); break;
         case WIDGET_STATE_DISABLED: {
             bgColor = (Color){70, 70, 80, 255};
             textColor = (Color){140, 140, 150, 255};
@@ -59,7 +48,7 @@ void textButtonDraw(const TextButton_St* btn, Font font, f32 fontSize) {
 
     DrawRectangleRounded(btn->bounds, btn->roundness, 8, bgColor);
     DrawRectangleRoundedLinesEx(btn->bounds, btn->roundness, 8, 2.0f,
-        (btn->state == WIDGET_STATE_ACTIVE) ? YELLOW : DARKGRAY);
+        (btn->state == WIDGET_STATE_CLICK) ? YELLOW : DARKGRAY);
 
     if (btn->text && btn->text[0]) {
         Vector2 textSize = MeasureTextEx(font, btn->text, fontSize, 0.0f);
@@ -71,12 +60,8 @@ void textButtonDraw(const TextButton_St* btn, Font font, f32 fontSize) {
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-
 bool imageButtonUpdate(ImageButton_St* btn, Vector2 mouseScreen) {
-    if (btn->state == WIDGET_STATE_DISABLED) {
-        return false;
-    }
+    if (btn->state == WIDGET_STATE_DISABLED) return false;
 
     bool hovered = CheckCollisionPointRec(mouseScreen, btn->bounds);
 
@@ -84,14 +69,14 @@ bool imageButtonUpdate(ImageButton_St* btn, Vector2 mouseScreen) {
         if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
             btn->state = WIDGET_STATE_CLICK;
         } else {
-            btn->state = WIDGET_STATE_HOVER;
+            btn->state = WIDGET_STATE_HOVERED;
         }
     } else {
         btn->state = WIDGET_STATE_NORMAL;
     }
 
     if (btn->state == WIDGET_STATE_CLICK && IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-        btn->state = WIDGET_STATE_HOVER;
+        btn->state = WIDGET_STATE_HOVERED;
         return true;
     }
 
@@ -99,12 +84,12 @@ bool imageButtonUpdate(ImageButton_St* btn, Vector2 mouseScreen) {
 }
 
 void imageButtonDraw(const ImageButton_St* btn) {
-    Color tint = btn->tint;
+    Color tint = btn->baseColor;
 
     switch (btn->state) {
-        case WIDGET_STATE_HOVER:    tint = Fade(btn->tint, 0.9f); break;
-        case WIDGET_STATE_CLICK:    tint = Fade(btn->tint, 0.7f); break;
-        case WIDGET_STATE_DISABLED: tint = Fade(btn->tint, 0.5f); break;
+        case WIDGET_STATE_HOVERED:  tint = Fade(btn->baseColor, 0.9f); break;
+        case WIDGET_STATE_CLICK:    tint = Fade(btn->baseColor, 0.7f); break;
+        case WIDGET_STATE_DISABLED: tint = Fade(btn->baseColor, 0.5f); break;
         default: break;
     }
 
@@ -117,7 +102,7 @@ void imageButtonDraw(const ImageButton_St* btn) {
         tint
     );
 
-    if (btn->state == WIDGET_STATE_HOVER || btn->state == WIDGET_STATE_CLICK) {
+    if (btn->state == WIDGET_STATE_HOVERED || btn->state == WIDGET_STATE_CLICK) {
         DrawRectangleLinesEx(btn->bounds, 2.0f, YELLOW);
     }
 }

@@ -3,7 +3,7 @@
     @author Fshimi-Hawlk
     @author i-Charlys
     @date 2026-01-07
-    @date 2026-03-18
+    @date 2026-03-30
     @brief Central location for process-wide global variables and pre-loaded resources.
 */
 
@@ -12,6 +12,7 @@
 
 #include "userTypes.h"
 #include "configs.h"
+#include "firstparty/progress.h"
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
@@ -38,5 +39,11 @@ extern Texture2D logoSkinButton;
 
 /** @brief Skin button screen rectangle. */
 extern Rectangle skinButtonRect;
+
+/** @brief Whether the physics debug panel is visible (toggle with F2). */
+extern bool showPhysicsDebugPanel;
+
+/** @brief Scroll position for panels. */
+extern f32 panelScrollY;
 
 #endif // UTILS_GLOBALS_H

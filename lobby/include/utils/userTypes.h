@@ -2,7 +2,7 @@
     @file utils/userTypes.h
     @author LeandreB8
     @date 2026-01-12
-    @date 2026-03-20
+    @date 2026-03-30
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
 */
 
@@ -41,12 +41,38 @@ typedef enum {
 } PlayerTextureId_Et;
 
 /**
+    @brief Runtime-editable physics & water parameters for the lobby.
+*/
+typedef struct {
+    f32 gravity;
+    f32 moveSpeed;
+    f32 jumpForce;
+    f32 coyoteTime;
+    f32 jumpBufferTime;
+    s32 maxJumps;
+    f32 friction;
+    f32 iceFriction;
+
+    f32  waterBuoyancy;
+    f32  waterDefaultSink;
+    f32  waterSinkWithS;
+    f32  waterHorizDrag;
+    f32  waterVertDrag;
+    f32  waterJumpForce;
+    f32  waterTargetSubmersion;
+    f32  waterMaxSubmersion;
+    bool waterCanJump;
+    bool waterInfiniteJump;
+    bool waterAlwaysFloat;
+} PhysicsConstants_St;
+
+/**
     @brief Visual / rendering related state of the player character.
 */
 typedef struct {
-    Rectangle defaultTextureRect;               ///< Source rectangle used when no special animation/state is active
-    bool      isTextureMenuOpen;                ///< Whether the skin/character selection overlay is currently visible
-    Texture   textures[__playerTextureCount];   ///< Preloaded textures for each available player skin
+    Rectangle defaultTextureRect;
+    bool      isTextureMenuOpen;
+    Texture   textures[__playerTextureCount];
 } PlayerVisuals_St;
 
 #pragma pack(push, 1)
@@ -63,36 +89,67 @@ typedef struct {
 #pragma pack(pop)
 
 /**
-    @brief Physics and movement state of the player character in the lobby (platformer).
+    @brief Physics and movement state of the player character in the lobby.
 */
 typedef struct {
     bool    active;
     char    name[32];
 
-    Vector2 position;           ///< Center position of the player (world coordinates)
-    f32     radius;             ///< Collision radius (circle-based collision)
-    f32     angle;              ///< Visual rotation in radians
+    Vector2 position;
+    f32     radius;
+    f32     angle;
 
-    PlayerTextureId_Et textureId;                   ///< Currently selected / active skin
-    bool    unlockedTextures[__playerTextureCount]; ///< Which skins the player has already unlocked
+    PlayerTextureId_Et textureId;
+    bool    unlockedTextures[__playerTextureCount];
 
-    Vector2 velocity;           ///< Current movement speed
-    bool    onGround;           ///< True when player is standing on a platform
-    s32     nbJumps;            ///< Number of jumps performed
+    Vector2 velocity;
+    bool    onGround;
+    s32     nbJumps;
 
-    f32     coyoteTime;         ///< Coyote time duration
-    f32     coyoteTimer;        ///< Coyote time countdown
-    f32     jumpBuffer;         ///< Jump buffer window
-    Vector2 targetPosition;     ///< Network target position for smoothing
+    f32     coyoteTime;
+    f32     coyoteTimer;
+    f32     jumpBuffer;
+
+    bool    isInWater;
+    bool    waterFastDescent;
+    bool    onIce;
+    f32     portalTeleportCooldown;
+
+    Vector2 targetPosition; // Network sync
 } Player_St;
+
+/**
+    @brief Terrain/platform types in the lobby world.
+*/
+typedef enum {
+    TERRAIN_NORMAL,
+    TERRAIN_WOOD,
+    TERRAIN_STONE,
+    TERRAIN_ICE,
+    TERRAIN_BOUNCY,
+    TERRAIN_MOVING_H,
+    TERRAIN_MOVING_V,
+    TERRAIN_WATER,
+    TERRAIN_DECORATIVE,
+    TERRAIN_PORTAL,
+    __terrainTypeCount
+} TerrainType_Et;
 
 /**
     @brief One piece of terrain in the lobby world.
 */
 typedef struct {
-    Rectangle      rect;                  ///< World position and size
-    Color          color;                 ///< Debug / base rendering color
-    f32            roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
+    Rectangle      rect;
+    Color          color;
+    f32            roundness;
+    TerrainType_Et type;
+
+    Vector2        velocity;
+    f32            moveDistance;
+
+    Vector2        portalTargetPosition;
+    bool           isTwoWayPortal;
+    bool           isOnlyReceiverPortal;
 } LobbyTerrain_St;
 
 typeDA(LobbyTerrain_St, TerrainVec_St);
@@ -107,15 +164,31 @@ typedef struct {
 */
 typedef struct {
     BaseGame_St         base;
-    GameState_Et        currentState;               ///< Current state of the game.
+    GameState_Et        currentState;
 
-    s32                 id;                         ///< Internal ID (s32 for consistency)
+    s32                 id;
 
-    Chat_St             chat;                       ///< Game chat
-    Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.
-    Player_St           player;                     ///< Physics & movement state of the player character
-    PlayerVisuals_St    playerVisuals;              ///< Rendering and skin selection state
-    Camera2D            cam;                        ///< 2D camera following the player
+    Chat_St             chat;
+    Player_St           otherPlayers[MAX_CLIENTS];
+    Player_St           player;
+    PlayerVisuals_St    playerVisuals;
+    Camera2D            cam;
+
+    // Editor mode
+    bool                editorMode;
+    bool                showLeftPalette;
+    bool                showPropertiesPanel;
+    s32                 selectedTerrainIndex;
+    bool                isDragging;
+    Vector2             dragStartWorld;
+    bool                showGrid;
+    f32                 gridStep;
+
+    // Live physics
+    PhysicsConstants_St physics[__playerTextureCount];
+    s32                 physicsPanelEditIndex;
+    char                physicsPanelEditBuffer[64];
+    u32                 physicsPanelEditCursor;
 } LobbyGame_St;
 
 #endif // USER_TYPES_H

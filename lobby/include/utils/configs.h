@@ -2,7 +2,7 @@
     @file utils/configs.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-03-20
+    @date 2026-03-30
     @brief Central place for compile-time and tuning constants used throughout the game.
 */
 
@@ -27,16 +27,32 @@
 
 #define APP_TEXT_FONT_SIZE 32       ///< Base text size
 
-// Game Constants (Lobby Platformer)
-#define GRAVITY 1200.0f
-#define MOVE_SPEED 300.0f
-#define JUMP_FORCE 500.0f
-#define GROUND_Y 50
+// ────────────────────────────────────────────────
+// Physics & movement tuning (lobby platformer)
+// ────────────────────────────────────────────────
 
-#define COYOTE_TIME 0.1f
-#define JUMP_BUFFER_TIME 0.1f
-#define MAX_JUMPS 2
+#define GRAVITY             1200.0f
+#define MOVE_SPEED          300.0f
+#define JUMP_FORCE         -500.0f
+#define GROUND_Y            50.0f
+#define COYOTE_TIME         0.1f
+#define JUMP_BUFFER_TIME    0.1f
+#define MAX_JUMPS           2
+#define FRICTION            2000.0f
 
-#define FRICTION 2000
+// ────────────────────────────────────────────────
+// Water terrain physics
+// ────────────────────────────────────────────────
+
+#define WATER_BUOYANCY      -320.0f
+#define WATER_HORIZ_DRAG     0.82f
+#define WATER_VERT_DRAG      0.88f
+#define WATER_JUMP_FORCE    -320.0f
+
+// ────────────────────────────────────────────────
+// Ice terrain physics
+// ────────────────────────────────────────────────
+
+#define ICE_FRICTION        120.0f
 
 #endif // CONFIGS_H
