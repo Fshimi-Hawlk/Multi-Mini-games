@@ -50,16 +50,6 @@
 */
 #define APP_BACKGROUND_COLOR ((Color){18, 18, 18, 255})
 
-/**
-    @brief Port used for server communication.
-*/
-#define SERVER_PORT 8080
-
-/**
-    @brief Action code for game data transmission.
-*/
-#define ACTION_GAME_DATA 5
-
 // ────────────────────────────────────────────────
 // Physics & movement tuning (lobby platformer)
 // ────────────────────────────────────────────────

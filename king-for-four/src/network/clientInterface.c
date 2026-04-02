@@ -5,6 +5,7 @@
  * @brief Client-side module for the King-for-Four game, handling network synchronization and UI.
  */
 
+#include <sys/socket.h>
 
 #include "core/game.h"
 #include "ui/renderer.h"

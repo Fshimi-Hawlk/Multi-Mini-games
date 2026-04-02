@@ -11,8 +11,6 @@
 #ifndef SETUPS_GAME_H
 #define SETUPS_GAME_H
 
-#include "utils/userTypes.h"
-
 /**
     @brief Initializes all game-related data (dynamic terrains, etc.).
     Should be called after window creation but before editor or gameplay starts.

@@ -30,7 +30,6 @@
 
 #include "APIs/generalAPI.h"
 #include "APIs/chatAPI.h"
-#include "networkInterface.h"
 
 typedef enum {
     GAME_STATE_GAMEPLAY,
@@ -45,9 +44,9 @@ typedef enum {
     PLAYER_TEXTURE_EARTH,
     PLAYER_TEXTURE_TROLL_FACE,
     PLAYER_TEXTURE_BATTLESHIP_TODO,     //< a ship -> not round
-    PLAYER_TEXTURE_BINGO_TODO,          //< bingo card (?) -> not round or the ball (?)
+    PLAYER_TEXTURE_BINGO,
     PLAYER_TEXTURE_CONNECT_4_TODO,      //< don't know
-    PLAYER_TEXTURE_KFF_TODO,            //< king for four card (?) -> not round
+    PLAYER_TEXTURE_KFF,
     PLAYER_TEXTURE_MINIGOLF_TODO,       //< don't know
     PLAYER_TEXTURE_MORPION_TODO,        //< don't know
     PLAYER_TEXTURE_OTHELLO_TODO,        //< don't know
@@ -82,22 +81,23 @@ typedef struct {
 typedef struct {
     bool    active;
 
-    Vector2 position;                           ///< Center position of the player (world coordinates)
-    float   radius;                             ///< Collision radius (circle-based collision)
+    Vector2 position;           ///< Center position of the player (world coordinates)
+    f32   radius;               ///< Collision radius (circle-based collision)
+    f32   angle;                ///< Visual rotation in radians (usually 0 unless doing tricks/rotations)
 
-    float   angle;                              ///< Visual rotation in radians (usually 0 unless doing tricks/rotations)
-    PlayerTextureId_Et textureId;               ///< Currently selected / active skin
+    PlayerTextureId_Et textureId;                   ///< Currently selected / active skin
     bool    unlockedTextures[__playerTextureCount]; ///< Which skins the player has already unlocked
 
-    Vector2 velocity;                           ///< Current movement speed (pixels per second)
+    Vector2 velocity;           ///< Current movement speed (pixels per second)
 
-    bool    onGround;                           ///< True when player is standing on a platform (affects jump eligibility)
-    int     nbJumps;                            ///< Number of jumps performed since last grounded state (multi-jump tracking)
+    bool    onGround;           ///< True when player is standing on a platform (affects jump eligibility)
+    s32     nbJumps;            ///< Number of jumps performed since last grounded state (multi-jump tracking)
 
-    float   coyoteTime;                         ///< How many seconds player can still jump after leaving ground (coyote time)
-    float   coyoteTimer;                        ///< Countdown timer for coyote time
+    f32     coyoteTime;         ///< How many seconds player can still jump after leaving ground (coyote time)
+    f32     coyoteTimer;        ///< Countdown timer for coyote time
 
-    float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
+    f32     jumpBuffer;         ///< Remaining time window to accept jump input before landing (jump buffering)
+    Vector2 targetPosition;     ///< Network target position for smoothing
 } Player_St;
 
 /**
@@ -107,7 +107,7 @@ typedef struct {
 typedef struct {
     Rectangle      rect;                  ///< World position and size
     Color          color;                 ///< Debug / base rendering color
-    float          roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
+    f32            roundness;             ///< 0.0f = sharp corners, 1.0f = fully rounded
 } LobbyTerrain_St;
 
 typeDA(LobbyTerrain_St, TerrainVec_St);
@@ -123,6 +123,8 @@ typedef struct {
 typedef struct{
     BaseGame_St         base;
     GameState_Et        currentState;               ///< Current state of the game.
+
+    s8                  id;                         ///< Internal ID
 
     Chat_St             chat;                       ///< Game chat
     Player_St           otherPlayers[MAX_CLIENTS];  ///< Array of other players in the lobby.

@@ -34,9 +34,28 @@ void* lobby_create(void) {
  * @param broadcast Fonction de rappel pour diffuser le message.
  */
 void lobby_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    UNUSED(state);
-    // On ne regarde même pas ce qu'il y a dedans. On diffuse.
-    broadcast(0, player_id, action, payload, len);
+    LobbyGame_St *game = (LobbyGame_St*) state;
+
+    if (action == ACTION_CODE_JOIN_GAME) {
+        // Un client vient de rejoindre, on lui envoie la position de TOUS les autres
+        for (s32 i = 0; i < MAX_CLIENTS; i++) {
+            if (i != player_id && game->otherPlayers[i].active) {
+                // On simule un message ACTION_CODE_LOBBY_MOVE venant du joueur i vers le nouveau client
+                broadcast(player_id, i, ACTION_CODE_LOBBY_MOVE, &game->otherPlayers[i], sizeof(Player_St));
+            }
+        }
+    } else if (action == ACTION_CODE_LOBBY_MOVE) {
+        // On enregistre la position du joueur
+        if (player_id >= 0 && player_id < MAX_CLIENTS && len == sizeof(Player_St)) {
+            memcpy(&game->otherPlayers[player_id], payload, sizeof(Player_St));
+            game->otherPlayers[player_id].active = true;
+        }
+        // Relay everything back to all clients in same room (target_id = UNICAST, original sender_id = player_id)
+        broadcast(UNICAST, player_id, action, payload, len);
+    }
+    else {
+        broadcast(UNICAST, player_id, action, payload, len);
+    }
 }
 
 /**

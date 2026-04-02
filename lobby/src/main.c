@@ -24,18 +24,32 @@
 */
 
 #include "core/game.h"              // GameScene_Et, general game types
+
 #include "ui/connection_screen.h"
+
 #include "setups/app.h"
+
 #include "utils/globals.h"
 
+#include "systemSettings.h"
 #include "APIs/generalAPI.h"
 
-s32 networkSocket = 0;
-RUDPConnection_St serverConnection = {0};
+s32 networkSocket = -1;
+RUDPConnection_St serverConnection;
 
-static GameClientInterface_St* miniGameInterfaces[__miniGameCount];    ///< Pointers to the mini-game client interfaces
 static MiniGame_Et currentMiniGameID = MINI_GAME_LOBBY;
 static GameClientInterface_St* currentMiniGame = NULL;
+
+extern GameClientInterface_St lobbyClientInterface;
+extern GameClientInterface_St kingForFourClientInterface;
+extern GameClientInterface_St bingoClientInterface;
+
+// Pointers to the mini-game client interfaces
+static GameClientInterface_St* miniGameInterfaces[__miniGameCount] = {
+    [MINI_GAME_LOBBY] = &lobbyClientInterface,
+    [MINI_GAME_KFF] = &kingForFourClientInterface,
+    [MINI_GAME_BINGO] = &bingoClientInterface,
+};
 
 Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
     if (nextMiniGame >= __miniGameCount) {
@@ -44,7 +58,14 @@ Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
     }
 
     Error_Et error = OK;
-    miniGameInterfaces[nextMiniGame]->init();
+    GameClientInterface_St* interface = miniGameInterfaces[nextMiniGame];
+    if (interface == NULL) {
+        log_error("Received idx for non-integrated game: %d", nextMiniGame);
+        return ERROR_INVALID_ENUM_VAL;
+    }
+
+    interface->init();
+    currentMiniGame = interface;
 
     return error;
 }
@@ -93,7 +114,9 @@ void initNetwork(const char* targetIp) {
 
     inet_pton(AF_INET, targetIp, &addr.sin_addr);
     if (connect(networkSocket, (struct sockaddr *)&addr, sizeof(addr)) != 0) {
-        log_error("Couldn't connect to %d:%d", targetIp, SERVER_PORT);
+        log_error("[SYSTEM %s] Couldn't connect to %s:%d",
+            getPreciseTimeString(), targetIp, SERVER_PORT
+        );
     }
     
     rudpInitConnection(&serverConnection);
@@ -101,7 +124,7 @@ void initNetwork(const char* targetIp) {
     GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
     u8 buffer[sizeof(RUDPHeader_St) + sizeof(GameTLVHeader_St)];
     
-    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
+    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
     
     memcpy(buffer, &h, sizeof(h)); memcpy(buffer + sizeof(h), &tlv, sizeof(tlv));
     send(networkSocket, buffer, sizeof(buffer), 0);
@@ -128,30 +151,36 @@ void receiveNetworkData(void) {
             continue;
         }
 
-        if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME && rudpProcessIncoming(&serverConnection, h)) {
+        if (!rudpProcessIncoming(&serverConnection, h)) {
+            log_warn("Couldn't process package");
+            continue;
+        }
+
+        if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME) {
             u8 targetGameId = *(u8*) (buffer + sizeof(RUDPHeader_St));
-            printf("[SYSTEM] Switching to game ID: %d\n", targetGameId);
+            log_info(
+                "[SYSTEM %s] Switching to game ID: %d", 
+                getPreciseTimeString(), targetGameId
+            );
+
             switchMinigame(targetGameId);
             continue;
         }
 
-        if (h->action == ACTION_GAME_DATA && rudpProcessIncoming(&serverConnection, h)) {
-            GameTLVHeader_St* g = (GameTLVHeader_St*) (buffer + sizeof(RUDPHeader_St));
-            void* payload = (u8*) g + sizeof(GameTLVHeader_St);
-            
-            if (miniGameInterfaces[g->game_id]) {
-                miniGameInterfaces[g->game_id]->on_data(
+        if (h->action == ACTION_CODE_GAME_DATA) {
+            GameTLVHeader_St* tlv = (GameTLVHeader_St*) (buffer + sizeof(RUDPHeader_St));
+            void* payload = (u8*) tlv + sizeof(GameTLVHeader_St);
+
+            if (miniGameInterfaces[tlv->game_id] != NULL) {
+                miniGameInterfaces[tlv->game_id]->on_data(
                     ntohs(h->sender_id),
-                    g->action, payload,
-                    g->length
+                    tlv->action, payload,
+                    tlv->length
                 );
             }
         }
     }
 }
-
-extern GameClientInterface_St lobbyClientInterface;
-extern GameClientInterface_St kingForFourClientInterface;
 
 /**
     @brief Program entry point.
@@ -164,10 +193,7 @@ int main(void) {
         return 1;
     }
 
-    miniGameInterfaces[MINI_GAME_LOBBY] = &lobbyClientInterface;
-    lobbyClientInterface.init();
-    miniGameInterfaces[MINI_GAME_KFF] = &kingForFourClientInterface;
-
+    miniGameInterfaces[MINI_GAME_LOBBY]->init();
     currentMiniGame = miniGameInterfaces[MINI_GAME_LOBBY];
 
     initConnectionScreen();
@@ -177,6 +203,11 @@ int main(void) {
         f32 dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
         receiveNetworkData();
+
+        if (IsWindowResized()) {
+            systemSettings.video.width  = GetScreenWidth();
+            systemSettings.video.height = GetScreenHeight();
+        }
 
         static bool switch_sent = false;
 
@@ -218,7 +249,10 @@ int main(void) {
                         
                         send(networkSocket, buffer, sizeof(buffer), 0);
                         switch_sent = true;
-                        printf("[SYSTEM] Requête de switch vers ID %d envoyée.\n", miniGameId);
+                        log_info(
+                            "[SYSTEM %s] Requête de switch vers ID %d envoyée.", 
+                            getPreciseTimeString(), miniGameId
+                        );
                     }
 
                     if (!trigger) switch_sent = false;
@@ -234,6 +268,16 @@ int main(void) {
                 }
             } break;
         }
+    }
+
+    log_debug("Goodbye !");
+
+    RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
+    send(networkSocket, &leave_h, sizeof(leave_h), 0);
+
+    if (currentMiniGameID != MINI_GAME_LOBBY) {
+        RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
+        send(networkSocket, &leave_h, sizeof(leave_h), 0);
     }
 
     freeApp();
