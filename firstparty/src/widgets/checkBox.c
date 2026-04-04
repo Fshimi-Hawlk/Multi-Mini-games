@@ -8,8 +8,6 @@
 #include "widgets/checkBox.h"
 #include "widgets/types.h"
 
-#include "systemSettings.h"
-
 // ─────────────────────────────────────────────────────────────────────────────
 
 bool checkBoxUpdate(CheckBox_St* cb, Vector2 mouseScreen) {

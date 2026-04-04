@@ -14,12 +14,12 @@
             - Added roundness, placeholder support and validation border coloring
 */
 
+#include <string.h>
+
 #include "widgets/textBox.h"
 #include "widgets/types.h"
 
-#include "utils/utils.h"
-
-#include "systemSettings.h"
+#include "utils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

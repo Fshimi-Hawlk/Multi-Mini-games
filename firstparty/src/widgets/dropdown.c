@@ -14,11 +14,7 @@
 */
 
 #include "widgets/dropdown.h"
-#include "utils/common.h"
-#include "utils/utils.h"
 #include "widgets/types.h"
-
-#include "systemSettings.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

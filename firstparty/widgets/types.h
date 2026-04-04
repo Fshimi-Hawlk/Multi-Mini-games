@@ -13,7 +13,17 @@
 #ifndef WIDGETS_TYPES_H
 #define WIDGETS_TYPES_H
 
-#include "utils/userTypes.h"   // for Rectangle, Vector2, Color, etc.
+#include "raylib.h"
+
+#ifndef f32Vector2_def
+#define f32Vector2_def      // marker to indicate the typedef is active
+/**
+    @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
+ */
+typedef Vector2 f32Vector2;
+#endif
+
+#include "baseTypes.h"
 
 // ── Common widget states ─────────────────────────────────────────────────────
 

@@ -17,7 +17,9 @@
 #include "setups/game.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/random.h"
+#include "utils/debug.h"
 
 #include "networkInterface.h"
 

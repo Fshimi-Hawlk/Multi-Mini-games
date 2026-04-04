@@ -18,7 +18,7 @@
                        | action = SWITCH?    | ----> Change active_module
                        | action = GAME_DATA? | ----> on_action(active_game)
                        +---------------------+
-    
+
 
     @note Currently supports lobby and King-for-Four. Easy to extend for more modules.
 */

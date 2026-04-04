@@ -1,106 +1,122 @@
 /**
- * @file lobby.c
- * @brief Implémentation de la logique de gestion du lobby.
- * 
- * Gère les états des joueurs, les déplacements et les déconnexions 
- * au sein de l'espace de rencontre initial.
- * 
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-18
- */
+    @file network/serverInterface.c
+    @author i-Charlys (CAILLON Charles)
+    @date 2026-03-18
+    @date 2026-04-04
+    @brief Server-side logic for the lobby module.
+
+    Handles player movement synchronization, join notifications, and cleanup when players leave.
+    All game-specific actions are simply broadcast to the room.
+
+    Contributors:
+        - i-Charlys (CAILLON Charles):
+            - Original implementation
+        - Fshimi-Hawlk:
+            - Full CSC compliance, English translation
+*/
 
 #include "utils/userTypes.h"
 #include "utils/utils.h"
+#include "networkInterface.h"
 
 /**
- * @brief Alloue et initialise une nouvelle instance de lobby.
- * 
- * @return void* Pointeur vers la structure LobbyGame_St créée, ou NULL en cas d'échec.
- */
-void* lobby_create(void) {
+    @brief Allocates and initializes a new lobby game instance.
+    @return Pointer to a zero-initialized LobbyGame_St, or NULL on allocation failure.
+*/
+void* lobby_createInstance(void) {
     return calloc(1, sizeof(LobbyGame_St));
 }
 
 /**
- * @brief Traite une action reçue d'un client.
- * 
- * Dans le lobby, les actions sont généralement diffusées à tous les autres clients.
- * 
- * @param state Pointeur vers l'état du lobby (LobbyGame_St).
- * @param player_id Index du joueur émetteur.
- * @param action Type d'action reçu.
- * @param payload Pointeur vers les données brutes.
- * @param len Taille des données reçues.
- * @param broadcast Fonction de rappel pour diffuser le message.
- */
-void lobby_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    LobbyGame_St *game = (LobbyGame_St*) state;
+    @brief Processes an incoming action from a client in the lobby.
+
+    - On join: sends all existing players to the newcomer.
+    - On move: stores the new position and broadcasts it to everyone.
+    - All other actions are simply relayed to the room.
+
+    @param state        Pointer to the LobbyGame_St instance.
+    @param playerID     ID of the client that sent the action.
+    @param action       Action code received.
+    @param payload      Raw payload data.
+    @param len          Payload size in bytes.
+    @param broadcast    Callback to send messages to other clients.
+*/
+void lobby_onAction(void* state, s32 playerID, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+    LobbyGame_St* game = (LobbyGame_St*) state;
 
     if (action == ACTION_CODE_JOIN_GAME) {
-        // Un client vient de rejoindre, on lui envoie la position de TOUS les autres
-        for (s32 i = 0; i < MAX_CLIENTS; i++) {
-            if (i != player_id && game->otherPlayers[i].active) {
-                // On simule un message ACTION_CODE_LOBBY_MOVE venant du joueur i vers le nouveau client
-                broadcast(player_id, i, ACTION_CODE_LOBBY_MOVE, &game->otherPlayers[i], sizeof(Player_St));
+        // Send all currently active players to the new client
+        for (s32 i = 0; i < MAX_CLIENTS; ++i) {
+            if (i != playerID && game->otherPlayers[i].active) {
+                broadcast(playerID, i, ACTION_CODE_LOBBY_MOVE, &game->otherPlayers[i], sizeof(Player_St));
             }
         }
     } else if (action == ACTION_CODE_LOBBY_MOVE) {
-        // On enregistre la position du joueur
-        if (player_id >= 0 && player_id < MAX_CLIENTS && len == sizeof(Player_St)) {
-            memcpy(&game->otherPlayers[player_id], payload, sizeof(Player_St));
-            game->otherPlayers[player_id].active = true;
+        if (playerID >= 0 && playerID < MAX_CLIENTS && len == sizeof(Player_St)) {
+            memcpy(&game->otherPlayers[playerID], payload, sizeof(Player_St));
+            game->otherPlayers[playerID].active = true;
         }
-        // Relay everything back to all clients in same room (target_id = UNICAST, original sender_id = player_id)
-        broadcast(UNICAST, player_id, action, payload, len);
-    }
-    else {
-        broadcast(UNICAST, player_id, action, payload, len);
+        // Relay the move to everyone (including the sender for confirmation)
+        broadcast(UNICAST, playerID, action, payload, len);
+    } else {
+        // Any other action is simply broadcast to the room
+        broadcast(UNICAST, playerID, action, payload, len);
     }
 }
 
 /**
- * @brief Gère le nettoyage des données lorsqu'un joueur quitte.
- * 
- * @param state Pointeur vers l'état du lobby.
- * @param player_id Index du joueur qui se déconnecte.
- */
-void lobby_on_player_leave(void *state, int player_id) {
+    @brief Cleans up a player's data when they leave the lobby.
+
+    Called by the server when a client disconnects or times out.
+    Does **not** perform any game switching — that is handled in server.c.
+
+    @param state        Pointer to the LobbyGame_St instance.
+    @param playerID     ID of the player who left.
+*/
+void lobby_onPlayerLeave(void* state, s32 playerID) {
     LobbyGame_St* game = (LobbyGame_St*) state;
-    if (player_id >= 0 && player_id < MAX_CLIENTS) {
-        memset(&game->otherPlayers[player_id], 0, sizeof(Player_St));
+
+    if (playerID >= 0 && playerID < MAX_CLIENTS) {
+        memset(&game->otherPlayers[playerID], 0, sizeof(Player_St));
     }
+
+    // Count remaining active players and log (for easier debugging, matching Bingo style)
+    s32 remaining = 0;
+    for (s32 i = 0; i < MAX_CLIENTS; ++i) {
+        if (game->otherPlayers[i].active) {
+            ++remaining;
+        }
+    }
+
+    log_info("Player %d left the lobby (remaining: %d)", playerID, remaining);
 }
 
 /**
- * @brief Mise à jour logique du lobby (appelée à chaque frame serveur).
- * 
- * @param state Pointeur vers l'état du lobby.
- */
-void lobby_tick(void *state) {
-    UNUSED(state); 
+    @brief Server-side tick for the lobby (currently does nothing).
+    @param state Pointer to the LobbyGame_St instance.
+*/
+void lobby_onTick(void* state) {
+    UNUSED(state);
 }
 
 /**
- * @brief Libère la mémoire allouée pour l'instance du lobby.
- * 
- * @param state Pointeur vers l'état à détruire.
- */
-void lobby_destroy(void *state) { 
+    @brief Destroys a lobby instance and frees its memory.
+    @param state Pointer previously returned by lobby_createInstance().
+*/
+void lobby_destroyInstance(void* state) {
     if (state) {
-        free(state); 
+        free(state);
     }
 }
 
 /**
- * @brief Interface du module lobby pour le serveur.
- * 
- * Expose les fonctions de gestion du cycle de vie et de traitement des messages.
- */
+    @brief Public interface exposed to the server.
+*/
 GameServerInterface_St lobbyServerInterface = {
     .game_name          = "lobby",
-    .create_instance    = lobby_create,
-    .on_action          = lobby_on_action,
-    .on_tick            = lobby_tick,
-    .destroy_instance   = lobby_destroy,
-    .on_player_leave    = lobby_on_player_leave 
+    .create_instance    = lobby_createInstance,
+    .on_action          = lobby_onAction,
+    .on_tick            = lobby_onTick,
+    .destroy_instance   = lobby_destroyInstance,
+    .on_player_leave    = lobby_onPlayerLeave
 };

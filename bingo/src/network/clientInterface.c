@@ -21,9 +21,14 @@
 #include "ui/game.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/debug.h"
+#include "utils/geometry.h"
+#include "utils/container.h"
+#include "utils/mathUtils.h"
 
 #include "networkInterface.h"
+#include "systemSettings.h"
 #include "logger.h"
 
 #include "APIs/generalAPI.h"

@@ -13,9 +13,7 @@
 #include "widgets/scrollFrame.h"
 #include "widgets/types.h"
 
-#include "utils/utils.h"
-
-#include "systemSettings.h"
+#include "utils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

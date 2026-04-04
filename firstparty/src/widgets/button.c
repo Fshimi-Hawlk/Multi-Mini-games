@@ -11,10 +11,7 @@
 */
 
 #include "widgets/button.h"
-#include "utils/common.h"
 #include "widgets/types.h"
-
-#include "systemSettings.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -56,7 +56,7 @@ Error_Et initApp(void) {
     SetWindowPosition(100, 50);
 
 #ifdef LOGGER_H
-    init_logger();
+    initLogger();
 #endif
 
     if (!initFonts()) {

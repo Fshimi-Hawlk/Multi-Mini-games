@@ -8,7 +8,7 @@
 
 #include "setups/game.h"
 
-#include "utils/utils.h"
+#include "utils/random.h"
 
 void bingo_computeLayout(Layout_St* layout) {
     layout->windowCenter = (f32Vector2) {

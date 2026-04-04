@@ -12,12 +12,13 @@
             - Optional value label
 */
 
+#include <stdio.h>
+#include <math.h>
+
 #include "widgets/slider.h"
 #include "widgets/types.h"
 
-#include "utils/utils.h"
-
-#include "systemSettings.h"
+#include "utils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -46,7 +47,7 @@ bool sliderUpdate(Slider_St* slider, Vector2 mouseScreen) {
         f32 oldValue = slider->value;
         slider->value = slider->minValue + t * (slider->maxValue - slider->minValue);
 
-        return (fabsf(slider->value - oldValue) > 0.0001f);
+        return (fabs(slider->value - oldValue) > 0.0001f);
     }
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {

@@ -27,18 +27,32 @@ endif
 
 # Compiler and flags
 
+# Base flags
+BASE_CFLAGS := \
+	-Iinclude \
+	-I../thirdparty \
+	-I../firstparty \
+	-I../reseau/include \
+	-I..
+
+# Linker base
+BASE_LDFLAGS := \
+	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
+	-l:libraylib.a \
+	-lm
+
 # Modes
 MODE ?= release
 ifeq ($(MODE),release)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-O2
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-O2
 	TOOL := 
 else ifeq ($(MODE),debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Wall \
 		-Wextra \
 		-g \
@@ -48,14 +62,14 @@ else ifeq ($(MODE),debug)
 		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
 	TOOL := 
 else ifeq ($(MODE),strict-debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -67,7 +81,7 @@ else ifeq ($(MODE),strict-debug)
 		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -76,7 +90,7 @@ else ifeq ($(MODE),strict-debug)
 else ifeq ($(MODE),clang-debug)
 	ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
 		CC := clang
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -93,7 +107,7 @@ else ifeq ($(MODE),clang-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -113,7 +127,7 @@ else ifeq ($(MODE),valgrind-debug)
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -126,7 +140,7 @@ else ifeq ($(MODE),valgrind-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
@@ -142,27 +156,8 @@ else
 	$(error Unknown MODE=$(MODE). Use release, debug, strict-debug, clang-debug, valgrind-debug)
 endif
 
-# Base flags (always present)
-BASE_CFLAGS := \
-	-Iinclude \
-	-I../thirdparty \
-	-I../firstparty \
-	-I../reseau/include \
-	-I..
-
-# Linker base
-BASE_LDFLAGS := \
-	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
-	-l:libraylib.a \
-	-lm
-
-# Combine with base
-CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
-
-# Allow extras from command line
-CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+CFLAGS 	:= $(MODE_CFLAGS) $(EXTRA_CFLAGS) $(BASE_CFLAGS)
+LDFLAGS := $(MODE_LDFLAGS) $(EXTRA_LDFLAGS) $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
 LIB_NAME := lobby
