@@ -19,7 +19,7 @@ void toggleSkinMenu(void);
 
 void DrawSceneBackground(float time, Vector2 playerPos);
 void DrawTreeAndPlatforms(Platform_st* platforms, int count, Player_st* player, Camera2D camera);
-void InitGrass();
+void InitGrass(void);
 void UpdateAndDrawGrass(Player_st* player, float dt, float time, Camera2D camera);
 
 Camera2D cam = {0};
@@ -85,7 +85,7 @@ int main(void) {
                 drawPlayer(&player);
                 // DrawPlatforms(platforms, platformCount);
             } EndMode2D();
-            DrawText("Multi-Mini-Games", WINDOW_WIDTH / 2 - MeasureText("Multi-Mini-Games", 20) / 2, 20, 20, PURPLE);
+            DrawText("Multi-Mini-Games", WINDOW_WIDTH / 2 - MeasureText("Multi-Mini-Games", 20) / 2.0f, 20, 20, PURPLE);
             drawSkinButton();
             if (isTextureMenuOpen) {
                 drawMenuTextures();
@@ -357,6 +357,8 @@ void DrawWorldBoundaries(Player_st* player) {
 }
 
 void DrawSceneBackground(float time, Vector2 playerPos) {
+    (void) time;
+
     float parallaxFactor = 0.15f; 
     
     float pX = playerPos.x * parallaxFactor;
@@ -388,7 +390,7 @@ void DrawSceneBackground(float time, Vector2 playerPos) {
 }
 
 void DrawTreeAndPlatforms(Platform_st* platforms, int count, Player_st* player, Camera2D camera) {
-    if (texTree.id > 0) { 
+    if (IsTextureValid(texTree)) { 
         float treeScale = 0.7f; 
         float drawWidth = (float)texTree.width * treeScale;
         float drawHeight = (float)texTree.height * treeScale;
@@ -410,24 +412,26 @@ void DrawTreeAndPlatforms(Platform_st* platforms, int count, Player_st* player, 
         if (platforms[i].idTex == PLATFORM_TEXTURE_WOODPLANK_ID) {
             Texture2D tex = platformTextures[platforms[i].idTex];
 
-            float offsetX = (float)((int)(r.x * 0.5f) % (tex.width - (int)r.width));
-            float offsetY = (float)((int)(r.y * 0.3f) % (tex.height - (int)r.height));
-            
-            if (offsetX < 0) offsetX = 0;
-            if (offsetY < 0) offsetY = 0;
+            f32 hash = (r.x * 13.0f + r.y * 17.0f + r.width * 19.0f);
+            u32 h = *(u32*)&hash;
+            h = (h ^ 0xDEADBEEF) * 2654435761u;   // good mixing constant
 
-            Rectangle sourceRec = { offsetX, offsetY, r.width, r.height };
-            
-            // Ombre
-            DrawRectangle(r.x - 1, r.y - 1, r.width + 2, r.height + 2, BLACK);
+            Rectangle source = {
+                .x      = (f32)(h % (u32)(tex.width - r.width  + 1)),
+                .y      = (f32)((h >> 16) % (u32)(tex.height - r.height + 1)),
+                .width  = r.width,
+                .height = r.height
+            };
 
-            // Plateforme
-            DrawTextureRec(tex, sourceRec, (Vector2){r.x, r.y}, WHITE);
+            DrawTextureRec(tex, source, (Vector2){r.x, r.y}, WHITE);
+
+            // subtle shadow for depth
+            DrawRectangleRec((Rectangle){r.x + 2, r.y + 4, r.width, r.height}, Fade(BLACK, 0.15f));
         }
     }
 }
 
-void InitGrass() {
+void InitGrass(void) {
     Rectangle floor = platforms[0].rect; 
     grassCount = 0;
 

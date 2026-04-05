@@ -1,6 +1,6 @@
 #include "global.h"
 
-void lobby_initTextures() {
+void lobby_initTextures(void) {
     platformTextures[PLATFORM_TEXTURE_GRASS_ID]     = LoadTexture("assets/textures/grass.png");
     platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID] = LoadTexture("assets/textures/wood_plank.png");
 
@@ -13,7 +13,7 @@ void lobby_initTextures() {
     SetTextureFilter(texTree, TEXTURE_FILTER_TRILINEAR);
 }
 
-void lobby_freeTextures() {
+void lobby_freeTextures(void) {
     UnloadTexture(platformTextures[PLATFORM_TEXTURE_GRASS_ID]);
     UnloadTexture(platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID]);
     UnloadTexture(texTree);

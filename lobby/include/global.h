@@ -4,13 +4,13 @@
 #include "types.h"
 
 // --- CONFIGURATION DU LOBBY ---
-#define WINDOW_WIDTH  800
-#define WINDOW_HEIGHT 600
-#define GROUND_Y      500
-#define PLAT_H        20
-#define STEP_Y        100
-#define WALL_W        100
-#define DOOR_H        200
+#define WINDOW_WIDTH  800.0f
+#define WINDOW_HEIGHT 600.0f
+#define GROUND_Y      500.0f
+#define PLAT_H        20.0f
+#define STEP_Y        100.0f
+#define WALL_W        100.0f
+#define DOOR_H        200.0f
 
 extern Platform_st platforms[];
 extern int platformCount;
