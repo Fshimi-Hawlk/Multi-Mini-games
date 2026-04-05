@@ -21,8 +21,6 @@
 
 #include "core/game.h"
 
-#include "utils/globals.h"
-
 bool bingo_isValidDaub(const CallState_St* const state, const PlayerCard_St* playerCard, uint row, uint col) {
     return (state->column == col) 
         && (state->number == playerCard->numbers[row][col]);

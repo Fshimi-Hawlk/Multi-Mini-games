@@ -45,7 +45,7 @@ bool bingo_initApp(void) {
     SetTargetFPS(60);
 
 #ifdef LOGGER_H
-    init_logger();
+    initLogger();
 #endif
 
     if (!bingo_initFonts()) {

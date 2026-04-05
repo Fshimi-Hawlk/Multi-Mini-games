@@ -76,7 +76,8 @@
 // Game Configs
 // ────────────────────────────────────────────────
 
-#define MAX_PLAYER 4
+#define MIN_PLAYER 2    ///< Minimum number of players required to start (including host)
+#define MAX_PLAYER 4    ///< Maximum number of players in a game
 
 
 #endif // CONFIGS_H

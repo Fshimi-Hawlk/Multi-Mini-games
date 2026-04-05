@@ -48,14 +48,15 @@ typedef struct {
     uint            encodedValue;
     uint            column;             ///< 0..4 (B/I/N/G/O)
     uint            number;
-    char            displayedText[16];
+    char            displayedText[8];
     f32             timer;
 } CallState_St;
 
 typedef enum {
+    GAME_SCENE_WAITING_ROOM,
     GAME_SCENE_CARD_CHOICE,
-    GAME_SCENE_PLAYING,
     GAME_SCENE_LAUNCHING,
+    GAME_SCENE_PLAYING,
     GAME_SCENE_END,
 } GameScene_Et;
 

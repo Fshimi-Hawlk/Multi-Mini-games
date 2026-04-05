@@ -31,6 +31,8 @@
 #include "systemSettings.h"
 #include "logger.h"
 
+#include "widgets/button.h"
+
 #include "APIs/generalAPI.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -38,45 +40,61 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 enum {
-    ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
+    ACTION_CODE_BINGO_PLAYER_READY = firstAvailableActionCode,
+    ACTION_CODE_BINGO_SET_MAX_PLAYERS,
+    ACTION_CODE_BINGO_SEND_CHOICE_CARDS,
+    ACTION_CODE_BINGO_CHOOSE_CARD,
+    ACTION_CODE_BINGO_LOCK_CARD,
+    ACTION_CODE_BINGO_SYNC_STATE,
     ACTION_CODE_BINGO_DAUB_SQUARE,
-    ACTION_CODE_BINGO_START_GAME,
-    ACTION_CODE_BINGO_SYNC_STATE
 };
 
 #pragma pack(push, 1)
-/**
-    @brief Payload sent when client selects one of the 12 preview cards.
-*/
 typedef struct {
     u8 cardIndex;   ///< 0..11 – index into layout.choiceCards
 } ActionChooseCardPayload_St;
 
-/**
-    @brief Payload for a daub attempt on the player’s 5×5 card.
-*/
+typedef struct {
+    u8 cardIndex;   ///< 0..11 – the card the player is locking
+} ActionLockCardPayload_St;
+
 typedef struct {
     u8 row;
     u8 col;
 } ActionDaubSquarePayload_St;
-#pragma pack(pop)
+
+typedef struct {
+    u8 maxPlayers;  ///< MIN_PLAYER..MAX_PLAYER
+} ActionSetMaxPlayersPayload_St;
+
+typedef struct {
+    Card_t choiceCards[12];
+} BingoChoiceCardsPayload_St;
 
 /**
     @brief Minimal payload sent to clients for synchronization.
            Only fields that actually change during play are included.
 */
-#pragma pack(push, 1)
 typedef struct {
-    u32              remainingBalls;
-    CallState_St     currentCall;
+    f32              timer;
+    char             displayedText[32];
     GameScene_Et     scene;
     const char*      resultMessage;
+    u8               numPlayers;
+    u8               maxPlayers;
+    u8               playerColors[MAX_PLAYER];   ///< 0-3 for visual distinction
+    u8               cardOwners[12];             ///< MAX_PLAYER = free, otherwise player slot
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
 static BingoGame_St localGame;
 static bool         assetsLoaded = false;
 static f32          joinRetryTimer = 0.0f;
+static bool         isHost = false;
+static u8           selectedCardIndex = MAX_PLAYER;   ///< currently previewed card (MAX_PLAYER = none)
+static u8           maxPlayers = MIN_PLAYER;
+
+static TextButton_St readyButton = {0};
 
 /**
     @brief Helper to send a game-specific action to the server.
@@ -119,6 +137,16 @@ void bingo_init(void) {
 
     localGame.clientID = -1;
     joinRetryTimer     = 0.0f;
+    isHost             = false;
+    selectedCardIndex  = MAX_PLAYER;
+
+    readyButton = (TextButton_St){
+        .bounds    = {100.0f, (f32) GetScreenHeight() - 120.0f, 220.0f, 50.0f},
+        .state     = WIDGET_STATE_NORMAL,
+        .text      = "READY",
+        .baseColor = GREEN,
+        .roundness = 0.4f
+    };
 
     log_info("Bingo client initialized");
 }
@@ -130,37 +158,44 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
 
     switch (action) {
         case ACTION_CODE_JOIN_ACK: {
-            if (len < sizeof(s32)) break;
+            if (len < sizeof(s32) ) break;
 
-            memcpy(&localGame.clientID, data, sizeof(s32));
-            log_info("Bingo client received internal ID: %d", localGame.clientID);
+            memcpy(&localGame.clientID, data, sizeof(s32) );
+            isHost = (localGame.clientID == 0);
+            log_info("Bingo client received internal ID: %d (isHost=%s)", localGame.clientID, boolStr(isHost));
+        } break;
+
+        case ACTION_CODE_BINGO_SEND_CHOICE_CARDS: {
+            if (len < sizeof(BingoChoiceCardsPayload_St)) break;
+
+            BingoChoiceCardsPayload_St payload;
+            memcpy(&payload, data, sizeof(payload));
+
+            for (uint i = 0; i < 12; ++i) {
+                memcpy(&localGame.layout.choiceCards[i].values, &payload.choiceCards[i], sizeof(Card_t));
+            }
+
+            log_info("Received 12 choice cards from server");
         } break;
 
         case ACTION_CODE_BINGO_SYNC_STATE: {
-            if (len < sizeof(BingoSyncPayload_St)) {
-                log_warn(
-                    "Bingo sync payload too small: %u bytes (expected %zu)", 
-                    len, sizeof(BingoSyncPayload_St)
-                );
-
-                break;
-            }
+            if (len < sizeof(BingoSyncPayload_St)) break;
 
             BingoSyncPayload_St payload;
             memcpy(&payload, data, sizeof(BingoSyncPayload_St));
 
-            // Apply minimal sync payload
-            localGame.balls.remainingCount = payload.remainingBalls;
-            localGame.currentCall          = payload.currentCall;
-            localGame.progress.scene       = payload.scene;
-            localGame.progress.resultMessage = payload.resultMessage;
-
-            // Keep local preview cards / player card choice (server only syncs shared state)
-            // Daubs are client-authoritative for the player's own card (with server validation)
-            log_debug(
-                "Bingo sync received: scene=%d, remainingBalls=%u", 
-                (s32)payload.scene, payload.remainingBalls
+            localGame.currentCall.timer = payload.timer;
+            
+            strncpy(
+                localGame.currentCall.displayedText, 
+                payload.displayedText,
+                sizeof(localGame.currentCall.displayedText) - 1
             );
+
+            localGame.currentCall.displayedText[sizeof(localGame.currentCall.displayedText)-1] = '\0';
+
+            localGame.progress.scene         = payload.scene;
+            localGame.progress.resultMessage = payload.resultMessage;
         } break;
 
         default: log_warn("Action code (%d) not Implemented", action);
@@ -174,40 +209,59 @@ void bingo_update(f32 dt) {
             sendToServer(ACTION_CODE_JOIN_GAME, NULL, 0);
             joinRetryTimer = 0.0f;
         }
+
         return;
     }
 
-    f32Vector2 mousePos = GetMousePosition();
+    f32Vector2 mouse = GetMousePosition();
 
     switch (localGame.progress.scene) {
+        case GAME_SCENE_WAITING_ROOM: {
+            if (textButtonUpdate(&readyButton, mouse)) {
+                sendToServer(ACTION_CODE_BINGO_PLAYER_READY, NULL, 0);
+            }
+
+            if (isHost) {
+                if (IsKeyPressed(KEY_UP)) {
+                    ActionSetMaxPlayersPayload_St p = { .maxPlayers = (u8) clamp((s32) maxPlayers + 1, MIN_PLAYER, MAX_PLAYER) };
+                    sendToServer(ACTION_CODE_BINGO_SET_MAX_PLAYERS, &p, sizeof(p));
+                }
+                if (IsKeyPressed(KEY_DOWN)) {
+                    ActionSetMaxPlayersPayload_St p = { .maxPlayers = (u8) clamp((s32) maxPlayers - 1, MIN_PLAYER, MAX_PLAYER) };
+                    sendToServer(ACTION_CODE_BINGO_SET_MAX_PLAYERS, &p, sizeof(p));
+                }
+            }
+        } break;
+
         case GAME_SCENE_CARD_CHOICE: {
             for (uint i = 0; i < 12; ++i) {
                 CardUI_St* card = &localGame.layout.choiceCards[i];
                 if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
-                    CheckCollisionPointRec(mousePos, card->backgroundRect)) {
+                    CheckCollisionPointRec(mouse, card->backgroundRect)) {
 
-                    if (localGame.previouslySelectedCard != NULL) {
-                        localGame.previouslySelectedCard->selected = false;
+                    if (selectedCardIndex != MAX_PLAYER) {
+                        localGame.layout.choiceCards[selectedCardIndex].selected = false;
                     }
 
-                    localGame.previouslySelectedCard = card;
+                    selectedCardIndex = (u8) i;
                     card->selected = true;
 
-                    ActionChooseCardPayload_St payload = { .cardIndex = (u8)i };
+                    ActionChooseCardPayload_St payload = { .cardIndex = (u8) i };
                     sendToServer(ACTION_CODE_BINGO_CHOOSE_CARD, &payload, sizeof(payload));
                     break;
                 }
             }
 
-            if (localGame.previouslySelectedCard != NULL && IsKeyPressed(KEY_ENTER)) {
-                sendToServer(ACTION_CODE_BINGO_START_GAME, NULL, 0);
+            // Lock card with ENTER
+            if (selectedCardIndex != MAX_PLAYER && IsKeyPressed(KEY_ENTER)) {
+                ActionLockCardPayload_St payload = { .cardIndex = selectedCardIndex };
+                sendToServer(ACTION_CODE_BINGO_LOCK_CARD, &payload, sizeof(payload));
             }
         } break;
 
         case GAME_SCENE_PLAYING: {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                bool inGrace = (localGame.currentCall.timer <=
-                               (localGame.balls.showDelay + localGame.balls.graceDelay));
+                bool inGrace = (localGame.currentCall.timer <= (localGame.balls.showDelay + localGame.balls.graceDelay));
 
                 bool handled = false;
                 for (u8 r = 0; r < 5 && !handled; ++r) {
@@ -219,7 +273,7 @@ void bingo_update(f32 dt) {
                             localGame.layout.cardRectsRect.height - 1
                         };
 
-                        if (!CheckCollisionPointRec(mousePos, rect)) continue;
+                        if (!CheckCollisionPointRec(mouse, rect)) continue;
 
                         if (inGrace && bingo_isValidDaub(&localGame.currentCall, &localGame.player, r, c)) {
                             localGame.player.daubs[r][c] = true;
@@ -242,37 +296,53 @@ void bingo_draw(void) {
     if (!assetsLoaded) return;
 
     switch (localGame.progress.scene) {
-        case GAME_SCENE_CARD_CHOICE:
-            bingo_drawChoiceCards(&localGame.layout);
-            break;
+        case GAME_SCENE_WAITING_ROOM: {
+            if (localGame.clientID == -1) {
+                drawTextPro("Connexion au serveur...", bingo_fonts[FONT28], localGame.layout.windowCenter, ANCHOR_CENTER, GRAY);
+                break;
+            }
 
-        case GAME_SCENE_LAUNCHING:
-            bingo_drawChoiceCards(&localGame.layout);
-            char text[8] = {0};
-            sprintf(text, "%.0f", localGame.currentCall.timer / 2.0f);
-            f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
-            DrawTextEx(bingo_fonts[FONT48], text,
-                        Vector2Subtract(localGame.layout.windowCenter,
-                                        Vector2Scale(textSize, 0.5f)),
-                        128, 0, BLACK);
-            break;
+            drawTextPro("Bingo - Waiting Room", bingo_fonts[FONT32], (f32Vector2) { .x = WINDOW_WIDTH / 2.0f, .y = 125.0f }, ANCHOR_CENTER, GOLD);
 
-        case GAME_SCENE_PLAYING:
+            textButtonDraw(&readyButton, bingo_fonts[FONT24], 24.0f);
+
+            if (isHost) {
+                drawTextPro(
+                    TextFormat("Max players: %u", maxPlayers), 
+                    bingo_fonts[FONT24], 
+                    (f32Vector2) { .x = systemSettings.video.width - 100, .y = systemSettings.video.height - 120 }, 
+                    ANCHOR_BOTTOM_RIGHT,
+                    WHITE
+                );
+            }
+        } break;
+
+        case GAME_SCENE_CARD_CHOICE: bingo_drawChoiceCards(&localGame.layout); break;
+
+        case GAME_SCENE_LAUNCHING: {
+            bingo_drawChoiceCards(&localGame.layout);
+            
+            drawTextPro(
+                TextFormat("%.0f", localGame.currentCall.timer / 2.0f), bingo_fonts[FONT128], 
+                localGame.layout.windowCenter, ANCHOR_CENTER, BLACK
+            );
+        } break;
+
+        case GAME_SCENE_PLAYING: {
             bingo_drawCard(&localGame.layout, &localGame.player);
             bingo_drawUI(&localGame.layout, &localGame.balls, &localGame.currentCall);
-            break;
+        } break;
 
         case GAME_SCENE_END: {
-            f32 fontSize = 64.0f;
-            u32 w = MeasureText(localGame.progress.resultMessage, fontSize);
-            Color col = (localGame.progress.resultMessage[0] == 'B') ? GREEN : RED;
-
-            f32Vector2 textPos = {
-                localGame.layout.windowCenter.x - w / 2.0f,
-                localGame.layout.windowCenter.y - fontSize / 2.0f
-            };
-            DrawTextEx(bingo_fonts[FONT48], localGame.progress.resultMessage,
-                        textPos, fontSize, 0, col);
+            drawTextPro(
+                localGame.progress.resultMessage, 
+                bingo_fonts[FONT64], 
+                localGame.layout.windowCenter, 
+                ANCHOR_CENTER, 
+                (localGame.progress.resultMessage[0] == 'B') 
+                    ? GREEN 
+                    : RED
+            );
         } break;
     }
 }
