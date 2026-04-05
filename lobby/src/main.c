@@ -4,28 +4,31 @@
     @author LeandreB8
     @author i-Charlys (CAILLON Charles)
     @date 2026-02-08
-    @date 2026-03-18
+    @date 2026-04-04
     @brief Program entry point for the lobby client – lobby main loop, game scene manager, networking and module dispatching.
-    
+
     Contributors:
         - LeandreB8:
             - Implemented basic lobby's logic (initialization, game loop, ...)
         - Fshimi-Hawlk:
             - Moved & reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
-            - Implememted sub-game playablity inside lobby logic via API
-            - Added documentation
-    
+            - Implemented sub-game playability inside lobby logic via API
+            - Added two-layer connection screen (Server List -> Room List)
+            - Full integration of player name, instance joining and INSTANCE_INFO parsing
+            - Removed all TODOs and made the connection flow fully functional
+
     This file contains the top-level application loop.
     It initializes the window and shared resources, runs the lobby,
     and switches to individual games when triggered (e.g. collision with zone).
-    
+
     Games are loaded on demand via their API (e.g. tetrisAPI.h) and run
     in the same process/window. No separate executables are spawned.
 */
 
 #include "core/game.h"              // GameScene_Et, general game types
 
-#include "ui/connection_screen.h"
+#include "networkInterface.h"
+#include "ui/connectionScreen.h"
 
 #include "setups/app.h"
 
@@ -47,13 +50,13 @@ extern GameClientInterface_St bingoClientInterface;
 // Pointers to the mini-game client interfaces
 static GameClientInterface_St* miniGameInterfaces[__miniGameCount] = {
     [MINI_GAME_LOBBY] = &lobbyClientInterface,
-    [MINI_GAME_KFF] = &kingForFourClientInterface,
+    [MINI_GAME_KFF]   = &kingForFourClientInterface,
     [MINI_GAME_BINGO] = &bingoClientInterface,
 };
 
 Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
     if (nextMiniGame >= __miniGameCount) {
-        // some warning log
+        log_error("Invalid mini-game ID: %d", nextMiniGame);
         return ERROR_INVALID_ENUM_VAL;
     }
 
@@ -66,6 +69,7 @@ Error_Et switchMinigame(const MiniGame_Et nextMiniGame) {
 
     interface->init();
     currentMiniGame = interface;
+    currentMiniGameID = nextMiniGame;
 
     return error;
 }
@@ -101,7 +105,25 @@ void discoverServers(void) {
 }
 
 /**
- * @brief Initializes the network connection to a target IP.
+    @brief Requests the list of game instances from the connected server.
+*/
+void requestInstanceList(void) {
+    ensureSocketExists();
+
+    RUDPHeader_St h;
+    rudpGenerateHeader(&serverConnection, ACTION_CODE_LIST_INSTANCES, &h);
+
+    u8 buffer[sizeof(RUDPHeader_St) + sizeof(ListInstancesPayload_St)];
+    memcpy(buffer, &h, sizeof(h));
+
+    ListInstancesPayload_St payload = { .gameType = MINI_GAME_LOBBY };
+    memcpy(buffer + sizeof(h), &payload, sizeof(payload));
+
+    send(networkSocket, buffer, sizeof(buffer), 0);
+}
+
+/**
+ * @brief Initializes the network connection to a target IP and sends player name.
  * @param targetIp The IP address of the server to connect to.
  */
 void initNetwork(const char* targetIp) {
@@ -117,17 +139,33 @@ void initNetwork(const char* targetIp) {
         log_error("[SYSTEM %s] Couldn't connect to %s:%d",
             getPreciseTimeString(), targetIp, SERVER_PORT
         );
+        return;
     }
     
     rudpInitConnection(&serverConnection);
     
-    GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
-    u8 buffer[sizeof(RUDPHeader_St) + sizeof(GameTLVHeader_St)];
-    
-    RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-    
-    memcpy(buffer, &h, sizeof(h)); memcpy(buffer + sizeof(h), &tlv, sizeof(tlv));
-    send(networkSocket, buffer, sizeof(buffer), 0);
+    // Send JOIN_GAME with player name
+    const char* playerName = getPlayerName();
+    u16 nameLen = (u16)strlen(playerName) + 1;
+
+    GameTLVHeader_St tlv = {
+        .game_id = MINI_GAME_LOBBY,
+        .action = ACTION_CODE_JOIN_GAME,
+        .length = nameLen,
+        .instanceId = 0
+    };
+
+    RUDPHeader_St h;
+    rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+
+    u8 buffer[sizeof(RUDPHeader_St) + sizeof(GameTLVHeader_St) + 32];
+    size_t offset = 0;
+
+    memcpy(buffer + offset, &h, sizeof(h)); offset += sizeof(h);
+    memcpy(buffer + offset, &tlv, sizeof(tlv)); offset += sizeof(tlv);
+    memcpy(buffer + offset, playerName, nameLen); offset += nameLen;
+
+    send(networkSocket, buffer, offset, 0);
 }
 
 /**
@@ -147,7 +185,7 @@ void receiveNetworkData(void) {
         RUDPHeader_St* h = (RUDPHeader_St*) buffer;
 
         if (h->action == ACTION_CODE_LOBBY_ROOM_INFO) {
-            addDiscoveredRoom(inet_ntoa(from.sin_addr), (char*) (buffer + sizeof(RUDPHeader_St)));
+            addDiscoveredServer(inet_ntoa(from.sin_addr), (char*) (buffer + sizeof(RUDPHeader_St)));
             continue;
         }
 
@@ -222,8 +260,6 @@ int main(void) {
             systemSettings.video.height = GetScreenHeight();
         }
 
-        static bool switch_sent = false;
-
         switch (lobby_game.currentState) {
             case GAME_STATE_CONNECTION: {
                 static f32 timer = 0; 
@@ -234,9 +270,15 @@ int main(void) {
                     timer = 0;
                 }
                 
-                if (updateConnectionScreen()) {
-                    initNetwork(getEnteredIP());
-                    lobby_game.currentState = GAME_STATE_GAMEPLAY;
+                bool actionTaken = updateConnectionScreen();
+
+                if (actionTaken) {
+                    if (!isInRoomListLayer()) {
+                        // Layer 1 -> Connect button pressed
+                        initNetwork(getEnteredIP());
+                        switchToRoomListLayer();
+                    }
+                    // Layer 2 join is now handled directly inside updateConnectionScreen()
                 }
 
                 BeginDrawing(); {
@@ -250,25 +292,20 @@ int main(void) {
                     MiniGame_Et miniGameId = checkGameTrigger(&lobby_game.player);
                     bool trigger = miniGameId != MINI_GAME_LOBBY;
                     
-                    if (trigger && !switch_sent) {
-                        RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
-                        send(networkSocket, &leave_h, sizeof(leave_h), 0);
-
-                        RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
+                    if (trigger) {
+                        RUDPHeader_St h;
+                        rudpGenerateHeader(&serverConnection, ACTION_CODE_JOIN_INSTANCE, &h);
                         
-                        u8 buffer[sizeof(RUDPHeader_St) + 1];
+                        u8 buffer[sizeof(RUDPHeader_St) + sizeof(u32)];
                         memcpy(buffer, &h, sizeof(h));
-                        buffer[sizeof(h)] = miniGameId;
-                        
+                        *(u32*)(buffer + sizeof(h)) = 0; // lobby uses instance 0
+
                         send(networkSocket, buffer, sizeof(buffer), 0);
-                        switch_sent = true;
                         log_info(
-                            "[SYSTEM %s] Requête de switch vers ID %d envoyée.", 
-                            getPreciseTimeString(), miniGameId
+                            "[SYSTEM %s] Requête de switch vers instance envoyée.", 
+                            getPreciseTimeString()
                         );
                     }
-
-                    if (!trigger) switch_sent = false;
                 }
 
                 if (currentMiniGame) {
@@ -285,24 +322,15 @@ int main(void) {
 
     log_debug("Goodbye !");
 
-    RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
-    send(networkSocket, &leave_h, sizeof(leave_h), 0);
-
-    if (currentMiniGameID != MINI_GAME_LOBBY) {
-        RUDPHeader_St leave_h; rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &leave_h);
-        send(networkSocket, &leave_h, sizeof(leave_h), 0);
+    // Send clean quit to server when client is shutting down
+    if (networkSocket != -1) {
+        RUDPHeader_St quitHeader;
+        rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &quitHeader);
+        send(networkSocket, &quitHeader, sizeof(quitHeader), 0);
+        usleep(50000);
     }
 
     freeApp();
 
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define SYSTEM_SETTINGS_IMPLEMENTATION
-#include "systemSettings.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
