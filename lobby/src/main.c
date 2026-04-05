@@ -156,14 +156,27 @@ void receiveNetworkData(void) {
             continue;
         }
 
-        if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME) {
-            u8 targetGameId = *(u8*) (buffer + sizeof(RUDPHeader_St));
+        if (h->action == ACTION_CODE_JOIN_INSTANCE) {
+            u32 targetInstanceId = *(u32*) (buffer + sizeof(RUDPHeader_St));
             log_info(
-                "[SYSTEM %s] Switching to game ID: %d", 
-                getPreciseTimeString(), targetGameId
+                "[SYSTEM %s] Switching to instance ID: %u", 
+                getPreciseTimeString(), targetInstanceId
             );
 
-            switchMinigame(targetGameId);
+            // Server now tells us which game to switch to (future extension point)
+            switchMinigame(MINI_GAME_LOBBY);
+            continue;
+        } 
+
+        if (h->action == ACTION_CODE_INSTANCE_INFO) {
+            u8 count = buffer[sizeof(RUDPHeader_St)];
+            InstanceInfo_St* infos = (InstanceInfo_St*)(buffer + sizeof(RUDPHeader_St) + 1);
+
+            for (u8 i = 0; i < count; ++i) {
+                MiniGame_Et gt = MINI_GAME_LOBBY; // default for lobby; server may send real type later
+                addGameInstance(infos[i].instanceId, gt, infos[i].hostName,
+                                infos[i].playerCount, infos[i].maxPlayers);
+            }
             continue;
         }
 

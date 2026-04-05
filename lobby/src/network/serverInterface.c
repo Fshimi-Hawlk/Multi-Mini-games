@@ -16,7 +16,9 @@
 */
 
 #include "utils/userTypes.h"
-#include "utils/utils.h"
+
+#include "utils/debug.h"
+
 #include "networkInterface.h"
 
 /**
@@ -28,27 +30,23 @@ void* lobby_createInstance(void) {
 }
 
 /**
-    @brief Processes an incoming action from a client in the lobby.
+    @brief Handles an incoming player action for the lobby instance.
 
-    - On join: sends all existing players to the newcomer.
-    - On move: stores the new position and broadcasts it to everyone.
-    - All other actions are simply relayed to the room.
-
-    @param state        Pointer to the LobbyGame_St instance.
-    @param playerID     ID of the client that sent the action.
-    @param action       Action code received.
-    @param payload      Raw payload data.
-    @param len          Payload size in bytes.
-    @param broadcast    Callback to send messages to other clients.
+    @param instance     Owning GameInstance_St (use instance->gameState for LobbyGame_St).
+    @param playerId     Player who sent the action.
+    @param action       Action code.
+    @param payload      Payload data.
+    @param len          Payload length.
+    @param broadcast    Scoped broadcast function (must be called with the same instance).
 */
-void lobby_onAction(void* state, s32 playerID, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
-    LobbyGame_St* game = (LobbyGame_St*) state;
+void lobby_onAction(GameInstance_St* instance, s32 playerID, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+    LobbyGame_St* game = (LobbyGame_St*) instance->gameState;
 
     if (action == ACTION_CODE_JOIN_GAME) {
         // Send all currently active players to the new client
         for (s32 i = 0; i < MAX_CLIENTS; ++i) {
             if (i != playerID && game->otherPlayers[i].active) {
-                broadcast(playerID, i, ACTION_CODE_LOBBY_MOVE, &game->otherPlayers[i], sizeof(Player_St));
+                broadcast(instance, i, ACTION_CODE_LOBBY_MOVE, &game->otherPlayers[i], sizeof(Player_St));
             }
         }
     } else if (action == ACTION_CODE_LOBBY_MOVE) {
@@ -57,10 +55,10 @@ void lobby_onAction(void* state, s32 playerID, u8 action, const void* payload, u
             game->otherPlayers[playerID].active = true;
         }
         // Relay the move to everyone (including the sender for confirmation)
-        broadcast(UNICAST, playerID, action, payload, len);
+        broadcast(instance, BROADCAST_ALL, action, payload, len);
     } else {
         // Any other action is simply broadcast to the room
-        broadcast(UNICAST, playerID, action, payload, len);
+        broadcast(instance, BROADCAST_ALL, action, payload, len);
     }
 }
 
@@ -114,9 +112,9 @@ void lobby_destroyInstance(void* state) {
 */
 GameServerInterface_St lobbyServerInterface = {
     .game_name          = "lobby",
-    .create_instance    = lobby_createInstance,
-    .on_action          = lobby_onAction,
-    .on_tick            = lobby_onTick,
-    .destroy_instance   = lobby_destroyInstance,
-    .on_player_leave    = lobby_onPlayerLeave
+    .createInstance    = lobby_createInstance,
+    .onAction          = lobby_onAction,
+    .onTick            = lobby_onTick,
+    .destroyInstance   = lobby_destroyInstance,
+    .onPlayerLeave    = lobby_onPlayerLeave
 };

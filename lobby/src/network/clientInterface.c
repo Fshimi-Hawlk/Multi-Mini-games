@@ -22,7 +22,8 @@
 #include "ui/app.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/mathUtils.h"
 
 #include "systemSettings.h"
 

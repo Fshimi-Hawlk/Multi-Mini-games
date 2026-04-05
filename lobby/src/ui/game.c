@@ -33,8 +33,9 @@
 
 #include "ui/game.h"
 
-#include "utils/utils.h"
 #include "utils/globals.h"
+
+#include "utils/geometry.h"
 
 void drawPlayer(const PlayerVisuals_St* const playerVisuals, const Player_St* const player) {
     Texture2D texture = playerVisuals->textures[player->textureId];

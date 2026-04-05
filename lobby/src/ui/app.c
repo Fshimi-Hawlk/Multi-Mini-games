@@ -38,7 +38,8 @@
 #include "ui/app.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/geometry.h"
 
 void drawMenuTextures(const LobbyGame_St* const game) {
     Rectangle destRect = game->playerVisuals.defaultTextureRect;
