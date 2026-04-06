@@ -24,6 +24,7 @@ int main(void) {
     SetTraceLogLevel(LOG_WARNING);
 
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Lobby Multi-Mini-Games");
+    SetTargetFPS(60);
 
     lobby_initAudio();
     lobby_initTextures();
