@@ -24,5 +24,6 @@
 
 #define MAX_GRASS_BLADES 80000
 
+#define MAX_FIREFLIES 46
 
 #endif

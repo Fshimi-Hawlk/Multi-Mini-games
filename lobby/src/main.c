@@ -9,6 +9,8 @@
 #include "skin.h"
 
 #include "grass.h"
+#include "background.h"
+#include "ambiance.h"
 
 void drawTree(void);
 void drawPlatforms(Platform_st* platforms, int count);
@@ -26,6 +28,7 @@ int main(void) {
     lobby_initAudio();
     lobby_initTextures();
     initGrass();
+    initAtmosphericEffects();
 
     logoSkinButton = LoadTexture("assets/logoSkin.png");
 
@@ -70,6 +73,7 @@ int main(void) {
         }
 
         updateGrass(&player, GetFrameTime(), gameTime, cam);
+        updateAtmosphericEffects(dt, &player, cam);
 
         BeginDrawing(); {
             ClearBackground(RAYWHITE);
@@ -83,6 +87,8 @@ int main(void) {
                 drawWorldBoundaries(&player);
 
                 drawGrass(&player, cam);
+
+                drawAtmosphericEffects();
 
                 drawPlayer(&player);
                 // DrawPlatforms(platforms, platformCount);
@@ -116,6 +122,12 @@ void drawTree(void) {
     float drawHeight = (float)texTree.height * treeScale;
 
     Vector2 treePos = {-drawWidth / 2.0f, GROUND_Y - drawHeight + 350.0f};
+
+    // Soft drop shadow
+    Vector2 shadowOffset = {moonLightDir.x * -42.0f, moonLightDir.y * -22.0f};
+    DrawTexturePro(texTree, (Rectangle){0,0,(float)texTree.width,(float)texTree.height},
+                    (Rectangle){treePos.x + shadowOffset.x, treePos.y + shadowOffset.y, drawWidth, drawHeight},
+                    Vector2Zero(), 0, Fade(BLACK, 0.38f));
 
     // Main tree
     DrawTexturePro(texTree,

@@ -29,4 +29,7 @@ extern float gameTime;
 extern GrassBlade_st grassBlades[MAX_GRASS_BLADES];
 extern int grassCount;
 
+// Moonlight direction
+extern const Vector2 moonLightDir;
+
 #endif
