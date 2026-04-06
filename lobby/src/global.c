@@ -1,5 +1,4 @@
 #include "global.h"
-#include "constant.h"
 #include "config.h"
 
 Platform_st platforms[] = {
@@ -74,6 +73,7 @@ Texture2D platformTextures[] = {
 int platformTexturesCount;
 
 Texture2D texTree;
+Texture2D texBackground;
 
 float gameTime = 0.0f;
 
