@@ -6,5 +6,6 @@
 void initAtmosphericEffects(void);
 void updateAtmosphericEffects(float dt, Player_st* player, Camera2D cam);
 void drawAtmosphericEffects(void);
+void drawScreenEffects(Player_st* player);
 
 #endif // AMBIANCE_H
