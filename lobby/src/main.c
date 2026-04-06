@@ -92,8 +92,10 @@ int main(void) {
                 drawAtmosphericEffects();
 
                 drawPlayer(&player);
-                // DrawPlatforms(platforms, platformCount);
             } EndMode2D();
+
+            drawScreenEffects(&player);
+
             DrawText("Multi-Mini-Games", WINDOW_WIDTH / 2 - MeasureText("Multi-Mini-Games", 20) / 2.0f, 20, 20, PURPLE);
             drawSkinButton();
             if (isTextureMenuOpen) {
