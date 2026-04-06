@@ -39,4 +39,29 @@ typedef struct {
     Color color;
 } GrassBlade_st;
 
+typedef enum {
+    FIREFLY_MODE_WANDER,
+    FIREFLY_MODE_LOOP,
+    FIREFLY_MODE_BOB
+} FireflyMode_Et;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   radius;
+    float   alpha;
+    float   phase;
+    bool    active;
+
+    // Enhanced behavior
+    FireflyMode_Et mode;
+    float          modeTimer;
+    Vector2        wanderTarget;
+    Vector2        loopPoints[12];
+    int            loopCount;
+    int            currentLoopIndex;
+    float          facingAngle;
+    float          currentSpeed;
+} Firefly_St;
+
 #endif
