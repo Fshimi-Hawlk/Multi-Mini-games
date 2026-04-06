@@ -64,4 +64,19 @@ typedef struct {
     float          currentSpeed;
 } Firefly_St;
 
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   rotation;
+    float   rotationSpeed;
+    float   scale;
+    float   life;
+    float   currentAlpha;
+    bool    active;
+    bool    onGround;
+    float   groundTimer;
+    float   spinDampTimer;      ///< Time left to apply strong rotational drag after player push (0 = normal drag)
+    Color   color;
+} FallingLeaf_St;
+
 #endif

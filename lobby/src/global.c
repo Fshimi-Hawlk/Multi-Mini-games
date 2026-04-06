@@ -79,3 +79,5 @@ float gameTime = 0.0f;
 
 GrassBlade_st grassBlades[MAX_GRASS_BLADES];
 int grassCount = 0;
+
+const Vector2 moonLightDir = {-0.6f, -0.8f};
