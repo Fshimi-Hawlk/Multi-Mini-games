@@ -1,9 +1,11 @@
 #include "networkInterface.h"
 #include "APIs/generalAPI.h"
+#include "APIs/rubikAPI.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <arpa/inet.h>
 
 typedef struct {
     int id;
@@ -29,8 +31,8 @@ void* rubik_create_instance(void) {
     return rs;
 }
 
-void rubik_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    if (action != ACTION_GAME_DATA) return;
+void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+    if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
     
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
@@ -48,11 +50,13 @@ void rubik_on_action(void *state, int player_id, u8 action, const void *payload,
         rs->players[player_id].eliminated = false;
         
         int internal_id = player_id; // Simple mapping
+        int net_id = htonl(internal_id);
         u8 buf_ack[64];
-        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+        memset(buf_ack, 0, sizeof(buf_ack));
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
         memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-        memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
-        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(int));
+        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
     }
     else if (real_action == ACTION_CODE_START_GAME) {
         rs->status = 1;
@@ -60,10 +64,11 @@ void rubik_on_action(void *state, int player_id, u8 action, const void *payload,
         rs->seed = (int)time(NULL);
         
         u8 buf[64];
-        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = sizeof(int) };
+        memset(buf, 0, sizeof(buf));
+        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = htons(sizeof(int)) };
         memcpy(buf, &tlv_scr, sizeof(tlv_scr));
         memcpy(buf + sizeof(tlv_scr), &rs->seed, sizeof(int));
-        broadcast(0, -1, ACTION_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(int));
+        broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(int));
     }
     else if (real_action == ACTION_CODE_RUBIK_PROGRESS) {
         if (len >= sizeof(GameTLVHeader_St) + sizeof(float)) {
@@ -80,7 +85,7 @@ void rubik_on_tick(void* state) {
     // Simplified for now: just a placeholder logic
 }
 
-void rubik_on_player_leave(void* state, int player_id) {
+void rubik_on_player_leave(void* state, s32 player_id) {
     RubikServerState* rs = (RubikServerState*)state;
     rs->players[player_id].active = false;
 }
@@ -89,7 +94,7 @@ void rubik_destroy_instance(void *state) {
     free(state);
 }
 
-GameServerInterface_St rubik_module = {
+GameServerInterface_St rubikServerInterface = {
     .game_name = "rubik",
     .create_instance = rubik_create_instance,
     .on_action = rubik_on_action,

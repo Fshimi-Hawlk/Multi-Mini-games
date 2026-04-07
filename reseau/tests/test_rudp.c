@@ -31,9 +31,9 @@ void test_rudp_header_gen() {
     RUDPConnection_St conn;
     rudpInitConnection(&conn);
     RUDPHeader_St h;
-    rudpGenerateHeader(&conn, ACTION_GAME_DATA, &h);
+    rudpGenerateHeader(&conn, ACTION_CODE_GAME_DATA, &h);
     assert(ntohs(h.sequence) == 0);
-    assert(h.action == ACTION_GAME_DATA);
+    assert(h.action == ACTION_CODE_GAME_DATA);
     assert(conn.local_sequence == 1);
     printf("test_rudp_header_gen passed\n");
 }
@@ -48,7 +48,7 @@ void test_rudp_process_incoming() {
     RUDPHeader_St h;
     memset(&h, 0, sizeof(h));
     h.sequence = htons(0);
-    h.action = ACTION_GAME_DATA;
+    h.action = ACTION_CODE_GAME_DATA;
 
     assert(rudpProcessIncoming(&conn, &h) == true);
     assert(conn.remote_sequence == 0);
@@ -75,7 +75,7 @@ void test_rudp_send_packet() {
     RUDPHeader_St h;
     memset(&h, 0, sizeof(h));
     h.sequence = htons(0);
-    h.action = ACTION_GAME_DATA;
+    h.action = ACTION_CODE_GAME_DATA;
 
     rudpSendPacket(&conn, &h, NULL, 0);
     assert(conn.local_sequence == 1);

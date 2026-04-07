@@ -153,16 +153,18 @@ BASE_CFLAGS := \
 # Linker base
 BASE_LDFLAGS := \
 	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
+	-L../build/lib \
+	-lreseau -lbingo -lkingforfour -lchess -lrubik -lfirstparty \
 	-l:libraylib.a \
 	-lm
 
-# Combine with base
-CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
+# Combine flags in requested order: MODE -> EXTRA -> BASE
+# MODE flags are already in CFLAGS/LDFLAGS at this point
+MODE_CFLAGS := $(CFLAGS)
+MODE_LDFLAGS := $(LDFLAGS)
 
-# Allow extras from command line
-CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+CFLAGS  := $(MODE_CFLAGS) $(EXTRA_CFLAGS) $(BASE_CFLAGS)
+LDFLAGS := $(MODE_LDFLAGS) $(EXTRA_LDFLAGS) $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
 LIB_NAME := lobby

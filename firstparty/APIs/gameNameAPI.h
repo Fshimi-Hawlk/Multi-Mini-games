@@ -27,14 +27,14 @@
 #define GAME_NAME_API_H
 
 /// @note: if you reading this file inside `firstparty/APIs` this following
-///        include may have siggly-lines, but there's actually no real issue.
-///        So, if any then just forget about it.
+/// include may have siggly-lines, but there's actually no real issue.
+/// So, if any then just forget about it.
 #include "baseTypes.h"
 #include "APIs/generalAPI.h"
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Types
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
     @brief Forward declaration - internal game state definition is private.
@@ -51,9 +51,9 @@ typedef struct {
     // Difficulty level, etc. can be added here
 } GameNameConfigs_St;
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Core lifecycle API
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
     @brief Convenience macro for C99 compound literal initialization.

@@ -96,7 +96,7 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
     if (!game->base.running) return OK;
 
     // ============================
-    //     LOGIQUE (UPDATE)
+    // LOGIQUE (UPDATE)
     // ============================
     switch (game->currentState) {
         case STATE_MENU:
@@ -151,7 +151,7 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
     }
 
     // ============================
-    //      DESSIN (DRAW)
+    // DESSIN (DRAW)
     // ============================
     {
         switch (game->currentState) {

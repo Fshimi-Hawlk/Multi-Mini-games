@@ -84,9 +84,9 @@ typedef enum {
     __fontSizeCount
 } FontSize_Et;
 
-// ────────────────────────────────────────────────
+// 
 // Game interface
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Identifiers of the different playable scenes / mini-games.
@@ -104,6 +104,7 @@ typedef enum {
     MINI_GAME_OTHELLO,
     MINI_GAME_CHESS,
     MINI_GAME_CUBE,
+    MINI_GAME_EDITOR,      ///< Level editor integrated as a mini-game
     __miniGameCount
 } MiniGame_Et;
 

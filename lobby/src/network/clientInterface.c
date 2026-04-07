@@ -21,10 +21,14 @@
 
 static f32Vector2 lastSentPos = {0};
 static bool firstFrame = true;
+static bool isFirstInit = true;
 
 void lobby_init(void) {
     log_debug("[LOBBY]: Initializing client lobby");
     
+    s32 savedId = isFirstInit ? -1 : lobby_game.id;
+    isFirstInit = false;
+
     memset(&lobby_game, 0, sizeof(lobby_game));
 
     systemSettings.video.height = DEFAULT_VIDEO_SETTING_HEIGHT;
@@ -51,7 +55,7 @@ void lobby_init(void) {
     strncpy(lobby_game.player.name, "Moi", 31);
 
     lobby_game.cam = (Camera2D) {
-        .offset = {systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f},
+        .offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
         .zoom   = 1.0f,
     };
     
@@ -60,11 +64,12 @@ void lobby_init(void) {
     };
 
     const char* playerTextureImagePaths[__playerTextureCount] = {
-        [PLAYER_TEXTURE_EARTH]      = IMAGES_PATH "earth.png",
-        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
-        [PLAYER_TEXTURE_BINGO]      = IMAGES_PATH "bingo69.png",
-        [PLAYER_TEXTURE_KFF]        = IMAGES_PATH "king67.png",
+        [PLAYER_TEXTURE_EARTH]      = "lobby/assets/images/earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = "lobby/assets/images/trollFace.png",
+        [PLAYER_TEXTURE_BINGO]      = "lobby/assets/images/bingo69.png",
+        [PLAYER_TEXTURE_KFF]        = "lobby/assets/images/king67.png",
     };
+
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {
         if (playerTextureImagePaths[i]) {
@@ -72,13 +77,13 @@ void lobby_init(void) {
         }
     }
     
-    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
-    lobby_game.currentState = GAME_STATE_CONNECTION;
+    logoSkinButton = LoadTexture("lobby/assets/images/logoSkin.png");
+    lobby_game.currentState = GAME_STATE_LOBBY;
+    lobby_game.id = savedId; // Restore valid ID if we had one
 
     // Physics constants for each skin
-    PhysicsConstants_St physics[__playerTextureCount];
     for(int i=0; i<__playerTextureCount; i++) {
-        physics[i] = (PhysicsConstants_St){
+        lobby_game.physics[i] = (PhysicsConstants_St){
             .gravity = GRAVITY, .moveSpeed = MOVE_SPEED, .jumpForce = JUMP_FORCE,
             .coyoteTime = COYOTE_TIME, .jumpBufferTime = JUMP_BUFFER_TIME,
             .maxJumps = MAX_JUMPS, .friction = FRICTION, .iceFriction = 500.0f,
@@ -86,15 +91,27 @@ void lobby_init(void) {
             .waterMaxSubmersion = 1.0f, .waterCanJump = true
         };
     }
-    memcpy(lobby_game.physics, physics, sizeof(physics));
 
     lobby_game.selectedTerrainIndex = -1;
     lobby_game.gridStep = 25.0f;
 }
 
-void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
-    if (playerID < 0 || playerID >= MAX_CLIENTS) return;
+void lobby_on_data(s32 playerID, u8 action, const void* data, u16 len) {
+    if (playerID < 0 || (playerID >= MAX_CLIENTS && playerID != 999)) {
+        // Handle JOIN_ACK specifically if it comes from the server (which might use ID 0 or 999 depending on logic)
+        if (action == ACTION_CODE_JOIN_ACK && len >= sizeof(u16)) {
+            u16 tempID;
+            memcpy(&tempID, data, sizeof(u16));
+            lobby_game.id = ntohs(tempID);
+            log_info("[LOBBY] My assigned ID: %d", lobby_game.id);
+        }
+        return;
+    }
     if (playerID == lobby_game.id) return;
+
+    if (playerID >= MAX_CLIENTS && action != ACTION_CODE_JOIN_ACK && action != ACTION_CODE_LOBBY_ROOM_INFO) {
+        return; // Prevent OOB for server playerID (999)
+    }
 
     switch (action) {
         case ACTION_CODE_JOIN_ACK: {
@@ -104,6 +121,7 @@ void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
         } break;
 
         case ACTION_CODE_LOBBY_MOVE: {
+            if (playerID >= MAX_CLIENTS) break;
             if (len < sizeof(PlayerNet_St)) break;
             PlayerNet_St net;
             memcpy(&net, data, sizeof(PlayerNet_St));
@@ -122,18 +140,33 @@ void lobby_on_data(int playerID, u8 action, const void* data, u16 len) {
         } break;
 
         case ACTION_CODE_LOBBY_CHAT: {
-            addChatMessage(TextFormat("Joueur %d", playerID), (char*)data);
+            if (len == 0) break;
+            char safe_msg[MAX_CHAT_MSG_LEN];
+            u16 copy_len = len > MAX_CHAT_MSG_LEN - 1 ? MAX_CHAT_MSG_LEN - 1 : len;
+            memcpy(safe_msg, data, copy_len);
+            safe_msg[copy_len] = '\0';
+            
+            char sender_name[32];
+            snprintf(sender_name, sizeof(sender_name), "Joueur %d", playerID);
+            if (playerID < MAX_CLIENTS && lobby_game.otherPlayers[playerID].active) {
+                strncpy(sender_name, lobby_game.otherPlayers[playerID].name, 31);
+                sender_name[31] = '\0';
+            }
+            
+            addChatMessage(sender_name, safe_msg);
         } break;
 
         case ACTION_CODE_QUIT_GAME: {
-            lobby_game.otherPlayers[playerID].active = false;
+            if (playerID < MAX_CLIENTS) {
+                lobby_game.otherPlayers[playerID].active = false;
+            }
         } break;
     }
 }
 
 void lobby_update(float dt) {
     updateChat();
-    toggleEditorMode(&lobby_game);
+    // toggleEditorMode removed: now handled by interaction zone in main.c
 
     if (lobby_game.chat.isOpen) {
         lobby_game.cam.target = lobby_game.player.position;
@@ -149,10 +182,26 @@ void lobby_update(float dt) {
 
     updatePlayer(&lobby_game, dt);
     lobby_game.cam.target = lobby_game.player.position;
+    lobby_game.cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 
-    toggleSkinMenu(&lobby_game.playerVisuals);
+    // Interpolate other players
+    for (int i = 0; i < MAX_CLIENTS; i++) {
+        if (lobby_game.otherPlayers[i].active && i != lobby_game.id) {
+            Player_St* p = &lobby_game.otherPlayers[i];
+            // Simple lerp for smooth movement
+            p->position.x += (p->targetPosition.x - p->position.x) * 15.0f * dt;
+            p->position.y += (p->targetPosition.y - p->position.y) * 15.0f * dt;
+            
+            // If very close, just snap
+            if (CheckCollisionCircles(p->position, 1.0f, p->targetPosition, 1.0f)) {
+                p->position = p->targetPosition;
+            }
+        }
+    }
+
+    toggleSkinMenu(&lobby_game);
     if (lobby_game.playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&lobby_game.player, &lobby_game.playerVisuals);
+        choosePlayerTexture(&lobby_game);
     }
 
     if (lobby_game.player.position.x != lastSentPos.x || lobby_game.player.position.y != lastSentPos.y || firstFrame) {
@@ -163,8 +212,9 @@ void lobby_update(float dt) {
         };
         strncpy(net.name, lobby_game.player.name, 31);
 
-        GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = sizeof(PlayerNet_St) };
+        GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = htons(sizeof(PlayerNet_St)) };
         RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+        h.sender_id = htons((u16)lobby_game.id);
         
         u8 buffer[1024];
         memcpy(buffer, &h, sizeof(h));
@@ -179,7 +229,7 @@ void lobby_update(float dt) {
 
 void lobby_draw(void) {
     BeginMode2D(lobby_game.cam); {
-        drawLobbyTerrains(terrains, gameInteractionZones);
+        drawLobbyTerrains();
         drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
         for (int i = 0; i < MAX_CLIENTS; i++) {
             if (lobby_game.otherPlayers[i].active)
@@ -198,11 +248,25 @@ void lobby_draw(void) {
     drawChat();
 }
 
+void lobby_client_destroy(void) {
+    for (u8 i = 0; i < __playerTextureCount; ++i) {
+        if (lobby_game.playerVisuals.textures[i].id != 0) {
+            UnloadTexture(lobby_game.playerVisuals.textures[i]);
+            lobby_game.playerVisuals.textures[i] = (Texture){0};
+        }
+    }
+    if (logoSkinButton.id != 0) {
+        UnloadTexture(logoSkinButton);
+        logoSkinButton = (Texture){0};
+    }
+}
+
 GameClientInterface_St lobbyClientInterface = {
     .id         = MINI_GAME_LOBBY,
     .name       = "Lobby",
     .init       = lobby_init,
     .on_data    = lobby_on_data,
     .update     = lobby_update,
-    .draw       = lobby_draw
+    .draw       = lobby_draw,
+    .destroy    = lobby_client_destroy
 };

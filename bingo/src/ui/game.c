@@ -27,8 +27,8 @@
 void bingo_drawChoiceCards(const Layout_St* layout) {
     const char* title = "Choose your bingo card";
     uint titleSize = 32;
-    f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], title, titleSize, 0);
-    f32Vector2 textPos = {
+    Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], title, titleSize, 0);
+    Vector2 textPos = {
         layout->windowCenter.x - textSize.x / 2.0f,
         layout->choiceCards[0].innerRect.y - 60.0f
     };
@@ -50,7 +50,7 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
         f32 cellW = innerCard.width / 5.0f;
 
         for (u8 i = 0; i < 5; ++i) {
-            f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT14], LETTERS[i], 14, 0);
+            Vector2 textSize = MeasureTextEx(bingo_fonts[FONT14], LETTERS[i], 14, 0);
             f32 lx = innerCard.x + cellW * (i + 0.5f) - textSize.x / 2.0f;
             f32 ly = innerCard.y + cellW / 7.5;
             DrawTextEx(bingo_fonts[FONT14], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
@@ -75,7 +75,7 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
                     text = TextFormat("%u", card->values[row][col]);
                 }
 
-                f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
+                Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
 
                 DrawTextEx(
                     bingo_fonts[FONT32], text, 
@@ -96,8 +96,8 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
 
     // Column letters
     for (u8 i = 0; i < 5; ++i) {
-        f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], LETTERS[i], 32, 0);
-        f32Vector2 pos = {
+        Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], LETTERS[i], 32, 0);
+        Vector2 pos = {
             .x = layout->cardRectsRect.x + layout->cardRectsRect.width * (i + 0.5f) - textSize.x / 2.0f,
             .y = layout->cardRectsRect.y - layout->cardRectsRect.height / 1.5f
         };
@@ -132,7 +132,7 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
                     default: {
                         DrawRectangleRec(innerRect, RED);
                         
-                        f32Vector2 textPos = {
+                        Vector2 textPos = {
                             .x = innerRect.x + layout->cardRectsRect.width / 2.0f - 10,
                             .y = innerRect.y + layout->cardRectsRect.height / 2.0f - 16, 
                         };
@@ -160,8 +160,8 @@ void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const pl
                     text = TextFormat("%u", player->numbers[r][c]);
                 }
 
-                f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
-                f32Vector2 textPos = {
+                Vector2 textSize = MeasureTextEx(bingo_fonts[FONT32], text, textHeight, 0);
+                Vector2 textPos = {
                     .x = rect.x + (layout->cardRectsRect.width - textSize.x) / 2.0f,
                     .y = rect.y + (layout->cardRectsRect.height - textSize.y) / 2.0f,
                 };

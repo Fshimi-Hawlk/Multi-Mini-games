@@ -50,7 +50,7 @@ void textButtonDraw(const TextButton_St* btn, Font font, f32 fontSize) {
     DrawRectangleRoundedLinesEx(btn->bounds, btn->roundness, 8, 2.0f,
         (btn->state == WIDGET_STATE_CLICK) ? YELLOW : DARKGRAY);
 
-    if (btn->text && btn->text[0]) {
+    if (btn->text[0]) {
         Vector2 textSize = MeasureTextEx(font, btn->text, fontSize, 0.0f);
         Vector2 pos = {
             btn->bounds.x + (btn->bounds.width - textSize.x) * 0.5f,

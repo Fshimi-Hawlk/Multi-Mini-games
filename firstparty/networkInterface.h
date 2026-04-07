@@ -38,16 +38,10 @@ enum BaseActionCodes_e {
     ACTION_CODE_LOBBY_CHAT,             ///< Lobby chat message.
     ACTION_CODE_LOBBY_SWITCH_GAME,      ///< Switching to a mini-game.
     
-    // Chess specific actions (0x20 range)
-    ACTION_CODE_CHESS_MOVE = 0x20,
-    ACTION_CODE_CHESS_SYNC = 0x21,
-    
-    // Rubik specific actions (0x30 range)
-    ACTION_CODE_RUBIK_SCRAMBLE = 0x30,
-    ACTION_CODE_RUBIK_PROGRESS = 0x31,
-    ACTION_CODE_RUBIK_ELIMINATE = 0x32,
+    ACTION_CODE_DISCOVERY_QUERY = 0x10, ///< Global server discovery query (broadcast).
+    ACTION_CODE_DISCOVERY_INFO  = 0x11, ///< Global server discovery response.
 
-    firstAvailableActionCode            ///< First action code usable by the codes specific to each sub-game
+    firstAvailableActionCode    = 0x20  ///< First action code usable by sub-games
 };
 
 /**
@@ -84,10 +78,11 @@ typedef struct {
         @param data         Pointer to the payload bytes (after header)
         @param len          Payload length
     */
-    void (*on_data)(int player_id, u8 action, const void* data, u16 len);
+    void (*on_data)(s32 player_id, u8 action, const void* data, u16 len);
 
     void (*update)(float dt);   ///< Local simulation / animation update
     void (*draw)(void);         ///< Raylib rendering pass
+    void (*destroy)(void);      ///< Clean up resources and textures
 } GameClientInterface_St;
 
 /**
@@ -95,8 +90,8 @@ typedef struct {
     Provided by the networking/server layer to each game instance.
 */
 typedef void (*BroadcastMessage_Ft)(
-    int         room_id,
-    int         exclude_id,
+    s32         room_id,
+    s32         exclude_id,
     u8          action,
     const void* payload,
     u16         len
@@ -117,6 +112,7 @@ typedef struct {
     /**
         @brief Handles an incoming player action / event
         @param state        Game-specific instance state
+        @param room_id      The ID of the room where this action occurred
         @param player_id    Player who sent this message
         @param action       Action code from client
         @param payload      Decoded payload pointer
@@ -125,7 +121,8 @@ typedef struct {
     */
     void (*on_action)(
         void*               state,
-        int                 player_id,
+        s32                 room_id,
+        s32                 player_id,
         u8                  action,
         const void*         payload,
         u16                 len,
@@ -139,7 +136,7 @@ typedef struct {
         @param state        Game instance
         @param player_id    ID of the player who left
     */
-    void (*on_player_leave)(void* state, int player_id);
+    void (*on_player_leave)(void* state, s32 player_id);
 
     /**
         @brief Destroys the game instance and frees all owned memory

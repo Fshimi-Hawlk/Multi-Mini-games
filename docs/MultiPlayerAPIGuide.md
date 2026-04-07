@@ -23,7 +23,7 @@ Chaque message réseau envoyé suit cette structure binaire stricte :
 | 2 | `u16` | `ack` | Dernier numéro de séquence reçu en ordre. |
 | 4 | `u32` | `ack_bitfield` | Historique des 32 derniers paquets reçus (1 = reçu). |
 | 2 | `u16` | `sender_id` | ID réseau du joueur (rempli par le serveur). |
-| 1 | `u8` | `action` | Code d'action global (ex: `0x06` pour `ACTION_GAME_DATA`). |
+| 1 | `u8` | `action` | Code d'action global (ex: `0x06` pour `ACTION_CODE_GAME_DATA`). |
 
 #### Détail de l'En-tête TLV (`GameTLVHeader_St`)
 | Taille | Type | Champ | Description |
@@ -77,7 +77,7 @@ Vos fonctions `update()` et `draw()` **NE DOIVENT PAS** appeler `BeginDrawing()`
 ActionPlayPayload_St play = { .card_index = 5 };
 GameTLVHeader_St tlv = { .game_id = 1, .action = KFF_PLAY_CARD, .length = sizeof(play) };
 RUDPHeader_St rudp;
-rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &rudp);
+rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &rudp);
 
 // Envoi (Formatage binaire)
 u8 buffer[1024];
@@ -107,7 +107,7 @@ Utilisez ces enums de `networkInterface.h` pour éviter les collisions :
 *   `ACTION_CODE_JOIN_GAME` (0x02)
 *   `ACTION_CODE_SYNC_GAME` (0x04) : Synchronisation complète périodique.
 *   `ACTION_CODE_QUIT_GAME` (0x05) : Sortie propre.
-*   `ACTION_GAME_DATA` (0x06) : **Obligatoire** pour tout le trafic interne aux mini-jeux.
+*   `ACTION_CODE_GAME_DATA` (0x06) : **Obligatoire** pour tout le trafic interne aux mini-jeux.
 
 ---
 *Dernière mise à jour : 31 Mars 2026 - Révision Correction Performance & RUDP.*

@@ -4,6 +4,7 @@ BASE_CFLAGS := \
     -Iinclude \
     -I../thirdparty \
     -I../firstparty \
+	-I../lobby/include \
     -DPLATFORM_DESKTOP   # raylib sometimes needs this on Windows
 
 BASE_LDFLAGS := \

@@ -11,11 +11,13 @@
 
 #include "common.h"
 
-// ────────────────────────────────────────────────
+// 
 // Macros
-// ────────────────────────────────────────────────
+// 
 
 #define swap(T, a, b) do { T _tmp = (a); (a) = (b); (b) = _tmp; } while (0)
+
+#define ARRAY_LEN(x) (u32)(sizeof(x) / sizeof((x)[0]))
 
 #define clamp(val, min, max) \
     ((val) < (min) ? (min) : ((val) > (max) ? (max) : (val)))
@@ -37,14 +39,19 @@ do { \
     } \
 } while (0)
 
-// ────────────────────────────────────────────────
+// 
 // Functions
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Returns the full source rectangle for a texture.
 */
 Rectangle getTextureRec(Texture2D texture);
+
+/**
+    @brief Returns the center position of a rectangle.
+*/
+Vector2 getRectCenterPos(Rectangle rect);
 
 /**
     @brief Platform-specific entropy gathering for PRNG seeding.

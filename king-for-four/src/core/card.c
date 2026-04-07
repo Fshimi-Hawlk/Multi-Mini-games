@@ -6,11 +6,9 @@
  */
 
 #include "core/card.h"
-<<<<<<< HEAD
 #include "rand.h"
 #include <string.h>
-=======
->>>>>>> origin/mgit-PR1-20-03
+#include <stdio.h>
 
 /**
  * @brief Adds a card to the "top" of the deck (end of the array).

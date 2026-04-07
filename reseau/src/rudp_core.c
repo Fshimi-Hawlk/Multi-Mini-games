@@ -91,7 +91,7 @@ bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
             conn->receive_history = 0;
         } else {
             // Décale l'historique et marque le précédent remote_sequence comme reçu (bit 0)
-            conn->receive_history = (conn->receive_history << difference) | (1 << (difference - 1));
+            conn->receive_history = (conn->receive_history << difference) | (1U << (difference - 1));
         }
         conn->remote_sequence = seq;
         return true;
@@ -100,7 +100,7 @@ bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
     // Cas 2 : Le paquet est arrivé en retard mais dans la fenêtre de l'historique
     u16 diff_old = (u16)(conn->remote_sequence - seq);
     if (diff_old > 0 && diff_old <= HISTORY_SIZE) {
-        u32 mask = 1 << (diff_old - 1);
+        u32 mask = 1U << (diff_old - 1);
         if (!(conn->receive_history & mask)) {
             conn->receive_history |= mask;
             return true; // Paquet retardataire accepté car non reçu précédemment

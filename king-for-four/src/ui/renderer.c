@@ -6,11 +6,9 @@
  */
 
 #include <math.h>
-
+#include <stdio.h>
 #include "raylib.h"
-
 #include "ui/renderer.h"
-
 #include "logger.h"
 
 /** @brief Number of columns in the card texture sheet. */
@@ -33,29 +31,14 @@
 GameAssets LoadAssets(void) {
     GameAssets assets;
     
-<<<<<<< HEAD
-    // Chargement via ASSET_PATH (défini par le Makefile pour la compatibilité Monorepo)
-    assets.cardSheet = LoadTexture(ASSET_PATH "textures/playingCards.png");
-    assets.cardBack = LoadTexture(ASSET_PATH "textures/cardBack_blue5.png");
+    // Chargement via le chemin relatif correct dans le monorepo
+    assets.cardSheet = LoadTexture("king-for-four/assets/textures/playingCards.png");
+    assets.cardBack = LoadTexture("king-for-four/assets/textures/cardBack_blue5.png");
     
     // Vérifications de sécurité
-    if (assets.cardSheet.id == 0) printf("ERREUR: Texture playingCards.png introuvable à %s\n", ASSET_PATH);
-    if (assets.cardBack.id == 0)  printf("ERREUR: Texture cardBack_blue5.png introuvable à %s\n", ASSET_PATH);
+    if (!IsTextureValid(assets.cardSheet)) log_error("Texture playingCards.png introuvable à king-for-four/assets/textures/");
+    if (!IsTextureValid(assets.cardBack))  log_error("Texture cardBack_blue5.png introuvable à king-for-four/assets/textures/");
 
-=======
-    const char *cardsTexturePath = TEXTURES_PATH "playingCards.png";
-    assets.cardSheet = LoadTexture(cardsTexturePath);
-    if (!IsTextureValid(assets.cardSheet)) {
-        log_error("Can't load %s", cardsTexturePath);
-    }
-
-    const char *cardBackTexturePath = TEXTURES_PATH "cardBack_blue5.png";
-    assets.cardBack = LoadTexture(cardBackTexturePath);
-    if (!IsTextureValid(assets.cardSheet)) {
-        log_error("Can't load %s", cardBackTexturePath);
-    }
-    
->>>>>>> origin/mgit-PR1-20-03
     return assets;
 }
 

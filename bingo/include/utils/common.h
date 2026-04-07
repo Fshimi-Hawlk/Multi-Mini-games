@@ -33,9 +33,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// ────────────────────────────────────────────────
+// 
 // C Standard Library
-// ────────────────────────────────────────────────
+// 
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,9 +49,9 @@
 #include <ctype.h>
 #include <fcntl.h>
 
-// ────────────────────────────────────────────────
+// 
 // Third-party / single-header libraries
-// ────────────────────────────────────────────────
+// 
 
 #include "rand.h"                // custom PRNG - used in bingo
 
@@ -65,30 +65,30 @@
 // #include "nob/stringBuilder.h"   // string builder - not used in current codebase
 // #include "stringView.h"          // lightweight string view - not used in current codebase
 
-// ────────────────────────────────────────────────
+// 
 // Raylib core + helpers
-// ────────────────────────────────────────────────
+// 
 
 #include "raylib.h"                 // main Raylib API (drawing, input, window, audio, …)
 #include "raymath.h"                // vector/matrix/math helpers
 #include "rlgl.h"                   // low-level OpenGL abstraction (used rarely)
 
-// ────────────────────────────────────────────────
+// 
 // Project foundational headers
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
  */
-typedef Vector2 f32Vector2;
-#define f32Vector2_def      // marker to indicate the typedef is active
+// #define Vector2 Vector2
+#define Vector2_def      // marker to indicate the typedef is active
 
-#include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
+#include "baseTypes.h"              // primitive typedefs (u8, Vector2, etc.)
 #include "configs.h"                // tuning constants, paths, physics values
 
-// ────────────────────────────────────────────────
+// 
 // Project utilities (currently used / active)
-// ────────────────────────────────────────────────
+// 
 
 #include "logger.h"                 // logging macros and functions (log_info, log_warn, etc.)
 #include "networkInterface.h"

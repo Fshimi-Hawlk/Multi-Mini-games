@@ -28,9 +28,9 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
-// ────────────────────────────────────────────────
+// 
 // Asset paths
-// ────────────────────────────────────────────────
+// 
 
 #ifndef ASSET_PATH
 /**
@@ -47,9 +47,9 @@
 */
 #define IMAGES_PATH ASSET_PATH "images/"
 
-// ────────────────────────────────────────────────
+// 
 // Window & display
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Default client-area width of the application window (pixels).
@@ -72,9 +72,9 @@
 */
 #define APP_BACKGROUND_COLOR ((Color) {196, 215, 165, 255})
 
-// ────────────────────────────────────────────────
+// 
 // Game Configs
-// ────────────────────────────────────────────────
+// 
 
 #define MAX_PLAYER 4
 

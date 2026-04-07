@@ -64,7 +64,7 @@ typedef enum {
 */
 typedef struct {
     GameScene_Et    scene;
-    const char     *resultMessage;
+    char            resultMessage[64];
     f32             gameDuration;
     uint            ballsDrawnTotal;
 } GameProgress_St;
@@ -81,7 +81,7 @@ typedef struct {
     @brief Visual/layout constants and computed positions.
 */
 typedef struct {
-    f32Vector2  windowCenter;
+    Vector2  windowCenter;
     Rectangle   cardRectsRect;
     Rectangle   cardRect;
     Rectangle   cardRectBorder;
@@ -91,12 +91,11 @@ typedef struct {
 
 /**
     @brief Complete Bingo game state used by both client and server interfaces.
-           Server uses extra fields (playerCards, numPlayers). Client uses the local `player` and layout.
-           bingoAPI.c will be removed after this change.
 */
-typedef struct {
+typedef struct BingoGame_St {
     BaseGame_St     base;
 
+    s32             room_id;
     s32             clientID;
     CardUI_St*      previouslySelectedCard;     ///< Only relevant during card choice phase (client)
     PlayerCard_St   player;

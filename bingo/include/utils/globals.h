@@ -16,15 +16,11 @@
            Indexed by FontSize_Et values (FONT8 … FONT48).
            All fonts should use the same typeface for visual consistency.
 */
-<<<<<<< HEAD
-extern Font      bingo_fonts[__fontSizeCount];
-=======
 extern Font bingo_fonts[__fontSizeCount];
->>>>>>> origin/mgit-PR1-20-03
 
-// ────────────────────────────────────────────────
+// 
 // Game's Globals
-// ────────────────────────────────────────────────
+// 
 
 extern const char* const LETTERS[5];
 

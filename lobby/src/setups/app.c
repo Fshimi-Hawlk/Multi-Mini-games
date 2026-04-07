@@ -51,8 +51,9 @@ Error_Et initApp(void) {
     systemSettings.video.resizable = true;
     systemSettings.video.title = "Lobby";
 
-    // ── Initialization ───────────────────────────────────────────────────────
+    // Initialization 
     InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    SetExitKey(0); // Disable Escape key for closing window
     // SetWindowPosition(100, 50);
 
 #ifdef LOGGER_H

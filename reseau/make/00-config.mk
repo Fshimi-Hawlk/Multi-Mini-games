@@ -151,11 +151,7 @@ CFLAGS += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
 MAIN_NAME ?= server
-<<<<<<< HEAD
 LIB_NAME := reseau
-=======
-LIB_NAME := server
->>>>>>> origin/mgit-PR1-20-03
 
 SRC_DIR := src
 TEST_DIR := tests

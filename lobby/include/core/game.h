@@ -1,118 +1,49 @@
 /**
     @file core/game.h
     @author Fshimi-Hawlk
-    @author i-Charlys
+    @author LeandreB8
     @date 2026-01-30
-    @date 2026-03-18
-    @brief Core logic and helper functions for the lobby gameplay (player update, collision, skin selection).
-
-    This header declares the main functions that drive:
-        - player physics and input handling
-        - circle-vs-rectangle collision resolution
-        - skin / texture selection logic
-        - skin menu toggle
-
-    Functions are split between:
-        - pure helpers (getPlayerCollisionBox, getPlayerCenter) — used by rendering
-        - update / simulation logic (updatePlayer, resolveCircleRectCollision)
-        - UI interaction logic (choosePlayerTexture, toggleSkinMenu)
-
-    All update functions expect dt in seconds (typically GetFrameTime()).
-    Collision functions assume circle-based player representation.
-
-    Typical usage in the lobby main loop:
-      updatePlayer(&game->player, platforms, platformCount, GetFrameTime());
-      toggleSkinMenu(game);
-      choosePlayerTexture(&game->player, game);
-
-    @see `core/game.c`        for implementation details
-    @see `utils/userTypes.h`  for Player_St, LobbyGame_St, Platform_St definitions
-    @see `utils/globals.h`    for skinButtonRect (used in toggleSkinMenu)
- */
+    @date 2026-03-30
+    @brief Public interface for player physics and lobby core logic.
+*/
 
 #ifndef CORE_GAME_H
 #define CORE_GAME_H
 
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
-// Player shape / rendering helpers
-// ────────────────────────────────────────────────
-
 /**
-    @brief Computes the axis-aligned bounding box that fully encloses the player's circle.
-
-    Used primarily by rendering code (DrawTexturePro destination rectangle)
-    and potentially by broad-phase checks.
-
-    @param player  Pointer to player state (uses position and radius)
-    @return Rectangle centered on player->position with width/height = 2 radius
- */
-Rectangle getPlayerCollisionBox(const Player_St* const player);
-
-/**
-    @brief Returns the local offset from the top-left of the collision box to its center.
-
-    Equivalent to {player->radius, player->radius}.
-    Used as the origin/pivot point in DrawTexturePro calls.
-
-    @param player  Pointer to player state
-    @return Vector2 {radius, radius}
- */
-Vector2 getPlayerCenter(const Player_St* const player);
-
-// ────────────────────────────────────────────────
-// Player physics & update
-// ────────────────────────────────────────────────
-
-f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect);
-
-/**
-    @brief Updates player physics and resolves collisions against lobby terrain only.
-    @param game  Full lobby context (provides live-tunable physics constants)
-    @param dt    Delta time
+    @brief Updates the player's position, velocity and state based on inputs and physics.
+    @param game Pointer to the complete lobby game state.
+    @param dt   Delta time in seconds for frame-independent movement.
 */
 void updatePlayer(LobbyGame_St* const game, const f32 dt);
 
-// ────────────────────────────────────────────────
-// Skin / texture selection
-// ────────────────────────────────────────────────
+/**
+    @brief Checks for and handles interaction with the skin selection menu.
+    @param game Pointer to the lobby game state.
+*/
+void toggleSkinMenu(LobbyGame_St* const game);
 
 /**
-    @brief Handles skin selection via mouse clicks on preview rectangles or number keybinds.
-
-    Checks mouse clicks inside the skin menu grid (only unlocked textures)  
-    or key presses (1,2,3...) and applies the selected texture if unlocked.
-    Closes the menu on successful selection.
-
-    @param player  Player whose textureId will be updated
-    @param game    Lobby game state (to close the menu via playerVisuals)
- */
-void choosePlayerTexture(Player_St* const player, PlayerVisuals_St* const visuals);
+    @brief Processes mouse input to select a new skin from the open menu.
+    @param game Pointer to the lobby game state.
+*/
+void choosePlayerTexture(LobbyGame_St* const game);
 
 /**
-    @brief Toggles the skin selection menu visibility.
-
-    Opens/closes when:
-        - left mouse button is pressed on skinButtonRect, or
-        - P key is pressed
-
-    @param game  Lobby game state (modifies playerVisuals.isTextureMenuOpen)
- */
-void toggleSkinMenu(PlayerVisuals_St* const visuals);
+    @brief Returns the axis-aligned bounding box for the player's circle collider.
+*/
+Rectangle getPlayerCollisionBox(const Player_St* const player);
 
 /**
- * @brief Checks if the player has triggered a game transition zone.
- * @param player Pointer to the player structure.
-<<<<<<< HEAD
- * @param game   Pointer to the lobby game state.
- * @return 1 if a trigger is activated, 0 otherwise.
- */
-int checkGameTrigger(Player_St* player, LobbyGame_St* const game);
-=======
- * @return MiniGame_Et, the idx of the corresponding game
- */
-MiniGame_Et checkGameTrigger(const Player_St* const player);
->>>>>>> origin/mgit-PR1-20-03
+    @brief Returns the local center offset for the player character drawing.
+*/
+Vector2 getPlayerCenter(const Player_St* const player);
+
+/**
+    @brief Calculates the percentage of the player submerged in a water rectangle.
+*/
+f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect);
 
 #endif // CORE_GAME_H

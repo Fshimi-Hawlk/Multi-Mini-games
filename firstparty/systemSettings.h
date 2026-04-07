@@ -24,9 +24,9 @@
 #include "raylib.h"
 #include "logger.h"
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Default values
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 #define DEFAULT_VIDEO_SETTING_FPS           60
 #define DEFAULT_VIDEO_SETTING_WIDTH         800
@@ -39,9 +39,9 @@
 #define DEFAULT_AUDIO_SETTING_VOLUME        1.0f
 #define DEFAULT_AUDIO_SETTING_MUTE          false
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Audio settings
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
     @brief Audio settings for a mini-game.
@@ -65,9 +65,9 @@ typedef struct {
     .mute         = DEFAULT_AUDIO_SETTING_MUTE \
 }
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Video settings
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
     @brief Video/Display settings for a mini-game.
@@ -99,9 +99,9 @@ typedef struct {
     .title       = NULL \
 }
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Main settings structure
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
     @brief Combined settings for a mini-game.
@@ -146,17 +146,17 @@ static Error_Et applyAudioSettings(AudioSettings_St settings) {
     }
 
     // if (0.0f <= settings.musicVolume && settings.musicVolume <= 1.0f) {
-    //     SetMusicVolume(settings.musicVolume); // Note: Need `music`
+    // SetMusicVolume(settings.musicVolume); // Note: Need `music`
     // } else {
-    //     log_warn("Received `musicVolume` setting exceed value range [0; 1]");
-    //     err = ERROR_INVALID_SETTING;
+    // log_warn("Received `musicVolume` setting exceed value range [0; 1]");
+    // err = ERROR_INVALID_SETTING;
     // }
 
     // if (0.0f <= settings.sfxVolume && settings.sfxVolume <= 1.0f) {
-    //     SetSoundVolume(settings.sfxVolume); // Note: Need `sound`
+    // SetSoundVolume(settings.sfxVolume); // Note: Need `sound`
     // } else {
-    //     log_warn("Received `sfxVolume` setting exceed value range [0; 1]");
-    //     err = ERROR_INVALID_SETTING;
+    // log_warn("Received `sfxVolume` setting exceed value range [0; 1]");
+    // err = ERROR_INVALID_SETTING;
     // }
 
     return err;

@@ -46,7 +46,7 @@ LobbyTerrain_St createDefaultTerrain(TerrainType_Et type, Vector2 position);
 */
 bool terrainsOverlap(const LobbyTerrain_St* const a, const LobbyTerrain_St* const b);
 
-/* ── Editor-specific helpers ── */
+/*  Editor-specific helpers  */
 
 /**
     @brief Computes mouse position in world space using the current camera.

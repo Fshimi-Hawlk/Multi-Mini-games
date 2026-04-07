@@ -20,7 +20,7 @@ OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
 
 LIB_NAME := firstparty
-SOURCES := logger.c systemSettings.c progress.c rand.c
+SOURCES := logger.c systemSettings.c progress.c rand.c APIs/gameRegistry.c
 OBJECTS := $(SOURCES:%.c=$(OBJ_DIR)/%.o)
 STATIC_LIB := $(LIB_DIR)/lib$(LIB_NAME).a
 

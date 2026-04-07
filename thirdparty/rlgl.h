@@ -2179,10 +2179,10 @@ static void GLAPIENTRY rlDebugMessageCallback(GLenum source, GLenum type, GLuint
     // NOTE: Here there are the details with a sample output:
     // - #131169 - Framebuffer detailed info: The driver allocated storage for renderbuffer 2. (severity: low)
     // - #131185 - Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_ENUM_88e4)
-    //             will use VIDEO memory as the source for buffer object operations. (severity: low)
+    // will use VIDEO memory as the source for buffer object operations. (severity: low)
     // - #131218 - Program/shader state performance warning: Vertex shader in program 7 is being recompiled based on GL state. (severity: medium)
     // - #131204 - Texture state usage warning: The texture object (0) bound to texture image unit 0 does not have
-    //             a defined base level and cannot be used for texture mapping. (severity: low)
+    // a defined base level and cannot be used for texture mapping. (severity: low)
     if ((id == 131169) || (id == 131185) || (id == 131218) || (id == 131204)) return;
 
     const char *msgSource = NULL;
@@ -2244,8 +2244,8 @@ void rlglInit(int width, int height)
         // glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_HIGH, 0, 0, GL_TRUE);
 
         // Debug context options:
-        //  - GL_DEBUG_OUTPUT - Faster version but not useful for breakpoints
-        //  - GL_DEBUG_OUTPUT_SYNCHRONUS - Callback is in sync with errors, so a breakpoint can be placed on the callback in order to get a stacktrace for the GL error
+        // - GL_DEBUG_OUTPUT - Faster version but not useful for breakpoints
+        // - GL_DEBUG_OUTPUT_SYNCHRONUS - Callback is in sync with errors, so a breakpoint can be placed on the callback in order to get a stacktrace for the GL error
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     }
@@ -4017,8 +4017,8 @@ void rlSetVertexAttribute(unsigned int index, int compSize, int type, bool norma
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
     // NOTE: Data type could be: GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_INT, GL_UNSIGNED_INT
     // Additional types (depends on OpenGL version or extensions):
-    //  - GL_HALF_FLOAT, GL_FLOAT, GL_DOUBLE, GL_FIXED,
-    //  - GL_INT_2_10_10_10_REV, GL_UNSIGNED_INT_2_10_10_10_REV, GL_UNSIGNED_INT_10F_11F_11F_REV
+    // - GL_HALF_FLOAT, GL_FLOAT, GL_DOUBLE, GL_FIXED,
+    // - GL_INT_2_10_10_10_REV, GL_UNSIGNED_INT_2_10_10_10_REV, GL_UNSIGNED_INT_10F_11F_11F_REV
 
     size_t offsetNative = offset;
     glVertexAttribPointer(index, compSize, type, normalized, stride, (void *)offsetNative);

@@ -3,6 +3,7 @@
 #include "rudp_core.h"
 #include "raylib.h"
 #include <sys/socket.h>
+#include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -59,11 +60,21 @@ void rubik_client_init(void) {
     camera.projection = CAMERA_PERSPECTIVE;
 }
 
-void rubik_client_on_data(int player_id, u8 action, const void* data, u16 len) {
-    (void)player_id;
-    (void)len;
+void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
+    if (action != ACTION_CODE_JOIN_ACK) {
+        if (player_id < 0 || player_id >= MAX_CLIENTS) {
+            printf("[RUBIK] Data received from invalid player ID: %d\n", (int)player_id);
+            return;
+        }
+    }
+    if (data == NULL && action != ACTION_CODE_RUBIK_SCRAMBLE) return;
+
     if (action == ACTION_CODE_JOIN_ACK) {
-        memcpy(&my_id_internal, data, sizeof(int));
+        if (len >= sizeof(int)) {
+            int net_id;
+            memcpy(&net_id, data, sizeof(int));
+            my_id_internal = ntohl(net_id);
+        }
     }
     else if (action == ACTION_CODE_RUBIK_SCRAMBLE) {
         // Scramble the cube using the received seed or sequence
@@ -101,7 +112,8 @@ void rubik_client_update(float dt) {
         if (join_timer > 1.0f) {
             GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
             RUDPHeader_St h;
-            rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+            h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
@@ -123,10 +135,12 @@ void rubik_client_update(float dt) {
         float current_progress = calculate_progress(&my_cube);
         if (current_progress != solve_progress) {
             solve_progress = current_progress;
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = sizeof(float) };
+            GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
             RUDPHeader_St h;
-            rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
-            u8 buf[64];
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+            h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+            u8 buf[128];
+            memset(buf, 0, sizeof(buf));
             memcpy(buf, &h, sizeof(h));
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
             memcpy(buf + sizeof(h) + sizeof(tlv), &solve_progress, sizeof(float));
@@ -137,8 +151,10 @@ void rubik_client_update(float dt) {
         if (IsKeyPressed(KEY_ENTER) && my_id_internal == 0) {
             GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
             RUDPHeader_St h;
-            rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
-            u8 buf[64];
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+            h.sender_id = htons((u16)my_id_internal);
+            u8 buf[128];
+            memset(buf, 0, sizeof(buf));
             memcpy(buf, &h, sizeof(h));
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
             send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
@@ -148,7 +164,8 @@ void rubik_client_update(float dt) {
     if (IsKeyPressed(KEY_ESCAPE)) {
         GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
         RUDPHeader_St h;
-        rudpGenerateHeader(&serverConnection, ACTION_GAME_DATA, &h);
+        rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+        h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
         u8 buf[64];
         memcpy(buf, &h, sizeof(h));
         memcpy(buf + sizeof(h), &tlv, sizeof(tlv));

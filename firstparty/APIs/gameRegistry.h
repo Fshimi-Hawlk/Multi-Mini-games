@@ -1,0 +1,28 @@
+/**
+ * @file gameRegistry.h
+ * @author i-Charlys
+ * @date 2026-04-07
+ * @brief Unified static registry for server-side game modules.
+ */
+
+#ifndef GAME_REGISTRY_H
+#define GAME_REGISTRY_H
+
+#include "../networkInterface.h"
+#include "generalAPI.h"
+
+// Uniform naming convention for all game module interfaces
+extern GameServerInterface_St lobbyServerInterface;
+extern GameServerInterface_St bingoServerInterface;
+extern GameServerInterface_St chessServerInterface;
+extern GameServerInterface_St kingServerInterface;
+extern GameServerInterface_St rubikServerInterface;
+
+/**
+ * @brief Get the server interface for a given game ID.
+ * @param gameId The game identifier (MiniGame_Et).
+ * @return A pointer to the interface, or NULL if not found.
+ */
+const GameServerInterface_St* getGameServerInterface(MiniGame_Et gameId);
+
+#endif // GAME_REGISTRY_H

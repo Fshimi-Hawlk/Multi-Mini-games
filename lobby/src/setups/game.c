@@ -13,26 +13,23 @@
 #include "systemSettings.h"
 #include "APIs/generalAPI.h"
 
-/** @brief Fallback terrain content if loading fails */
+/** @brief Fallback terrain content - Restored from 22-03 branch */
 static LobbyTerrain_St _fallbackTerrainContent[] = {
-    { .rect = {-1126.1f, -628.1f, 3889.2f, 299.3f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {-148.0f, 276.7f, 2736.7f, 517.0f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {2074.3f, -429.7f, 687.8f, 711.2f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {-355.2f, 96.9f, 106.0f, 28.0f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {-489.2f, 210.9f, 104.0f, 37.0f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {-259.2f, 276.9f, 165.0f, 29.0f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    { .rect = {-1143.2f, -426.1f, 682.0f, 715.0f}, .color = {139, 69, 19, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL },
-    
-    // Water test pool
-    { .rect = {-1600.0f, 520.0f, 800.0f, 40.0f}, .color = {30, 100, 200, 180}, .roundness = 0.8f, .type = TERRAIN_WATER },
-    
-    // Stone platform for games
-    { .rect = {600.0f, 250.0f, 1800.0f, 30.0f}, .color = {160, 160, 160, 255}, .roundness = 0.0f, .type = TERRAIN_STONE }
+    { .rect = {-1000, 500, 2000, 1000}, .color = {0, 228, 48, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
+    { .rect = {-1000, 0, 500, 500},     .color = {0, 0, 0, 255},     .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
+    { .rect = {500, 0, 500, 500},       .color = {0, 0, 0, 255},     .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
+    { .rect = {-350, 400, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {250, 400, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {-200, 300, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {100, 300, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {-50, 200, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {-350, 150, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+    { .rect = {250, 150, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
 };
 
 Error_Et gameInit(void) {
-    skinButtonRect.x = systemSettings.video.width - 70;
-    skinButtonRect.y = systemSettings.video.height / 2.0f - 25;
+    skinButtonRect.x = GetScreenWidth() - 70;
+    skinButtonRect.y = GetScreenHeight() / 2.0f - 25;
     skinButtonRect.width = 50;
     skinButtonRect.height = 50;
 

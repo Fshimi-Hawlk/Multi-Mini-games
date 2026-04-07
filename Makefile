@@ -60,8 +60,8 @@ MODULES := $(filter-out $(EXCLUDED_DIRS),$(MODULES))
 SUBDIRS       := $(MODULES)
 
 # Library outputs from modules (needed for final link)
-# Order: firstparty and reseau first, then games, then lobby last
-ORDERED_MODULES := firstparty reseau bingo chess king-for-four rubik lobby
+# Order: firstparty and games first, then lobby, then reseau
+ORDERED_MODULES := firstparty bingo chess king-for-four rubik lobby reseau
 LIBS_REL        := $(foreach mod,$(ORDERED_MODULES),$(LIB_DIR)/lib$(subst -, ,$(mod)).a)
 
 # Modes: release, debug, strict-debug, clang-debug, valgrind-debug
@@ -103,12 +103,14 @@ modules: $(foreach mod,$(ORDERED_MODULES),module-$(mod))
 # Build main lobby binary
 bin: modules | $(BIN_DIR)
 	@echo "Building lobby executable..."
-	$(SILENT_PREFIX)$(MAKE) -C lobby MODE=$(MODE) VERBOSE=$(VERBOSE)
+	$(SILENT_PREFIX)$(MAKE) -C lobby MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -lreseau -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group"
+	$(SILENT_PREFIX)install -m 755 lobby/build/bin/main$(EXE_EXT) $(BIN_DIR)/main$(EXE_EXT)
 
 # Build server binary
 server: modules | $(BIN_DIR)
 	@echo "Building server executable..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE)
+	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group"
+	$(SILENT_PREFIX)install -m 755 reseau/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
 
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
@@ -148,6 +150,9 @@ run-server: server
 		echo "No executable found: ./reseau/build/bin/server$(EXE_EXT)"; \
 		echo "Run 'make server' first."; \
 	fi
+
+run-multi: all
+	$(SILENT_PREFIX)./test-multi.sh 2 $(MODE)
 
 help:
 	@echo "Multi-Mini-Games root Makefile"

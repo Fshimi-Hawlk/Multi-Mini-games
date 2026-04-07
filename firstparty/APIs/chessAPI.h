@@ -7,6 +7,12 @@
 #define CHESS_API_H
 
 #include "APIs/generalAPI.h"
+#include "networkInterface.h"
+
+enum ChessActionCodes_e {
+    ACTION_CODE_CHESS_MOVE = firstAvailableActionCode + 0x10,
+    ACTION_CODE_CHESS_SYNC
+};
 
 typedef struct {
     BaseGame_St base;

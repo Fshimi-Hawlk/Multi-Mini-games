@@ -39,9 +39,9 @@
 
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
+// 
 // Skin selection UI rendering
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Draws the skin selection menu overlay when open.

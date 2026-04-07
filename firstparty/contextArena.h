@@ -37,9 +37,9 @@
 
 #include "arena.h"
 
-// ────────────────────────────────────────────────
+// 
 // Global context arenas
-// ────────────────────────────────────────────────
+// 
 
 static Arena globalArena;
 /**
@@ -51,9 +51,9 @@ static Arena tempArena;
  */
 static Arena* contextArena;
 
-// ────────────────────────────────────────────────
+// 
 // Core allocation API
-// ────────────────────────────────────────────────
+// 
 
 /**
  * @brief Allocates memory from the current context arena.
@@ -73,9 +73,9 @@ void *context_alloc(size_t size_bytes);
  */
 void *context_realloc(void *oldptr, size_t oldsz, size_t newsz);
 
-// ────────────────────────────────────────────────
+// 
 // Convenience duplication helpers
-// ────────────────────────────────────────────────
+// 
 
 /**
  * @brief Duplicates a C string in the current context arena.
@@ -94,9 +94,9 @@ char *context_strdup(const char *cstr);
  */
 void *context_memdup(void *data, size_t size);
 
-// ────────────────────────────────────────────────
+// 
 // Formatting helpers
-// ────────────────────────────────────────────────
+// 
 
 /**
  * @brief sprintf into arena-allocated buffer.

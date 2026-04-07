@@ -45,9 +45,9 @@ void drawSkinButton(void) {
     );
 }
 
-// ────────────────────────────────────────────────
+// 
 // Physics Debug Panel (from mgit-PR1-30-03)
-// ────────────────────────────────────────────────
+// 
 
 void drawPhysicsDebugPanel(LobbyGame_St* game) {
     if (!showPhysicsDebugPanel) return;
@@ -73,9 +73,9 @@ void drawPhysicsDebugPanel(LobbyGame_St* game) {
     DrawText("Press F2 to close", (int)panelX + 20, (int)panelY + panelH - 30, 16, GRAY);
 }
 
-// ────────────────────────────────────────────────
+// 
 // Level Code Generator Overlay
-// ────────────────────────────────────────────────
+// 
 
 void drawCodeGenOverlay(void) {
     const f32 w = (f32)GetScreenWidth();

@@ -1,8 +1,10 @@
 #include "networkInterface.h"
 #include "APIs/generalAPI.h"
+#include "APIs/chessAPI.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <arpa/inet.h>
 
 #pragma pack(push, 1)
 typedef struct {
@@ -30,8 +32,8 @@ void* chess_create_instance(void) {
     return cs;
 }
 
-void chess_on_action(void *state, int player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    if (action != ACTION_GAME_DATA) return;
+void chess_on_action(void *state, s32 room_id, s32 player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+    if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
     
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
@@ -57,22 +59,24 @@ void chess_on_action(void *state, int player_id, u8 action, const void *payload,
         
         if (internal_id != -1) {
             u8 buf_ack[64];
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+            memset(buf_ack, 0, sizeof(buf_ack));
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
+            int net_internal_id = htonl(internal_id);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &internal_id, sizeof(int));
-            broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            memcpy(buf_ack + sizeof(tlv_ack), &net_internal_id, sizeof(int));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
         }
     }
     else if (real_action == ACTION_CODE_START_GAME) {
         // Broadcast game start to everyone else
-        broadcast(0, player_id, ACTION_GAME_DATA, payload, len);
+        broadcast(room_id, player_id, ACTION_CODE_GAME_DATA, payload, len);
         // Also send back to host so they start the game too
-        broadcast(-(player_id + 1), 999, ACTION_GAME_DATA, payload, len);
+        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, payload, len);
     }
     else if (real_action == ACTION_CODE_CHESS_MOVE) {
         // Broadcast move to all (including sender for simplicity or excluding)
         // In our case, we broadcast to everyone so the other player sees it.
-        broadcast(0, player_id, ACTION_GAME_DATA, payload, len);
+        broadcast(room_id, player_id, ACTION_CODE_GAME_DATA, payload, len);
         cs->turn = !cs->turn;
     }
 }
@@ -81,7 +85,7 @@ void chess_on_tick(void* state) {
     (void)state;
 }
 
-void chess_on_player_leave(void* state, int player_id) {
+void chess_on_player_leave(void* state, s32 player_id) {
     ChessServerState* cs = (ChessServerState*)state;
     if (cs->players[0] == player_id) cs->players[0] = -1;
     if (cs->players[1] == player_id) cs->players[1] = -1;
@@ -91,7 +95,7 @@ void chess_destroy_instance(void *state) {
     free(state);
 }
 
-GameServerInterface_St chess_module = {
+GameServerInterface_St chessServerInterface = {
     .game_name = "chess",
     .create_instance = chess_create_instance,
     .on_action = chess_on_action,

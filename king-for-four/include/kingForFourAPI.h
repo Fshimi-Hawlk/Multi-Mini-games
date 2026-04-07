@@ -11,9 +11,9 @@
 
 #include "APIs/generalAPI.h"
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // Types
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
  * @struct KingForFourGame_St
@@ -36,9 +36,9 @@ typedef struct {
 #define kingforfour_initGame(game, ...) \
     kingforfour_initGame__full((game), (KingForFourConfigs_St){ .fps = 60, __VA_ARGS__ })
 
-// ────────────────────────────────────────────────────────────────────────────
+// 
 // API de Cycle de Vie
-// ────────────────────────────────────────────────────────────────────────────
+// 
 
 /**
  * @brief Allocates and initializes an instance of King-for-Four.

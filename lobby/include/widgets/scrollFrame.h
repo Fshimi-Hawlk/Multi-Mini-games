@@ -2,7 +2,7 @@
     @file widgets/scrollFrame.h
     @author Fshimi-Hawlk
     @date 2026-03-28
-    @brief Reusable scrollable frame – replaces all the repeated scrollY + scissor logic.
+    @brief Container for scrollable content.
 */
 
 #ifndef WIDGETS_SCROLL_FRAME_H
@@ -11,32 +11,28 @@
 #include "widgets/types.h"
 
 /**
-    @brief Initializes a ScrollFrame_St with sensible defaults.
-    @param frame         Pointer to the scroll frame
-    @param scrollSpeed   Pixels per wheel unit (0 = use default 60.0f)
+    @brief Initializes a scroll frame.
+    @param frame    Pointer to ScrollFrame_St
+    @param bounds   Outer visible rectangle
+    @param content  Inner total content rectangle
 */
-void scrollFrameInit(ScrollFrame_St* frame, f32 scrollSpeed) ;
+void scrollFrameInit(ScrollFrame_St* frame, Rectangle bounds, Rectangle content);
 
 /**
-    @brief Updates scroll offset from mouse wheel when mouse is inside the area.
-           Automatically clamps scrollY.
-    @param frame        Scroll frame to update
-    @param visibleArea  Screen-space rectangle of the visible region
+    @brief Updates scroll position based on mouse wheel.
+    @param frame        Pointer to ScrollFrame_St
     @param mouseScreen  Current mouse position
-    @return true if scrolling occurred this frame
+    @return true if scrolled
 */
-bool scrollFrameUpdate(ScrollFrame_St* frame, Rectangle visibleArea, Vector2 mouseScreen);
+bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen);
 
 /**
-    @brief Begins scissor mode and applies scroll transform.
-           Call this before drawing the scrollable content.
-    @param frame        Scroll frame
-    @param visibleArea  Screen-space visible rectangle
+    @brief Starts clipping for the scroll frame.
 */
-void scrollFrameBegin(ScrollFrame_St* frame, Rectangle visibleArea);
+void scrollFrameBegin(ScrollFrame_St* frame);
 
 /**
-    @brief Ends the scissor mode. Must be paired with scrollFrameBegin().
+    @brief Ends clipping.
 */
 void scrollFrameEnd(void);
 

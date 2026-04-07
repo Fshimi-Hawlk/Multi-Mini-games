@@ -37,7 +37,7 @@ static void drawHeader(void) {
 static void drawMenu(const char *title, const char **options, int count, int selected, const bool *enabled) {
     drawHeader();
     printf(COLOR_YELLOW "  %s\r\n" COLOR_RESET, title);
-    printf("  ────────────────────────────────────────\r\n");
+    printf("  \r\n");
 
     for (int i = 0; i < count; ++i) {
         if (!enabled[i]) {
@@ -116,7 +116,7 @@ void runMainMenu(void) {
         }
 
         if (choice == 0) {
-            // ── Launch server ──
+            // Launch server 
             const char *hostModes[] = {
                 "Loopback only (127.0.0.1)",
                 "Local network (LAN)",
@@ -135,7 +135,7 @@ void runMainMenu(void) {
             startServerOnInterface(bindIp);
             return;
         } else {
-            // ── Join server ──
+            // Join server 
             bool localAvailable = isLocalServerRunning();
             const char *joinOptions[] = {
                 "Connect to local server (127.0.0.1)",

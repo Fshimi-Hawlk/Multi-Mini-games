@@ -18,12 +18,14 @@
 
 #include "utils/globals.h"
 #include "utils/utils.h"
+#include <arpa/inet.h>
+#include <string.h>
 
 #include "networkInterface.h"
 
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 // Action codes
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 
 enum {
     ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
@@ -52,8 +54,8 @@ typedef struct {
     u32              remainingBalls;
     CallState_St     currentCall;
     GameScene_Et     scene;
-    const char*      resultMessage;   // pointer is safe because it's a literal or static
-    // Per-player daubs would be sent separately or compressed later
+    u32              numPlayers;
+    char             resultMessage[64];
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
@@ -67,16 +69,24 @@ typedef enum {
     BINGO_STATUS_ENDED                  ///< Game finished (win or no more balls)
 } BingoStatus_Et;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 // Server-only state
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 
 static u32                 numPlayers;
 static PlayerCard_St       playerCards[MAX_PLAYER];
 static BingoStatus_Et      status;
 static BroadcastMessage_Ft serverBroadcastCallback;
 
-// ─────────────────────────────────────────────────────────────────────────────
+// 
+
+#include "utils/utils.h"
+#include <arpa/inet.h>
+#include <string.h>
+
+// 
+// Ball pool and draw history management (shared on server)
+// 
 
 void* bingo_createInstance(void) {
     BingoGame_St* game = calloc(1, sizeof(BingoGame_St));
@@ -109,7 +119,7 @@ void* bingo_createInstance(void) {
         }
     }
 
-    shuffleArrayT(uint, game->balls.encodedBalls, 500, rand);
+    shuffleArray(uint, game->balls.encodedBalls, 500, prng_rand);
 
     game->balls.choiceDelay = 3.5f;
     game->balls.showDelay   = 1.5f;
@@ -124,30 +134,32 @@ void* bingo_createInstance(void) {
     return game;
 }
 
-static void bingo_serverBroadcastSync(BingoGame_St* game, BroadcastMessage_Ft broadcast) {
+static void bingo_serverBroadcastSync(BingoGame_St* game, s32 room_id, BroadcastMessage_Ft broadcast) {
     if (!broadcast) return;
 
     BingoSyncPayload_St payload = {
         .remainingBalls  = game->balls.remainingCount,
         .currentCall     = game->currentCall,
         .scene           = game->progress.scene,
-        .resultMessage   = game->progress.resultMessage
+        .numPlayers      = numPlayers
     };
+    strncpy(payload.resultMessage, game->progress.resultMessage, 63);
 
     GameTLVHeader_St tlv = {
         .game_id = MINI_GAME_BINGO,
         .action  = ACTION_CODE_BINGO_SYNC_STATE,
-        .length  = sizeof(BingoSyncPayload_St)
+        .length  = htons(sizeof(BingoSyncPayload_St))
     };
 
-    u8 buf[512];
+    u8 buf[1024];
+    memset(buf, 0, sizeof(buf));
     memcpy(buf, &tlv, sizeof(tlv));
     memcpy(buf + sizeof(tlv), &payload, sizeof(payload));
 
-    broadcast(0, -1, 5, buf, sizeof(tlv) + sizeof(payload));
+    broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv) + sizeof(payload));
 }
 
-void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA) return;
 
     if (len < sizeof(GameTLVHeader_St)) return;
@@ -158,6 +170,7 @@ void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u
     void* realPayload = (u8*)payload + sizeof(GameTLVHeader_St);
 
     BingoGame_St* game = (BingoGame_St*)state;
+    game->room_id = room_id;
     serverBroadcastCallback = broadcast;
 
     switch (realAction) {
@@ -168,13 +181,15 @@ void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u
             u32 randomCard = rand() % 12;
             
             memcpy(&playerCards[slot], &game->layout.choiceCards[randomCard].values, sizeof(Card_t));
-            log_info("Player %d joined Bingo (slot %u)", playerID, slot);
+            log_info("Player %d joined Bingo (slot %u)", player_id, slot);
 
-            u8 buf_ack[1024];
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = sizeof(int) };
+            u8 buf_ack[512];
+            memset(buf_ack, 0, sizeof(buf_ack));
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_BINGO, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
+            int net_id = htonl((int)slot);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &game->clientID, sizeof(int));
-            broadcast(UNICAST, playerID, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(int));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
         } break;
 
         case ACTION_CODE_BINGO_CHOOSE_CARD: {
@@ -184,10 +199,10 @@ void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u
             ActionChooseCardPayload_St p;
             memcpy(&p, realPayload, sizeof(p));
 
-            if (p.cardIndex < 12 && (u32)playerID < numPlayers) {
-                u32 slot = (u32)playerID;
+            if (p.cardIndex < 12 && (u32)player_id < numPlayers) {
+                u32 slot = (u32)player_id;
                 memcpy(&playerCards[slot], &game->layout.choiceCards[p.cardIndex].values, sizeof(Card_t));
-                log_info("Player %d chose card %u", playerID, p.cardIndex);
+                log_info("Player %d chose card %u", player_id, p.cardIndex);
             }
         } break;
 
@@ -197,13 +212,14 @@ void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u
 
             ActionDaubSquarePayload_St p;
             memcpy(&p, realPayload, sizeof(p));
-            u32 slot = (u32)playerID;
+            u32 slot = (u32)player_id;
             if (slot < numPlayers &&
                 bingo_isValidDaub(&game->currentCall, &playerCards[slot], p.row, p.col)) {
                 playerCards[slot].daubs[p.row][p.col] = true;
             }
         } break;
 
+        case ACTION_CODE_START_GAME:
         case ACTION_CODE_BINGO_START_GAME: {
             if (status != BINGO_STATUS_WAITING_CARD_CHOICE) break;
 
@@ -215,7 +231,7 @@ void bingo_onAction(void* state, int playerID, u8 action, const void* payload, u
         default: log_warn("Action code (%d) not Implemented", action);
     }
 
-    bingo_serverBroadcastSync(game, broadcast);
+    bingo_serverBroadcastSync(game, room_id, broadcast);
 }
 
 void bingo_onTick(void* state) {
@@ -243,33 +259,33 @@ void bingo_onTick(void* state) {
     // Win check
     for (u32 i = 0; i < numPlayers; ++i) {
         if (bingo_hasBingo(&playerCards[i])) {
-            game->progress.scene         = GAME_SCENE_END;
-            game->progress.resultMessage = "BINGO! Player wins!";
+            game->progress.scene = GAME_SCENE_END;
+            strncpy(game->progress.resultMessage, "BINGO! Player wins!", 63);
             status = BINGO_STATUS_ENDED;
             break;
         }
     }
 
-    if (game->balls.remainingCount == 0) {
-        game->progress.scene         = GAME_SCENE_END;
-        game->progress.resultMessage = "No more balls - Game Over";
+    if (game->balls.remainingCount == 0 && status != BINGO_STATUS_ENDED) {
+        game->progress.scene = GAME_SCENE_END;
+        strncpy(game->progress.resultMessage, "No more balls - Game Over", 63);
         status = BINGO_STATUS_ENDED;
     }
 
-    bingo_serverBroadcastSync(game, serverBroadcastCallback);
+    bingo_serverBroadcastSync(game, game->room_id, serverBroadcastCallback);
 }
 
-void bingo_onPlayerLeave(void* state, int playerID) {
+void bingo_onPlayerLeave(void* state, s32 player_id) {
     UNUSED(state);
     
-    if (playerID < 0 || (u32)playerID >= numPlayers) return;
+    if (player_id < 0 || (u32)player_id >= numPlayers) return;
 
     // Simple shift for demo
-    for (u32 i = (u32)playerID; i < numPlayers - 1; ++i) {
+    for (u32 i = (u32)player_id; i < numPlayers - 1; ++i) {
         playerCards[i] = playerCards[i + 1];
     }
     numPlayers--;
-    log_info("Player %d left Bingo room", playerID);
+    log_info("Player %d left Bingo room", player_id);
 }
 
 void bingo_destroyInstance(void* state) {

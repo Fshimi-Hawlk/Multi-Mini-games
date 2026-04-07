@@ -11,7 +11,7 @@
 #include "utils/utils.h"
 
 void bingo_computeLayout(Layout_St* layout) {
-    layout->windowCenter = (f32Vector2) {
+    layout->windowCenter = (Vector2) {
         WINDOW_WIDTH / 2.0f,
         WINDOW_HEIGHT / 2.0f
     };
@@ -23,7 +23,7 @@ void bingo_computeLayout(Layout_St* layout) {
         .height = mainCell
     };
 
-    f32Vector2 offset = {
+    Vector2 offset = {
         layout->windowCenter.x - mainCell / 2.0f,
         layout->windowCenter.y + mainCell / 2.0f
     };
@@ -45,7 +45,7 @@ void bingo_computeLayout(Layout_St* layout) {
         layout->cardRect.height - 15
     };
 
-    // ── Choice cards (precomputed grid) ─────────────────────────────────────
+    // Choice cards (precomputed grid) 
     const f32 scale  = 0.75f;
     const f32 margin = 45.0f;
     const uint rows  = 3;

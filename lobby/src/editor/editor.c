@@ -8,12 +8,10 @@
 #include "editor/editor.h"
 #include "editor/types.h"
 #include "editor/properties.h"
-
 #include "widgets/scrollFrame.h"
-
 #include "systemSettings.h"
 
-// ── Editor initialization ───────────────────────────────────────────────────
+// Editor state 
 EditorDragMode_Et editorDragMode = DRAG_NONE;
 ResizeHandle_Et activeHandle = HANDLE_NONE;
 Vector2 dragStartWorld = {0.0f, 0.0f};
@@ -55,11 +53,35 @@ TextButton_St btnLoad  = { .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, .text = "Load
 TextButton_St btnSave  = { .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, .text = "Save",  .baseColor = GREEN };
 TextButton_St btnGenerate  = { .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, .text = "Code",  .baseColor = PURPLE };
 
+extern LobbyGame_St lobby_game;
+extern void updateEditor(LobbyGame_St* game, float dt);
+extern void drawEditor(const LobbyGame_St* const game);
+
+static void editor_interface_init(void) {
+    initEditor(&lobby_game);
+}
+
+static void editor_interface_update(float dt) {
+    updateEditor(&lobby_game, dt);
+}
+
+static void editor_interface_draw(void) {
+    drawEditor(&lobby_game);
+}
+
+GameClientInterface_St editorClientInterface = {
+    .id      = MINI_GAME_EDITOR,
+    .name    = "Level Editor",
+    .init    = editor_interface_init,
+    .update  = editor_interface_update,
+    .draw    = editor_interface_draw,
+    .on_data = NULL
+};
+
 void initEditor(LobbyGame_St* const game) {
     // Reset drag & selection state
     editorDragMode = DRAG_NONE;
     activeHandle = HANDLE_NONE;
-
 
     showHelpPanel = false;
     showSelectionBox = true;
@@ -74,9 +96,9 @@ void initEditor(LobbyGame_St* const game) {
     game->showPropertiesPanel = false;
 
     // Initialize scroll frames
-    scrollFrameInit(&paletteScroll,    10.0f);
-    scrollFrameInit(&helpScroll,       10.0f);
-    scrollFrameInit(&propertiesScroll, 10.0f);
+    scrollFrameInit(&paletteScroll, (Rectangle){0, 80, 250, GetScreenHeight() - 80}, (Rectangle){0, 0, 250, 1000});
+    scrollFrameInit(&helpScroll, (Rectangle){260, 80, 400, 500}, (Rectangle){0, 0, 400, 2000});
+    scrollFrameInit(&propertiesScroll, (Rectangle){GetScreenWidth() - 300, 80, 300, GetScreenHeight() - 80}, (Rectangle){0, 0, 300, 2000});
 
     propertiesInit();
 

@@ -1,19 +1,18 @@
 /**
     @file setups/game.h
     @author Grok (assisted)
-    @date 2026-03-27
+    @date 2026-03-30
     @brief Central game state and initialization for the lobby.
-
-    Manages dynamic terrain array and provides init/free functions.
-    Replaces scattered global initialization from app.c and clientInterface.c.
 */
 
 #ifndef SETUPS_GAME_H
 #define SETUPS_GAME_H
 
+#include "APIs/generalAPI.h"
+#include "utils/userTypes.h"
+
 /**
     @brief Initializes all game-related data (dynamic terrains, etc.).
-    Should be called after window creation but before editor or gameplay starts.
 */
 Error_Et gameInit(void);
 

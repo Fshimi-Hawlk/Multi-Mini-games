@@ -553,7 +553,7 @@ RMAPI int Vector2Equals(Vector2 p, Vector2 q)
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 RMAPI Vector2 Vector2Refract(Vector2 v, Vector2 n, float r)
 {
     Vector2 result = { 0 };
@@ -1203,7 +1203,7 @@ RMAPI int Vector3Equals(Vector3 p, Vector3 q)
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 RMAPI Vector3 Vector3Refract(Vector3 v, Vector3 n, float r)
 {
     Vector3 result = { 0 };

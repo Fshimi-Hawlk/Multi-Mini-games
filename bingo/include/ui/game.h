@@ -19,6 +19,7 @@
 #include "utils/userTypes.h"
 
 void bingo_drawChoiceCards(const Layout_St* layout);
+void bingo_computeLayout(Layout_St* layout);
 
 /**
     @brief Draws the player card.

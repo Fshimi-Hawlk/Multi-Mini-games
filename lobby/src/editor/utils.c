@@ -77,7 +77,7 @@ bool terrainsOverlap(const LobbyTerrain_St* const a, const LobbyTerrain_St* cons
     return CheckCollisionRecs(a->rect, b->rect);
 }
 
-/* ── Editor-specific helpers ─────────────────────────────────────────────── */
+/*  Editor-specific helpers  */
 
 Vector2 getMouseWorld(const LobbyGame_St* const game) {
     return GetScreenToWorld2D(GetMousePosition(), game->cam);

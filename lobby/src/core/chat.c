@@ -1,16 +1,11 @@
 #include "utils/globals.h"
 #include "networkInterface.h"
-
 #include "core/chat.h"
-<<<<<<< HEAD
 #include "APIs/generalAPI.h"
-
 #include <string.h>
 #include <stdio.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-=======
->>>>>>> origin/mgit-PR1-20-03
+#include <arpa/inet.h>
 
 static float msgVisibleTimer = 0.0f;
 
@@ -25,7 +20,6 @@ void addChatMessage(const char* sender, const char* text) {
     lobby_game.chat.head = (lobby_game.chat.head + 1) % MAX_CHAT_HISTORY;
     if (lobby_game.chat.count < MAX_CHAT_HISTORY) lobby_game.chat.count++;
     
-    // Make chat visible for 7 seconds
     msgVisibleTimer = 7.0f;
 }
 
@@ -33,21 +27,14 @@ void updateChat(void) {
     float dt = GetFrameTime();
     if (msgVisibleTimer > 0) msgVisibleTimer -= dt;
 
-    // Force close with ESC
-    if (IsKeyPressed(KEY_ESCAPE)) {
+    if (IsKeyPressed(KEY_ESCAPE) && lobby_game.chat.isOpen) {
         lobby_game.chat.isOpen = false;
         return;
     }
 
-<<<<<<< HEAD
-    if (!gameChat.isOpen && IsKeyPressed(KEY_T)) {
-        gameChat.isOpen = true;
-        // Consume the 'T' key so it doesn't get typed
-        GetCharPressed(); 
-=======
     if (!lobby_game.chat.isOpen && IsKeyPressed(KEY_T)) {
         lobby_game.chat.isOpen = true;
->>>>>>> origin/mgit-PR1-20-03
+        GetCharPressed(); // Consume 'T'
     }
 
     if (lobby_game.chat.isOpen) {
@@ -68,25 +55,20 @@ void updateChat(void) {
         }
 
         if (IsKeyPressed(KEY_ENTER)) {
-<<<<<<< HEAD
-            if (gameChat.inputPos > 0 && networkSocket != -1) {
-                GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = (u16)strlen(gameChat.inputBuffer) + 1 };
-=======
             if (lobby_game.chat.inputPos > 0 && networkSocket != -1) {
-                GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = (u16)strlen(lobby_game.chat.inputBuffer) + 1 };
->>>>>>> origin/mgit-PR1-20-03
-                RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_CHAT, &h);
+                u16 payloadLen = (u16)strlen(lobby_game.chat.inputBuffer) + 1;
+                GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = htons(payloadLen) };
+                RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+                h.sender_id = htons((u16)lobby_game.id);
                 
                 u8 buffer[2048];
                 size_t offset = 0;
                 memcpy(buffer + offset, &h, sizeof(h)); offset += sizeof(h);
                 memcpy(buffer + offset, &tlv, sizeof(tlv)); offset += sizeof(tlv);
-                memcpy(buffer + offset, lobby_game.chat.inputBuffer, tlv.length); offset += (size_t)tlv.length;
+                memcpy(buffer + offset, lobby_game.chat.inputBuffer, payloadLen); offset += (size_t)payloadLen;
                 
                 send(networkSocket, buffer, offset, 0);
-
                 addChatMessage("Moi >", lobby_game.chat.inputBuffer);
-
                 lobby_game.chat.inputPos = 0;
                 lobby_game.chat.inputBuffer[0] = '\0';
             }
@@ -97,15 +79,14 @@ void updateChat(void) {
 
 static void drawTextWrapped(Font font, const char* text, Vector2 pos, float width, float fontSize, float spacing, Color color) {
     int length = strlen(text);
-    char buffer[MAX_CHAT_MSG_LEN + 32];
-    strcpy(buffer, text);
+    char buffer[MAX_CHAT_MSG_LEN + MAX_NICKNAME_LEN + 8];
+    strncpy(buffer, text, sizeof(buffer)-1);
     
     int start = 0;
-    int end = 0;
     float currentY = pos.y;
 
     while (start < length) {
-        end = start;
+        int end = start;
         int lastSpace = -1;
         while (end < length) {
             char saved = buffer[end + 1];
@@ -118,9 +99,7 @@ static void drawTextWrapped(Font font, const char* text, Vector2 pos, float widt
             end++;
         }
 
-        if (end < length && lastSpace != -1 && lastSpace > start) {
-            end = lastSpace;
-        }
+        if (end < length && lastSpace != -1 && lastSpace > start) end = lastSpace;
 
         char saved = buffer[end];
         buffer[end] = '\0';
@@ -134,46 +113,21 @@ static void drawTextWrapped(Font font, const char* text, Vector2 pos, float widt
 }
 
 void drawChat(void) {
-<<<<<<< HEAD
-    // Safety check for fonts
-    if (!IsFontValid(lobby_fonts[FONT16])) {
-        // Fallback to default font if lobby_fonts failed to load
-        if (!gameChat.isOpen && msgVisibleTimer <= 0) {
-            DrawText("Press T to chat", 10, GetScreenHeight() - 30, 16, Fade(GRAY, 0.5f));
-            return;
-        }
-        // ... more complex fallback would be needed for full chat, but this prevents Segfault
-=======
-    // If chat is closed and no recent messages, only show hint
     if (!lobby_game.chat.isOpen && msgVisibleTimer <= 0) {
         DrawTextEx(lobby_fonts[FONT16], "Press T to chat", (Vector2){10, (float)GetScreenHeight() - 30}, 16.0f, 0.0f, Fade(GRAY, 0.5f));
->>>>>>> origin/mgit-PR1-20-03
         return;
     }
 
-    // If chat is closed and no recent messages, only show hint
-
     u32 width = 400; u32 height = 300; u32 x = 10; u32 y = GetScreenHeight() - height - 40;
-    float spacing = 0.0f;
     
-<<<<<<< HEAD
-    // Draw background 'voilage' if chat is open or there are recent messages
-    if (gameChat.isOpen || msgVisibleTimer > 0) {
-        float alpha = gameChat.isOpen ? 0.4f : (msgVisibleTimer > 1.0f ? 0.4f : msgVisibleTimer * 0.4f);
+    if (lobby_game.chat.isOpen || msgVisibleTimer > 0) {
+        float alpha = lobby_game.chat.isOpen ? 0.4f : (msgVisibleTimer > 1.0f ? 0.4f : msgVisibleTimer * 0.4f);
         DrawRectangle(x, y, width, height, Fade(BLACK, alpha));
-        if (gameChat.isOpen) DrawRectangleLines(x, y, width, height, Fade(WHITE, 0.5f));
-=======
-    // Only draw background if open
-    if (lobby_game.chat.isOpen) {
-        DrawRectangle(x, y, width, height, Fade(BLACK, 0.1f));
-        DrawRectangleLines(x, y, width, height, Fade(WHITE, 0.5f));
->>>>>>> origin/mgit-PR1-20-03
+        if (lobby_game.chat.isOpen) DrawRectangleLines(x, y, width, height, Fade(WHITE, 0.5f));
     }
 
     u32 start = (lobby_game.chat.count < MAX_CHAT_HISTORY) ? 0 : lobby_game.chat.head;
     float currentY = (float)y + 5;
-    
-    // When closed, only show last 5 messages
     u32 maxDisplay = lobby_game.chat.isOpen ? lobby_game.chat.count : 5;
     u32 displayStart = (lobby_game.chat.count > maxDisplay) ? (lobby_game.chat.count - maxDisplay) : 0;
 
@@ -184,26 +138,13 @@ void drawChat(void) {
         
         Color textColor = WHITE;
         if (!lobby_game.chat.isOpen) {
-            // Fade out based on timer
             float alpha = msgVisibleTimer > 1.0f ? 1.0f : msgVisibleTimer;
             textColor = Fade(WHITE, alpha);
         }
 
-<<<<<<< HEAD
-        drawTextWrapped(lobby_fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, (float)width - 10, 16.0f, spacing, textColor);
-=======
-        Vector2 textSize = MeasureTextEx(lobby_fonts[FONT16], fullText, 16.0f, 0.0f);
-        if (textSize.x > width - 10) {
-            DrawTextEx(lobby_fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, 16.0f, 0.0f, textColor);
-            currentY += 40;
-        } else {
-            DrawTextEx(lobby_fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, 16.0f, 0.0f, textColor);
-            currentY += 20;
-        }
->>>>>>> origin/mgit-PR1-20-03
+        drawTextWrapped(lobby_fonts[FONT16], fullText, (Vector2){(float)x + 5, currentY}, (float)width - 10, 16.0f, 0.0f, textColor);
         
-        // Dynamic Y advance (very approximate wrap count)
-        Vector2 size = MeasureTextEx(lobby_fonts[FONT16], fullText, 16.0f, spacing);
+        Vector2 size = MeasureTextEx(lobby_fonts[FONT16], fullText, 16.0f, 0.0f);
         int lines = (int)(size.x / (width - 10)) + 1;
         currentY += lines * 18;
 
@@ -213,12 +154,6 @@ void drawChat(void) {
     if (lobby_game.chat.isOpen) {
         DrawRectangle(x, y + height - 30, width, 30, Fade(BLACK, 0.3f));
         DrawRectangleLines(x, y + height - 30, width, 30, Fade(WHITE, 0.5f));
-<<<<<<< HEAD
-        DrawTextEx(lobby_fonts[FONT16], gameChat.inputBuffer, (Vector2){(float)x + 5, (float)y + height - 25}, 16.0f, 0.0f, WHITE);
-=======
         DrawTextEx(lobby_fonts[FONT16], lobby_game.chat.inputBuffer, (Vector2){(float)x + 5, (float)y + height - 25}, 16.0f, 0.0f, WHITE);
->>>>>>> origin/mgit-PR1-20-03
-    } else {
-        DrawTextEx(lobby_fonts[FONT16], "Press T to chat", (Vector2){10, (float)GetScreenHeight() - 30}, 16.0f, 0.0f, Fade(GRAY, 0.4f));
     }
 }

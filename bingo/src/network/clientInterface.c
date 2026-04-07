@@ -24,13 +24,17 @@
 #include "utils/utils.h"
 
 #include "networkInterface.h"
+#include "rudp_core.h"
 #include "logger.h"
 
 #include "APIs/generalAPI.h"
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <string.h>
 
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 // Action codes (must stay in sync with server)
-// ─────────────────────────────────────────────────────────────────────────────
+// 
 
 enum {
     ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
@@ -65,7 +69,8 @@ typedef struct {
     u32              remainingBalls;
     CallState_St     currentCall;
     GameScene_Et     scene;
-    const char*      resultMessage;
+    u32              numPlayers;
+    char             resultMessage[64];
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
@@ -80,13 +85,15 @@ static void sendToServer(u8 action, const void* data, u16 len) {
     GameTLVHeader_St tlv = {
         .game_id = MINI_GAME_BINGO,
         .action  = action,
-        .length  = len
+        .length  = htons(len)
     };
 
     RUDPHeader_St header;
     rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &header);
+    header.sender_id = htons((u16)(localGame.clientID != -1 ? localGame.clientID : 0));
 
-    u8 buffer[1024];
+    u8 buffer[2048];
+    memset(buffer, 0, sizeof(buffer));
     u32 offset = 0;
 
     memcpy(buffer + offset, &header, sizeof(header)); offset += sizeof(header);
@@ -119,7 +126,12 @@ void bingo_init(void) {
 }
 
 void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
-    UNUSED(playerId);
+    if (action != ACTION_CODE_JOIN_ACK) {
+        if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
+            log_warn("Bingo: Received data from invalid player ID: %d", playerId);
+            return;
+        }
+    }
 
     if (data == NULL) return;
 
@@ -127,7 +139,9 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
         case ACTION_CODE_JOIN_ACK: {
             if (len < sizeof(s32)) break;
 
-            memcpy(&localGame.clientID, data, sizeof(s32));
+            s32 net_id;
+            memcpy(&net_id, data, sizeof(s32));
+            localGame.clientID = ntohl(net_id);
             log_info("Bingo client received internal ID: %d", localGame.clientID);
         } break;
 
@@ -148,7 +162,11 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
             localGame.balls.remainingCount = payload.remainingBalls;
             localGame.currentCall          = payload.currentCall;
             localGame.progress.scene       = payload.scene;
-            localGame.progress.resultMessage = payload.resultMessage;
+
+            extern void updateWaitingRoomInfo(int players, int max, bool host);
+            updateWaitingRoomInfo((int)payload.numPlayers, 4, (localGame.clientID == 0));
+
+            strncpy(localGame.progress.resultMessage, payload.resultMessage, 63);
 
             // Keep local preview cards / player card choice (server only syncs shared state)
             // Daubs are client-authoritative for the player's own card (with server validation)
@@ -172,7 +190,7 @@ void bingo_update(f32 dt) {
         return;
     }
 
-    f32Vector2 mousePos = GetMousePosition();
+    Vector2 mousePos = GetMousePosition();
 
     switch (localGame.progress.scene) {
         case GAME_SCENE_CARD_CHOICE: {
@@ -245,7 +263,7 @@ void bingo_draw(void) {
             bingo_drawChoiceCards(&localGame.layout);
             char text[8] = {0};
             sprintf(text, "%.0f", localGame.currentCall.timer / 2.0f);
-            f32Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
+            Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
             DrawTextEx(bingo_fonts[FONT48], text,
                         Vector2Subtract(localGame.layout.windowCenter,
                                         Vector2Scale(textSize, 0.5f)),
@@ -262,7 +280,7 @@ void bingo_draw(void) {
             u32 w = MeasureText(localGame.progress.resultMessage, fontSize);
             Color col = (localGame.progress.resultMessage[0] == 'B') ? GREEN : RED;
 
-            f32Vector2 textPos = {
+            Vector2 textPos = {
                 localGame.layout.windowCenter.x - w / 2.0f,
                 localGame.layout.windowCenter.y - fontSize / 2.0f
             };

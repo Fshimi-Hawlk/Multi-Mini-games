@@ -7,10 +7,7 @@
 
 #include "widgets/checkBox.h"
 #include "widgets/types.h"
-
-#include "systemSettings.h"
-
-// ─────────────────────────────────────────────────────────────────────────────
+#include <string.h>
 
 bool checkBoxUpdate(CheckBox_St* cb, Vector2 mouseScreen) {
     if (cb->state == WIDGET_STATE_DISABLED) return false;
@@ -24,7 +21,7 @@ bool checkBoxUpdate(CheckBox_St* cb, Vector2 mouseScreen) {
             cb->checked = !cb->checked;
             changed = true;
         } else {
-            cb->state = WIDGET_STATE_HOVER;
+            cb->state = WIDGET_STATE_HOVERED;
         }
     } else {
         cb->state = WIDGET_STATE_NORMAL;
@@ -34,15 +31,13 @@ bool checkBoxUpdate(CheckBox_St* cb, Vector2 mouseScreen) {
 }
 
 void checkBoxDraw(const CheckBox_St* cb, Font font, f32 fontSize) {
-    // Box
-    Color boxColor = (cb->state == WIDGET_STATE_HOVER) ? Fade(LIGHTGRAY, 0.9f)
+    Color boxColor = (cb->state == WIDGET_STATE_HOVERED) ? Fade(LIGHTGRAY, 0.9f)
                    : (cb->state == WIDGET_STATE_CLICK) ? Fade(LIGHTGRAY, 0.7f)
                    : LIGHTGRAY;
 
     DrawRectangleRec(cb->bounds, boxColor);
     DrawRectangleLinesEx(cb->bounds, 2.0f, DARKGRAY);
 
-    // Check mark
     if (cb->checked) {
         DrawLineEx(
             (Vector2){cb->bounds.x + 4.0f, cb->bounds.y + cb->bounds.height * 0.5f},
@@ -54,12 +49,11 @@ void checkBoxDraw(const CheckBox_St* cb, Font font, f32 fontSize) {
             3.0f, BLACK);
     }
 
-    // Label
-    if (cb->label) {
+    if (cb->text[0] != '\0') {
         Vector2 labelPos = {
             cb->bounds.x + cb->bounds.width + 8.0f,
             cb->bounds.y + (cb->bounds.height - fontSize) * 0.5f
         };
-        DrawTextEx(font, cb->label, labelPos, fontSize, 0.0f, BLACK);
+        DrawTextEx(font, cb->text, labelPos, fontSize, 0.0f, BLACK);
     }
 }

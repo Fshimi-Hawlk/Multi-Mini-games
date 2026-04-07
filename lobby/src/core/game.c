@@ -158,11 +158,24 @@ void updatePlayer(LobbyGame_St* const game, const f32 dt) {
         }
     }
 
-    if (player->onGround) player->nbJumps = 0;
-    if (player->jumpBuffer > 0.0f && (player->onGround || (player->isInWater && pc->waterInfiniteJump))) {
-        player->velocity.y = pc->jumpForce;
-        player->onGround = false;
-        player->jumpBuffer = 0;
+    if (player->onGround) {
+        player->nbJumps = 0;
+        player->coyoteTimer = pc->coyoteTime;
+    } else if (player->coyoteTimer > 0) {
+        player->coyoteTimer -= dt;
+    }
+
+    if (player->jumpBuffer > 0.0f) {
+        bool canJump = (player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < pc->maxJumps);
+        bool inWaterJump = (player->isInWater && pc->waterInfiniteJump);
+
+        if (canJump || inWaterJump) {
+            player->velocity.y = pc->jumpForce;
+            player->onGround = false;
+            player->coyoteTimer = 0;
+            player->jumpBuffer = 0;
+            player->nbJumps++;
+        }
     }
 }
 

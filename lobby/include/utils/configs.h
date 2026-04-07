@@ -13,10 +13,10 @@
 /**
     @brief Root directory for all game assets.
 */
-#define ASSET_PATH "assets/"
+#define ASSET_PATH "lobby/assets/"
 #endif
 
-#define FONT_PATH ASSET_PATH "fonts/"
+#define FONT_PATH "assets/fonts/"
 #define IMAGES_PATH ASSET_PATH "images/"
 
 #define WINDOW_TITLE "Multi-Mini-Games"
@@ -27,9 +27,9 @@
 
 #define APP_TEXT_FONT_SIZE 32       ///< Base text size
 
-// ────────────────────────────────────────────────
+// 
 // Physics & movement tuning (lobby platformer)
-// ────────────────────────────────────────────────
+// 
 
 #define GRAVITY             1200.0f
 #define MOVE_SPEED          300.0f
@@ -40,18 +40,18 @@
 #define MAX_JUMPS           2
 #define FRICTION            2000.0f
 
-// ────────────────────────────────────────────────
+// 
 // Water terrain physics
-// ────────────────────────────────────────────────
+// 
 
 #define WATER_BUOYANCY      -320.0f
 #define WATER_HORIZ_DRAG     0.82f
 #define WATER_VERT_DRAG      0.88f
 #define WATER_JUMP_FORCE    -320.0f
 
-// ────────────────────────────────────────────────
+// 
 // Ice terrain physics
-// ────────────────────────────────────────────────
+// 
 
 #define ICE_FRICTION        120.0f
 
