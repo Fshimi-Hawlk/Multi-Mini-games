@@ -34,9 +34,9 @@
 
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Player shape / rendering helpers
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Computes the axis-aligned bounding box that fully encloses the player's circle.
@@ -60,9 +60,9 @@ Rectangle getPlayerCollisionBox(const Player_st* const player);
  */
 Vector2 getPlayerCenter(const Player_st* const player);
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Player physics & update
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Updates player position, velocity, angle, jump state, and performs collisions.
@@ -96,9 +96,9 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
  */
 void resolveCircleRectCollision(Player_st* player, const Rectangle rect);
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Skin / texture selection
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Handles skin selection via mouse clicks on preview rectangles or number keybinds.

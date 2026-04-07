@@ -62,7 +62,12 @@ void plat_get_entropy(void* data, u32 size);
 
 #endif // RAND_H
 
+/* Like arena.h / contextArena.h: implementation sits outside RAND_H. If this file is
+ * #included again in the same TU while RAND_IMPLEMENTATION stays defined (e.g. blockBlastAPI.c
+ * pulls rand.h then common.h -> rand.h), the body would be emitted twice. */
 #ifdef RAND_IMPLEMENTATION
+#ifndef RAND_IMPLEMENTATION_COMPILED
+#define RAND_IMPLEMENTATION_COMPILED
 
 static prng_state s_prng_state = { 
     0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL,
@@ -145,7 +150,7 @@ void plat_get_entropy(void* data, u32 size) {
 #include <unistd.h>
 
 void plat_get_entropy(void* data, u32 size) {
-    s32 fd = open("/dev/urandom", O_RDONLY);
+    int fd = open("/dev/urandom", O_RDONLY);
     if (fd < 0) {
         perror("open");
         exit(EXIT_FAILURE);
@@ -162,4 +167,5 @@ void plat_get_entropy(void* data, u32 size) {
 
 #endif
 
-#endif // RAND_IMPLEMENTATION
+#endif /* RAND_IMPLEMENTATION_COMPILED */
+#endif /* RAND_IMPLEMENTATION */

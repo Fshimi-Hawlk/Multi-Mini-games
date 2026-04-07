@@ -4,45 +4,6 @@
     @date 2026-02-08
     @date 2026-02-23
     @brief Lobby / hub scene - entry point and central navigation area
-
-    Contributors:
-        - LeandreB8:
-            - Provided the initial logic for init and the game loop.
-        - Fshimi-Hawlk:
-            - Moved reworked lobby's initialization, game loop and freeing logic in dedicated `lobbyAPI` files
-            - Added documentation
-
-    This module implements the main lobby scene that serves as the central hub
-    of the multi mini-game application. The player can:
-        - move around a small 2D platformer-style world,
-        - open a skin / texture selection menu,
-        - collide with designated trigger zones to launch individual mini-games.
-
-    Responsibilities:
-        - Setting seed for rand
-        - Window & camera initialization
-        - Player movement & basic platformer physics (via shared updatePlayer())
-        - Skin / player texture selection UI
-        - Collision-based mini-game activation with grace period / debounce
-        - Debug visualization (hitboxes, origin marker)
-        - Resource loading & cleanup for lobby-specific assets
-
-    Important data flow:
-      LobbyGame_St -> owns player, camera, sub-game manager state
-      SubGameManager -> controls which scene is active and whether initialization
-                       is required on next frame
-
-    Mini-game activation is currently performed via rectangular hitbox checks.
-    Future directions may include UI buttons, portals with animations, etc.
-
-    @note    Most mini-game specific logic is delegated to the corresponding
-             scene modules through the function pointer table in SubGameManager.
-
-    @see `core/game.h`       for `choosePlayerTexture()`, `toggleSkinMenu()`, `updatePlayer()`
-    @see `ui/app.h`          for `drawMenuTextures()`, `drawSkinButton()`
-    @see `ui/game.h`         for `drawPlatforms()`, `drawPlayer()`
-    @see `utils/globals.h`   for `logoSkinButton`, `platformCount`, `platforms`
-    @see `APIs/generalAPI.h` for `Error_Et`
 */
 
 #include "core/game.h"
@@ -56,25 +17,34 @@
 
 #include "lobbyAPI.h"
 #include "systemSettings.h"
+#include "APIs/snakeAPI.h"
+#include "APIs/bingoAPI.h"
+#include "APIs/blockBlastAPI.h"
+#include "APIs/puissance4API.h"
+#include "APIs/rubikscubeAPI.h"
+#include "APIs/kingforfourAPI.h"
+#include "APIs/echecsAPI.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
-    Error_Et error;
+    Error_Et error = OK;
 
     srand(time(NULL));
     SetTraceLogLevel(LOG_WARNING);
 
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
-    SetWindowPosition(100, 100);
+    (void) configs;
 
-    (void) configs; // Configs aren't used yet
-
+    /* FIX: systemSettings must be initialized BEFORE InitWindow so the window
+     * is created with the correct dimensions (not uninitialized zeroes). */
     systemSettings = DEFAULT_SYSTEM_SETTING;
     systemSettings.video.resizable = true;
     systemSettings.video.title = "Lobby";
+
+    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
+    SetWindowPosition(100, 100);
+
     error = applySystemSettings();
     if (error != OK) {
-        log_error("System settings couldn't be applied corretly");
+        log_error("System settings couldn't be applied correctly");
     }
 
     (*game) = malloc(sizeof(LobbyGame_St));
@@ -83,60 +53,123 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     LobbyGame_St* gameRef = *game;
     memset(gameRef, 0, sizeof(*gameRef));
 
-    /** Hitbox that triggers the Tetris mini-game when player collides */
+    /* Hitboxes posées sur le sol (floor top = y:500, hitbox height = 75 → y:425)
+     * Réparties en x de -350 à +350 pour couvrir toute la zone de jeu. */
     gameRef->subGameManager.gameHitboxes[GAME_SCENE_TETRIS] = (Rectangle) {
-        .x      = 600,
-        .y      = -150,
+        .x      = -350,
+        .y      = 425,
         .width  = 75,
         .height = 75
     };
 
-    /** Current active scene (lobby or one of the mini-games) */
-    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
-    
-    /** Flag: game needs initialization on next frame */
-    gameRef->subGameManager.needGameInit = false;
-    
-    /** Player controlled by the user in the lobby */
-    gameRef->player = (Player_st) {
-        .position   = {0, 250},
-        .radius     = 20,
-        .coyoteTime = 0.1f,
-        .coyoteTimer= 0.1f,
-        .jumpBuffer = 0.2f
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_SOLITAIRE] = (Rectangle) {
+        .x      = -125,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
     };
 
-    gameRef->player.unlockedTextures[PLAYER_TEXTURE_DEFAULT] = 1;
-    gameRef->player.unlockedTextures[PLAYER_TEXTURE_EARTH] = 1;
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_SUIKA] = (Rectangle) {
+        .x      = 100,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
 
-    /** Camera following the player in 2D mode */
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_BOWLING] = (Rectangle) {
+        .x      = 325,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_GOLF] = (Rectangle) {
+        .x      = 550,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_SNAKE] = (Rectangle) {
+        .x      = 775,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_BINGO] = (Rectangle) {
+        .x      = 1000,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_BLOCKBLAST] = (Rectangle) {
+        .x      = 1225,
+        .y      = 425,
+        .width  = 75,
+        .height = 75
+    };
+
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_PUISSANCE4] = (Rectangle) {
+        .x = -575, .y = 425, .width = 75, .height = 75
+    };
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_RUBIKSCUBE] = (Rectangle) {
+        .x = -800, .y = 425, .width = 75, .height = 75
+    };
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_KINGFORFOUR] = (Rectangle) {
+        .x = -1025, .y = 425, .width = 75, .height = 75
+    };
+    gameRef->subGameManager.gameHitboxes[GAME_SCENE_ECHECS] = (Rectangle) {
+        .x = -1250, .y = 425, .width = 75, .height = 75
+    };
+
+    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
+    gameRef->subGameManager.needGameInit = false;
+
+    /* FIX: coyoteTime removed from struct — we now only initialize coyoteTimer.
+     * jumpBuffer initialized to 0: the buffer should not be active at spawn. */
+    gameRef->player = (Player_st) {
+        .position    = { 0, 540 },  /* spawn above floor: floor_y(500) - radius(20) - margin(40) */
+        .radius      = 20,
+        .coyoteTimer = COYOTE_TIME,
+        .jumpBuffer  = 0.0f
+    };
+
+    gameRef->player.unlockedTextures[PLAYER_TEXTURE_DEFAULT]   = 1;
+    gameRef->player.unlockedTextures[PLAYER_TEXTURE_EARTH]     = 1;
+
     gameRef->cam = (Camera2D) {
-        .offset = {systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f},
+        .offset = { systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f },
         .zoom   = 1.0f,
     };
-    
+
     gameRef->playerVisuals.defaultTextureRect = (Rectangle) {
         .x = 20, .y = 60, .width = 50, .height = 50
     };
 
-    // Load shared UI textures
     gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH] = LoadTexture(IMAGES_PATH "earth.png");
     if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "earth.png");
-        error =  ERROR_TEXTURE_LOAD;
+        log_warn("%s couldn't be loaded properly.", IMAGES_PATH "earth.png");
+        /* FIX: use |= so that a previous error is never silently lost when a
+         * subsequent texture loads successfully and would overwrite 'error'. */
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
     }
-    
+
     gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(IMAGES_PATH "trollFace.png");
     if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "trollFace.png");
-        error =  ERROR_TEXTURE_LOAD;
+        log_warn("%s couldn't be loaded properly.", IMAGES_PATH "trollFace.png");
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
     }
-    
+
     logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
     if (!IsTextureValid(logoSkinButton)) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
-        error =  ERROR_TEXTURE_LOAD;
+        log_warn("%s couldn't be loaded properly.", IMAGES_PATH "logoSkin.png");
+        error = (error != OK) ? error : ERROR_TEXTURE_LOAD;
     }
+
+    // Initialize parameters menu (settings button)
+    paramsMenu_init(&paramsMenu);
 
     return error;
 }
@@ -145,47 +178,122 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     if (game == NULL) return ERROR_NULL_POINTER;
 
     f32 dt = GetFrameTime();
-    static f32 lobbyTextXPos;
+
+    /* FIX: skinButtonRect is a global initialized with compile-time constants
+     * (WINDOW_WIDTH/HEIGHT = 800/600) but the lobby runs at 1200×800 and can be
+     * resized at any time. Recalculate here every frame so hit-testing and
+     * rendering always match the actual window size. */
+    skinButtonRect.x = GetScreenWidth()  - 70;
+    skinButtonRect.y = GetScreenHeight() / 2.0f - 25;
 
     updatePlayer(&game->player, platforms, platformCount, dt);
     game->cam.target = game->player.position;
+    /* Recalculate offset each frame — window may have been resized by a mini-game */
+    game->cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
 
     toggleSkinMenu(game);
+
+    // Update params menu (settings button clicks)
+    paramsMenu_update(&paramsMenu);
 
     if (game->playerVisuals.isTextureMenuOpen) {
         choosePlayerTexture(&game->player, game);
     }
 
-    // Collision check with game zone
     for (u8 i = 1; i < __gameSceneCount; ++i) {
         if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->subGameManager.gameHitboxes[i])) {
-            if (!game->subGameManager.gameHitGracePeriodActive) {
+            // Vérifier si la touche E est pressée pour lancer le jeu
+            if (IsKeyPressed(KEY_E)) {
                 game->subGameManager.currentScene = i;
                 game->subGameManager.needGameInit = true;
-                game->subGameManager.gameHitGracePeriodActive = true;
             }
         } else if (game->subGameManager.gameHitGracePeriodActive) {
             game->subGameManager.gameHitGracePeriodActive = false;
         }
     }
 
+    // Teleport to center when ENTER is pressed
+    if (IsKeyPressed(KEY_ENTER)) {
+        game->player.position = (Vector2){ 0, 440 };
+        game->player.velocity = (Vector2){ 0, 0 };
+    }
+
     BeginDrawing(); {
-        ClearBackground(RAYWHITE);
+        ClearBackground((Color){135, 206, 235, 255}); /* ciel bleu */
 
         BeginMode2D(game->cam); {
-            DrawCircle(0, 0, 10, RED);          // Debug origin marker
+            /* Fond de ciel en world-space (large rectangle derrière tout) */
+            DrawRectangle(-2000, -2000, 4000, 2500, (Color){135, 206, 235, 255});
+            /* Sol herbe */
+            DrawRectangle(-1000, 500, 2000, 1000, (Color){34, 139, 34, 255});
+
             drawPlayer(game, &game->player);
             drawPlatforms(platforms, platformCount);
 
             for (u8 i = 1; i < __gameSceneCount; ++i) {
-                DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
+                Rectangle hitbox = game->subGameManager.gameHitboxes[i];
+
+                /* Couleur et nom par jeu */
+                const char* gameName = "";
+                Color portalColor = RED;
+                switch (i) {
+                    case GAME_SCENE_TETRIS:    gameName = "Tetris";    portalColor = (Color){0, 120, 220, 200}; break;
+                    case GAME_SCENE_SOLITAIRE: gameName = "Solitaire"; portalColor = (Color){0, 160, 80,  200}; break;
+                    case GAME_SCENE_SUIKA:     gameName = "Suika";     portalColor = (Color){220, 80, 0,  200}; break;
+                    case GAME_SCENE_BOWLING:   gameName = "Bowling";   portalColor = (Color){140, 0, 200, 200}; break;
+                    case GAME_SCENE_GOLF:      gameName = "Golf 3D";   portalColor = (Color){ 20, 160,  50, 200}; break;
+                    case GAME_SCENE_SNAKE:      gameName = "Snake";      portalColor = (Color){  0, 200,  80, 200}; break;
+                    case GAME_SCENE_BINGO:      gameName = "Bingo";      portalColor = (Color){255, 200,   0, 200}; break;
+                    case GAME_SCENE_BLOCKBLAST: gameName = "BlockBlast"; portalColor = (Color){ 60,  60, 200, 200}; break;
+                    case GAME_SCENE_PUISSANCE4:  gameName = "Puissance4"; portalColor = (Color){255,  80,   0, 200}; break;
+                    case GAME_SCENE_RUBIKSCUBE:  gameName = "Rubik's";    portalColor = (Color){255, 255,  50, 200}; break;
+                    case GAME_SCENE_KINGFORFOUR: gameName = "King4Four";  portalColor = (Color){200,  30,  30, 200}; break;
+                    case GAME_SCENE_ECHECS:      gameName = "Echecs";     portalColor = (Color){180, 140,  80, 200}; break;
+                }
+
+                bool playerNear = CheckCollisionCircleRec(
+                    game->player.position, game->player.radius, hitbox);
+
+                /* Portal: fond coloré + bordure blanche si proche */
+                DrawRectangleRec(hitbox, portalColor);
+                if (playerNear)
+                    DrawRectangleLinesEx(hitbox, 3, WHITE);
+
+                /* Icône centrale (flèche vers le haut) */
+                f32 cx = hitbox.x + hitbox.width / 2.0f;
+                f32 cy = hitbox.y + hitbox.height / 2.0f;
+                DrawTriangle(
+                    (Vector2){cx,        cy - 18},
+                    (Vector2){cx - 12,   cy + 8},
+                    (Vector2){cx + 12,   cy + 8},
+                    WHITE);
+
+                /* Nom du jeu au-dessus du portail */
+                f32 nameWidth = MeasureText(gameName, 14);
+                DrawText(gameName,
+                    hitbox.x + (hitbox.width - nameWidth) / 2.0f,
+                    hitbox.y - 20, 14, WHITE);
+
+                /* "[ E ]" en dessous si proche */
+                if (playerNear) {
+                    const char* prompt = "[ E ]";
+                    f32 pw = MeasureText(prompt, 12);
+                    DrawText(prompt,
+                        hitbox.x + (hitbox.width - pw) / 2.0f,
+                        hitbox.y + hitbox.height + 4, 12, YELLOW);
+                }
             }
         } EndMode2D();
 
-        lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+        /* FIX: use GetScreenWidth() — systemSettings.video.width may lag behind
+         * the actual window size if the user resized the window manually. */
+        f32 lobbyTextXPos = (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
         DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
         drawSkinButton();
+
+        // Draw params menu (settings button)
+        paramsMenu_draw(&paramsMenu);
 
         if (game->playerVisuals.isTextureMenuOpen) {
             drawMenuTextures(game);
@@ -210,6 +318,9 @@ Error_Et lobby_freeGame(LobbyGame_St** game) {
     }
 
     UnloadTexture(logoSkinButton);
+
+    // Cleanup params menu
+    paramsMenu_free(&paramsMenu);
 
     free(gameRef);
     *game = NULL;

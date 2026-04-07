@@ -23,9 +23,12 @@
 
 #include "userTypes.h"
 
-// ────────────────────────────────────────────────
+// Params menu - include the header for the type definition
+#include "include/ui/paramsMenu.h"
+
+// ------------------------------------------------
 // Window & display
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     Rectangle describing the full client area of the application window.
@@ -33,9 +36,9 @@
 */
 extern Rectangle windowRect;
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Fonts
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Default font used for most UI labels, buttons and in-game text.
@@ -50,9 +53,9 @@ extern Font      appFont;
 */
 extern Font      fonts[_fontSizeCount];
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Lobby world content
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     brief Static array of platform definitions for the lobby scene.
@@ -66,9 +69,9 @@ extern Platform_st platforms[];
 */
 extern u32 platformCount;
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Skin selection UI
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     brief Screen-space rectangle where the "change skin" button is drawn and clickable.
@@ -81,5 +84,14 @@ extern Rectangle skinButtonRect;
           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;
+
+// ------------------------------------------------
+// Parameters menu (settings/resolution)
+// ------------------------------------------------
+
+/**
+    @brief Global parameters menu state (settings button + resolution selector).
+*/
+extern ParamsMenu_St paramsMenu;
 
 #endif // UTILS_GLOBALS_H

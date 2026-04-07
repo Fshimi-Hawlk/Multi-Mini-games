@@ -1,5 +1,5 @@
-# ───────────────────────────────────────────────────────────────
-# Makefile ─ Project build system
+# ---------------------------------------------------------------
+# Makefile - Project build system
 #
 #     Main targets: see 'make help' for the full list and descriptions
 #     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
@@ -8,7 +8,22 @@
 #     Quick usage        ->  make help
 #
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
-# ───────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------
+
+# ---------------------------------------------------------------
+# Auto-detect game libraries when built standalone (not via root Makefile).
+# Must be set BEFORE 00-config.mk so EXTRA_LDFLAGS is set when
+# LDFLAGS += $(EXTRA_LDFLAGS) is evaluated during that include.
+# ---------------------------------------------------------------
+ifeq ($(strip $(EXTRA_LDFLAGS)),)
+    _GAME_LIBS := $(wildcard ../build/lib/lib*.a)
+    ifneq ($(strip $(_GAME_LIBS)),)
+        $(info [lobby] Auto-detected game libs: $(_GAME_LIBS))
+        EXTRA_LDFLAGS := $(_GAME_LIBS)
+    else
+        $(info [lobby] No game libs in ../build/lib/ — run 'make libs' from project root first.)
+    endif
+endif
 
 MAKEFILE_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 include $(MAKEFILE_DIR)make/00-config.mk

@@ -28,9 +28,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Fixed-width scalar types
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 typedef uint8_t   u8;     ///< 8-bit unsigned integer
 typedef int8_t    s8;     ///< 8-bit signed integer
@@ -47,9 +47,9 @@ typedef int64_t   s64;    ///< 64-bit signed integer
 typedef float     f32;    ///< 32-bit IEEE 754 floating-point
 typedef double    f64;    ///< 64-bit IEEE 754 floating-point
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Convenience shorthand aliases (use when readability > exact size)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 typedef unsigned char       uchar;   ///< Shorthand for unsigned char
 typedef unsigned short      ushort;  ///< Shorthand for unsigned short
@@ -60,9 +60,9 @@ typedef unsigned long long  ullong;  ///< Shorthand for unsigned long long
 typedef struct { int  x, y; } iVector2;   ///< Signed int 2D vector - convenient when exact 32-bit width is not required.
 typedef struct { uint x, y; } uVector2;   ///< Unsigned int 2D vector - convenient when exact 32-bit width is not required.
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // 2D vector types (integer components)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 typedef struct { u8  x, y; } u8Vector2;   ///< 8-bit unsigned integer coordinates
 typedef struct { s8  x, y; } s8Vector2;   ///< 8-bit signed integer coordinates
@@ -76,9 +76,9 @@ typedef struct { s32 x, y; } s32Vector2;  ///< 32-bit signed (common for large g
 typedef struct { u64 x, y; } u64Vector2;  ///< 64-bit unsigned (rare - mostly for very large indices)
 typedef struct { s64 x, y; } s64Vector2;  ///< 64-bit signed
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // 2D vector types (floating-point)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #ifndef f32Vector2_def
 /**

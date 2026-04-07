@@ -32,9 +32,9 @@
 
 #include "stdbool.h"
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Error codes (used project-wide)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Standardized error codes for initialization, operations and resource loading.
@@ -59,9 +59,9 @@ typedef enum {
     // Future extension point: add more codes here as needed
 } Error_Et;
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Game interface
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Opaque forward declaration of the concrete game state.

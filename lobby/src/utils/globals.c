@@ -30,26 +30,35 @@
 
 #include "utils/globals.h"
 
+#include "include/ui/paramsMenu.h"
+
 Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 Font      fonts[_fontSizeCount] = {0};
 Font      appFont = {0};
 
 Platform_st platforms[] = {
-    {{-1000, 500, 2000, 1000}, {0, 228, 48, 255}, 0},
-    {{-1000, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{500, 0, 500, 500}, {0, 0, 0, 255}, 0},
-    {{-350, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 400, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-200, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{100, 300, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-50, 200, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{-350, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
-    {{250, 150, 100, 30}, {127, 106, 79, 255}, 0.5},
+    /* Sol principal */
+    {{-1000, 500, 2000, 1000}, {34, 139, 34, 255}, 0},
+    /* Murs latéraux (pierre) */
+    {{-1000, 0, 500, 500}, {80, 70, 60, 255}, 0},
+    {{500, 0, 500, 500}, {80, 70, 60, 255}, 0},
+    /* Plateformes bois */
+    {{-350, 400, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{250, 400, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{-200, 300, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{100, 300, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{-50, 200, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{-350, 150, 100, 30}, {139, 90, 43, 255}, 0.3},
+    {{250, 150, 100, 30}, {139, 90, 43, 255}, 0.3},
 };
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
 Rectangle skinButtonRect = {
+    /* FIX: This initial value uses WINDOW_WIDTH/HEIGHT (800/600) but the lobby
+     * actually runs at 1200×800 and can be resized. The rect is recalculated
+     * dynamically every frame via skinButtonRect_get() in ui/app.c and
+     * core/game.c; this static value is only used before the first frame. */
     .x = WINDOW_WIDTH - 70,
     .y = WINDOW_HEIGHT / 2.0f - 25,
     .width = 50,
@@ -57,3 +66,6 @@ Rectangle skinButtonRect = {
 };
 
 Texture2D logoSkinButton;
+
+// Parameters menu state
+ParamsMenu_St paramsMenu = {0};

@@ -33,9 +33,9 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // C Standard Library
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,15 +48,15 @@
 #include <math.h>
 #include <assert.h>
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Project utilities (currently used / active)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #include "logger.h"                 // logging macros and functions (log_info, log_warn, etc.)
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Third-party / single-header libraries
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 // #include "rand.h"                // custom PRNG - not currently used in lobby
 
@@ -70,17 +70,17 @@
 // #include "nob/stringBuilder.h"   // string builder - not used in current codebase
 // #include "stringView.h"          // lightweight string view - not used in current codebase
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Raylib core + helpers
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #include "raylib.h"                 // main Raylib API (drawing, input, window, audio, …)
 #include "raymath.h"                // vector/matrix/math helpers
 #include "rlgl.h"                   // low-level OpenGL abstraction (used rarely)
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Project foundational headers
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).

@@ -404,5 +404,7 @@ Rectangle getTextureRec(const Texture texture);
 ## Credits
 
 **Created: January 15, 2025**  
-**Last updated: March 02, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: March 17, 2026**  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+- Maxime CHAUVEAU

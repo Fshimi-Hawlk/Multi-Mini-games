@@ -1,12 +1,18 @@
-# ───────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------
 # OS detection (runs on the machine where "make" is invoked)
-# ───────────────────────────────────────────────────────────────
+# ---------------------------------------------------------------
 UNAME_S := $(shell uname -s)
+UNAME_R := $(shell uname -r)
 
 ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
     OS := darwin
 else ifeq ($(findstring Linux,$(UNAME_S)),Linux)
-    OS := linux
+    # WSL reports Linux but contains "microsoft" in the kernel release string
+    ifneq ($(findstring microsoft,$(UNAME_R)),)
+        OS := wsl
+    else
+        OS := linux
+    endif
 else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
     OS := mingw
 else ifeq ($(findstring MSYS,$(UNAME_S)),MSYS)
@@ -109,7 +115,9 @@ else ifeq ($(MODE),clang-debug)
 	endif
 else ifeq ($(MODE),valgrind-debug)
 	ifneq ($(OS),linux)
-        $(error valgrind-debug mode is only supported on Linux (native Valgrind unavailable on $(OS)))
+	ifneq ($(OS),wsl)
+        $(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
+    endif
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
@@ -144,11 +152,11 @@ endif
 
 # Combine with base
 CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
+LDFLAGS += $(EXTRA_LDFLAGS)
 
 # Allow extras from command line
 CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+LDFLAGS += $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
 LIB_NAME := lobby

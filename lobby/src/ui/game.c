@@ -33,7 +33,9 @@
 
 void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
     if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
-        DrawCircleV(player->position, player->radius, BLUE);
+        /* player->position is the top-left corner of the collision box, not the center */
+        Vector2 center = { player->position.x + player->radius, player->position.y + player->radius };
+        DrawCircleV(center, player->radius, BLUE);
     }
     else {
         DrawTexturePro(

@@ -7,7 +7,13 @@ BASE_CFLAGS := \
 	-I../firstparty \
 
 # Linker base
+# -l:libraylib.a  : bundled raylib 5.5 static (avoids system version conflicts)
+# -lGL            : OpenGL (required by raylib on Linux)
+# -lm -lpthread -ldl : standard C + threading + dynamic linking
 BASE_LDFLAGS := \
 	-L$(RAYLIB_LIB_DIR) \
 	-l:libraylib.a \
-	-lm
+	-lGL \
+	-lm \
+	-lpthread \
+	-ldl

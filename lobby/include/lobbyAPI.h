@@ -40,10 +40,10 @@ typedef struct {
 #define lobby_initGame(game, ...) \
     lobby_initGame__full(game, (LobbyConfigs_St){ .__useless = 0, __VA_ARGS__ })
 
-/* ────────────────────────────────────────────────────────────────────────────
+/* ----------------------------------------------------------------------------
    Core game lifecycle functions
    All functions follow the naming pattern: lobby_*
-   ──────────────────────────────────────────────────────────────────────────── */
+   ---------------------------------------------------------------------------- */
 
 /**
     @brief Allocates and initializes a new Lobby game instance.

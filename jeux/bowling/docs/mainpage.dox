@@ -1,0 +1,122 @@
+/**
+ * @mainpage Bowling Mini-Game API Documentation
+ *
+ * @section intro Introduction
+ *
+ * Welcome to the Bowling Mini-Game API documentation. This project provides
+ * a complete 3D bowling game implementation using Raylib, featuring realistic
+ * physics, dynamic camera system, and full scoring mechanics.
+ *
+ * @section desc Project Description
+ *
+ * The Bowling Mini-Game is a software implementation of a classic 10-pin bowling
+ * game built with Raylib for 3D graphics rendering. The game offers an immersive
+ * bowling experience with realistic ball physics, pin collision dynamics, and
+ * authentic scoring rules following official bowling regulations.
+ *
+ * The project is designed as a modular mini-game that can be integrated into
+ * a larger multi-game lobby system, featuring an opaque API for clean separation
+ * of concerns.
+ *
+ * @section features Features Implemented
+ *
+ * @subsection spin Ball Spin Mechanics
+ * - Adjustable spin amount using A/D keys
+ * - Visual spin indicator showing direction (Left/Right/Straight)
+ * - Realistic spin effect on ball trajectory
+ * - Spin decay over time during roll
+ * - Visual curve preview in aim guide
+ *
+ * @subsection camera Dynamic Camera System
+ * - Smooth camera following during ball roll
+ * - Lerp-based camera transitions
+ * - Automatic return to default position after roll
+ * - Configurable camera offset and lerp speed
+ * - Perspective projection with 45-degree FOV
+ *
+ * @subsection physics Physics Simulation
+ * - Ball physics with velocity and friction
+ * - Pin collision detection and response
+ * - Pin-to-pin collision chain reactions
+ * - Tumble physics for fallen pins
+ * - Angular velocity and rotation for pins
+ * - Gravity simulation for falling pins
+ * - Gutter detection and handling
+ * - Ball shadow and pin shadow rendering
+ *
+ * @subsection scoring Full Scoring System
+ * - Complete 10-frame bowling rules
+ * - Strike detection and bonus calculation
+ * - Spare detection and bonus calculation
+ * - Special 10th frame rules (bonus rolls)
+ * - Cumulative score tracking per frame
+ * - Real-time scoreboard display
+ * - End-game statistics (strikes, spares, gutters, average)
+ *
+ * @subsection visuals Visual Effects
+ * - Particle system for pin impacts
+ * - Aim guide with trajectory preview
+ * - Power meter with color-coded levels
+ * - Spin meter with direction indicator
+ * - Full-screen end game summary
+ * - Play Again / Quit buttons
+ *
+ * @section controls Controls
+ *
+ * | Action | Control |
+ * |--------|---------|
+ * | Aim and Throw | Click and drag mouse |
+ * | Add Left Spin | A key (hold) |
+ * | Add Right Spin | D key (hold) |
+ * | Adjust Aim | Left/Right Arrow keys |
+ * | Adjust Power | Mouse Scroll Wheel |
+ * | Reset Ball | R key |
+ * | Skip Reset Timer | SPACE key |
+ * | Quit Game | ESC key |
+ *
+ * @section assets Assets Used
+ *
+ * The game uses the following texture assets located in the `assets/` directory:
+ *
+ * | Asset | File | Description |
+ * |-------|------|-------------|
+ * | Ball Texture | boules.png | Multiple bowling ball designs |
+ * | Pin Texture | quille.png | Bowling pin sprite |
+ * | Lane Texture | piste.png | Bowling lane surface |
+ *
+ * @note If textures fail to load, the game falls back to procedural 3D primitives
+ *       (spheres for balls, cylinders for pins, planes for lanes).
+ *
+ * @section api API Overview
+ *
+ * The bowling game API provides a minimal, opaque interface for integration:
+ *
+ * - `bowling_initGame()` - Allocate and initialize a new game instance
+ * - `bowling_gameLoop()` - Execute one frame of the game (input, logic, render)
+ * - `bowling_freeGame()` - Release all resources and cleanup
+ *
+ * The `BowlingGame_St` structure is opaque to external modules. All interaction
+ * occurs through the public API functions defined in bowlingAPI.h.
+ *
+ * @section structure Project Structure
+ *
+ * - `include/` - Public header files (bowlingAPI.h, utils/types.h, utils/configs.h)
+ * - `src/` - Source files containing the implementation
+ * - `assets/` - Texture files for balls, pins, and lane
+ * - `docs/` - Doxygen documentation files
+ * - `build/` - Compiled objects and binaries
+ *
+ * @section dependencies Dependencies
+ *
+ * - Raylib (graphics, input, 3D rendering)
+ * - Raymath (vector operations)
+ * - Standard C library (stdlib, string, math)
+ *
+ * @section author Author
+ *
+ * - **Author:** Maxime CHAUVEAU
+ * - **Date:** 2026-02-25
+ * - **Version:** 2.0
+ *
+ * @copyright Copyright (c) 2026 Maxime CHAUVEAU. All rights reserved.
+ */

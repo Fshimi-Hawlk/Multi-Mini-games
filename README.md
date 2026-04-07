@@ -36,23 +36,23 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 
 ```
 .
-├── assets/                     # Images, sounds, fonts - shared or per game
-│   └── fonts/                  # Different fonts used by the games
-├── docs/                       # Aggregated/shared documentation across all games/lobby
-│   ├── API_Conversion.md       # Explains how to convert a game into an API to be intergrated into the lobby
-│   └── makefile.md             # Explains make commands to build the entire project
-├── LICENSE                     # Project license
-├── CHANGELOG.md                # High-level changes (branch creations, merges, shared updates)
-├── CONTRIBUTING.md             # Internal guidelines
-├── TODO.md                     # Internal reminders (lobby integration, docs, etc.)
-├── .gitignore                  # Ignores build/, logs/, docs/, etc.
-├── Makefile                    # Root-level build: lobby + all merged games
-├── README.md                   # <-- This file
-├── sub-project-example/        # Template structure when starting a new game
-├── lobby/                      # The lobby follows the same structure as sub-project-example
-├── firstparty/                 # Reusable single-header libs made by the team
-└── thirdparty/                 # External libraries and headers
-    └── NOTICE                  # Third-party license notices & attributions
+├-- assets/                     # Images, sounds, fonts - shared or per game
+│   └-- fonts/                  # Different fonts used by the games
+├-- docs/                       # Aggregated/shared documentation across all games/lobby
+│   ├-- API_Conversion.md       # Explains how to convert a game into an API to be intergrated into the lobby
+│   └-- makefile.md             # Explains make commands to build the entire project
+├-- LICENSE                     # Project license
+├-- CHANGELOG.md                # High-level changes (branch creations, merges, shared updates)
+├-- CONTRIBUTING.md             # Internal guidelines
+├-- TODO.md                     # Internal reminders (lobby integration, docs, etc.)
+├-- .gitignore                  # Ignores build/, logs/, docs/, etc.
+├-- Makefile                    # Root-level build: lobby + all merged games
+├-- README.md                   # <-- This file
+├-- sub-project-example/        # Template structure when starting a new game
+├-- lobby/                      # The lobby follows the same structure as sub-project-example
+├-- firstparty/                 # Reusable single-header libs made by the team
+└-- thirdparty/                 # External libraries and headers
+    └-- NOTICE                  # Third-party license notices & attributions
 
 ```
 
@@ -60,28 +60,28 @@ We use a [**monorepo**](https://wellarchitected.github.com/library/scenarios/mon
 
 ```
 sub-project/
-├── assets/                 # Sub-project-specific images, sounds, etc.
-├── docs/                   # generated documentation
-├── include/                # .h files
-│   ├── core/               # Core logic of the game
-│   ├── ui/                 # Draw/Render of the game/app UI
-│   ├── setups/             # Init and free of the diverse game/app elements
-│   ├── utils/              # Utils like common.h, globals.h, configs.h, ...
-│   └── subProjectAPI.h     # API header to be used by the lobby
-├── src/                    # .c files -> same structure as include + main
-├── tests/                  # unit tests
-├── CHANGELOG.md            # Per-sub-project detailed changelog
-├── Makefile                # Makefile to build the sub-project
-├── make/                   # Split of the Makefile into distinct logical parts
-├── makefile.md             # Explains make commands to build the sub-project
-├── Doxyfile.min            # Minimal Doxygen configs for per-sub-project docs
-└── README.md               # Template README for new sub-projects
+├-- assets/                 # Sub-project-specific images, sounds, etc.
+├-- docs/                   # generated documentation
+├-- include/                # .h files
+│   ├-- core/               # Core logic of the game
+│   ├-- ui/                 # Draw/Render of the game/app UI
+│   ├-- setups/             # Init and free of the diverse game/app elements
+│   ├-- utils/              # Utils like common.h, globals.h, configs.h, ...
+│   └-- subProjectAPI.h     # API header to be used by the lobby
+├-- src/                    # .c files -> same structure as include + main
+├-- tests/                  # unit tests
+├-- CHANGELOG.md            # Per-sub-project detailed changelog
+├-- Makefile                # Makefile to build the sub-project
+├-- make/                   # Split of the Makefile into distinct logical parts
+├-- makefile.md             # Explains make commands to build the sub-project
+├-- Doxyfile.min            # Minimal Doxygen configs for per-sub-project docs
+└-- README.md               # Template README for new sub-projects
 ```
 
 After merging the first game (e.g. block-blast):
 
 ```
-├── block-blast/              # Merged game – same internal structure as `sub-project`
+├-- block-blast/              # Merged game – same internal structure as `sub-project`
 ```
 
 ## Building & Running (Root Level – after games are merged)
@@ -133,5 +133,7 @@ make docs
 ## Credits
 
 **Created: December 16, 2025**  
-**Last updated: March 02, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: March 17, 2026**  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+- Maxime CHAUVEAU

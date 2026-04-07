@@ -23,9 +23,9 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Asset paths
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #ifndef ASSET_PATH
 /**
@@ -37,11 +37,11 @@
 
 #define IMAGES_PATH ASSET_PATH "images/"            ///< Subdirectory containing all image files.
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Window & display
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
-#define WINDOW_WIDTH    1000        ///< Default client-area width of the application window (pixels).
+#define WINDOW_WIDTH    800         ///< Default client-area width of the application window (pixels).
 #define WINDOW_HEIGHT   600         ///< Default client-area height of the application window (pixels).
 
 #define WINDOW_TITLE    "Lobby"     ///< Window title shown in the title bar / task manager.
@@ -58,9 +58,9 @@
 */
 #define APP_TEXT_FONT_SIZE 32
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Physics & movement tuning (lobby platformer)
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #define GRAVITY         1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
 #define MOVE_SPEED      300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).

@@ -1,26 +1,26 @@
 #!/bin/bash
-# generate-docs.sh
-# One-command documentation generation with convenient entry point
+# generate-root-docs.sh
+# Generates English documentation. Other languages via index.php + LibreTranslate.
 
-set -e  # exit on any error
+set -e
 
-echo "Generating Doxygen documentation for $(basename "$PWD")..."
+PROJNAME=$(basename "$PWD")
+echo "Generating documentation for ${PROJNAME}..."
 
-rm -rf docs/doxygen/html docs/doxygen/index.html 2>/dev/null || true
+rm -rf docs/doxygen/html 2>/dev/null || true
 
 cd docs/doxygen
-
-# Run Doxygen
 doxygen Doxyfile
 
-# Create convenient redirect at docs/index.html
-cat > index.html << 'REDIRECT'
+# FIX: index.html — the title contained $(basename "$PWD") literally because the heredoc
+# used single quotes ('REDIRECT'). Replaced with an interpolated variable.
+cat > index.html << REDIRECT
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; url=html/index.html">
-    <title>Documentation - $(basename "$PWD")</title>
+    <title>Documentation - ${PROJNAME}</title>
     <style>
         body { font-family: system-ui, sans-serif; text-align: center; padding: 4rem; }
         a { color: #0066cc; }
@@ -33,3 +33,5 @@ cat > index.html << 'REDIRECT'
 </body>
 </html>
 REDIRECT
+
+echo "Done. Open docs/doxygen/index.php (via php -S localhost:8080) or docs/doxygen/index.html."

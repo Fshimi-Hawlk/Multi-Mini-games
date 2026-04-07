@@ -59,3 +59,11 @@ main
 
 # Other
 docs/doxygen/html
+docs/doxygen/html-*/
+docs/doxygen/src-*/
+docs/doxygen/Doxyfile.*
+
+# Windows Zone Identifier files
+*:Zone.Identifier
+*#Uf03aZone.Identifier
+*Zone.Identifier

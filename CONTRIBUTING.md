@@ -243,5 +243,7 @@ Thanks for working together - take your time, ask questions, and enjoy making th
 ## Credits
 
 **Created: January 15, 2026**  
-**Last updated: March 01, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: March 17, 2026**  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+- Maxime CHAUVEAU
