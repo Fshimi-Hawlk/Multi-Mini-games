@@ -46,4 +46,6 @@ extern Sound sound_combo;
 extern Sound sound_gameOver;
 extern Sound sound_lineBreak;
 
+extern PromptState_Et currentPrompt;   ///< Modal state for save/load UI
+
 #endif // UTILS_GLOBALS_H

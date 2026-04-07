@@ -4,6 +4,13 @@
     @date 2026-01-07
     @date 2026-04-07
     @brief Full game state initialization implementation.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Added initGame() / initSizeWeights()
+            - Added initBoard() / initPrefabManager()
+            - Added game loading logic
+            - Added resetGame() / new-game logic
 */
 
 #include "setups/game.h"
@@ -83,6 +90,10 @@ bool initPrefabManager(PrefabManager_St* const manager) {
 
     initSizeWeights(manager);
 
+    for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
+        manager->bags[i].count = 0;
+    }
+
     for (u32 i = 0; i < prefabsBag.count; ++i) {
         u8 size_idx = prefabsBag.items[i].blockCount - 1;
         da_append(&manager->bags[size_idx], i);
@@ -99,28 +110,14 @@ bool initPrefabManager(PrefabManager_St* const manager) {
     return true;
 }
 
-bool initGame(GameState_St* const game, bool fromLoad) {
+bool initGame(GameState_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
-            if (fromLoad) {
-                initPrefabManager(&game->prefabManager);
-                
-                if (!deserializeGameState(game, stateLoadingBuffer, stateLoadingBufferSize, true)) {
-                    log_warn("Can't load that save file");
-                }
-
-                initBoard(&game->board);
-                buildScoreRelatedTexts(&game->scoring);
-            } else {
-                initPrefabsAndVariants(&prefabsBag, prefabVariant);
-                initPrefabManager(&game->prefabManager);
-
-                game->board.width = game->board.height = 8;
-                initBoard(&game->board);
-                buildScoreRelatedTexts(&game->scoring);
-                
-                placementSimulation(game);
-            }
+            initPrefabsAndVariants(&prefabsBag, prefabVariant);
+            initPrefabManager(&game->prefabManager);
+            
+            game->board.width = game->board.height = 8;
+            initBoard(&game->board);
 
             return true;
         } break;
@@ -149,4 +146,27 @@ bool initGame(GameState_St* const game, bool fromLoad) {
 
         default: UNREACHABLE("GameSceneState_St");
     }
+}
+
+void resetGame(GameState_St* const game) {
+    if (game == NULL) {
+        log_warn("Received NULL game");
+        return;
+    }
+
+    // Reset core state
+    game->gameOver = false;
+    game->scoring.score = 0;
+    game->scoring.streakCount = 0;
+    game->scoring.streakGrace = 0;
+    buildScoreRelatedTexts(&game->scoring);
+
+    // Full board reset (re-allocates clearing arrays if needed)
+    memset(game->board.blocks, 0, sizeof(**game->board.blocks) * game->board.width * game->board.height);
+
+    // Fresh prefab manager + slots
+    initPrefabManager(&game->prefabManager);
+
+    // Give the player 3 new shapes immediately
+    placementSimulation(game);
 }

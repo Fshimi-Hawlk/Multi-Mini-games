@@ -178,6 +178,8 @@ u64 getSerializedGameStateSize(const GameState_St* const state) {
     // Slots (3 fixed)
     size += 3 * (sizeof(u64) + sizeof(u8) + sizeof(u8));
 
+    size += sizeof(u8); // hasBeenLost
+
     return size;
 }
 
@@ -216,8 +218,6 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
         offset += writeF32(buffer, bufferSize, offset, manager->sizeWeights.runTimeWeights[i]);
     }
 
-
-
     // Bags
     for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
         const PrefabIndexBagVec_St* bag = &manager->bags[i];
@@ -236,6 +236,8 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
         offset += writeU8(buffer, bufferSize, offset, colorIndex);
         offset += writeU8(buffer, bufferSize, offset, placed);
     }
+
+    offset += writeU8(buffer, bufferSize, offset, state->hasBeenLost);
 
     return offset;
 }
@@ -336,7 +338,49 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
         slot->prefab = &prefabsBag.items[prefabIndex];
     }
 
+    u8 hasBeenLostFlag;
+    offset += readU8(buffer, bufferSize, offset, &hasBeenLostFlag);
+
+    state->hasBeenLost = (hasBeenLostFlag != 0);
+
     state->gameOver = false;
+
+    return true;
+}
+
+bool saveGameToFile(const GameState_St* const state, const char* filename) {
+    if (state == NULL || filename == NULL) return false;
+
+    char path[256];
+    snprintf(path, sizeof(path), "%s%s", SAVES_PATH, filename);
+    if (strstr(filename, ".sav") == NULL) {
+        snprintf(path, sizeof(path), "%s%s.sav", SAVES_PATH, filename);
+    }
+
+    u64 size = getSerializedGameStateSize(state);
+    u8* buffer = calloc(size, sizeof(*buffer));
+    if (!buffer) {
+        log_fatal("Couldn't allocate buffer");
+
+        return false;
+    }
+
+    u64 written = serializeGameState(state, buffer, size);
+    if (written == 0) {
+        log_warn("Couldn't write to buffer");
+        free(buffer);
+        return false;
+    }
+
+    FILE* f = fopen(path, "wb");
+    if (f == NULL) {
+        free(buffer);
+        return false;
+    }
+
+    fwrite(buffer, 1, written, f);
+    fclose(f);
+    free(buffer);
 
     return true;
 }

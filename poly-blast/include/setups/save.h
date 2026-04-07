@@ -2,9 +2,12 @@
     @file save.h
     @author Fshimi Hawlk
     @date 2026-02-27
-    @brief Game state serialization and deserialization.
-*/
+    @date 2026-04-07
+    @brief Game state serialization, file I/O, and save-list management.
 
+    @note Saves are stored in "./assets/saves/" (created automatically).
+          Each file is a binary blob with magic/version + minimal metadata for fast listing.
+*/
 #ifndef SAVE_H
 #define SAVE_H
 
@@ -48,5 +51,7 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
     @return       true if deserialization succeeded, false on error (e.g., invalid magic/version, buffer too small).
 */
 bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init);
+
+bool saveGameToFile(const GameState_St* const state, const char* filename);
 
 #endif // SAVE_H

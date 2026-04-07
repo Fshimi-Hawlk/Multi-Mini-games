@@ -86,6 +86,7 @@ typedef struct { \
         (da)->items[(da)->count++] = (item);   \
     } while (0)
 
+#define da_clear(da) (da)->count = 0
 #define da_free(da) FREE((da).items)
 
 // Append several items to a dynamic array

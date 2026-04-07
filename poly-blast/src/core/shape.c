@@ -97,11 +97,6 @@ void handleShape(GameState_St* const game, Shape_St* const shape) {
                     PlaySound(sound_combo);
                 }
             }
-
-            if (testGameOver(game->board, game->prefabManager.slots)) {
-                PlaySound(sound_gameOver);
-                game->gameOver = true;
-            }
         }
     }
 }

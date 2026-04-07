@@ -16,6 +16,8 @@ void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag, GamePrefabVariant
                  ? _prefabNameCount
                  : prefabCount;
 
+    da_clear(prefabsBag);
+
     for (u32 i = 0; i < initCount; ++i) {
         Prefab_St prefab = prefabs[i];
 

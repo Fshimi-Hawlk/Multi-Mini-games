@@ -11,12 +11,14 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
+#define FONT_PATH "../assets/fonts/"
+
 #ifndef ASSET_PATH
 #define ASSET_PATH "assets/"
 #endif
 
-#define FONT_PATH "../assets/fonts/"
 #define SOUNDS_PATH ASSET_PATH "sounds/"
+#define SAVES_PATH ASSET_PATH "saves/"
 
 #define WINDOW_TITLE "Block Blast"
 #define WINDOW_WIDTH 1000

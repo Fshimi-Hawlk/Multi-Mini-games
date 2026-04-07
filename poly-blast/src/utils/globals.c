@@ -105,6 +105,7 @@ const Prefab_St prefabs[] = {
 
 const u32 prefabCount = sizeof(prefabs) / sizeof(*prefabs);
 
+PromptState_Et currentPrompt = PROMPT_START_LOAD;   ///< Modal state for save/load UI
 
 // Map_St maps[] = {
 //     {

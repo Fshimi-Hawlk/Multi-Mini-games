@@ -29,10 +29,18 @@ int main(void) {
 
     // game.sceneState = SCENE_STATE_ALL_PREFABS;
 
-    f64 prevScore = mainGameState.scoring.score; // TODO: Useful when loading a mainGameState from save file
+    f64 prevScore = mainGameState.scoring.score;
 
-    while (!WindowShouldClose()) {
-        if (!mainGameState.gameOver) {
+    bool windowShouldClose = false;
+
+    while (!windowShouldClose) {
+        Vector2 mouse = GetMousePosition();
+
+        if (promptUpdate(&mainGameState, mouse)) {
+            windowShouldClose = true;
+        }
+
+        if (currentPrompt == PROMPT_NONE && !mainGameState.gameOver) {
             bool allPlaced = true;
             for (u8 i = 0; i < 3; ++i) {
                 handleShape(&mainGameState, &mainGameState.prefabManager.slots[i]);
@@ -49,40 +57,38 @@ int main(void) {
                 // }
                 prevScore = mainGameState.scoring.score;
             }
-    
-            if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_S)) {
-                u64 newStateLoadingBufferSize = getSerializedGameStateSize(&mainGameState);
-                if (newStateLoadingBufferSize != stateLoadingBufferSize) {
-                    stateLoadingBufferSize = newStateLoadingBufferSize;
-                    if (stateLoadingBuffer != NULL) free(stateLoadingBuffer);
-                    stateLoadingBuffer = malloc(stateLoadingBufferSize);
-                }
 
-                if (stateLoadingBuffer == NULL) {
-                    log_error("Couldn't allocate stateLoadingBuffer");
-                }
+            if (testGameOver(mainGameState.board, mainGameState.prefabManager.slots)) {
+                PlaySound(sound_gameOver);
+                mainGameState.gameOver = true;
 
-                s64 diff = serializeGameState(&mainGameState, stateLoadingBuffer, stateLoadingBufferSize);
-                if (diff != 0) {
-                    log_warn("The new computed buffer size is incorrect by %zi", diff);
+                if (mainGameState.gameOver && mainGameState.loadFilename != NULL && !mainGameState.hasBeenLost) {
+                    mainGameState.hasBeenLost = true;
+                    if (saveGameToFile(&mainGameState, mainGameState.loadFilename)) {
+                        log_info("Marked loaded save as lost: %s", mainGameState.loadFilename);
+                    }
                 }
-            } else if (IsKeyPressed(KEY_S)) {
-                shuffleSlots(&mainGameState.prefabManager);
             }
         }
-        
-        if (IsKeyPressed(KEY_U) && stateLoadingBuffer != NULL) {
-            if (!deserializeGameState(&mainGameState, stateLoadingBuffer, stateLoadingBufferSize, false)) {
-                log_warn("Couldn't deserialized last save");
+
+        if (IsKeyPressed(KEY_R)) resetGame(&mainGameState);
+
+        if (WindowShouldClose()) {
+            if (currentPrompt == PROMPT_NONE && !mainGameState.gameOver) {
+                currentPrompt = PROMPT_SAVE_QUIT;
+            } else {
+                windowShouldClose = true;
             }
-            
-            buildScoreRelatedTexts(&mainGameState.scoring);
         }
 
         BeginDrawing(); {
             ClearBackground(APP_BACKGROUND_COLOR);
 
-            drawUI(&mainGameState);
+            if (currentPrompt == PROMPT_NONE) {
+                drawUI(&mainGameState);
+            }
+
+            promptDraw();
         } EndDrawing();
     }
 
@@ -90,12 +96,3 @@ int main(void) {
 
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"

@@ -56,7 +56,7 @@ bool initApp(void) {
         log_warn("Couldn't initialize every fonts");
     };
 
-    initGame(&mainGameState, false);
+    initGame(&mainGameState);
 
     return true;
 }
