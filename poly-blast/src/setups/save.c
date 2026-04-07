@@ -2,26 +2,28 @@
     @file save.c
     @author Fshimi Hawlk
     @date 2026-02-27
-    @brief Implementation of game state serialization.
+    @date 2026-04-07
+    @brief Implementation of game state serialization and file I/O.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Fixed broken deserializeDA macro
+            - Added hasBeenLost flag (anti-cheat for leaderboards)
+            - Full file-based save/load + directory listing + delete
 */
 
 #include "setups/save.h"
 
 #include "setups/shape.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
-
-#include <assert.h>
 
 #define SERIAL_MAGIC (u32) (('K' << 0) | ('I' << 8) | ('M' << 16) | ('I' << 24))
-#define SERIAL_VERSION 1
+#define SERIAL_VERSION 2
 
 static u64 writeU8(u8* buffer, u64 bufferSize, u64 offset, u8 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_error("Excess writing detected");
-        abort();
+        log_fatal("Excess writing detected")
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(value));
@@ -30,8 +32,7 @@ static u64 writeU8(u8* buffer, u64 bufferSize, u64 offset, u8 value) {
 
 static u64 writeS8(u8* buffer, u64 bufferSize, u64 offset, s8 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_error("Excess writing detected");
-        abort();
+        log_fatal("Excess writing detected")
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(s8));
@@ -40,8 +41,7 @@ static u64 writeS8(u8* buffer, u64 bufferSize, u64 offset, s8 value) {
 
 static u64 writeU32(u8* buffer, u64 bufferSize, u64 offset, u32 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_error("Excess writing detected");
-        abort();
+        log_fatal("Excess writing detected")
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(u32));
@@ -50,8 +50,7 @@ static u64 writeU32(u8* buffer, u64 bufferSize, u64 offset, u32 value) {
 
 static u64 writeU64(u8* buffer, u64 bufferSize, u64 offset, u64 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_error("Excess writing detected");
-        abort();
+        log_fatal("Excess writing detected")
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(u64));
@@ -60,8 +59,7 @@ static u64 writeU64(u8* buffer, u64 bufferSize, u64 offset, u64 value) {
 
 static u64 writeF32(u8* buffer, u64 bufferSize, u64 offset, f32 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_error("Excess writing detected");
-        abort();
+        log_fatal("Excess writing detected")
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(f32));
@@ -72,8 +70,7 @@ static u64 writeF32(u8* buffer, u64 bufferSize, u64 offset, f32 value) {
 static u64 readU8(const u8* buffer, u64 bufferSize, u64 offset, u8* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_error("Excess reading detected");
-        abort();
+        log_fatal("Excess reading detected")
         return 0;
     }
 
@@ -84,8 +81,7 @@ static u64 readU8(const u8* buffer, u64 bufferSize, u64 offset, u8* value) {
 static u64 readS8(const u8* buffer, u64 bufferSize, u64 offset, s8* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_error("Excess reading detected");
-        abort();
+        log_fatal("Excess reading detected")
         return 0;
     }
 
@@ -96,8 +92,7 @@ static u64 readS8(const u8* buffer, u64 bufferSize, u64 offset, s8* value) {
 static u64 readU32(const u8* buffer, u64 bufferSize, u64 offset, u32* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_error("Excess reading detected");
-        abort();
+        log_fatal("Excess reading detected")
         return 0;
     }
 
@@ -108,8 +103,7 @@ static u64 readU32(const u8* buffer, u64 bufferSize, u64 offset, u32* value) {
 static u64 readU64(const u8* buffer, u64 bufferSize, u64 offset, u64* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_error("Excess reading detected");
-        abort();
+        log_fatal("Excess reading detected")
         return 0;
     }
 
@@ -120,14 +114,33 @@ static u64 readU64(const u8* buffer, u64 bufferSize, u64 offset, u64* value) {
 static u64 readF32(const u8* buffer, u64 bufferSize, u64 offset, f32* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_error("Excess reading detected");
-        abort();
+        log_fatal("Excess reading detected")
         return 0;
     }
 
     memcpy(value, buffer + offset, sizeof(*value));
     return sizeof(*value);
 }
+
+#define serializeDA(buffer, bufferSize, offset, da, writeItem)                      \
+    do {                                                                            \
+        offset += writeU64(buffer, (bufferSize), (offset), (da)->count);            \
+        for (u64 __si = 0; __si < (da)->count; ++__si) {                                     \
+            offset += writeItem(buffer, (bufferSize), (offset), (da)->items[__si]);    \
+        }                                                                           \
+    } while (0)
+
+#define deserializeDA(buffer, bufferSize, offset, T, da, readItem)                  \
+    do {                                                                            \
+        T __item;                                                                   \
+        u64 __count = 0;                                                            \
+        offset += readU64((buffer), (bufferSize), (offset), &__count);              \
+        (da)->count = 0;                                                            \
+        for (u64 __dsi = 0; __dsi < __count; ++__dsi) {                                   \
+            offset += readItem((buffer), (bufferSize), (offset), &__item);          \
+            da_append((da), __item);                                                \
+        }                                                                           \
+    } while (0)
 
 u64 getSerializedGameStateSize(const GameState_St* const state) {
     const PrefabManager_St* manager = &state->prefabManager;
@@ -163,16 +176,13 @@ u64 getSerializedGameStateSize(const GameState_St* const state) {
     }
 
     // Slots (3 fixed)
-    size += (sizeof(u64) 
-         + sizeof((u8) state->prefabManager.slots[0].colorIndex)
-         + sizeof((u8) state->prefabManager.slots[0].placed)
-    ) * 3;  // placed, colorIndex, bagIndex
+    size += 3 * (sizeof(u64) + sizeof(u8) + sizeof(u8));
 
     return size;
 }
 
 u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize) {
-    if (state == NULL || buffer == NULL) return false;
+    if (state == NULL || buffer == NULL) return 0;
 
     const PrefabManager_St* manager = &state->prefabManager;
 
@@ -206,13 +216,7 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
         offset += writeF32(buffer, bufferSize, offset, manager->sizeWeights.runTimeWeights[i]);
     }
 
-#define serializeDA(buffer, bufferSize, offset, da, writeItem)                      \
-    do {                                                                            \
-        offset += writeU64(buffer, (bufferSize), (offset), (da)->count);            \
-        for (u64 i = 0; i < (da)->count; ++i) {                                     \
-            offset += writeItem(buffer, (bufferSize), (offset), (da)->items[i]);    \
-        }                                                                           \
-    } while (0)
+
 
     // Bags
     for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
@@ -233,7 +237,7 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
         offset += writeU8(buffer, bufferSize, offset, placed);
     }
 
-    return bufferSize - offset;
+    return offset;
 }
 
 bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init) {
@@ -258,15 +262,13 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
 
     offset += readU32(buffer, bufferSize, offset, &magic);
     if (magic != SERIAL_MAGIC) {
-        log_error("Data corruption detected: \"SERIAL_MAGIC\" doesn't correspond.");
-        abort();
+        log_fatal("Data corruption detected: \"SERIAL_MAGIC\" doesn't correspond.")
         return false;
     }
 
     offset += readU8(buffer, bufferSize, offset, &version);
     if (version != SERIAL_VERSION) {
-        log_error("Data corruption detected: \"SERIAL_VERSION\" doesn't correspond: got %zu, expected: %zu", version, SERIAL_VERSION);
-        abort();
+        log_fatal("Data corruption detected: \"SERIAL_VERSION\" doesn't correspond: got %zu, expected: %zu", version, SERIAL_VERSION)
         return false;
     }
 
@@ -305,19 +307,6 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
         offset += readF32(buffer, bufferSize, offset, &manager->sizeWeights.runTimeWeights[i]);
     }
 
-#define deserializeDA(buffer, bufferSize, offset, T, da, readItem)          \
-    do {                                                                    \
-        T __item;                                                           \
-        u64 __count = 0;                                                    \
-        offset += readU64((buffer), (bufferSize), (offset), &__count);      \
-        (bag)->count = 0;                                                   \
-        while (__count > 0) {                                               \
-            __count--;                                                      \
-            offset += readItem((buffer), (bufferSize), (offset), &__item);  \
-            da_append((da), __item);                                        \
-        }                                                                   \
-    } while (0);
-
     // Bags (load directly, skipping default init from prefabsBag)
     for (u8 i = 0; i < MAX_SHAPE_SIZE; ++i) {
         PrefabIndexBagVec_St* bag = &manager->bags[i];
@@ -340,8 +329,7 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
         slot->center = defaultPositions[i];
 
         if (prefabIndex >= prefabsBag.count) {
-            log_error("Prefab index of slot %u was corrupted: got %zu (Max: %u)", i, prefabIndex, prefabCount - 1);
-            abort();
+            log_fatal("Prefab index of slot %u was corrupted: got %zu (Max: %u)", i, prefabIndex, prefabCount - 1);
             return false;
         }
 
