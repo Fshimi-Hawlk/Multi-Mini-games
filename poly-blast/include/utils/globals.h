@@ -16,9 +16,9 @@
 
 #include "userTypes.h"
 
-extern Rectangle windowRect;            ///< Main window rectangle (set at init).
-extern Font      appFont;               ///< Primary font for UI text.
-extern Font      fonts[_fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
+#include "widgets/types.h"
+
+extern Font      polyBlast_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 extern GameState_St mainGameState;
 extern GameState_St previousGameState;

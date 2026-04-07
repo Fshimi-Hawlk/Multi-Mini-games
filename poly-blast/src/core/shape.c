@@ -12,7 +12,10 @@
 #include "core/placement.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/random.h"
+#include "utils/container.h"
+#include "utils/debug.h"
 
 bool isShapeClicked(const Shape_St* const shape) {
     f32Vector2 mousePos = GetMousePosition();
@@ -174,11 +177,7 @@ static PrefabIndexBagVec_St* getRandomPrefabBag(PrefabManager_St* const manager)
     u8 sizeIdx;
 
     do {
-#ifndef _USE_DEFAULT_RAND
-        f32 prob = prng_randf();
-#else
         f32 prob = randfloat();
-#endif
         f32 weightedSum = 0.0f;
         for (sizeIdx = 0; sizeIdx < MAX_SHAPE_SIZE; ++sizeIdx) {
             weightedSum += manager->sizeWeights.runTimeWeights[sizeIdx];

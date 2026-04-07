@@ -8,7 +8,8 @@
 #include "core/board.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/debug.h"
 
 bool isInBound(const s8Vector2 pos, const Board_St* const board) {
     return (0 <= pos.x) && (pos.x < board->width)

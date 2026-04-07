@@ -15,6 +15,7 @@
 #define ASSET_PATH "assets/"
 #endif
 
+#define FONT_PATH "../assets/fonts/"
 #define SOUNDS_PATH ASSET_PATH "sounds/"
 
 #define WINDOW_TITLE "Block Blast"

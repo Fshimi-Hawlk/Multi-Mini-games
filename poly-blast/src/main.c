@@ -2,6 +2,7 @@
     @file main.c
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-04-07
     @brief Program entry point and main loop.
 */
 
@@ -10,11 +11,13 @@
 #include "core/game.h"
 
 #include "setups/save.h"
+#include "setups/game.h"
+
 #include "ui/game.h"
+#include "ui/prompt.h"
 
 #include "setups/app.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
 
 int main(void) {

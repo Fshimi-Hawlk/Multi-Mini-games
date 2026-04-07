@@ -9,6 +9,7 @@
 #define USER_TYPES_H
 
 #include "common.h"
+#include "APIs/generalAPI.h"
 
 /**
     @brief Colors available for blocks in the game.
@@ -48,15 +49,6 @@ enum {
     PREFAB_3x3,
     _prefabNameCount
 };
-
-typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
-} FontSize_Et;
 
 /**
     @brief Variants of prefab sets used in the game.
@@ -238,6 +230,18 @@ typedef struct {
 } ScoringState_St;
 
 /**
+    @brief Prompt / modal state for save/load UI.
+*/
+typedef enum {
+    PROMPT_NONE,
+    PROMPT_START_LOAD,          ///< Startup: New Game vs Load Save
+    PROMPT_SAVE_QUIT,           ///< On window close: Save before leaving?
+    PROMPT_SAVE_FILENAME,       ///< Filename input after choosing to save
+    PROMPT_SAVES_LIST,          ///< Scrollable save list table
+    PROMPT_CONFIRM_DELETE       ///< Confirmation before deleting a save
+} PromptState_Et;
+
+/**
     @brief Core game state, encapsulating board, UI, and scoring.
 
     This struct is designed for easy saving/loading (e.g., via fwrite). It holds
@@ -251,6 +255,9 @@ typedef struct {
 
     bool gameOver;                      ///< Game over flag.
     SceneState_Et sceneState;           ///< Current scene/view.
+
+    bool hasBeenLost;                   ///< Anti-cheat: true if this save already reached gameOver once
+    const char *loadFilename;
 } GameState_St;
 
 // typedef struct {

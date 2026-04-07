@@ -4,8 +4,10 @@
 #include "core/board.h"
 #include "core/game.h"
 
-#include "utils/utils.h"
 #include "utils/globals.h"
+
+#include "utils/random.h"
+#include "utils/container.h"
 
 bool isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board) {
     bool canBePlaced = isPrefabInBoundAt(shape->prefab, pos, board);

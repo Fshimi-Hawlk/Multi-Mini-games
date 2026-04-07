@@ -10,7 +10,8 @@
 #include "ui/shape.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/debug.h"
 
 f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos) {
     f32Vector2 textSize = MeasureTextEx(font, text, fontSize, 1);
@@ -46,15 +47,15 @@ void drawUI(const GameState_St* const game) {
             drawBoard(game->board);
             drawSlots(game->prefabManager.slots);
 
-            drawText(game->scoring.scoreText, fonts[FONT48], 48, scorePos, WHITE);
+            drawText(game->scoring.scoreText, polyBlast_fonts[FONT48], 48, scorePos, WHITE);
 
             if (game->scoring.streakCount > 0) {
                 Color streakTextColor = Fade(WHITE, game->scoring.streakGrace * 2.0f / game->scoring.streakCount);
-                drawText(game->scoring.streakText, fonts[FONT48], 48, streakPos, streakTextColor);
+                drawText(game->scoring.streakText, polyBlast_fonts[FONT48], 48, streakPos, streakTextColor);
             }
 
             if (mainGameState.gameOver) {
-                drawText("Game Over", fonts[FONT48], 48, gameOverPos, RED);
+                drawText("Game Over", polyBlast_fonts[FONT48], 48, gameOverPos, RED);
             }
         } break;
 

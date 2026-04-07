@@ -1,9 +1,12 @@
 /**
     @file generalAPI.h
-    @author Fshimi-Hawlk
+    @author Fshimi Hawlk
+    @author i-Charlys (CAILLON Charles)
+    @author Maxime-CHAUVEAU
     @date 2026-01-08
-    @date 2026-02-23
-    @brief Minimal shared interface and common types used by all mini-games and the lobby.
+    @date 2026-03-23
+    @brief Shared core types and error codes used across all games and the lobby.
+           Standardized interface for Client-side mini-games (Raylib Frontend).
 
     This header defines:
         - a standard set of error codes used across game subsystems
@@ -16,12 +19,12 @@
         - Keep the common interface as small as possible (only what truly belongs to every game)
 
     Important rules for mini-game implementations:
-        - The concrete game state struct **must** have `Game_St base;` as its **first member**
-        - This guarantees that `Game_St* base = (Game_St*)specificGame;` is always valid
+        - The concrete game state struct **must** have `BaseGame_St base;` as its **first member**
+        - This guarantees that `BaseGame_St* base = (BaseGame_St*)specificGame;` is always valid
         - The `freeGame` callback must free the entire game object (including the specific part)
 
     Typical usage in the lobby:
-        - `Game_St* current = miniGames[scene];`
+        - `BaseGame_St* current = miniGames[scene];`
         - `if (current && current->running) { ... }`
         - On exit: `if (current && current->freeGame) current->freeGame(current);`
  */
@@ -29,11 +32,9 @@
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 
-#include "stdbool.h"
-
-// ────────────────────────────────────────────────
-// Error codes (used project-wide)
-// ────────────────────────────────────────────────
+#include <stdbool.h>
+#include <stdint.h>
+#include <stddef.h>
 
 /**
     @brief Standardized error codes for initialization, operations and resource loading.
@@ -50,20 +51,56 @@ typedef enum {
     ERROR_NULL_POINTER,         ///< Required pointer argument was NULL
     ERROR_ALLOC,                ///< Memory allocation failed
     ERROR_INVALID,              ///< Argument value or state is invalid/illegal
-    ERROR_TEXTURE_LOAD,         ///< Failed to load a required texture
+    ERROR_INVALID_ENUM_VAL,     ///< Enum value is invalid
+    ERROR_INVALID_SETTING,      ///< Setting parameters is invalid
+    ERROR_WINDOW_INIT,          ///< Failed to initialize window/display
+    ERROR_ASSET_LOAD,           ///< Failed to load any kind of asset
+    ERROR_TEXTURE_LOAD,         ///< Failed to load a texture
+    ERROR_AUDIO_LOAD,           ///< Failed to load an audio
+    ERROR_FONT_LOAD,            ///< Failed to load a font
     // Future extension point: add more codes here as needed
 } Error_Et;
+
+/**
+    @brief Available font sizes used for in-game UI and text rendering.
+
+    Values are listed in ascending order.  
+    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+*/
+typedef enum {
+    FONT16, FONT24, FONT32, 
+    FONT48, FONT64, FONT96, 
+    FONT128,
+    __fontSizeCount
+} FontSize_Et;
 
 // ────────────────────────────────────────────────
 // Game interface
 // ────────────────────────────────────────────────
 
 /**
+    @brief Identifiers of the different playable scenes / mini-games.
+
+    Used both as array indices and as state identifiers.
+*/
+typedef enum {
+    MINI_GAME_LOBBY,       ///< Main lobby / hub world with platformer movement
+    MINI_GAME_BATTLESHIP,
+    MINI_GAME_BINGO,
+    MINI_GAME_CONNECT_4,
+    MINI_GAME_KFF,
+    MINI_GAME_MINIGOLF,
+    MINI_GAME_MORPION,
+    MINI_GAME_OTHELLO,
+    __miniGameCount
+} MiniGame_Et;
+
+/**
     @brief Opaque forward declaration of the concrete game state.
 
     Actual definition lives in the specific mini-game header (.e.g. tetrisGame.h).
  */
-typedef struct Game_St Game_St;
+typedef struct BaseGame_St BaseGame_St;
 
 /**
     @brief Function pointer type for game cleanup.
@@ -73,26 +110,26 @@ typedef struct Game_St Game_St;
 
     Signature: `Error_Et freeMyGame(void* game);`
  */
-typedef Error_Et (*freeGame_Ft)(void*);
+typedef Error_Et (*FreeGame_Ft)(void*);
 
 /**
     @brief Common base structure that **every** mini-game state must embed as its first member.
 
     Layout guarantee:
       struct MyGame {
-          Game_St base;
+          BaseGame_St base;
           // MyGame-specific fields...
       };
 
-    This allows safe downcasting from `Game_St*` to concrete type only when needed,
+    This allows safe downcasting from `BaseGame_St*` to concrete type only when needed,
     while the lobby can safely access `running`, `paused`, `score`, and call `freeGame`.
  */
-struct Game_St {
+struct BaseGame_St {
     bool        running;        ///< true = game should continue updating/rendering
     bool        paused;         ///< true = game is paused (no update, optional dimmed render)
     long        score;          ///< Score accumulated during the current/last session
 
-    freeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
+    FreeGame_Ft freeGame;       ///< Cleanup callback (must free the whole object)
 };
 
 #endif // GENERAL_API_H

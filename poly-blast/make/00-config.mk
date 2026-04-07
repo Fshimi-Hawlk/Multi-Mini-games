@@ -117,10 +117,12 @@ BASE_CFLAGS := \
 	-I../firstparty \
 
 # Linker base
-BASE_LDFLAGS := \
+BASE_LDFLAGS :=                                 \
 	-L../thirdparty/libs/raylib-5.5_linux_amd64 \
-	-l:libraylib.a \
-	-lm
+	-l:libraylib.a                              \
+	-lm                                         \
+	-L../firstparty/build/lib                   \
+	-l:libfirstparty.a                          \
 
 # Combine with base
 CFLAGS += $(BASE_CFLAGS)

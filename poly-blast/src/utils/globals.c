@@ -7,9 +7,7 @@
 
 #include "utils/globals.h"
 
-Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-Font      fonts[_fontSizeCount] = {0};
-Font      appFont = {0};
+Font polyBlast_fonts[__fontSizeCount] = {0};
 
 GameState_St mainGameState = {0};
 GameState_St previousGameState = {0};

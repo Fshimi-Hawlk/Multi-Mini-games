@@ -9,7 +9,8 @@
 #include "core/board.h"
 #include "core/placement.h"
 
-#include "utils/utils.h"
+#include "utils/container.h"
+#include "utils/mathUtils.h"
 
 #define da_copy(da, copy)  \
     do {                   \

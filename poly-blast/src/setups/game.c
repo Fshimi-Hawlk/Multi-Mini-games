@@ -1,7 +1,8 @@
 /**
-    @file game.h (setups)
+    @file game.c (setups)
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-04-07
     @brief Full game state initialization implementation.
 */
 
@@ -14,7 +15,9 @@
 #include "core/placement.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "utils/debug.h"
+#include "utils/random.h"
 
 /**
     @brief Initializes size-based runTimeWeights for random prefab selection.
