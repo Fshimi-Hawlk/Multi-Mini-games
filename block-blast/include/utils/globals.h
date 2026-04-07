@@ -41,4 +41,9 @@ extern const Color blockColors[_blockColorCount]; ///< Color palette for each Bl
 extern const Prefab_St prefabs[];  ///< Static array of base prefab definitions.
 extern const u32 prefabCount;      ///< Number of entries in the prefabs[] array.
 
+extern Sound sound_shapePlacement;
+extern Sound sound_combo;
+extern Sound sound_gameOver;
+extern Sound sound_lineBreak;
+
 #endif // UTILS_GLOBALS_H

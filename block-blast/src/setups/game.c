@@ -64,7 +64,10 @@ bool initBoard(Board_St* const board) {
     };
 
     board->rowsToClear = context_alloc(board->height * sizeof(bool));
+    memset(board->rowsToClear, 0, sizeof(*board->rowsToClear) * board->height);
+
     board->columnsToClear = context_alloc(board->width * sizeof(bool));
+    memset(board->columnsToClear, 0, sizeof(*board->columnsToClear) * board->width);
 
     return true;
 }

@@ -82,11 +82,21 @@ void handleShape(GameState_St* const game, Shape_St* const shape) {
             releaseShape(shape, &game->board);
 
             if (shape->placed) {
-                if (checkBoardForClearing(&game->board)) clearBoard(&game->board);
+                if (checkBoardForClearing(&game->board)) {
+                    PlaySound(sound_lineBreak);
+                    clearBoard(&game->board);
+                }
+
+                u8 currentStreakCount = game->scoring.streakCount;
                 manageScoreAndStreak(&game->scoring, &game->board, shape->prefab->blockCount);
+
+                if (currentStreakCount < game->scoring.streakCount) {
+                    PlaySound(sound_combo);
+                }
             }
 
             if (testGameOver(game->board, game->prefabManager.slots)) {
+                PlaySound(sound_gameOver);
                 game->gameOver = true;
             }
         }
@@ -213,6 +223,7 @@ static void randomizeShape(Shape_St* const shape, PrefabManager_St* manager) {
 }
 
 void shuffleSlots(PrefabManager_St* const manager) {
+    memset(manager->slots, 0, sizeof(manager->slots));
     for (u8 i = 0; i < 3; ++i) {
         manager->slots[i].id = i;
         randomizeShape(&manager->slots[i], manager);

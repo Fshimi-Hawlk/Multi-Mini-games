@@ -11,6 +11,12 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
+
+#define SOUNDS_PATH ASSET_PATH "sounds/"
+
 #define WINDOW_TITLE "Block Blast"
 #define WINDOW_WIDTH 1000
 #define WINDOW_HEIGHT 800 // 600
@@ -30,7 +36,5 @@
 
 #define BOARD_WIDTH  8  ///< Grid columns
 #define BOARD_HEIGHT 8  ///< Grid rows
-
-#define SOUNDS_PATH "assets/sounds/"
 
 #endif // CONFIGS_H

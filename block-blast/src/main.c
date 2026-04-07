@@ -68,10 +68,11 @@ int main(void) {
             }
         }
         
-        if (IsKeyPressed(KEY_U)) {
+        if (IsKeyPressed(KEY_U) && stateLoadingBuffer != NULL) {
             if (!deserializeGameState(&mainGameState, stateLoadingBuffer, stateLoadingBufferSize, false)) {
                 log_warn("Couldn't deserialized last save");
             }
+            
             buildScoreRelatedTexts(&mainGameState.scoring);
         }
 

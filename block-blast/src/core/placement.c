@@ -205,6 +205,7 @@ void releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board)
         previousGameState = mainGameState; // copy pre-release state as previous state
         placeShape(shape, castTo(u8Vector2) &pos, board);
         shape->placed = true;
+        PlaySound(sound_shapePlacement);
     } else {
         shape->center = defaultPositions[shape->id];
     }
