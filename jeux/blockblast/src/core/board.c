@@ -130,16 +130,12 @@ void clearBoard(Board_St* const board) {
         return;
     }
     
-    if (board->rowsToClear != NULL) {
-        for (u8 row = 0; row < board->height; ++row) {
-            if (board->rowsToClear[row]) clearRow(board, row);
-        }
+    for (u8 row = 0; row < board->height; ++row) {
+        if (board->rowsToClear[row]) clearRow(board, row);
     }
 
-    if (board->columnsToClear != NULL) {
-        for (u8 col = 0; col < board->width; ++col) {
-            if (board->columnsToClear[col]) clearColumn(board, col);
-        }
+    for (u8 col = 0; col < board->width; ++col) {
+        if (board->columnsToClear[col]) clearColumn(board, col);
     }
 }
 

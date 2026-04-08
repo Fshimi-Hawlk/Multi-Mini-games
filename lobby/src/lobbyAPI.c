@@ -11,6 +11,9 @@
 #include "raylib.h"
 #include "ui/app.h"
 #include "ui/game.h"
+#include "ui/ambiance.h"
+#include "ui/background.h"
+#include "ui/grass.h"
 
 #include "utils/common.h"
 #include "utils/globals.h"
@@ -42,6 +45,32 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     if (error != OK) {
         log_error("System settings couldn't be applied correctly");
     }
+
+    // Audio
+    InitAudioDevice();
+    sound_jump       = LoadSound(SOUNDS_PATH "lobby_jump.wav");
+    sound_doubleJump = LoadSound(SOUNDS_PATH "lobby_jump.wav");
+    SetSoundPitch(sound_doubleJump, 1.35f);
+    sound_gameLaunch = LoadSound(SOUNDS_PATH "lobby_gameLaunch.wav");
+    meme             = LoadSound(SOUNDS_PATH "meme.wav");
+
+    // Textures monde
+    platformTextures[0] = LoadTexture(TEXTURES_PATH "grass.png");
+    platformTextures[1] = LoadTexture(TEXTURES_PATH "wood_plank.png");
+    SetTextureWrap(platformTextures[0], TEXTURE_WRAP_REPEAT);
+    SetTextureWrap(platformTextures[1], TEXTURE_WRAP_REPEAT);
+
+    texTree = LoadTexture(TEXTURES_PATH "tree.png");
+    GenTextureMipmaps(&texTree);
+    SetTextureFilter(texTree, TEXTURE_FILTER_TRILINEAR);
+
+    texBackground = LoadTexture(TEXTURES_PATH "starry-background.png");
+    GenTextureMipmaps(&texBackground);
+    SetTextureFilter(texBackground, TEXTURE_FILTER_TRILINEAR);
+
+    // Grass & atmospheric effects
+    initGrass();
+    initAtmosphericEffects();
 
     (*game) = malloc(sizeof(LobbyGame_St));
     if (*game == NULL) return ERROR_ALLOC;
@@ -201,14 +230,21 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         game->player.velocity = (Vector2){ 0, 0 };
     }
 
+    // Update gameTime + atmospheric effects
+    gameTime += GetFrameTime();
+    updateGrass(&game->player, GetFrameTime(), gameTime, game->cam);
+    updateAtmosphericEffects(GetFrameTime(), &game->player, game->cam);
+
     BeginDrawing(); {
-        ClearBackground((Color){135, 206, 235, 255}); /* ciel bleu */
+        ClearBackground((Color){10, 10, 30, 255}); /* nuit */
 
         BeginMode2D(game->cam); {
-            /* Fond de ciel en world-space (large rectangle derrière tout) */
-            DrawRectangle(-2000, -2000, 4000, 2500, (Color){135, 206, 235, 255});
-            /* Sol herbe */
-            DrawRectangle(-1000, 500, 2000, 1000, (Color){34, 139, 34, 255});
+            drawStarryBackground(game->player.position, game->cam);
+
+            drawTree();
+            drawWorldBoundaries(&game->player);
+            drawGrass(&game->player, game->cam);
+            drawAtmosphericEffects();
 
             drawPlayer(game, &game->player);
             drawPlatforms(platforms, platformCount);
@@ -264,6 +300,8 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             }
         } EndMode2D();
 
+        drawScreenEffects(&game->player);
+
         /* FIX: use GetScreenWidth() — systemSettings.video.width may lag behind
          * the actual window size if the user resized the window manually. */
         f32 lobbyTextXPos = (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
@@ -297,6 +335,19 @@ Error_Et lobby_freeGame(LobbyGame_St** game) {
     }
 
     UnloadTexture(logoSkinButton);
+
+    // World textures
+    UnloadTexture(platformTextures[0]);
+    UnloadTexture(platformTextures[1]);
+    UnloadTexture(texTree);
+    UnloadTexture(texBackground);
+
+    // Audio
+    if (IsSoundValid(sound_jump))       UnloadSound(sound_jump);
+    if (IsSoundValid(sound_doubleJump)) UnloadSound(sound_doubleJump);
+    if (IsSoundValid(sound_gameLaunch)) UnloadSound(sound_gameLaunch);
+    if (IsSoundValid(meme))             UnloadSound(meme);
+    CloseAudioDevice();
 
     // Cleanup params menu
     paramsMenu_free(&paramsMenu);

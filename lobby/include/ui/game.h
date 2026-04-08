@@ -59,4 +59,7 @@ void drawPlayer(const LobbyGame_St* const game, const Player_st* const player);
 */
 void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms);
 
+void drawTree(void);
+void drawWorldBoundaries(const Player_st* player);
+
 #endif // UI_GAME_H

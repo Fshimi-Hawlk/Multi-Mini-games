@@ -10,7 +10,6 @@
 
 #include "utils/utils.h"
 #include "utils/globals.h"
-
 Rectangle getPlayerCollisionBox(const Player_st* const player) {
     return (Rectangle) {
         player->position.x - player->radius,
@@ -84,6 +83,12 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
             player->coyoteTimer = 0;
             player->nbJumps++;
             player->jumpBuffer  = 0;
+            if (player->nbJumps <= 1) {
+                if (IsSoundValid(sound_jump)) PlaySound(sound_jump);
+            } else {
+                if (rand() % 1000 == 0 && IsSoundValid(meme)) PlaySound(meme);
+                else if (IsSoundValid(sound_doubleJump))       PlaySound(sound_doubleJump);
+            }
         }
     }
 }

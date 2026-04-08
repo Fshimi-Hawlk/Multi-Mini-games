@@ -94,4 +94,38 @@ extern Texture2D logoSkinButton;
 */
 extern ParamsMenu_St paramsMenu;
 
+// ------------------------------------------------
+// Visual / atmospheric state
+// ------------------------------------------------
+
+/** @brief Shared moonlight direction vector (normalized). Used for shadows/glow. */
+extern const Vector2 moonLightDir;
+
+/** @brief Pre-loaded tree texture used in the lobby background. */
+extern Texture2D texTree;
+
+/** @brief Pre-loaded starry-background texture. */
+extern Texture2D texBackground;
+
+/** @brief Platform texture atlas entries (grass, wood plank). */
+extern Texture2D platformTextures[2];
+
+/** @brief Accumulated lobby time since launch (seconds). Used for animations. */
+extern float gameTime;
+
+/** @brief Grass blade simulation array. */
+extern GrassBlade_st grassBlades[MAX_GRASS_BLADES];
+
+/** @brief Number of active grass blades. */
+extern int grassCount;
+
+// ------------------------------------------------
+// Audio handles
+// ------------------------------------------------
+
+extern Sound sound_jump;
+extern Sound sound_doubleJump;
+extern Sound sound_gameLaunch;
+extern Sound meme;
+
 #endif // UTILS_GLOBALS_H

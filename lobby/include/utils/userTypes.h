@@ -79,6 +79,52 @@ typedef struct {
 } Platform_st;
 
 typedef struct {
+    Vector2 position;
+    float   height;
+    float   angle;
+    float   velocity;
+    Color   color;
+} GrassBlade_st;
+
+typedef enum {
+    FIREFLY_MODE_WANDER,
+    FIREFLY_MODE_LOOP,
+    FIREFLY_MODE_BOB
+} FireflyMode_Et;
+
+typedef struct {
+    Vector2        position;
+    Vector2        velocity;
+    float          radius;
+    float          alpha;
+    float          phase;
+    bool           active;
+    FireflyMode_Et mode;
+    float          modeTimer;
+    Vector2        wanderTarget;
+    Vector2        loopPoints[12];
+    int            loopCount;
+    int            currentLoopIndex;
+    float          facingAngle;
+    float          currentSpeed;
+} Firefly_St;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   rotation;
+    float   rotationSpeed;
+    float   scale;
+    float   life;
+    float   currentAlpha;
+    bool    active;
+    bool    onGround;
+    float   groundTimer;
+    float   spinDampTimer;
+    Color   color;
+} FallingLeaf_St;
+
+typedef struct {
     Rectangle     gameHitboxes[__gameSceneCount];
     BaseGame_St*  miniGames[__gameSceneCount];
 
