@@ -1,12 +1,7 @@
-#include "audio.h"
+#include "setups/audio.h"
+#include "utils/globals.h"
 
 static bool audioInitialized = false;
-
-Sound sound_jump;
-Sound sound_doubleJump;
-Sound sound_gameLaunch;
-
-Sound meme;
 
 void lobby_initAudio(void) {
     if (audioInitialized) return;
@@ -18,7 +13,7 @@ void lobby_initAudio(void) {
     SetSoundPitch(sound_doubleJump, 1.35);
     sound_gameLaunch = LoadSound(SOUNDS_PATH "lobby_gameLaunch.wav");
 
-    meme = LoadSound(SOUNDS_PATH "meme.wav");
+    sound_doubleJumpMeme = LoadSound(SOUNDS_PATH "meme.wav");
 
     audioInitialized = true;
 }
@@ -30,7 +25,7 @@ void lobby_freeAudio(void) {
     if (IsSoundValid(sound_doubleJump)) UnloadSound(sound_doubleJump);
     if (IsSoundValid(sound_gameLaunch)) UnloadSound(sound_gameLaunch);
 
-    if (IsSoundValid(meme)) UnloadSound(meme);
+    if (IsSoundValid(sound_doubleJumpMeme)) UnloadSound(sound_doubleJumpMeme);
 
 
     CloseAudioDevice();

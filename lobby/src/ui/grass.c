@@ -1,57 +1,16 @@
-#include "config.h"
-#include "constant.h"
-#include "global.h"
+#include "ui/grass.h"
 
-#include "grass.h"
+#include "utils/globals.h"
+#include "utils/utils.h"
 
-void initGrass(void) {
-    Rectangle floor = platforms[0].rect;
-    grassCount = 0;
-
-    float stepX = 3.0f;
-    float stepY = 5.0f;
-
-    for (float y = floor.y; y < floor.y + 200.0f; y += stepY) {
-        for (float x = -X_LIMIT - 500; x < X_LIMIT + 500; x += stepX) {
-            if (grassCount >= MAX_GRASS_BLADES) break;
-
-            float offX = (float)(rand() % 15) - 7.5f;
-            float offY = (float)(rand() % 10);
-
-            float baseHeight;
-            int type = rand() % 10;
-            if (type < 7) baseHeight = 5.0f + (rand() % 10);
-            else if (type < 9) baseHeight = 15.0f + (rand() % 15);
-            else baseHeight = 2.0f + (rand() % 4);
-
-            float depth = (y - floor.y) / floor.height;
-            float colorVar = (float)(rand() % 35);
-
-            grassBlades[grassCount] = (GrassBlade_st){
-                .position = { x + offX, y + offY },
-                .height = baseHeight,
-                .angle = 0.0f,
-                .velocity = 0.0f,
-                .color = (Color){
-                    (unsigned char)Clamp(35 + colorVar - (depth * 15), 10, 255),
-                    (unsigned char)Clamp(90 + colorVar - (depth * 70), 20, 180),
-                    (unsigned char)Clamp(25 - (depth * 10), 5, 255),
-                    255
-                }
-            };
-            grassCount++;
-        }
-    }
-}
-
-void updateGrass(Player_st* player, float dt, float time, Camera2D camera) {
-    float viewL = camera.target.x - (WINDOW_WIDTH / 2) - 100.0f;
-    float viewR = camera.target.x + (WINDOW_WIDTH / 2) + 100.0f;
-    float viewT = camera.target.y - (WINDOW_HEIGHT / 2) - 100.0f;
-    float viewB = camera.target.y + (WINDOW_HEIGHT / 2) + 100.0f;
+void updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
+    float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
+    float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
+    float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
+    float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
 
     for (int i = 0; i < grassCount; ++i) {
-        GrassBlade_st* b = &grassBlades[i];
+        GrassBlade_St* b = &grassBlades[i];
         if (b->position.x < viewL || b->position.x > viewR ||
             b->position.y < viewT || b->position.y > viewB) continue;
 
@@ -70,22 +29,22 @@ void updateGrass(Player_st* player, float dt, float time, Camera2D camera) {
         float distSq = dx*dx + dy*dy;
         if (distSq > 360000.0f) b->angle = sinf(time * 2.0f + b->position.x * 0.05f) * 0.1f;
         if (distSq < 2000.0f) b->velocity -= (dx * 1.5f);
-        b->angle = Clamp(b->angle, -1.0f, 1.0f);
+        b->angle = clamp(b->angle, -1.0f, 1.0f);
     }
 }
 
-void drawGrass(Player_st* player, Camera2D camera) {
+void drawGrass(const Player_St* const player, const Camera2D camera) {
     float skyLeft = player->position.x - SKY_WIDTH / 2.0f;
     DrawRectangleGradientV(skyLeft, GROUND_Y, SKY_WIDTH, 1000.0f,
                            (Color){45, 35, 25, 255}, (Color){20, 15, 10, 255});
 
-    float viewL = camera.target.x - (WINDOW_WIDTH / 2) - 100.0f;
-    float viewR = camera.target.x + (WINDOW_WIDTH / 2) + 100.0f;
-    float viewT = camera.target.y - (WINDOW_HEIGHT / 2) - 100.0f;
-    float viewB = camera.target.y + (WINDOW_HEIGHT / 2) + 100.0f;
+    float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
+    float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
+    float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
+    float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
 
     for (int i = 0; i < grassCount; ++i) {
-        GrassBlade_st* b = &grassBlades[i];
+        GrassBlade_St* b = &grassBlades[i];
         if (b->position.x < viewL || b->position.x > viewR ||
             b->position.y < viewT || b->position.y > viewB) continue;
 

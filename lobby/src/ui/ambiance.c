@@ -1,8 +1,6 @@
-#include "config.h"
-#include "constant.h"
-#include "global.h"
+#include "utils/globals.h"
 
-#include "ambiance.h"
+#include "ui/ambiance.h"
 
 static Firefly_St fireflies[MAX_FIREFLIES] = {0};
 static FallingLeaf_St fallingLeaves[MAX_FALLING_LEAVES] = {0};
@@ -39,7 +37,7 @@ static Vector2 getRandomCanopySpawnPoint(void) {
     @brief Applies a gentle push to a leaf (airborne or grounded).
     Activates temporary strong rotational drag for the requested 3-5 s window.
 */
-static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_st* player) {
+static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_St* player) {
     Vector2 dir = Vector2Subtract(leaf->position, player->position);
     float distSq = Vector2LengthSqr(dir);
 
@@ -69,7 +67,7 @@ static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_st* player) {
     @brief Checks for landing on the *top surface only* of any platform.
     Side or bottom contacts are ignored. Landing is now softer (no hard snap).
 */
-static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_st* platforms, int count) {
+static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_St* platforms, int count) {
     float leafRadius = 11.0f * leaf->scale;
 
     for (int i = 0; i < count; ++i) {
@@ -96,11 +94,7 @@ static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_st* platforms
     return false;
 }
 
-void initAtmosphericEffects(void) {
-    // nothing to do
-}
-
-void updateAtmosphericEffects(float dt, Player_st* player, Camera2D cam) {
+void updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
     // Compute visible world rectangle + padding so nothing pops in/out of nowhere
     float padding = 180.0f;
     Rectangle view = {
@@ -474,7 +468,7 @@ void drawAtmosphericEffects(void) {
     }
 }
 
-void drawScreenEffects(Player_st* player) {
+void drawScreenEffects(Player_St* player) {
     float heightFactor = 1 - Clamp((GROUND_Y - player->position.y) / 650.0f, 0.0f, 1.0f); // stronger near ground
 
     // Vignette + night grading - much softer when player is high

@@ -1,26 +1,24 @@
 #ifndef CONSTANT_H
 #define CONSTANT_H
 
+#define GRAVITY          1200.0f    ///< Downward acceleration applied every frame (pixels/second²).
+#define MOVE_SPEED       300.0f     ///< Horizontal movement speed when holding left/right (pixels/second).
+#define JUMP_FORCE       500.0f     ///< Upward velocity applied on jump (pixels/second).
+#define COYOTE_TIME      0.2f       ///< Time window (seconds) after leaving ground where jump is still allowed.
+#define JUMP_BUFFER_TIME 0.2f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
+#define MAX_JUMPS        2          ///< Maximum number of jumps allowed without touching ground (includes ground jump).
+#define FRICTION         2000.0f    ///< Horizontal deceleration rate when no input is given (pixels/second²).
+
+#define GROUND_Y         500.0f     ///< Y-position considered "ground level" for initial spawn / debug.
+#define PLAT_H           20.0f
+#define STEP_Y           100.0f
+#define WALL_W           100.0f
+#define DOOR_H           200.0f
+
 #define SKY_WIDTH 8000.0f
 #define SKY_HEIGHT 2000.0f
 
 #define X_LIMIT 1200.0f
-
-#define GROUND_Y      500.0f
-#define PLAT_H        20.0f
-#define STEP_Y        100.0f
-#define WALL_W        100.0f
-#define DOOR_H        200.0f
-
-#define GRAVITY 1200.0f
-#define MOVE_SPEED 300.0f
-#define JUMP_FORCE 500.0f
-
-#define COYOTE_TIME 0.2f
-#define JUMP_BUFFER_TIME 0.2f
-#define MAX_JUMPS 2
-
-#define FRICTION 2000
 
 #define MAX_GRASS_BLADES 80000
 

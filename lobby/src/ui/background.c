@@ -1,21 +1,20 @@
-#include "background.h"
+#include "ui/background.h"
 
-#include "constant.h"
-#include "global.h"
+#include "utils/globals.h"
 
-void drawSceneBackground(float time, Vector2 playerPos) {
+void drawSceneBackground(f32 time, Vector2 playerPos) {
     (void) time;
 
-    float parallaxFactor = 0.15f;
+    f32 parallaxFactor = 0.15f;
 
-    float pX = playerPos.x * parallaxFactor;
-    float pY = playerPos.y * parallaxFactor;
+    f32 pX = playerPos.x * parallaxFactor;
+    f32 pY = playerPos.y * parallaxFactor;
 
     Color skyTop = (Color){ 25, 84, 157, 255 };
     Color skyMid = (Color){ 125, 195, 230, 255 };
     Color skyLow = (Color){ 210, 240, 255, 255 };
 
-    float skyLeft = (playerPos.x - SKY_WIDTH / 2.0f) + pX;
+    f32 skyLeft = (playerPos.x - SKY_WIDTH / 2.0f) + pX;
 
     DrawRectangleGradientV(
         skyLeft,
@@ -37,7 +36,7 @@ void drawSceneBackground(float time, Vector2 playerPos) {
 }
 
 void drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
-    if (!IsTextureValid(texBackground)) {
+    if (!IsTextureValid(backgroundTexture)) {
         // fallback to old gradient sky
         drawSceneBackground(0.0f, playerPos);
         return;
@@ -45,10 +44,10 @@ void drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
 
     // ── Configuration ───────────────────────────────────────────────────────
     const Vector2 parallax = {-0.035f, -0.05f};
-    const float scale    = 0.35f;
+    const f32 scale    = 0.35f;
 
-    float bgWidth  = (float)texBackground.width  * scale;
-    float bgHeight = (float)texBackground.height * scale;
+    f32 bgWidth  = (f32) backgroundTexture.width  * scale;
+    f32 bgHeight = (f32) backgroundTexture.height * scale;
 
     // ── Parallax offset ────────
     Vector2 offset = Vector2Multiply(playerPos, parallax);
@@ -66,8 +65,8 @@ void drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
 
     // ── Draw the single scaled background ───────────────────────────────────
     DrawTexturePro(
-        texBackground,
-        (Rectangle){0.0f, 0.0f, (float)texBackground.width, (float)texBackground.height},
+        backgroundTexture,
+        (Rectangle){0.0f, 0.0f, (f32)backgroundTexture.width, (f32)backgroundTexture.height},
         dest,
         Vector2Zero(),
         0.0f,
