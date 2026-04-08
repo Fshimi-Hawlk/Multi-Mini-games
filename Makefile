@@ -103,13 +103,13 @@ modules: $(foreach mod,$(ORDERED_MODULES),module-$(mod))
 # Build main lobby binary
 bin: modules | $(BIN_DIR)
 	@echo "Building lobby executable..."
-	$(SILENT_PREFIX)$(MAKE) -C lobby MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -lreseau -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group"
+	$(SILENT_PREFIX)$(MAKE) -C lobby MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -lreseau -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group -lm"
 	$(SILENT_PREFIX)install -m 755 lobby/build/bin/main$(EXE_EXT) $(BIN_DIR)/main$(EXE_EXT)
 
 # Build server binary
 server: modules | $(BIN_DIR)
 	@echo "Building server executable..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group"
+	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group -lm"
 	$(SILENT_PREFIX)install -m 755 reseau/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
 
 clean:
