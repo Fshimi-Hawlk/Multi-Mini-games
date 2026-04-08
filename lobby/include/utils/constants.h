@@ -9,6 +9,9 @@
 #define MAX_JUMPS        2          ///< Maximum number of jumps allowed without touching ground (includes ground jump).
 #define FRICTION         2000.0f    ///< Horizontal deceleration rate when no input is given (pixels/second²).
 
+#define MAX_FALL_SPEED   920.0f     ///< Maximum downward speed (pixels/second). Caps y-velocity when airborne to prevent tunneling.
+#define AIR_DRAG         0.3f       ///< Air resistance coefficient for falling (higher = stronger drag). Applied only when falling in air.
+
 #define GROUND_Y         500.0f     ///< Y-position considered "ground level" for initial spawn / debug.
 #define PLAT_H           20.0f
 #define STEP_Y           100.0f
@@ -18,7 +21,7 @@
 #define SKY_WIDTH 8000.0f
 #define SKY_HEIGHT 2000.0f
 
-#define X_LIMIT 1200.0f
+#define X_LIMIT 1600.0f
 
 #define MAX_GRASS_BLADES 80000
 

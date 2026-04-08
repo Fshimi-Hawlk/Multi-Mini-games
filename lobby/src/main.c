@@ -21,8 +21,9 @@ int main(void) {
         float dt = GetFrameTime();
         gameTime += dt;
 
-        if (gameTime > 1.45f)
+        if (gameTime > 1.45f) {
             updatePlayer(&game.player, platforms, platformCount, dt);
+        }
 
         game.cam.target = game.player.position;
 
@@ -42,14 +43,14 @@ int main(void) {
                 drawStarryBackground(game.player.position, game.cam);
 
                 drawTree();
+                
                 drawPlatforms(platforms, platformCount);
-                drawWorldBoundaries(&game.player);
-
-                drawGrass(&game.player, game.cam);
-
-                drawAtmosphericEffects();
-
                 drawPlayer(&game, &game.player);
+                
+                drawWorldBoundaries(&game.player);
+                
+                drawGrass(&game.player, game.cam);
+                drawAtmosphericEffects();
             } EndMode2D();
 
             drawScreenEffects(&game.player);

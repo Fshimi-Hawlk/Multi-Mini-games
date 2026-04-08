@@ -29,12 +29,6 @@
 #include "common.h"
 #include "APIs/generalAPI.h"
 
-typedef enum {
-    PLATFORM_TEXTURE_GRASS_ID,
-    PLATFORM_TEXTURE_WOODPLANK_ID,
-    __platformTextureCount
-} PlatformTextureId_Et;
-
 typedef struct {
     Vector2 position;
     float height;
@@ -140,6 +134,12 @@ typedef struct {
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
 } Player_St;
 
+typedef enum {
+    PLATFORM_TYPE_GRASS,
+    PLATFORM_TYPE_WOODPLANK,
+    __platformTypeCount
+} PlatformType_Et;
+
 /**
     @brief Single rectangular platform / solid surface in the lobby world.
 */
@@ -147,7 +147,7 @@ typedef struct {
     Rectangle rect;         ///< Position and size (world coordinates)
     Color     color;        ///< Debug / placeholder rendering color
     float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-    PlatformTextureId_Et textureId;
+    PlatformType_Et type;
 } Platform_St;
 
 /**

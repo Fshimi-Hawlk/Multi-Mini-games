@@ -49,14 +49,6 @@
 */
 void drawPlayer(const LobbyGame_St* const game, const Player_St* const player);
 
-/**
-    @brief Draws all static platforms in the lobby world.
-
-    Renders each platform as a rounded rectangle using its stored rect, color and roundness.
-
-    @param platforms    Array of platform definitions
-    @param count        Number of platforms in the array
-*/
 void drawPlatforms(const Platform_St *const platforms, const int count);
 
 void drawTree(void);

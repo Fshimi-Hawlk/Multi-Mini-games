@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-04-08
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
 
     Contributors:
@@ -16,6 +16,8 @@
             - Moved the game logic off main to this file
             - Reworked player texture logic
             - Provided documentation
+            - Fixed getPlayerCollisionBox (was incorrectly using center as top-left)
+            - Added MAX_FALL_SPEED terminal velocity + air drag when airborne (fixes tunneling through floor from high jumps and slows y-speed as requested)
 
     This file contains the core systems that drive the lobby player character:
         - Movement and input processing (horizontal + jump)
@@ -41,7 +43,6 @@
 
 #include "core/game.h"
 
-#include "utils/common.h"
 #include "utils/utils.h"
 #include "utils/globals.h"
 
@@ -82,21 +83,29 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
     // Rotate depending on the player's direction
     if (player->velocity.x > 0) {
         player->angle += 360 * dt; // Clockwise
-    }
-    else if (player->velocity.x < 0) {
+    } else if (player->velocity.x < 0) {
         player->angle -= 360 * dt; // Anti-clockwise
     }
 
     // Buffered jump input
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    }
-    else if (player->jumpBuffer > 0) {
+    } else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
 
     // Gravity
     player->velocity.y += 1200 * dt;
+
+    // Air resistance + terminal velocity when in air
+    // Fixes tunneling through floor from high jumps and slows down y-speed as requested
+    if (!player->onGround && player->velocity.y > 0) {
+        if (player->velocity.y > MAX_FALL_SPEED) {
+            player->velocity.y = MAX_FALL_SPEED;
+        }
+        // Gentle linear drag for natural falling feel (very light)
+        player->velocity.y *= (1.0f - AIR_DRAG * dt);
+    }
 
     // Collision
     player->position.x += player->velocity.x * dt;
@@ -107,12 +116,23 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
         resolveCircleRectCollision(player, platforms[i].rect);
     }
 
+    // Left border
+    if (player->position.x - player->radius < -X_LIMIT) {
+        player->position.x = -X_LIMIT + player->radius;
+        player->velocity.x = 0;
+    }
+
+    // Right border
+    if (player->position.x + player->radius > X_LIMIT) {
+        player->position.x = X_LIMIT - player->radius;
+        player->velocity.x = 0;
+    }
+
     // Coyote time
     if (player->onGround) {
         player->coyoteTimer = COYOTE_TIME;
         player->nbJumps = 0;
-    }
-    else {
+    } else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0)
             player->coyoteTimer = 0;

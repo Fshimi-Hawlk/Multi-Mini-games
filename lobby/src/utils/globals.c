@@ -37,45 +37,38 @@ float gameTime = 0.0f;
 
 Platform_St platforms[] = {
     // --- SOL ---
-    { .rect = {-X_LIMIT, GROUND_Y, X_LIMIT * 2, 1000}, .textureId = PLATFORM_TEXTURE_GRASS_ID},
+    { .rect = {-X_LIMIT, GROUND_Y, X_LIMIT * 2, 1000}, .type = PLATFORM_TYPE_GRASS},
 
     // --- BAS DU TRONC (Fini l'escalier droit, on zigzag) ---
-    { .rect = { -100, GROUND_Y - 100, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre
-    { .rect = {  100, GROUND_Y - 220, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Décalé droite
-    { .rect = { -280, GROUND_Y - 340, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Décalé gauche
+    { .rect = { -100, GROUND_Y -  100, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre
+    { .rect = {  100, GROUND_Y -  220, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Décalé droite
+    { .rect = { -280, GROUND_Y -  340, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Décalé gauche
 
     // --- PREMIER GROS ÉCARTEMENT (Les grosses branches du bas) ---
-    { .rect = {  -50, GROUND_Y - 450, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-droit
-    { .rect = { -480, GROUND_Y - 440, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Extrême gauche (sur les feuilles)
-    { .rect = {  280, GROUND_Y - 460, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Extrême droite (sur les feuilles)
-
-    // --- MILIEU DE L'ARBRE (On remonte sur les côtés) ---
-    { .rect = { -350, GROUND_Y - 560, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Gauche
-    { .rect = {  150, GROUND_Y - 580, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Droite
-    { .rect = { -150, GROUND_Y - 670, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Retour vers le centre
+    { .rect = {    0, GROUND_Y -  500, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre-droit
 
     // --- EXTÉRIEURS HAUTS (On exploite vraiment la largeur) ---
-    { .rect = { -520, GROUND_Y - 720, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Tout au bout à gauche
-    { .rect = {  350, GROUND_Y - 740, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Tout au bout à droite
+    { .rect = { -600, GROUND_Y -  650, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Tout au bout à gauche
+    { .rect = { -150, GROUND_Y -  700, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Retour vers le centre
+    { .rect = {  350, GROUND_Y -  850, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Tout au bout à droite
 
     // --- ON GRIMPE VERS LA CANOPÉE ---
-    { .rect = { -280, GROUND_Y - 840, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Gauche
-    { .rect = {   80, GROUND_Y - 860, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Droite
-    { .rect = { -100, GROUND_Y - 960, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Jonction centrale
+    { .rect = { -920, GROUND_Y -  940, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut gauche
+    { .rect = { -100, GROUND_Y -  960, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Jonction centrale
 
     // --- LES BRANCHES SUPÉRIEURES ---
-    { .rect = { -380, GROUND_Y - 1020, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Haut gauche
-    { .rect = {  250, GROUND_Y - 1050, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Haut droite
-    { .rect = { -220, GROUND_Y - 1140, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-gauche
-    { .rect = {   50, GROUND_Y - 1160, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Centre-droit
+    { .rect = { -650, GROUND_Y - 1180, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut gauche
+    { .rect = {  250, GROUND_Y - 1050, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut droite
+    { .rect = { -220, GROUND_Y - 1140, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre-gauche
+    { .rect = {  620, GROUND_Y - 1200, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
 
     // --- LE SOMMET DU FEUILLAGE ---
-    { .rect = { -320, GROUND_Y - 1260, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID},
-    { .rect = {  180, GROUND_Y - 1280, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID},
-    { .rect = {  -80, GROUND_Y - 1380, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}, // Juste sous la pointe
+    { .rect = { -490, GROUND_Y - 1350, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+    { .rect = {  180, GROUND_Y - 1280, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
 
     // --- LA CIME ABSOLUE ---
-    { .rect = { -100, GROUND_Y - 1500, 200, PLAT_H}, .textureId = PLATFORM_TEXTURE_WOODPLANK_ID}
+    { .rect = { -100, GROUND_Y - 1480, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+    { .rect = {  340, GROUND_Y - 1600, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}
 };
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
@@ -84,7 +77,7 @@ Rectangle skinButtonRect = { WINDOW_WIDTH - 70, WINDOW_HEIGHT / 2.0f - 25, 50, 5
 
 Texture2D logoSkinButton = {0};
 
-Texture2D platformTextures[__platformTextureCount] = {0};
+Texture2D platformTextures[__platformTypeCount] = {0};
 
 Texture2D treeTexture;
 Texture2D backgroundTexture;

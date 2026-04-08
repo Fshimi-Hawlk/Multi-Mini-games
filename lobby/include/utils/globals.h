@@ -21,8 +21,7 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "raylib.h"
-#include "userTypes.h"
+#include "utils/userTypes.h"
 
 // ────────────────────────────────────────────────
 // Lobby world content
@@ -42,6 +41,11 @@ extern Platform_St platforms[];
 */
 extern u32 platformCount;
 
+extern Texture2D platformTextures[__platformTypeCount];
+
+extern Texture2D treeTexture;
+extern Texture2D backgroundTexture;
+
 // ────────────────────────────────────────────────
 // Skin selection UI
 // ────────────────────────────────────────────────
@@ -57,11 +61,6 @@ extern Rectangle skinButtonRect;
           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;
-
-extern Texture2D platformTextures[__platformTextureCount];
-
-extern Texture2D treeTexture;
-extern Texture2D backgroundTexture;
 
 extern float gameTime;
 

@@ -7,11 +7,11 @@ void lobby_initTextures(void) {
     game.playerVisuals.textures[PLAYER_TEXTURE_EARTH]      = LoadTexture(SKINS_PATH "earth.png");
     game.playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(SKINS_PATH "trollFace.png");
 
-    platformTextures[PLATFORM_TEXTURE_GRASS_ID]     = LoadTexture(IMAGES_PATH "grass.png");
-    platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID] = LoadTexture(IMAGES_PATH "wood_plank.png");
+    platformTextures[PLATFORM_TYPE_GRASS]     = LoadTexture(IMAGES_PATH "grass.png");
+    platformTextures[PLATFORM_TYPE_WOODPLANK] = LoadTexture(IMAGES_PATH "wood_plank.png");
 
-    SetTextureWrap(platformTextures[PLATFORM_TEXTURE_GRASS_ID], TEXTURE_WRAP_REPEAT);
-    SetTextureWrap(platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID], TEXTURE_WRAP_REPEAT);
+    SetTextureWrap(platformTextures[PLATFORM_TYPE_GRASS], TEXTURE_WRAP_REPEAT);
+    SetTextureWrap(platformTextures[PLATFORM_TYPE_WOODPLANK], TEXTURE_WRAP_REPEAT);
     
     treeTexture = LoadTexture(IMAGES_PATH "tree.png");
     GenTextureMipmaps(&treeTexture);
@@ -33,7 +33,7 @@ void lobby_freeTextures(void) {
         UnloadTexture(game.playerVisuals.textures[i]);
     }
 
-    for (u8 i = 0; i < __platformTextureCount; ++i) {
+    for (u8 i = 0; i < __platformTypeCount; ++i) {
         if (!IsTextureValid(platformTextures[i])) continue;
 
         UnloadTexture(platformTextures[i]);

@@ -51,10 +51,11 @@ void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
 
 void drawPlatforms(const Platform_St* const platforms, const int count) {
     for (int i = 0; i < count; ++i) {
-        Rectangle r = platforms[i].rect;
+        const Platform_St* p = &platforms[i];
+        Rectangle r = p->rect;
 
-        if (platforms[i].textureId == PLATFORM_TEXTURE_WOODPLANK_ID && IsTextureValid(platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID])) {
-            Texture2D tex = platformTextures[PLATFORM_TEXTURE_WOODPLANK_ID];
+        if (p->type == PLATFORM_TYPE_WOODPLANK && IsTextureValid(platformTextures[PLATFORM_TYPE_WOODPLANK])) {
+            Texture2D tex = platformTextures[PLATFORM_TYPE_WOODPLANK];
 
             // Stable random wood clip
             f32 hash = (r.x * 13.0f + r.y * 17.0f + r.width * 19.0f);
@@ -62,24 +63,25 @@ void drawPlatforms(const Platform_St* const platforms, const int count) {
             h = (h ^ 0xDEADBEEF) * 2654435761u;
 
             Rectangle source = {
-                .x      = (f32) (h % (uint)(tex.width - r.width  + 1)),
-                .y      = (f32) ((h >> 16) % (uint)(tex.height - r.height + 1)),
+                .x      = (f32)(h % (uint)(tex.width - r.width  + 1)),
+                .y      = (f32)((h >> 16) % (uint)(tex.height - r.height + 1)),
                 .width  = r.width,
                 .height = r.height
             };
 
-            // Soft drop shadow (offset opposite to moonlight)
+            // Soft drop shadow
             Vector2 shadowOffset = {moonLightDir.x * -12.0f, moonLightDir.y * -8.0f};
             DrawRectangleRec((Rectangle){r.x + shadowOffset.x, r.y + shadowOffset.y, r.width, r.height}, Fade(BLACK, 0.28f));
 
             // Main wood texture
             DrawTextureRec(tex, source, (Vector2){r.x, r.y}, WHITE);
 
-            // Subtle shading on the side away from the light
-            DrawRectangleRec(r, Fade(BLACK, 0.18f));   // overall dark tint
-            // Light rim on the opposite side
+            // Subtle shading
+            DrawRectangleRec(r, Fade(BLACK, 0.18f));
+            // Light rim
             DrawRectangleLinesEx((Rectangle){r.x - 2, r.y - 2, r.width + 4, r.height + 4}, 3.0f, Fade(WHITE, 0.09f));
         }
+        // Add grass or other solid types here later if needed
     }
 }
 
