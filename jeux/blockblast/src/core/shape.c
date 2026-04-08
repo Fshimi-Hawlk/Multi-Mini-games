@@ -14,6 +14,24 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
+void initGame(GameState_St* const state, bool init) {
+    (void)init;
+    clearBoard(&state->board);
+    state->scoring.score = 0;
+    state->scoring.streakCount = 0;
+    state->scoring.streakGrace = 0;
+    state->gameOver = false;
+    initPrefabsAndVariants(&state->prefabManager, prefabVariant);
+    shuffleSlots(&state->prefabManager);
+}
+
+void initPrefabsAndVariants(PrefabManager_St* const manager, const GamePrefabVariant_Et variant) {
+    (void)variant;
+    manager->slots[0].placed = true;
+    manager->slots[1].placed = true;
+    manager->slots[2].placed = true;
+}
+
 bool isShapeClicked(const Shape_St* const shape) {
     f32Vector2 mousePos = GetMousePosition();
 

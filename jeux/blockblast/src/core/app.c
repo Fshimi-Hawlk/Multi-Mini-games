@@ -8,26 +8,19 @@
 #include "utils/common.h"
 #include "utils/globals.h"
 
+#ifndef ASSET_PATH
+#define ASSET_PATH "assets/"
+#endif
+
 #include "core/app.h"
 #include "core/game.h"
 #include "utils/audio.h"
 
 bool initFonts(void) {
-    u64 fontSize = 8;
-
-    bool allFontLoaded = true;
-
     for (u64 fontId = 0; fontId < _fontSizeCount; fontId++) {
-        fonts[fontId] = LoadFontEx("../assets/fonts/Nunito/Nunito-Black.ttf", fontSize, NULL, 0);
-        if (!IsFontValid(fonts[fontId])) {
-            log_warn("Font %zu (%d) wasn't proprely loaded", fontId, fontSize);
-            allFontLoaded = false;
-        }
-
-        fontSize += 2;
+        fonts[fontId] = GetFontDefault();
     }
-
-    return allFontLoaded;
+    return true;
 }
 
 void freeFonts(void) {

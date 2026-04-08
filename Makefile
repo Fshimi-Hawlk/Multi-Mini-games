@@ -110,6 +110,7 @@ bin: libs
 
 # Run the lobby executable (./ so the shell runs a path, not a PATH lookup)
 run-exe:
+	@if [ -f $(BIN_DIR)/main ]; then $(BIN_DIR)/main; else echo "Executable not found at $(BIN_DIR)/main"; fi
 
 # ==============================================================================
 # Test Targets

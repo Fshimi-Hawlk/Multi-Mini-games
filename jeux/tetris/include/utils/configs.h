@@ -14,7 +14,7 @@
 
 #define CELL_SIZE 25
 #define RGB(r, g, b) (Color) {r, g, b, 255}
-#define BACKGROUND_COLOR RGB(0, 0, 30)
+#define BACKGROUND_COLOR RGB(0, 0, 0)
 #define BOARD_BACKGROUND_COLOR RGB(50, 50, 50)
 #define BOARD_GRID_COLOR RGB(100, 100, 100)
 

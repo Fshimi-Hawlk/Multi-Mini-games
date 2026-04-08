@@ -20,10 +20,6 @@
 #include "APIs/snakeAPI.h"
 #include "APIs/bingoAPI.h"
 #include "APIs/blockBlastAPI.h"
-#include "APIs/puissance4API.h"
-#include "APIs/rubikscubeAPI.h"
-#include "APIs/kingforfourAPI.h"
-#include "APIs/echecsAPI.h"
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error = OK;
@@ -109,19 +105,6 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         .y      = 425,
         .width  = 75,
         .height = 75
-    };
-
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_PUISSANCE4] = (Rectangle) {
-        .x = -575, .y = 425, .width = 75, .height = 75
-    };
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_RUBIKSCUBE] = (Rectangle) {
-        .x = -800, .y = 425, .width = 75, .height = 75
-    };
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_KINGFORFOUR] = (Rectangle) {
-        .x = -1025, .y = 425, .width = 75, .height = 75
-    };
-    gameRef->subGameManager.gameHitboxes[GAME_SCENE_ECHECS] = (Rectangle) {
-        .x = -1250, .y = 425, .width = 75, .height = 75
     };
 
     gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
@@ -245,10 +228,6 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
                     case GAME_SCENE_SNAKE:      gameName = "Snake";      portalColor = (Color){  0, 200,  80, 200}; break;
                     case GAME_SCENE_BINGO:      gameName = "Bingo";      portalColor = (Color){255, 200,   0, 200}; break;
                     case GAME_SCENE_BLOCKBLAST: gameName = "BlockBlast"; portalColor = (Color){ 60,  60, 200, 200}; break;
-                    case GAME_SCENE_PUISSANCE4:  gameName = "Puissance4"; portalColor = (Color){255,  80,   0, 200}; break;
-                    case GAME_SCENE_RUBIKSCUBE:  gameName = "Rubik's";    portalColor = (Color){255, 255,  50, 200}; break;
-                    case GAME_SCENE_KINGFORFOUR: gameName = "King4Four";  portalColor = (Color){200,  30,  30, 200}; break;
-                    case GAME_SCENE_ECHECS:      gameName = "Echecs";     portalColor = (Color){180, 140,  80, 200}; break;
                 }
 
                 bool playerNear = CheckCollisionCircleRec(

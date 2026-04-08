@@ -11,6 +11,16 @@
 #include "utils/userTypes.h"
 
 /**
+    @brief Initializes a new game state (board, scoring, prefabs).
+*/
+void initGame(GameState_St* const state, bool init);
+
+/**
+    @brief Initializes prefab manager with given variant.
+*/
+void initPrefabsAndVariants(PrefabManager_St* const manager, const GamePrefabVariant_Et variant);
+
+/**
     @brief Creates a deep copy of a PrefabManager_St.
 
     A plain `memcpy` is insufficient because each `bags[i]` contains a heap-allocated

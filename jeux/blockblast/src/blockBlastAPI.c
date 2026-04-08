@@ -69,8 +69,11 @@ static void bb_loadFonts(void) {
     u64 fontSize = 8;
     for (u64 id = 0; id < _fontSizeCount; id++, fontSize += 2) {
         bb_fonts[id] = LoadFontEx(BB_FONT_PATH, (float)fontSize, NULL, 0);
-        if (!IsFontValid(bb_fonts[id]))
-            log_warn("BlockBlast: font id=%zu not loaded", id);
+        if (!IsFontValid(bb_fonts[id])) {
+            log_warn("BlockBlast: font id=%zu not loaded, using default", id);
+            UnloadFont(bb_fonts[id]);
+            bb_fonts[id] = GetFontDefault();
+        }
     }
 }
 

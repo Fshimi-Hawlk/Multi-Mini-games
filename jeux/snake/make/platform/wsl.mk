@@ -7,7 +7,7 @@ BASE_CFLAGS := \
 	-I../../thirdparty \
 	-I../../firstparty \
 	-DPLATFORM_WSL \
-	-D_BSD_SOURCE
+	-D_DEFAULT_SOURCE
 
 # Linker base
 BASE_LDFLAGS := \

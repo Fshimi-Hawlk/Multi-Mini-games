@@ -6,6 +6,7 @@
 */
 
 #include "core/save.h"
+#include "core/game.h"
 
 #include "core/shape.h"
 
@@ -276,7 +277,7 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
     offset += readU8(buffer, bufferSize, offset, &prefabVariantU8);
     if (init) {
         prefabVariant = (GamePrefabVariant_Et) prefabVariantU8;
-        initPrefabsAndVariants(&prefabsBag, prefabVariant);
+        initPrefabsAndVariants(manager, prefabVariant);
     }
 
     // Scoring

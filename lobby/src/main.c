@@ -30,10 +30,6 @@
 #include "APIs/snakeAPI.h"
 #include "APIs/bingoAPI.h"
 #include "APIs/blockBlastAPI.h"
-#include "APIs/puissance4API.h"
-#include "APIs/rubikscubeAPI.h"
-#include "APIs/kingforfourAPI.h"
-#include "APIs/echecsAPI.h"
 #include "systemSettings.h"
 #include "utils/configs.h"
 
@@ -98,20 +94,6 @@ static Error_Et blockBlast_init_shim(BaseGame_St** p)  { return blockBlast_initG
 static Error_Et blockBlast_loop_shim(BaseGame_St*  p)  { return blockBlast_gameLoop((BlockBlastAPI_St*)p);   }
 static Error_Et blockBlast_free_shim(BaseGame_St** p)  { return blockBlast_freeGame((BlockBlastAPI_St**)p);  }
 
-static Error_Et rubikscube_init_shim(BaseGame_St** p)  { return rubikscube_initGame((RubiksCubeAPI_St**)p);   }
-static Error_Et rubikscube_loop_shim(BaseGame_St*  p)  { return rubikscube_gameLoop((RubiksCubeAPI_St*)p);    }
-static Error_Et rubikscube_free_shim(BaseGame_St** p)  { return rubikscube_freeGame((RubiksCubeAPI_St**)p);   }
-
-static Error_Et kingforfour_init_shim(BaseGame_St** p) {
-    return kingforfour_initGame__full((KingForFourGame_St**)p, (KingForFourConfigs_St){ .fps = 60 });
-}
-static Error_Et kingforfour_loop_shim(BaseGame_St*  p) { return kingforfour_gameLoop((KingForFourGame_St*)p);  }
-static Error_Et kingforfour_free_shim(BaseGame_St** p) { return kingforfour_freeGame((KingForFourGame_St**)p); }
-
-static Error_Et echecs_init_shim(BaseGame_St** p)      { return echecs_initGame((EchecsAPI_St**)p);            }
-static Error_Et echecs_loop_shim(BaseGame_St*  p)      { return echecs_gameLoop((EchecsAPI_St*)p);             }
-static Error_Et echecs_free_shim(BaseGame_St** p)      { return echecs_freeGame((EchecsAPI_St**)p);            }
-
 /**
     @brief Scene dispatch table.
 
@@ -128,10 +110,6 @@ static const SceneDesc_St scenes[__gameSceneCount] = {
     [GAME_SCENE_SNAKE]       = { "Snake",      snake_init_shim,      snake_loop_shim,      snake_free_shim,       800,  600 },
     [GAME_SCENE_BINGO]       = { "Bingo",      bingo_init_shim,      bingo_loop_shim,      bingo_free_shim,       800,  700 },
     [GAME_SCENE_BLOCKBLAST]   = { "Block Blast", blockBlast_init_shim,  blockBlast_loop_shim,  blockBlast_free_shim,  1000, 800 },
-    // [GAME_SCENE_PUISSANCE4]   = { "Puissance 4", NULL,              NULL,              NULL,               1000, 800 },
-    [GAME_SCENE_RUBIKSCUBE]   = { "Rubik's Cube",rubikscube_init_shim,  rubikscube_loop_shim,  rubikscube_free_shim,  1200, 800 },
-    [GAME_SCENE_KINGFORFOUR]  = { "King 4 Four", kingforfour_init_shim, kingforfour_loop_shim, kingforfour_free_shim, 1200, 800 },
-    [GAME_SCENE_ECHECS]       = { "Echecs",       echecs_init_shim,      echecs_loop_shim,      echecs_free_shim,       800, 600 },
 };
 
 // ─────────────────────────────────────────────────────────────────
