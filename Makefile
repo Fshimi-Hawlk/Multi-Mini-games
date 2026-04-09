@@ -38,7 +38,6 @@ ROOT_MODULES := $(filter-out $(EXCLUDED_DIRS), $(ROOT_MODULES))
 JEUX_MODULES := $(patsubst %/,%,$(wildcard jeux/*/))
 
 MODULES := $(ROOT_MODULES) $(JEUX_MODULES)
-SUBDIRS := $(MODULES) lobby
 
 FIRSTPARTY_API_DIR := firstparty/APIs
 
@@ -73,10 +72,13 @@ all: bin
 libs: $(LIBS)
 
 $(LIB_DIR)/lib%.a:
-	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
+	$(eval MOD_DIR := $(strip $(foreach m,$(MODULES),$(if $(filter $(call compute-lib-name,$m),$*),$m))))
+	
+	$(if $(MOD_DIR),,$(error Could not find module directory for lib$*.a - check MODULES and compute-lib-name))
+
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	@echo "Building library for \"$(MOD_DIR)\""
+	@echo "[$* => $(MOD_DIR)] Building library for \"$(MOD_DIR)\" (lib$(LIB_NAME).a)"
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
@@ -134,7 +136,7 @@ run-exe:
 # ───────────────────────────────────────────────────────────────
 
 tests:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Building tests in $$dir ..."; \
 			$(MAKE) -C "$$dir" tests MODE=$(MODE) VERBOSE=$(VERBOSE) || exit 1; \
@@ -150,7 +152,7 @@ run-tests: tests
 	$(SILENT_PREFIX)all_passed=1; \
 	total_modules=0; \
 	failed_modules=0; \
-	for dir in $(SUBDIRS); do \
+	for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "-> Module: $$dir"; \
 			$(MAKE) -C "$$dir" run-tests MODE=$(MODE) VERBOSE=$(VERBOSE) \
@@ -172,7 +174,7 @@ run-tests: tests
 # ==============================================================================
 
 clean-libs:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
 		fi; \
@@ -186,7 +188,7 @@ clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
 clean-all: clean
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Cleaning $$dir ..."; \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \

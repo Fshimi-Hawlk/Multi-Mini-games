@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------
 # OS detection (runs on the machine where "make" is invoked)
-# ---------------------------------------------------------------
+# ───────────────────────────────────────────────────────────────
 UNAME_S := $(shell uname -s)
 UNAME_R := $(shell uname -r)
 
@@ -31,8 +31,6 @@ else
     EXE_EXT :=
 endif
 
-# Compiler and flags
-
 # Modes
 MODE ?= release
 ifeq ($(MODE),release)
@@ -51,7 +49,6 @@ else ifeq ($(MODE),debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -70,7 +67,7 @@ else ifeq ($(MODE),strict-debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
+		-Wno-unused-variable \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -89,7 +86,6 @@ else ifeq ($(MODE),clang-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-macro-redefined \
 		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
@@ -115,9 +111,9 @@ else ifeq ($(MODE),clang-debug)
 	endif
 else ifeq ($(MODE),valgrind-debug)
 	ifneq ($(OS),linux)
-	ifneq ($(OS),wsl)
-        $(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
-    endif
+		ifneq ($(OS),wsl)
+			$(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
+		endif
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
@@ -152,11 +148,11 @@ endif
 
 # Combine with base
 CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+LDFLAGS += $(BASE_LDFLAGS)
 
 # Allow extras from command line
 CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
+LDFLAGS += $(EXTRA_LDFLAGS)
 
 MAIN_NAME ?= main
 LIB_NAME := lobby

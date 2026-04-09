@@ -59,7 +59,8 @@
 #include "setups/texture.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "sharedUtils/mathUtils.h"
 
 #include "lobbyAPI.h"
 
