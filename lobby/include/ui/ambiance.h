@@ -3,9 +3,8 @@
 
 #include "utils/userTypes.h"
 
-void initAtmosphericEffects(void);
-void updateAtmosphericEffects(float dt, Player_st* player, Camera2D cam);
-void drawAtmosphericEffects(void);
-void drawScreenEffects(const Player_st* player);
+void lobby_updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam);
+void lobby_drawAtmosphericEffects(void);
+void lobby_drawScreenEffects(Player_St* player);
 
 #endif // UI_AMBIANCE_H

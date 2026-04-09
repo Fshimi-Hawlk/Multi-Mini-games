@@ -1,0 +1,45 @@
+#include "setups/game.h"
+
+#include "utils/constants.h"
+#include "utils/globals.h"
+#include "utils/utils.h"
+
+void lobby_initGrass(void) {
+    Rectangle floor = platforms[0].rect;
+    grassCount = 0;
+
+    float stepX = 3.0f;
+    float stepY = 5.0f;
+
+    for (float y = GROUND_Y; y < GROUND_Y + 600.0f; y += stepY) {
+        for (float x = -X_LIMIT - 500; x < X_LIMIT + 500; x += stepX) {
+            if (grassCount >= MAX_GRASS_BLADES) break;
+
+            float offX = (float)(rand() % 15) - 7.5f;
+            float offY = (float)(rand() % 10);
+
+            float baseHeight;
+            int type = rand() % 10;
+            if (type < 7) baseHeight = 5.0f + (rand() % 10);
+            else if (type < 9) baseHeight = 15.0f + (rand() % 15);
+            else baseHeight = 2.0f + (rand() % 4);
+
+            float depth = (y - GROUND_Y) / floor.height;
+            float colorVar = (float)(rand() % 35);
+
+            grassBlades[grassCount] = (GrassBlade_St){
+                .position = { x + offX, y + offY },
+                .height = baseHeight,
+                .angle = 0.0f,
+                .velocity = 0.0f,
+                .color = (Color){
+                    clamp(35 + colorVar - (depth * 15), 10, 255),
+                    clamp(90 + colorVar - (depth * 70), 20, 180),
+                    clamp(25 - (depth * 10), 5, 255),
+                    255
+                }
+            };
+            grassCount++;
+        }
+    }
+}

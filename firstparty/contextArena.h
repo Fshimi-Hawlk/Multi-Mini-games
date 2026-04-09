@@ -37,17 +37,17 @@
 
 #include "arena.h"
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Global context arenas
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 static Arena globalArena;
 static Arena tempArena;
 static Arena* contextArena;
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Core allocation API
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
  * @brief Allocates memory from the current context arena.
@@ -67,9 +67,9 @@ void *context_alloc(size_t size_bytes);
  */
 void *context_realloc(void *oldptr, size_t oldsz, size_t newsz);
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Convenience duplication helpers
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
  * @brief Duplicates a C string in the current context arena.
@@ -88,9 +88,9 @@ char *context_strdup(const char *cstr);
  */
 void *context_memdup(void *data, size_t size);
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Formatting helpers
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
  * @brief sprintf into arena-allocated buffer.
@@ -117,8 +117,6 @@ char *context_vsprintf(const char *format, va_list args);
  * common.h) while CONTEXT_ARENA_IMPLEMENTATION is still defined — without this,
  * arena.h's implementation block is emitted twice and the linker/compiler errors. */
 #ifdef CONTEXT_ARENA_IMPLEMENTATION
-#ifndef CONTEXT_ARENA_IMPLEMENTATION_COMPILED
-#define CONTEXT_ARENA_IMPLEMENTATION_COMPILED
 
 static Arena globalArena = {0};
 static Arena tempArena = {0};
@@ -164,5 +162,4 @@ char *context_vsprintf(const char *format, va_list args) {
 #include "arena.h"
 #undef ARENA_IMPLEMENTATION
 
-#endif /* CONTEXT_ARENA_IMPLEMENTATION_COMPILED */
 #endif /* CONTEXT_ARENA_IMPLEMENTATION */

@@ -76,7 +76,7 @@ $(LIB_DIR)/lib%.a:
 	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	@echo "Building library for $(MOD_DIR)"
+	@echo "Building library for \"$(MOD_DIR)\""
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
@@ -108,13 +108,30 @@ bin: libs
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
-# Run the lobby executable (./ so the shell runs a path, not a PATH lookup)
-run-exe:
-	@if [ -f $(BIN_DIR)/main ]; then $(BIN_DIR)/main; else echo "Executable not found at $(BIN_DIR)/main"; fi
+# Force rebuild of lobby executable only (removes exe first)
+rebuild-exe: libs
+	@echo "Force rebuilding lobby executable..."
+	$(SILENT_PREFIX)rm -f $(BIN_DIR)/$(MAIN_NAME)
+	$(SILENT_PREFIX)$(MAKE) -C lobby \
+		MODE=$(MODE) \
+		VERBOSE=$(VERBOSE) \
+		BIN_DIR=../$(BIN_DIR) \
+		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
+		EXTRA_LDFLAGS="$(LIBS_REL)" \
+		rebuild
 
-# ==============================================================================
+# Run the lobby executable
+run-exe:
+	@if [ -f $(BIN_DIR)/$(MAIN_NAME) ]; then \
+		$(BIN_DIR)/$(MAIN_NAME); \
+	else \
+		echo "No executable found at $(BIN_DIR)/$(MAIN_NAME)"; \
+		echo "Run 'make bin' or 'make rebuild-exe' first."; \
+	fi
+
+# ───────────────────────────────────────────────────────────────
 # Test Targets
-# ==============================================================================
+# ───────────────────────────────────────────────────────────────
 
 tests:
 	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
@@ -142,7 +159,7 @@ run-tests: tests
 			echo ""; \
 		fi; \
 	done
-	@echo "-----------------------------------------------"
+	@echo "───────────────────────────────────────────────"
 	$(SILENT_PREFIX)if [ $$all_passed -eq 1 ]; then \
 		echo "ALL TESTS PASSED across $$total_modules module(s)."; \
 	else \
@@ -180,24 +197,19 @@ rebuild: clean-all all
 
 rebuild-libs: clean-libs libs
 
-# Wipe lobby binary output only, then relink (keeps libs — faster than full rebuild)
-rebuild-exe: clean-exe bin
-
 rebuild-tests: clean tests
 
 # ==============================================================================
 # Documentation
 # ==============================================================================
 
-# FIX: target renamed 'docs' (was announced as 'docs-root' in help but didn't exist).
 # Both names are now valid aliases.
 docs: docs-root
 
 docs-root:
 	@./generate-root-docs.sh
 
-# FIX: guard on LANG — displays a clear message if the variable is not provided.
-# docs-translate depends on docs — ensures html/ (EN doc) exists before translating.
+# docs-translate depends on docs - ensures html/ (EN doc) exists before translating.
 # Without this, the English button in index.php points to a non-existent folder.
 docs-translate: docs
 	@if [ -z "$(LANG)" ]; then \

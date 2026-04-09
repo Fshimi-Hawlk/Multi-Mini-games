@@ -30,76 +30,63 @@
 
 #include "utils/globals.h"
 
-#include "include/ui/paramsMenu.h"
+float gameTime = 0.0f;
 
-Rectangle windowRect = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-Font      fonts[_fontSizeCount] = {0};
-Font      appFont = {0};
+Platform_St platforms[] = {
+    // --- SOL ---
+    { .rect = {-X_LIMIT, GROUND_Y, X_LIMIT * 2, 1000}, .type = PLATFORM_TYPE_GRASS},
 
-Platform_st platforms[] = {
-    /* Sol principal */
-    {{-1600, 500, 3200, 1000}, {34, 139, 34, 255}, 0},
-    /* Bas du tronc – zigzag */
-    {{ -100, 400, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  100, 280, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{ -280, 160, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Grosses branches du bas */
-    {{  -50,  50, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{ -480,  60, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  280,  40, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Milieu de l'arbre */
-    {{ -350, -60, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  150, -80, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{ -150,-170, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Extérieurs hauts */
-    {{ -520,-220, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  350,-240, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Vers la canopée */
-    {{ -280,-340, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{   80,-360, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{ -100,-460, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Branches supérieures */
-    {{ -380,-520, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  250,-550, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{ -220,-640, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{   50,-660, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Sommet du feuillage */
-    {{ -320,-760, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  180,-780, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    {{  -80,-880, 200, 20}, {139, 90, 43, 255}, 0.3f},
-    /* Cime absolue */
-    {{ -100,-1000,200, 20}, {139, 90, 43, 255}, 0.3f},
+    // --- BAS DU TRONC (Fini l'escalier droit, on zigzag) ---
+    { .rect = { -100, GROUND_Y -  100, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre
+    { .rect = {  100, GROUND_Y -  220, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Décalé droite
+    { .rect = { -280, GROUND_Y -  340, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Décalé gauche
+
+    // --- PREMIER GROS ÉCARTEMENT (Les grosses branches du bas) ---
+    { .rect = {    0, GROUND_Y -  500, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre-droit
+
+    // --- EXTÉRIEURS HAUTS (On exploite vraiment la largeur) ---
+    { .rect = { -600, GROUND_Y -  650, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Tout au bout à gauche
+    { .rect = { -150, GROUND_Y -  700, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Retour vers le centre
+    { .rect = {  350, GROUND_Y -  850, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Tout au bout à droite
+
+    // --- ON GRIMPE VERS LA CANOPÉE ---
+    { .rect = { -920, GROUND_Y -  940, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut gauche
+    { .rect = { -100, GROUND_Y -  960, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Jonction centrale
+
+    // --- LES BRANCHES SUPÉRIEURES ---
+    { .rect = { -650, GROUND_Y - 1180, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut gauche
+    { .rect = {  250, GROUND_Y - 1050, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Haut droite
+    { .rect = { -220, GROUND_Y - 1140, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}, // Centre-gauche
+    { .rect = {  620, GROUND_Y - 1200, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+
+    // --- LE SOMMET DU FEUILLAGE ---
+    { .rect = { -490, GROUND_Y - 1350, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+    { .rect = {  180, GROUND_Y - 1280, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+
+    // --- LA CIME ABSOLUE ---
+    { .rect = { -100, GROUND_Y - 1480, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
+    { .rect = {  340, GROUND_Y - 1600, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}
 };
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
-Rectangle skinButtonRect = {
-    /* FIX: This initial value uses WINDOW_WIDTH/HEIGHT (800/600) but the lobby
-     * actually runs at 1200×800 and can be resized. The rect is recalculated
-     * dynamically every frame via skinButtonRect_get() in ui/app.c and
-     * core/game.c; this static value is only used before the first frame. */
-    .x = WINDOW_WIDTH - 70,
-    .y = WINDOW_HEIGHT / 2.0f - 25,
-    .width = 50,
-    .height = 50
-};
-
-Texture2D logoSkinButton;
-
-// Parameters menu state
 ParamsMenu_St paramsMenu = {0};
 
-// Visual / atmospheric globals
-const Vector2 moonLightDir = {-0.6f, -0.8f};
-Texture2D texTree = {0};
-Texture2D texBackground = {0};
-Texture2D platformTextures[2] = {0};
-float gameTime = 0.0f;
-GrassBlade_st grassBlades[MAX_GRASS_BLADES];
+Rectangle skinButtonRect = {0};
+Texture2D logoSkinButton = {0};
+
+Texture2D platformTextures[__platformTypeCount] = {0};
+
+Texture2D treeTexture;
+Texture2D backgroundTexture;
+
+GrassBlade_St grassBlades[MAX_GRASS_BLADES];
 int grassCount = 0;
 
-// Audio
-Sound sound_jump       = {0};
-Sound sound_doubleJump = {0};
-Sound sound_gameLaunch = {0};
-Sound meme             = {0};
+const Vector2 moonLightDir = {-0.6f, -0.8f};
+
+Sound sound_jump;
+Sound sound_doubleJump;
+Sound sound_gameLaunch;
+
+Sound sound_doubleJumpMeme;

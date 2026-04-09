@@ -43,23 +43,23 @@ We are using a **monorepo** setup (everything lives in one repository) with **on
 
 ```text
 .
-├-- assets/                     # shared + per-game images, sounds, fonts
-│   └-- fonts/                  # fonts used across games
-├-- docs/                       # shared documentation + Doxygen output
-│   ├-- API_Conversion.md       # how to turn a standalone game into lobby-compatible API
-│   ├-- makefile.md             # root make commands explained
-│   └-- ...                     # other guides
-├-- firstparty/                 # our own reusable headers & single-file libs
-├-- thirdparty/                 # external dependencies + NOTICE file for licenses
-├-- lobby/                      # the hub/world code
-├-- tetris/                     # example of already integrated game
-├-- sub-project-example/        # copy-paste template for starting new games
-├-- Makefile                    # root-level build system (libs + lobby exe)
-├-- LICENSE.md
-├-- CONTRIBUTING.md
-├-- CHANGELOG.md
-├-- TODO.md
-└-- .gitignore
+├── assets/                     # shared + per-game images, sounds, fonts
+│   └── fonts/                  # fonts used across games
+├── docs/                       # shared documentation + Doxygen output
+│   ├── API_Conversion.md       # how to turn a standalone game into lobby-compatible API
+│   ├── makefile.md             # root make commands explained
+│   └── ...                     # other guides
+├── firstparty/                 # our own reusable headers & single-file libs
+├── thirdparty/                 # external dependencies + NOTICE file for licenses
+├── lobby/                      # the hub/world code
+├── tetris/                     # example of already integrated game
+├── sub-project-example/        # copy-paste template for starting new games
+├── Makefile                    # root-level build system (libs + lobby exe)
+├── LICENSE.md
+├── CONTRIBUTING.md
+├── CHANGELOG.md
+├── TODO.md
+└── .gitignore
 ```
 
 After more games get merged you will see additional top-level folders like `block-blast/`, `snake-classic/`, etc.
@@ -68,22 +68,22 @@ After more games get merged you will see additional top-level folders like `bloc
 
 ```text
 sub-project/
-├-- assets/                 # game-specific images, sounds, fonts, etc.
-├-- docs/                   # per-game generated html (after make docs)
-├-- include/                # all headers
-│   ├-- core/               # game logic headers
-│   ├-- ui/                 # rendering / drawing code headers
-│   ├-- setups/             # init & cleanup functions
-│   ├-- utils/              # helpers, globals, configs, common types
-│   └-- subProjectAPI.h     # lobby-facing API header
-├-- src/                    # implementation files (mirrors include/ + main.c)
-├-- tests/                  # unit tests
-├-- CHANGELOG.md            # detailed per-game changes
-├-- Makefile                # build this sub-project standalone or as lib
-├-- make/                   # split Makefile logic into smaller files
-├-- makefile.md             # commands & modes explained for this sub-project
-├-- Doxyfile.min            # minimal Doxygen config for local docs
-└-- README.md               # per-game readme (template provided)
+├── assets/                 # game-specific images, sounds, fonts, etc.
+├── docs/                   # per-game generated html (after make docs)
+├── include/                # all headers
+│   ├── core/               # game logic headers
+│   ├── ui/                 # rendering / drawing code headers
+│   ├── setups/             # init & cleanup functions
+│   ├── utils/              # helpers, globals, configs, common types
+│   └── subProjectAPI.h     # lobby-facing API header
+├── src/                    # implementation files (mirrors include/ + main.c)
+├── tests/                  # unit tests
+├── CHANGELOG.md            # detailed per-game changes
+├── Makefile                # build this sub-project standalone or as lib
+├── make/                   # split Makefile logic into smaller files
+├── makefile.md             # commands & modes explained for this sub-project
+├── Doxyfile.min            # minimal Doxygen config for local docs
+└── README.md               # per-game readme (template provided)
 ```
 
 ## Building & Running (Root Level – merged games + lobby)

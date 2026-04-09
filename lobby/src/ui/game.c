@@ -27,96 +27,150 @@
     @see `utils/utils.h` for `getTextureRec`
 */
 
-#include "ui/game.h"
 #include "core/game.h"
-#include "utils/utils.h"
+
+#include "ui/game.h"
+
 #include "utils/globals.h"
-#include "utils/configs.h"
+#include "utils/utils.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_st* const player) {
-    float r = player->radius;
-
-    // Shadow
-    Vector2 shadowOffset = Vector2Scale(moonLightDir, -r * 0.45f);
-    Color shadowColor = Fade(BLACK, 0.28f);
-
-    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
-        /* FIX: position IS the center — do not offset by radius */
-        DrawCircleV((Vector2){player->position.x + shadowOffset.x,
-                              player->position.y + shadowOffset.y}, r, shadowColor);
-        DrawCircleV(player->position, r, BLUE);
-    } else {
-        DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            (Rectangle){player->position.x + shadowOffset.x - r,
-                        player->position.y + shadowOffset.y - r, r*2, r*2},
-            Vector2Zero(), player->angle, shadowColor);
-        DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            getPlayerCollisionBox(player),
-            getPlayerCenter(player),
-            player->angle, WHITE);
+void lobby_drawPlayer(const LobbyGame_St* const game) {
+    if (game->player.textureId == PLAYER_TEXTURE_DEFAULT) {
+        DrawCircleV(game->player.position, game->player.radius, BLUE);
+        return;
     }
-
-    // Moonlight glow
-    Vector2 glowPos = {
-        player->position.x + moonLightDir.x * r * 0.38f,
-        player->position.y + moonLightDir.y * r * 0.38f
-    };
-    Color glowBase = (Color){180, 220, 255, 255};
-    DrawCircleV(glowPos, r * 0.72f, Fade(glowBase, 0.09f));
-    DrawCircleV(glowPos, r * 0.48f, Fade(glowBase, 0.14f));
-    DrawCircleV(glowPos, r * 0.26f, Fade(glowBase, 0.11f));
+    
+    DrawTexturePro(
+        game->playerVisuals.textures[game->player.textureId],
+        getTextureRec(game->playerVisuals.textures[game->player.textureId]),  // source
+        getPlayerCollisionBox(&game->player), // destination
+        getPlayerCenter(&game->player), // origine du pivot
+        game->player.angle, // angle en degrés
+        WHITE
+    );
 }
 
-void drawPlatforms(const Platform_st* const platforms, const int nbPlatforms) {
-    for (int i = 0; i < nbPlatforms; i++) {
-        DrawRectangleRounded(platforms[i].rect, platforms[i].roundness, 0, platforms[i].color);
+void lobby_drawPlatforms(const Platform_St* const platforms, const int count) {
+    for (int i = 0; i < count; ++i) {
+        const Platform_St* p = &platforms[i];
+        Rectangle r = p->rect;
+
+        if (p->type == PLATFORM_TYPE_WOODPLANK && IsTextureValid(platformTextures[PLATFORM_TYPE_WOODPLANK])) {
+            Texture2D tex = platformTextures[PLATFORM_TYPE_WOODPLANK];
+
+            // Stable random wood clip
+            f32 hash = (r.x * 13.0f + r.y * 17.0f + r.width * 19.0f);
+            uint h = *(uint*)&hash;
+            h = (h ^ 0xDEADBEEF) * 2654435761u;
+
+            Rectangle source = {
+                .x      = (f32)(h % (uint)(tex.width - r.width  + 1)),
+                .y      = (f32)((h >> 16) % (uint)(tex.height - r.height + 1)),
+                .width  = r.width,
+                .height = r.height
+            };
+
+            // Soft drop shadow
+            Vector2 shadowOffset = {moonLightDir.x * -12.0f, moonLightDir.y * -8.0f};
+            DrawRectangleRec((Rectangle){r.x + shadowOffset.x, r.y + shadowOffset.y, r.width, r.height}, Fade(BLACK, 0.28f));
+
+            // Main wood texture
+            DrawTextureRec(tex, source, (Vector2){r.x, r.y}, WHITE);
+
+            // Subtle shading
+            DrawRectangleRec(r, Fade(BLACK, 0.18f));
+            // Light rim
+            DrawRectangleLinesEx((Rectangle){r.x - 2, r.y - 2, r.width + 4, r.height + 4}, 3.0f, Fade(WHITE, 0.09f));
+        }
+        // Add grass or other solid types here later if needed
     }
 }
 
-void drawTree(void) {
-    if (!IsTextureValid(texTree)) return;
+void lobby_drawTree(void) {
+    if (!IsTextureValid(treeTexture)) return;
 
     float treeScale  = 0.7f;
-    float drawWidth  = (float)texTree.width  * treeScale;
-    float drawHeight = (float)texTree.height * treeScale;
+    float drawWidth  = (float)treeTexture.width  * treeScale;
+    float drawHeight = (float)treeTexture.height * treeScale;
     Vector2 treePos  = {-drawWidth / 2.0f, GROUND_Y - drawHeight + 350.0f};
 
     Vector2 shadowOffset = {moonLightDir.x * -42.0f, moonLightDir.y * -22.0f};
-    DrawTexturePro(texTree,
-        (Rectangle){0,0,(float)texTree.width,(float)texTree.height},
+    DrawTexturePro(treeTexture,
+        (Rectangle){0,0,(float)treeTexture.width,(float)treeTexture.height},
         (Rectangle){treePos.x + shadowOffset.x, treePos.y + shadowOffset.y, drawWidth, drawHeight},
         Vector2Zero(), 0, Fade(BLACK, 0.38f));
 
-    DrawTexturePro(texTree,
-        (Rectangle){0,0,(float)texTree.width,(float)texTree.height},
+    DrawTexturePro(treeTexture,
+        (Rectangle){0,0,(float)treeTexture.width,(float)treeTexture.height},
         (Rectangle){treePos.x, treePos.y, drawWidth, drawHeight},
         Vector2Zero(), 0.0f, WHITE);
 }
 
-void drawWorldBoundaries(const Player_st* player) {
-    float limitL = -X_LIMIT, limitR = X_LIMIT;
-    float wallTop = -SKY_HEIGHT;
-    float wallHeight = SKY_HEIGHT + GROUND_Y + 1000;
-    float detectionRange = 400.0f;
+void lobby_drawWorldBoundaries(const Player_St* const player) {
+    f32 limitL = -X_LIMIT;
+    f32 limitR = X_LIMIT;
 
-    float distL = player->position.x - limitL;
-    float distR = limitR - player->position.x;
+    f32 wallTop = -SKY_HEIGHT;
+    f32 wallHeight = SKY_HEIGHT + GROUND_Y + 1000;
+    f32 detectionRange = 400.0f;
+
+    f32 distL = player->position.x - limitL;
+    f32 distR = limitR - player->position.x;
 
     if (distL < detectionRange && distL >= 0) {
-        unsigned char alpha = (unsigned char)((1.0f - distL/detectionRange) * 160.0f);
-        DrawRectangleGradientH((int)limitL, (int)wallTop, 150, (int)wallHeight,
-            (Color){255,255,255,alpha}, (Color){255,255,255,0});
-        DrawLineEx((Vector2){limitL,wallTop},(Vector2){limitL,wallTop+wallHeight},3.0f,(Color){255,255,255,alpha});
+        f32 alphaFactor = 1.0f - (distL / detectionRange);
+        unsigned char alpha = (unsigned char)(alphaFactor * 160.0f);
+
+        DrawRectangleGradientH(limitL, wallTop, 150, wallHeight,
+                               (Color){255, 255, 255, alpha},
+                               (Color){255, 255, 255, 0});
+        DrawLineEx((Vector2){limitL, wallTop}, (Vector2){limitL, wallTop + wallHeight}, 3.0f, (Color){255, 255, 255, alpha});
     }
+
     if (distR < detectionRange && distR >= 0) {
-        unsigned char alpha = (unsigned char)((1.0f - distR/detectionRange) * 160.0f);
-        DrawRectangleGradientH((int)(limitR-150), (int)wallTop, 150, (int)wallHeight,
-            (Color){255,255,255,0}, (Color){255,255,255,alpha});
-        DrawLineEx((Vector2){limitR,wallTop},(Vector2){limitR,wallTop+wallHeight},3.0f,(Color){255,255,255,alpha});
+        f32 alphaFactor = 1.0f - (distR / detectionRange);
+        unsigned char alpha = (unsigned char)(alphaFactor * 160.0f);
+
+        DrawRectangleGradientH(limitR - 150, wallTop, 150, wallHeight,
+                               (Color){255, 255, 255, 0},
+                               (Color){255, 255, 255, alpha});
+        DrawLineEx((Vector2){limitR, wallTop}, (Vector2){limitR, wallTop + wallHeight}, 3.0f, (Color){255, 255, 255, alpha});
     }
 }
 
+void lobby_drawGameZones(const LobbyGame_St* const game) {
+    for (u8 i = 1; i < __miniGameIdCount; ++i) {
+        GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
+
+        bool playerNear = CheckCollisionCircleRec(
+            game->player.position, game->player.radius, gameZone.hitbox);
+
+        /* Portal: fond coloré + bordure blanche si proche */
+        DrawRectangleRec(gameZone.hitbox, gameZone.color);
+        if (playerNear) DrawRectangleLinesEx(gameZone.hitbox, 3, WHITE);
+
+        /* Icône centrale (flèche vers le haut) */
+        f32 cx = gameZone.hitbox.x + gameZone.hitbox.width / 2.0f;
+        f32 cy = gameZone.hitbox.y + gameZone.hitbox.height / 2.0f;
+        DrawTriangle(
+            (Vector2){cx,        cy - 18},
+            (Vector2){cx - 12,   cy + 8},
+            (Vector2){cx + 12,   cy + 8},
+            WHITE);
+
+        /* Nom du jeu au-dessus du portail */
+        f32 nameWidth = MeasureText(gameZone.name, 14);
+        DrawText(gameZone.name,
+            gameZone.hitbox.x + (gameZone.hitbox.width - nameWidth) / 2.0f,
+            gameZone.hitbox.y - 20, 14, WHITE);
+
+        /* "[ E ]" en dessous si proche */
+        if (playerNear) {
+            const char* prompt = "[ E ]";
+            f32 pw = MeasureText(prompt, 12);
+            DrawText(prompt,
+                gameZone.hitbox.x + (gameZone.hitbox.width - pw) / 2.0f,
+                gameZone.hitbox.y + gameZone.hitbox.height + 4, 12, YELLOW);
+        }
+    }
+}

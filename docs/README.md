@@ -40,14 +40,14 @@ Open `docs/doxygen/html/index.html` in a browser.
 
 ```
 docs/
-├-- Doxyfile              # Main Doxygen configuration
-├-- mainpage.dox          # Documentation homepage
-├-- README.md             # This file
-├-- API_Conversion.md     # API conversion guide
-├-- makefile.md           # Makefile documentation
-└-- doxygen/              # Generated documentation (gitignored)
-    └-- html/
-        └-- index.html    # Entry page
+├── Doxyfile              # Main Doxygen configuration
+├── mainpage.dox          # Documentation homepage
+├── README.md             # This file
+├── API_Conversion.md     # API conversion guide
+├── makefile.md           # Makefile documentation
+└── doxygen/              # Generated documentation (gitignored)
+    └── html/
+        └── index.html    # Entry page
 ```
 
 ## Documentation Content

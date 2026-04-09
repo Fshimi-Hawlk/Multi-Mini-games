@@ -2,14 +2,11 @@ all: $(BIN)
 
 rebuild: clean all
 
-.PHONY: rebuild-obj
-rebuild-obj:
-	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
-	$(SILENT_PREFIX)$(MAKE) $(LIB_OBJECTS)
+rebuild-obj: clean $(LIB_OBJECTS)
 
 rebuild-tests: clean tests
 
-static-lib: $(STATIC_LIB)
+static-lib: rebuild-obj $(STATIC_LIB)
 
 run-main:
 	@if [ -f $(BIN) ]; then \

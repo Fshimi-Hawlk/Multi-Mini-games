@@ -40,14 +40,13 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-void drawMenuTextures(const LobbyGame_St* const game) {
+void lobby_drawMenuTextures(const LobbyGame_St* const game) {
     Rectangle destRect = game->playerVisuals.defaultTextureRect;
 
     // Default texture
     f32 radius = destRect.width / 2.0f;
     DrawCircleV((Vector2) {destRect.x + radius, destRect.y + radius}, radius, BLUE);
 
-    
     DrawText("choose your skin :", 20, 40, 20, DARKGRAY);
     for (u32 i = 1; i < __playerTextureCount; i++) {
         Color textureTint = game->player.unlockedTextures[i] ? WHITE : GRAY;
@@ -63,7 +62,7 @@ void drawMenuTextures(const LobbyGame_St* const game) {
     }
 }
 
-void drawSkinButton(void) {
+void lobby_drawSkinButton(void) {
     DrawTexturePro(
         logoSkinButton,
         getTextureRec(logoSkinButton),

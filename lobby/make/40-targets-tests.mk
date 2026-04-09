@@ -46,7 +46,7 @@ run-tests: tests
 				echo ">>> Running $$test_name..."; \
 				echo "Command: $(STDBUF) $(TOOL) ./$$test_bin"; \
 				echo ""; \
-				echo "--- Output ---------------------------------------------------------"; \
+				echo "─── Output ─────────────────────────────────────────────────────────"; \
 				\
 				stdout_tmp=$$(mktemp); \
 				stderr_tmp=$$(mktemp); \
@@ -76,7 +76,7 @@ run-tests: tests
 				} > "$$log_file"; \
 				\
 				rm -f "$$stdout_tmp" "$$stderr_tmp"; \
-				echo "--------------------------------------------------------------------"; \
+				echo "────────────────────────────────────────────────────────────────────"; \
 				echo ""; \
 				if [ $$test_status -eq 0 ]; then \
 					printf ">>> $$test_name: $${green}PASSED$${reset}\n"; \
@@ -87,7 +87,7 @@ run-tests: tests
 					all_passed=0; \
 					printf "%s\tFAILED\t%s\n" "$$test_name" "$$log_file" >> "$$results_file"; \
 				fi; \
-				echo "--------------------------------------------------------------------"; \
+				echo "────────────────────────────────────────────────────────────────────"; \
 				echo ""; \
 			else \
 				printf "Test binary $$test_bin $${yellow}not found$${reset}\n"; \
@@ -108,10 +108,10 @@ run-tests: tests
 		status_width=7; \
 		\
 		# Top border \
-		printf '┌-%s┬-%s┬-%s┐\n' \
-			"$$(printf '-%.0s' $$(seq 1 $$name_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$status_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$log_width))"; \
+		printf '┌─%s┬─%s┬─%s┐\n' \
+			"$$(printf '─%.0s' $$(seq 1 $$name_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$status_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$log_width))"; \
 		\
 		# Header \
 		printf "│ %-*s│ %-*s│ %-*s│\n" \
@@ -120,10 +120,10 @@ run-tests: tests
 			"$$log_width"  "Log File"; \
 		\
 		# Separator \
-		printf '├-%s┼-%s┼-%s┤\n' \
-			"$$(printf '-%.0s' $$(seq 1 $$name_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$status_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$log_width))"; \
+		printf '├─%s┼─%s┼─%s┤\n' \
+			"$$(printf '─%.0s' $$(seq 1 $$name_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$status_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$log_width))"; \
 		\
 		# Data rows \
 		while IFS=$$'\t' read -r name status log; do \
@@ -142,10 +142,10 @@ run-tests: tests
 		done < "$$results_file"; \
 		\
 		# Bottom border \
-		printf '└%s-┴%s-┴%s-┘\n' \
-			"$$(printf '-%.0s' $$(seq 1 $$name_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$status_width))" \
-			"$$(printf '-%.0s' $$(seq 1 $$log_width))"; \
+		printf '└%s─┴%s─┴%s─┘\n' \
+			"$$(printf '─%.0s' $$(seq 1 $$name_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$status_width))" \
+			"$$(printf '─%.0s' $$(seq 1 $$log_width))"; \
 		\
 		echo ""; \
 		failed=$$((test_count - passed_test_count)); \

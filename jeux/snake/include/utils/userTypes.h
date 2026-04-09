@@ -28,21 +28,6 @@
 
 #include "common.h"
 
-/**
-    @brief Available font sizes used for in-game UI and text rendering.
-
-    Values are listed in ascending order.  
-    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
-*/
-typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
-} FontSize_Et;
-
 typedef enum {
     GAME_TILE_GRASS,
     GAME_TILE_HEAD,

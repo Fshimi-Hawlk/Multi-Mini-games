@@ -30,11 +30,11 @@
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 
-#include "stdbool.h"
+#include <stdbool.h>
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Error codes (used project-wide)
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Standardized error codes for initialization, operations and resource loading.
@@ -59,9 +59,29 @@ typedef enum {
     // Future extension point: add more codes here as needed
 } Error_Et;
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Game interface
-// ------------------------------------------------
+// ────────────────────────────────────────────────
+
+typedef enum {
+    FONT12, FONT24, FONT32, 
+    FONT48, FONT64, FONT96, 
+    FONT128,
+    _fontSizeCount
+} FontSize_Et;
+
+typedef enum {
+    MINI_GAME_ID_LOBBY,
+    MINI_GAME_ID_TETRIS,
+    MINI_GAME_ID_SOLITAIRE,
+    MINI_GAME_ID_SUIKA,
+    MINI_GAME_ID_BOWLING,
+    MINI_GAME_ID_GOLF,
+    MINI_GAME_ID_SNAKE,
+    MINI_GAME_ID_BINGO,
+    MINI_GAME_ID_BLOCKBLAST,
+    __miniGameIdCount
+} MiniGameId_Et;
 
 /**
     @brief Opaque forward declaration of the concrete game state.

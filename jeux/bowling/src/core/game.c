@@ -21,9 +21,7 @@
 #include <string.h>
 #include <math.h>
 
-#define PARAMS_MENU_IMPLEMENTATION
-#define SYSTEM_SETTINGS_IMPLEMENTATION
-#include "include/ui/paramsMenu.h"
+#include "paramsMenu.h"
 
 // 
 // Constants – mesures officielles World Bowling / USBC

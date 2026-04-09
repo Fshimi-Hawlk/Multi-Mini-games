@@ -149,7 +149,7 @@ Check logs if something breaks.
 
 ## Common Pitfalls and Tips
 
-- Forgot to put `Game_St base` as first struct member -> casting breaks  
+- Forgot to put `BaseGame_St base` as first struct member -> casting breaks  
 - Game calls `InitWindow` / `CloseWindow` -> crash or weird behaviour  
 - Leaking resources -> free textures/sounds/allocs in freeGame  
 - No `running` check at loop start -> runs after quit  
