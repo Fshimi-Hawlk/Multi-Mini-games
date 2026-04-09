@@ -88,7 +88,10 @@
 typedef Vector2 f32Vector2;
 #define f32Vector2_def      // marker to indicate the typedef is active
 
-#include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
 #include "configs.h"                // tuning constants, paths, physics values
+#include "constants.h"
+
+#include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
+#include "systemSettings.h"
 
 #endif // COMMON_H

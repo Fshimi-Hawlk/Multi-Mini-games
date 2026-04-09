@@ -47,11 +47,17 @@
 
 #include "core/game.h"
 
-#include "raylib.h"
+#include "setups/app.h"
+#include "setups/game.h"
+#include "setups/audio.h"
+
+#include "setups/texture.h"
 #include "ui/app.h"
 #include "ui/game.h"
+#include "ui/grass.h"
+#include "ui/background.h"
+#include "ui/ambiance.h"
 
-#include "utils/common.h"
 #include "utils/globals.h"
 
 #include "lobbyAPI.h"
@@ -60,18 +66,13 @@
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error;
 
-    srand(time(NULL));
-    SetTraceLogLevel(LOG_WARNING);
+    systemSettings = DEFAULT_SYSTEM_SETTING;
+    systemSettings.video.title = "Lobby";
 
-    // ── Initialization ───────────────────────────────────────────────────────
-    InitWindow(systemSettings.video.width, systemSettings.video.height, WINDOW_TITLE);
-    SetWindowPosition(100, 100);
+    lobby_initApp();
 
     (void) configs; // Configs aren't used yet
 
-    systemSettings = DEFAULT_SYSTEM_SETTING;
-    systemSettings.video.resizable = true;
-    systemSettings.video.title = "Lobby";
     error = applySystemSettings();
     if (error != OK) {
         log_error("System settings couldn't be applied corretly");
@@ -98,7 +99,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     gameRef->subGameManager.needGameInit = false;
     
     /** Player controlled by the user in the lobby */
-    gameRef->player = (Player_st) {
+    gameRef->player = (Player_St) {
         .position   = {0, 250},
         .radius     = 20,
         .coyoteTime = 0.1f,
@@ -119,24 +120,8 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         .x = 20, .y = 60, .width = 50, .height = 50
     };
 
-    // Load shared UI textures
-    gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH] = LoadTexture(IMAGES_PATH "earth.png");
-    if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_EARTH])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "earth.png");
-        error =  ERROR_TEXTURE_LOAD;
-    }
-    
-    gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE] = LoadTexture(IMAGES_PATH "trollFace.png");
-    if (!IsTextureValid(gameRef->playerVisuals.textures[PLAYER_TEXTURE_TROLL_FACE])) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "trollFace.png");
-        error =  ERROR_TEXTURE_LOAD;
-    }
-    
-    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
-    if (!IsTextureValid(logoSkinButton)) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
-        error =  ERROR_TEXTURE_LOAD;
-    }
+    lobby_initGrass();
+    lobby_initTextures(gameRef);
 
     return error;
 }
@@ -147,14 +132,13 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     f32 dt = GetFrameTime();
     static f32 lobbyTextXPos;
 
-    updatePlayer(&game->player, platforms, platformCount, dt);
-    game->cam.target = game->player.position;
+    gameTime += dt;
 
-    toggleSkinMenu(game);
-
-    if (game->playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&game->player, game);
+    if (gameTime > 1.45f) {
+        updatePlayer(&game->player, platforms, platformCount, dt);
     }
+
+    game->cam.target = game->player.position;
 
     // Collision check with game zone
     for (u8 i = 1; i < __gameSceneCount; ++i) {
@@ -169,27 +153,47 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         }
     }
 
+    toggleSkinMenu(game);
+
+    if (game->playerVisuals.isTextureMenuOpen) {
+        choosePlayerTexture(&game->player, game);
+    }
+
+    updateGrass(&game->player, GetFrameTime(), gameTime, game->cam);
+    updateAtmosphericEffects(dt, &game->player, game->cam);
+
     BeginDrawing(); {
         ClearBackground(RAYWHITE);
 
         BeginMode2D(game->cam); {
-            DrawCircle(0, 0, 10, RED);          // Debug origin marker
-            drawPlayer(game, &game->player);
+            drawStarryBackground(game->player.position, game->cam);
+
+            drawTree();
+            
             drawPlatforms(platforms, platformCount);
+            drawPlayer(game, &game->player);
+            
+            drawWorldBoundaries(&game->player);
+            
+            drawGrass(&game->player, game->cam);
 
             for (u8 i = 1; i < __gameSceneCount; ++i) {
                 DrawRectangleRec(game->subGameManager.gameHitboxes[i], RED); // Debug hitbox
             }
+
+            drawAtmosphericEffects();
         } EndMode2D();
+
+        drawScreenEffects(&game->player);
 
         lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
         DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
         drawSkinButton();
-
         if (game->playerVisuals.isTextureMenuOpen) {
             drawMenuTextures(game);
         }
+
     } EndDrawing();
 
     return OK;

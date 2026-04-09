@@ -93,6 +93,8 @@
  */
 #define clamp(v, _min, _max) min(max((_min), (v)), (_max))
 
+#define lerp(a, b, t) ((a) + ((b) - (a)) * (t))
+
 /**
     @brief Constructs a Vector2 by adding/subtracting/multiplying/dividing components.
  */

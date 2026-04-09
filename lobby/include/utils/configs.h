@@ -35,7 +35,9 @@
 #define ASSET_PATH "assets/"
 #endif
 
-#define IMAGES_PATH ASSET_PATH "images/"            ///< Subdirectory containing all image files.
+#define IMAGES_PATH ASSET_PATH "images/"
+#define SKINS_PATH  IMAGES_PATH "skins/"
+#define SOUNDS_PATH ASSET_PATH "sounds/"
 
 // ────────────────────────────────────────────────
 // Window & display
@@ -57,18 +59,5 @@
            Other sizes are usually derived from this via the fonts[] array.
 */
 #define APP_TEXT_FONT_SIZE 32
-
-// ────────────────────────────────────────────────
-// Physics & movement tuning (lobby platformer)
-// ────────────────────────────────────────────────
-
-#define GRAVITY         1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
-#define MOVE_SPEED      300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).
-#define JUMP_FORCE      500.0f      ///< Upward velocity applied on jump (pixels/second).
-#define GROUND_Y        50.0f       ///< Y-position considered "ground level" for initial spawn / debug.
-#define COYOTE_TIME     0.1f        ///< Time window (seconds) after leaving ground where jump is still allowed.
-#define JUMP_BUFFER_TIME 0.1f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
-#define MAX_JUMPS       2           ///< Maximum number of jumps allowed without touching ground (includes ground jump).
-#define FRICTION        2000.0f     ///< Horizontal deceleration rate when no input is given (pixels/second²).
 
 #endif // CONFIGS_H

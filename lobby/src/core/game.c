@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-04-08
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
 
     Contributors:
@@ -16,6 +16,8 @@
             - Moved the game logic off main to this file
             - Reworked player texture logic
             - Provided documentation
+            - Fixed getPlayerCollisionBox (was incorrectly using center as top-left)
+            - Added MAX_FALL_SPEED terminal velocity + air drag when airborne (fixes tunneling through floor from high jumps and slows y-speed as requested)
 
     This file contains the core systems that drive the lobby player character:
         - Movement and input processing (horizontal + jump)
@@ -33,7 +35,7 @@
     Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
     by draw routines and assume the player's collision shape is always a circle.
 
-    @see `utils/userTypes.h`     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/userTypes.h`     for `Player_St`, `LobbyGame_St`, `PlayerTexture_Et`
     @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
     @see `utils/globals.h`       for `skinButtonRect`
     @see `core/game.h`           for `resolveCircleRectCollision()` declaration
@@ -44,7 +46,7 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle getPlayerCollisionBox(const Player_st* const player) {
+Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x,
         player->position.y,
@@ -53,49 +55,57 @@ Rectangle getPlayerCollisionBox(const Player_st* const player) {
     };
 }
 
-Vector2 getPlayerCenter(const Player_st* const player) {
+Vector2 getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const f32 dt) {
-
+void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
         player->velocity.x = -300;
-    }
-    else if (IsKeyDown(KEY_D)) {
+    } else if (IsKeyDown(KEY_D)) {
         player->velocity.x = 300;
-    }
-    // Apply friction
-    else {
+    } else {
         if (player->velocity.x > 0) {
             player->velocity.x -= FRICTION * dt;
             if (player->velocity.x < 0) player->velocity.x = 0;
-        }
-        else if (player->velocity.x < 0) {
+        } else if (player->velocity.x < 0) {
             player->velocity.x += FRICTION * dt;
             if (player->velocity.x > 0) player->velocity.x = 0;
         }
     }
 
+    if (IsKeyPressed(KEY_R)) {
+        player->position = (f32Vector2) {0};
+        player->velocity = (f32Vector2) {0};
+    }
+
     // Rotate depending on the player's direction
     if (player->velocity.x > 0) {
         player->angle += 360 * dt; // Clockwise
-    }
-    else if (player->velocity.x < 0) {
+    } else if (player->velocity.x < 0) {
         player->angle -= 360 * dt; // Anti-clockwise
     }
 
     // Buffered jump input
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    }
-    else if (player->jumpBuffer > 0) {
+    } else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
 
     // Gravity
     player->velocity.y += 1200 * dt;
+
+    // Air resistance + terminal velocity when in air
+    // Fixes tunneling through floor from high jumps and slows down y-speed as requested
+    if (!player->onGround && player->velocity.y > 0) {
+        if (player->velocity.y > MAX_FALL_SPEED) {
+            player->velocity.y = MAX_FALL_SPEED;
+        }
+        // Gentle linear drag for natural falling feel (very light)
+        player->velocity.y *= (1.0f - AIR_DRAG * dt);
+    }
 
     // Collision
     player->position.x += player->velocity.x * dt;
@@ -106,12 +116,23 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
         resolveCircleRectCollision(player, platforms[i].rect);
     }
 
+    // Left border
+    if (player->position.x - player->radius < -X_LIMIT) {
+        player->position.x = -X_LIMIT + player->radius;
+        player->velocity.x = 0;
+    }
+
+    // Right border
+    if (player->position.x + player->radius > X_LIMIT) {
+        player->position.x = X_LIMIT - player->radius;
+        player->velocity.x = 0;
+    }
+
     // Coyote time
     if (player->onGround) {
         player->coyoteTimer = COYOTE_TIME;
         player->nbJumps = 0;
-    }
-    else {
+    } else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0)
             player->coyoteTimer = 0;
@@ -129,11 +150,22 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
             player->coyoteTimer = 0;
             player->nbJumps++;
             player->jumpBuffer = 0;
+
+            if (player->nbJumps > 1) {
+                if (rand() % 1000 == 0) {
+                    PlaySound(sound_doubleJumpMeme);
+                } else {
+                    PlaySound(sound_doubleJump);
+                }
+            }
+            else {
+                PlaySound(sound_jump);
+            }
         }
     }
 }
 
-void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
+void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
     // Search the position that is closest to the circle on the rectangle
     f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
     f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
@@ -177,7 +209,7 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
 }
 
 
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
+void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;

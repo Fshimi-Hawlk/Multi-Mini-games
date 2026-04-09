@@ -29,20 +29,53 @@
 #include "common.h"
 #include "APIs/generalAPI.h"
 
-/**
-    @brief Available font sizes used for in-game UI and text rendering.
+typedef struct {
+    Vector2 position;
+    float height;
+    float angle;      // L'angle actuel du brin
+    float velocity;   // La vitesse de rotation (pour l'élasticité)
+    Color color;
+} GrassBlade_St;
 
-    Values are listed in ascending order.  
-    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
-*/
 typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
-} FontSize_Et;
+    FIREFLY_MODE_WANDER,
+    FIREFLY_MODE_LOOP,
+    FIREFLY_MODE_BOB
+} FireflyMode_Et;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   radius;
+    float   alpha;
+    float   phase;
+    bool    active;
+
+    // Enhanced behavior
+    FireflyMode_Et mode;
+    float          modeTimer;
+    Vector2        wanderTarget;
+    Vector2        loopPoints[12];
+    int            loopCount;
+    int            currentLoopIndex;
+    float          facingAngle;
+    float          currentSpeed;
+} Firefly_St;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   rotation;
+    float   rotationSpeed;
+    float   scale;
+    float   life;
+    float   currentAlpha;
+    bool    active;
+    bool    onGround;
+    float   groundTimer;
+    float   spinDampTimer;      ///< Time left to apply strong rotational drag after player push (0 = normal drag)
+    Color   color;
+} FallingLeaf_St;
 
 /**
     @brief Identifiers of the different playable scenes / mini-games.
@@ -99,7 +132,13 @@ typedef struct {
     float   coyoteTimer;                        ///< Countdown timer for coyote time
 
     float   jumpBuffer;                         ///< Remaining time window to accept jump input before landing (jump buffering)
-} Player_st;
+} Player_St;
+
+typedef enum {
+    PLATFORM_TYPE_GRASS,
+    PLATFORM_TYPE_WOODPLANK,
+    __platformTypeCount
+} PlatformType_Et;
 
 /**
     @brief Single rectangular platform / solid surface in the lobby world.
@@ -108,7 +147,8 @@ typedef struct {
     Rectangle rect;         ///< Position and size (world coordinates)
     Color     color;        ///< Debug / placeholder rendering color
     float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-} Platform_st;
+    PlatformType_Et type;
+} Platform_St;
 
 /**
     @brief Manages which mini-game is currently active and its integration with the lobby.
@@ -131,7 +171,7 @@ typedef struct {
 typedef struct {
     BaseGame_St base;
 
-    Player_st         player;                     ///< Physics & movement state of the player character
+    Player_St         player;                     ///< Physics & movement state of the player character
     PlayerVisuals_St  playerVisuals;              ///< Rendering and skin selection state
     Camera2D          cam;                        ///< 2D camera following the player
 

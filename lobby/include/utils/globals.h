@@ -21,50 +21,30 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "userTypes.h"
-
-// ────────────────────────────────────────────────
-// Window & display
-// ────────────────────────────────────────────────
-
-/**
-    Rectangle describing the full client area of the application window.
-    Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
-
-// ────────────────────────────────────────────────
-// Fonts
-// ────────────────────────────────────────────────
-
-/**
-    @brief Default font used for most UI labels, buttons and in-game text.
-           Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
-
-/**
-    @brief Array of pre-loaded fonts at different sizes.
-           Indexed by FontSize_Et values (FONT8 … FONT48).
-           All fonts should use the same typeface for visual consistency.
-*/
-extern Font      fonts[_fontSizeCount];
+#include "utils/userTypes.h"
 
 // ────────────────────────────────────────────────
 // Lobby world content
 // ────────────────────────────────────────────────
+
+extern LobbyGame_St game;
 
 /**
     brief Static array of platform definitions for the lobby scene.
           Size is determined by platformCount.
           @note Consider moving to dynamic allocation or level data file in the future.
 */
-extern Platform_st platforms[];
+extern Platform_St platforms[];
 
 /**
     brief Number of valid entries in the platforms array.
 */
 extern u32 platformCount;
+
+extern Texture2D platformTextures[__platformTypeCount];
+
+extern Texture2D treeTexture;
+extern Texture2D backgroundTexture;
 
 // ────────────────────────────────────────────────
 // Skin selection UI
@@ -81,5 +61,18 @@ extern Rectangle skinButtonRect;
           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;
+
+extern float gameTime;
+
+extern GrassBlade_St grassBlades[MAX_GRASS_BLADES];
+extern int grassCount;
+
+extern const Vector2 moonLightDir;
+
+extern Sound sound_jump;
+extern Sound sound_doubleJump;
+extern Sound sound_gameLaunch;
+
+extern Sound sound_doubleJumpMeme;
 
 #endif // UTILS_GLOBALS_H
