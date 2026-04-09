@@ -258,11 +258,22 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         updateCameraOnWindowResize(game);
     }
 
-    if (gameTime > 1.45f) {
+    if (gameTime > 3.0f) {
         updatePlayer(&game->player, platforms, platformCount, dt);
     }
     
-    game->cam.target = game->player.position;
+    Vector2 desiredTarget = game->player.position;
+    if (game->player.onGround && game->player.position.y > GROUND_Y - 70.0f) {
+        desiredTarget.y -= 135.0f;
+    } else {
+        desiredTarget.y -= game->player.radius * 1.5f;
+    }
+
+    game->cam.target = Vector2Lerp(
+        game->cam.target,
+        desiredTarget,
+        0.1f
+    );
 
     toggleSkinMenu(game);
 
@@ -295,8 +306,6 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             lobby_drawTree();
             
             lobby_drawPlatforms(platforms, platformCount);
-
-            lobby_drawGameZones(game);
 
             lobby_drawPlayer(game);
             

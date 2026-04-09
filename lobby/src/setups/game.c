@@ -11,7 +11,7 @@ void lobby_initGrass(void) {
     float stepX = 3.0f;
     float stepY = 5.0f;
 
-    for (float y = GROUND_Y; y < GROUND_Y + 600.0f; y += stepY) {
+    for (float y = GROUND_Y; y < GROUND_Y + 200.0f; y += stepY) {
         for (float x = -X_LIMIT - 500; x < X_LIMIT + 500; x += stepX) {
             if (grassCount >= MAX_GRASS_BLADES) break;
 
