@@ -208,7 +208,7 @@ LDFLAGS += $(BASE_LDFLAGS)
 CFLAGS += $(EXTRA_CFLAGS)
 LDFLAGS += $(EXTRA_LDFLAGS)
 
-MAIN_NAME ?= main
+MAIN_NAME ?= chess_core
 
 # Dirs
 SRC_DIR := src

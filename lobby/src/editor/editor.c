@@ -10,6 +10,7 @@
 #include "editor/properties.h"
 #include "widgets/scrollFrame.h"
 #include "systemSettings.h"
+#include "utils/globals.h"
 
 // Editor state 
 EditorDragMode_Et editorDragMode = DRAG_NONE;
@@ -88,6 +89,7 @@ void initEditor(LobbyGame_St* const game) {
 
     da_clear(&selectedIndices);
     da_clear(&clipboard);
+    da_clear(&terrains);
     clipboardHasData = false;
     pasteAnchorIndex = 4;                     // center anchor
 
@@ -104,6 +106,11 @@ void initEditor(LobbyGame_St* const game) {
 
     // Camera backup for clean exit
     editorCameraBackup = game->cam;
+
+    // Start with an empty centered canvas
+    game->cam.target = (Vector2){0.0f, 0.0f};
+    game->cam.offset = (Vector2){(float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f};
+    game->cam.zoom = 0.5f;
 
     // Default palette selection
     currentPaletteType = TERRAIN_NORMAL;

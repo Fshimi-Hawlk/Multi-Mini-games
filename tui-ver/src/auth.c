@@ -80,7 +80,8 @@ void runAuth(void) {
                 else if (strlen(password) < 4) error = "Password too short";
                 else if (isRegister) {
                     if (db_registerUser(username, password)) {
-                        strcpy(g_currentUser.nickname, username);
+                        strncpy(g_currentUser.nickname, username, sizeof(g_currentUser.nickname)-1);
+                        g_currentUser.nickname[sizeof(g_currentUser.nickname)-1] = '\0';
                         break;
                     } else {
                         error = "Username already taken";
@@ -88,7 +89,8 @@ void runAuth(void) {
                 } else {
                     if (db_userExists(username)) {
                         if (db_checkPassword(username, password)) {
-                            strcpy(g_currentUser.nickname, username);
+                            strncpy(g_currentUser.nickname, username, sizeof(g_currentUser.nickname)-1);
+                        g_currentUser.nickname[sizeof(g_currentUser.nickname)-1] = '\0';
                             break;
                         } else error = "Wrong password";
                     } else error = "User does not exist";

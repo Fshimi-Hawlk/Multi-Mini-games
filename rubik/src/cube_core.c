@@ -69,7 +69,10 @@ const KeyFunction moveKeyToFunction[] = {
     {KEY_U, rotateUcube},
     {KEY_D, rotateDcube},
     {KEY_F, rotateFcube},
-    {KEY_B, rotateBcube}
+    {KEY_B, rotateBcube},
+    {KEY_X, rotateXcube},
+    {KEY_Y, rotateYcube},
+    {KEY_Z, rotateZcube}
 };
 
 typedef struct { 

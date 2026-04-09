@@ -35,7 +35,7 @@ void UpdateMenu(void) {
         }
     }
 
-    if (IsKeyPressed(KEY_F)) {
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F)) {
         ToggleBorderlessWindowed();
         systemSettings.video.fullscreen = !systemSettings.video.fullscreen;
     }
@@ -216,7 +216,7 @@ void DrawSettingsMenu(void) {
     DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.8f));
     DrawText("SETTINGS", sw/2 - 100, 100, 40, WHITE);
     DrawText(TextFormat("Music Volume: %.1f  (M)", systemSettings.audio.musicVolume), 100, 200, 25, LIGHTGRAY);
-    DrawText(TextFormat("Windowed Fullscreen: %s (F)", systemSettings.video.fullscreen ? "ON" : "OFF"), 100, 250, 25, LIGHTGRAY);
+    DrawText(TextFormat("Windowed Fullscreen: %s (Ctrl+F)", systemSettings.video.fullscreen ? "ON" : "OFF"), 100, 250, 25, LIGHTGRAY);
     
     Rectangle btnBack = { sw/2 - 100, sh - 120, 200, 50 };
     bool hover = CheckCollisionPointRec(GetMousePosition(), btnBack);

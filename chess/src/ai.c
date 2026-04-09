@@ -81,8 +81,9 @@ static const s32 kingTable[8][8] = {
 static s32 getPieceValue(Piece_st* p, s32 x, s32 y) {
     if (!p) return 0;
     s32 val = 0;
-    s32 tableX = x;
+    s32 tableX = (x < 0) ? 0 : (x > 7 ? 7 : x);
     s32 tableY = (p->color == COLOR_PIECE_WHITE) ? (7 - y) : y;
+    tableY = (tableY < 0) ? 0 : (tableY > 7 ? 7 : tableY);
 
     switch (p->name) {
         case PIECE_NAME_PAWN:   val = MATERIAL_PAWN + pawnTable[tableY][tableX]; break;
@@ -132,6 +133,8 @@ static s32 minimax(Board_t board, Player_st* white, Player_st* black, u8 depth, 
     if (depth == 0) return ai_evaluateBoard(board);
 
     Player_st* currentPlayer = isMaximizing ? white : black;
+    if (!currentPlayer) return 0;
+
     s32 bestVal = isMaximizing ? -2000000 : 2000000;
 
     for (s32 i = 0; i < PIECES_PER_PLAYER; i++) {
@@ -145,9 +148,13 @@ static s32 minimax(Board_t board, Player_st* white, Player_st* black, u8 depth, 
                     if (!isInCheck(board, p, tx, ty, isMaximizing ? 0 : 1)) {
                         IVec2_st to = {tx, ty};
                         Piece_st* captured = simulateMove(board, from, to);
-                        
+                        if (!board[to.y][to.x]) { // Safety check if simulateMove failed
+                             undoMove(board, from, to, captured);
+                             continue;
+                        }
+
                         s32 val = minimax(board, white, black, depth - 1, alpha, beta, !isMaximizing);
-                        
+
                         undoMove(board, from, to, captured);
 
                         if (isMaximizing) {
@@ -172,7 +179,11 @@ ChessMove_st ai_getBestMove(Board_t board, Player_st* white, Player_st* black, s
     s32 alpha = -2000000;
     s32 beta = 2000000;
 
+    // Hard limit depth to 2 to prevent stack overflow/crash during intensive simulation
+    if (depth > 2) depth = 2;
+
     Player_st* currentPlayer = isMaximizing ? white : black;
+    if (!currentPlayer) return bestMove;
 
     for (s32 i = 0; i < PIECES_PER_PLAYER; i++) {
         Piece_st* p = currentPlayer->pieces[i];
@@ -185,9 +196,13 @@ ChessMove_st ai_getBestMove(Board_t board, Player_st* white, Player_st* black, s
                     if (!isInCheck(board, p, tx, ty, player)) {
                         IVec2_st to = {tx, ty};
                         Piece_st* captured = simulateMove(board, from, to);
-                        
+                        if (!board[to.y][to.x]) {
+                            undoMove(board, from, to, captured);
+                            continue;
+                        }
+
                         s32 val = minimax(board, white, black, depth - 1, alpha, beta, !isMaximizing);
-                        
+
                         undoMove(board, from, to, captured);
 
                         if (isMaximizing) {

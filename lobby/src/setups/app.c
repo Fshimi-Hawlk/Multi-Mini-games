@@ -52,7 +52,9 @@ Error_Et initApp(void) {
     systemSettings.video.title = "Lobby";
 
     // Initialization 
-    InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    if (!IsWindowReady()) {
+        InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    }
     SetExitKey(0); // Disable Escape key for closing window
     // SetWindowPosition(100, 50);
 

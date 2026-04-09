@@ -41,7 +41,7 @@ void rudpInitConnection(RUDPConnection_St *conn) {
  * @return true si s1 est chronologiquement après s2.
  */
 static inline bool sequenceMoreRecent(u16 s1, u16 s2) {
-    return ((s1 > s2) && (s1 - s2 <= 32768)) || ((s1 < s2) && (s2 - s1 > 32768));
+    return (u16)(s1 - s2) < 32768 && (s1 != s2);
 }
 
 /**
@@ -76,12 +76,16 @@ void rudpGenerateHeader(RUDPConnection_St *conn, u8 action, RUDPHeader_St *out_h
  */
 bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
     u16 seq = ntohs(in_h->sequence);
+    u16 ack = ntohs(in_h->ack);
+    u32 bitfield = ntohl(in_h->ack_bitfield);
 
     /* 
-       Note technique : Les champs ack et ack_bitfield de in_h indiquent ce que le PAIR 
-       a reçu de notre part. Ils devraient être utilisés ici pour marquer nos paquets
-       locaux comme confirmés et arrêter les éventuelles retransmissions.
+       Traitement des ACKs du pair :
+       Le pair nous dit qu'il a reçu jusqu'à 'ack' et les paquets du 'bitfield'.
+       Ici, on pourrait nettoyer une file de retransmission locale.
     */
+    (void)ack;
+    (void)bitfield;
 
     // Cas 1 : Le paquet est plus récent que tout ce qu'on a vu
     if (sequenceMoreRecent(seq, conn->remote_sequence)) {

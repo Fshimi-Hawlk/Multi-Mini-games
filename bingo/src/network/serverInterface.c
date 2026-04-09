@@ -49,6 +49,8 @@ typedef struct {
     u32              numPlayers;
     u32              seed;
     char             resultMessage[64];
+    PlayerCard_St    playerCards[MAX_PLAYER];
+    s32              playerNetworkIds[MAX_PLAYER];
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
@@ -142,6 +144,11 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
         .seed            = srv->seed
     };
     snprintf(payload.resultMessage, sizeof(payload.resultMessage), "%s", game->progress.resultMessage);
+    
+    for (int i = 0; i < MAX_PLAYER; i++) {
+        payload.playerCards[i] = srv->playerCards[i];
+        payload.playerNetworkIds[i] = srv->playerNetworkIds[i];
+    }
 
     GameTLVHeader_St tlv = {
         .game_id = MINI_GAME_BINGO,
@@ -149,12 +156,12 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
         .length  = htons(sizeof(BingoSyncPayload_St))
     };
 
-    u8 buf[1024];
+    u8 buf[2048]; // Increased buffer size for larger payload
     memset(buf, 0, sizeof(buf));
     memcpy(buf, &tlv, sizeof(tlv));
     memcpy(buf + sizeof(tlv), &payload, sizeof(payload));
 
-    broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv) + sizeof(payload));
+    broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv) + sizeof(payload)));
 }
 
 void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
@@ -173,7 +180,10 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
 
     switch (realAction) {
         case ACTION_CODE_JOIN_GAME: {
-            if (srv->numPlayers >= MAX_PLAYER) break;
+            if (srv->numPlayers >= MAX_PLAYER) {
+                log_warn("Bingo room full, rejecting player %d", player_id);
+                break;
+            }
             if (bingo_getSlot(srv, player_id) != -1) break; // Already in
 
             u32 slot = srv->numPlayers++;
@@ -212,10 +222,23 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
 
             ActionDaubSquarePayload_St p;
             memcpy(&p, realPayload, sizeof(p));
-            if (p.row >= 5 || p.col >= 5) break; // FIX 1: OOB protection
+            if (p.row >= 5 || p.col >= 5) break; 
             s32 slot = bingo_getSlot(srv, player_id);
-            if (slot != -1 && bingo_isValidDaub(&game->currentCall, &srv->playerCards[slot], p.row, p.col)) {
+            if (slot == -1) break;
+
+            if (bingo_isValidDaub(&game->currentCall, &srv->playerCards[slot], p.row, p.col)) {
                 srv->playerCards[slot].daubs[p.row][p.col] = true;
+                srv->playerCards[slot].misclicks[p.row][p.col] = 0;
+                
+                // Check for victory
+                if (bingo_hasBingo(&srv->playerCards[slot])) {
+                    srv->status = BINGO_STATUS_ENDED;
+                    game->progress.scene = GAME_SCENE_END;
+                    snprintf(game->progress.resultMessage, 63, "BINGO! Player %d wins!", player_id);
+                    log_info("Bingo: Player %d wins in room %d", player_id, room_id);
+                }
+            } else {
+                srv->playerCards[slot].misclicks[p.row][p.col]++;
             }
         } break;
 

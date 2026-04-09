@@ -25,9 +25,9 @@ static bool isFirstInit = true;
 
 void lobby_init(void) {
     log_debug("[LOBBY]: Initializing client lobby");
-    
-    s32 savedId = isFirstInit ? -1 : lobby_game.id;
-    isFirstInit = false;
+    firstFrame = true;
+
+    s32 savedId = isFirstInit ? -1 : lobby_game.id;    isFirstInit = false;
 
     // Preserve the player name across lobby re-inits
     char savedName[32] = {0};

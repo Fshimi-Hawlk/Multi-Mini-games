@@ -45,6 +45,7 @@ void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
     (void)real_payload;
 
     if (real_action == ACTION_CODE_JOIN_GAME) {
+        if (player_id < 0 || player_id >= MAX_CLIENTS) return;
         rs->players[player_id].active = true;
         rs->players[player_id].id = player_id;
         rs->players[player_id].progress = 0;
@@ -73,6 +74,7 @@ void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
         memcpy(buf + sizeof(tlv_scr), &net_seed, sizeof(u32));
         broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(u32));    }
     else if (real_action == ACTION_CODE_RUBIK_PROGRESS) {
+        if (player_id < 0 || player_id >= MAX_CLIENTS) return;
         if (len >= sizeof(GameTLVHeader_St) + sizeof(float)) {
             memcpy(&rs->players[player_id].progress, real_payload, sizeof(float));
         }
@@ -88,6 +90,7 @@ void rubik_on_tick(void* state) {
 }
 
 void rubik_on_player_leave(void* state, s32 player_id) {
+    if (player_id < 0 || player_id >= MAX_CLIENTS) return;
     RubikServerState* rs = (RubikServerState*)state;
     rs->players[player_id].active = false;
 }

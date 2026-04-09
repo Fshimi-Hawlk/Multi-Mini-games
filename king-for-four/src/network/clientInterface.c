@@ -139,12 +139,10 @@ void king_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
             if (local_state.discard_pile.size == 0) push_card(&local_state.discard_pile, sync.top_card);
             else local_state.discard_pile.cards[local_state.discard_pile.size - 1] = sync.top_card;
             
-            int total_cards = 0;
             for (int i = 0; i < sync.num_players; i++) {
-                total_cards += sync.hand_sizes[i];
                 local_state.players[i].hand.size = sync.hand_sizes[i];
             }
-            if (total_cards > 10 && game_status == 1) {
+            if (game_status == 1) {
                 for (int i = 0; i < sync.num_players; i++) {
                     if (sync.hand_sizes[i] == 0) winner_id = i;
                 }

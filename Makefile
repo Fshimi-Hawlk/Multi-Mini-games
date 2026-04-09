@@ -79,6 +79,9 @@ $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR) $(API_DIR):
 module-%: | $(LIB_DIR) $(API_DIR)
 	@echo "Building static library -> $* (lib$*.a)"
 	$(SILENT_PREFIX)$(MAKE) -j1 -C $* static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=$(subst -,,$*) EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"
+	$(SILENT_PREFIX)if [ "$*" = "chess" ]; then \
+		$(MAKE) -j1 -C chess static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=chess MAIN_NAME=chess_core EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"; \
+	fi
 	$(SILENT_PREFIX)if cmp -s "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a" 2>/dev/null; then \
 		echo "  lib$(subst -,,$*).a unchanged"; \
 	else \

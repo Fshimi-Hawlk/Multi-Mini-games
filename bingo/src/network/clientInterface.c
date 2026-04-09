@@ -72,6 +72,8 @@ typedef struct {
     u32              numPlayers;
     u32              seed;
     char             resultMessage[64];
+    PlayerCard_St    playerCards[MAX_PLAYER];
+    s32              playerNetworkIds[MAX_PLAYER];
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
@@ -125,6 +127,13 @@ void bingo_init(void) {
     joinRetryTimer     = 0.0f;
     cardsGenerated     = false;
 
+    // Ces valeurs sont des constantes de config partagées avec le serveur.
+    // Sans elles, bingo_drawUI et inGrace ne fonctionnent pas en mode réseau
+    // car memset les a mis à 0.
+    localGame.balls.choiceDelay = 3.5f;
+    localGame.balls.showDelay   = 1.5f;
+    localGame.balls.graceDelay  = 1.0f;
+
     log_info("Bingo client initialized");
 }
 
@@ -166,18 +175,47 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
             localGame.currentCall          = payload.currentCall;
             localGame.progress.scene       = payload.scene;
 
-            // Generate choice cards locally if not done yet (using shared seed)
+            // Generate choice cards locally if not done yet (using shared seed).
+            // Must happen BEFORE the player card sync so card->values are valid
+            // when we fall back to copying them for the player's numbers.
             if (!cardsGenerated && payload.seed != 0) {
                 srand(payload.seed);
                 uint available[100];
                 for (uint i = 0; i < 100; ++i) available[i] = i;
-                
+
                 extern bool bingo_generateCard(Card_t card, uint *available, uint count);
                 for (uint i = 0; i < 12; ++i) {
                     bingo_generateCard(localGame.layout.choiceCards[i].values, available, 100);
                 }
                 cardsGenerated = true;
                 log_info("Bingo cards generated locally with seed %u", payload.seed);
+
+                // If the player had already selected a card before the seed arrived,
+                // their numbers were copied from all-zero values. Re-copy now.
+                if (localGame.previouslySelectedCard != NULL) {
+                    memcpy(localGame.player.numbers, localGame.previouslySelectedCard->values, sizeof(Card_t));
+                    log_info("Bingo: retroactively synced player numbers from selected card");
+                }
+            }
+
+            // Sync local player card state (daubs and misclicks) from server.
+            // clientID == slot index (sent via JOIN_ACK); playerCards is indexed by slot.
+            if (localGame.clientID >= 0 && localGame.clientID < MAX_PLAYER) {
+                int slot = localGame.clientID;
+                for (int r = 0; r < 5; r++) {
+                    for (int c = 0; c < 5; c++) {
+                        localGame.player.daubs[r][c]     = payload.playerCards[slot].daubs[r][c];
+                        localGame.player.misclicks[r][c] = payload.playerCards[slot].misclicks[r][c];
+                    }
+                }
+                // Sync numbers from server if choice cards aren't generated yet locally
+                if (!cardsGenerated) {
+                    for (int r = 0; r < 5; r++) {
+                        for (int c = 0; c < 5; c++) {
+                            localGame.player.numbers[r][c] = payload.playerCards[slot].numbers[r][c];
+                        }
+                    }
+                }
             }
 
             extern void updateWaitingRoomInfo(int players, int max, bool host);
@@ -242,6 +280,12 @@ void bingo_update(f32 dt) {
                     localGame.previouslySelectedCard = card;
                     card->selected = true;
 
+                    // Copy the selected card's numbers into the player's card so
+                    // bingo_isValidDaub has the right values during GAME_SCENE_PLAYING
+                    memcpy(localGame.player.numbers, card->values, sizeof(Card_t));
+                    memset(localGame.player.daubs, 0, sizeof(localGame.player.daubs));
+                    localGame.player.daubs[2][2] = true; // free space
+
                     ActionChooseCardPayload_St payload = { .cardIndex = (u8)i };
                     sendToServer(ACTION_CODE_BINGO_CHOOSE_CARD, &payload, sizeof(payload));
                     break;
@@ -263,6 +307,7 @@ void bingo_update(f32 dt) {
             // Solo mode: countdown locally then transition to PLAYING
             if (networkSocket < 0) {
                 localGame.currentCall.timer -= dt;
+                if (localGame.currentCall.timer < 0.0f) localGame.currentCall.timer = 0.0f;
                 if (localGame.currentCall.timer <= 0.0f) {
                     localGame.currentCall.timer = localGame.balls.showDelay;
                     localGame.progress.scene = GAME_SCENE_PLAYING;

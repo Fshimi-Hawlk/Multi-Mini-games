@@ -295,9 +295,8 @@ bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int
     board[targetLine][targetColumn]->pos.y = targetLine;
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (!adversaryPlayer->pieces[i] || adversaryPlayer->pieces[i]->isTaken) 
+        if (!adversaryPlayer->pieces[i] || adversaryPlayer->pieces[i] == NULL || adversaryPlayer->pieces[i]->isTaken)
             continue;
-
         if ((res = canBePlaced(board, adversaryPlayer->pieces[i], targetKing->pos.x, targetKing->pos.y))) {
             break; 
         }
@@ -331,7 +330,7 @@ bool isCheckmate(Board_t board) {
     }
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (tempJoueur->pieces[i]->isTaken) {
+        if (tempJoueur->pieces[i] == NULL || tempJoueur->pieces[i]->isTaken) {
             continue;
         }
 
@@ -361,7 +360,7 @@ bool isStalemate(Board_t board) {
     }
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (tempJoueur->pieces[i]->isTaken) {
+        if (tempJoueur->pieces[i] == NULL || tempJoueur->pieces[i]->isTaken) {
             continue;
         }
         
@@ -380,8 +379,18 @@ bool isSquareThreatened(Board_t board, int playerA, int xCase, int yCase) {
     Player_st* playerAdverse = !playerA ? whitePlayer : blackPlayer;
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (!playerAdverse->pieces[i]->isTaken && canBePlaced(board, playerAdverse->pieces[i], xCase, yCase)) {
-            return true;
+        Piece_st* p = playerAdverse->pieces[i];
+        if (p == NULL || p->isTaken) continue;
+
+        // For the king, only check 1-square moves — castling is not an attack
+        // and calling canBePlaced for the king here would cause infinite recursion
+        // (canBePlaced -> isSquareThreatened -> canBePlaced -> ...)
+        if (p->name == PIECE_NAME_KING) {
+            int dx = abs(xCase - p->pos.x);
+            int dy = abs(yCase - p->pos.y);
+            if (dx <= 1 && dy <= 1 && (dx + dy > 0)) return true;
+        } else {
+            if (canBePlaced(board, p, xCase, yCase)) return true;
         }
     }
     return false;
@@ -406,7 +415,7 @@ bool promotionChoice(Board_t board) {
         return false;
     }
 
-    Piece_st* piece;
+    Piece_st* piece = NULL;
     
     for (int i = 0; i < BOARD_SIZE; i++) {
         if (board[0][i] && board[0][i]->name == PIECE_NAME_PAWN) {
@@ -447,15 +456,14 @@ bool promotionChoice(Board_t board) {
     piece->name = promotionVers;
     waitingForPromotion = false;
 
-    char *temp = calloc(7, sizeof(char));
+    char temp[32]; // Increased size
+    strncpy(temp, moveMade, sizeof(temp)-1);
+    temp[sizeof(temp)-1] = '\0';
 
-    strcpy(temp, moveMade);
-
-    sprintf(moveMade, "%s+%c", temp, names[promotionVers]);
+    snprintf(moveMade, 7, "%s+%c", temp, names[promotionVers]);
+    moveMade[6] = '\0';
 
     saveMove = true;
-
-    free(temp);
 
     return true;
 

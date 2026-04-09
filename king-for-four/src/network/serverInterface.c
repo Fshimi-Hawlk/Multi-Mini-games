@@ -132,7 +132,6 @@ static void broadcast_sync(KingServerState* ks, s32 room_id, BroadcastMessage_Ft
         memset(buf, 0, sizeof(buf));
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, (size_t)hand_count * sizeof(Card));
-        
         broadcast(UNICAST, target_player_id, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv_hand) + hand_count * sizeof(Card)));
         free(cards);
     }
@@ -168,14 +167,6 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
         internal_id = g->num_players++;
         init_player(&g->players[internal_id], player_id, "Joueur");
         printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
-        
-        u8 buf_ack[64];
-        memset(buf_ack, 0, sizeof(buf_ack));
-        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
-        u16 net_id = htons((u16)internal_id);
-        memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
-        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
     }
 
     if (internal_id != -1 && internal_id >= 0 && internal_id < g->num_players) {
@@ -227,6 +218,12 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
                 ks->last_action = 0; 
                 if (played.color == CARD_BLACK) g->active_color = p.chosen_color;
                 
+                // Win detection
+                if (g->players[internal_id].hand.size == 0) {
+                    ks->status = 2; // Finished
+                    printf("[KING] Joueur %d a GAGNÉ !\n", internal_id);
+                }
+
                 int next_p = (g->current_player + g->game_direction + g->num_players) % g->num_players;
                 int skip = 0;
                 if (played.value == PLUS_TWO) {
@@ -279,6 +276,13 @@ void king_on_tick(void* state) {
                         ks->last_player_id = cp;
                         ks->last_action = 0; 
                         if (toPlay.color == CARD_BLACK) g->active_color = (int)(prng_rand() % 4);
+                        
+                        // Bot win detection
+                        if (g->players[cp].hand.size == 0) {
+                            ks->status = 2; // Finished
+                            printf("[KING] Bot %d a GAGNÉ !\n", cp);
+                        }
+
                         int next_p = (g->current_player + g->game_direction + g->num_players) % g->num_players;
                         int skip = 0;
                         if (toPlay.value == PLUS_TWO) {

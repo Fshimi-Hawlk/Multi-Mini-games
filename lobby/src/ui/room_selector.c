@@ -118,9 +118,10 @@ bool updateRoomSelector(void) {
         }
     }
 
-    // Check for "New Room" (+)
+    // Check for "New Room" (+) — désactivé en mode global (currentGameId == -1)
+    // car envoyer MINI_GAME_LOBBY avec targetRoomId=-1 est rejeté par le serveur
     Rectangle btnNew = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 150, 200, 40 };
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnNew)) {
+    if (currentGameId != -1 && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnNew)) {
         RUDPHeader_St h;
         rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
         h.sender_id = htons((u16)lobby_game.id);
@@ -188,10 +189,12 @@ void drawRoomSelector(void) {
         DrawText(TextFormat("Par: %s - %d J", discoveredRooms[i].creator, discoveredRooms[i].playerCount), (int)r.x + 10, (int)r.y + 22, 12, LIGHTGRAY);
     }
 
-    Rectangle btnNew = { panel.x + 100, panel.y + 360, 200, 40 };
-    bool hoverNew = CheckCollisionPointRec(GetMousePosition(), btnNew);
-    DrawRectangleRec(btnNew, hoverNew ? LIME : GREEN);
-    DrawText("CRÉER SALON (+)", (int)btnNew.x + 30, (int)btnNew.y + 10, 18, WHITE);
+    if (currentGameId != -1) {
+        Rectangle btnNew = { panel.x + 100, panel.y + 360, 200, 40 };
+        bool hoverNew = CheckCollisionPointRec(GetMousePosition(), btnNew);
+        DrawRectangleRec(btnNew, hoverNew ? LIME : GREEN);
+        DrawText("CRÉER SALON (+)", (int)btnNew.x + 30, (int)btnNew.y + 10, 18, WHITE);
+    }
     
     if (currentGameId != -1)
         DrawText("ESC pour fermer", (int)panel.x + 140, (int)panel.y + 410, 15, DARKGRAY);

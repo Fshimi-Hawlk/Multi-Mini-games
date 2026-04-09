@@ -87,11 +87,13 @@ u64 serializeMessage(Message_St* msg, char *buf) {
     memcpy(buf + offset, &msg->type, sizeof(MessageType_Et)); 
     offset += sizeof(MessageType_Et);
 
-    strcpy(buf + offset, msg->sender); 
-    offset += strlen(msg->sender) + 1;
+    strncpy(buf + offset, msg->sender, 31);
+    buf[offset + 31] = '\0';
+    offset += 32;
 
-    strcpy(buf + offset, msg->target); 
-    offset += strlen(msg->target) + 1;
+    strncpy(buf + offset, msg->content, 255);
+    buf[offset + 255] = '\0';
+    offset += 256;
 
     strcpy(buf + offset, msg->text); 
     offset += strlen(msg->text) + 1;

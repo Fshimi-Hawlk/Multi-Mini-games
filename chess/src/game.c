@@ -182,8 +182,10 @@ int initGame(Board_t board) {
     int returnCode;
 
     SetTraceLogLevel(LOG_WARNING);
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Echecs");
-    SetTargetFPS(60);
+    if (!IsWindowReady()) {
+        InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Echecs");
+        SetTargetFPS(60);
+    }
 
     chess_initAudio();
 

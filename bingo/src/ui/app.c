@@ -40,7 +40,7 @@ void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const ball
     if (currentCall->timer <= balls->showDelay) {
         f32 fontSize = 48;
         
-        Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], currentCall->displayedText, 0, fontSize);
+        Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], currentCall->displayedText, fontSize, 0);
         Vector2 textPos = {
             .x = layout->windowCenter.x - textSize.x / 4.0f,
             .y = layout->cardRect.y - fontSize * 1.5f,

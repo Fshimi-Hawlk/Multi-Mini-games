@@ -89,6 +89,8 @@ void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
             // Apply move to local board
             Piece_st* p = current_board[move.from_y][move.from_x];
             if (p) {
+                Piece_st* captured = current_board[move.to_y][move.to_x];
+                if (captured) captured->isTaken = true;
                 current_board[move.to_y][move.to_x] = p;
                 current_board[move.from_y][move.from_x] = NULL;
                 p->pos.x = move.to_x;
@@ -168,8 +170,8 @@ void chess_client_update(float dt) {
             // Host plays for the bot
             static f32 bot_delay = 0;
             bot_delay += dt;
-            if (bot_delay >= 1.0f) {
-                u8 depth = (u8)((selected_bot_level == 1) ? 2 : (selected_bot_level == 2 ? 3 : 4));
+            if (bot_delay >= 1.0f && whitePlayer != NULL && blackPlayer != NULL) {
+                u8 depth = (u8)((selected_bot_level == 1) ? 2 : (selected_bot_level == 2 ? 3 : 3)); // Max depth 3
                 ChessMove_st best = ai_getBestMove(current_board, whitePlayer, blackPlayer, playerTurn, depth);
                 if (best.from.x != -1) {
                     ChessMovePayload_St payload = {
@@ -181,6 +183,8 @@ void chess_client_update(float dt) {
                     // Apply locally
                     Piece_st* p = current_board[payload.from_y][payload.from_x];
                     if (p) {
+                        Piece_st* captured = current_board[payload.to_y][payload.to_x];
+                        if (captured) captured->isTaken = true;
                         current_board[payload.to_y][payload.to_x] = p;
                         current_board[payload.from_y][payload.from_x] = NULL;
                         p->pos.x = payload.to_x;

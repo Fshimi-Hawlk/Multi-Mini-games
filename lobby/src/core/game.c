@@ -192,6 +192,18 @@ void choosePlayerTexture(LobbyGame_St* const game) {
             }
         }
     }
+
+    static const int skinKeys[] = {
+        KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE,
+        KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE
+    };
+    for (u32 i = 0; i < __playerTextureCount && i < 9; ++i) {
+        if (IsKeyPressed(skinKeys[i]) && game->player.unlockedTextures[i]) {
+            game->player.textureId = (PlayerTextureId_Et)i;
+            game->playerVisuals.isTextureMenuOpen = false;
+            break;
+        }
+    }
 }
 
 void toggleSkinMenu(LobbyGame_St* const game) {
