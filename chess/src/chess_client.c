@@ -53,7 +53,7 @@ void chess_client_init(void) {
 
 void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
-        if (player_id < 0 || player_id >= MAX_CLIENTS) {
+        if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
             printf("[CHESS] Data received from invalid player ID: %d\n", (int)player_id);
             return;
         }
@@ -206,21 +206,7 @@ void chess_client_update(float dt) {
         }
     }
 
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        GameTLVHeader_St tlv = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
-        RUDPHeader_St h;
-        rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-        h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
-        u8 buf[128];
-        memset(buf, 0, sizeof(buf));
-        u8* ptr = buf;
-        memcpy(ptr, &h, sizeof(h)); ptr += sizeof(h);
-        memcpy(ptr, &tlv, sizeof(tlv)); ptr += sizeof(tlv);
-        send(networkSocket, buf, (size_t)(ptr - buf), 0);
-        
-        extern void switch_minigame(u8 game_id);
-        switch_minigame(0);
-    }
+    // removed local ESC handler to use lobby pause menu instead
 }
 
 void chess_client_draw(void) {

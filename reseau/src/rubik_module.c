@@ -1,6 +1,7 @@
 #include "networkInterface.h"
 #include "APIs/generalAPI.h"
 #include "APIs/rubikAPI.h"
+#include "logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -59,17 +60,18 @@ void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
         broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
     }
     else if (real_action == ACTION_CODE_START_GAME) {
+        log_info("[RUBIK] Room %d: Game starting (triggered by player %d)", room_id, player_id);
         rs->status = 1;
         rs->elimination_timer = 30.0f;
         rs->seed = (int)time(NULL);
-        
+        u32 net_seed = htonl((u32)rs->seed);
+
         u8 buf[64];
         memset(buf, 0, sizeof(buf));
-        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = htons(sizeof(int)) };
+        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = htons(sizeof(u32)) };
         memcpy(buf, &tlv_scr, sizeof(tlv_scr));
-        memcpy(buf + sizeof(tlv_scr), &rs->seed, sizeof(int));
-        broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(int));
-    }
+        memcpy(buf + sizeof(tlv_scr), &net_seed, sizeof(u32));
+        broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(u32));    }
     else if (real_action == ACTION_CODE_RUBIK_PROGRESS) {
         if (len >= sizeof(GameTLVHeader_St) + sizeof(float)) {
             memcpy(&rs->players[player_id].progress, real_payload, sizeof(float));

@@ -42,4 +42,9 @@ const char* getEnteredPseudo(void);
  */
 void addDiscoveredRoom(const char* ip, const char* name);
 
+/**
+ * @brief Sets an error message to be displayed on the connection screen.
+ */
+void setConnectionError(const char* error);
+
 #endif // UI_CONNECTION_SCREEN_H

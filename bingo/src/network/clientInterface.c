@@ -70,6 +70,7 @@ typedef struct {
     CallState_St     currentCall;
     GameScene_Et     scene;
     u32              numPlayers;
+    u32              seed;
     char             resultMessage[64];
 } BingoSyncPayload_St;
 #pragma pack(pop)
@@ -77,6 +78,7 @@ typedef struct {
 static BingoGame_St localGame;
 static bool         assetsLoaded = false;
 static f32          joinRetryTimer = 0.0f;
+static bool         cardsGenerated = false;
 
 /**
     @brief Helper to send a game-specific action to the server.
@@ -121,6 +123,7 @@ void bingo_init(void) {
 
     localGame.clientID = -1;
     joinRetryTimer     = 0.0f;
+    cardsGenerated     = false;
 
     log_info("Bingo client initialized");
 }
@@ -162,6 +165,20 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
             localGame.balls.remainingCount = payload.remainingBalls;
             localGame.currentCall          = payload.currentCall;
             localGame.progress.scene       = payload.scene;
+
+            // Generate choice cards locally if not done yet (using shared seed)
+            if (!cardsGenerated && payload.seed != 0) {
+                srand(payload.seed);
+                uint available[100];
+                for (uint i = 0; i < 100; ++i) available[i] = i;
+                
+                extern bool bingo_generateCard(Card_t card, uint *available, uint count);
+                for (uint i = 0; i < 12; ++i) {
+                    bingo_generateCard(localGame.layout.choiceCards[i].values, available, 100);
+                }
+                cardsGenerated = true;
+                log_info("Bingo cards generated locally with seed %u", payload.seed);
+            }
 
             extern void updateWaitingRoomInfo(int players, int max, bool host);
             updateWaitingRoomInfo((int)payload.numPlayers, 4, (localGame.clientID == 0));

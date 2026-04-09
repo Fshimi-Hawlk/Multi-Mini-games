@@ -63,7 +63,7 @@ void rubik_client_init(void) {
 
 void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
-        if (player_id < 0 || player_id >= MAX_CLIENTS) {
+        if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
             printf("[RUBIK] Data received from invalid player ID: %d\n", (int)player_id);
             return;
         }
@@ -78,8 +78,8 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
         }
     }
     else if (action == ACTION_CODE_RUBIK_SCRAMBLE) {
-        int seed;
-        memcpy(&seed, data, sizeof(int));
+        u32 seed;
+        memcpy(&seed, data, sizeof(u32));
         srand(ntohl(seed));
         initCube(&my_cube);
         char *moves[20];
@@ -87,6 +87,7 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
         applyScrambleInstant(&my_cube, moves);
         game_started = true;
         eliminated = false;
+        printf("[RUBIK] Rubik's scramble started with seed %u\n", ntohl(seed));
     }
     else if (action == ACTION_CODE_RUBIK_ELIMINATE) {
         int target_id;
@@ -175,19 +176,8 @@ void rubik_client_update(float dt) {
         }
     }
 
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
-        RUDPHeader_St h;
-        rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-        h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
-        u8 buf[64];
-        memcpy(buf, &h, sizeof(h));
-        memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
-        send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
-        
-        extern void switch_minigame(u8 game_id);
-        switch_minigame(0);
-    }
+    // Keyboard Shortcuts 
+    // removed local ESC handler to use lobby pause menu instead
 }
 
 void rubik_client_draw(void) {

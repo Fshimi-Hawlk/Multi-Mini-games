@@ -163,13 +163,17 @@ void UpdatePauseMenu(void) {
         if (CheckCollisionPointRec(m, btnSet))    { g_previousMenu = g_currentMenu; g_currentMenu = MENU_SETTINGS; }
         if (CheckCollisionPointRec(m, btnAbandon)) {
             extern LobbyGame_St lobby_game;
-            if (lobby_game.currentState == GAME_STATE_CONNECTION || lobby_game.currentState == GAME_STATE_ROOM_LIST) {
-                g_currentMenu = MENU_MAIN;
-            } else {
+            if (lobby_game.currentState == GAME_STATE_INGAME) {
+                // Return to lobby from minigame
                 extern void switch_minigame(u8 game_id);
                 switch_minigame(0);
-                lobby_game.currentState = GAME_STATE_CONNECTION; // Back to discovery
                 g_currentMenu = MENU_NONE;
+            } else if (lobby_game.currentState == GAME_STATE_GAMEPLAY || lobby_game.currentState == GAME_STATE_ROOM_LIST) {
+                // Return to server selection from lobby
+                lobby_game.currentState = GAME_STATE_CONNECTION;
+                g_currentMenu = MENU_NONE;
+            } else {
+                g_currentMenu = MENU_MAIN;
             }
         }
         if (CheckCollisionPointRec(m, btnQuit)) CloseWindow();

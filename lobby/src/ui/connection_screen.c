@@ -31,6 +31,8 @@ static TextButton_St connectButton;
 
 static RoomEntry_St discoveredRooms[MAX_ROOMS_DISPLAY];
 static int          roomsCount = 0;
+static char         errorMessage[128] = "";
+static float        errorTimer = 0.0f;
 
 static bool isValidIPv4(const char* ip) {
     if (ip == NULL || ip[0] == '\0') return false;
@@ -121,6 +123,9 @@ void addDiscoveredRoom(const char* ip, const char* name) {
 extern void discoverServers(void);
 
 bool updateConnectionScreen(void) {
+    if (errorTimer > 0) errorTimer -= GetFrameTime();
+    else errorMessage[0] = '\0';
+
     Vector2 m = GetMousePosition();
     textBoxUpdate(&ipTextBox, m);
     textBoxUpdate(&pseudoTextBox, m);
@@ -146,6 +151,11 @@ void drawConnectionScreen(void) {
     float cX = (float)w / 2.0f;
     float tY = (float)h * 0.09f;
     DrawTextEx(lobby_fonts[FONT48], "CONNECT TO SERVER", (Vector2) {cX - MeasureTextEx(lobby_fonts[FONT48], "CONNECT TO SERVER", 48, 2).x / 2.0f, tY}, 48, 2, (Color) {235, 235, 255, 255});
+    
+    if (errorMessage[0] != '\0') {
+        DrawTextEx(lobby_fonts[FONT24], errorMessage, (Vector2) {cX - MeasureTextEx(lobby_fonts[FONT24], errorMessage, 24, 0).x / 2.0f, tY + 60.0f}, 24, 0, RED);
+    }
+
     Font uiF = lobby_fonts[FONT24];
     textBoxDraw(&ipTextBox, uiF, 24.0f);
     textBoxDraw(&pseudoTextBox, uiF, 24.0f);
@@ -160,6 +170,13 @@ void drawConnectionScreen(void) {
             textButtonDraw(&discoveredRooms[i].button, lobby_fonts[FONT20], 20.0f);
             DrawTextEx(lobby_fonts[FONT18], discoveredRooms[i].ip, (Vector2) {(float)w - 215.0f, discoveredRooms[i].button.bounds.y + 14.0f}, 18, 1, (Color) {165, 175, 195, 255});
         }
+    }
+}
+
+void setConnectionError(const char* error) {
+    if (error) {
+        strncpy(errorMessage, error, 127);
+        errorTimer = 5.0f;
     }
 }
 

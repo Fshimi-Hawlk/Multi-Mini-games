@@ -176,6 +176,7 @@ void receiveNetworkData(void) {
 
                 if (header.action == ACTION_CODE_JOIN_ERROR) {
                     log_error("[NET] Join rejected by server: %s", (char*)payload);
+                    setConnectionError((char*)payload);
                     lobby_game.currentState = GAME_STATE_CONNECTION;
                     // Reset network state if needed
                     rudpInitConnection(&serverConnection);
@@ -244,6 +245,18 @@ static TerrainVec_St lobbyTerrainBackup = {0};
 
 void switch_minigame(u8 game_id) {
     if (game_id < __miniGameCount && miniGameInterfaces[game_id]) {
+        // Notify server that we are leaving the current minigame room (if any)
+        if (currentMiniGameID != MINI_GAME_LOBBY && currentMiniGameID != MINI_GAME_EDITOR && game_id == MINI_GAME_LOBBY) {
+            GameTLVHeader_St tlv = { .game_id = currentMiniGameID, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
+            RUDPHeader_St h;
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+            h.sender_id = htons((u16)lobby_game.id);
+            u8 buf[64];
+            memcpy(buf, &h, sizeof(h));
+            memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
+            send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
+        }
+
         // Leaving editor → restore lobby terrains
         if (currentMiniGameID == MINI_GAME_EDITOR && game_id != MINI_GAME_EDITOR) {
             da_clear(&terrains);
@@ -391,6 +404,14 @@ int main(void) {
     }
 
     SaveProgress(&g_progress);
+
+    if (networkSocket != -1) {
+        RUDPHeader_St h;
+        rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &h);
+        h.sender_id = htons((u16)lobby_game.id);
+        send(networkSocket, &h, sizeof(h), 0);
+    }
+
     kill_server();
     freeApp();
     return 0;

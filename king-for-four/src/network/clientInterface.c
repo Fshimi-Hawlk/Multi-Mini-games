@@ -219,11 +219,7 @@ void king_client_update(float dt) {
 
         if (IsKeyPressed(KEY_ENTER)) send_to_server(ACTION_CODE_START_GAME, &selected_players, sizeof(int));
     }
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        send_to_server(ACTION_CODE_QUIT_GAME, NULL, 0);
-        extern void switch_minigame(u8 game_id);
-        switch_minigame(0);
-    }
+    // removed local ESC handler to use lobby pause menu instead
 }
 
 void king_client_draw(void) {

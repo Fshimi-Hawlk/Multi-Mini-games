@@ -47,6 +47,7 @@ typedef struct {
     CallState_St     currentCall;
     GameScene_Et     scene;
     u32              numPlayers;
+    u32              seed;
     char             resultMessage[64];
 } BingoSyncPayload_St;
 #pragma pack(pop)
@@ -71,6 +72,7 @@ typedef struct {
     s32                 playerNetworkIds[MAX_PLAYER]; ///< slot -> network player_id mapping
     BingoStatus_Et      status;                     ///< Current phase
     BroadcastMessage_Ft serverBroadcastCallback;    ///< Broadcast function
+    u32                 seed;                       ///< Common seed for card generation
 } BingoServerState_St;
 
 // 
@@ -90,6 +92,9 @@ static s32 bingo_getSlot(BingoServerState_St* srv, s32 player_id) {
 void* bingo_createInstance(void) {
     BingoServerState_St* srv = calloc(1, sizeof(BingoServerState_St));
     if (srv == NULL) return NULL;
+
+    srv->seed = (u32)time(NULL);
+    srand(srv->seed);
 
     BingoGame_St* game = &srv->game;
     game->base.running = true;
@@ -133,7 +138,8 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
         .remainingBalls  = game->balls.remainingCount,
         .currentCall     = game->currentCall,
         .scene           = game->progress.scene,
-        .numPlayers      = srv->numPlayers
+        .numPlayers      = srv->numPlayers,
+        .seed            = srv->seed
     };
     snprintf(payload.resultMessage, 63, "%s", game->progress.resultMessage);
 
