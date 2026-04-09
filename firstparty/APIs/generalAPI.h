@@ -67,7 +67,7 @@ typedef enum {
     FONT12, FONT24, FONT32, 
     FONT48, FONT64, FONT96, 
     FONT128,
-    _fontSizeCount
+    __fontSizeCount
 } FontSize_Et;
 
 typedef enum {

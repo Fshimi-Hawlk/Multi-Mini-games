@@ -303,6 +303,9 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
             lobby_drawWorldBoundaries(&game->player);
             
             lobby_drawGrass(&game->player, game->cam);
+
+            lobby_drawGameZones(game);
+
             lobby_drawAtmosphericEffects();
         } EndMode2D();
 

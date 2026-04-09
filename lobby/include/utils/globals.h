@@ -23,6 +23,8 @@
 
 #include "utils/userTypes.h"
 
+extern Font lobby_fonts[__fontSizeCount];
+
 // ────────────────────────────────────────────────
 // Lobby world content
 // ────────────────────────────────────────────────

@@ -159,18 +159,22 @@ void lobby_drawGameZones(const LobbyGame_St* const game) {
             WHITE);
 
         /* Nom du jeu au-dessus du portail */
-        f32 nameWidth = MeasureText(gameZone.name, 14);
-        DrawText(gameZone.name,
-            gameZone.hitbox.x + (gameZone.hitbox.width - nameWidth) / 2.0f,
-            gameZone.hitbox.y - 20, 14, WHITE);
+        f32Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT24], gameZone.name, 18, 0);
+        DrawTextEx(lobby_fonts[FONT24], gameZone.name, (Vector2) {
+                gameZone.hitbox.x + (gameZone.hitbox.width - nameSize.x) / 2.0f,
+                gameZone.hitbox.y - 20
+            }, 18, 0, WHITE
+        );
 
         /* "[ E ]" en dessous si proche */
         if (playerNear) {
             const char* prompt = "[ E ]";
-            f32 pw = MeasureText(prompt, 12);
-            DrawText(prompt,
-                gameZone.hitbox.x + (gameZone.hitbox.width - pw) / 2.0f,
-                gameZone.hitbox.y + gameZone.hitbox.height + 4, 12, YELLOW);
+            f32Vector2 promptSize = MeasureTextEx(lobby_fonts[FONT12], prompt, 16, 0);
+            DrawTextEx(lobby_fonts[FONT32], prompt, (Vector2) {
+                    gameZone.hitbox.x + (gameZone.hitbox.width - promptSize.x) / 2.0f,
+                    gameZone.hitbox.y + gameZone.hitbox.height + 4
+                }, 16, 0, YELLOW
+            );
         }
     }
 }

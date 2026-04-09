@@ -35,9 +35,8 @@
 #define ASSET_PATH "assets/"
 #endif
 
-/**
- * @brief Subdirectory containing all image files.
- */
+#define FONTS_PATH "assets/fonts/" ///< `assets` shared folder is not to be confused lobby's own assets
+
 #define IMAGES_PATH ASSET_PATH "images/"
 #define SKINS_PATH  IMAGES_PATH "skins/"
 #define SOUNDS_PATH ASSET_PATH "sounds/"

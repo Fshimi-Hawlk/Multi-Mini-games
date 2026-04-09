@@ -30,6 +30,8 @@
 
 #include "utils/globals.h"
 
+Font lobby_fonts[__fontSizeCount] = {0};
+
 float gameTime = 0.0f;
 
 Platform_St platforms[] = {
