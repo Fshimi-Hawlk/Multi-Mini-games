@@ -16,6 +16,7 @@
 #include "widgets/slider.h"
 #include "widgets/checkBox.h"
 #include "widgets/scrollFrame.h"
+#include "ui/game.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -41,6 +42,8 @@ void drawEditor(const LobbyGame_St* const game) {
     // Draw world entities
     BeginMode2D(game->cam);
     {
+        drawLobbyTerrains();
+
         for (u32 i = 0; i < terrains.count; i++) {
             LobbyTerrain_St* t = &terrains.items[i];
             // Highlight selected

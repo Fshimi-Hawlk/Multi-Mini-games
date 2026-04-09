@@ -91,7 +91,7 @@ bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
             conn->receive_history = 0;
         } else {
             // Décale l'historique et marque le précédent remote_sequence comme reçu (bit 0)
-            conn->receive_history = (conn->receive_history << difference) | (1U << (difference - 1));
+            conn->receive_history = (conn->receive_history << difference) | ((u32)1 << (difference - 1));
         }
         conn->remote_sequence = seq;
         return true;

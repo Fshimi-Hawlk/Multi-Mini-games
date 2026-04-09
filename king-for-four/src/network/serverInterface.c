@@ -1,5 +1,5 @@
 /**
- * @file king_module.c
+ * @file serverInterface.c
  * @author i-Charlys
  * @date 2026-03-18
  * @brief Server-side module for the King-for-Four (Uno) game.
@@ -142,14 +142,14 @@ static void broadcast_sync(KingServerState* ks, s32 room_id, BroadcastMessage_Ft
  * @brief Processes client actions and broadcasts updates.
  */
 void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
-    if (action != ACTION_CODE_GAME_DATA) return;
+    if (action != ACTION_CODE_GAME_DATA || len < sizeof(GameTLVHeader_St)) return;
 
-    if (len < sizeof(GameTLVHeader_St)) return;
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
     if (tlv->game_id != MINI_GAME_KFF) return; 
     
     u8 real_action = tlv->action;
     void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
+    u16 payloadLen = len - sizeof(GameTLVHeader_St);
 
     KingServerState* ks = (KingServerState*)state;
     ks->room_id = room_id;
@@ -169,28 +169,28 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
         init_player(&g->players[internal_id], player_id, "Joueur");
         printf("[KING] Nouveau joueur enregistré: %d (Slot %d)\n", player_id, internal_id);
         
-        u8 buf_ack[1024];
+        u8 buf_ack[64];
         memset(buf_ack, 0, sizeof(buf_ack));
-        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
-        int net_id = htonl(internal_id);
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+        u16 net_id = htons((u16)internal_id);
         memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(int));
-        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
+        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
     }
 
-    if (internal_id != -1) {
+    if (internal_id != -1 && internal_id >= 0 && internal_id < g->num_players) {
         if (real_action == ACTION_CODE_JOIN_GAME) {
-            u8 buf_ack[1024];
+            u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
-            int net_id = htonl(internal_id);
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            u16 net_id = htons((u16)internal_id);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(int));
-            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
         }
         else if (real_action == ACTION_CODE_START_GAME && internal_id == 0 && ks->status == 0) {
             int total_requested = ks->requested_players;
-            if (tlv->length >= sizeof(int)) memcpy(&total_requested, real_payload, sizeof(int));
+            if (payloadLen >= sizeof(int)) memcpy(&total_requested, real_payload, sizeof(int));
             if (total_requested < g->num_players) total_requested = g->num_players;
             if (total_requested > 4) total_requested = 4;
 
@@ -207,7 +207,7 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
             return; 
         }
         else if (real_action == ACTION_CODE_KFF_SET_PLAYER_COUNT && internal_id == 0 && ks->status == 0) {
-            if (tlv->length >= sizeof(int)) {
+            if (payloadLen >= sizeof(int)) {
                 int count;
                 memcpy(&count, real_payload, sizeof(int));
                 if (count >= 2 && count <= 4) {
@@ -217,6 +217,7 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
             }
         }
         else if (real_action == ACTION_CODE_KFF_PLAY_CARD && ks->status == 1 && internal_id == g->current_player) {
+            if (payloadLen < sizeof(ActionPlayPayload_St)) return;
             ActionPlayPayload_St p;
             memcpy(&p, real_payload, sizeof(ActionPlayPayload_St));
             
@@ -317,7 +318,8 @@ void king_on_player_leave(void* state, s32 player_id) {
         printf("[KING] Joueur %d a quitté.\n", player_id);
         if (ks->status == 1) {
             g->players[internal_id].id = -(internal_id + 1);
-            strcpy(g->players[internal_id].name, "Bot (ex-humain)");
+            strncpy(g->players[internal_id].name, "Bot (ex-humain)", sizeof(g->players[internal_id].name) - 1);
+            g->players[internal_id].name[sizeof(g->players[internal_id].name) - 1] = '\0';
         } else {
             for (int i = internal_id; i < g->num_players - 1; i++) g->players[i] = g->players[i+1];
             g->num_players--;
@@ -328,7 +330,9 @@ void king_on_player_leave(void* state, s32 player_id) {
 
 void king_destroy_instance(void *state) {
     KingServerState* ks = (KingServerState*)state;
-    for (int i = 0; i < 4; i++) clear_deck(&ks->state.players[i].hand);
+    for (int i = 0; i < ks->state.num_players; i++) {
+        clear_deck(&ks->state.players[i].hand);
+    }
     clear_deck(&ks->state.draw_pile);
     clear_deck(&ks->state.discard_pile);
     free(ks);

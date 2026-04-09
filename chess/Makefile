@@ -229,7 +229,7 @@ MAIN_SOURCE := $(SRC_DIR)/$(MAIN_NAME).c
 MAIN_OBJECT := $(OBJ_DIR)/$(MAIN_NAME).o
 
 # Test sources/objects/bins (recursive)
-TEST_SOURCES := $(shell find $(TEST_DIR) -name '*.c')
+TEST_SOURCES := $(shell find $(TEST_DIR) -name '*.c' 2>/dev/null)
 TEST_OBJECTS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(OBJ_DIR)/tests/%.o)
 TEST_BINS := $(TEST_SOURCES:$(TEST_DIR)/%.c=$(TEST_BIN_DIR)/%)
 

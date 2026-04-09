@@ -26,7 +26,7 @@ void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const ball
     if (balls->showDelay <= currentCall->timer && currentCall->timer <= (balls->showDelay + balls->graceDelay)) {
         f32 fontSize = 32;
         char buf[16];
-        sprintf(buf, "%.2f", balls->graceDelay * ((balls->showDelay + balls->graceDelay) - currentCall->timer));
+        snprintf(buf, sizeof(buf), "%.2f", balls->graceDelay * ((balls->showDelay + balls->graceDelay) - currentCall->timer));
         Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], buf, fontSize, 0);
         Vector2 textPos = {
             .x = layout->windowCenter.x - textSize.x / 2.0f,

@@ -8,8 +8,6 @@
 
 #include "baseTypes.h"
 #include <stdbool.h>
-#include <stdio.h>
-#include <string.h>
 
 /** @brief Paliers d'Ability Potential. */
 typedef enum {
@@ -60,29 +58,16 @@ static inline AP_Tier_Et CalculateAPTier(s32 rank, s32 total) {
     return AP_COMMON;
 }
 
-static inline void SaveProgress(const PlayerProgress_St* progress) {
-    FILE* f = fopen(PROGRESS_FILE, "wb");
-    if (f) {
-        fwrite(progress, sizeof(PlayerProgress_St), 1, f);
-        fclose(f);
-    }
-}
+/**
+ * @brief Saves the player progress to disk in a portable, endianness-safe format.
+ * @note  Implemented in progress.c (part of libfirstparty).
+ */
+void SaveProgress(const PlayerProgress_St* progress);
 
-static inline PlayerProgress_St LoadProgress(void) {
-    PlayerProgress_St progress;
-    memset(&progress, 0, sizeof(PlayerProgress_St));
-    
-    FILE* f = fopen(PROGRESS_FILE, "rb");
-    if (f) {
-        fread(&progress, sizeof(PlayerProgress_St), 1, f);
-        fclose(f);
-    } else {
-        progress.has_crown = false;
-        for (int g = 0; g < MAX_GAMES_PROGRESS; g++) {
-            progress.current_ap[g] = AP_COMMON;
-        }
-    }
-    return progress;
-}
+/**
+ * @brief Loads the player progress from disk.
+ * @note  Implemented in progress.c (part of libfirstparty).
+ */
+PlayerProgress_St LoadProgress(void);
 
 #endif

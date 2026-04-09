@@ -95,7 +95,7 @@ Error_Et bingo_gameLoop(struct BingoGame_St* const game) {
                     game->currentCall.encodedValue = game->balls.encodedBalls[--game->balls.remainingCount];
                     game->currentCall.column = (game->currentCall.encodedValue / 100) - 1;
                     game->currentCall.number = game->currentCall.encodedValue - (game->currentCall.column + 1) * 100;
-                    sprintf(game->currentCall.displayedText, "%s %u", LETTERS[game->currentCall.column], game->currentCall.number);
+                    snprintf(game->currentCall.displayedText, sizeof(game->currentCall.displayedText), "%s %u", LETTERS[game->currentCall.column], game->currentCall.number);
                 }
             }
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -130,7 +130,7 @@ Error_Et bingo_gameLoop(struct BingoGame_St* const game) {
         case GAME_SCENE_CARD_CHOICE: bingo_drawChoiceCards(&game->layout); break;
         case GAME_SCENE_LAUNCHING: {
             bingo_drawChoiceCards(&game->layout);
-            char text[8]; sprintf(text, "%.0f", game->currentCall.timer / 2.0f);
+            char text[8]; snprintf(text, sizeof(text), "%.0f", game->currentCall.timer / 2.0f);
             Vector2 sz = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
             DrawTextEx(bingo_fonts[FONT48], text, Vector2Subtract((Vector2){game->layout.windowCenter.x, game->layout.windowCenter.y}, Vector2Scale(sz, 0.5f)), 128, 0, BLACK);
         } break;

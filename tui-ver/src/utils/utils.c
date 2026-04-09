@@ -107,16 +107,19 @@ u64 serializeMessage(Message_St* msg, char *buf) {
  */
 void deserializeMessage(const char *buf, Message_St* msg) {
     u64 offset = 0;
-    memcpy(&msg->type, buf + offset, sizeof(MessageType_Et)); 
+    memcpy(&msg->type, buf + offset, sizeof(MessageType_Et));
     offset += sizeof(MessageType_Et);
 
-    strcpy(msg->sender, buf + offset); 
-    offset += strlen(msg->sender) + 1;
+    strncpy(msg->sender, buf + offset, sizeof(msg->sender) - 1);
+    msg->sender[sizeof(msg->sender) - 1] = '\0';
+    offset += strlen(buf + offset) + 1;
 
-    strcpy(msg->target, buf + offset); 
-    offset += strlen(msg->target) + 1;
+    strncpy(msg->target, buf + offset, sizeof(msg->target) - 1);
+    msg->target[sizeof(msg->target) - 1] = '\0';
+    offset += strlen(buf + offset) + 1;
 
-    strcpy(msg->text, buf + offset);
+    strncpy(msg->text, buf + offset, sizeof(msg->text) - 1);
+    msg->text[sizeof(msg->text) - 1] = '\0';
 }
 
 

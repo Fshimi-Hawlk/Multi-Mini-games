@@ -31,7 +31,7 @@ static inline Leaderboard_St LoadLeaderboard(u8 game_id) {
     memset(&lb, 0, sizeof(lb));
     
     char path[64];
-    sprintf(path, "leaderboard_%d.dat", game_id);
+    snprintf(path, sizeof(path), "leaderboard_%d.dat", game_id);
     
     FILE* f = fopen(path, "rb");
     if (f) {
@@ -41,7 +41,7 @@ static inline Leaderboard_St LoadLeaderboard(u8 game_id) {
         // Data de test si fichier absent
         lb.count = 20;
         for (int i=0; i<20; i++) {
-            sprintf(lb.entries[i].name, "Player %d", i+1);
+            snprintf(lb.entries[i].name, sizeof(lb.entries[i].name), "Player %d", i+1);
             lb.entries[i].score = (20-i) * 1000;
         }
     }
@@ -78,7 +78,7 @@ static inline s32 SubmitScore(u8 game_id, const char* name, s32 score) {
     }
 
     char path[64];
-    sprintf(path, "leaderboard_%d.dat", game_id);
+    snprintf(path, sizeof(path), "leaderboard_%d.dat", game_id);
     FILE* f = fopen(path, "wb");
     if (f) {
         fwrite(&lb, sizeof(Leaderboard_St), 1, f);

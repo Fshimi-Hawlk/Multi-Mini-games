@@ -36,6 +36,7 @@
 #define CLIENT_TIMEOUT_US       (60 * MACROSECONDS_IN_A_SECOND)         /**< Délai de déconnexion automatique (60 secondes). */
 #define SERVER_DISPLAY_NAME     "Multi-Mini-Games Server"
 #define MAX_PAYLOAD_SIZE        (2048 - sizeof(RUDPHeader_St))          /**< Taille maximale de la charge utile. */
+#define ACTION_CODE_ACK_ONLY    0x00                                    /**< RUDP-level acknowledgment only. */
 
 // 
 // Internal client representation
@@ -76,6 +77,7 @@ typedef struct {
 static int          masterSocket = -1;              ///< Main server listening socket
 static UDPClient_St clients[MAX_CLIENTS] = {0};     ///< Table of connected clients
 static Room_St      rooms[MAX_ROOMS] = {0};         ///< Table of active game rooms
+static bool         g_broadcastHappened = false;    ///< Tracks if a response was sent during current packet processing
 
 // 
 // Helper functions
@@ -135,6 +137,21 @@ static int findOrCreateClient(struct sockaddr_in* addr) {
 }
 
 /**
+    @brief Sends a minimal RUDP acknowledgment to a client.
+    @param clientId Client index
+*/
+static void serverSendAck(int clientId) {
+    if (clientId < 0 || clientId >= MAX_CLIENTS || !clients[clientId].active) return;
+
+    RUDPHeader_St header;
+    rudpGenerateHeader(&clients[clientId].rudpState, ACTION_CODE_ACK_ONLY, &header);
+    header.sender_id = htons(999); // Server ID
+
+    sendto(masterSocket, &header, sizeof(RUDPHeader_St), 0,
+           (struct sockaddr*)&clients[clientId].address, sizeof(struct sockaddr_in));
+}
+
+/**
     @brief Broadcasts or unicasts a message to clients.
     @param roomId   >= 0 : Broadcast in the specific room (excludes excludeId).
                     UNICAST (-1) : Unicast to client excludeId.
@@ -144,6 +161,7 @@ static int findOrCreateClient(struct sockaddr_in* addr) {
     @param len      Payload length
 */
 static void serverBroadcast(int roomId, int excludeId, u8 action, const void* payload, u16 len) {
+    g_broadcastHappened = true;
     u8 buffer[2048];
     if (len > MAX_PAYLOAD_SIZE) len = MAX_PAYLOAD_SIZE;
 
@@ -245,10 +263,11 @@ static void checkTimeouts(void) {
             if (elapsed > CLIENT_TIMEOUT_US) {
                 log_info("Client %d timed out", i);
                 int rId = clients[i].roomId;
-                clients[i].active = false;
 
-                // Notify others in the same room
+                // Notify others in the same room BEFORE marking as inactive
                 serverBroadcast(rId, i, ACTION_CODE_QUIT_GAME, NULL, 0);
+                
+                clients[i].active = false;
 
                 if (rooms[rId].active && rooms[rId].module && rooms[rId].module->on_player_leave) {
                     rooms[rId].module->on_player_leave(rooms[rId].state, i);
@@ -258,15 +277,6 @@ static void checkTimeouts(void) {
     }
     cleanupEmptyRooms();
 }
-
-#pragma pack(push, 1)
-typedef struct {
-    u16 id;
-    u16 playerCount;
-    char name[32];
-    char creator[32];
-} RoomInfo_St;
-#pragma pack(pop)
 
 /**
     @brief Sends list of active rooms for a specific game to a client.
@@ -329,10 +339,10 @@ int main(void) {
     rooms[0].id = 0;
     rooms[0].gameId = MINI_GAME_LOBBY;
     rooms[0].module = getGameServerInterface(MINI_GAME_LOBBY);
-    if (rooms[0].module->create_instance) {
+    if (rooms[0].module && rooms[0].module->create_instance) {
         rooms[0].state = rooms[0].module->create_instance();
     } else {
-        log_error("Lobby module does not implement create_instance");
+        log_error("Lobby module does not implement create_instance or not found");
         exit(1);
     }
     strncpy(rooms[0].name, "Lobby Central", 31);
@@ -403,38 +413,69 @@ int main(void) {
                         continue;
                     }
 
-                    int clientId = findOrCreateClient(&c_addr);
+                    // Strict Authentication Gate:
+                    // Only allow findOrCreateClient for unknown IPs if the action is JOIN_GAME.
+                    int clientId = -1;
+                    for (int i = 0; i < MAX_CLIENTS; ++i) {
+                        if (clients[i].active &&
+                            clients[i].address.sin_addr.s_addr == c_addr.sin_addr.s_addr &&
+                            clients[i].address.sin_port == c_addr.sin_port) {
+                            clientId = i;
+                            break;
+                        }
+                    }
+
+                    if (clientId == -1) {
+                        if (h->action != ACTION_CODE_JOIN_GAME) {
+                            // Silently drop unauthenticated packets from unknown IPs
+                            continue;
+                        }
+                        clientId = findOrCreateClient(&c_addr);
+                    }
+
                     if (clientId == -1) {
                         log_warn("[NET] Rejected connection from %s:%d (Server Full)", inet_ntoa(c_addr.sin_addr), ntohs(c_addr.sin_port));
                         continue;
                     }
 
-                    if (!rudpProcessIncoming(&clients[clientId].rudpState, h)) {
-                        // log_debug("[NET] Packet from client %d dropped by RUDP (duplicate or out of sync)", clientId);
+                    g_broadcastHappened = false;
+                    bool isNew = rudpProcessIncoming(&clients[clientId].rudpState, h);
+                    if (!isNew) {
+                        serverSendAck(clientId);
                         continue;
                     }
 
                     gettimeofday(&clients[clientId].lastSeen, NULL);
+
+                    if (h->action == ACTION_CODE_ACK_ONLY) {
+                        continue;
+                    }
+
                     int currentRoomId = clients[clientId].roomId;
+
+                    if (currentRoomId < 0 || currentRoomId >= MAX_ROOMS) {
+                        log_error("[NET] Client %d has invalid roomId %d", clientId, currentRoomId);
+                        clients[clientId].roomId = 0;
+                        currentRoomId = 0;
+                    }
 
                     // Handle Join Game (Server handshake)
                     if (h->action == ACTION_CODE_JOIN_GAME) {
                         if (received > (ssize_t)sizeof(RUDPHeader_St)) {
-                            strncpy(clients[clientId].name, (char*)buf + sizeof(RUDPHeader_St), 31);
+                            snprintf(clients[clientId].name, 31, "%s", (char*)buf + sizeof(RUDPHeader_St));
                             log_info("[JOIN] Client %d ('%s') connected", clientId, clients[clientId].name);
                         } else {
-                            strncpy(clients[clientId].name, "unnamed", 31);
+                            snprintf(clients[clientId].name, 31, "unnamed");
                             log_info("[JOIN] Client %d (unnamed) connected", clientId);
                         }
 
                         u16 assigned_id = htons((u16)clientId);
                         serverBroadcast(UNICAST, clientId, ACTION_CODE_JOIN_ACK, &assigned_id, sizeof(u16));
-                        
-                        if (rooms[currentRoomId].active && rooms[currentRoomId].module->on_action) {
+
+                        if (rooms[currentRoomId].active && rooms[currentRoomId].module && rooms[currentRoomId].module->on_action) {
                             rooms[currentRoomId].module->on_action(rooms[currentRoomId].state, currentRoomId, clientId, h->action, buf + sizeof(RUDPHeader_St), (u16)(received - sizeof(RUDPHeader_St)), serverBroadcast);
                         }
-                    }
-                    // Handle Room List Query
+                    }                    // Handle Room List Query
                     else if (h->action == ACTION_CODE_LOBBY_ROOM_QUERY) {
                         if (received >= (ssize_t)(sizeof(RUDPHeader_St) + 1)) {
                             MiniGame_Et gameId = buf[sizeof(RUDPHeader_St)];
@@ -481,12 +522,25 @@ int main(void) {
                                 serverBroadcast(currentRoomId, clientId, ACTION_CODE_QUIT_GAME, NULL, 0);
 
                                 // Notify old room module
-                                if (rooms[currentRoomId].module->on_player_leave) {
+                                if (rooms[currentRoomId].active && rooms[currentRoomId].module && rooms[currentRoomId].module->on_player_leave) {
                                     rooms[currentRoomId].module->on_player_leave(rooms[currentRoomId].state, clientId);
                                 }
 
                                 clients[clientId].roomId = newRoomId;
                                 log_info("Client %d moved to room %d", clientId, newRoomId);
+
+                                // Synthesize JOIN_GAME for the new room module
+                                if (rooms[newRoomId].active && rooms[newRoomId].module && rooms[newRoomId].module->on_action) {
+                                    rooms[newRoomId].module->on_action(
+                                        rooms[newRoomId].state,
+                                        newRoomId,
+                                        clientId,
+                                        ACTION_CODE_JOIN_GAME,
+                                        clients[clientId].name,
+                                        (u16)strlen(clients[clientId].name) + 1,
+                                        serverBroadcast
+                                    );
+                                }
 
                                 // Confirm switch to client
                                 u8 switchPayload[2] = { (u8)rooms[newRoomId].gameId, (u8)newRoomId };
@@ -522,6 +576,10 @@ int main(void) {
                                 serverBroadcast
                             );
                         }
+                    }
+
+                    if (!g_broadcastHappened) {
+                        serverSendAck(clientId);
                     }
                 }
             }

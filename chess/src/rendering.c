@@ -97,7 +97,7 @@ void drawBorder(void) {
 
     for (int i = 0; i < BOARD_SIZE; i++) {
         char line[2];
-        sprintf(line, "%d", 8 - i);
+        snprintf(line, sizeof(line), "%d", 8 - i);
 
         int fontSize = 20;
         Vector2 textSize = MeasureTextEx(font, line, fontSize, 1);
@@ -117,7 +117,7 @@ void drawBorder(void) {
 
     for (int i = 0; i < BOARD_SIZE; i++) {
         char col[2];
-        sprintf(col, "%c", 'a' + i);
+        snprintf(col, sizeof(col), "%c", 'a' + i);
 
         Vector2 textSize = MeasureTextEx(font, col, fontSize, 1);
 

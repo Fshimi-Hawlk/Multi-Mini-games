@@ -56,6 +56,8 @@ static GameClientInterface_St* miniGameInterfaces[__miniGameCount] = {
 
 static bool server_spawned = false;
 
+
+
 void kill_server(void) {
     if (server_spawned) {
         log_info("Arrêt du serveur local...");
@@ -144,97 +146,79 @@ void receiveNetworkData(void) {
     struct sockaddr_in fromAddr;
     socklen_t fromLen = sizeof(fromAddr);
 
-    ssize_t bytesRead = recvfrom(networkSocket, buffer, sizeof(buffer), 0, (struct sockaddr*)&fromAddr, &fromLen);
-    
-    if (bytesRead < 0) {
-        if (errno != EAGAIN && errno != EWOULDBLOCK) {
-            log_error("[NET] recvfrom error: %s", strerror(errno));
-        }
-        return;
-    }
-
-    log_debug("[NET] UDP RAW RECV: %zd bytes from %s:%d", bytesRead, inet_ntoa(fromAddr.sin_addr), ntohs(fromAddr.sin_port));
-
-    if (bytesRead >= (ssize_t)sizeof(RUDPHeader_St)) {
-        RUDPHeader_St header;
-        memcpy(&header, buffer, sizeof(RUDPHeader_St));
+    while (1) {
+        ssize_t bytesRead = recvfrom(networkSocket, buffer, sizeof(buffer), 0, (struct sockaddr*)&fromAddr, &fromLen);
         
-        log_debug("[NET] Action: 0x%02X | Sender: %d", header.action, ntohs(header.sender_id));
-
-        // Handle discovery outside of RUDP state machine (unreliable, action specific)
-        if (header.action == ACTION_CODE_DISCOVERY_INFO && ntohs(header.sender_id) == 999) {
-            char* info = (char*)buffer + sizeof(RUDPHeader_St);
-            log_info("[DISCOVERY] Found Server at %s: %s", inet_ntoa(fromAddr.sin_addr), info);
-            extern void addDiscoveredRoom(const char* ip, const char* name);
-            addDiscoveredRoom(inet_ntoa(fromAddr.sin_addr), info);
-            return;
+        if (bytesRead < 0) {
+            if (errno != EAGAIN && errno != EWOULDBLOCK) {
+                log_error("[NET] recvfrom error: %s", strerror(errno));
+            }
+            break;
         }
 
-        if (rudpProcessIncoming(&serverConnection, &header)) {
-            u8* payload = buffer + sizeof(RUDPHeader_St);
-            u16 payloadLen = (u16)(bytesRead - sizeof(RUDPHeader_St));
-            u16 senderId = ntohs(header.sender_id);
-
-            // Handle Room List Query Response
-            if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
-                extern void handleRoomList(const void* data, int count);
-                #pragma pack(push, 1)
-                typedef struct { u16 id; u16 playerCount; char name[32]; char creator[32]; } RoomInfo_St;
-                #pragma pack(pop)
-                handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
+        if (bytesRead >= (ssize_t)sizeof(RUDPHeader_St)) {
+            RUDPHeader_St header;
+            memcpy(&header, buffer, sizeof(RUDPHeader_St));
+            
+            // Handle discovery outside of RUDP state machine
+            if (header.action == ACTION_CODE_DISCOVERY_INFO && ntohs(header.sender_id) == 999) {
+                char* info = (char*)buffer + sizeof(RUDPHeader_St);
+                log_info("[DISCOVERY] Found Server at %s: %s", inet_ntoa(fromAddr.sin_addr), info);
+                extern void addDiscoveredRoom(const char* ip, const char* name);
+                addDiscoveredRoom(inet_ntoa(fromAddr.sin_addr), info);
+                continue;
             }
-            // Dispatch standard actions to the current active module
-            else if (currentMiniGame && currentMiniGame->on_data) {
-                if (header.action != ACTION_CODE_GAME_DATA) {
-                    currentMiniGame->on_data(senderId, header.action, payload, payloadLen);
+
+            if (rudpProcessIncoming(&serverConnection, &header)) {
+                u8* payload = buffer + sizeof(RUDPHeader_St);
+                u16 payloadLen = (u16)(bytesRead - sizeof(RUDPHeader_St));
+                u16 senderId = ntohs(header.sender_id);
+
+                if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
+                    extern void handleRoomList(const void* data, int count);
+                    handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
                 }
-            }
-
-            if (header.action == ACTION_CODE_GAME_DATA) {
-                if (payloadLen >= sizeof(GameTLVHeader_St)) {
-                    GameTLVHeader_St tlv;
-                    memcpy(&tlv, payload, sizeof(tlv));
-                    u16 tlv_len = ntohs(tlv.length);
-                    
-                    if (tlv_len <= payloadLen - sizeof(GameTLVHeader_St)) {
-                        if (tlv.game_id < __miniGameCount && miniGameInterfaces[tlv.game_id]) {
-                            miniGameInterfaces[tlv.game_id]->on_data(senderId, tlv.action, payload + sizeof(tlv), tlv_len);
+                else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
+                    if (payloadLen >= 2) {
+                        u8 nextGame = payload[0];
+                        u8 roomId = payload[1];
+                        log_info("[NET] Server confirmed switch to Game %d, Room %d", nextGame, roomId);
+                        
+                        if (nextGame < __miniGameCount) {
+                            if (currentMiniGame && currentMiniGame->destroy) {
+                                currentMiniGame->destroy();
+                            }
+                            currentMiniGameID = (MiniGame_Et)nextGame;
+                            currentMiniGame = miniGameInterfaces[currentMiniGameID];
+                            if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
+                            
+                            closeRoomSelector();
+                            lobby_game.currentState = (nextGame == MINI_GAME_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
+                            if (nextGame == MINI_GAME_LOBBY) initWaitingRoom();
                         }
                     }
                 }
-            } else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
-                if (payloadLen >= 1) {
-                    u8 nextGame = payload[0];
-                    u8 roomId = (payloadLen >= 2) ? payload[1] : 0;
-                    log_info("[NET] Server confirmed switch to Game %d, Room %d", nextGame, roomId);
-                    
-                    if (nextGame < __miniGameCount) {
-                        if (currentMiniGame && currentMiniGame->destroy) {
-                            currentMiniGame->destroy();
-                        }
-                        currentMiniGameID = (MiniGame_Et)nextGame;
-                        currentMiniGame = miniGameInterfaces[currentMiniGameID];
-                        if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
+                else if (header.action == ACTION_CODE_GAME_DATA) {
+                    if (payloadLen >= sizeof(GameTLVHeader_St)) {
+                        GameTLVHeader_St tlv;
+                        memcpy(&tlv, payload, sizeof(tlv));
+                        u16 tlv_data_len = ntohs(tlv.length);
                         
-                        // Clear persistent UI overlays
-                        lobby_game.currentState = (nextGame == MINI_GAME_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
-                        closeRoomSelector();
-                        
-                        if (nextGame == MINI_GAME_LOBBY) {
-                            lobby_game.currentState = GAME_STATE_GAMEPLAY;
-                        } else {
-                            lobby_game.currentState = GAME_STATE_INGAME;
-                            showWaitingRoom(nextGame, roomId, true);
+                        if (tlv_data_len <= payloadLen - sizeof(GameTLVHeader_St)) {
+                            if (tlv.game_id < __miniGameCount && miniGameInterfaces[tlv.game_id]) {
+                                miniGameInterfaces[tlv.game_id]->on_data(senderId, tlv.action, payload + sizeof(tlv), tlv_data_len);
+                            }
                         }
                     }
+                } 
+                else if (currentMiniGame && currentMiniGame->on_data) {
+                    if (header.action < firstAvailableActionCode || header.action == ACTION_CODE_JOIN_ACK) {
+                        currentMiniGame->on_data(senderId, header.action, payload, payloadLen);
+                    }
                 }
-            } else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
-                log_info("[NET] Received room list from server (%d bytes)", payloadLen);
-                handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
             }
         }
     }
-    fflush(stdout);
 }
 
 void spawn_server(void) {
@@ -265,6 +249,7 @@ void switch_minigame(u8 game_id) {
         if (game_id == MINI_GAME_LOBBY) {
             lobby_game.currentState = GAME_STATE_GAMEPLAY;
             lobby_game.editorMode = false;
+            initWaitingRoom(); // Réinitialise l'overlay pour éviter qu'il reste visible au retour lobby
         } else {
             lobby_game.currentState = GAME_STATE_INGAME;
             if (game_id == MINI_GAME_EDITOR) lobby_game.editorMode = true;
@@ -298,7 +283,9 @@ int main(void) {
 
         UpdateMenu();
         bool selectorActive = updateRoomSelector();
-        updateWaitingRoom();
+        // L'overlay "salle d'attente" du lobby n'est actif qu'en lobby :
+        // chaque module de jeu gère sa propre phase pré-partie.
+        if (currentMiniGameID == MINI_GAME_LOBBY) updateWaitingRoom();
 
         BeginDrawing();
         ClearBackground(SKYBLUE);
@@ -321,7 +308,6 @@ int main(void) {
             drawConnectionScreen();
         } 
         else if (lobby_game.currentState == GAME_STATE_ROOM_LIST) {
-            updateRoomSelector();
             drawRoomSelector();
         }
         else {
@@ -371,7 +357,7 @@ int main(void) {
             }
             
             drawRoomSelector();
-            drawWaitingRoom();
+            if (currentMiniGameID == MINI_GAME_LOBBY) drawWaitingRoom();
         }
 
         DrawFPS(10, 10);

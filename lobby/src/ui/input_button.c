@@ -28,14 +28,17 @@ int confirmation_button = STATE_DISABLED;
 IaC_button InitIaCElement(float x, float y, float width, float height, char *text, Color color) {
     IaC_button element = {
         .rect = { x, y, width, height },
-        .text = malloc(strlen(text) + 1),
+        .text = NULL,
         .baseColor = color,
         .state = STATE_NORMAL,
         .isIPValid = false,
     };
-    
-    if (element.text != NULL) {
-        strcpy(element.text, text);
+
+    if (text != NULL) {
+        element.text = malloc(strlen(text) + 1);
+        if (element.text != NULL) {
+            strcpy(element.text, text);
+        }
     }
 
     return element;

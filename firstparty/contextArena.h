@@ -41,15 +41,15 @@
 // Global context arenas
 // 
 
-static Arena globalArena;
+extern Arena globalArena;
 /**
  * @brief Temporary memory arena for short-term allocations.
  */
-static Arena tempArena;
+extern Arena tempArena;
 /**
  * @brief Current pointer to the active arena used by context functions.
  */
-static Arena* contextArena;
+extern Arena* contextArena;
 
 // 
 // Core allocation API
@@ -121,11 +121,11 @@ char *context_vsprintf(const char *format, va_list args);
 #ifdef CONTEXT_ARENA_IMPLEMENTATION
 
 /** @brief Global arena instance. */
-static Arena globalArena = {0};
+Arena globalArena = {0};
 /** @brief Temporary arena instance. */
-static Arena tempArena = {0};
+Arena tempArena = {0};
 /** @brief Active context arena pointer. Defaults to globalArena. */
-static Arena* contextArena = &globalArena;
+Arena* contextArena = &globalArena;
 
 /**
  * @brief Implementation of context_alloc.

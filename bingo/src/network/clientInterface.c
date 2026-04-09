@@ -137,11 +137,11 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
 
     switch (action) {
         case ACTION_CODE_JOIN_ACK: {
-            if (len < sizeof(s32)) break;
+            if (len < sizeof(u16)) break;
 
-            s32 net_id;
-            memcpy(&net_id, data, sizeof(s32));
-            localGame.clientID = ntohl(net_id);
+            u16 net_id;
+            memcpy(&net_id, data, sizeof(u16));
+            localGame.clientID = (s32)ntohs(net_id);
             log_info("Bingo client received internal ID: %d", localGame.clientID);
         } break;
 
@@ -262,7 +262,7 @@ void bingo_draw(void) {
         case GAME_SCENE_LAUNCHING:
             bingo_drawChoiceCards(&localGame.layout);
             char text[8] = {0};
-            sprintf(text, "%.0f", localGame.currentCall.timer / 2.0f);
+            snprintf(text, sizeof(text), "%.0f", localGame.currentCall.timer / 2.0f);
             Vector2 textSize = MeasureTextEx(bingo_fonts[FONT48], text, 128, 0);
             DrawTextEx(bingo_fonts[FONT48], text,
                         Vector2Subtract(localGame.layout.windowCenter,

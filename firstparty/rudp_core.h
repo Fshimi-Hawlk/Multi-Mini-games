@@ -26,7 +26,7 @@
 /** @} */
 
 /**
-    @brief Fixed-size reliable UDP header (exactly 9 bytes on wire)
+    @brief Fixed-size reliable UDP header (exactly 11 bytes on wire: 2+2+4+2+1)
 */
 #if defined(_MSC_VER)
 #pragma pack(push, 1)

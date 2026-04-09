@@ -92,19 +92,19 @@ ClientInfo_St* findClientByUsername(const char *username) {
 void handleCommand(ClientInfo_St* client, Message_St* msg) {
     if (strcmp(msg->text, "/list") == 0) {
         Message_St resp = { .type = MSG_COMMAND_RESPONSE, .sender = "Server" };
-        char list[1024] = "Connected users:\r\n";
-        for (s32 i = 0; i < g_connectedCount; ++i) {
-            strcat(list, allClients[i].nickname);
-            strcat(list, "\r\n");
+        size_t pos = (size_t)snprintf(resp.text, sizeof(resp.text), "Connected users:\r\n");
+        for (s32 i = 0; i < g_connectedCount && pos < sizeof(resp.text) - 1; ++i) {
+            int written = snprintf(resp.text + pos, sizeof(resp.text) - pos, "%s\r\n",
+                                   allClients[i].nickname);
+            if (written < 0 || (size_t)written >= sizeof(resp.text) - pos) break;
+            pos += (size_t)written;
         }
-        
-        strcpy(resp.text, list);
 
         unicastMessage(&resp, &client->socketFd);
     } else if (strcmp(msg->text, "/quit") == 0) {
         Message_St resp = { .type = MSG_COMMAND_RESPONSE, .sender = "Server" };
-        
-        strcpy(resp.text, "Good Bye ...- Socket Closed\r\n");
+
+        snprintf(resp.text, sizeof(resp.text), "Good Bye ...- Socket Closed\r\n");
         unicastMessage(&resp, &client->socketFd);
 
         log_info("Client fd = %d disconnected", client->socketFd);
@@ -112,20 +112,19 @@ void handleCommand(ClientInfo_St* client, Message_St* msg) {
 
         client->socketFd = -1;
         client->valid    = false;
-        
+
         g_connectedCount--;
         broadcastUserCount();
     } else if (strcmp(msg->text, "/help") == 0) {
         Message_St resp = { .type = MSG_COMMAND_RESPONSE, .sender = "Server" };
-        
-        const char buf[1024] = \
-            "Availble Commands:\r\n"
-            "    - \"/help\": get the list of available commands\r\n"
-            "    - \"/list\": get the list of tje connected users\r\n"
-            "    - \"/whisper [username]\": toggle private message toward `username`\r\n"
-            "    - \"/quit\": trigger a disconnection of the user\r\n";
 
-        strcpy(resp.text, buf);
+        snprintf(resp.text, sizeof(resp.text),
+            "Available Commands:\r\n"
+            "    - \"/help\": get the list of available commands\r\n"
+            "    - \"/list\": get the list of the connected users\r\n"
+            "    - \"/whisper [username]\": toggle private message toward `username`\r\n"
+            "    - \"/quit\": trigger a disconnection of the user\r\n");
+
         unicastMessage(&resp, &client->socketFd);
     }
 }
@@ -200,14 +199,15 @@ s32 startServerOnInterface(const char *bindIp) {
                         .valid                  = true,
                     };
 
-                    strcpy(allClients[g_connectedCount].nickname, "Anonymous"); // will be updated on first message
+                    strncpy(allClients[g_connectedCount].nickname, "Anonymous",
+                            sizeof(allClients[g_connectedCount].nickname) - 1); // will be updated on first message
                     g_connectedCount++;
 
                     if (newFd > maxFd) maxFd = newFd;
                     setLogOpts(.hideLineId = true);
                     log_info("New client connected, fd %d (total=%d)", newFd, g_connectedCount);
 
-                    sendHistoryToClient(&allClients[g_connectedCount]);
+                    sendHistoryToClient(&allClients[g_connectedCount - 1]);
                     broadcastUserCount();
                 }
             }
@@ -270,7 +270,8 @@ s32 startServerOnInterface(const char *bindIp) {
 
                 // Update nickname on first message if needed
                 if (allClients[i].nickname[0] == '\0' || strcmp(allClients[i].nickname, "Anonymous") == 0) {
-                    strcpy(allClients[i].nickname, msg.sender);
+                    strncpy(allClients[i].nickname, msg.sender, sizeof(allClients[i].nickname) - 1);
+                    allClients[i].nickname[sizeof(allClients[i].nickname) - 1] = '\0';
                 }
 
                 if (msg.type == MSG_COMMAND) {
@@ -282,7 +283,7 @@ s32 startServerOnInterface(const char *bindIp) {
                         unicastMessage(&msg, &fd);  // echo back to sender
                     } else {
                         Message_St resp = { .type = MSG_COMMAND_RESPONSE, .sender = "Server" };
-                        strcpy(resp.text, "User not found");
+                        snprintf(resp.text, sizeof(resp.text), "User not found");
                         unicastMessage(&resp, &fd);
                     }
                 } else { // MSG_BROADCAST

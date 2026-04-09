@@ -61,17 +61,19 @@ void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     if (data == NULL) return;
 
     if (action == ACTION_CODE_JOIN_ACK) {
-        if (len >= sizeof(s32)) {
-            s32 net_id;
-            memcpy(&net_id, data, sizeof(s32));
-            my_id_internal = ntohl(net_id);
+        if (len >= sizeof(u16)) {
+            u16 net_id;
+            memcpy(&net_id, data, sizeof(u16));
+            my_id_internal = (s32)ntohs(net_id);
             my_color = (my_id_internal == 0) ? 0 : 1; // 0: White, 1: Black
             printf("[CHESS] Assigned internal ID: %d, color: %s\n", (int)my_id_internal, my_color == 0 ? "White" : "Black");
         }
     }
     else if (action == ACTION_CODE_START_GAME) {
         if (len >= sizeof(s32)) {
-            memcpy(&selected_bot_level, data, sizeof(s32));
+            s32 net_level;
+            memcpy(&net_level, data, sizeof(s32));
+            selected_bot_level = (s32)ntohl((uint32_t)net_level);
         }
         game_status = 1;
         game_started = true;
@@ -134,12 +136,9 @@ void chess_client_update(float dt) {
                 u8* ptr = buf;
                 memcpy(ptr, &h, sizeof(h)); ptr += sizeof(h);
                 memcpy(ptr, &tlv, sizeof(tlv)); ptr += sizeof(tlv);
-                memcpy(ptr, &selected_bot_level, sizeof(s32)); ptr += sizeof(s32);
+                s32 net_level = (s32)htonl((uint32_t)selected_bot_level);
+                memcpy(ptr, &net_level, sizeof(s32)); ptr += sizeof(s32);
                 send(networkSocket, buf, (size_t)(ptr - buf), 0);
-                
-                // Local backup: start game immediately for host
-                game_status = 1;
-                game_started = true;
             }
         }
     } else {

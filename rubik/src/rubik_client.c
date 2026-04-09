@@ -39,7 +39,8 @@ extern void initCube(Cube *cube);
 extern void mouvement(Cube *cube);
 extern void display3D(Cube *cube, Camera3D camera);
 extern bool isCubeSolve(Cube* cube);
-extern void scrambleMoves(char *moves[20]); // We'll use our own logic for network scramble
+extern void scrambleMoves(char *moves[20]);
+extern void applyScrambleInstant(Cube *cube, char *moves[20]);
 
 static Camera3D camera = {0};
 static float angleX = 1.0f;
@@ -70,27 +71,27 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     if (data == NULL && action != ACTION_CODE_RUBIK_SCRAMBLE) return;
 
     if (action == ACTION_CODE_JOIN_ACK) {
-        if (len >= sizeof(int)) {
-            int net_id;
-            memcpy(&net_id, data, sizeof(int));
-            my_id_internal = ntohl(net_id);
+        if (len >= sizeof(u16)) {
+            u16 net_id;
+            memcpy(&net_id, data, sizeof(u16));
+            my_id_internal = (int)ntohs(net_id);
         }
     }
     else if (action == ACTION_CODE_RUBIK_SCRAMBLE) {
-        // Scramble the cube using the received seed or sequence
-        // Simplified: seed-based scramble
         int seed;
         memcpy(&seed, data, sizeof(int));
-        srand(seed);
-        // Apply 20 random moves
-        // (Logic from scrambleMoves but deterministic with seed)
+        srand(ntohl(seed));
+        initCube(&my_cube);
+        char *moves[20];
+        scrambleMoves(moves);
+        applyScrambleInstant(&my_cube, moves);
         game_started = true;
         eliminated = false;
     }
     else if (action == ACTION_CODE_RUBIK_ELIMINATE) {
         int target_id;
         memcpy(&target_id, data, sizeof(int));
-        if (target_id == my_id_internal) {
+        if ((int)ntohl(target_id) == my_id_internal) {
             eliminated = true;
         }
     }
@@ -148,7 +149,7 @@ void rubik_client_update(float dt) {
         }
     } else {
         // Wait for start
-        if (IsKeyPressed(KEY_ENTER) && my_id_internal == 0) {
+        if (IsKeyPressed(KEY_ENTER) && my_id_internal != -1) {
             GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
@@ -186,7 +187,7 @@ void rubik_client_draw(void) {
     
     if (!game_started) {
         DrawText("RUBIK BATTLE ROYALE", 10, 10, 30, GOLD);
-        if (my_id_internal == 0) DrawText("Appuyez sur ENTRÉE pour lancer", 10, 50, 20, GREEN);
+        if (my_id_internal != -1) DrawText("Appuyez sur ENTRÉE pour lancer", 10, 50, 20, GREEN);
         else DrawText("En attente de l'hôte...", 10, 50, 20, LIGHTGRAY);
     } else {
         DrawText(TextFormat("PROGRÈS: %.1f%%", solve_progress), 10, 10, 20, SKYBLUE);

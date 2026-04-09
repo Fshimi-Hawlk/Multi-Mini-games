@@ -62,7 +62,7 @@ SUBDIRS       := $(MODULES)
 # Library outputs from modules (needed for final link)
 # Order: firstparty and games first, then lobby, then reseau
 ORDERED_MODULES := firstparty bingo chess king-for-four rubik lobby reseau
-LIBS_REL        := $(foreach mod,$(ORDERED_MODULES),$(LIB_DIR)/lib$(subst -, ,$(mod)).a)
+LIBS_REL        := $(foreach mod,$(ORDERED_MODULES),$(LIB_DIR)/lib$(subst -,,$(mod)).a)
 
 # Modes: release, debug, strict-debug, clang-debug, valgrind-debug
 MODE ?= release
@@ -78,7 +78,7 @@ $(BIN_DIR) $(LIB_DIR) $(OBJ_DIR) $(API_DIR):
 # Module build rule
 module-%: | $(LIB_DIR) $(API_DIR)
 	@echo "Building static library -> $* (lib$*.a)"
-	$(SILENT_PREFIX)$(MAKE) -C $* static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=$(subst -,,$*) EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"
+	$(SILENT_PREFIX)$(MAKE) -j1 -C $* static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=$(subst -,,$*) EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"
 	$(SILENT_PREFIX)if cmp -s "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a" 2>/dev/null; then \
 		echo "  lib$(subst -,,$*).a unchanged"; \
 	else \
@@ -143,12 +143,12 @@ run-client: bin
 	fi
 
 run-server: server
-	$(SILENT_PREFIX)if [ -f "./reseau/build/bin/server$(EXE_EXT)" ]; then \
+	$(SILENT_PREFIX)if [ -f "$(BIN_DIR)/server$(EXE_EXT)" ]; then \
 		echo "===> Starting server..."; \
-		./reseau/build/bin/server$(EXE_EXT); \
+		$(BIN_DIR)/server$(EXE_EXT); \
 	else \
-		echo "No executable found: ./reseau/build/bin/server$(EXE_EXT)"; \
-		echo "Run 'make server' first."; \
+		echo "No executable found: $(BIN_DIR)/server$(EXE_EXT)"; \
+		echo "Run 'make rebuild' first."; \
 	fi
 
 run-multi: all

@@ -31,8 +31,7 @@ void lobby_init(void) {
 
     memset(&lobby_game, 0, sizeof(lobby_game));
 
-    systemSettings.video.height = DEFAULT_VIDEO_SETTING_HEIGHT;
-    systemSettings.video.width = DEFAULT_VIDEO_SETTING_WIDTH;
+    // Video settings persist across lobby re-init.
     applySystemSettings();
 
     lobby_game.player = (Player_St) {

@@ -32,7 +32,7 @@ endif
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
-static-lib: rebuild-obj $(STATIC_LIB)
+static-lib: $(STATIC_LIB)
 
 clean-docs:
 	@rm -rf docs/html docs/index.html 2>/dev/null || true

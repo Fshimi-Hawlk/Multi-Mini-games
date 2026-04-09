@@ -8,15 +8,7 @@
 
 #include "baseTypes.h"
 #include "raylib.h"
-
-#pragma pack(push, 1)
-typedef struct {
-    u16 id;
-    u16 playerCount;
-    char name[32];
-    char creator[32];
-} RoomInfo_St;
-#pragma pack(pop)
+#include "networkInterface.h"
 
 /**
  * @brief Initializes the room selector.

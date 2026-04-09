@@ -772,6 +772,23 @@ void scrambleMoves(char *moves[20]) {
     }
 }
 
+void applyScrambleInstant(Cube *cube, char *moves[20]) {
+    for (int m = 0; m < 20; m++) {
+        for (int i = 0; i < MOVES_COUNT; i++) {
+            if (moves[m][0] == moveCharToFunction[i].letterMove) {
+                if (moves[m][1] == '2') {
+                    moveCharToFunction[i].rotate(cube, 1);
+                    moveCharToFunction[i].rotate(cube, 1);
+                } else {
+                    int clockwise = (moves[m][1] == '\0' || moves[m][1] == ' ') ? 1 : 0;
+                    moveCharToFunction[i].rotate(cube, clockwise);
+                }
+                break;
+            }
+        }
+    }
+}
+
 void scrambleMovesToString(char (*movesString)[60], char *moves[20]) {
     size_t pos = 0;
 

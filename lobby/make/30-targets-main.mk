@@ -6,7 +6,9 @@ rebuild-obj: clean $(LIB_OBJECTS)
 
 rebuild-tests: clean tests
 
-static-lib: rebuild-obj $(STATIC_LIB)
+static-lib: $(LIB_OBJECTS)
+	@mkdir -p $(dir $(STATIC_LIB))
+	$(SILENT_PREFIX)ar rcs $(STATIC_LIB) $(LIB_OBJECTS)
 
 run-main:
 	@if [ -f $(BIN) ]; then \

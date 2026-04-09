@@ -50,13 +50,13 @@ void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
         rs->players[player_id].eliminated = false;
         
         int internal_id = player_id; // Simple mapping
-        int net_id = htonl(internal_id);
+        u16 net_id = htons((u16)internal_id);
         u8 buf_ack[64];
         memset(buf_ack, 0, sizeof(buf_ack));
-        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
+        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
         memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(int));
-        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
+        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
     }
     else if (real_action == ACTION_CODE_START_GAME) {
         rs->status = 1;

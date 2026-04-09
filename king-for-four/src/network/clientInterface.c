@@ -101,10 +101,10 @@ void king_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     }
     if (data == NULL) return;
     if (action == ACTION_CODE_JOIN_ACK) {
-        if (len >= (u16) sizeof(int)) {
-            int net_id;
-            memcpy(&net_id, data, sizeof(int));
-            my_internal_id = ntohl(net_id);
+        if (len >= sizeof(u16)) {
+            u16 net_id;
+            memcpy(&net_id, data, sizeof(u16));
+            my_internal_id = (int)ntohs(net_id);
             log_info("[KING] Mon ID interne: %d", my_internal_id);
         }
     } else if (action == ACTION_CODE_SYNC_GAME) {
@@ -119,6 +119,7 @@ void king_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
             }
             local_state.current_player = sync.current_player;
             local_state.active_color = sync.active_color;
+            local_state.num_players = sync.num_players;
             game_status = sync.status;
 
             extern void updateWaitingRoomInfo(int players, int max, bool host);
@@ -137,22 +138,24 @@ void king_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
             else local_state.discard_pile.cards[local_state.discard_pile.size - 1] = sync.top_card;
             
             int total_cards = 0;
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < sync.num_players; i++) {
                 total_cards += sync.hand_sizes[i];
                 local_state.players[i].hand.size = sync.hand_sizes[i];
             }
             if (total_cards > 10 && game_status == 1) {
-                for (int i = 0; i < 4; i++) {
+                for (int i = 0; i < sync.num_players; i++) {
                     if (sync.hand_sizes[i] == 0) winner_id = i;
                 }
             }
         }
     } else if (action == ACTION_CODE_KFF_SYNC_HAND) {
         int count = len / sizeof(Card);
-        clear_deck(&local_state.players[0].hand);
-        for (int i = 0; i < count; i++) {
-            Card c; memcpy(&c, (u8*)data + (i * sizeof(Card)), sizeof(Card));
-            push_card(&local_state.players[0].hand, c);
+        if (my_internal_id >= 0 && my_internal_id < 4) {
+            clear_deck(&local_state.players[my_internal_id].hand);
+            for (int i = 0; i < count; i++) {
+                Card c; memcpy(&c, (u8*)data + (i * sizeof(Card)), sizeof(Card));
+                push_card(&local_state.players[my_internal_id].hand, c);
+            }
         }
     }
 }
@@ -190,16 +193,18 @@ void king_client_update(float dt) {
             }
         }
         else if (local_state.current_player == my_internal_id && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            int clickedHandIndex = GetHoveredCardIndex(&local_state.players[0], assets);
-            if (clickedHandIndex != -1) {
-                if (local_state.players[0].hand.cards[clickedHandIndex].color == CARD_BLACK) {
-                    is_choosing_color = true; pending_card_index = clickedHandIndex;
-                } else {
-                    ActionPlayPayload_St payload = { .card_index = clickedHandIndex, .chosen_color = -1 };
-                    send_to_server(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
+            if (my_internal_id >= 0 && my_internal_id < 4) {
+                int clickedHandIndex = GetHoveredCardIndex(&local_state.players[my_internal_id], assets);
+                if (clickedHandIndex != -1) {
+                    if (local_state.players[my_internal_id].hand.cards[clickedHandIndex].color == CARD_BLACK) {
+                        is_choosing_color = true; pending_card_index = clickedHandIndex;
+                    } else {
+                        ActionPlayPayload_St payload = { .card_index = clickedHandIndex, .chosen_color = -1 };
+                        send_to_server(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
+                    }
+                } else if (CheckCollisionPointRec(GetMousePosition(), GetDeckRect(assets))) {
+                    send_to_server(ACTION_CODE_KFF_DRAW_CARD, NULL, 0);
                 }
-            } else if (CheckCollisionPointRec(GetMousePosition(), GetDeckRect(assets))) {
-                send_to_server(ACTION_CODE_KFF_DRAW_CARD, NULL, 0);
             }
         }
     }
@@ -227,18 +232,21 @@ void king_client_draw(void) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
         if (my_internal_id != -1) {
             DrawText(TextFormat("Vous êtes le JOUEUR %d", my_internal_id), 100, 180, 30, WHITE);
+            DrawText(TextFormat("Joueurs connectés : %d", local_state.num_players), 100, 215, 22, LIGHTGRAY);
             if (my_internal_id == 0) {
-                DrawText(TextFormat("HÔTE: Flèches HAUT/BAS pour changer : %d JOUEURS", selected_players), 100, 240, 25, GREEN);
-                DrawText("Appuyez sur ENTRÉE pour lancer.", 100, 280, 25, GREEN);
+                DrawText(TextFormat("HÔTE: Flèches HAUT/BAS : %d JOUEURS (dont bots)", selected_players), 100, 250, 25, GREEN);
+                DrawText("Appuyez sur ENTRÉE pour lancer.", 100, 285, 25, GREEN);
             } else {
-                DrawText(TextFormat("En attente de l'hôte... (%d JOUEURS)", selected_players), 100, 240, 30, LIGHTGRAY);
+                DrawText(TextFormat("En attente de l'hôte... (%d JOUEURS)", selected_players), 100, 250, 30, LIGHTGRAY);
             }
         } else DrawText("Connexion au serveur...", 100, 180, 30, GRAY);
         return;
     }
     RenderTable(&local_state, assets, card_pop_timer > 0 ? (card_pop_timer * 0.2f) : 0);
     RenderOpponents(&local_state, assets, my_internal_id);
-    RenderHand(&local_state.players[0], assets);
+    if (my_internal_id >= 0 && my_internal_id < 4) {
+        RenderHand(&local_state.players[my_internal_id], assets);
+    }
     if (last_move_timer > 0 && last_player_who_moved != -1) {
         const char* pName = (last_player_who_moved == my_internal_id) ? "VOUS" : TextFormat("JOUEUR %d", last_player_who_moved);
         const char* actionName = (last_action_type == 0) ? "a JOUÉ une carte" : "a PIOCHÉ une carte";

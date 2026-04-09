@@ -60,11 +60,11 @@ void chess_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
         if (internal_id != -1) {
             u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(int)) };
-            int net_internal_id = htonl(internal_id);
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            u16 net_internal_id = htons((u16)internal_id);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &net_internal_id, sizeof(int));
-            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(int));
+            memcpy(buf_ack + sizeof(tlv_ack), &net_internal_id, sizeof(u16));
+            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
         }
     }
     else if (real_action == ACTION_CODE_START_GAME) {
@@ -87,8 +87,8 @@ void chess_on_tick(void* state) {
 
 void chess_on_player_leave(void* state, s32 player_id) {
     ChessServerState* cs = (ChessServerState*)state;
-    if (cs->players[0] == player_id) cs->players[0] = -1;
-    if (cs->players[1] == player_id) cs->players[1] = -1;
+    if (cs->players[0] == player_id) { cs->players[0] = -1; cs->num_players--; }
+    if (cs->players[1] == player_id) { cs->players[1] = -1; cs->num_players--; }
 }
 
 void chess_destroy_instance(void *state) {

@@ -234,7 +234,11 @@ void gameLoop(Board_t board, char *predifinedMoves[], int nbMoves) {
         handleEvents(board);
 
         if (saveMove) {
-            strcpy(movesPlayed[nbMoves++], moveMade);
+            if (nbMoves < NB_MAX_MOVE) {
+                strncpy(movesPlayed[nbMoves], moveMade, sizeof(movesPlayed[0]) - 1);
+                movesPlayed[nbMoves][sizeof(movesPlayed[0]) - 1] = '\0';
+                nbMoves++;
+            }
             saveMove = false;
         }
 

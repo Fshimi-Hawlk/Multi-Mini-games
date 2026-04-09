@@ -70,9 +70,9 @@ void distribute_cards(GameState* g) {
         
         // Setup initial game state based on first card
         if (first.color == CARD_BLACK) {
-            g->active_color = -1; // No color chosen yet
+            g->active_color = -1; // No color chosen yet, host must pick
         } else {
-            g->active_color = -1;
+            g->active_color = (int)first.color;
         }
 
         // Apply first card effect logic

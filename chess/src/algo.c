@@ -295,7 +295,7 @@ bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int
     board[targetLine][targetColumn]->pos.y = targetLine;
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (!adversaryPlayer->pieces[i] && adversaryPlayer->pieces[i]->isTaken) 
+        if (!adversaryPlayer->pieces[i] || adversaryPlayer->pieces[i]->isTaken) 
             continue;
 
         if ((res = canBePlaced(board, adversaryPlayer->pieces[i], targetKing->pos.x, targetKing->pos.y))) {
@@ -380,7 +380,7 @@ bool isSquareThreatened(Board_t board, int playerA, int xCase, int yCase) {
     Player_st* playerAdverse = !playerA ? whitePlayer : blackPlayer;
 
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
-        if (!playerAdverse->pieces[i]->isTaken && playerAdverse->pieces[i]->name != PIECE_NAME_KING && canBePlaced(board, playerAdverse->pieces[i], xCase, yCase)) {
+        if (!playerAdverse->pieces[i]->isTaken && canBePlaced(board, playerAdverse->pieces[i], xCase, yCase)) {
             return true;
         }
     }

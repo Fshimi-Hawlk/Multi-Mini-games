@@ -8,6 +8,7 @@
 #ifndef KING_PROTOCOL_H
 #define KING_PROTOCOL_H
 
+#include "networkInterface.h"
 #include "core/card.h"
 #include "baseTypes.h"
 
@@ -33,22 +34,22 @@ typedef struct {
 #pragma pack(pop)
 
 /** @brief Action code for playing a card. */
-#define ACTION_PLAY_CARD 0x10
+#define ACTION_PLAY_CARD (firstAvailableActionCode + 0x01)
 /** @brief Action code for drawing a card. */
-#define ACTION_DRAW_CARD 0x11
+#define ACTION_DRAW_CARD (firstAvailableActionCode + 0x02)
 /** @brief Action code for synchronizing the game state. */
-#define ACTION_SYNC_GAME 0x12
+#define ACTION_SYNC_GAME (firstAvailableActionCode + 0x03)
 /** @brief Action code for joining a game. */
-#define ACTION_JOIN_GAME 0x13
+#define ACTION_JOIN_GAME (firstAvailableActionCode + 0x04)
 /** @brief Action code for starting a game. */
-#define ACTION_START_GAME 0x14
+#define ACTION_START_GAME (firstAvailableActionCode + 0x05)
 /** @brief Action code for synchronizing a player's hand. */
-#define ACTION_SYNC_HAND 0x15
+#define ACTION_SYNC_HAND (firstAvailableActionCode + 0x06)
 /** @brief Action code for acknowledging a join request. */
-#define ACTION_JOIN_ACK 0x16
+#define ACTION_JOIN_ACK (firstAvailableActionCode + 0x07)
 /** @brief Action code for quitting the game. */
-#define ACTION_QUIT_GAME 0x17
+#define ACTION_QUIT_GAME (firstAvailableActionCode + 0x08)
 /** @brief Action code for game over. */
-#define ACTION_GAME_OVER 0x18
+#define ACTION_GAME_OVER (firstAvailableActionCode + 0x09)
 
 #endif // KING_PROTOCOL_H

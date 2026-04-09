@@ -8,7 +8,7 @@
 
 #include "chat.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h.h"
+#include "utils/userTypes.h"
 #include "utils/utils.h"
 
 
@@ -125,7 +125,6 @@ int startChatClient(const char *serverIp) {
                         printf(NL "=== User: %s to %s ===" NL, g_currentUser.nickname, gargetUser[0] ? gargetUser : "everyone");
                         printf("> %s", inputBuffer);
                         fflush(stdout);
-                        fflush(stdout);
                     }
                 }
             }
@@ -138,9 +137,9 @@ int startChatClient(const char *serverIp) {
                 if (inputPos > 0) {
                     Message_St msg = {0};
                     
-                    strcpy(msg.sender, g_currentUser.nickname);
-                    strcpy(msg.target, gargetUser);
-                    strcpy(msg.text, inputBuffer);
+                    strncpy(msg.sender, g_currentUser.nickname, sizeof(msg.sender) - 1);
+                    strncpy(msg.target, gargetUser, sizeof(msg.target) - 1);
+                    strncpy(msg.text, inputBuffer, sizeof(msg.text) - 1);
 
                     msg.type = gargetUser[0] ? MSG_WHISPER : MSG_BROADCAST;
                     msg.type = (msg.text[0] == '/') ? MSG_COMMAND : msg.type;
@@ -148,7 +147,8 @@ int startChatClient(const char *serverIp) {
                     if (strncmp(msg.text, "/whisper ", 9) == 0) {
                         // Parse /whisper user
                         char *target = msg.text + 9;
-                        strcpy(gargetUser, target);
+                        strncpy(gargetUser, target, MAX_USERNAME_LENGTH - 1);
+                        gargetUser[MAX_USERNAME_LENGTH - 1] = '\0';
                         inputPos = 0;
                         inputBuffer[0] = '\0';
 

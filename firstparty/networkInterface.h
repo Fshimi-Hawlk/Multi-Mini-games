@@ -26,22 +26,22 @@ extern RUDPConnection_St serverConnection;
 #define UNICAST -1
 
 enum BaseActionCodes_e {
-    ACTION_CODE_JOIN_ACK     = 0x01,    ///< Acknowledging a join request.
-    ACTION_CODE_JOIN_GAME    = 0x02,    ///< Joining a game.
-    ACTION_CODE_START_GAME   = 0x03,    ///< Starting a game.
-    ACTION_CODE_SYNC_GAME    = 0x04,    ///< Synchronizing the game state.
-    ACTION_CODE_QUIT_GAME    = 0x05,    ///< quitting the game.
-    ACTION_CODE_GAME_DATA    = 0x06,    ///< Multi-Mini-Games specific game data
-    ACTION_CODE_LOBBY_MOVE   = 0x07,    ///< Player movement in the lobby.
-    ACTION_CODE_LOBBY_ROOM_QUERY,       ///< Querying room information.
-    ACTION_CODE_LOBBY_ROOM_INFO,        ///< Receiving room information.
-    ACTION_CODE_LOBBY_CHAT,             ///< Lobby chat message.
-    ACTION_CODE_LOBBY_SWITCH_GAME,      ///< Switching to a mini-game.
+    ACTION_CODE_JOIN_ACK          = 0x01,    ///< Acknowledging a join request.
+    ACTION_CODE_JOIN_GAME         = 0x02,    ///< Joining a game.
+    ACTION_CODE_START_GAME        = 0x03,    ///< Starting a game.
+    ACTION_CODE_SYNC_GAME         = 0x04,    ///< Synchronizing the game state.
+    ACTION_CODE_QUIT_GAME         = 0x05,    ///< quitting the game.
+    ACTION_CODE_GAME_DATA         = 0x06,    ///< Multi-Mini-Games specific game data
+    ACTION_CODE_LOBBY_MOVE        = 0x07,    ///< Player movement in the lobby.
+    ACTION_CODE_LOBBY_ROOM_QUERY  = 0x08,    ///< Querying room information.
+    ACTION_CODE_LOBBY_ROOM_INFO   = 0x09,    ///< Receiving room information.
+    ACTION_CODE_LOBBY_CHAT        = 0x0A,    ///< Lobby chat message.
+    ACTION_CODE_LOBBY_SWITCH_GAME = 0x0B,    ///< Switching to a mini-game.
     
-    ACTION_CODE_DISCOVERY_QUERY = 0x10, ///< Global server discovery query (broadcast).
-    ACTION_CODE_DISCOVERY_INFO  = 0x11, ///< Global server discovery response.
+    ACTION_CODE_DISCOVERY_QUERY    = 0x10,    ///< Global server discovery query (broadcast).
+    ACTION_CODE_DISCOVERY_INFO     = 0x11,    ///< Global server discovery response.
 
-    firstAvailableActionCode    = 0x20  ///< First action code usable by sub-games
+    firstAvailableActionCode       = 0x20     ///< First action code usable by sub-games
 };
 
 /**
@@ -55,10 +55,21 @@ enum BaseActionCodes_e {
     @brief Type-Length-Value header used on the network for mini-game messages
 */
 typedef struct {
-    u8  game_id;        ///< 0 = lobby, otherwise mini-game identifier
-    u8  action;         ///< game-specific command / event code
-    u16 length;         ///< size of the payload that follows (not including this header)
+    u8   game_id;        ///< 0 = lobby, otherwise mini-game identifier
+    u8   action;         ///< game-specific command / event code
+    u16  length;         ///< size of the payload that follows (not including this header)
+    bool is_reliable;    ///< true if the message must be delivered reliably
 } GameTLVHeader_St;
+
+/**
+    @brief Shared structure for room information exchange.
+*/
+typedef struct {
+    u16 id;             ///< Room network index
+    u16 playerCount;    ///< Current number of players
+    char name[32];      ///< Display name
+    char creator[32];   ///< Creator pseudo
+} RoomInfo_St;
 
 #pragma pack(pop)
 
