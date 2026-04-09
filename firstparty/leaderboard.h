@@ -39,10 +39,12 @@ static inline Leaderboard_St LoadLeaderboard(u8 game_id) {
         fclose(f);
     } else {
         // Data de test si fichier absent
-        lb.count = 20;
-        for (int i=0; i<20; i++) {
+        int test_count = 10;
+        if (test_count > MAX_LEADERBOARD_ENTRIES) test_count = MAX_LEADERBOARD_ENTRIES;
+        lb.count = test_count;
+        for (int i=0; i<test_count; i++) {
             snprintf(lb.entries[i].name, sizeof(lb.entries[i].name), "Player %d", i+1);
-            lb.entries[i].score = (20-i) * 1000;
+            lb.entries[i].score = (test_count-i) * 1000;
         }
     }
     return lb;

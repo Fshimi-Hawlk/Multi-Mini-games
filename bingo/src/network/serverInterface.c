@@ -141,7 +141,7 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
         .numPlayers      = srv->numPlayers,
         .seed            = srv->seed
     };
-    snprintf(payload.resultMessage, 63, "%s", game->progress.resultMessage);
+    snprintf(payload.resultMessage, sizeof(payload.resultMessage), "%s", game->progress.resultMessage);
 
     GameTLVHeader_St tlv = {
         .game_id = MINI_GAME_BINGO,

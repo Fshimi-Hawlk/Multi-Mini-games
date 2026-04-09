@@ -472,8 +472,15 @@ int main(void) {
                         bool duplicate = false;
                         for (int i = 0; i < MAX_CLIENTS; i++) {
                             if (clients[i].active && i != clientId && strcmp(clients[i].name, proposedName) == 0) {
-                                duplicate = true;
-                                break;
+                                // If same IP, we allow it by taking over the old slot or kicking the old one
+                                if (clients[i].address.sin_addr.s_addr == clients[clientId].address.sin_addr.s_addr) {
+                                    log_info("[JOIN] Client %d re-using existing name '%s' from same IP. Replacing old session %d.", clientId, proposedName, i);
+                                    clients[i].active = false;
+                                    // We continue and let this clientId take the name
+                                } else {
+                                    duplicate = true;
+                                    break;
+                                }
                             }
                         }
 

@@ -30,6 +30,10 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <errno.h>
+#ifndef _WIN32
+#include <signal.h>
+#include <sys/types.h>
+#endif
 
 s32 networkSocket = -1;
 RUDPConnection_St serverConnection; 
@@ -56,7 +60,9 @@ static GameClientInterface_St* miniGameInterfaces[__miniGameCount] = {
 
 static bool server_spawned = false;
 
-
+#ifndef _WIN32
+static pid_t server_pid = -1;
+#endif
 
 void kill_server(void) {
     if (server_spawned) {
@@ -64,7 +70,12 @@ void kill_server(void) {
 #ifdef _WIN32
         system("taskkill /F /IM server.exe > nul 2>&1");
 #else
-        system("killall server 2>/dev/null");
+        if (server_pid > 0) {
+            kill(server_pid, SIGTERM);
+            server_pid = -1;
+        } else {
+            system("killall server 2>/dev/null");
+        }
 #endif
         server_spawned = false;
     }
@@ -233,10 +244,20 @@ void spawn_server(void) {
         log_info("Lancement du serveur local...");
 #ifdef _WIN32
         system("start /B server.exe");
-#else
-        system("./build/bin/server &");
-#endif
         server_spawned = true;
+#else
+        server_pid = fork();
+        if (server_pid == 0) {
+            // Child process
+            execl("./build/bin/server", "server", (char*)NULL);
+            perror("execl failed");
+            exit(1);
+        } else if (server_pid > 0) {
+            server_spawned = true;
+        } else {
+            log_error("Fork failed to spawn server");
+        }
+#endif
     }
 }
 

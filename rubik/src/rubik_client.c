@@ -33,6 +33,9 @@ static int my_id_internal = -1;
 static bool eliminated = false;
 static float solve_progress = 0.0f;
 static bool game_started = false;
+static double solve_start_time = 0;
+static double current_solve_time = 0;
+static bool is_solved = false;
 
 // Extern functions from main.c (need to be exposed or moved)
 extern void initCube(Cube *cube);
@@ -53,6 +56,9 @@ void rubik_client_init(void) {
     eliminated = false;
     solve_progress = 0.0f;
     game_started = false;
+    solve_start_time = 0;
+    current_solve_time = 0;
+    is_solved = false;
     
     camera.position = (Vector3){6.0f, 6.0f, 6.0f};
     camera.target = (Vector3){0.0f, 0.0f, 0.0f};
@@ -87,6 +93,8 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
         applyScrambleInstant(&my_cube, moves);
         game_started = true;
         eliminated = false;
+        is_solved = false;
+        solve_start_time = GetTime();
         printf("[RUBIK] Rubik's scramble started with seed %u\n", ntohl(seed));
     }
     else if (action == ACTION_CODE_RUBIK_ELIMINATE) {
@@ -99,12 +107,26 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
 }
 
 static float calculate_progress(Cube* c) {
-    // int correct = 0;
-    // Count stickers matching their center
-    // ColorElmt centers[6] = {c->back[1][1], c->left[1][1], c->front[1][1], c->right[1][1], c->up[1][1], c->down[1][1]};
-    // ... simplified count ...
     if (isCubeSolve(c)) return 100.0f;
-    return 0.0f; // TODO: Real progress calculation
+    
+    int correct = 0;
+    // Count matches for each face
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (c->front[i][j] == c->front[1][1]) correct++;
+            if (c->back[i][j] == c->back[1][1]) correct++;
+            if (c->left[i][j] == c->left[1][1]) correct++;
+            if (c->right[i][j] == c->right[1][1]) correct++;
+            if (c->up[i][j] == c->up[1][1]) correct++;
+            if (c->down[i][j] == c->down[1][1]) correct++;
+        }
+    }
+    
+    // 54 stickers total (6 faces * 9). Centers always match (6 centers).
+    // Progress = (correct - 6) / (54 - 6) * 100
+    float progress = ((float)correct - 6.0f) / 48.0f * 100.0f;
+    if (progress < 0) progress = 0;
+    return progress;
 }
 
 void rubik_client_update(float dt) {
@@ -137,11 +159,22 @@ void rubik_client_update(float dt) {
     UpdateCameraOrbit(&camera, (Vector3){0,0,0}, radius, &angleX, &angleY);
     
     if (game_started) {
-        mouvement(&my_cube);
+        if (!is_solved) {
+            mouvement(&my_cube);
+            current_solve_time = GetTime() - solve_start_time;
+            
+            if (isCubeSolve(&my_cube)) {
+                is_solved = true;
+                solve_progress = 100.0f;
+            } else {
+                solve_progress = calculate_progress(&my_cube);
+            }
+        }
         
-        float current_progress = calculate_progress(&my_cube);
-        if (current_progress != solve_progress) {
-            solve_progress = current_progress;
+        // Always sync progress periodically
+        static float sync_timer = 0;
+        sync_timer += dt;
+        if (sync_timer > 0.5f) {
             GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
@@ -152,16 +185,20 @@ void rubik_client_update(float dt) {
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
             memcpy(buf + sizeof(h) + sizeof(tlv), &solve_progress, sizeof(float));
             send(networkSocket, buf, sizeof(h) + sizeof(tlv) + sizeof(float), 0);
+            sync_timer = 0;
         }
     } else {
         // Wait for start
-        if (IsKeyPressed(KEY_ENTER)) {
+        if (IsKeyPressed(KEY_M)) {
             if (networkSocket < 0) {
                 // Solo mode: start directly, scramble cube locally
+                initCube(&my_cube);
                 char* moves[20];
                 scrambleMoves(moves);
                 applyScrambleInstant(&my_cube, moves);
                 game_started = true;
+                is_solved = false;
+                solve_start_time = GetTime();
             } else {
                 GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
                 RUDPHeader_St h;
@@ -190,10 +227,16 @@ void rubik_client_draw(void) {
     
     if (!game_started) {
         DrawText("RUBIK BATTLE ROYALE", 10, 10, 30, GOLD);
-        if (my_id_internal != -1) DrawText("Appuyez sur ENTRÉE pour lancer", 10, 50, 20, GREEN);
+        if (my_id_internal != -1) DrawText("Appuyez sur M pour lancer", 10, 50, 20, GREEN);
         else DrawText("En attente de l'hôte...", 10, 50, 20, LIGHTGRAY);
     } else {
         DrawText(TextFormat("PROGRÈS: %.1f%%", solve_progress), 10, 10, 20, SKYBLUE);
+        int min = (int)current_solve_time / 60;
+        int sec = (int)current_solve_time % 60;
+        DrawText(TextFormat("TEMPS: %02d:%02d", min, sec), 10, 40, 20, WHITE);
+        if (is_solved) {
+            DrawText("RÉSOLU !", GetScreenWidth()/2 - 80, 100, 40, LIME);
+        }
     }
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }

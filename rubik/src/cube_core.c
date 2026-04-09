@@ -64,9 +64,6 @@ typedef struct {
 } KeyFunction;
 
 const KeyFunction moveKeyToFunction[] = {
-    {KEY_X, rotateXcube},
-    {KEY_Y, rotateYcube},
-    {KEY_W, rotateZcube}, // Z pour azerty
     {KEY_R, rotateRcube},
     {KEY_L, rotateLcube},
     {KEY_U, rotateUcube},
@@ -915,12 +912,14 @@ int readBestTimer(void) {
         return -1;
     }
 
-    int bestTimer;
+    int bestTimer = 0;
     int tempTimer;
-    fscanf(fd, "%d", &bestTimer);
+    if (fscanf(fd, "%d", &bestTimer) != 1) {
+        bestTimer = -1; // Or some default
+    }
 
     while (fscanf(fd, "%d", &tempTimer) == 1) {
-        if (tempTimer < bestTimer) bestTimer = tempTimer;
+        if (bestTimer == -1 || tempTimer < bestTimer) bestTimer = tempTimer;
     }
 
     fclose(fd);
