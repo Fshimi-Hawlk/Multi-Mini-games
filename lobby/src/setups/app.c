@@ -1,7 +1,7 @@
 #include "setups/app.h"
 #include "setups/audio.h"
 
-#include "utils/common.h"
+#include "utils/globals.h"
 
 void lobby_initApp(void) {
     srand(time(NULL));
@@ -12,6 +12,7 @@ void lobby_initApp(void) {
     SetTargetFPS(60);
 
     lobby_initAudio();
+    paramsMenu_init(&paramsMenu);
 }
 
 void lobby_freeApp(void) {

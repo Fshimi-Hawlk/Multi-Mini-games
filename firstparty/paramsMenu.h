@@ -15,9 +15,8 @@
 #ifndef PARAMS_MENU_H
 #define PARAMS_MENU_H
 
-#include <stdbool.h>
 #include "baseTypes.h"
-
+#include "raylib.h"
 
 // ----------------------------------------------------------------------------
 // Resolution options
@@ -110,7 +109,6 @@ void paramsMenu_free(ParamsMenu_St* menu);
 
 #ifdef PARAMS_MENU_IMPLEMENTATION
 
-#include "raylib.h"
 #include "logger.h"
 #include "systemSettings.h"
 
@@ -326,8 +324,8 @@ void paramsMenu_init(ParamsMenu_St* menu) {
     menu->draggingVolume= false;
     menu->showFps       = false;
 
-    const char* path = "assets/parametres.png";
-    if (!FileExists(path)) path = "../assets/parametres.png";
+    const char* path = "assets/images/parametres.png";
+    if (!FileExists(path)) path = "../assets/images/parametres.png";
 
     if (FileExists(path)) {
         menu->gearTexture = LoadTexture(path);
