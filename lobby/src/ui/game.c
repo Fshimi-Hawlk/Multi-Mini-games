@@ -170,7 +170,7 @@ void lobby_drawGameZones(const LobbyGame_St* const game) {
         /* "[ E ]" en dessous si proche */
         if (playerNear) {
             const char* prompt = "[ E ]";
-            f32Vector2 promptSize = MeasureTextEx(lobby_fonts[FONT12], prompt, 16, 0);
+            f32Vector2 promptSize = MeasureTextEx(lobby_fonts[FONT16], prompt, 16, 0);
             DrawTextEx(lobby_fonts[FONT32], prompt, (Vector2) {
                     gameZone.hitbox.x + (gameZone.hitbox.width - promptSize.x) / 2.0f,
                     gameZone.hitbox.y + gameZone.hitbox.height + 4

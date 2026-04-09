@@ -10,6 +10,7 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     };
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {
+        if (playerTexturePaths[i] == NULL) continue;
         playerTextures[i] = LoadTexture(playerTexturePaths[i]);
         if (!IsTextureValid(playerTextures[i])) {
             error = ERROR_TEXTURE_LOAD;
