@@ -40,6 +40,7 @@ struct KingForFourGame_St {
     GameState state;        /**< Uno business data (deck, hands, etc.) */
     GameAssets assets;      /**< Raylib textures */
     AppState currentState;  /**< Menu / Game management */
+    bool showInfoWindow;    /**< Toggle for the powers list */
 };
 
 /**
@@ -81,6 +82,7 @@ Error_Et kingforfour_initGame__full(KingForFourGame_St** game, KingForFourConfig
     // Le Lobby a déjà appelé InitWindow(), on peut donc charger les assets en sécurité
     g->assets = LoadAssets();
     g->currentState = STATE_MENU;
+    g->showInfoWindow = false;
 
     log_debug("King-for-Four : Instance allouée et assets chargés.");
     return OK;
@@ -124,14 +126,22 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
         case STATE_GAME:
             // --- GESTION DU JEU ---
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                int clickedHandIndex = GetHoveredCardIndex(&game->state.players[0], game->assets);
-                if (clickedHandIndex != -1) {
-                    try_play_card(&game->state, 0, clickedHandIndex);
-                }
-                else {
-                    Rectangle deckRect = GetDeckRect(game->assets);
-                    if (CheckCollisionPointRec(GetMousePosition(), deckRect)) {
-                        player_draw_card(&game->state, 0);
+                Vector2 m = GetMousePosition();
+                Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+                if (CheckCollisionPointRec(m, infoIconRect)) {
+                    game->showInfoWindow = !game->showInfoWindow;
+                } else if (game->showInfoWindow) {
+                    game->showInfoWindow = false;
+                } else {
+                    int clickedHandIndex = GetHoveredCardIndex(&game->state.players[0], game->assets);
+                    if (clickedHandIndex != -1) {
+                        try_play_card(&game->state, 0, clickedHandIndex);
+                    }
+                    else {
+                        Rectangle deckRect = GetDeckRect(game->assets);
+                        if (CheckCollisionPointRec(GetMousePosition(), deckRect)) {
+                            player_draw_card(&game->state, 0);
+                        }
                     }
                 }
             }
@@ -170,6 +180,29 @@ Error_Et kingforfour_gameLoop(KingForFourGame_St* const game) {
                 const char* cColors[] = {"ROUGE", "JAUNE", "VERT", "BLEU", "NOIR"};
                 const char* activeColor = (game->state.active_color >= 0 && game->state.active_color <= 4) ? cColors[game->state.active_color] : "---";
                 DrawText(TextFormat("Couleur Active: %s", activeColor), 10, 60, 20, WHITE);
+
+                // Info Icon
+                Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+                bool hoverInfo = CheckCollisionPointRec(GetMousePosition(), infoIconRect);
+                DrawCircleV((Vector2){infoIconRect.x + 15, infoIconRect.y + 15}, 15, hoverInfo ? SKYBLUE : BLUE);
+                DrawText("i", (int)infoIconRect.x + 11, (int)infoIconRect.y + 5, 25, WHITE);
+
+                if (game->showInfoWindow) {
+                    int sw = GetScreenWidth(); int sh = GetScreenHeight();
+                    Rectangle win = { sw/2.0f - 250, sh/2.0f - 200, 500, 400 };
+                    DrawRectangleRec(win, Fade(DARKGRAY, 0.95f));
+                    DrawRectangleLinesEx(win, 2, GOLD);
+                    DrawText("POUVOIRS DES CARTES", (int)win.x + 120, (int)win.y + 20, 25, GOLD);
+                    
+                    int ty = (int)win.y + 70;
+                    DrawText("- SKIP (Symbole barré) : Passe le tour du suivant", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+                    DrawText("- REVERSE (Flèches) : Inverse le sens de jeu", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+                    DrawText("- +2 : Le suivant pioche 2 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+                    DrawText("- JOKER (Couleur changeante) : Change la couleur", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+                    DrawText("- +4 : Le suivant pioche 4 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 60;
+                    
+                    DrawText("Cliquez n'importe où pour fermer", (int)win.x + 100, (int)win.y + 360, 18, GRAY);
+                }
                 break;
         }
     }

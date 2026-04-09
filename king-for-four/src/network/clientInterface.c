@@ -62,6 +62,7 @@ static Card last_seen_top_card = {CARD_BLACK, ZERO};
 static float card_pop_timer = 0;
 static bool is_choosing_color = false;
 static int pending_card_index = -1;
+static bool show_info_window = false;
 
 static void send_to_server(u8 action, void* data, u16 len) {
     GameTLVHeader_St tlv = { .game_id = MINI_GAME_KFF, .action = action, .length = htons(len) };
@@ -88,6 +89,7 @@ void king_client_init(void) {
     join_retry_timer = 0;
     is_choosing_color = false;
     pending_card_index = -1;
+    show_info_window = false;
 }
 
 static int selected_players = 4;
@@ -172,6 +174,16 @@ void king_client_update(float dt) {
     if (turn_overlay_timer > 0) turn_overlay_timer -= dt;
     if (last_move_timer > 0) last_move_timer -= dt;
     if (card_pop_timer > 0) card_pop_timer -= dt;
+
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Vector2 m = GetMousePosition();
+        Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+        if (CheckCollisionPointRec(m, infoIconRect)) {
+            show_info_window = !show_info_window;
+        } else if (show_info_window) {
+            show_info_window = false; // Close when clicking elsewhere
+        }
+    }
 
     if (game_status == 1) {
         if (is_choosing_color) {
@@ -280,6 +292,30 @@ void king_client_draw(void) {
         DrawText(txt, GetScreenWidth()/2 - MeasureText(txt, 80)/2, GetScreenHeight()/2 - 100, 80, winner_id == my_internal_id ? GREEN : RED);
         DrawText("Appuyez sur ESC pour quitter", GetScreenWidth()/2 - 150, GetScreenHeight()/2 + 50, 20, GRAY);
     }
+
+    // Info Icon
+    Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+    bool hoverInfo = CheckCollisionPointRec(GetMousePosition(), infoIconRect);
+    DrawCircleV((Vector2){infoIconRect.x + 15, infoIconRect.y + 15}, 15, hoverInfo ? SKYBLUE : BLUE);
+    DrawText("i", (int)infoIconRect.x + 11, (int)infoIconRect.y + 5, 25, WHITE);
+
+    if (show_info_window) {
+        int sw = GetScreenWidth(); int sh = GetScreenHeight();
+        Rectangle win = { sw/2.0f - 250, sh/2.0f - 200, 500, 400 };
+        DrawRectangleRec(win, Fade(DARKGRAY, 0.95f));
+        DrawRectangleLinesEx(win, 2, GOLD);
+        DrawText("POUVOIRS DES CARTES", (int)win.x + 120, (int)win.y + 20, 25, GOLD);
+        
+        int ty = (int)win.y + 70;
+        DrawText("- SKIP (Symbole barré) : Passe le tour du suivant", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- REVERSE (Flèches) : Inverse le sens de jeu", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- +2 : Le suivant pioche 2 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- JOKER (Couleur changeante) : Change la couleur", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- +4 : Le suivant pioche 4 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 60;
+        
+        DrawText("Cliquez n'importe où pour fermer", (int)win.x + 100, (int)win.y + 360, 18, GRAY);
+    }
+
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 

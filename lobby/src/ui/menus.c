@@ -199,7 +199,7 @@ void DrawPauseMenu(void) {
 }
 
 void UpdateSettingsMenu(void) {
-    if (IsKeyPressed(KEY_M)) systemSettings.audio.musicVolume = (systemSettings.audio.musicVolume + 0.1f);
+    if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_SEMICOLON)) systemSettings.audio.musicVolume = (systemSettings.audio.musicVolume + 0.1f);
     if (systemSettings.audio.musicVolume > 1.0f) systemSettings.audio.musicVolume = 0.0f;
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {

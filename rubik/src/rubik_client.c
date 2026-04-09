@@ -189,7 +189,7 @@ void rubik_client_update(float dt) {
         }
     } else {
         // Wait for start
-        if (IsKeyPressed(KEY_M)) {
+        if (IsKeyPressed(KEY_M) || IsKeyPressed(KEY_SEMICOLON)) {
             if (networkSocket < 0) {
                 // Solo mode: start directly, scramble cube locally
                 initCube(&my_cube);

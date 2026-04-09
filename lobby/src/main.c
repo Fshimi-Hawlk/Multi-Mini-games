@@ -420,7 +420,6 @@ int main(void) {
         }
 
         DrawFPS(10, 10);
-        DrawText("VERSION FUSION v1.1", GetScreenWidth() - 180, 10, 15, Fade(BLACK, 0.5f));
         EndDrawing();
     }
 

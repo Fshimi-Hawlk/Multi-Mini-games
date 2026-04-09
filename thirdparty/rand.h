@@ -38,7 +38,9 @@ typedef int32_t  s32;
 
 typedef float f32;
 
+#ifndef PI
 #define PI 3.14159265358979
+#endif
 
 typedef struct {
     u64 state;
@@ -65,7 +67,7 @@ void plat_get_entropy(void* data, u32 size);
 
 #ifdef RAND_IMPLEMENTATION
 
-static prng_state s_prng_state = { 
+static prng_state s_prng_state = {
     0x853c49e6748fea9bULL, 0xda3e39cb94b95bdbULL,
     NAN
 };
@@ -151,13 +153,13 @@ void plat_get_entropy(void* data, u32 size) {
         perror("open");
         exit(EXIT_FAILURE);
     }
-    
+
     if (read(fd, data, size) != size) {
         perror("read");
         close(fd);
         exit(EXIT_FAILURE);
     }
-    
+
     close(fd);
 }
 
