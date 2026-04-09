@@ -50,7 +50,7 @@ void lobby_drawSceneBackground(f32 time, Vector2 playerPos) {
     );
 }
 
-static f32 backgroundBaseScale = 1.0f;   // computed once
+static f32 backgroundBaseScale = 0.35f;   // computed once
 
 void lobby_initBackgroundScale(void) {
     if (!IsTextureValid(backgroundTexture)) return;
@@ -58,7 +58,7 @@ void lobby_initBackgroundScale(void) {
     f32 windowAspect = (f32) systemSettings.video.width / (f32) systemSettings.video.height;
     f32 bgAspect     = (f32) backgroundTexture.width / (f32) backgroundTexture.height;
 
-    const f32 targetCoverage = 2.0f;
+    const f32 targetCoverage = 1.5f;
 
     if (windowAspect > bgAspect) { // wider window -> fit to height
         backgroundBaseScale = (f32) systemSettings.video.height / (f32) backgroundTexture.height * targetCoverage;
@@ -85,7 +85,7 @@ void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera) 
     // Final destination (centered horizontally, vertical anchor)
     Rectangle dest = {
         .x      = center.x - bgWidth / 2.0f,
-        .y      = center.y - bgHeight / 2.0f - 250.0f,
+        .y      = center.y - bgHeight / 2.0f,
         .width  = bgWidth,
         .height = bgHeight
     };
