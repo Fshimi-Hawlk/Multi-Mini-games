@@ -14,9 +14,9 @@
     All extern variables used throughout the game.
 */
 
-#include "userTypes.h"
+#include "utils/userTypes.h"
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 extern Font      polyBlast_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 

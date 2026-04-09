@@ -10,8 +10,7 @@
             - Consistent visual feedback
 */
 
-#include "widgets/button.h"
-#include "widgets/types.h"
+#include "sharedWidgets/button.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

@@ -43,8 +43,9 @@
 
 #include "core/game.h"
 
-#include "utils/utils.h"
 #include "utils/globals.h"
+
+#include "sharedUtils/mathUtils.h"
 
 Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {

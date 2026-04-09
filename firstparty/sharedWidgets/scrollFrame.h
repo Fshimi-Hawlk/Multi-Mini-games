@@ -1,5 +1,5 @@
 /**
-    @file widgets/scrollFrame.h
+    @file sharedWidgets/scrollFrame.h
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Reusable scrollable frame – replaces all the repeated scrollY + scissor logic.
@@ -8,7 +8,7 @@
 #ifndef WIDGETS_SCROLL_FRAME_H
 #define WIDGETS_SCROLL_FRAME_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 /**
     @brief Initializes a ScrollFrame_St with sensible defaults.

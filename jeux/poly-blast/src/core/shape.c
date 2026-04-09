@@ -13,9 +13,9 @@
 
 #include "utils/globals.h"
 
-#include "utils/random.h"
-#include "utils/container.h"
-#include "utils/debug.h"
+#include "sharedUtils/random.h"
+#include "sharedUtils/container.h"
+#include "sharedUtils/debug.h"
 
 bool isShapeClicked(const Shape_St* const shape) {
     f32Vector2 mousePos = GetMousePosition();

@@ -1,5 +1,5 @@
 /**
-    @file widgets/dropdown.h
+    @file sharedWidgets/dropdown.h
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Dropdown widget for the reusable UI system.
@@ -8,7 +8,7 @@
 #ifndef WIDGETS_DROPDOWN_H
 #define WIDGETS_DROPDOWN_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 /**
     @brief Updates a dropdown widget (handles open/close, selection, mouse interaction).

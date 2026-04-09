@@ -1,4 +1,4 @@
-#include "utils/random.h"
+#include "sharedUtils/random.h"
 #include <stdlib.h>
 
 u64 randint(u64 min, u64 max) {

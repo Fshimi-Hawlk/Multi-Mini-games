@@ -15,10 +15,9 @@
 
 #include "utils/globals.h"
 
-#include "widgets/button.h"
-#include "widgets/textBox.h"
-#include "widgets/scrollFrame.h"
-#include "widgets/types.h"
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/textBox.h"
+#include "sharedWidgets/scrollFrame.h"
 
 #include <sys/stat.h>
 #include <dirent.h>

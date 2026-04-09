@@ -1,7 +1,8 @@
 #include "ui/grass.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "sharedUtils/mathUtils.h"
 
 void lobby_updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
     const float viewL = camera.target.x - (systemSettings.video.width / 2.0f) - 100.0f;

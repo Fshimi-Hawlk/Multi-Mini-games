@@ -1,8 +1,8 @@
 #include "setups/game.h"
 
-#include "utils/constants.h"
 #include "utils/globals.h"
-#include "utils/utils.h"
+
+#include "sharedUtils/mathUtils.h"
 
 void lobby_initGrass(void) {
     Rectangle floor = platforms[0].rect;

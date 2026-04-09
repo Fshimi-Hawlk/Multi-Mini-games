@@ -10,9 +10,9 @@
             - Clean integration point for all scrolling panels
 */
 
-#include "widgets/scrollFrame.h"
+#include "sharedWidgets/scrollFrame.h"
 
-#include "utils/mathUtils.h"
+#include "sharedUtils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

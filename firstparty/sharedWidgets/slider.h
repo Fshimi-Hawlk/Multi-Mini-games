@@ -1,5 +1,5 @@
 /**
-    @file widgets/slider.h
+    @file sharedWidgets/slider.h
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Horizontal slider widget.
@@ -8,7 +8,7 @@
 #ifndef WIDGETS_SLIDER_H
 #define WIDGETS_SLIDER_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 /**
     @brief Updates a slider and returns true if value changed.

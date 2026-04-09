@@ -5,8 +5,7 @@
     @brief Implementation of the CheckBox widget.
 */
 
-#include "widgets/checkBox.h"
-#include "widgets/types.h"
+#include "sharedWidgets/checkBox.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

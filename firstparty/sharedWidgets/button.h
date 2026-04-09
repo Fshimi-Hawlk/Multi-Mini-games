@@ -1,5 +1,5 @@
 /**
-    @file widgets/button.h
+    @file sharedWidgets/button.h
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Text and image button widgets.
@@ -8,7 +8,7 @@
 #ifndef WIDGETS_BUTTON_H
 #define WIDGETS_BUTTON_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 /**
     @brief Updates a text button and returns true if it was clicked this frame.

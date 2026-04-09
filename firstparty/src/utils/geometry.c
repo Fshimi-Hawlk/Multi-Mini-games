@@ -12,8 +12,8 @@
     @see geometry.h
 */
 
-#include "utils/geometry.h"
-#include "utils/debug.h"
+#include "sharedUtils/geometry.h"
+#include "sharedUtils/debug.h"
 
 Rectangle getTextureRec(const Texture texture) {
     return (Rectangle) {
