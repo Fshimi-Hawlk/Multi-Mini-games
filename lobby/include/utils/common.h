@@ -82,13 +82,18 @@
 // Project foundational headers
 // ------------------------------------------------
 
+#ifndef f32Vector2_def
+#define f32Vector2_def      // marker to indicate the typedef is active
 /**
     @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
  */
 typedef Vector2 f32Vector2;
-#define f32Vector2_def      // marker to indicate the typedef is active
+#endif // f32Vector2_def
+
+#include "configs.h"                // tuning constants, paths, physics values
+#include "constants.h"
 
 #include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
-#include "configs.h"                // tuning constants, paths, physics values
+#include "systemSettings.h"
 
 #endif // COMMON_H

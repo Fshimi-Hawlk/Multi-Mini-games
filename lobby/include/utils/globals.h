@@ -21,55 +21,40 @@
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
-#include "userTypes.h"
-
-// Params menu - include the header for the type definition
+#include "utils/userTypes.h"
 #include "include/ui/paramsMenu.h"
-
-// ------------------------------------------------
-// Window & display
-// ------------------------------------------------
-
-/**
-    Rectangle describing the full client area of the application window.
-    Usually set to {0, 0, GetScreenWidth(), GetScreenHeight()} after InitWindow().
-*/
-extern Rectangle windowRect;
-
-// ------------------------------------------------
-// Fonts
-// ------------------------------------------------
-
-/**
-    @brief Default font used for most UI labels, buttons and in-game text.
-           Normally corresponds to fonts[FONT16] or similar mid-size variant.
-*/
-extern Font      appFont;
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
            Indexed by FontSize_Et values (FONT8 … FONT48).
            All fonts should use the same typeface for visual consistency.
 */
-extern Font      fonts[_fontSizeCount];
+extern Font lobby_fonts[__fontSizeCount];
 
 // ------------------------------------------------
 // Lobby world content
 // ------------------------------------------------
+
+extern LobbyGame_St game;
 
 /**
     brief Static array of platform definitions for the lobby scene.
           Size is determined by platformCount.
           @note Consider moving to dynamic allocation or level data file in the future.
 */
-extern Platform_st platforms[];
+extern Platform_St platforms[];
 
 /**
     brief Number of valid entries in the platforms array.
 */
 extern u32 platformCount;
 
-// ------------------------------------------------
+extern Texture2D platformTextures[__platformTypeCount];
+
+extern Texture2D treeTexture;
+extern Texture2D backgroundTexture;
+
+// ────────────────────────────────────────────────
 // Skin selection UI
 // ------------------------------------------------
 
@@ -113,11 +98,12 @@ extern Texture2D platformTextures[2];
 /** @brief Accumulated lobby time since launch (seconds). Used for animations. */
 extern float gameTime;
 
-/** @brief Grass blade simulation array. */
-extern GrassBlade_st grassBlades[MAX_GRASS_BLADES];
+extern float gameTime;
 
-/** @brief Number of active grass blades. */
+extern GrassBlade_St grassBlades[MAX_GRASS_BLADES];
 extern int grassCount;
+
+extern const Vector2 moonLightDir;
 
 // ------------------------------------------------
 // Audio handles
@@ -126,6 +112,6 @@ extern int grassCount;
 extern Sound sound_jump;
 extern Sound sound_doubleJump;
 extern Sound sound_gameLaunch;
-extern Sound meme;
+extern Sound sound_doubleJumpMeme;
 
 #endif // UTILS_GLOBALS_H

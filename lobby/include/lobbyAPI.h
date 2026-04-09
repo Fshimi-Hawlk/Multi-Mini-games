@@ -18,7 +18,6 @@
 #define LOBBY_API_H
 
 #include "utils/userTypes.h"
-#include "APIs/generalAPI.h"
 
 /**
     @brief Configuration options passed to the initialization function.

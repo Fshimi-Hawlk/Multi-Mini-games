@@ -12,14 +12,53 @@
 #include "common.h"
 #include "APIs/generalAPI.h"
 
+typedef struct {
+    Vector2 position;
+    float height;
+    float angle;      // L'angle actuel du brin
+    float velocity;   // La vitesse de rotation (pour l'élasticité)
+    Color color;
+} GrassBlade_St;
+
 typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
-} FontSize_Et;
+    FIREFLY_MODE_WANDER,
+    FIREFLY_MODE_LOOP,
+    FIREFLY_MODE_BOB
+} FireflyMode_Et;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   radius;
+    float   alpha;
+    float   phase;
+    bool    active;
+
+    // Enhanced behavior
+    FireflyMode_Et mode;
+    float          modeTimer;
+    Vector2        wanderTarget;
+    Vector2        loopPoints[12];
+    int            loopCount;
+    int            currentLoopIndex;
+    float          facingAngle;
+    float          currentSpeed;
+} Firefly_St;
+
+typedef struct {
+    Vector2 position;
+    Vector2 velocity;
+    float   rotation;
+    float   rotationSpeed;
+    float   scale;
+    float   life;
+    float   currentAlpha;
+    bool    active;
+    bool    onGround;
+    float   groundTimer;
+    float   spinDampTimer;      ///< Time left to apply strong rotational drag after player push (0 = normal drag)
+    Color   color;
+} FallingLeaf_St;
 
 typedef enum {
     GAME_SCENE_LOBBY,
@@ -48,10 +87,6 @@ typedef struct {
 } PlayerVisuals_St;
 
 typedef struct {
-    /* FIX: removed `cercle playerHitBox` — the type `cercle` was never defined
-     * anywhere in the project (causing a compile error) and the field was never
-     * read or written. Collision is handled via `position` + `radius` through
-     * getPlayerCollisionBox() / resolveCircleRectCollision(). */
     Vector2 position;
     float   radius;
 
@@ -64,68 +99,32 @@ typedef struct {
     bool    onGround;
     int     nbJumps;
 
-    /* FIX: coyoteTime field removed — it was initialized in lobbyAPI.c but never
-     * read afterwards: the constant COYOTE_TIME (configs.h) is used everywhere
-     * in game.c. Keeping both was confusing. */
     float   coyoteTimer;
 
-    float   jumpBuffer;
-} Player_st;
-
-typedef struct {
-    Rectangle rect;
-    Color     color;
-    float     roundness;
-} Platform_st;
-
-typedef struct {
-    Vector2 position;
-    float   height;
-    float   angle;
-    float   velocity;
-    Color   color;
-} GrassBlade_st;
+    float   jumpBuffer; 
+} Player_St;
 
 typedef enum {
-    FIREFLY_MODE_WANDER,
-    FIREFLY_MODE_LOOP,
-    FIREFLY_MODE_BOB
-} FireflyMode_Et;
+    PLATFORM_TYPE_GRASS,
+    PLATFORM_TYPE_WOODPLANK,
+    __platformTypeCount
+} PlatformType_Et;
 
 typedef struct {
-    Vector2        position;
-    Vector2        velocity;
-    float          radius;
-    float          alpha;
-    float          phase;
-    bool           active;
-    FireflyMode_Et mode;
-    float          modeTimer;
-    Vector2        wanderTarget;
-    Vector2        loopPoints[12];
-    int            loopCount;
-    int            currentLoopIndex;
-    float          facingAngle;
-    float          currentSpeed;
-} Firefly_St;
+    Rectangle rect;         ///< Position and size (world coordinates)
+    Color     color;        ///< Debug / placeholder rendering color
+    float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
+    PlatformType_Et type;
+} Platform_St;
 
 typedef struct {
-    Vector2 position;
-    Vector2 velocity;
-    float   rotation;
-    float   rotationSpeed;
-    float   scale;
-    float   life;
-    float   currentAlpha;
-    bool    active;
-    bool    onGround;
-    float   groundTimer;
-    float   spinDampTimer;
-    Color   color;
-} FallingLeaf_St;
+    Rectangle hitbox;
+    const char *name;
+    Color color;
+} GameCollisionZone_St;
 
 typedef struct {
-    Rectangle     gameHitboxes[__gameSceneCount];
+    GameCollisionZone_St gameZones[__gameSceneCount];
     BaseGame_St*  miniGames[__gameSceneCount];
 
     GameScene_Et  currentScene;
@@ -137,9 +136,9 @@ typedef struct {
 typedef struct {
     BaseGame_St base;
 
-    Player_st         player;
-    PlayerVisuals_St  playerVisuals;
-    Camera2D          cam;
+    Player_St         player;                     ///< Physics & movement state of the player character
+    PlayerVisuals_St  playerVisuals;              ///< Rendering and skin selection state
+    Camera2D          cam;                        ///< 2D camera following the player
 
     SubGameManager_St subGameManager;
 } LobbyGame_St;

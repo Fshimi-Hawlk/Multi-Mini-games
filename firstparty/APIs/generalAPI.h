@@ -63,6 +63,13 @@ typedef enum {
 // Game interface
 // ------------------------------------------------
 
+typedef enum {
+    FONT16, FONT24, FONT32, 
+    FONT48, FONT64, FONT96, 
+    FONT128,
+    __fontSizeCount
+} FontSize_Et;
+
 /**
     @brief Opaque forward declaration of the concrete game state.
 

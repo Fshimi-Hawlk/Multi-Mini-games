@@ -1,7 +1,6 @@
-#include "ui/ambiance.h"
-#include "utils/configs.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
+
+#include "ui/ambiance.h"
 
 static Firefly_St fireflies[MAX_FIREFLIES] = {0};
 static FallingLeaf_St fallingLeaves[MAX_FALLING_LEAVES] = {0};
@@ -38,7 +37,7 @@ static Vector2 getRandomCanopySpawnPoint(void) {
     @brief Applies a gentle push to a leaf (airborne or grounded).
     Activates temporary strong rotational drag for the requested 3-5 s window.
 */
-static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_st* player) {
+static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_St* player) {
     Vector2 dir = Vector2Subtract(leaf->position, player->position);
     float distSq = Vector2LengthSqr(dir);
 
@@ -68,7 +67,7 @@ static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_st* player) {
     @brief Checks for landing on the *top surface only* of any platform.
     Side or bottom contacts are ignored. Landing is now softer (no hard snap).
 */
-static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_st* platforms, int count) {
+static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_St* platforms, int count) {
     float leafRadius = 11.0f * leaf->scale;
 
     for (int i = 0; i < count; ++i) {
@@ -95,20 +94,14 @@ static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_st* platforms
     return false;
 }
 
-void initAtmosphericEffects(void) {
-    // nothing to do
-}
-
-void updateAtmosphericEffects(float dt, Player_st* player, Camera2D cam) {
+void updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
     // Compute visible world rectangle + padding so nothing pops in/out of nowhere
     float padding = 180.0f;
-    float sw = (float)GetScreenWidth();
-    float sh = (float)GetScreenHeight();
     Rectangle view = {
-        cam.target.x - sw / 2.0f - padding,
-        cam.target.y - sh / 2.0f - padding,
-        sw + padding * 2.0f,
-        sh + padding * 2.0f
+        cam.target.x - WINDOW_WIDTH / 2.0f - padding,
+        cam.target.y - WINDOW_HEIGHT / 2.0f - padding,
+        WINDOW_WIDTH + padding * 2.0f,
+        WINDOW_HEIGHT + padding * 2.0f
     };
 
     // ── Fireflies ───────────────────────────────────────────────────────────
@@ -130,26 +123,25 @@ void updateAtmosphericEffects(float dt, Player_st* player, Camera2D cam) {
             // At very beginning (first ~3 seconds) spawn inside camera + padding
             // After that, only recycle in the outer padding ring so it never feels empty
             float spawnPadding = 280.0f;
-            float sw2 = (float)GetScreenWidth();
-            float sh2 = (float)GetScreenHeight();
 
             Rectangle spawnArea = {
-                cam.target.x - sw2 / 2.0f - spawnPadding,
-                cam.target.y - sh2 / 2.0f - spawnPadding * 0.6f,
-                sw2 + spawnPadding * 2.0f,
-                sh2 + spawnPadding * 1.2f
+                cam.target.x - WINDOW_WIDTH / 2.0f - spawnPadding,
+                cam.target.y - WINDOW_HEIGHT / 2.0f - spawnPadding * 0.6f,
+                WINDOW_WIDTH + spawnPadding * 2.0f,
+                WINDOW_HEIGHT + spawnPadding * 1.2f
             };
 
             fireflies[i].position.x = spawnArea.x + (rand() % (int)spawnArea.width);
             fireflies[i].position.y = spawnArea.y + (rand() % (int)spawnArea.height);
 
             // Post-initial-burst: force recycled fireflies into the outer padding ring
+            // (between camera bounds and despawn distance) - no more inside-camera spawns
             if (!isInitialBurst) {
                 Rectangle innerCamera = {
-                    cam.target.x - sw2 / 2.0f + 40.0f,
-                    cam.target.y - sh2 / 2.0f + 40.0f,
-                    sw2 - 80.0f,
-                    sh2 - 80.0f
+                    cam.target.x - WINDOW_WIDTH / 2.0f + 40.0f,
+                    cam.target.y - WINDOW_HEIGHT / 2.0f + 40.0f,
+                    WINDOW_WIDTH - 80.0f,
+                    WINDOW_HEIGHT - 80.0f
                 };
                 int tries = 0;
                 while (CheckCollisionPointRec(fireflies[i].position, innerCamera) && tries < 8) {
@@ -476,12 +468,13 @@ void drawAtmosphericEffects(void) {
     }
 }
 
-void drawScreenEffects(const Player_st* player) {
-    float heightFactor = 1 - Clamp((GROUND_Y - player->position.y) / 650.0f, 0.0f, 1.0f);
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
-    DrawRectangleGradientV(0, 0, sw, sh,
+void drawScreenEffects(Player_St* player) {
+    float heightFactor = 1 - Clamp((GROUND_Y - player->position.y) / 650.0f, 0.0f, 1.0f); // stronger near ground
+
+    // Vignette + night grading - much softer when player is high
+    DrawRectangleGradientV(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
                            Fade(BLACK, 0.0f),
                            Fade(PURPLE, 0.19f * heightFactor));
-    DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.09f));
+
+    DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.09f));
 }

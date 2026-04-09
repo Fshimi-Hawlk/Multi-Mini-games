@@ -2,15 +2,49 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-04-08
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
+
+    Contributors:
+        - LeandreB8:
+            - Circle-vs-rectangle collision with basic resolution and ground detection
+            - Horizontal movement with friction, rotation based on direction
+            - Coyote time, jump buffering, limited air jumps
+            - Mouse + keybind driven skin selection
+            - Skin menu toggle
+        - Fshimi-Hawlk:
+            - Moved the game logic off main to this file
+            - Reworked player texture logic
+            - Provided documentation
+
+    This file contains the core systems that drive the lobby player character:
+        - Movement and input processing (horizontal + jump)
+        - Gravity, velocity integration, friction
+        - Circle-rectangle collision and penetration resolution
+        - Coyote time and jump buffering mechanics
+        - Texture/skin selection via mouse or number keys
+        - Toggle logic for the skin selection overlay
+
+    All update functions expect:
+        - dt in seconds (typically from GetFrameTime())
+        - platforms in world coordinates
+        - functions to be called once per frame in the main update loop
+
+    Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
+    by draw routines and assume the player's collision shape is always a circle.
+
+    @see `utils/userTypes.h`     for `Player_St`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
+    @see `utils/globals.h`       for `skinButtonRect`
+    @see `core/game.h`           for `resolveCircleRectCollision()` declaration
 */
 
 #include "core/game.h"
 
 #include "utils/utils.h"
 #include "utils/globals.h"
-Rectangle getPlayerCollisionBox(const Player_st* const player) {
+
+Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x - player->radius,
         player->position.y - player->radius,
@@ -19,12 +53,11 @@ Rectangle getPlayerCollisionBox(const Player_st* const player) {
     };
 }
 
-Vector2 getPlayerCenter(const Player_st* const player) {
-    return (Vector2) { player->radius, player->radius };
+Vector2 getPlayerCenter(const Player_St* const player) {
+    return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const f32 dt) {
-
+void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
         player->velocity.x = -300;
@@ -40,11 +73,18 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
         }
     }
 
+    if (IsKeyPressed(KEY_R)) {
+        player->position = (f32Vector2) {0};
+        player->velocity = (f32Vector2) {0};
+    }
+
     // Rotate depending on the player's direction
-    if (player->velocity.x > 0)
-        player->angle += 360 * dt;
-    else if (player->velocity.x < 0)
-        player->angle -= 360 * dt;
+    if (player->velocity.x > 0) {
+        player->angle += 360 * dt; // Clockwise
+    }
+    else if (player->velocity.x < 0) {
+        player->angle -= 360 * dt; // Anti-clockwise
+    }
 
     // Buffered jump input
     if (IsKeyPressed(KEY_SPACE)) {
@@ -54,7 +94,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     }
 
     // Gravity
-    player->velocity.y += GRAVITY * dt;
+    player->velocity.y += 1200 * dt;
 
     // Move
     player->position.x += player->velocity.x * dt;
@@ -63,6 +103,18 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
 
     for (int i = 0; i < nbPlatforms; i++) {
         resolveCircleRectCollision(player, platforms[i].rect);
+    }
+
+    // Left border
+    if (player->position.x - player->radius < -X_LIMIT) {
+        player->position.x = -X_LIMIT + player->radius;
+        player->velocity.x = 0;
+    }
+
+    // Right border
+    if (player->position.x + player->radius > X_LIMIT) {
+        player->position.x = X_LIMIT - player->radius;
+        player->velocity.x = 0;
     }
 
     // Coyote time
@@ -82,37 +134,19 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
             player->onGround    = false;
             player->coyoteTimer = 0;
             player->nbJumps++;
-            player->jumpBuffer  = 0;
-            if (player->nbJumps <= 1) {
-                if (IsSoundValid(sound_jump)) PlaySound(sound_jump);
-            } else {
-                if (rand() % 1000 == 0 && IsSoundValid(meme)) PlaySound(meme);
-                else if (IsSoundValid(sound_doubleJump))       PlaySound(sound_doubleJump);
-            }
+            player->jumpBuffer = 0;
         }
     }
 }
 
-/*
- * resolveCircleRectCollision
- *
- * Deux cas :
- *
- * Cas 1 — centre HORS du rectangle (normal).
- *   Point le plus proche sur le bord, push-out si dist < rayon.
- *
- * Cas 2 — centre DANS le rectangle (tunneling à grande vitesse).
- *   dist == 0 → pas de normale calculable avec la méthode standard.
- *   On calcule la pénétration minimale sur chaque axe et on éjecte
- *   par le côté le moins profond. Sans ce cas, la balle traverse le sol.
- */
-void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
+void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
     f32 centerX = player->position.x;
     f32 centerY = player->position.y;
     f32 r       = player->radius;
 
-    f32 closestX = Clamp(centerX, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(centerY, rect.y, rect.y + rect.height);
+    // Search the position that is closest to the circle on the rectangle
+    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
+    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
 
     f32 dx = centerX - closestX;
     f32 dy = centerY - closestY;
@@ -170,7 +204,7 @@ void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
     }
 }
 
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
+void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
