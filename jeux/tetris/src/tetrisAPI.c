@@ -90,7 +90,6 @@ Error_Et tetris_initGame__full(TetrisGame_St** game, TetrisConfigs_St configs) {
     // Initialize params menu (settings button)
     paramsMenu_init(&tetrisParamsMenu);
 
-    log_debug("Tetris initialized successfully");
     return OK;
 }
 
