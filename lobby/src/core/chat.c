@@ -68,7 +68,7 @@ void updateChat(void) {
                 memcpy(buffer + offset, lobby_game.chat.inputBuffer, payloadLen); offset += (size_t)payloadLen;
                 
                 send(networkSocket, buffer, offset, 0);
-                addChatMessage("Moi >", lobby_game.chat.inputBuffer);
+                addChatMessage(TextFormat("%s >", lobby_game.player.name), lobby_game.chat.inputBuffer);
                 lobby_game.chat.inputPos = 0;
                 lobby_game.chat.inputBuffer[0] = '\0';
             }

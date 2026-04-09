@@ -71,8 +71,34 @@ bool updateRoomSelector(void) {
         return false;
     }
 
-    // Layer 2 specific: Join Lobby button
     extern LobbyGame_St lobby_game;
+    if (IsKeyPressed(KEY_ENTER)) {
+        // If there are rooms, join the first one
+        if (roomsCount > 0) {
+            RUDPHeader_St h;
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
+            h.sender_id = htons((u16)lobby_game.id);
+            u8 buf[64];
+            memcpy(buf, &h, sizeof(h));
+            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId;
+            buf[sizeof(h) + 1] = (s8)discoveredRooms[0].id;
+            send(networkSocket, buf, sizeof(h) + 2, 0);
+        } else {
+            // Create a new room
+            RUDPHeader_St h;
+            rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
+            h.sender_id = htons((u16)lobby_game.id);
+            u8 buf[64];
+            memcpy(buf, &h, sizeof(h));
+            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId;
+            buf[sizeof(h) + 1] = (s8)-1;
+            send(networkSocket, buf, sizeof(h) + 2, 0);
+        }
+        closeRoomSelector();
+        return true;
+    }
+
+    // Layer 2 specific: Join Lobby button
     if (currentGameId == -1) {
         Rectangle btnLobby = { (float)GetScreenWidth()/2 - 150, (float)GetScreenHeight()/2 - 160, 300, 40 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnLobby)) {

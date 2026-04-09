@@ -206,6 +206,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
 
             ActionDaubSquarePayload_St p;
             memcpy(&p, realPayload, sizeof(p));
+            if (p.row >= 5 || p.col >= 5) break; // FIX 1: OOB protection
             s32 slot = bingo_getSlot(srv, player_id);
             if (slot != -1 && bingo_isValidDaub(&game->currentCall, &srv->playerCards[slot], p.row, p.col)) {
                 srv->playerCards[slot].daubs[p.row][p.col] = true;
@@ -215,7 +216,9 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
         case ACTION_CODE_START_GAME:
         case ACTION_CODE_BINGO_START_GAME: {
             if (srv->status != BINGO_STATUS_WAITING_CARD_CHOICE) break;
+            game->room_id = room_id;
             srv->status = BINGO_STATUS_LAUNCHING;
+            game->progress.scene = GAME_SCENE_LAUNCHING; // Tell clients to transition from card choice
             game->currentCall.timer = 6.5f;
             log_info("Bingo game launching...");
         } break;

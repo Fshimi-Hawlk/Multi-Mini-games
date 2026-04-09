@@ -64,7 +64,7 @@ Player_st* initPlayer(ColorPiece_et color, int mainLineY, int pawnLineY) {
             error("Couldn't allocate memory");
             
             for (int j = 0; j < i; j++) {
-                free(player->pieces[i]);
+                free(player->pieces[j]);
             }
 
             free(player);

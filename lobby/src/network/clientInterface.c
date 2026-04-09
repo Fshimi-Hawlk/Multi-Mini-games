@@ -29,6 +29,10 @@ void lobby_init(void) {
     s32 savedId = isFirstInit ? -1 : lobby_game.id;
     isFirstInit = false;
 
+    // Preserve the player name across lobby re-inits
+    char savedName[32] = {0};
+    strncpy(savedName, lobby_game.player.name, 31);
+
     memset(&lobby_game, 0, sizeof(lobby_game));
 
     // Video settings persist across lobby re-init.
@@ -51,7 +55,14 @@ void lobby_init(void) {
         .waterFastDescent = false,
         .onIce            = false
     };
-    strncpy(lobby_game.player.name, "Moi", 31);
+    // Restore the preserved name, or use the pseudo from the connection screen
+    if (savedName[0] != '\0') {
+        strncpy(lobby_game.player.name, savedName, 31);
+    } else {
+        extern const char* getEnteredPseudo(void);
+        const char* _pseudo = getEnteredPseudo();
+        strncpy(lobby_game.player.name, (_pseudo && _pseudo[0]) ? _pseudo : "Joueur", 31);
+    }
 
     lobby_game.cam = (Camera2D) {
         .offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},

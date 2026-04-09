@@ -32,7 +32,7 @@
 #include <errno.h>
 
 s32 networkSocket = -1;
-RUDPConnection_St serverConnection;
+RUDPConnection_St serverConnection; 
 
 static MiniGame_Et currentMiniGameID = MINI_GAME_LOBBY;
 static GameClientInterface_St* currentMiniGame = NULL;
@@ -174,7 +174,13 @@ void receiveNetworkData(void) {
                 u16 payloadLen = (u16)(bytesRead - sizeof(RUDPHeader_St));
                 u16 senderId = ntohs(header.sender_id);
 
-                if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
+                if (header.action == ACTION_CODE_JOIN_ERROR) {
+                    log_error("[NET] Join rejected by server: %s", (char*)payload);
+                    lobby_game.currentState = GAME_STATE_CONNECTION;
+                    // Reset network state if needed
+                    rudpInitConnection(&serverConnection);
+                }
+                else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
                     extern void handleRoomList(const void* data, int count);
                     handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
                 }
@@ -233,19 +239,35 @@ void spawn_server(void) {
     }
 }
 
+// Backup of lobby terrains before entering editor (so editor changes don't persist in lobby)
+static TerrainVec_St lobbyTerrainBackup = {0};
+
 void switch_minigame(u8 game_id) {
     if (game_id < __miniGameCount && miniGameInterfaces[game_id]) {
+        // Leaving editor → restore lobby terrains
+        if (currentMiniGameID == MINI_GAME_EDITOR && game_id != MINI_GAME_EDITOR) {
+            da_clear(&terrains);
+            if (lobbyTerrainBackup.count > 0)
+                da_append_many(&terrains, lobbyTerrainBackup.items, lobbyTerrainBackup.count);
+        }
+        // Entering editor → backup lobby terrains
+        if (game_id == MINI_GAME_EDITOR) {
+            da_clear(&lobbyTerrainBackup);
+            if (terrains.count > 0)
+                da_append_many(&lobbyTerrainBackup, terrains.items, terrains.count);
+        }
+
         if (currentMiniGame && currentMiniGame->destroy) {
             currentMiniGame->destroy();
         }
         currentMiniGameID = (MiniGame_Et)game_id;
         currentMiniGame = miniGameInterfaces[currentMiniGameID];
         if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
-        
+
         // Ensure UI state is cleared when switching
         lobby_game.currentState = GAME_STATE_GAMEPLAY;
         closeRoomSelector();
-        
+
         if (game_id == MINI_GAME_LOBBY) {
             lobby_game.currentState = GAME_STATE_GAMEPLAY;
             lobby_game.editorMode = false;
@@ -267,6 +289,8 @@ int main(void) {
     miniGameInterfaces[MINI_GAME_LOBBY]->init();
     currentMiniGame = miniGameInterfaces[MINI_GAME_LOBBY];
     initConnectionScreen();
+    // Use the default pseudo from the connection screen as the initial player name
+    strncpy(lobby_game.player.name, getEnteredPseudo(), 31);
     initRoomSelector();
     initWaitingRoom();
 
@@ -336,8 +360,9 @@ int main(void) {
                              GetScreenHeight() - 100, 20, GREEN);
 
                     if (IsKeyPressed(KEY_ENTER)) {
-                        if (triggerID == MINI_GAME_EDITOR) {
-                            switch_minigame(MINI_GAME_EDITOR);
+                        // Solo mode (no server) or editor: switch directly without room selector
+                        if (triggerID == MINI_GAME_EDITOR || networkSocket < 0) {
+                            switch_minigame(triggerID);
                         } else {
                             openRoomSelector(triggerID);
                         }

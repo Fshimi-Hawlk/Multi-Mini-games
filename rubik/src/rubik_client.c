@@ -108,20 +108,25 @@ static float calculate_progress(Cube* c) {
 
 void rubik_client_update(float dt) {
     if (my_id_internal == -1) {
-        static float join_timer = 0;
-        join_timer += dt;
-        if (join_timer > 1.0f) {
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
-            RUDPHeader_St h;
-            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-            h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
-            u8 buf[64];
-            memcpy(buf, &h, sizeof(h));
-            memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
-            send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
-            join_timer = 0;
+        if (networkSocket < 0) {
+            // Solo mode: no server, auto-assign ID so we can play immediately
+            my_id_internal = 0;
+        } else {
+            static float join_timer = 0;
+            join_timer += dt;
+            if (join_timer > 1.0f) {
+                GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
+                RUDPHeader_St h;
+                rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+                h.sender_id = htons(0);
+                u8 buf[64];
+                memcpy(buf, &h, sizeof(h));
+                memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
+                send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
+                join_timer = 0;
+            }
+            return;
         }
-        return;
     }
 
     if (eliminated) return;
@@ -149,16 +154,24 @@ void rubik_client_update(float dt) {
         }
     } else {
         // Wait for start
-        if (IsKeyPressed(KEY_ENTER) && my_id_internal != -1) {
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
-            RUDPHeader_St h;
-            rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-            h.sender_id = htons((u16)my_id_internal);
-            u8 buf[128];
-            memset(buf, 0, sizeof(buf));
-            memcpy(buf, &h, sizeof(h));
-            memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
-            send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
+        if (IsKeyPressed(KEY_ENTER)) {
+            if (networkSocket < 0) {
+                // Solo mode: start directly, scramble cube locally
+                char* moves[20];
+                scrambleMoves(moves);
+                applyScrambleInstant(&my_cube, moves);
+                game_started = true;
+            } else {
+                GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
+                RUDPHeader_St h;
+                rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
+                h.sender_id = htons((u16)my_id_internal);
+                u8 buf[128];
+                memset(buf, 0, sizeof(buf));
+                memcpy(buf, &h, sizeof(h));
+                memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
+                send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
+            }
         }
     }
 

@@ -461,13 +461,31 @@ int main(void) {
 
                     // Handle Join Game (Server handshake)
                     if (h->action == ACTION_CODE_JOIN_GAME) {
+                        char proposedName[32];
                         if (received > (ssize_t)sizeof(RUDPHeader_St)) {
-                            snprintf(clients[clientId].name, 31, "%s", (char*)buf + sizeof(RUDPHeader_St));
-                            log_info("[JOIN] Client %d ('%s') connected", clientId, clients[clientId].name);
+                            snprintf(proposedName, 31, "%s", (char*)buf + sizeof(RUDPHeader_St));
                         } else {
-                            snprintf(clients[clientId].name, 31, "unnamed");
-                            log_info("[JOIN] Client %d (unnamed) connected", clientId);
+                            snprintf(proposedName, 31, "unnamed");
                         }
+
+                        // Check for duplicate pseudo
+                        bool duplicate = false;
+                        for (int i = 0; i < MAX_CLIENTS; i++) {
+                            if (clients[i].active && i != clientId && strcmp(clients[i].name, proposedName) == 0) {
+                                duplicate = true;
+                                break;
+                            }
+                        }
+
+                        if (duplicate) {
+                            log_warn("[JOIN] Rejected client %d: Duplicate pseudo '%s'", clientId, proposedName);
+                            serverBroadcast(UNICAST, clientId, ACTION_CODE_JOIN_ERROR, "Pseudo already taken", 20);
+                            clients[clientId].active = false; // Kick immediately
+                            continue;
+                        }
+
+                        strncpy(clients[clientId].name, proposedName, 31);
+                        log_info("[JOIN] Client %d ('%s') connected", clientId, clients[clientId].name);
 
                         u16 assigned_id = htons((u16)clientId);
                         serverBroadcast(UNICAST, clientId, ACTION_CODE_JOIN_ACK, &assigned_id, sizeof(u16));

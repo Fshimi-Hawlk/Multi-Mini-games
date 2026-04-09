@@ -9,6 +9,8 @@
 #include "editor/types.h"
 #include "editor/properties.h"
 #include "editor/utils.h"
+#include "editor/io.h"
+#include "editor/codegen.h"
 #include "utils/globals.h"
 #include "utils/utils.h"
 #include "widgets/button.h"
@@ -26,9 +28,23 @@ void updateEditor(LobbyGame_St* game, float dt) {
     Vector2 mouseWorld = getMouseWorld(game);
 
     // Update UI buttons
-    textButtonUpdate(&btnLoad, mouseScreen);
-    textButtonUpdate(&btnSave, mouseScreen);
-    textButtonUpdate(&btnGenerate, mouseScreen);
+    if (textButtonUpdate(&btnLoad, mouseScreen)) {
+        char* path = editorShowOpenDialog(ASSET_PATH "levels/");
+        if (path) {
+            editorLoadLevel(path);
+            free(path);
+        }
+    }
+    if (textButtonUpdate(&btnSave, mouseScreen)) {
+        char* path = editorShowSaveDialog("myLevel", ".dat");
+        if (path) {
+            editorSaveLevel(path);
+            free(path);
+        }
+    }
+    if (textButtonUpdate(&btnGenerate, mouseScreen)) {
+        editorGenerateCode(game, ASSET_PATH "levels/generated_level.c");
+    }
 
     // Update scroll frames
     scrollFrameUpdate(&paletteScroll, mouseScreen);
@@ -44,6 +60,12 @@ void updateEditor(LobbyGame_St* game, float dt) {
 
     // Keyboard Shortcuts 
     
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        extern void switch_minigame(u8 game_id);
+        switch_minigame(MINI_GAME_LOBBY);
+        return;
+    }
+
     if (IsKeyPressed(KEY_G)) game->showGrid = !game->showGrid;
 
     // Delete selected

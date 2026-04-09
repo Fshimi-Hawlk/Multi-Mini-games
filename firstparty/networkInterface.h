@@ -37,6 +37,7 @@ enum BaseActionCodes_e {
     ACTION_CODE_LOBBY_ROOM_INFO   = 0x09,    ///< Receiving room information.
     ACTION_CODE_LOBBY_CHAT        = 0x0A,    ///< Lobby chat message.
     ACTION_CODE_LOBBY_SWITCH_GAME = 0x0B,    ///< Switching to a mini-game.
+    ACTION_CODE_JOIN_ERROR        = 0x0C,    ///< Error during join (e.g. duplicate name).
     
     ACTION_CODE_DISCOVERY_QUERY    = 0x10,    ///< Global server discovery query (broadcast).
     ACTION_CODE_DISCOVERY_INFO     = 0x11,    ///< Global server discovery response.

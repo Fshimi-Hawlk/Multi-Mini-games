@@ -180,7 +180,26 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
     }
 }
 
+// Initialize the ball system for solo play (no server)
+static void bingo_initBallsSolo(void) {
+    uint b = 0;
+    for (uint n = 0; n < 100; ++n)
+        for (uint col = 1; col <= 5; ++col)
+            localGame.balls.encodedBalls[b++] = 100 * col + n;
+    shuffleArray(uint, localGame.balls.encodedBalls, 500, prng_rand);
+    localGame.balls.remainingCount = 500;
+    localGame.balls.choiceDelay    = 3.5f;
+    localGame.balls.showDelay      = 1.5f;
+    localGame.balls.graceDelay     = 1.0f;
+}
+
 void bingo_update(f32 dt) {
+    // Solo mode (no server): give ourselves a local ID and init balls
+    if (localGame.clientID == -1 && networkSocket < 0) {
+        localGame.clientID = 0;
+        bingo_initBallsSolo();
+    }
+
     if (localGame.clientID == -1) {
         joinRetryTimer += dt;
         if (joinRetryTimer > 1.0f) {
@@ -213,11 +232,50 @@ void bingo_update(f32 dt) {
             }
 
             if (localGame.previouslySelectedCard != NULL && IsKeyPressed(KEY_ENTER)) {
-                sendToServer(ACTION_CODE_BINGO_START_GAME, NULL, 0);
+                if (networkSocket < 0) {
+                    // Solo mode: transition locally without server
+                    localGame.progress.scene = GAME_SCENE_LAUNCHING;
+                    localGame.currentCall.timer = 6.5f;
+                } else {
+                    sendToServer(ACTION_CODE_BINGO_START_GAME, NULL, 0);
+                }
+            }
+        } break;
+
+        case GAME_SCENE_LAUNCHING: {
+            // Solo mode: countdown locally then transition to PLAYING
+            if (networkSocket < 0) {
+                localGame.currentCall.timer -= dt;
+                if (localGame.currentCall.timer <= 0.0f) {
+                    localGame.currentCall.timer = localGame.balls.showDelay;
+                    localGame.progress.scene = GAME_SCENE_PLAYING;
+                }
             }
         } break;
 
         case GAME_SCENE_PLAYING: {
+            // Solo mode: advance ball timer locally
+            if (networkSocket < 0) {
+                localGame.currentCall.timer += dt;
+                if (localGame.currentCall.timer >= localGame.balls.choiceDelay) {
+                    localGame.currentCall.timer = 0.0f;
+                    if (localGame.balls.remainingCount > 0) {
+                        localGame.currentCall.encodedValue = localGame.balls.encodedBalls[--localGame.balls.remainingCount];
+                        localGame.currentCall.column = (localGame.currentCall.encodedValue / 100) - 1;
+                        localGame.currentCall.number = localGame.currentCall.encodedValue - (localGame.currentCall.column + 1) * 100;
+                        snprintf(localGame.currentCall.displayedText, sizeof(localGame.currentCall.displayedText),
+                                 "%s %u", LETTERS[localGame.currentCall.column], localGame.currentCall.number);
+                    }
+                }
+                if (bingo_hasBingo(&localGame.player)) {
+                    localGame.progress.scene = GAME_SCENE_END;
+                    strncpy(localGame.progress.resultMessage, "BINGO! You win!", 63);
+                } else if (localGame.balls.remainingCount == 0) {
+                    localGame.progress.scene = GAME_SCENE_END;
+                    strncpy(localGame.progress.resultMessage, "No more balls - Game Over", 63);
+                }
+            }
+
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 bool inGrace = (localGame.currentCall.timer <=
                                (localGame.balls.showDelay + localGame.balls.graceDelay));
@@ -238,8 +296,10 @@ void bingo_update(f32 dt) {
                             localGame.player.daubs[r][c] = true;
                             localGame.player.misclicks[r][c] = 0;
 
-                            ActionDaubSquarePayload_St payload = { .row = r, .col = c };
-                            sendToServer(ACTION_CODE_BINGO_DAUB_SQUARE, &payload, sizeof(payload));
+                            if (networkSocket >= 0) {
+                                ActionDaubSquarePayload_St payload = { .row = r, .col = c };
+                                sendToServer(ACTION_CODE_BINGO_DAUB_SQUARE, &payload, sizeof(payload));
+                            }
                         }
                         handled = true;
                     }
@@ -257,6 +317,11 @@ void bingo_draw(void) {
     switch (localGame.progress.scene) {
         case GAME_SCENE_CARD_CHOICE:
             bingo_drawChoiceCards(&localGame.layout);
+            if (localGame.previouslySelectedCard != NULL) {
+                DrawText("APPUYEZ SUR ENTRÉE POUR COMMENCER", 
+                         GetScreenWidth()/2 - MeasureText("APPUYEZ SUR ENTRÉE POUR COMMENCER", 20)/2, 
+                         GetScreenHeight() - 50, 20, GREEN);
+            }
             break;
 
         case GAME_SCENE_LAUNCHING:
