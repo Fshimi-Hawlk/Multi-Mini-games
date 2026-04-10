@@ -11,7 +11,7 @@ void lobby_initGrass(void) {
     float stepX = 3.0f;
     float stepY = 5.0f;
 
-    for (float y = floor.y; y < floor.y + 200.0f; y += stepY) {
+    for (float y = floor.y; y < floor.y + 500.0f; y += stepY) {
         for (float x = -X_LIMIT - 500; x < X_LIMIT + 500; x += stepX) {
             if (grassCount >= MAX_GRASS_BLADES) break;
 
@@ -33,9 +33,9 @@ void lobby_initGrass(void) {
                 .angle = 0.0f,
                 .velocity = 0.0f,
                 .color = (Color){
-                    (unsigned char)Clamp(35 + colorVar - (depth * 15), 10, 255),
-                    (unsigned char)Clamp(90 + colorVar - (depth * 70), 20, 180),
-                    (unsigned char)Clamp(25 - (depth * 10), 5, 255),
+                    clamp(35 + colorVar - (depth * 15), 10, 255),
+                    clamp(90 + colorVar - (depth * 70), 20, 180),
+                    clamp(25 - (depth * 10), 5, 255),
                     255
                 }
             };

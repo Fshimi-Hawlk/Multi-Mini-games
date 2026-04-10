@@ -22,6 +22,7 @@
 #include "utils/globals.h"
 
 #include "sharedUtils/mathUtils.h"
+#include "utils/userTypes.h"
 
 #include "lobbyAPI.h"
 
@@ -73,7 +74,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     GameCollisionZone_St gameZones[__miniGameIdCount] = {
         [MINI_GAME_ID_TETRIS] = {
             .hitbox = {
-                .x      = -350,
+                .x      = -800,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -83,7 +84,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         },
         [MINI_GAME_ID_SOLITAIRE] = {
             .hitbox = {
-                .x      = -125,
+                .x      = -575,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -93,7 +94,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         },
         [MINI_GAME_ID_SUIKA] = {
             .hitbox = {
-                .x      = 100,
+                .x      = -350,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -103,7 +104,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         },
         [MINI_GAME_ID_BOWLING] = {
             .hitbox = {
-                .x      = 325,
+                .x      = -125,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -113,7 +114,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         },
         [MINI_GAME_ID_GOLF] = {
             .hitbox = {
-                .x      = 550,
+                .x      = 100,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -123,7 +124,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
         },
         [MINI_GAME_ID_SNAKE] = {
             .hitbox = {
-                .x      = 775,
+                .x      = 325,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -131,19 +132,9 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Snake",
             .color = {  0, 200,  80, 200},
         },
-        [MINI_GAME_ID_BINGO] = {
-            .hitbox = {
-                .x      = 1000,
-                .y      = 425,
-                .width  = 75,
-                .height = 75
-            },
-            .name = "Bingo",
-            .color = {255, 200,   0, 200},
-        },
         [MINI_GAME_ID_POLY_BLAST] = {
             .hitbox = {
-                .x      = 1225,
+                .x      = 550,
                 .y      = 425,
                 .width  = 75,
                 .height = 75
@@ -228,7 +219,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     game->cam.target = Vector2Lerp(
         game->cam.target,
         desiredTarget,
-        0.1f
+        0.05f
     );
 
     paramsMenu_update(&paramsMenu);

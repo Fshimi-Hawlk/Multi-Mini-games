@@ -5,8 +5,8 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     Error_Et error = OK;
 
     const char *playerTexturePaths[__playerTextureCount] = {
-        [PLAYER_TEXTURE_EARTH] = IMAGES_PATH "earth.png",
-        [PLAYER_TEXTURE_TROLL_FACE] = IMAGES_PATH "trollFace.png",
+        [PLAYER_TEXTURE_EARTH] = SKINS_PATH "earth.png",
+        [PLAYER_TEXTURE_TROLL_FACE] = SKINS_PATH "trollFace.png",
     };
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {

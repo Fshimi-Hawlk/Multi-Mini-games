@@ -41,25 +41,22 @@ void lobby_drawPlayer(const LobbyGame_St* const game) {
     Vector2 shadowOffset = Vector2Scale(moonLightDir, -r * 0.45f);
     Color shadowColor = Fade(BLACK, 0.28f);
 
+    DrawCircleV((Vector2) {
+            game->player.position.x + shadowOffset.x,
+            game->player.position.y + shadowOffset.y
+        }, r, shadowColor
+    );
+
     if (game->player.textureId == PLAYER_TEXTURE_DEFAULT) {
-        /* FIX: position IS the center — do not offset by radius */
-        DrawCircleV((Vector2){game->player.position.x + shadowOffset.x,
-                              game->player.position.y + shadowOffset.y}, r, shadowColor);
         DrawCircleV(game->player.position, r, BLUE);
     } else {
         DrawTexturePro(
             game->playerVisuals.textures[game->player.textureId],
             getTextureRec(game->playerVisuals.textures[game->player.textureId]),
-            (Rectangle){game->player.position.x + shadowOffset.x - r,
-                        game->player.position.y + shadowOffset.y - r, r*2, r*2},
-            Vector2Zero(), game->player.angle, shadowColor);
-
-        DrawTexturePro(
-            game->playerVisuals.textures[game->player.textureId],
-            getTextureRec(game->playerVisuals.textures[game->player.textureId]),
             lobby_getPlayerCollisionBox(&game->player),
             lobby_getPlayerCenter(&game->player),
-            game->player.angle, WHITE);
+            game->player.angle, WHITE
+        );
     }
 
     // Moonlight glow
