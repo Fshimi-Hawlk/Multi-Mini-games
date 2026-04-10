@@ -184,7 +184,7 @@ void polyBlast_printBoard(const Board_St* const board) {
         for (u8 c = 0; c < board->width; ++c) {
             Block_St block = board->blocks[r][c];
             if (block.hitsLeft >= 0) {
-                Color color = block.hitsLeft > 0 ? blockColors[block.colorIndex] : BLACK;
+                Color color = block.hitsLeft > 0 ? polyBlast_blockColors[block.colorIndex] : BLACK;
                 printf("\033[38;2;%u;%u;%um██\033[0m", color.r, color.g, color.b);
             } else printf("  ");
         }

@@ -109,10 +109,7 @@ void paramsMenu_free(ParamsMenu_St* menu);
 
 #ifdef PARAMS_MENU_IMPLEMENTATION
 
-#define LOGGER_IMPLEMENTATION
 #include "logger.h"
-
-#define SYSTEM_SETTINGS_IMPLEMENTATION
 #include "systemSettings.h"
 
 // ────────────────────────────────────────────────----------------------------

@@ -11,15 +11,15 @@
 // #include "utils/configs.h"
 #include "utils/globals.h"
 
-void drawShape(const Shape_St shape) {
+void polyBlast_drawShape(const Shape_St shape) {
     for (u8 i = 0; i < shape.prefab->blockCount; ++i) {
-        drawBlock(getIthBlockPosition(shape, i), blockColors[shape.colorIndex]);
+        polyBlast_drawBlock(polyBlast_getIthBlockPosition(shape, i), polyBlast_blockColors[shape.colorIndex]);
     }
 }
 
-void drawSlots(const ShapeSlots_t slots) {
+void polyBlast_drawSlots(const ShapeSlots_t slots) {
     for (u8 i = 0; i < 3; ++i) {
         if (slots[i].placed) continue;
-        drawShape(slots[i]);
+        polyBlast_drawShape(slots[i]);
     }
 }

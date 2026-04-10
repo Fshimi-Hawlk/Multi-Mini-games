@@ -9,8 +9,8 @@
 #include "sharedUtils/random.h"
 #include "sharedUtils/container.h"
 
-bool isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board) {
-    bool canBePlaced = isPrefabInBoundAt(shape->prefab, pos, board);
+bool polyBlast_isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board) {
+    bool canBePlaced = polyBlast_isPrefabInBoundAt(shape->prefab, pos, board);
     // log_debug("is prefab in bound at (" vec2siStr "): %s",vec2Fmt(pos), boolStr(canBePlaced));
     if (!canBePlaced) return false; // early exit to avoid unnecessary checks
 
@@ -26,7 +26,7 @@ bool isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Bo
     return canBePlaced;
 }
 
-void placeShape(const Shape_St* const shape, const u8Vector2 pos, Board_St* const board) {
+void polyBlast_placeShape(const Shape_St* const shape, const u8Vector2 pos, Board_St* const board) {
     for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
         u8Vector2 blockPos = {
             .x = pos.x + shape->prefab->offsets[j].x,
@@ -37,16 +37,16 @@ void placeShape(const Shape_St* const shape, const u8Vector2 pos, Board_St* cons
         board->blocks[blockPos.y][blockPos.x].colorIndex = shape->colorIndex;
     }
 
-    updateBoardClearing(board);
+    polyBlast_updateBoardClearing(board);
 }
 
-bool getRandomValidPosition(const Board_St* const board, const Shape_St* const shape, u8Vector2* const outPosition) {
+bool polyBlast_getRandomValidPosition(const Board_St* const board, const Shape_St* const shape, u8Vector2* const outPosition) {
     bool success = false;
 
     Arena* prev = contextArena;
     contextArena = &tempArena;
     Arena_Mark save = arena_snapshot(contextArena); {
-        AnchorVec_St candidates = getAnchorCandidates(board, shape);
+        AnchorVec_St candidates = polyBlast_getAnchorCandidates(board, shape);
         
         if (candidates.count > 0) {
             da_shuffleT(u8Vector2, &candidates, rand);
@@ -62,16 +62,16 @@ bool getRandomValidPosition(const Board_St* const board, const Shape_St* const s
 
 static bool tryGreedyPlaceShape(Board_St* const board, const Shape_St* const shape, ScoringState_St* const scoring) {
     u8Vector2 pos;
-    if (!getRandomValidPosition(board, shape, &pos)) return false;
+    if (!polyBlast_getRandomValidPosition(board, shape, &pos)) return false;
 
-    placeShape(shape, pos, board);
+    polyBlast_placeShape(shape, pos, board);
 
-    if (checkBoardForClearing(board)) {
-        clearBoard(board);
+    if (polyBlast_checkBoardForClearing(board)) {
+        polyBlast_clearBoard(board);
     }
 
     if (scoring != NULL) {
-        manageScoreAndStreak(scoring, board, shape->prefab->blockCount);
+        polyBlast_manageScoreAndStreak(scoring, board, shape->prefab->blockCount);
     }
 
     return true;
@@ -110,28 +110,28 @@ static bool greedyPlaceAll(Board_St* const board, const ShapeSlots_t slots, cons
     return true;
 }
 
-bool canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 order[3], u8 idx) {
+bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 order[3], u8 idx) {
     if (idx == 3) return true;
 
     const Shape_St* shape = &slots[order[idx]];
-    if (shape->placed) return canPlaceAll(board, slots, order, idx+1);
+    if (shape->placed) return polyBlast_canPlaceAll(board, slots, order, idx+1);
 
-    AnchorVec_St anchors = getAnchorCandidates(board, shape);
+    AnchorVec_St anchors = polyBlast_getAnchorCandidates(board, shape);
 
     // try every valid possible origin in shuffle order for more fairness of odd
     da_foreach(u8Vector2, anchor, &anchors) {
         Board_St simBoard = *board; // Avoid the need to backtrack when the attempt fails
         
-        placeShape(shape, *anchor, &simBoard);
-        if (checkBoardForClearing(&simBoard)) clearBoard(&simBoard);
+        polyBlast_placeShape(shape, *anchor, &simBoard);
+        if (polyBlast_checkBoardForClearing(&simBoard)) polyBlast_clearBoard(&simBoard);
 
-        if (canPlaceAll(&simBoard, slots, order, idx+1)) return true;
+        if (polyBlast_canPlaceAll(&simBoard, slots, order, idx+1)) return true;
     }
 
     return false;
 }
 
-void placementSimulation(GameState_St* const game) {
+void polyBlast_placementSimulation(GameState_St* const game) {
     f32 bestAttemptScore = 0;
     const Prefab_St* selectedPrefabs[3] = {0};
     bool success = false;
@@ -145,7 +145,7 @@ void placementSimulation(GameState_St* const game) {
     // Need specialized function because of `bags`,
     // because the vectors contain allocated array `items`
     // that can't be simply copied with a single memcpy of the whole bag
-    algoGame.prefabManager = deepcopyPrefabManager(&game->prefabManager);
+    algoGame.prefabManager = polyBlast_deepcopyPrefabManager(&game->prefabManager);
 
     static const u8 permutations[6][3] = {
         {0, 1, 2}, {0, 2, 1},
@@ -154,7 +154,7 @@ void placementSimulation(GameState_St* const game) {
     };
 
     for (u8 attempt = 0; attempt < 100; ++attempt) {
-        shuffleSlots(&algoGame.prefabManager);
+        polyBlast_shuffleSlots(&algoGame.prefabManager);
 
         for (u8 p = 0; p < 6; ++p) {
             ScoringState_St scoring = {
@@ -182,7 +182,7 @@ void placementSimulation(GameState_St* const game) {
 
         if (!success) {
             if (attempt > 0 && attempt % 25 == 0) {
-                adjustSizeWeights(game, 0);
+                polyBlast_adjustSizeWeights(game, 0);
             }
         } 
     }
@@ -199,19 +199,19 @@ void placementSimulation(GameState_St* const game) {
 }
 
 
-void releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board) {
+void polyBlast_releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board) {
     shape->dragging = false;
-    dragging = false;
+    polyBlast_dragging = false;
 
-    if (isShapeInBound(shape, board) && isShapePlaceable(shape, pos, board)) {
-        placeShape(shape, castTo(u8Vector2) &pos, board);
+    if (polyBlast_isShapeInBound(shape, board) && polyBlast_isShapePlaceable(shape, pos, board)) {
+        polyBlast_placeShape(shape, castTo(u8Vector2) &pos, board);
         shape->placed = true;
         PlaySound(sound_shapePlacement);
     } else {
-        shape->center = defaultPositions[shape->id];
+        shape->center = polyBlast_defaultPositions[shape->id];
     }
 }
 
-void releaseShape(Shape_St* const shape, Board_St* const board) {
-    releaseShapeAt(shape, mapShapeToBoardPos(shape, board), board);
+void polyBlast_releaseShape(Shape_St* const shape, Board_St* const board) {
+    polyBlast_releaseShapeAt(shape, polyBlast_mapShapeToBoardPos(shape, board), board);
 }

@@ -58,12 +58,3 @@ int main(void) {
     log_info("Slots shuffling tests passed");
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"

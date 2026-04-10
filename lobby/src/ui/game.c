@@ -27,6 +27,7 @@
     @see `utils/utils.h` for `getTextureRec`
 */
 
+#include "core/game.h"
 #include "ui/game.h"
 
 #include "utils/globals.h"
@@ -166,6 +167,7 @@ void lobby_drawWorldBoundaries(const Player_St* const player) {
 void lobby_drawGameZones(const LobbyGame_St* const game) {
     for (u8 i = 1; i < __miniGameIdCount; ++i) {
         GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
+        if (gameZone.name == NULL) continue;
 
         bool playerNear = CheckCollisionCircleRec(
             game->player.position, game->player.radius, gameZone.hitbox);

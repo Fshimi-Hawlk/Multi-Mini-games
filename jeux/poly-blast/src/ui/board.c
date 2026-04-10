@@ -2,13 +2,14 @@
     @file board.c (ui)
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-04-09
     @brief Board rendering implementation.
 */
 
 #include "ui/board.h"
 #include "utils/globals.h"
 
-void drawBlock(const f32Vector2 pos, const Color color) {
+void polyBlast_drawBlock(const f32Vector2 pos, const Color color) {
     s32 ix = roundf(pos.x);
     s32 iy = roundf(pos.y);
 
@@ -16,7 +17,7 @@ void drawBlock(const f32Vector2 pos, const Color color) {
     DrawRectangleLines(ix, iy, BLOCK_PX_SIZE, BLOCK_PX_SIZE, BLOCK_OUTLINE_COLOR);
 }
 
-void drawBoard(const Board_St board) {
+void polyBlast_drawBoard(const Board_St board) {
     for (u32 r = 0; r < board.height; ++r) {
         for (u32 c = 0; c < board.width; ++c) {
             const f32Vector2 tilePos = {
@@ -31,12 +32,12 @@ void drawBoard(const Board_St board) {
             } else if (block.hitsLeft < 0) {
                 tileColor = APP_BACKGROUND_COLOR;
             } else {
-                tileColor = blockColors[block.colorIndex];
+                tileColor = polyBlast_blockColors[block.colorIndex];
                 // Vector3 tileColor3 = ColorToHSV(tileColor);
                 // tileColor = ColorBrightness(tileColor, tileColor3.z * (1 - ((block.hitsLeft - 1) / 10.0f)));
             }
 
-            drawBlock(tilePos, tileColor);
+            polyBlast_drawBlock(tilePos, tileColor);
         }
     }
 }

@@ -23,11 +23,6 @@ struct SolitaireGame_St {
 #include <stdlib.h>
 #include <string.h>
 
-// Temporarily disable params menu to fix compilation
-// #define PARAMS_MENU_IMPLEMENTATION
-// #define SYSTEM_SETTINGS_IMPLEMENTATION
-// #include "paramsMenu.h"
-
 // Global params menu state for solitaire (disabled)
 // static ParamsMenu_St solitaireParamsMenu = {0};
 #include "APIs/generalAPI.h"

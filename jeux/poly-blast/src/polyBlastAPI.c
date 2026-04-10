@@ -51,7 +51,7 @@ Error_Et polyBlast_freeGameWrapper(void* game) {
 Error_Et polyBlast_initGame__full(PolyBlastGame_St** game, PolyBlastConfigs_St configs) {
     UNUSED(configs);
 
-    blockBlast_initAudio();
+    polyBlast_initAudio();
 
     *game = malloc(sizeof(PolyBlastGame_St));
     if (*game == NULL) {
@@ -65,7 +65,7 @@ Error_Et polyBlast_initGame__full(PolyBlastGame_St** game, PolyBlastConfigs_St c
     gameRef->base.freeGame  = polyBlast_freeGameWrapper;
     gameRef->base.running   = true;
 
-    polyBlast_initPrefabsAndVariants(&prefabsBag, prefabVariant);
+    polyBlast_initPrefabsAndVariants(&polyBlast_prefabsBag, polyBlast_prefabVariant);
     polyBlast_initPrefabManager(&gameRef->state.prefabManager);
     
     gameRef->state.board.width = gameRef->state.board.height = 8;
@@ -96,35 +96,35 @@ Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game) {
 
     Vector2 mouse = GetMousePosition();
 
-    if (promptUpdate(&game->state, mouse)) {
+    if (polyBlast_promptUpdate(&game->state, mouse)) {
         game->base.running = true;
     }
 
     if (currentPrompt == PROMPT_NONE && !game->state.gameOver) {
         bool allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
-            handleShape(&game->state, &game->state.prefabManager.slots[i]);
+            polyBlast_handleShape(&game->state, &game->state.prefabManager.slots[i]);
 
             allPlaced &= game->state.prefabManager.slots[i].placed;
         }
 
         if (allPlaced) {
-            adjustSizeWeights(&game->state, game->state.scoring.score - game->prevScore);
+            polyBlast_adjustSizeWeights(&game->state, game->state.scoring.score - game->prevScore);
             // array_printContent("%.3f ", game->state.prefabManager.sizeWeights.runTimeWeights, MAX_SHAPE_SIZE);
-            shuffleSlots(&game->state.prefabManager);
+            polyBlast_shuffleSlots(&game->state.prefabManager);
             // if (game->state.scoring.score > 0) {
-                placementSimulation(&game->state);
+                polyBlast_placementSimulation(&game->state);
             // }
             game->prevScore = game->state.scoring.score;
         }
 
-        if (testGameOver(game->state.board, game->state.prefabManager.slots)) {
+        if (polyBlast_testGameOver(game->state.board, game->state.prefabManager.slots)) {
             PlaySound(sound_gameOver);
             game->state.gameOver = true;
 
             if (game->state.gameOver && game->state.loadFilename != NULL && !game->state.hasBeenLost) {
                 game->state.hasBeenLost = true;
-                if (saveGameToFile(&game->state, game->state.loadFilename)) {
+                if (polyBlast_saveGameToFile(&game->state, game->state.loadFilename)) {
                     log_info("Marked loaded save as lost: %s", game->state.loadFilename);
                 }
             }
@@ -145,10 +145,10 @@ Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game) {
         ClearBackground(APP_BACKGROUND_COLOR);
 
         if (currentPrompt == PROMPT_NONE) {
-            drawUI(&game->state);
+            polyBlast_drawUI(&game->state);
         }
 
-        promptDraw();
+        polyBlast_promptDraw();
     } EndDrawing();
 
     return OK;
@@ -162,9 +162,9 @@ Error_Et polyBlast_freeGame(PolyBlastGame_St** game) {
 
     arena_free(&tempArena);
 
-    freeFonts();
+    polyBlast_freeFonts();
 
-    blockBlast_freeAudio();
+    polyBlast_freeAudio();
 
     free(*game);
     *game = NULL;

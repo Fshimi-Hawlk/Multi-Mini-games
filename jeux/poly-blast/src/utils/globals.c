@@ -9,30 +9,23 @@
 
 Font polyBlast_fonts[__fontSizeCount] = {0};
 
-GameState_St mainGameState = {0};
-GameState_St previousGameState = {0};
+GameState_St polyBlast_mainGameState = {0};
 
-u8* stateLoadingBuffer = NULL;
-u64 stateLoadingBufferSize = 0;
+Shape_St *polyBlast_shapeBag = NULL;
+GamePrefabVariant_Et polyBlast_prefabVariant = GAME_PREFAB_VARIANT_DEFAULT;
+PrefabBagVec_St polyBlast_prefabsBag = {0};
+u32 polyBlast_prefabsPerSizeOffsets[MAX_SHAPE_SIZE] = {0};
 
-Shape_St *shapeBag = NULL;
-GamePrefabVariant_Et prefabVariant = GAME_PREFAB_VARIANT_DEFAULT;
-PrefabBagVec_St prefabsBag = {0};
-u32 prefabsPerSizeOffsets[MAX_SHAPE_SIZE] = {0};
+f32Vector2 polyBlast_mouseDeltaFromShapeCenter = {0};
+bool polyBlast_dragging = false;
 
-GameState_St game = {0};
-GameState_St algoGame = {0};
-
-f32Vector2 mouseDeltaFromShapeCenter = {0};
-bool dragging = false;
-
-const f32Vector2 defaultPositions[3] = {
+const f32Vector2 polyBlast_defaultPositions[3] = {
     {.x = WINDOW_WIDTH * 17.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
     {.x = WINDOW_WIDTH * 50 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
     {.x = WINDOW_WIDTH * 82.5 / 100.0f, .y = WINDOW_HEIGHT * 85 / 100.0f},
 };
 
-const Color blockColors[_blockColorCount] = {
+const Color polyBlast_blockColors[_blockColorCount] = {
     { .r = 254, .g =  40, .b =  44, .a = 255 }, // Red
     { .r = 232, .g = 116, .b =  33, .a = 255 }, // Orange
     { .r = 242, .g = 187, .b =  58, .a = 255 }, // Yellow
@@ -43,7 +36,7 @@ const Color blockColors[_blockColorCount] = {
     { .r = 255, .b = 109, .g = 194, .a = 255 }, // Pink
 };
 
-const Prefab_St prefabs[] = {
+const Prefab_St polyBlast_prefabs[] = {
     [PREFAB_1x1]  = { .blockCount = 1, .orientations = -1, .offsets = { {0, 0} } },
     [PREFAB_2x2]  = { .blockCount = 4, .orientations = -1, .offsets = { {0, 0}, {0, 1}, {1, 0}, {1, 1} } },
     [PREFAB_2x3]  = { .blockCount = 6, .orientations = -1, .offsets = { {0, 0}, {0, 1}, {0, 2}, {1, 0}, {1, 1}, {1, 2} } },
@@ -103,9 +96,9 @@ const Prefab_St prefabs[] = {
     { .blockCount = 6, .orientations = -1, .offsets = { {1, 0}, {1, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 2} } },
 };
 
-const u32 prefabCount = sizeof(prefabs) / sizeof(*prefabs);
+const u32 prefabCount = sizeof(polyBlast_prefabs) / sizeof(*polyBlast_prefabs);
 
-PromptState_Et currentPrompt = PROMPT_START_LOAD;   ///< Modal state for save/load UI
+PromptState_Et polyBlast_currentPrompt = PROMPT_START_LOAD;   ///< Modal state for save/load UI
 
 // Map_St maps[] = {
 //     {

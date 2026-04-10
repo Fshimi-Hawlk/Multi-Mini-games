@@ -48,15 +48,15 @@ bool initApp(void) {
     SetTargetFPS(60);
 
     InitAudioDevice();
-    blockBlast_initAudio();
+    polyBlast_initAudio();
 
     initLogger();
 
-    if (!initFonts()) {
+    if (!polyBlast_initFonts()) {
         log_warn("Couldn't initialize every fonts");
     };
 
-    initGame(&mainGameState);
+    initGame(&polyBlast_mainGameState);
 
     return true;
 }
@@ -65,9 +65,9 @@ void freeApp(void) {
     arena_free(&globalArena);
     arena_free(&tempArena);
 
-    freeFonts();
+    polyBlast_freeFonts();
 
-    blockBlast_freeAudio();
+    polyBlast_freeAudio();
     CloseAudioDevice();
 
     CloseWindow();

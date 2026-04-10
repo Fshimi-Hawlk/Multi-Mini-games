@@ -141,7 +141,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Bingo",
             .color = {255, 200,   0, 200},
         },
-        [MINI_GAME_ID_BLOCKBLAST] = {
+        [MINI_GAME_ID_POLY_BLAST] = {
             .hitbox = {
                 .x      = 1225,
                 .y      = 425,
@@ -235,6 +235,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
 
     // Collision check with game zone
     for (u8 i = 1; i < __miniGameIdCount; ++i) {
+        if (game->subGameManager.gameZones[i].name == NULL) continue;
         if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->subGameManager.gameZones[i].hitbox)) {
             if (IsKeyPressed(KEY_E)) {
                 game->subGameManager.currentScene = i;

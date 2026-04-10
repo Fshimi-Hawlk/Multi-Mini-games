@@ -41,7 +41,5 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-#define LOGGER_IMPLEMENTATION
 #define PARAMS_MENU_IMPLEMENTATION
-#define SYSTEM_SETTINGS_IMPLEMENTATION
 #include "paramsMenu.h"

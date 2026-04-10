@@ -2,7 +2,7 @@
     @file save.c
     @author Fshimi Hawlk
     @date 2026-02-27
-    @date 2026-04-07
+    @date 2026-04-09
     @brief Implementation of game state serialization and file I/O.
 
     Contributors:
@@ -142,7 +142,7 @@ static u64 readF32(const u8* buffer, u64 bufferSize, u64 offset, f32* value) {
         }                                                                           \
     } while (0)
 
-u64 getSerializedGameStateSize(const GameState_St* const state) {
+u64 polyBlast_getSerializedGameStateSize(const GameState_St* const state) {
     const PrefabManager_St* manager = &state->prefabManager;
     u64 size = 0;
 
@@ -183,7 +183,7 @@ u64 getSerializedGameStateSize(const GameState_St* const state) {
     return size;
 }
 
-u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize) {
+u64 polyBlast_serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize) {
     if (state == NULL || buffer == NULL) return 0;
 
     const PrefabManager_St* manager = &state->prefabManager;
@@ -195,7 +195,7 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
     offset += writeU8(buffer, bufferSize, offset, SERIAL_VERSION);
 
     // prefab variant
-    offset += writeU8(buffer, bufferSize, offset, (u8) prefabVariant);
+    offset += writeU8(buffer, bufferSize, offset, (u8) polyBlast_prefabVariant);
 
     // Scoring
     offset += writeU64(buffer, bufferSize, offset, state->scoring.score);
@@ -228,8 +228,8 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
     for (u8 i = 0; i < 3; ++i) {
         const Shape_St* slot = &manager->slots[i];
 
-        assert(slot->prefab >= prefabs && "Slot wasn't proprely init");
-        u64 prefabIndex = (slot->prefab - prefabsBag.items);
+        assert(slot->prefab >= polyBlast_prefabs && "Slot wasn't proprely init");
+        u64 prefabIndex = (slot->prefab - polyBlast_prefabsBag.items);
         u8 colorIndex = (u8) slot->colorIndex;
         u8 placed = (u8) slot->placed;
         offset += writeU64(buffer, bufferSize, offset, prefabIndex);
@@ -242,7 +242,7 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
     return offset;
 }
 
-bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init) {
+bool polyBlast_deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init) {
     if (state == NULL) {
         log_warn("Received NULL state");
         return false;
@@ -279,8 +279,8 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
     u8 prefabVariantU8;
     offset += readU8(buffer, bufferSize, offset, &prefabVariantU8);
     if (init) {
-        prefabVariant = (GamePrefabVariant_Et) prefabVariantU8;
-        polyBlast_initPrefabsAndVariants(&prefabsBag, prefabVariant);
+        polyBlast_prefabVariant = (GamePrefabVariant_Et) prefabVariantU8;
+        polyBlast_initPrefabsAndVariants(&polyBlast_prefabsBag, polyBlast_prefabVariant);
     }
 
     // Scoring
@@ -318,7 +318,7 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
     // Slots
     for (u8 i = 0; i < 3; ++i) {
         Shape_St* slot = &manager->slots[i];
-        u64 prefabIndex = prefabsBag.count;
+        u64 prefabIndex = polyBlast_prefabsBag.count;
         u8 placed, colorIndex;
         offset += readU64(buffer, bufferSize, offset, &prefabIndex);
         offset += readU8(buffer, bufferSize, offset, &colorIndex);
@@ -328,14 +328,14 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
         slot->colorIndex = (BlockColor_Et) colorIndex;
         slot->dragging = false;
         slot->id = i;
-        slot->center = defaultPositions[i];
+        slot->center = polyBlast_defaultPositions[i];
 
-        if (prefabIndex >= prefabsBag.count) {
-            log_fatal("Prefab index of slot %u was corrupted: got %zu (Max: %u)", i, prefabIndex, prefabCount - 1);
+        if (prefabIndex >= polyBlast_prefabsBag.count) {
+            log_fatal("Prefab index of slot %u was corrupted: got %zu (Max: %u)", i, prefabIndex, polyBlast_prefabCount - 1);
             return false;
         }
 
-        slot->prefab = &prefabsBag.items[prefabIndex];
+        slot->prefab = &polyBlast_prefabsBag.items[prefabIndex];
     }
 
     u8 hasBeenLostFlag;
@@ -348,7 +348,7 @@ bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64
     return true;
 }
 
-bool saveGameToFile(const GameState_St* const state, const char* filename) {
+bool polyBlast_saveGameToFile(const GameState_St* const state, const char* filename) {
     if (state == NULL || filename == NULL) return false;
 
     char path[256];
@@ -357,7 +357,7 @@ bool saveGameToFile(const GameState_St* const state, const char* filename) {
         snprintf(path, sizeof(path), "%s%s.sav", SAVES_PATH, filename);
     }
 
-    u64 size = getSerializedGameStateSize(state);
+    u64 size = polyBlast_getSerializedGameStateSize(state);
     u8* buffer = calloc(size, sizeof(*buffer));
     if (!buffer) {
         log_fatal("Couldn't allocate buffer");
@@ -365,7 +365,7 @@ bool saveGameToFile(const GameState_St* const state, const char* filename) {
         return false;
     }
 
-    u64 written = serializeGameState(state, buffer, size);
+    u64 written = polyBlast_serializeGameState(state, buffer, size);
     if (written == 0) {
         log_warn("Couldn't write to buffer");
         free(buffer);

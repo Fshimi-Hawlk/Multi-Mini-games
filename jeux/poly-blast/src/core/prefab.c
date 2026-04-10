@@ -1,7 +1,7 @@
 #include "core/prefab.h"
 #include "core/board.h"
 
-bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
+bool polyBlast_haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
     bool hashmap[36] = {0};
     bool same = true;
 
@@ -18,8 +18,8 @@ bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
     return same;
 }
 
-bool isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 pos, const Board_St* const board) {
-    return isInBound(pos, board)
+bool polyBlast_isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 pos, const Board_St* const board) {
+    return polyBlast_isInBound(pos, board)
         && (pos.x + prefab->width <= board->width)
         && (pos.y + prefab->height <= board->height);
 }
@@ -49,7 +49,7 @@ static void findPrefabMinMax(const s8Vector2 *const offsets, const u8 blockCount
     }
 }
 
-void setPrefabBoundingBox(Prefab_St* const prefab) {
+void polyBlast_setPrefabBoundingBox(Prefab_St* const prefab) {
     s8Vector2 min, max;
     findPrefabMinMax((const s8Vector2 *const) prefab->offsets, prefab->blockCount, &min, &max);
 
@@ -58,32 +58,32 @@ void setPrefabBoundingBox(Prefab_St* const prefab) {
     prefab->height = (max.y - min.y + 1);
 }
 
-f32Vector2 getOffsetCenter(const Prefab_St prefab) {
+f32Vector2 polyBlast_getOffsetCenter(const Prefab_St prefab) {
     if (prefab.blockCount == 0) return (f32Vector2) {0};
     return (f32Vector2) { .x = prefab.width / 2.0f, .y = prefab.height / 2.0f };
 }
 
-void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag) {
+void polyBlast_addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag) {
     da_append(prefabsBag, prefab);
 
     for (u8 k = 1; k < prefab.orientations; ++k) {
-        rotatePrefab(&prefab, 1);
+        polyBlast_rotatePrefab(&prefab, 1);
         da_append(prefabsBag, prefab);
     }
 
     if (!prefab.canMirror) return;
 
-    rotatePrefab(&prefab, 1);
-    mirrorPrefab(&prefab);
+    polyBlast_rotatePrefab(&prefab, 1);
+    polyBlast_mirrorPrefab(&prefab);
     da_append(prefabsBag, prefab);
 
     for (u8 k = 1; k < prefab.orientations; ++k) {
-        rotatePrefab(&prefab, 1);
+        polyBlast_rotatePrefab(&prefab, 1);
         da_append(prefabsBag, prefab);
     }
 }
 
-void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
+void polyBlast_rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 
     rotateBy %= 4;
@@ -118,7 +118,7 @@ void rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
     memcpy(prefab->offsets, newOffsets, prefab->blockCount * sizeof(*prefab->offsets));
 }
 
-void mirrorPrefab(Prefab_St* const prefab) {
+void polyBlast_mirrorPrefab(Prefab_St* const prefab) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 
     s8Vector2 newOffsets[MAX_SHAPE_SIZE];

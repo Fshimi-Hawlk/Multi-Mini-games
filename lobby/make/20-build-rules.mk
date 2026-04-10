@@ -4,8 +4,8 @@
 # Rules
 $(BIN): $(LIB_OBJECTS) $(MAIN_OBJECT)
 	$(SILENT_PREFIX)mkdir -p $(@D)
-	# --start-group/--end-group: linker does multiple passes so circular
-	# static deps (e.g. game libs <-> raylib 3D) are all resolved.
+	@# --start-group/--end-group: linker does multiple passes so circular
+	@# static deps (e.g. game libs <-> raylib 3D) are all resolved.
 	$(SILENT_PREFIX)$(CC) $^ -Wl,--start-group $(LDFLAGS) -Wl,--end-group -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c

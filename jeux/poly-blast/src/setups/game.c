@@ -93,8 +93,8 @@ bool polyBlast_initPrefabManager(PrefabManager_St* const manager) {
         manager->bags[i].count = 0;
     }
 
-    for (u32 i = 0; i < prefabsBag.count; ++i) {
-        u8 size_idx = prefabsBag.items[i].blockCount - 1;
+    for (u32 i = 0; i < polyBlast_prefabsBag.count; ++i) {
+        u8 size_idx = polyBlast_prefabsBag.items[i].blockCount - 1;
         da_append(&manager->bags[size_idx], i);
     }
 
@@ -104,7 +104,7 @@ bool polyBlast_initPrefabManager(PrefabManager_St* const manager) {
         da_shuffleXor(bag, rand);
     }
 
-    shuffleSlots(manager);
+    polyBlast_shuffleSlots(manager);
 
     return true;
 }
@@ -112,7 +112,7 @@ bool polyBlast_initPrefabManager(PrefabManager_St* const manager) {
 bool initGame(GameState_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
-            polyBlast_initPrefabsAndVariants(&prefabsBag, prefabVariant);
+            polyBlast_initPrefabsAndVariants(&polyBlast_prefabsBag, polyBlast_prefabVariant);
             polyBlast_initPrefabManager(&game->prefabManager);
             
             game->board.width = game->board.height = 8;
@@ -128,10 +128,10 @@ bool initGame(GameState_St* const game) {
 
             // log_info("%u, %u", prefabPerRow, prefabPerCol);
 
-            shapeBag = context_alloc(prefabsBag.count * sizeof(*shapeBag));
-            for (u32 i = 0; i < prefabsBag.count; ++i) {
-                shapeBag[i] = (Shape_St) {
-                    .prefab = &prefabsBag.items[i],
+            polyBlast_shapeBag = context_alloc(polyBlast_prefabsBag.count * sizeof(*polyBlast_shapeBag));
+            for (u32 i = 0; i < polyBlast_prefabsBag.count; ++i) {
+                polyBlast_shapeBag[i] = (Shape_St) {
+                    .prefab = &polyBlast_prefabsBag.items[i],
                     .colorIndex = i % (_blockColorCount - 1),
                     .center = {
                         .x = offset * (1 + i % prefabPerRow),
@@ -158,7 +158,7 @@ void polyBlast_resetGame(GameState_St* const game) {
     game->scoring.score = 0;
     game->scoring.streakCount = 0;
     game->scoring.streakGrace = 0;
-    buildScoreRelatedTexts(&game->scoring);
+    polyBlast_buildScoreRelatedTexts(&game->scoring);
 
     // Full board reset (re-allocates clearing arrays if needed)
     memset(game->board.blocks, 0, sizeof(**game->board.blocks) * game->board.width * game->board.height);
@@ -167,5 +167,5 @@ void polyBlast_resetGame(GameState_St* const game) {
     polyBlast_initPrefabManager(&game->prefabManager);
 
     // Give the player 3 new shapes immediately
-    placementSimulation(game);
+    polyBlast_placementSimulation(game);
 }

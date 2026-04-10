@@ -115,5 +115,5 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
+#define PARAMS_MENU_IMPLEMENTATION
+#include "paramsMenu.h"

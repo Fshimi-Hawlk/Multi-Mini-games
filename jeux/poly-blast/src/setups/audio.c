@@ -9,7 +9,7 @@ Sound sound_combo;
 Sound sound_gameOver;
 Sound sound_lineBreak;
 
-void blockBlast_initAudio(void) {
+void polyBlast_initAudio(void) {
     if (audioInitialized) return;
 
     sound_shapePlacement = LoadSound(SOUNDS_PATH "shapePlacement.wav");
@@ -20,7 +20,7 @@ void blockBlast_initAudio(void) {
     audioInitialized = true;
 }
 
-void blockBlast_freeAudio(void) {
+void polyBlast_freeAudio(void) {
     if (!audioInitialized) return;
 
     if (IsSoundValid(sound_shapePlacement)) UnloadSound(sound_shapePlacement);

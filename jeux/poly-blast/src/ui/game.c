@@ -2,6 +2,7 @@
     @file game.c (ui)
     @author Fshimi Hawlk
     @date 2026-01-07
+    @date 2026-04-09
     @brief Main UI dispatch.
 */
 
@@ -13,7 +14,7 @@
 
 #include "sharedUtils/debug.h"
 
-f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos) {
+f32Vector2 polyBlast_getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos) {
     f32Vector2 textSize = MeasureTextEx(font, text, fontSize, 1);
     return (f32Vector2) {
         .x = pos.x - textSize.x / 2.0f,
@@ -21,12 +22,12 @@ f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize
     };
 }
 
-void drawText(const char *const text, Font font, f32 fontSize, f32Vector2 pos, Color tint) {
-    pos = getTextCenterPosition(text, font, fontSize, pos);
+void polyBlast_drawText(const char *const text, Font font, f32 fontSize, f32Vector2 pos, Color tint) {
+    pos = polyBlast_getTextCenterPosition(text, font, fontSize, pos);
     DrawTextEx(font, text, pos, fontSize, 1, tint);
 }
 
-void drawUI(const GameState_St* const game) {
+void polyBlast_drawUI(const GameState_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
             static f32Vector2 scorePos = {
@@ -44,24 +45,24 @@ void drawUI(const GameState_St* const game) {
                 .y = WINDOW_HEIGHT * 3.0f / 10.0f
             };
 
-            drawBoard(game->board);
-            drawSlots(game->prefabManager.slots);
+            polyBlast_drawBoard(game->board);
+            polyBlast_drawSlots(game->prefabManager.slots);
 
-            drawText(game->scoring.scoreText, polyBlast_fonts[FONT48], 48, scorePos, WHITE);
+            polyBlast_drawText(game->scoring.scoreText, polyBlast_fonts[FONT48], 48, scorePos, WHITE);
 
             if (game->scoring.streakCount > 0) {
                 Color streakTextColor = Fade(WHITE, game->scoring.streakGrace * 2.0f / game->scoring.streakCount);
-                drawText(game->scoring.streakText, polyBlast_fonts[FONT48], 48, streakPos, streakTextColor);
+                polyBlast_drawText(game->scoring.streakText, polyBlast_fonts[FONT48], 48, streakPos, streakTextColor);
             }
 
-            if (mainGameState.gameOver) {
-                drawText("Game Over", polyBlast_fonts[FONT48], 48, gameOverPos, RED);
+            if (game->gameOver) {
+                polyBlast_drawText("Game Over", polyBlast_fonts[FONT48], 48, gameOverPos, RED);
             }
         } break;
 
         case SCENE_STATE_ALL_PREFABS: {
-            for (u32 i = 0; i < prefabsBag.count; ++i) {
-                drawShape(shapeBag[i]);
+            for (u32 i = 0; i < polyBlast_prefabsBag.count; ++i) {
+                polyBlast_drawShape(polyBlast_shapeBag[i]);
             }
         } break;
 

@@ -3,7 +3,7 @@
 
 #include "utils/globals.h"
 
-void initFonts(void) {
+void lobby_initFonts(void) {
     f32 fontSizes[__fontSizeCount] = {16, 24, 32, 48, 64, 96, 128};
 
     for (u8 i = 0; i < __fontSizeCount; ++i) {

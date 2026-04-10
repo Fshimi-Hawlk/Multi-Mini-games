@@ -28,7 +28,7 @@ endif
 MAKEFLAGS += --no-print-directory
 
 # Excluded directories
-EXCLUDED_DIRS := assets build docs firstparty jeux lobby logs thirdparty sub-project-example lt-env
+EXCLUDED_DIRS := assets build docs jeux logs thirdparty sub-project-example lt-env
 
 # Detect modules (normalize by removing trailing /)
 ROOT_MODULES := $(patsubst %/,%,$(wildcard */))
