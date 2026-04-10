@@ -210,17 +210,17 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
                 physics_spawnParticles(particles, particleCount, pins[i].position, 5,
                                        (Color){240,200,160,180});
                 PlaySound(sound_pinFall);
-}
+            }
+        }
+    }
 }
 
 bool physics_hasBallReachedPins(Ball_St* ball) {
     return ball->position.z <= PIN1_Z + ball->radius;
 }
 
-    }
-}
-
 bool physics_isGutterBall(Ball_St* ball, float laneWidth, float gutterWidth) {
+    (void) laneWidth;
     float edge = LANE_EDGE - gutterWidth * 0.5f;
     return ball->position.x < -edge || ball->position.x > edge;
 }
