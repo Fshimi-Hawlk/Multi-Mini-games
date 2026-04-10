@@ -137,7 +137,7 @@ static bool deleteSave(const char* filename) {
     return (remove(path) == 0);
 }
 
-bool loadGameFromFile(GameState_St* const state, const char* filename) {
+bool polyBlast_loadGameFromFile(GameState_St* const state, const char* filename) {
     if (!state || !filename) return false;
 
     char path[256];
@@ -164,7 +164,7 @@ bool loadGameFromFile(GameState_St* const state, const char* filename) {
     fread(buffer, 1, size, f);
     fclose(f);
 
-    bool ok = deserializeGameState(state, buffer, size, true);
+    bool ok = polyBlast_deserializeGameState(state, buffer, size, true);
     free(buffer);
 
     state->loadFilename = context_strdup(filename);
@@ -173,7 +173,7 @@ bool loadGameFromFile(GameState_St* const state, const char* filename) {
         log_info("Loaded previously-lost save (stats will not be recorded for leaderboards)");
     }
 
-    buildScoreRelatedTexts(&state->scoring);
+    polyBlast_buildScoreRelatedTexts(&state->scoring);
 
     return ok;
 }
@@ -232,7 +232,7 @@ static void promptInitLoadList(void) {
 
 }
 
-bool promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
+bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
     if (currentPrompt == PROMPT_NONE) return false;
 
     bool shouldCloseWindow = false;
@@ -240,7 +240,7 @@ bool promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
     switch (currentPrompt) {
         case PROMPT_START_LOAD: {
             if (textButtonUpdate(&btnNewGame, mouseScreen)) {
-                resetGame(game);
+                polyBlast_resetGame(game);
                 currentPrompt = PROMPT_NONE;
             }
 
@@ -267,7 +267,7 @@ bool promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
             const char *filename = filenameBox.buffer;
             bool filenameEmpty = filename[0] == '\0';
             if (textButtonUpdate(&btnSaveFile, mouseScreen) && !filenameEmpty) {
-                if (saveGameToFile(game, filename)) {
+                if (polyBlast_saveGameToFile(game, filename)) {
                     log_info("Game saved as \"%s\"", filename);
                 }
 
@@ -284,14 +284,14 @@ bool promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
             scrollFrameUpdate(&saveListScroll, mouseScreen);
 
             if (textButtonUpdate(&btnCancelLoad, mouseScreen)) {
-                resetGame(game);
+                polyBlast_resetGame(game);
                 freeSaveList(&saveList);
                 currentPrompt = PROMPT_NONE;
             }
 
             bool canLoad = (saveList.count > 0 && selectedSaveIndex != -1);
             if (canLoad && textButtonUpdate(&btnLoadChosen, mouseScreen)) {
-                if (loadGameFromFile(game, saveList.items[selectedSaveIndex].filename)) {
+                if (polyBlast_loadGameFromFile(game, saveList.items[selectedSaveIndex].filename)) {
                     log_info("Loaded save: %s", saveList.items[selectedSaveIndex].filename);
                 }
                 freeSaveList(&saveList);
@@ -350,21 +350,21 @@ bool promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
     return shouldCloseWindow;
 }
 
-void promptDraw(void) {
+void polyBlast_promptDraw(void) {
     if (currentPrompt == PROMPT_NONE) return;
 
     DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.7f));
 
     switch (currentPrompt) {
         case PROMPT_START_LOAD: {
-            drawText("Do you want to load a previous save?", polyBlast_fonts[FONT48], 36,
+            polyBlast_drawText("Do you want to load a previous save?", polyBlast_fonts[FONT48], 36,
                      (f32Vector2){WINDOW_WIDTH / 2.0f, 200}, WHITE);
             textButtonDraw(&btnNewGame, polyBlast_fonts[FONT24], 24);
             textButtonDraw(&btnLoadSave, polyBlast_fonts[FONT24], 24);
         } break;
 
         case PROMPT_SAVE_QUIT: {
-            drawText("Do you want to save before leaving?", polyBlast_fonts[FONT48], 36,
+            polyBlast_drawText("Do you want to save before leaving?", polyBlast_fonts[FONT48], 36,
                      (f32Vector2){WINDOW_WIDTH / 2.0f, 200}, WHITE);
             textButtonDraw(&btnYesSave, polyBlast_fonts[FONT24], 24);
             textButtonDraw(&btnNoSave, polyBlast_fonts[FONT24], 24);
@@ -372,7 +372,7 @@ void promptDraw(void) {
 
         case PROMPT_SAVE_FILENAME: {
             // Filename input
-            drawText("Enter filename to save:", polyBlast_fonts[FONT32], 32,
+            polyBlast_drawText("Enter filename to save:", polyBlast_fonts[FONT32], 32,
                         (f32Vector2){WINDOW_WIDTH / 2.0f, 220}, WHITE);
             textBoxDraw(&filenameBox, polyBlast_fonts[FONT24], 24);
             textButtonDraw(&btnSaveFile, polyBlast_fonts[FONT24], 24);
@@ -380,7 +380,7 @@ void promptDraw(void) {
         } break;
 
         case PROMPT_SAVES_LIST: {
-            drawText("Load a previous save", polyBlast_fonts[FONT48], 36,
+            polyBlast_drawText("Load a previous save", polyBlast_fonts[FONT48], 36,
                         (f32Vector2){WINDOW_WIDTH / 2.0f, 120}, WHITE);
 
             DrawTextEx(polyBlast_fonts[FONT24], "                 ------Filename------     Score     Streak Status", (Vector2){140, 170}, 24, 1, LIGHTGRAY);
@@ -406,7 +406,7 @@ void promptDraw(void) {
         } break;
 
         case PROMPT_CONFIRM_DELETE: {
-            drawText("Delete this save?", polyBlast_fonts[FONT48], 36,
+            polyBlast_drawText("Delete this save?", polyBlast_fonts[FONT48], 36,
                      (f32Vector2){WINDOW_WIDTH/2.0f, 240}, WHITE);
             textButtonDraw(&btnYesDelete, polyBlast_fonts[FONT32], 28);
             textButtonDraw(&btnNoDelete, polyBlast_fonts[FONT32], 28);

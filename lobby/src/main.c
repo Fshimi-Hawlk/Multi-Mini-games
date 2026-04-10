@@ -28,7 +28,7 @@
 #include "APIs/bowlingAPI.h"
 #include "APIs/golfAPI.h"
 #include "APIs/snakeAPI.h"
-// #include "APIs/blockBlastAPI.h"
+#include "APIs/polyBlastAPI.h"
 
 // ─────────────────────────────────────────────────────────────────
 // Generic game dispatch table
@@ -79,9 +79,13 @@ static Error_Et golf_init_shim(BaseGame_St** p)     { return golf_initGame((Golf
 static Error_Et golf_loop_shim(BaseGame_St*  p)     { return golf_gameLoop((GolfGame_St*)p);            }
 static Error_Et golf_free_shim(BaseGame_St** p)     { return golf_freeGame((GolfGame_St**)p);           }
 
-static Error_Et snake_init_shim(BaseGame_St** p)    { return snake_initGame((SnakeGame_St**)p);          }
-static Error_Et snake_loop_shim(BaseGame_St*  p)    { return snake_gameLoop((SnakeGame_St*)p);            }
-static Error_Et snake_free_shim(BaseGame_St** p)    { return snake_freeGame((SnakeGame_St**)p);          }
+static Error_Et snake_init_shim(BaseGame_St** p)    { return snake_initGame((SnakeGame_St**)p);         }
+static Error_Et snake_loop_shim(BaseGame_St*  p)    { return snake_gameLoop((SnakeGame_St*)p);          }
+static Error_Et snake_free_shim(BaseGame_St** p)    { return snake_freeGame((SnakeGame_St**)p);         }
+
+static Error_Et polyBlast_init_shim(BaseGame_St** p)    { return polyBlast_initGame((PolyBlastGame_St**)p);         }
+static Error_Et polyBlast_loop_shim(BaseGame_St*  p)    { return polyBlast_gameLoop((PolyBlastGame_St*)p);          }
+static Error_Et polyBlast_free_shim(BaseGame_St** p)    { return polyBlast_freeGame((PolyBlastGame_St**)p);         }
 
 // static Error_Et blockBlast_init_shim(BaseGame_St** p)  { return blockBlast_initGame((BlockBlastAPI_St**)p);  }
 // static Error_Et blockBlast_loop_shim(BaseGame_St*  p)  { return blockBlast_gameLoop((BlockBlastAPI_St*)p);   }
@@ -94,14 +98,14 @@ static Error_Et snake_free_shim(BaseGame_St** p)    { return snake_freeGame((Sna
     Index i = MINI_GAME_ID_XXX.
 */
 static const SceneDesc_St scenes[__miniGameIdCount] = {
-    [MINI_GAME_ID_LOBBY]    = { "Lobby",    NULL,               NULL,               NULL,               0,    0   },
-    [MINI_GAME_ID_TETRIS]   = { "Tetris",   tetris_init_shim,   tetris_loop_shim,   tetris_free_shim,   600,  800 },
-    [MINI_GAME_ID_SOLITAIRE]= { "Solitaire",solitaire_init_shim,solitaire_loop_shim,solitaire_free_shim,0,    0   },
-    [MINI_GAME_ID_SUIKA]    = { "Suika",    suika_init_shim,    suika_loop_shim,    suika_free_shim,    800,  900 },
-    [MINI_GAME_ID_BOWLING]  = { "Bowling",  bowling_init_shim,  bowling_loop_shim,  bowling_free_shim,  1200, 800 },
-    [MINI_GAME_ID_GOLF]     = { "Golf 3D",  golf_init_shim,     golf_loop_shim,     golf_free_shim,     1280, 720 },
-    [MINI_GAME_ID_SNAKE]       = { "Snake",      snake_init_shim,      snake_loop_shim,      snake_free_shim,       800,  600 },
-    // [MINI_GAME_ID_BLOCKBLAST]   = { "Block Blast", blockBlast_init_shim,  blockBlast_loop_shim,  blockBlast_free_shim,  1000, 800 },
+    [MINI_GAME_ID_LOBBY]        = { "Lobby",        NULL,                   NULL,                   NULL,                   800,  600 },
+    [MINI_GAME_ID_TETRIS]       = { "Tetris",       tetris_init_shim,       tetris_loop_shim,       tetris_free_shim,       600,  800 },
+    [MINI_GAME_ID_SOLITAIRE]    = { "Solitaire",    solitaire_init_shim,    solitaire_loop_shim,    solitaire_free_shim,    0,    0   },
+    [MINI_GAME_ID_SUIKA]        = { "Suika",        suika_init_shim,        suika_loop_shim,        suika_free_shim,        800,  900 },
+    [MINI_GAME_ID_BOWLING]      = { "Bowling",      bowling_init_shim,      bowling_loop_shim,      bowling_free_shim,      1200, 800 },
+    [MINI_GAME_ID_GOLF]         = { "Golf 3D",      golf_init_shim,         golf_loop_shim,         golf_free_shim,         1280, 720 },
+    [MINI_GAME_ID_SNAKE]        = { "Snake",        snake_init_shim,        snake_loop_shim,        snake_free_shim,        800,  600 },
+    [MINI_GAME_ID_POLY_BLAST]   = { "Poly Blast",   snake_init_shim,        snake_loop_shim,        snake_free_shim,        800,  600 },
 };
 
 // ─────────────────────────────────────────────────────────────────

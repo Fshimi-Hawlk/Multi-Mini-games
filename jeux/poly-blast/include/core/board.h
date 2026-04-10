@@ -17,9 +17,9 @@
     @param board Pointer to the board.
     @return true if in bounds, false otherwise.
 */
-bool isInBound(const s8Vector2 pos, const Board_St* const board);
+bool polyBlast_isInBound(const s8Vector2 pos, const Board_St* const board);
 
-AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* const shape);
+AnchorVec_St polyBlast_getAnchorCandidates(const Board_St* const board, const Shape_St* const shape);
 
 /**
     @brief Scans the board and marks full rows and columns for clearing.
@@ -30,7 +30,7 @@ AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* co
     Results are written into board->rowsToClear[] and board->columnsToClear[].
     These arrays **must** be valid and zero-initialized before calling this function.
 */
-void updateBoardClearing(Board_St* const board);
+void polyBlast_updateBoardClearing(Board_St* const board);
 
 /**
     @brief Scans the board's rows/cols to clear arrays.
@@ -38,14 +38,14 @@ void updateBoardClearing(Board_St* const board);
     @return true if at least one row **or** column is full (i.e. clearBoard() would do something)
     @return false if the board has no completable lines
 */
-bool checkBoardForClearing(const Board_St* const board);
+bool polyBlast_checkBoardForClearing(const Board_St* const board);
 
 /**
     @brief Clears marked rows and columns on the board.
 
     @param board Pointer to the board.
 */
-void clearBoard(Board_St* const board);
+void polyBlast_clearBoard(Board_St* const board);
 
 /**
     @brief Counts empty cells (hitsLeft == 0) on the board.
@@ -56,9 +56,9 @@ void clearBoard(Board_St* const board);
     @param board Pointer to the board.
     @return Anount of empty cell
 */
-u32 getEmptyCellCount(const Board_St* const board);
+u32 polyBlast_getEmptyCellCount(const Board_St* const board);
 
-void printEmptyCells(const AnchorVec_St cells);
-void printBoard(const Board_St* const board);
+void polyBlast_printEmptyCells(const AnchorVec_St cells);
+void polyBlast_printBoard(const Board_St* const board);
 
 #endif // CORE_GAME_BOARD_H

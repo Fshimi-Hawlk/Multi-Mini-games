@@ -14,7 +14,9 @@
 /**
     @brief Initialises a fresh board (position, clearing arrays, etc.).
 */
-bool initBoard(Board_St* const board);
+bool polyBlast_initBoard(Board_St* const board);
+
+bool polyBlast_initPrefabManager(PrefabManager_St* const manager);
 
 /**
     @brief Full game initialisation (prefabs, board, slots, scoring).
@@ -34,6 +36,6 @@ bool initGame(GameState_St* const game);
     @pre  game != NULL
     @post  game->gameOver == false, board empty, fresh slots ready
 */
-void resetGame(GameState_St* const game);
+void polyBlast_resetGame(GameState_St* const game);
 
 #endif // SETUPS_GAME_H

@@ -10,8 +10,8 @@
 
 #include "utils/userTypes.h"
 
-f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos);
-void drawText(const char* const text, Font font, f32 fontSize, f32Vector2 pos, Color tint);
+f32Vector2 polyBlast_getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos);
+void polyBlast_drawText(const char* const text, Font font, f32 fontSize, f32Vector2 pos, Color tint);
 
 /**
     @brief Draws all UI elements for the current scene.
@@ -21,6 +21,6 @@ void drawText(const char* const text, Font font, f32 fontSize, f32Vector2 pos, C
 
     @param game Pointer to the current game state.
 */
-void drawUI(const GameState_St* const game);
+void polyBlast_drawUI(const GameState_St* const game);
 
 #endif // UI_GAME_H

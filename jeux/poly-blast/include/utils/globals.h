@@ -21,7 +21,6 @@
 extern Font      polyBlast_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
 
 extern GameState_St mainGameState;
-extern GameState_St previousGameState;
 
 extern u8* stateLoadingBuffer;
 extern u64 stateLoadingBufferSize;

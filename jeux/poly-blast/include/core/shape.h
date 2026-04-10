@@ -17,7 +17,7 @@
     @param shape Pointer to the active shape.
     @return true if clicked, false otherwise.
 */
-bool isShapeClicked(const Shape_St* const shape);
+bool polyBlast_isShapeClicked(const Shape_St* const shape);
 
 /**
     @brief Checks if the shape is within board bounds.
@@ -26,7 +26,7 @@ bool isShapeClicked(const Shape_St* const shape);
     @param shape Pointer to the active shape.
     @return true if in bounds, false otherwise.
 */
-bool isShapeInBound(const Shape_St* const shape, const Board_St* const board);
+bool polyBlast_isShapeInBound(const Shape_St* const shape, const Board_St* const board);
 
 /**
     @brief Gets the center position of the shape.
@@ -34,7 +34,7 @@ bool isShapeInBound(const Shape_St* const shape, const Board_St* const board);
     @param shape The active shape.
     @return The center position vector.
 */
-f32Vector2 getShapeCenter(const Shape_St shape);
+f32Vector2 polyBlast_getShapeCenter(const Shape_St shape);
 
 /**
     @brief Gets the position of the i-th block in the shape.
@@ -43,7 +43,7 @@ f32Vector2 getShapeCenter(const Shape_St shape);
     @param i The block index.
     @return The block position vector.
 */
-f32Vector2 getIthBlockPosition(const Shape_St shape, const u8 i);
+f32Vector2 polyBlast_getIthBlockPosition(const Shape_St shape, const u8 i);
 
 /**
     @brief Maps the shape's center to board coordinates.
@@ -52,7 +52,7 @@ f32Vector2 getIthBlockPosition(const Shape_St shape, const u8 i);
     @param board Pointer to the board.
     @return The mapped board position.
 */
-s8Vector2 mapShapeToBoardPos(const Shape_St* const shape, const Board_St* const board);
+s8Vector2 polyBlast_mapShapeToBoardPos(const Shape_St* const shape, const Board_St* const board);
 
 /**
     @brief Handles user interaction with a shape (dragging, release).
@@ -61,7 +61,7 @@ s8Vector2 mapShapeToBoardPos(const Shape_St* const shape, const Board_St* const 
 
     @param shape Pointer to the active shape.
 */
-void handleShape(GameState_St* const game, Shape_St* const shape);
+void polyBlast_handleShape(GameState_St* const game, Shape_St* const shape);
 
 /**
     @brief Refills all three player slots with new random shapes and resets their state.
@@ -81,7 +81,7 @@ void handleShape(GameState_St* const game, Shape_St* const shape);
 
     @param manager   Main game's prefabs manager
 */
-void shuffleSlots(PrefabManager_St* const manager);
+void polyBlast_shuffleSlots(PrefabManager_St* const manager);
 
 /**
     @brief Prints a graphical ASCII representation of a prefab shape to the terminal.
@@ -92,8 +92,8 @@ void shuffleSlots(PrefabManager_St* const manager);
 
     Add this to shape.c (or utils.c) and declare in the corresponding header.
 */
-void displayShape(const Shape_St* const shape);
+void polyBlast_displayShape(const Shape_St* const shape);
 
-void printSlotsGraphically(const ShapeSlots_t slots);
+void polyBlast_printSlotsGraphically(const ShapeSlots_t slots);
 
 #endif // CORE_GAME_SHAPE_H

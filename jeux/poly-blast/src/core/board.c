@@ -11,7 +11,7 @@
 
 #include "sharedUtils/debug.h"
 
-bool isInBound(const s8Vector2 pos, const Board_St* const board) {
+bool polyBlast_isInBound(const s8Vector2 pos, const Board_St* const board) {
     return (0 <= pos.x) && (pos.x < board->width)
         && (0 <= pos.y) && (pos.y < board->height);
 }
@@ -92,7 +92,7 @@ static void clearColumn(Board_St* const board, const u8 col) {
     }
 }
 
-void updateBoardClearing(Board_St* const board) {
+void polyBlast_updateBoardClearing(Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return;
@@ -107,7 +107,7 @@ void updateBoardClearing(Board_St* const board) {
     }
 }
 
-bool checkBoardForClearing(const Board_St* const board) {
+bool polyBlast_checkBoardForClearing(const Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return false;
@@ -125,7 +125,7 @@ bool checkBoardForClearing(const Board_St* const board) {
     return needClearing;
 }
 
-void clearBoard(Board_St* const board) {
+void polyBlast_clearBoard(Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return;
@@ -140,7 +140,7 @@ void clearBoard(Board_St* const board) {
     }
 }
 
-u32 getEmptyCellCount(const Board_St* const board) {
+u32 polyBlast_getEmptyCellCount(const Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
         return 0;
@@ -158,7 +158,7 @@ u32 getEmptyCellCount(const Board_St* const board) {
     return empty_cells;
 }
 
-void printEmptyCells(const AnchorVec_St cells) {
+void polyBlast_printEmptyCells(const AnchorVec_St cells) {
     bool grid[8][8] = {false};
     for (u8 i = 0; i < cells.count; ++i) {
         grid[cells.items[i].y][cells.items[i].x] = true;
@@ -179,7 +179,7 @@ void printEmptyCells(const AnchorVec_St cells) {
     }
 }
 
-void printBoard(const Board_St* const board) {
+void polyBlast_printBoard(const Board_St* const board) {
     for (u8 r = 0; r < board->height; ++r) {
         for (u8 c = 0; c < board->width; ++c) {
             Block_St block = board->blocks[r][c];

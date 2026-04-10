@@ -19,16 +19,6 @@
     @param prefabsBag Pointer to the bag of prefabs.
     @param variant    Game's prefab variant.
 */
-void initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag, GamePrefabVariant_Et variant);
-
-/**
-    @brief Initializes a single prefab, computing orientations and mirroring.
-
-    Rotates and compares offsets to find unique orientations. Checks for mirror duplicates.
-    Updates prefab->orientations and ->canMirror accordingly.
-
-    @param prefab Pointer to the prefab to initialize.
-*/
-void initPrefab(Prefab_St* const prefab);
+void polyBlast_initPrefabsAndVariants(PrefabBagVec_St* const prefabsBag, GamePrefabVariant_Et variant);
 
 #endif // SETUPS_SHAPE_H

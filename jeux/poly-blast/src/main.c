@@ -71,7 +71,7 @@ int main(void) {
             }
         }
 
-        if (IsKeyPressed(KEY_R)) resetGame(&mainGameState);
+        if (IsKeyPressed(KEY_R)) polyBlast_resetGame(&mainGameState);
 
         if (WindowShouldClose()) {
             if (currentPrompt == PROMPT_NONE && !mainGameState.gameOver) {

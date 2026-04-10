@@ -1,4 +1,4 @@
-#include "utils/audio.h"
+#include "setups/audio.h"
 
 #include "utils/globals.h"
 
@@ -11,8 +11,6 @@ Sound sound_lineBreak;
 
 void blockBlast_initAudio(void) {
     if (audioInitialized) return;
-
-    InitAudioDevice();
 
     sound_shapePlacement = LoadSound(SOUNDS_PATH "shapePlacement.wav");
     sound_combo = LoadSound(SOUNDS_PATH "combo.wav");
@@ -29,6 +27,4 @@ void blockBlast_freeAudio(void) {
     if (IsSoundValid(sound_combo)) UnloadSound(sound_combo);
     if (IsSoundValid(sound_gameOver)) UnloadSound(sound_gameOver);
     if (IsSoundValid(sound_lineBreak)) UnloadSound(sound_lineBreak);
-
-    CloseAudioDevice();
 }

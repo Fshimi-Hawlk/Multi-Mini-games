@@ -204,7 +204,6 @@ void releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board)
     dragging = false;
 
     if (isShapeInBound(shape, board) && isShapePlaceable(shape, pos, board)) {
-        previousGameState = mainGameState; // copy pre-release state as previous state
         placeShape(shape, castTo(u8Vector2) &pos, board);
         shape->placed = true;
         PlaySound(sound_shapePlacement);
