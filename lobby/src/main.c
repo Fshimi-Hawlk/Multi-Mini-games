@@ -28,10 +28,8 @@
 #include "APIs/bowlingAPI.h"
 #include "APIs/golfAPI.h"
 #include "APIs/snakeAPI.h"
-#include "APIs/bingoAPI.h"
-#include "APIs/blockBlastAPI.h"
+// #include "APIs/blockBlastAPI.h"
 #include "systemSettings.h"
-#include "utils/configs.h"
 
 // ─────────────────────────────────────────────────────────────────
 // Generic game dispatch table
@@ -86,13 +84,9 @@ static Error_Et snake_init_shim(BaseGame_St** p)    { return snake_initGame((Sna
 static Error_Et snake_loop_shim(BaseGame_St*  p)    { return snake_gameLoop((SnakeGame_St*)p);            }
 static Error_Et snake_free_shim(BaseGame_St** p)    { return snake_freeGame((SnakeGame_St**)p);          }
 
-static Error_Et bingo_init_shim(BaseGame_St** p)       { return bingo_initGame((BingoAPI_St**)p);            }
-static Error_Et bingo_loop_shim(BaseGame_St*  p)       { return bingo_gameLoop((BingoAPI_St*)p);             }
-static Error_Et bingo_free_shim(BaseGame_St** p)       { return bingo_freeGame((BingoAPI_St**)p);            }
-
-static Error_Et blockBlast_init_shim(BaseGame_St** p)  { return blockBlast_initGame((BlockBlastAPI_St**)p);  }
-static Error_Et blockBlast_loop_shim(BaseGame_St*  p)  { return blockBlast_gameLoop((BlockBlastAPI_St*)p);   }
-static Error_Et blockBlast_free_shim(BaseGame_St** p)  { return blockBlast_freeGame((BlockBlastAPI_St**)p);  }
+// static Error_Et blockBlast_init_shim(BaseGame_St** p)  { return blockBlast_initGame((BlockBlastAPI_St**)p);  }
+// static Error_Et blockBlast_loop_shim(BaseGame_St*  p)  { return blockBlast_gameLoop((BlockBlastAPI_St*)p);   }
+// static Error_Et blockBlast_free_shim(BaseGame_St** p)  { return blockBlast_freeGame((BlockBlastAPI_St**)p);  }
 
 /**
     @brief Scene dispatch table.
@@ -108,8 +102,7 @@ static const SceneDesc_St scenes[__gameSceneCount] = {
     [GAME_SCENE_BOWLING]  = { "Bowling",  bowling_init_shim,  bowling_loop_shim,  bowling_free_shim,  1200, 800 },
     [GAME_SCENE_GOLF]     = { "Golf 3D",  golf_init_shim,     golf_loop_shim,     golf_free_shim,     1280, 720 },
     [GAME_SCENE_SNAKE]       = { "Snake",      snake_init_shim,      snake_loop_shim,      snake_free_shim,       800,  600 },
-    [GAME_SCENE_BINGO]       = { "Bingo",      bingo_init_shim,      bingo_loop_shim,      bingo_free_shim,       800,  700 },
-    [GAME_SCENE_BLOCKBLAST]   = { "Block Blast", blockBlast_init_shim,  blockBlast_loop_shim,  blockBlast_free_shim,  1000, 800 },
+    // [GAME_SCENE_BLOCKBLAST]   = { "Block Blast", blockBlast_init_shim,  blockBlast_loop_shim,  blockBlast_free_shim,  1000, 800 },
 };
 
 // ─────────────────────────────────────────────────────────────────
