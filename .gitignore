@@ -60,3 +60,6 @@ main
 
 # Other
 docs/doxygen/html
+repomix-output.xml
+compile_commands.json
+compile_flags.txt
