@@ -164,7 +164,7 @@ void lobby_drawWorldBoundaries(const Player_St* const player) {
 }
 
 void lobby_drawGameZones(const LobbyGame_St* const game) {
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
+    for (u8 i = 1; i < __miniGameIdCount; ++i) {
         GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
 
         bool playerNear = CheckCollisionCircleRec(

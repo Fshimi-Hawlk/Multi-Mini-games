@@ -10,7 +10,7 @@
         - Moved `Player_St` and `Platform_St` here
     - Fshimi-Hawlk:
         - Added documentation
-        - Added `GameScene_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
+        - Added `MiniGameId_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
           `SubGameManager_St` and `LobbyGame_St` to centralize logic and 
           previously global variables and make everything as straight forward.
 

@@ -84,16 +84,23 @@ typedef enum {
     Used both as array indices and as state identifiers.
 */
 typedef enum {
-    MINI_GAME_LOBBY,       ///< Main lobby / hub world with platformer movement
-    MINI_GAME_BATTLESHIP,
-    MINI_GAME_BINGO,
-    MINI_GAME_CONNECT_4,
-    MINI_GAME_KFF,
-    MINI_GAME_MINIGOLF,
-    MINI_GAME_MORPION,
-    MINI_GAME_OTHELLO,
-    __miniGameCount
-} MiniGame_Et;
+    MINI_GAME_ID_LOBBY,       ///< Main lobby / hub world with platformer movement
+    MINI_GAME_ID_TETRIS,
+    MINI_GAME_ID_SOLITAIRE,
+    MINI_GAME_ID_SUIKA,
+    MINI_GAME_ID_BOWLING,
+    MINI_GAME_ID_GOLF,
+    MINI_GAME_ID_SNAKE,
+    MINI_GAME_ID_BINGO,
+    MINI_GAME_ID_BLOCKBLAST,
+    MINI_GAME_ID_BATTLESHIP,
+    MINI_GAME_ID_CONNECT_4,
+    MINI_GAME_ID_KFF,
+    MINI_GAME_ID_MINIGOLF,
+    MINI_GAME_ID_MORPION,
+    MINI_GAME_ID_OTHELLO,
+    __miniGameIdCount
+} MiniGameId_Et;
 
 /**
     @brief Opaque forward declaration of the concrete game state.

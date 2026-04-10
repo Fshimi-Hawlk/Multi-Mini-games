@@ -64,13 +64,13 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     memset(gameRef, 0, sizeof(*gameRef));
 
     /** Current active scene (lobby or one of the mini-games) */
-    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
+    gameRef->subGameManager.currentScene = MINI_GAME_ID_LOBBY;
     
     /** Flag: game needs initialization on next frame */
     gameRef->subGameManager.needGameInit = false;
 
-    GameCollisionZone_St gameZones[__gameSceneCount] = {
-        [GAME_SCENE_TETRIS] = {
+    GameCollisionZone_St gameZones[__miniGameIdCount] = {
+        [MINI_GAME_ID_TETRIS] = {
             .hitbox = {
                 .x      = -350,
                 .y      = 425,
@@ -80,7 +80,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Tetris",
             .color = {0, 120, 220, 200},
         },
-        [GAME_SCENE_SOLITAIRE] = {
+        [MINI_GAME_ID_SOLITAIRE] = {
             .hitbox = {
                 .x      = -125,
                 .y      = 425,
@@ -90,7 +90,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Solitaire",
             .color = {0, 160, 80,  200},
         },
-        [GAME_SCENE_SUIKA] = {
+        [MINI_GAME_ID_SUIKA] = {
             .hitbox = {
                 .x      = 100,
                 .y      = 425,
@@ -100,7 +100,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Suika",
             .color = {220, 80, 0,  200},
         },
-        [GAME_SCENE_BOWLING] = {
+        [MINI_GAME_ID_BOWLING] = {
             .hitbox = {
                 .x      = 325,
                 .y      = 425,
@@ -110,7 +110,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Bowling",
             .color = {140, 0, 200, 200},
         },
-        [GAME_SCENE_GOLF] = {
+        [MINI_GAME_ID_GOLF] = {
             .hitbox = {
                 .x      = 550,
                 .y      = 425,
@@ -120,7 +120,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Golf 3D",
             .color = { 20, 160,  50, 200},
         },
-        [GAME_SCENE_SNAKE] = {
+        [MINI_GAME_ID_SNAKE] = {
             .hitbox = {
                 .x      = 775,
                 .y      = 425,
@@ -130,7 +130,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Snake",
             .color = {  0, 200,  80, 200},
         },
-        [GAME_SCENE_BINGO] = {
+        [MINI_GAME_ID_BINGO] = {
             .hitbox = {
                 .x      = 1000,
                 .y      = 425,
@@ -140,7 +140,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
             .name = "Bingo",
             .color = {255, 200,   0, 200},
         },
-        [GAME_SCENE_BLOCKBLAST] = {
+        [MINI_GAME_ID_BLOCKBLAST] = {
             .hitbox = {
                 .x      = 1225,
                 .y      = 425,
@@ -154,7 +154,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     memcpy(gameRef->subGameManager.gameZones, gameZones, sizeof(gameZones));
 
-    gameRef->subGameManager.currentScene = GAME_SCENE_LOBBY;
+    gameRef->subGameManager.currentScene = MINI_GAME_ID_LOBBY;
     gameRef->subGameManager.needGameInit = false;
 
     gameRef->player = (Player_St) {
@@ -233,7 +233,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     paramsMenu_update(&paramsMenu);
 
     // Collision check with game zone
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
+    for (u8 i = 1; i < __miniGameIdCount; ++i) {
         if (CheckCollisionCircleRec(game->player.position, game->player.radius, game->subGameManager.gameZones[i].hitbox)) {
             if (IsKeyPressed(KEY_E)) {
                 game->subGameManager.currentScene = i;
@@ -293,7 +293,7 @@ Error_Et lobby_freeGame(LobbyGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
     LobbyGame_St* gameRef = *game;
 
-    for (u8 i = 1; i < __gameSceneCount; ++i) {
+    for (u8 i = 1; i < __miniGameIdCount; ++i) {
         if (gameRef->subGameManager.miniGames[i] == NULL) continue;
         gameRef->subGameManager.miniGames[i]->freeGame(&gameRef->subGameManager.miniGames[i]);
         gameRef->subGameManager.miniGames[i] = NULL;

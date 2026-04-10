@@ -60,19 +60,6 @@ typedef struct {
 } FallingLeaf_St;
 
 typedef enum {
-    GAME_SCENE_LOBBY,
-    GAME_SCENE_TETRIS,
-    GAME_SCENE_SOLITAIRE,
-    GAME_SCENE_SUIKA,
-    GAME_SCENE_BOWLING,
-    GAME_SCENE_GOLF,
-    GAME_SCENE_SNAKE,
-    GAME_SCENE_BINGO,
-    GAME_SCENE_BLOCKBLAST,
-    __gameSceneCount
-} GameScene_Et;
-
-typedef enum {
     PLAYER_TEXTURE_DEFAULT,
     PLAYER_TEXTURE_EARTH,
     PLAYER_TEXTURE_TROLL_FACE,
@@ -123,10 +110,10 @@ typedef struct {
 } GameCollisionZone_St;
 
 typedef struct {
-    GameCollisionZone_St gameZones[__gameSceneCount];
-    BaseGame_St*  miniGames[__gameSceneCount];
+    GameCollisionZone_St gameZones[__miniGameIdCount];
+    BaseGame_St*  miniGames[__miniGameIdCount];
 
-    GameScene_Et  currentScene;
+    MiniGameId_Et  currentScene;
 
     bool          needGameInit;
     bool          gameHitGracePeriodActive;
