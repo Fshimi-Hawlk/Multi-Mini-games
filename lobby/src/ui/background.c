@@ -35,6 +35,23 @@ void lobby_drawSceneBackground(f32 time, Vector2 playerPos) {
     );
 }
 
+static f32 backgroundBaseScale = 0.35f;   // computed once
+
+void lobby_initBackgroundScale(void) {
+    if (!IsTextureValid(backgroundTexture)) return;
+
+    f32 windowAspect = (f32) systemSettings.video.width / (f32) systemSettings.video.height;
+    f32 bgAspect     = (f32) backgroundTexture.width / (f32) backgroundTexture.height;
+
+    const f32 targetCoverage = 1.5f;
+
+    if (windowAspect > bgAspect) { // wider window -> fit to height
+        backgroundBaseScale = (f32) systemSettings.video.height / (f32) backgroundTexture.height * targetCoverage;
+    } else { // taller window -> fit to width
+        backgroundBaseScale = (f32) systemSettings.video.width / (f32) backgroundTexture.width * targetCoverage;
+    }
+}
+
 void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
     if (!IsTextureValid(backgroundTexture)) {
         // fallback to old gradient sky
@@ -42,28 +59,23 @@ void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera) 
         return;
     }
 
-    // ── Configuration ───────────────────────────────────────────────────────
+    f32 bgWidth  = (f32)backgroundTexture.width  * backgroundBaseScale;
+    f32 bgHeight = (f32)backgroundTexture.height * backgroundBaseScale;
+
+    // ── Parallax ───────────────────────────────────────────────────────────
     const Vector2 parallax = {-0.035f, -0.05f};
-    const f32 scale    = 0.35f;
-
-    f32 bgWidth  = (f32) backgroundTexture.width  * scale;
-    f32 bgHeight = (f32) backgroundTexture.height * scale;
-
-    // ── Parallax offset ────────
     Vector2 offset = Vector2Multiply(playerPos, parallax);
 
-    // ── Center horizontally on camera ───────────────────────────────────────
     Vector2 center = Vector2Add(camera.target, offset);
 
-    // Final destination rectangle (centered horizontally, bottom-anchored vertically)
+    // Final destination (centered horizontally, vertical anchor)
     Rectangle dest = {
         .x      = center.x - bgWidth / 2.0f,
-        .y      = center.y - bgHeight / 2.0f - 250,
+        .y      = center.y - bgHeight / 2.0f,
         .width  = bgWidth,
         .height = bgHeight
     };
 
-    // ── Draw the single scaled background ───────────────────────────────────
     DrawTexturePro(
         backgroundTexture,
         (Rectangle){0.0f, 0.0f, (f32)backgroundTexture.width, (f32)backgroundTexture.height},

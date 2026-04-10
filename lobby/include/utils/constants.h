@@ -18,6 +18,9 @@
 #define WALL_W           100.0f
 #define DOOR_H           200.0f
 
+#define PLAYER_SPAWN_X  -425.0f
+#define PLAYER_SPAWN_Y  GROUND_Y - 20.0f
+
 #define SKY_WIDTH 8000.0f
 #define SKY_HEIGHT 2000.0f
 

@@ -472,9 +472,9 @@ void lobby_drawScreenEffects(Player_St* player) {
     float heightFactor = 1 - Clamp((GROUND_Y - player->position.y) / 650.0f, 0.0f, 1.0f); // stronger near ground
 
     // Vignette + night grading - much softer when player is high
-    DrawRectangleGradientV(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT,
+    DrawRectangleGradientV(0, 0, systemSettings.video.width, systemSettings.video.height,
                            Fade(BLACK, 0.0f),
                            Fade(PURPLE, 0.19f * heightFactor));
 
-    DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.09f));
+    DrawRectangle(0, 0, systemSettings.video.width, systemSettings.video.height, Fade(BLACK, 0.09f));
 }

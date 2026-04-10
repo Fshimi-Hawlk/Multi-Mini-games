@@ -152,7 +152,7 @@ void lobby_updatePlayer(Player_St* const player, const Platform_St* const platfo
     }
 
     if (IsKeyPressed(KEY_R)) {
-        player->position = (f32Vector2) {0};
+        player->position = (f32Vector2) {PLAYER_SPAWN_X, PLAYER_SPAWN_Y};
         player->velocity = (f32Vector2) {0};
     }
 
@@ -174,7 +174,17 @@ void lobby_updatePlayer(Player_St* const player, const Platform_St* const platfo
     // Gravity
     player->velocity.y += 1200 * dt;
 
-    // Move
+    // Air resistance + terminal velocity when in air
+    // Fixes tunneling through floor from high jumps and slows down y-speed as requested
+    if (!player->onGround && player->velocity.y > 0) {
+        if (player->velocity.y > MAX_FALL_SPEED) {
+            player->velocity.y = MAX_FALL_SPEED;
+        }
+        // Gentle linear drag for natural falling feel (very light)
+        player->velocity.y *= (1.0f - AIR_DRAG * dt);
+    }
+
+    // Collision
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
     player->onGround = false;

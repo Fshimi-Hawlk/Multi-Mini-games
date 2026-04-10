@@ -20,8 +20,27 @@
 #include "ui/ambiance.h"
 
 #include "utils/globals.h"
+#include "utils/utils.h"
 
 #include "lobbyAPI.h"
+
+
+static void updateCameraOnWindowResize(LobbyGame_St* const game) {
+    const f32 originalWidth  = 800;
+    const f32 originalHeight = 600;
+
+    // Always keep camera perfectly centered on the new window size
+    game->cam.offset = (Vector2){
+        systemSettings.video.width  / 2.0f,
+        systemSettings.video.height / 2.0f
+    };
+
+    // ── Zoom adaptation when width OR height changes ─────────────────────
+    f32 zoomX = (f32)systemSettings.video.width  / originalWidth;
+    f32 zoomY = (f32)systemSettings.video.height / originalHeight;
+
+    game->cam.zoom = min(zoomX, zoomY);
+}
 
 Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     Error_Et error = OK;
@@ -140,6 +159,8 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     gameRef->player = (Player_St) {
         .radius      = 20,
+        .position    = {PLAYER_SPAWN_X, PLAYER_SPAWN_Y},
+        .onGround    = true,
         .unlockedTextures = {
             [PLAYER_TEXTURE_DEFAULT]   = 1,
             [PLAYER_TEXTURE_EARTH]     = 1,
@@ -148,6 +169,7 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
 
     gameRef->cam = (Camera2D) {
         .offset = { systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f },
+        .target = {.x = gameRef->player.position.x, gameRef->player.position.y - gameRef->player.radius * 1.5f},
         .zoom   = 1.0f,
     };
 
@@ -156,7 +178,10 @@ Error_Et lobby_initGame__full(LobbyGame_St** game, LobbyConfigs_St configs) {
     };
 
     lobby_initGrass();
-    lobby_initTextures(gameRef);
+    lobby_initBackgroundScale();
+    updateCameraOnWindowResize(gameRef);
+
+    error = lobby_initTextures(gameRef->playerVisuals.textures);
 
     // Initialize parameters menu (settings button)
     paramsMenu_init(&paramsMenu);
@@ -174,11 +199,36 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
 
     gameTime += dt;
 
-    if (gameTime > 1.45f) {
+    if (IsWindowResized()) {
+        systemSettings.video.width = GetScreenWidth();
+        systemSettings.video.height = GetScreenHeight();
+
+        skinButtonRect = (Rectangle) {
+            .x = systemSettings.video.width - 70,
+            .y = systemSettings.video.height / 2.0f - 25,
+            .width = 50, 
+            .height = 50
+        };
+
+        updateCameraOnWindowResize(game);
+    }
+
+    if (gameTime > 2.0f) {
         lobby_updatePlayer(&game->player, platforms, platformCount, dt);
     }
 
-    game->cam.target = game->player.position;
+    Vector2 desiredTarget = game->player.position;
+    if (game->player.onGround && game->player.position.y > GROUND_Y - 70.0f) {
+        desiredTarget.y -= 135.0f;
+    } else {
+        desiredTarget.y -= game->player.radius * 1.5f;
+    }
+
+    game->cam.target = Vector2Lerp(
+        game->cam.target,
+        desiredTarget,
+        0.1f
+    );
 
     paramsMenu_update(&paramsMenu);
 
@@ -250,7 +300,7 @@ Error_Et lobby_freeGame(LobbyGame_St** game) {
     }
 
     lobby_freeAudio();
-    lobby_freeTextures(gameRef);
+    lobby_freeTextures(gameRef->playerVisuals.textures);
 
     // Cleanup params menu
     paramsMenu_free(&paramsMenu);

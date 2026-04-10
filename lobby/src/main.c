@@ -110,7 +110,7 @@ static const SceneDesc_St scenes[__gameSceneCount] = {
 
 static void returnToLobby(LobbyGame_St* game) {
     game->subGameManager.currentScene = GAME_SCENE_LOBBY;
-    game->player.position = (Vector2){ 0, 440 };  // Teleport to center on lobby re-entry
+    game->player.position = (Vector2){ PLAYER_SPAWN_X, PLAYER_SPAWN_Y };  // Teleport to center on lobby re-entry
     game->player.velocity = (Vector2){ 0, 0 };   // Reset velocity to prevent momentum carryover
     game->player.coyoteTimer = COYOTE_TIME;       // Reset jump states
     game->player.jumpBuffer = 0.0f;

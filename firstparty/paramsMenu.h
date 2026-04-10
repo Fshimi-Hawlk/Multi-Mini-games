@@ -335,7 +335,6 @@ void paramsMenu_init(ParamsMenu_St* menu) {
         if (IsTextureValid(menu->gearTexture)) {
             menu->textureLoaded = true;
             SetTextureFilter(menu->gearTexture, TEXTURE_FILTER_BILINEAR);
-            log_debug("Params menu texture loaded: %s", path);
         } else {
             log_warn("Failed to load params menu texture: %s", path);
         }
@@ -362,7 +361,6 @@ void paramsMenu_update(ParamsMenu_St* menu) {
     // ── Gear button click ────────────────────────────────────────
     if (clicked && pm_hit(mouse, gear)) {
         menu->isOpen = !menu->isOpen;
-        log_debug("Params menu toggled: %s", menu->isOpen ? "open" : "closed");
         return;
     }
 

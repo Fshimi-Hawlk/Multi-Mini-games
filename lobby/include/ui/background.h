@@ -5,6 +5,8 @@
 
 void lobby_drawSceneBackground(float time, Vector2 playerPos);
 
+void lobby_initBackgroundScale(void);
+
 /**
     @brief Draws the parallax starry background using starry-background.png.
     The texture is scaled once to a fixed world size.

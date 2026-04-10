@@ -3,7 +3,7 @@
 
 #include "utils/userTypes.h"
 
-void lobby_initTextures(LobbyGame_St* const game);
-void lobby_freeTextures(LobbyGame_St* const game);
+Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]);
+void lobby_freeTextures(Texture2D playerTextures[__playerTextureCount]);
 
 #endif // UI_TEXTURE_H
