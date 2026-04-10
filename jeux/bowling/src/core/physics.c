@@ -18,11 +18,13 @@
 // 1 unité = 1 mètre
 #define LANE_WIDTH    1.05f   // largeur piste
 #define LANE_LENGTH   18.29f  // ligne de faute → quille de tête
-#define GUTTER_WIDTH  0.23f   // largeur d'une gouttière
+#define LANE_EDGE    (LANE_WIDTH / 2.0f)
+#define GUTTER_WIDTH 0.23f   // largeur d'une gouttière
 #define BALL_RADIUS   0.1092f // rayon max (diamètre 21.83 cm)
 #define PIN_BASE_R    0.060f  // rayon base quille (diamètre 12 cm)
 #define GRAVITY       9.8f
 #define NUM_PINS      10
+#define BALL_START_Z 4.0f
 
 //  Positions officielles des quilles 
 // Espacement centre-à-centre : 30,48 cm
@@ -110,7 +112,7 @@ void physics_setupPins(Pin_St* pins) {
 }
 
 void physics_resetBall(Ball_St* ball) {
-    ball->position       = (Vector3){0.0f, BALL_RADIUS, 4.0f}; // zone d'élan
+    ball->position       = (Vector3){0.0f, BALL_RADIUS, BALL_START_Z}; // zone d'élan
     ball->velocity       = (Vector3){0,0,0};
     ball->spin           = (Vector3){0,0,0};
     ball->spinAmount     = 0.0f;
@@ -133,7 +135,7 @@ void physics_updateBallSpin(Ball_St* ball, float deltaTime) {
     if (fabsf(ball->spinAmount) > 0.005f) {
         // Effet d'effet latéral (spin)
         ball->velocity.x += ball->spinAmount * deltaTime * 1.0f;
-        ball->spinAmount  *= 0.995f;
+        ball->spinAmount  *= powf(0.995f, deltaTime * 60.0f);
         if (fabsf(ball->spinAmount) < 0.005f) ball->spinAmount = 0.0f;
     }
     float speed = Vector3Length(ball->velocity);
@@ -207,20 +209,26 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
                 pins[i].angularVelocity = (Vector3){pins[i].rotationAxis.x*5.0f, 0, pins[i].rotationAxis.z*5.0f};
                 physics_spawnParticles(particles, particleCount, pins[i].position, 5,
                                        (Color){240,200,160,180});
-            }
-        }
+                PlaySound(sound_pinFall);
+}
+}
+
+bool physics_hasBallReachedPins(Ball_St* ball) {
+    return ball->position.z <= PIN1_Z + ball->radius;
+}
 
     }
 }
 
 bool physics_isGutterBall(Ball_St* ball, float laneWidth, float gutterWidth) {
-    float edge = laneWidth / 2.0f - gutterWidth * 0.5f;
+    float edge = LANE_EDGE - gutterWidth * 0.5f;
     return ball->position.x < -edge || ball->position.x > edge;
 }
 
 void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
                          float gutterWidth, bool bumpers) {
     (void)gutterWidth;
+    (void)laneWidth;
     physics_updateBallSpin(ball, deltaTime);
 
     // Friction de roulement (coefficient réaliste sur piste huilée)
@@ -229,7 +237,7 @@ void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
     ball->velocity   = Vector3Add(ball->velocity, Vector3Scale(friction, deltaTime));
 
     // Invisible barrier along gutter edges - always active (prevents ball leaving lane)
-    float edge = laneWidth / 2.0f;
+    float edge = LANE_EDGE;
     if (ball->position.x < -edge || ball->position.x > edge) {
         // Only apply bumper bounce if bumpers enabled, otherwise just block
         if (bumpers) {
@@ -251,12 +259,12 @@ void physics_updatePins(Pin_St* pins, int pinCount, float deltaTime,
         if (pins[i].isStanding) continue;
         pins[i].fallTime += deltaTime;
         pins[i].velocity.y -= GRAVITY * deltaTime;
-        pins[i].velocity    = Vector3Scale(pins[i].velocity, 0.98f);
+        pins[i].velocity    = Vector3Scale(pins[i].velocity, powf(0.98f, deltaTime * 60.0f));
         pins[i].position    = Vector3Add(pins[i].position,
                                          Vector3Scale(pins[i].velocity, deltaTime));
 
         float angSpd = Vector3Length(pins[i].angularVelocity);
-        pins[i].angularVelocity = Vector3Scale(pins[i].angularVelocity, 0.96f);
+        pins[i].angularVelocity = Vector3Scale(pins[i].angularVelocity, powf(0.96f, deltaTime * 60.0f));
         pins[i].rotationAngle  += angSpd * deltaTime;
         if (pins[i].rotationAngle >= MAX_FALL_ANGLE) {
             pins[i].rotationAngle   = MAX_FALL_ANGLE;

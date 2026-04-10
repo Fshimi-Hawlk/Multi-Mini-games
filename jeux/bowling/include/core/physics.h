@@ -62,5 +62,6 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins, Particle_St* particles
 bool physics_isGutterBall(Ball_St* ball, float laneWidth, float gutterWidth);
 void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth, float gutterWidth, bool bumpers);
 void physics_updatePins(Pin_St* pins, int pinCount, float deltaTime, float laneWidth, float laneLength);
+bool physics_hasBallReachedPins(Ball_St* ball);
 
 #endif
