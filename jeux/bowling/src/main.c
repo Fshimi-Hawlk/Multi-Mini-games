@@ -42,4 +42,6 @@ int main(int argc, char* argv[]) {
 }
 
 #define LOGGER_IMPLEMENTATION
-#include "logger.h"
+#define PARAMS_MENU_IMPLEMENTATION
+#define SYSTEM_SETTINGS_IMPLEMENTATION
+#include "paramsMenu.h"

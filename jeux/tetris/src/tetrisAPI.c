@@ -24,7 +24,7 @@
 
 #include <raylib.h>
 
-#include "include/ui/paramsMenu.h"
+#include "paramsMenu.h"
 #include "systemSettings.h"
 
 /* FIX: score table as static constant — removes unnecessary calloc/free for

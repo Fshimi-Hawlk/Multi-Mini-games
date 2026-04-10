@@ -22,7 +22,7 @@
 #define UTILS_GLOBALS_H
 
 #include "utils/userTypes.h"
-#include "include/ui/paramsMenu.h"
+#include "paramsMenu.h"
 
 /**
     @brief Array of pre-loaded fonts at different sizes.

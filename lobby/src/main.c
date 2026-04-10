@@ -29,7 +29,6 @@
 #include "APIs/golfAPI.h"
 #include "APIs/snakeAPI.h"
 // #include "APIs/blockBlastAPI.h"
-#include "systemSettings.h"
 
 // ─────────────────────────────────────────────────────────────────
 // Generic game dispatch table
@@ -210,7 +209,6 @@ s32 main(void) {
 }
 
 #define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
+#define PARAMS_MENU_IMPLEMENTATION
 #define SYSTEM_SETTINGS_IMPLEMENTATION
-#include "systemSettings.h"
+#include "paramsMenu.h"
