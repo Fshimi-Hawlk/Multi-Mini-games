@@ -26,6 +26,5 @@ Portions of this software include code from:
 - raylib (raylib.h, rlgl.h, raymath.h) – Copyright (c) 2013-2025 Ramon Santamaria (@raysan5) – zlib/libpng license
 - nob.h dynamic array & string builder – Public domain (Unlicense) by Tsoding
 - arena.h – Copyright (c) 2022 Alexey Kutepov – MIT license
-- PCG random number generator (in rand.h) – Apache License 2.0 by Melissa O'Neill (pcg-random.org), adapted by Magicalbat
 
 Full original license texts and authors are preserved in the respective header files.
