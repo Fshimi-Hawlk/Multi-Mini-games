@@ -3,7 +3,7 @@
 
 #include "raylib.h"
 
-void drawSceneBackground(float time, Vector2 playerPos);
+void lobby_drawSceneBackground(float time, Vector2 playerPos);
 
 /**
     @brief Draws the parallax starry background using starry-background.png.
@@ -16,6 +16,6 @@ void drawSceneBackground(float time, Vector2 playerPos);
     @param playerPos   Player world position (used for parallax offset)
     @param camera      Current camera (used to center horizontally)
 */
-void drawStarryBackground(const Vector2 playerPos, const Camera2D camera);
+void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera);
 
 #endif // UI_BACKGROUND_H

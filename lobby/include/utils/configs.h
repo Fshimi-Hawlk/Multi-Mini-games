@@ -2,7 +2,7 @@
     @file utils/configs.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-04-09
     @brief Central place for compile-time and tuning constants used throughout the game.
 
     This header defines:
@@ -34,6 +34,8 @@
 */
 #define ASSET_PATH "assets/"
 #endif
+
+#define FONTS_PATH "assets/fonts/"          ///< `assets` shared folder is not to be confused lobby's own assets
 
 #define IMAGES_PATH ASSET_PATH "images/"    ///< Subdirectory containing all image files.
 #define SKINS_PATH  IMAGES_PATH "skins/"    ///< Subdirectory containing all texture files.

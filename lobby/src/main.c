@@ -208,7 +208,5 @@ s32 main(void) {
     return 0;
 }
 
-#define LOGGER_IMPLEMENTATION
 #define PARAMS_MENU_IMPLEMENTATION
-#define SYSTEM_SETTINGS_IMPLEMENTATION
 #include "paramsMenu.h"

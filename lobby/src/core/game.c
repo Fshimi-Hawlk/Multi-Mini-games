@@ -44,7 +44,7 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle getPlayerCollisionBox(const Player_St* const player) {
+Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x - player->radius,
         player->position.y - player->radius,
@@ -53,11 +53,89 @@ Rectangle getPlayerCollisionBox(const Player_St* const player) {
     };
 }
 
-Vector2 getPlayerCenter(const Player_St* const player) {
+Vector2 lobby_getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
+/**
+    @brief Resolves collision between player's circle and a single axis-aligned rectangle.
+
+    Performs:
+        - closest-point calculation
+        - penetration depth computation
+        - position correction (push out)
+        - velocity nulling along dominant axis
+        - ground detection (sets onGround, resets jumps/coyote when landing from above)
+
+    @param player  Player state (position and velocity are modified)
+    @param rect    Rectangle to collide against
+*/
+static void resolveCircleRectCollision(Player_St* player, const Rectangle rect) {
+    f32 centerX = player->position.x;
+    f32 centerY = player->position.y;
+    f32 r       = player->radius;
+
+    // Search the position that is closest to the circle on the rectangle
+    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
+    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
+
+    f32 dx = centerX - closestX;
+    f32 dy = centerY - closestY;
+    f32 distSq = dx * dx + dy * dy;
+
+    if (distSq > 0.0f) {
+        /* Cas 1 : centre hors du rect */
+        if (distSq >= r * r) return;
+
+        f32 dist        = sqrtf(distSq);
+        f32 penetration = r - dist;
+        f32 nx = dx / dist;
+        f32 ny = dy / dist;
+
+        player->position.x += nx * penetration;
+        player->position.y += ny * penetration;
+
+        if (fabsf(nx) > fabsf(ny)) {
+            player->velocity.x = 0;
+        } else {
+            player->velocity.y = 0;
+            if (ny < 0) {
+                player->onGround    = true;
+                player->nbJumps     = 0;
+                player->coyoteTimer = COYOTE_TIME;
+            }
+        }
+    } else {
+        /* Cas 2 : tunneling — centre à l'intérieur du rectangle */
+        f32 overlapLeft   = centerX - rect.x;
+        f32 overlapRight  = rect.x + rect.width  - centerX;
+        f32 overlapTop    = centerY - rect.y;
+        f32 overlapBottom = rect.y  + rect.height - centerY;
+
+        f32 minOverlap = overlapLeft;
+        f32 nx = -1.0f, ny = 0.0f;
+
+        if (overlapRight  < minOverlap) { minOverlap = overlapRight;  nx =  1.0f; ny =  0.0f; }
+        if (overlapTop    < minOverlap) { minOverlap = overlapTop;    nx =  0.0f; ny = -1.0f; }
+        if (overlapBottom < minOverlap) { minOverlap = overlapBottom; nx =  0.0f; ny =  1.0f; }
+
+        player->position.x += nx * (minOverlap + r);
+        player->position.y += ny * (minOverlap + r);
+
+        if (fabsf(nx) > fabsf(ny)) {
+            player->velocity.x = 0;
+        } else {
+            player->velocity.y = 0;
+            if (ny < 0) {
+                player->onGround    = true;
+                player->nbJumps     = 0;
+                player->coyoteTimer = COYOTE_TIME;
+            }
+        }
+    }
+}
+
+void lobby_updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
         player->velocity.x = -300;
@@ -139,72 +217,7 @@ void updatePlayer(Player_St* const player, const Platform_St* const platforms, c
     }
 }
 
-void resolveCircleRectCollision(Player_St* player, Rectangle rect) {
-    f32 centerX = player->position.x;
-    f32 centerY = player->position.y;
-    f32 r       = player->radius;
-
-    // Search the position that is closest to the circle on the rectangle
-    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
-
-    f32 dx = centerX - closestX;
-    f32 dy = centerY - closestY;
-    f32 distSq = dx * dx + dy * dy;
-
-    if (distSq > 0.0f) {
-        /* Cas 1 : centre hors du rect */
-        if (distSq >= r * r) return;
-
-        f32 dist        = sqrtf(distSq);
-        f32 penetration = r - dist;
-        f32 nx = dx / dist;
-        f32 ny = dy / dist;
-
-        player->position.x += nx * penetration;
-        player->position.y += ny * penetration;
-
-        if (fabsf(nx) > fabsf(ny)) {
-            player->velocity.x = 0;
-        } else {
-            player->velocity.y = 0;
-            if (ny < 0) {
-                player->onGround    = true;
-                player->nbJumps     = 0;
-                player->coyoteTimer = COYOTE_TIME;
-            }
-        }
-    } else {
-        /* Cas 2 : tunneling — centre à l'intérieur du rectangle */
-        f32 overlapLeft   = centerX - rect.x;
-        f32 overlapRight  = rect.x + rect.width  - centerX;
-        f32 overlapTop    = centerY - rect.y;
-        f32 overlapBottom = rect.y  + rect.height - centerY;
-
-        f32 minOverlap = overlapLeft;
-        f32 nx = -1.0f, ny = 0.0f;
-
-        if (overlapRight  < minOverlap) { minOverlap = overlapRight;  nx =  1.0f; ny =  0.0f; }
-        if (overlapTop    < minOverlap) { minOverlap = overlapTop;    nx =  0.0f; ny = -1.0f; }
-        if (overlapBottom < minOverlap) { minOverlap = overlapBottom; nx =  0.0f; ny =  1.0f; }
-
-        player->position.x += nx * (minOverlap + r);
-        player->position.y += ny * (minOverlap + r);
-
-        if (fabsf(nx) > fabsf(ny)) {
-            player->velocity.x = 0;
-        } else {
-            player->velocity.y = 0;
-            if (ny < 0) {
-                player->onGround    = true;
-                player->nbJumps     = 0;
-                player->coyoteTimer = COYOTE_TIME;
-            }
-        }
-    }
-}
-
-void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
+void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
@@ -250,7 +263,7 @@ void choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     game->playerVisuals.isTextureMenuOpen = false;
 }
 
-void toggleSkinMenu(LobbyGame_St* const game) {
+void lobby_toggleSkinMenu(LobbyGame_St* const game) {
     bool cond = (
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)

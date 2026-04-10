@@ -42,9 +42,6 @@ dkms.conf
 # debug information files
 *.dwo
 
-# TrueType Font
-*.ttf
-
 # Build artifacts
 build/
 bin/

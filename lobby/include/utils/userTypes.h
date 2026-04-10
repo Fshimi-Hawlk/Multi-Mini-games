@@ -10,7 +10,6 @@
 #define USER_TYPES_H
 
 #include "common.h"
-#include "APIs/generalAPI.h"
 
 typedef struct {
     Vector2 position;

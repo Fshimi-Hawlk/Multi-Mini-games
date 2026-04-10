@@ -2,7 +2,7 @@
 
 #include "utils/globals.h"
 
-void drawSceneBackground(f32 time, Vector2 playerPos) {
+void lobby_drawSceneBackground(f32 time, Vector2 playerPos) {
     (void) time;
 
     f32 parallaxFactor = 0.15f;
@@ -35,10 +35,10 @@ void drawSceneBackground(f32 time, Vector2 playerPos) {
     );
 }
 
-void drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
+void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {
     if (!IsTextureValid(backgroundTexture)) {
         // fallback to old gradient sky
-        drawSceneBackground(0.0f, playerPos);
+        lobby_drawSceneBackground(0.0f, playerPos);
         return;
     }
 

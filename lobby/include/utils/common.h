@@ -95,5 +95,7 @@ typedef Vector2 f32Vector2;
 
 #include "baseTypes.h"              // primitive typedefs (u8, f32Vector2, etc.)
 #include "systemSettings.h"
+#include "paramsMenu.h"
+#include "APIs/generalAPI.h"
 
 #endif // COMMON_H

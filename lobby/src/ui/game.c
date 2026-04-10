@@ -34,38 +34,38 @@
 #include "utils/utils.h"
 #include "utils/globals.h"
 
-void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
-    float r = player->radius;
+void lobby_drawPlayer(const LobbyGame_St* const game) {
+    float r = game->player.radius;
 
     // Shadow
     Vector2 shadowOffset = Vector2Scale(moonLightDir, -r * 0.45f);
     Color shadowColor = Fade(BLACK, 0.28f);
 
-    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
+    if (game->player.textureId == PLAYER_TEXTURE_DEFAULT) {
         /* FIX: position IS the center — do not offset by radius */
-        DrawCircleV((Vector2){player->position.x + shadowOffset.x,
-                              player->position.y + shadowOffset.y}, r, shadowColor);
-        DrawCircleV(player->position, r, BLUE);
+        DrawCircleV((Vector2){game->player.position.x + shadowOffset.x,
+                              game->player.position.y + shadowOffset.y}, r, shadowColor);
+        DrawCircleV(game->player.position, r, BLUE);
     } else {
         DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            (Rectangle){player->position.x + shadowOffset.x - r,
-                        player->position.y + shadowOffset.y - r, r*2, r*2},
-            Vector2Zero(), player->angle, shadowColor);
+            game->playerVisuals.textures[game->player.textureId],
+            getTextureRec(game->playerVisuals.textures[game->player.textureId]),
+            (Rectangle){game->player.position.x + shadowOffset.x - r,
+                        game->player.position.y + shadowOffset.y - r, r*2, r*2},
+            Vector2Zero(), game->player.angle, shadowColor);
 
         DrawTexturePro(
-            game->playerVisuals.textures[player->textureId],
-            getTextureRec(game->playerVisuals.textures[player->textureId]),
-            getPlayerCollisionBox(player),
-            getPlayerCenter(player),
-            player->angle, WHITE);
+            game->playerVisuals.textures[game->player.textureId],
+            getTextureRec(game->playerVisuals.textures[game->player.textureId]),
+            lobby_getPlayerCollisionBox(&game->player),
+            lobby_getPlayerCenter(&game->player),
+            game->player.angle, WHITE);
     }
 
     // Moonlight glow
     Vector2 glowPos = {
-        player->position.x + moonLightDir.x * r * 0.38f,
-        player->position.y + moonLightDir.y * r * 0.38f
+        game->player.position.x + moonLightDir.x * r * 0.38f,
+        game->player.position.y + moonLightDir.y * r * 0.38f
     };
     Color glowBase = (Color){180, 220, 255, 255};
     DrawCircleV(glowPos, r * 0.72f, Fade(glowBase, 0.09f));
@@ -73,7 +73,7 @@ void drawPlayer(const LobbyGame_St* const game, const Player_St* const player) {
     DrawCircleV(glowPos, r * 0.26f, Fade(glowBase, 0.11f));
 }
 
-void drawPlatforms(const Platform_St* const platforms, const int count) {
+void lobby_drawPlatforms(const Platform_St* const platforms, const int count) {
     for (int i = 0; i < count; ++i) {
         const Platform_St* p = &platforms[i];
         Rectangle r = p->rect;
@@ -109,7 +109,7 @@ void drawPlatforms(const Platform_St* const platforms, const int count) {
     }
 }
 
-void drawTree(void) {
+void lobby_drawTree(void) {
     if (!IsTextureValid(treeTexture)) return;
 
     f32 treeScale = 0.7f;
@@ -119,8 +119,8 @@ void drawTree(void) {
     Vector2 treePos = {-drawWidth / 2.0f, GROUND_Y - drawHeight + 350.0f};
 
     Vector2 shadowOffset = {moonLightDir.x * -42.0f, moonLightDir.y * -22.0f};
-    DrawTexturePro(texTree,
-        (Rectangle){0,0,(float)texTree.width,(float)texTree.height},
+    DrawTexturePro(treeTexture,
+        (Rectangle){0,0,(float)treeTexture.width,(float)treeTexture.height},
         (Rectangle){treePos.x + shadowOffset.x, treePos.y + shadowOffset.y, drawWidth, drawHeight},
         Vector2Zero(), 0, Fade(BLACK, 0.38f));
 
@@ -132,7 +132,7 @@ void drawTree(void) {
         Vector2Zero(), 0.0f, WHITE);
 }
 
-void drawWorldBoundaries(const Player_St* const player) {
+void lobby_drawWorldBoundaries(const Player_St* const player) {
     f32 limitL = -X_LIMIT;
     f32 limitR = X_LIMIT;
 
@@ -161,5 +161,46 @@ void drawWorldBoundaries(const Player_St* const player) {
                                (Color){255, 255, 255, 0},
                                (Color){255, 255, 255, alpha});
         DrawLineEx((Vector2){limitR, wallTop}, (Vector2){limitR, wallTop + wallHeight}, 3.0f, (Color){255, 255, 255, alpha});
+    }
+}
+
+void lobby_drawGameZones(const LobbyGame_St* const game) {
+    for (u8 i = 1; i < __gameSceneCount; ++i) {
+        GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
+
+        bool playerNear = CheckCollisionCircleRec(
+            game->player.position, game->player.radius, gameZone.hitbox);
+
+        /* Portal: fond coloré + bordure blanche si proche */
+        DrawRectangleRec(gameZone.hitbox, gameZone.color);
+        if (playerNear) DrawRectangleLinesEx(gameZone.hitbox, 3, WHITE);
+
+        /* Icône centrale (flèche vers le haut) */
+        f32 cx = gameZone.hitbox.x + gameZone.hitbox.width / 2.0f;
+        f32 cy = gameZone.hitbox.y + gameZone.hitbox.height / 2.0f;
+        DrawTriangle(
+            (Vector2){cx,        cy - 18},
+            (Vector2){cx - 12,   cy + 8},
+            (Vector2){cx + 12,   cy + 8},
+            WHITE);
+
+        /* Nom du jeu au-dessus du portail */
+        f32Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT24], gameZone.name, 18, 0);
+        DrawTextEx(lobby_fonts[FONT24], gameZone.name, (Vector2) {
+                gameZone.hitbox.x + (gameZone.hitbox.width - nameSize.x) / 2.0f,
+                gameZone.hitbox.y - 20
+            }, 18, 0, WHITE
+        );
+
+        /* "[ E ]" en dessous si proche */
+        if (playerNear) {
+            const char* prompt = "[ E ]";
+            f32Vector2 promptSize = MeasureTextEx(lobby_fonts[FONT16], prompt, 16, 0);
+            DrawTextEx(lobby_fonts[FONT32], prompt, (Vector2) {
+                    gameZone.hitbox.x + (gameZone.hitbox.width - promptSize.x) / 2.0f,
+                    gameZone.hitbox.y + gameZone.hitbox.height + 4
+                }, 16, 0, YELLOW
+            );
+        }
     }
 }

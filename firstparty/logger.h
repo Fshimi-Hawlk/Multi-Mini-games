@@ -50,9 +50,9 @@
 #define MAX_TRACE_BACK_FRAMES 32
 #endif
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Types & Globals
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 typedef const char *ColorString_t;
 
@@ -99,9 +99,9 @@ extern LogExtraInfoOpt_St _logExtraInfoOptions;
 #define resetLogOpts()      _logExtraInfoOptions = (LogExtraInfoOpt_St) {0}
 #define setLogOptsP(...)    _logExtraInfoOptions = (LogExtraInfoOpt_St) {._persistentOpt = true, __VA_ARGS__}
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Logging Macros (preferred interface)
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 #define logger_log(fmt, ...) log_message(LOGGING_LEVEL_LOG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #define log_info(fmt, ...)   log_message(LOGGING_LEVEL_INFO,  __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
@@ -120,9 +120,9 @@ extern LogExtraInfoOpt_St _logExtraInfoOptions;
 #define log_error(fmt, ...) log_message(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Core API
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 extern ColorString_t getLevelString(LoggingLevel_Et level);
 
@@ -155,9 +155,9 @@ void print_stack_trace(unsigned int targetDepth);
  */
 void log_message(LoggingLevel_Et level, const char *file, int line, const char *func, const char *fmt, ...);
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Symbol / Caller Info (mostly Linux)
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
  * @brief Initialize platform-specific symbol handler (addr2line preparation on Linux).

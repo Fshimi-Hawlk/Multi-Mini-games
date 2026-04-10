@@ -22,11 +22,10 @@
 #define UTILS_GLOBALS_H
 
 #include "utils/userTypes.h"
-#include "paramsMenu.h"
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
-           Indexed by FontSize_Et values (FONT8 … FONT48).
+           Indexed by FontSize_Et values (FONT16 … FONT128).
            All fonts should use the same typeface for visual consistency.
 */
 extern Font lobby_fonts[__fontSizeCount];

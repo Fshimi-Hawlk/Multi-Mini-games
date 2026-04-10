@@ -175,7 +175,7 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
     gameTime += dt;
 
     if (gameTime > 1.45f) {
-        updatePlayer(&game->player, platforms, platformCount, dt);
+        lobby_updatePlayer(&game->player, platforms, platformCount, dt);
     }
 
     game->cam.target = game->player.position;
@@ -194,73 +194,44 @@ Error_Et lobby_gameLoop(LobbyGame_St* const game) {
         }
     }
 
-    toggleSkinMenu(game);
+    lobby_toggleSkinMenu(game);
 
     if (game->playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&game->player, game);
+        lobby_choosePlayerTexture(&game->player, game);
     }
 
-    updateGrass(&game->player, GetFrameTime(), gameTime, game->cam);
-    updateAtmosphericEffects(dt, &game->player, game->cam);
+    lobby_updateGrass(&game->player, GetFrameTime(), gameTime, game->cam);
+    lobby_updateAtmosphericEffects(dt, &game->player, game->cam);
 
     BeginDrawing(); {
         ClearBackground((Color){10, 10, 30, 255}); /* nuit */
 
         BeginMode2D(game->cam); {
-            drawStarryBackground(game->player.position, game->cam);
+            lobby_drawStarryBackground(game->player.position, game->cam);
 
-            drawTree();
+            lobby_drawTree();
             
-            drawPlatforms(platforms, platformCount);
-            drawPlayer(game, &game->player);
+            lobby_drawPlatforms(platforms, platformCount);
+
+            lobby_drawPlayer(game);
             
-            drawWorldBoundaries(&game->player);
+            lobby_drawWorldBoundaries(&game->player);
             
-            drawGrass(&game->player, game->cam);
+            lobby_drawGrass(&game->player, game->cam);
 
-            for (u8 i = 1; i < __gameSceneCount; ++i) {
-                GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
+            lobby_drawGameZones(game);
 
-                bool playerNear = CheckCollisionCircleRec(
-                    game->player.position, game->player.radius, gameZone.hitbox);
-
-                DrawRectangleRec(gameZone.hitbox, gameZone.color);
-                if (playerNear)
-                    DrawRectangleLinesEx(gameZone.hitbox, 3, WHITE);
-
-                f32 cx = gameZone.hitbox.x + gameZone.hitbox.width / 2.0f;
-                f32 cy = gameZone.hitbox.y + gameZone.hitbox.height / 2.0f;
-                DrawTriangle(
-                    (Vector2){cx,        cy - 18},
-                    (Vector2){cx - 12,   cy + 8},
-                    (Vector2){cx + 12,   cy + 8},
-                    WHITE);
-
-                f32 nameWidth = MeasureText(gameZone.name, 14);
-                DrawText(gameZone.name,
-                    gameZone.hitbox.x + (gameZone.hitbox.width - nameWidth) / 2.0f,
-                    gameZone.hitbox.y - 20, 14, WHITE);
-
-                if (playerNear) {
-                    const char* prompt = "[ E ]";
-                    f32 pw = MeasureText(prompt, 12);
-                    DrawText(prompt,
-                        gameZone.hitbox.x + (gameZone.hitbox.width - pw) / 2.0f,
-                        gameZone.hitbox.y + gameZone.hitbox.height + 4, 12, YELLOW);
-                }
-            }
-
-            drawAtmosphericEffects();
+            lobby_drawAtmosphericEffects();
         } EndMode2D();
 
-        drawScreenEffects(&game->player);
+        lobby_drawScreenEffects(&game->player);
 
         f32 lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
         DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
-        drawSkinButton();
+        lobby_drawSkinButton();
         if (game->playerVisuals.isTextureMenuOpen) {
-            drawMenuTextures(game);
+            lobby_drawMenuTextures(game);
         }
 
     } EndDrawing();

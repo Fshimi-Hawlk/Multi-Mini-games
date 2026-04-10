@@ -94,7 +94,7 @@ static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_St* platforms
     return false;
 }
 
-void updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
+void lobby_updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
     // Compute visible world rectangle + padding so nothing pops in/out of nowhere
     float padding = 180.0f;
     Rectangle view = {
@@ -417,7 +417,7 @@ void updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
     }
 }
 
-void drawAtmosphericEffects(void) {
+void lobby_drawAtmosphericEffects(void) {
     // Fireflies - mode aware color for debugging
     for (int i = 0; i < MAX_FIREFLIES; ++i) {
         Firefly_St* f = &fireflies[i];
@@ -468,7 +468,7 @@ void drawAtmosphericEffects(void) {
     }
 }
 
-void drawScreenEffects(Player_St* player) {
+void lobby_drawScreenEffects(Player_St* player) {
     float heightFactor = 1 - Clamp((GROUND_Y - player->position.y) / 650.0f, 0.0f, 1.0f); // stronger near ground
 
     // Vignette + night grading - much softer when player is high

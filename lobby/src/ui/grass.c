@@ -3,7 +3,7 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-void updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
+void lobby_updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
     const float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
     const float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
     const float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
@@ -61,7 +61,7 @@ void updateGrass(const Player_St* const player, const float dt, const float time
     }
 }
 
-void drawGrass(const Player_St* const player, const Camera2D camera) {
+void lobby_drawGrass(const Player_St* const player, const Camera2D camera) {
     float skyLeft = player->position.x - SKY_WIDTH / 2.0f;
     DrawRectangleGradientV(skyLeft, GROUND_Y, SKY_WIDTH, 1000.0f,
                            (Color){45, 35, 25, 255}, (Color){20, 15, 10, 255});

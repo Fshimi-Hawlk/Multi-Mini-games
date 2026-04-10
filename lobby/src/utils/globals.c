@@ -33,6 +33,8 @@
 
 LobbyGame_St game = {0};
 
+Font lobby_fonts[__fontSizeCount] = {0};
+
 float gameTime = 0.0f;
 
 Platform_St platforms[] = {
@@ -78,6 +80,8 @@ Rectangle skinButtonRect = { WINDOW_WIDTH - 70, WINDOW_HEIGHT / 2.0f - 25, 50, 5
 Texture2D logoSkinButton = {0};
 
 Texture2D platformTextures[__platformTypeCount] = {0};
+
+ParamsMenu_St paramsMenu;
 
 Texture2D treeTexture;
 Texture2D backgroundTexture;

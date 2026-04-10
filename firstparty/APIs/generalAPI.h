@@ -32,9 +32,9 @@
 
 #include "stdbool.h"
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Error codes (used project-wide)
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Standardized error codes for initialization, operations and resource loading.
@@ -59,10 +59,16 @@ typedef enum {
     // Future extension point: add more codes here as needed
 } Error_Et;
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Game interface
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
+/**
+    @brief Available font sizes used for in-game UI and text rendering.
+
+    Values are listed in ascending order.  
+    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+*/
 typedef enum {
     FONT16, FONT24, FONT32, 
     FONT48, FONT64, FONT96, 

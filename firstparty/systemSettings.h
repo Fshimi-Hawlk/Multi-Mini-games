@@ -12,9 +12,9 @@
 #include "baseTypes.h"
 #include "APIs/generalAPI.h"
 
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 // Default values
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 
 #define DEFAULT_VIDEO_SETTING_FPS           60
 #define DEFAULT_VIDEO_SETTING_WIDTH         1200
@@ -27,9 +27,9 @@
 #define DEFAULT_AUDIO_SETTING_VOLUME        1.0f
 #define DEFAULT_AUDIO_SETTING_MUTE          false
 
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 // Audio settings
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 
 typedef struct {
     f32       masterVolume;
@@ -45,9 +45,9 @@ typedef struct {
     .mute         = DEFAULT_AUDIO_SETTING_MUTE \
 }
 
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 // Video settings
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 
 typedef struct {
     s32         width;
@@ -71,9 +71,9 @@ typedef struct {
     .title       = NULL \
 }
 
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 // Main settings structure
-// ----------------------------------------------------------------------------
+// ────────────────────────────────────────────────
 
 typedef struct {
     AudioSettings_St audio;
@@ -85,10 +85,13 @@ typedef struct {
     .video = DEFAULT_VIDEO_SETTINGS \
 }
 
-#ifndef SYSTEM_SETTINGS_IMPLEMENTATION
 extern SystemSettings_St systemSettings;
 Error_Et applySystemSettings(void);
-#else
+
+#endif // SYSTEM_SETTINGS_H
+
+#ifdef SYSTEM_SETTINGS_IMPLEMENTATION
+
 SystemSettings_St systemSettings = {0};
 
 static Error_Et applyAudioSettings(AudioSettings_St settings) {
@@ -176,6 +179,5 @@ Error_Et applySystemSettings(void) {
 
     return err;
 }
-#endif
 
-#endif // SYSTEM_SETTINGS_H
+#endif // SYSTEM_SETTINGS_IMPLEMENTATION

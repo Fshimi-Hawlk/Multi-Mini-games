@@ -40,7 +40,7 @@
 #include "utils/globals.h"
 #include "utils/utils.h"
 
-void drawMenuTextures(const LobbyGame_St* const game) {
+void lobby_drawMenuTextures(const LobbyGame_St* const game) {
     Rectangle destRect = game->playerVisuals.defaultTextureRect;
 
     // Default texture
@@ -63,7 +63,7 @@ void drawMenuTextures(const LobbyGame_St* const game) {
     }
 }
 
-void drawSkinButton(void) {
+void lobby_drawSkinButton(void) {
     DrawTexturePro(
         logoSkinButton,
         getTextureRec(logoSkinButton),
