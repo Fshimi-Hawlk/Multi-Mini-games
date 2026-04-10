@@ -38,4 +38,3 @@ Feel free to add new items or move priorities - discuss big changes in the group
 **Last updated: March 17, 2026**  
 **Authors:**
 - [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
-- Maxime CHAUVEAU
