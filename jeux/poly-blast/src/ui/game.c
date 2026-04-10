@@ -11,7 +11,7 @@
 
 #include "utils/globals.h"
 
-#include "utils/debug.h"
+#include "sharedUtils/debug.h"
 
 f32Vector2 getTextCenterPosition(const char* const text, Font font, f32 fontSize, f32Vector2 pos) {
     f32Vector2 textSize = MeasureTextEx(font, text, fontSize, 1);

@@ -6,8 +6,8 @@
 
 #include "utils/globals.h"
 
-#include "utils/random.h"
-#include "utils/container.h"
+#include "sharedUtils/random.h"
+#include "sharedUtils/container.h"
 
 bool isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board) {
     bool canBePlaced = isPrefabInBoundAt(shape->prefab, pos, board);

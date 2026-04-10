@@ -1,5 +1,5 @@
 /**
-    @file widgets/types.h
+    @file sharedWidgets/types.h
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Core types and enums for the reusable widget system.

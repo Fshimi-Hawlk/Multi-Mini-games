@@ -29,10 +29,9 @@
 
 #include "ui/game.h"
 
-#include "core/game.h"
-
-#include "utils/utils.h"
 #include "utils/globals.h"
+
+#include "sharedUtils/geometry.h"
 
 void lobby_drawPlayer(const LobbyGame_St* const game) {
     float r = game->player.radius;

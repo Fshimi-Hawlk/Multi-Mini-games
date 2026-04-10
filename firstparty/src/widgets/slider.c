@@ -13,12 +13,10 @@
 */
 
 #include <stdio.h>
-#include <math.h>
 
-#include "widgets/slider.h"
-#include "widgets/types.h"
+#include "sharedWidgets/slider.h"
 
-#include "utils/mathUtils.h"
+#include "sharedUtils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

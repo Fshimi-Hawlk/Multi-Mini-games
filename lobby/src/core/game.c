@@ -41,10 +41,11 @@
 
 #include "core/game.h"
 
-#include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
+#include "sharedUtils/mathUtils.h"
+
+Rectangle getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
         player->position.x - player->radius,
         player->position.y - player->radius,

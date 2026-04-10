@@ -1,5 +1,5 @@
 /**
-    @file widgets/checkBox.h
+    @file sharedWidgets/checkBox.h
     @author Fshimi-Hawlk
     @date 2026-03-29
     @brief Checkbox widget for the reusable UI system.
@@ -8,7 +8,7 @@
 #ifndef WIDGETS_CHECK_BOX_H
 #define WIDGETS_CHECK_BOX_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 /**
     @brief Updates a checkbox and returns true if its checked state changed.

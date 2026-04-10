@@ -16,10 +16,9 @@
 
 #include <string.h>
 
-#include "widgets/textBox.h"
-#include "widgets/types.h"
+#include "sharedWidgets/textBox.h"
 
-#include "utils/mathUtils.h"
+#include "sharedUtils/mathUtils.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

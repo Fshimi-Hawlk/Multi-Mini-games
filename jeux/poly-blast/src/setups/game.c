@@ -23,8 +23,8 @@
 
 #include "utils/globals.h"
 
-#include "utils/debug.h"
-#include "utils/random.h"
+#include "sharedUtils/debug.h"
+#include "sharedUtils/random.h"
 
 /**
     @brief Initializes size-based runTimeWeights for random prefab selection.

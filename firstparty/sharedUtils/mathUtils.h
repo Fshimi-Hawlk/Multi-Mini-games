@@ -9,6 +9,7 @@
 #ifndef FIRSTPARTY_UTILS_MATHUTILS_H
 #define FIRSTPARTY_UTILS_MATHUTILS_H
 
+#include <math.h>
 
 /**
     @brief Returns the sign of a value: -1 if negative, 1 otherwise (0 becomes 1).
@@ -49,6 +50,8 @@
     @brief Clamps a value between min and max.
 */
 #define clamp(v, _min, _max) min(max((_min), (v)), (_max))
+
+#define lerp(a, b, t) (a) + ((b) - (a)) * (t)
 
 /**
     @brief Constructs a Vector2 by adding/subtracting/multiplying/dividing components.

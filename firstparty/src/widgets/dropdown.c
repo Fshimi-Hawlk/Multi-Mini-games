@@ -13,8 +13,7 @@
             - Arrow that points down/up
 */
 
-#include "widgets/dropdown.h"
-#include "widgets/types.h"
+#include "sharedWidgets/dropdown.h"
 
 // ─────────────────────────────────────────────────────────────────────────────
 

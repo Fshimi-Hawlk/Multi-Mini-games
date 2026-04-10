@@ -10,7 +10,7 @@
 #define FIRSTPARTY_UTILS_RANDOM_H
 
 #include "baseTypes.h"
-#include "utils/mathUtils.h"
+#include "sharedUtils/mathUtils.h"
 
 /**
     @brief Shuffles an array in-place using XOR swap and Fisher-Yates algorithm.

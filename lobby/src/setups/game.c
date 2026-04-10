@@ -2,6 +2,8 @@
 
 #include "utils/globals.h"
 
+#include "sharedUtils/mathUtils.h"
+
 void lobby_initGrass(void) {
     Rectangle floor = platforms[0].rect;
     grassCount = 0;
