@@ -15,23 +15,23 @@
 
     @return true if successful, false otherwise.
 */
-bool initFonts(void);
+bool polyBlast_initFonts(void);
 
 /**
     @brief Frees all loaded fonts.
 */
-void freeFonts(void);
+void polyBlast_freeFonts(void);
 
 /**
     @brief Initializes the app: RNG, window, fonts.
 
  * Seeds PRNG, opens window, loads fonts and initialize game.
 */
-bool initApp(void);
+bool polyBlast_initApp(void);
 
 /**
     @brief Frees application resources and closes the window.
 */
-void freeApp(void);
+void polyBlast_freeApp(void);
 
 #endif // SETUPS_APP_H

@@ -14,7 +14,6 @@
 */
 
 #include "setups/game.h"
-#include "setups/save.h"
 #include "setups/shape.h"
 
 #include "core/game.h"
@@ -52,7 +51,7 @@ static void initSizeWeights(PrefabManager_St* const manager) {
     }
 }
 
-bool initBoard(Board_St* const board) {
+bool polyBlast_initBoard(Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL board");
         return false;
@@ -82,7 +81,7 @@ bool initBoard(Board_St* const board) {
     return true;
 }
 
-bool initPrefabManager(PrefabManager_St* const manager) {
+bool polyBlast_initPrefabManager(PrefabManager_St* const manager) {
     if (manager == NULL) {
         log_warn("Received NULL manager");
         return false;
@@ -113,11 +112,11 @@ bool initPrefabManager(PrefabManager_St* const manager) {
 bool initGame(GameState_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
-            initPrefabsAndVariants(&prefabsBag, prefabVariant);
-            initPrefabManager(&game->prefabManager);
+            polyBlast_initPrefabsAndVariants(&prefabsBag, prefabVariant);
+            polyBlast_initPrefabManager(&game->prefabManager);
             
             game->board.width = game->board.height = 8;
-            initBoard(&game->board);
+            polyBlast_initBoard(&game->board);
 
             return true;
         } break;
@@ -148,7 +147,7 @@ bool initGame(GameState_St* const game) {
     }
 }
 
-void resetGame(GameState_St* const game) {
+void polyBlast_resetGame(GameState_St* const game) {
     if (game == NULL) {
         log_warn("Received NULL game");
         return;
@@ -165,7 +164,7 @@ void resetGame(GameState_St* const game) {
     memset(game->board.blocks, 0, sizeof(**game->board.blocks) * game->board.width * game->board.height);
 
     // Fresh prefab manager + slots
-    initPrefabManager(&game->prefabManager);
+    polyBlast_initPrefabManager(&game->prefabManager);
 
     // Give the player 3 new shapes immediately
     placementSimulation(game);

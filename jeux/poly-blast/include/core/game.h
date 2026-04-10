@@ -21,7 +21,7 @@
     @return             Independent deep copy. `prefabsBag` pointer and slot
                         prefabs remain valid as long as the original bag lives.
 */
-PrefabManager_St deepcopyPrefabManager(const PrefabManager_St* const manager);
+PrefabManager_St polyBlast_deepcopyPrefabManager(const PrefabManager_St* const manager);
 
 /**
     @brief Determines whether the current three slots can all be placed on the
@@ -36,12 +36,12 @@ PrefabManager_St deepcopyPrefabManager(const PrefabManager_St* const manager);
     @return `true`  -> game over (no legal way to place all three shapes)
             `false` -> at least one ordering works.
 */
-bool testGameOver(Board_St board, const ShapeSlots_t slots);
+bool polyBlast_testGameOver(Board_St board, const ShapeSlots_t slots);
 
 /**
     @brief Builds the score and streak texts string based on the current game state.
 */
-void buildScoreRelatedTexts(ScoringState_St* const scoringState);
+void polyBlast_buildScoreRelatedTexts(ScoringState_St* const scoringState);
 
 /**
     @brief Calculate the score of the move and update the streak relevant to any clearing of the board.
@@ -51,7 +51,7 @@ void buildScoreRelatedTexts(ScoringState_St* const scoringState);
     @param game Pointer to the game.
     @param prefabBlockCount Block count in the placed prefab.
 */
-void manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount);
+void polyBlast_manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount);
 
 /**
     @brief Adjusts the dynamic probability weights for prefab sizes based on game state.
@@ -94,6 +94,6 @@ void manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* c
     - Floors are respected during mass transfer, not only at the end, to prevent starvation.
     - Called before generating the next set of prefabs (e.g. in shuffleSlots or prefab generation).
 */
-void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta);
+void polyBlast_adjustSizeWeights(GameState_St* const game, const f32 scoreDelta);
 
 #endif // CORE_GAME_GAME_H

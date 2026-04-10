@@ -24,7 +24,7 @@
     @param prefab2 Second prefab.
     @return true if offsets match, false otherwise.
 */
-bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
+bool polyBlast_haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
 
 /**
     @brief Checks if the prefab is within board bounds at a given position.
@@ -34,14 +34,14 @@ bool haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2);
     @param board Pointer to the board.
     @return true if in bounds, false otherwise.
 */
-bool isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 pos, const Board_St* const board);
+bool polyBlast_isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 pos, const Board_St* const board);
 
 /**
     @brief Sets the bounding box (width/height) for a prefab.
 
     @param prefab Pointer to the prefab.
 */
-void setPrefabBoundingBox(Prefab_St* const prefab);
+void polyBlast_setPrefabBoundingBox(Prefab_St* const prefab);
 
 /**
     @brief Gets the center of the prefab's offsets.
@@ -49,7 +49,7 @@ void setPrefabBoundingBox(Prefab_St* const prefab);
     @param prefab The prefab.
     @return The offset center vector.
 */
-f32Vector2 getOffsetCenter(const Prefab_St prefab);
+f32Vector2 polyBlast_getOffsetCenter(const Prefab_St prefab);
 
 /**
     @brief Adds a prefab and its rotated/mirrored variants to the bag.
@@ -60,7 +60,7 @@ f32Vector2 getOffsetCenter(const Prefab_St prefab);
     @param prefab The base prefab.
     @param prefabsBag Pointer to the prefab bag.
 */
-void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag);
+void polyBlast_addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag);
 
 /**
     @brief Rotates the prefab's offsets by 90° × rotateBy times (clockwise).
@@ -78,20 +78,20 @@ void addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag);
     @param prefab    Prefab to modify (offsets are mutated)
     @param rotateBy  Number of 90° clockwise rotations (0 = no-op, negative = counterclockwise)
 */
-void rotatePrefab(Prefab_St* const prefab, u8 rotateBy);
+void polyBlast_rotatePrefab(Prefab_St* const prefab, u8 rotateBy);
 
 /**
     @brief Mirrors the prefab horizontally.
 
     @param prefab Pointer to the prefab.
 */
-void mirrorPrefab(Prefab_St* const prefab);
+void polyBlast_mirrorPrefab(Prefab_St* const prefab);
 
 /**
     @brief Prints debug information about a prefab (block count, dimensions, etc.).
 
     @param prefab The prefab to print.
 */
-void printPrefabInfo(const Prefab_St prefab);
+void polyBlast_printPrefabInfo(const Prefab_St prefab);
 
 #endif // CORE_PREFAB_H

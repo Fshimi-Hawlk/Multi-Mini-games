@@ -6,15 +6,14 @@
 */
 
 #include "utils/globals.h"
-#include "utils/audio.h"
 
 #include "setups/app.h"
 #include "setups/game.h"
+#include "setups/audio.h"
 
 #include "utils/globals.h"
 
-
-bool loadFontIdForSize(u64 fontId, f32 fontSize) {
+static bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     polyBlast_fonts[fontId] = LoadFontEx(FONT_PATH "Nunito/Nunito-Black.ttf", fontSize, NULL, 0);
     if (!IsFontValid(polyBlast_fonts[fontId])) {
         log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
@@ -24,7 +23,7 @@ bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     return true;
 }
 
-bool initFonts(void) {
+bool polyBlast_initFonts(void) {
     u64 fontSizes[__fontSizeCount] = {16, 24, 32, 48, 64, 96, 128};
     bool allFontLoaded = true;
     
@@ -35,7 +34,7 @@ bool initFonts(void) {
     return allFontLoaded;
 }
 
-void freeFonts(void) {
+void polyBlast_freeFonts(void) {
     for (u64 fontId = 0; fontId < __fontSizeCount; fontId++) {
         UnloadFont(polyBlast_fonts[fontId]);
     }
@@ -48,6 +47,7 @@ bool initApp(void) {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
+    InitAudioDevice();
     blockBlast_initAudio();
 
     initLogger();
@@ -68,6 +68,7 @@ void freeApp(void) {
     freeFonts();
 
     blockBlast_freeAudio();
+    CloseAudioDevice();
 
     CloseWindow();
 }

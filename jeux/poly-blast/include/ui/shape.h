@@ -15,13 +15,13 @@
 
     @param shape The active prefab shape to draw.
 */
-void drawShape(const Shape_St shape);
+void polyBlast_drawShape(const Shape_St shape);
 
 /**
     @brief Draws all prefab slots, skipping placed ones.
 
     @param slots Array of prefab slots.
 */
-void drawSlots(const ShapeSlots_t slots);
+void polyBlast_drawSlots(const ShapeSlots_t slots);
 
 #endif // UI_SHAPE_H

@@ -13,7 +13,7 @@
 
 #include "utils/userTypes.h"
 
-u64 getSerializedGameStateSize(const GameState_St* const state);
+u64 polyBlast_getSerializedGameStateSize(const GameState_St* const state);
 
 /**
     @brief Serializes the game state to a binary buffer.
@@ -30,7 +30,7 @@ u64 getSerializedGameStateSize(const GameState_St* const state);
     @param buffer Output buffer (must be pre-allocated if not NULL). Pass NULL to compute required size only.
     @return       Size of the serialized data (in bytes). Returns 0 on error (e.g., invalid state).
 */
-u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize);
+u64 polyBlast_serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize);
 
 /**
     @brief Deserializes a binary buffer into a game state.
@@ -50,8 +50,8 @@ u64 serializeGameState(const GameState_St* const state, u8* buffer, const u64 bu
     @param size   Size of the input buffer.
     @return       true if deserialization succeeded, false on error (e.g., invalid magic/version, buffer too small).
 */
-bool deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init);
+bool polyBlast_deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init);
 
-bool saveGameToFile(const GameState_St* const state, const char* filename);
+bool polyBlast_saveGameToFile(const GameState_St* const state, const char* filename);
 
 #endif // SAVE_H

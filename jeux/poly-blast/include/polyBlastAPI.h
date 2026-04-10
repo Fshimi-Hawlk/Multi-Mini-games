@@ -1,18 +1,18 @@
 /**
-    @file gameNameAPI.h
+    @file polyBlastAPI.h
     @author Fshimi-Hawlk
     @author Maxime-CHAUVEAU
     @date 2026-02-07
     @date 2026-02-23
-    @brief Public API for the GameName mini-game.
+    @brief Public API for the PolyBlast mini-game.
 
     This header defines the opaque game handle type and the minimal set of functions
     required to integrate and control the mini-game from the lobby.
 
     Design principles:
-      - The internal structure `GameNameGame_St` is **completely opaque** outside this module.
+      - The internal structure `PolyBlastGame_St` is **completely opaque** outside this module.
       - The lobby interacts only through this API - never accesses fields directly.
-      - All functions follow the `gameName_*` naming prefix.
+      - All functions follow the `polyBlast_*` naming prefix.
       - Errors are reported using the shared `Error_Et` codes from generalAPI.h.
       - The game state embeds `Game_St` as its first member (for type-safe casting).
 
@@ -23,8 +23,8 @@
     @see gameConfig.h for configuration options
 */
 
-#ifndef GAME_NAME_API_H
-#define GAME_NAME_API_H
+#ifndef POLY_BLAST_API_H
+#define POLY_BLAST_API_H
 
 /// @note: if you reading this file inside `firstparty/APIs` this following
 ///        include may have siggly-lines, but there's actually no real issue.
@@ -39,7 +39,7 @@
 /**
     @brief Forward declaration - internal game state definition is private.
 */
-typedef struct GameNameGame_St GameNameGame_St;
+typedef struct PolyBlastGame_St PolyBlastGame_St;
 
 /**
     @brief Configuration parameters passed during initialization.
@@ -47,9 +47,9 @@ typedef struct GameNameGame_St GameNameGame_St;
     All fields have safe defaults when zero-initialized.
 */
 typedef struct {
-    char _;         // make sure that using `gameName_initGame` doesn't cause any warning
+    char _;         // make sure that using `polyBlast_initGame` doesn't cause any warning
     // Difficulty level, etc. can be added here
-} GameNameConfigs_St;
+} PolyBlastConfigs_St;
 
 // ────────────────────────────────────────────────────────────────────────────
 // Core lifecycle API
@@ -59,18 +59,18 @@ typedef struct {
     @brief Convenience macro for C99 compound literal initialization.
 
     Example:
-        GameNameGame_St* game = NULL;
-        gameName_initGame(&game, .gameDifficulty = 144);
+        PolyBlastGame_St* game = NULL;
+        polyBlast_initGame(&game, .gameDifficulty = 144);
 */
-#define gameName_initGame(game, ...) \
-    gameName_initGame__full((game), (GameNameConfigs_St){ ._ = 0, __VA_ARGS__ })
+#define polyBlast_initGame(game, ...) \
+    polyBlast_initGame__full((game), (PolyBlastConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 /**
-    @brief Allocates and initializes a new instance of the GameName mini-game.
+    @brief Allocates and initializes a new instance of the PolyBlast mini-game.
 
     @param[out] game     Double pointer to receive the new game handle.
                              Set to NULL on failure.
-    @param[in]  configs      Video/Audio configuration (NULL = defaults)
+    @param[in]  configs      Video/Audio configuration (nothing => defaults)
 
     @return OK on success
     @return ERROR_ALLOC on memory allocation failure
@@ -87,7 +87,7 @@ typedef struct {
     @note If configs is NULL, the game uses default settings from gameConfig.h.
           Games should check configs->video and configs->audio pointers before accessing.
 */
-Error_Et gameName_initGame__full(GameNameGame_St** game, const GameNameConfigs_St configs);
+Error_Et polyBlast_initGame__full(PolyBlastGame_St** game, const PolyBlastConfigs_St configs);
 
 /**
     @brief Executes one full frame of the game: process input → update state → render.
@@ -106,7 +106,7 @@ Error_Et gameName_initGame__full(GameNameGame_St** game, const GameNameConfigs_S
     @note If the game reaches an end condition (win/lose/quit), it must set
           `game.base->running = false;`
 */
-Error_Et gameName_gameLoop(GameNameGame_St* const game);
+Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game);
 
 /**
     @brief Releases all resources owned by the game and frees the handle.
@@ -123,16 +123,6 @@ Error_Et gameName_gameLoop(GameNameGame_St* const game);
     @note Idempotent - safe to call multiple times.
     @note Does **not** close the Raylib window or call CloseWindow().
 */
-Error_Et gameName_freeGame(GameNameGame_St** game);
+Error_Et polyBlast_freeGame(PolyBlastGame_St** game);
 
-/**
-    @brief Checks if the game is still running.
-
-    @param[in] game  Game instance handle (may be NULL)
-
-    @return true if game is valid and running
-    @return false if game is NULL or has stopped
-*/
-bool gameName_isRunning(const GameNameGame_St* game);
-
-#endif // GAME_NAME_API_H
+#endif // POLY_BLAST_API_H

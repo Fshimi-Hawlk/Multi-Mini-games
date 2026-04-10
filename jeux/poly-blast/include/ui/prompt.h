@@ -12,11 +12,11 @@
 /**
     @brief Updates all active prompts and returns true if the window should close.
 */
-bool promptUpdate(GameState_St* const game, Vector2 mouse);
+bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouse);
 
 /**
     @brief Draws the active prompt (if any).
 */
-void promptDraw(void);
+void polyBlast_promptDraw(void);
 
 #endif // UI_PROMPT_H

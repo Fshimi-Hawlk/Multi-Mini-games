@@ -18,7 +18,7 @@
     @param pos The position vector for the block.
     @param color The color of the block.
 */
-void drawBlock(const f32Vector2 pos, const Color color);
+void polyBlast_drawBlock(const f32Vector2 pos, const Color color);
 
 /**
 * @brief Renders the game board, including all blocks and empty tiles.
@@ -30,6 +30,6 @@ void drawBlock(const f32Vector2 pos, const Color color);
 
     @param board The board structure to draw.
 */
-void drawBoard(const Board_St board);
+void polyBlast_drawBoard(const Board_St board);
 
 #endif // UI_BOARD_H

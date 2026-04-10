@@ -22,7 +22,7 @@
         );                 \
     } while (0)
 
-PrefabManager_St deepcopyPrefabManager(const PrefabManager_St* const manager) {
+PrefabManager_St polyBlast_deepcopyPrefabManager(const PrefabManager_St* const manager) {
     PrefabManager_St copy = {0};
     memcpy(&copy.sizeWeights, &manager->sizeWeights, sizeof(SizeWeight_St));
 
@@ -35,7 +35,7 @@ PrefabManager_St deepcopyPrefabManager(const PrefabManager_St* const manager) {
     return copy;
 }
 
-AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* const shape) {
+AnchorVec_St polyBlast_getAnchorCandidates(const Board_St* const board, const Shape_St* const shape) {
     AnchorVec_St anchors = {0};
 
     if (board == NULL || shape == NULL || shape->prefab == NULL) return anchors;
@@ -46,7 +46,7 @@ AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* co
     for (u8 y = 0; y <= maxY; ++y) {
         for (u8 x = 0; x <= maxX; ++x) {
             u8Vector2 anchor = {x, y};
-            if (isShapePlaceable(shape, castTo(s8Vector2) &anchor, board)) {
+            if (polyBlast_isShapePlaceable(shape, castTo(s8Vector2) &anchor, board)) {
                 da_append(&anchors, anchor);
             }
         }
@@ -55,7 +55,7 @@ AnchorVec_St getAnchorCandidates(const Board_St* const board, const Shape_St* co
     return anchors;
 }
 
-bool testGameOver(Board_St board, const ShapeSlots_t slots) {
+bool polyBlast_testGameOver(Board_St board, const ShapeSlots_t slots) {
     static const u8 permutations[6][3] = {
         {0, 1, 2}, {0, 2, 1},
         {1, 0, 2}, {1, 2, 0},
@@ -66,7 +66,7 @@ bool testGameOver(Board_St board, const ShapeSlots_t slots) {
     Board_St simBoard = board;
 
     for (u8 p = 0; p < 6; p++) {
-        allPlaced = canPlaceAll(&simBoard, slots, permutations[p], 0);
+        allPlaced = polyBlast_canPlaceAll(&simBoard, slots, permutations[p], 0);
 
         if (allPlaced) break;
     }
@@ -74,7 +74,7 @@ bool testGameOver(Board_St board, const ShapeSlots_t slots) {
     return !allPlaced;
 }
 
-void buildScoreRelatedTexts(ScoringState_St* const scoringState) {
+void polyBlast_buildScoreRelatedTexts(ScoringState_St* const scoringState) {
     // build score text
     snprintf(scoringState->scoreText, sizeof(scoringState->scoreText), "Score: %lu", scoringState->score);
 
@@ -114,10 +114,10 @@ static f32 calculateBoardClearingScore(const Board_St* const board) {
     return linesCleared * SCORE_PER_LINE_CLEAR * multiBonus;
 }
 
-void manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount) {
+void polyBlast_manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount) {
     scoringState->score += prefabBlockCount * SCORE_PER_UNIT_PLACED;
 
-    if (checkBoardForClearing(board)) {
+    if (polyBlast_checkBoardForClearing(board)) {
         scoringState->streakCount++;
         scoringState->streakGrace = (scoringState->streakCount + 1) / 2;
 
@@ -130,10 +130,10 @@ void manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* c
         }
     }
 
-    buildScoreRelatedTexts(scoringState);
+    polyBlast_buildScoreRelatedTexts(scoringState);
 }
 
-void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
+void polyBlast_adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // ─────────────────────────────────────────────────────────────
     // Tuning constants
 
@@ -171,7 +171,7 @@ void adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     shift += game->scoring.streakCount * STREAK_SHIFT_PER_LEVEL;
 
     // Fullness -> smaller shapes when crowded
-    u32 emptyCells = getEmptyCellCount(&game->board);
+    u32 emptyCells = polyBlast_getEmptyCellCount(&game->board);
     f32 fullnessRatio = 1.0f - (emptyCells / (f32) (game->board.width * game->board.height));
     shift -= fullnessRatio * FULLNESS_MAX_SHIFT;
 
