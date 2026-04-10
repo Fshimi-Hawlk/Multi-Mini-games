@@ -3,8 +3,8 @@
 
 #include "utils/globals.h"
 
-void lobby_initFonts(void) {
-    f32 fontSizes[__fontSizeCount] = {12, 24, 32, 48, 64, 96, 128};
+void initFonts(void) {
+    f32 fontSizes[__fontSizeCount] = {16, 24, 32, 48, 64, 96, 128};
 
     for (u8 i = 0; i < __fontSizeCount; ++i) {
         lobby_fonts[i] = LoadFontEx(FONTS_PATH "Noto/static/NotoSansMono-Bold.ttf", fontSizes[i], NULL, 0);
