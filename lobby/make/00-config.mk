@@ -2,11 +2,17 @@
 # OS detection (runs on the machine where "make" is invoked)
 # ───────────────────────────────────────────────────────────────
 UNAME_S := $(shell uname -s)
+UNAME_R := $(shell uname -r)
 
 ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
     OS := darwin
 else ifeq ($(findstring Linux,$(UNAME_S)),Linux)
-    OS := linux
+    # WSL reports Linux but contains "microsoft" in the kernel release string
+    ifneq ($(findstring microsoft,$(UNAME_R)),)
+        OS := wsl
+    else
+        OS := linux
+    endif
 else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
     OS := mingw
 else ifeq ($(findstring MSYS,$(UNAME_S)),MSYS)
@@ -24,8 +30,6 @@ ifeq ($(OS),mingw)
 else
     EXE_EXT :=
 endif
-
-# Compiler and flags
 
 # Modes
 MODE ?= release
@@ -45,7 +49,6 @@ else ifeq ($(MODE),debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -64,7 +67,7 @@ else ifeq ($(MODE),strict-debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
+		-Wno-unused-variable \
 		-D_STACK_TRACE \
 		-D_DEBUG
 	LDFLAGS := \
@@ -83,7 +86,6 @@ else ifeq ($(MODE),clang-debug)
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-macro-redefined \
 		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
@@ -109,7 +111,9 @@ else ifeq ($(MODE),clang-debug)
 	endif
 else ifeq ($(MODE),valgrind-debug)
 	ifneq ($(OS),linux)
-        $(error valgrind-debug mode is only supported on Linux (native Valgrind unavailable on $(OS)))
+		ifneq ($(OS),wsl)
+			$(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
+		endif
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc

@@ -1,14 +1,14 @@
-# Documentation Multi-Mini-Games Template
+# Multi-Mini-Games Template Documentation
 
-**Auteur: Maxime CHAUVEAU**  
-**Date: Fevrier 2026**
+**Author: Maxime CHAUVEAU**  
+**Date: February 2026**
 
-## Comment generer la documentation
+## How to Generate Documentation
 
-### Pre-requis
+### Prerequisites
 
-- [Doxygen](https://www.doxygen.nl/) installe sur votre systeme
-- (Optionnel) [Graphviz](https://graphviz.org/) pour les graphiques de dependance
+- [Doxygen](https://www.doxygen.nl/) installed on your system
+- (Optional) [Graphviz](https://graphviz.org/) for dependency graphs
 
 ### Installation
 
@@ -19,108 +19,108 @@ sudo apt-get install doxygen graphviz
 # macOS
 brew install doxygen graphviz
 
-# Windows (avec Chocolatey)
+# Windows (with Chocolatey)
 choco install doxygen.install graphviz
 ```
 
-### Generation de la documentation
+### Generating Documentation
 
-Depuis le dossier `docs/`:
+From the `docs/` folder:
 
 ```bash
 cd docs
 doxygen Doxyfile
 ```
 
-La documentation sera generee dans `docs/doxygen/html/`.
+The documentation will be generated in `docs/doxygen/html/`.
 
-Ouvrir `docs/doxygen/html/index.html` dans un navigateur.
+Open `docs/doxygen/html/index.html` in a browser.
 
-## Structure de la documentation
+## Documentation Structure
 
 ```
 docs/
-├── Doxyfile              # Configuration Doxygen principale
-├── mainpage.dox          # Page d'accueil de la documentation
-├── README.md             # Ce fichier
-├── API_Conversion.md     # Guide de conversion API
-├── makefile.md           # Documentation Makefile
-└── doxygen/              # Documentation generee (gitignore)
-    └── html/
-        └── index.html    # Page d'entree
+├-- Doxyfile              # Main Doxygen configuration
+├-- mainpage.dox          # Documentation homepage
+├-- README.md             # This file
+├-- API_Conversion.md     # API conversion guide
+├-- makefile.md           # Makefile documentation
+└-- doxygen/              # Generated documentation (gitignored)
+    └-- html/
+        └-- index.html    # Entry page
 ```
 
-## Contenu de la documentation
+## Documentation Content
 
-- **Page principale**: Description du projet, structure, compilation
-- **Module Lobby**: Architecture, API, integration des mini-jeux
-- **Module Tetris**: Regles, architecture (exemple)
-- **API Reference**: Documentation de toutes les fonctions et structures
-- **Graphiques**: Dependances, collaborations, hierarchies
+- **Main Page**: Project description, structure, compilation
+- **Lobby Module**: Architecture, API, mini-games integration
+- **Tetris Module**: Rules, architecture (example)
+- **API Reference**: Documentation of all functions and structures
+- **Graphics**: Dependencies, collaborations, hierarchies
 
-## Configuration Doxygen
+## Doxygen Configuration
 
-Le `Doxyfile` principal est configure pour:
+The main `Doxyfile` is configured as follows:
 
-| Option | Valeur | Description |
-|--------|--------|-------------|
-| `PROJECT_NAME` | Multi-Mini-Games Template | Nom du projet |
-| `PROJECT_BRIEF` | Template pour creer des mini-jeux... | Description courte |
-| `INPUT` | lobby, tetris, firstparty | Sources a documenter |
-| `RECURSIVE` | YES | Parcourir les sous-dossiers |
-| `EXTRACT_ALL` | YES | Documenter meme sans commentaires |
-| `GENERATE_HTML` | YES | Generer la documentation HTML |
-| `HAVE_DOT` | YES | Utiliser Graphviz |
-| `CALL_GRAPH` | YES | Generer les graphes d'appels |
+| Option | Value | Description |
+|--------|-------|-------------|
+| `PROJECT_NAME` | Multi-Mini-Games Template | Project name |
+| `PROJECT_BRIEF` | Template to create mini-games... | Short description |
+| `INPUT` | lobby, tetris, firstparty | Sources to document |
+| `RECURSIVE` | YES | Traverse subdirectories |
+| `EXTRACT_ALL` | YES | Document even without comments |
+| `GENERATE_HTML` | YES | Generate HTML documentation |
+| `HAVE_DOT` | YES | Use Graphviz |
+| `CALL_GRAPH` | YES | Generate call graphs |
 
-## Conventions de documentation
+## Documentation Conventions
 
-### Commentaires Doxygen
+### Doxygen Comments
 
-Utiliser le style Javadoc:
+Use Javadoc style:
 
 ```c
 /**
-    @file monFichier.c
-    @brief Description courte du fichier
+    @file myFile.c
+    @brief Short description of the file
     @author Maxime CHAUVEAU
-    @date Fevrier 2026
+    @date February 2026
 
-    Description detaillee du fichier...
+    Detailed description of the file...
 */
 
 /**
-    @brief Description courte de la fonction
+    @brief Short description of the function
 
-    Description detaillee si necessaire.
+    Detailed description if necessary.
 
-    @param param1 Description du parametre 1
-    @param param2 Description du parametre 2
-    @return Description de la valeur de retour
+    @param param1 Description of parameter 1
+    @param param2 Description of parameter 2
+    @return Description of the return value
 */
-int maFonction(int param1, const char* param2);
+int myFunction(int param1, const char* param2);
 ```
 
-### Tags courants
+### Common Tags
 
 | Tag | Usage |
 |-----|-------|
-| `@file` | Nom et description du fichier |
-| `@brief` | Description courte |
-| `@author` | Auteur du code |
-| `@date` | Date de creation/modification |
-| `@param` | Description d'un parametre |
-| `@return` | Description de la valeur de retour |
-| `@see` | Reference croisee |
-| `@note` | Note importante |
-| `@warning` | Avertissement |
-| `@todo` | Tache a faire |
+| `@file` | File name and description |
+| `@brief` | Short description |
+| `@author` | Code author |
+| `@date` | Creation/modification date |
+| `@param` | Parameter description |
+| `@return` | Return value description |
+| `@see` | Cross reference |
+| `@note` | Important note |
+| `@warning` | Warning |
+| `@todo` | Task to do |
 
-## Auteur
+## Author
 
 **Maxime CHAUVEAU**  
 Maxime.Chauveau.Etu@univ-lemans.fr
 
 ---
 
-*Derniere mise a jour: Fevrier 2026*
+*Last updated: February 2026*

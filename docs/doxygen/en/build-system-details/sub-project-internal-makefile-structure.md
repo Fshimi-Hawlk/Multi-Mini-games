@@ -15,24 +15,24 @@ The root `Makefile` in each sub-project is kept very short — it only includes 
 
 ```text
 sub-project-root/
-├── Makefile                  # very short: includes + .PHONY
-├── make/
-│   ├── 00-config.mk          # compiler, modes, flags, paths, OS detection
-│   ├── 10-sources.mk         # finds .c files in src/ and tests/, builds object lists
-│   ├── 20-build-rules.mk     # pattern rules (.o from .c, linking, static-lib)
-│   ├── 30-targets-main.mk    # main program targets (all, rebuild, run-main, etc.)
-│   ├── 40-targets-tests.mk   # test targets (tests, run-tests with logs)
-│   ├── 50-tools.mk           # verbosity control, clean, help, stdbuf handling
-│   ├── 99-overrides.mk       # optional local overrides (git-ignored)
-│   └── platform/             # OS-specific settings (included from 00-config.mk)
-│       ├── linux.mk
-│       ├── darwin.mk
-│       └── mingw.mk
-├── makefile.md               # user-facing guide (make help, modes, examples)
-├── src/
-├── tests/
-├── build/                    # generated files
-└── ...
+├-- Makefile                  # very short: includes + .PHONY
+├-- make/
+│   ├-- 00-config.mk          # compiler, modes, flags, paths, OS detection
+│   ├-- 10-sources.mk         # finds .c files in src/ and tests/, builds object lists
+│   ├-- 20-build-rules.mk     # pattern rules (.o from .c, linking, static-lib)
+│   ├-- 30-targets-main.mk    # main program targets (all, rebuild, run-main, etc.)
+│   ├-- 40-targets-tests.mk   # test targets (tests, run-tests with logs)
+│   ├-- 50-tools.mk           # verbosity control, clean, help, stdbuf handling
+│   ├-- 99-overrides.mk       # optional local overrides (git-ignored)
+│   └-- platform/             # OS-specific settings (included from 00-config.mk)
+│       ├-- linux.mk
+│       ├-- darwin.mk
+│       └-- mingw.mk
+├-- makefile.md               # user-facing guide (make help, modes, examples)
+├-- src/
+├-- tests/
+├-- build/                    # generated files
+└-- ...
 ```
 
 ## Inclusion Order (very important)

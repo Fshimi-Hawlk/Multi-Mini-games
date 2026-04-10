@@ -32,9 +32,9 @@
 #include "baseTypes.h"
 #include "APIs/generalAPI.h"
 
-// ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────----------------------------
 // Types
-// ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────----------------------------
 
 /**
     @brief Forward declaration - internal game state definition is private.
@@ -51,9 +51,9 @@ typedef struct {
     // Difficulty level, etc. can be added here
 } GameNameConfigs_St;
 
-// ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────----------------------------
 // Core lifecycle API
-// ────────────────────────────────────────────────────────────────────────────
+// ────────────────────────────────────────────────----------------------------
 
 /**
     @brief Convenience macro for C99 compound literal initialization.
@@ -63,7 +63,7 @@ typedef struct {
         gameName_initGame(&game, .gameDifficulty = 144);
 */
 #define gameName_initGame(game, ...) \
-    gameName_initGame__full((game), (GameNameConfigs_St){ _ = 0, __VA_ARGS__ })
+    gameName_initGame__full((game), (GameNameConfigs_St){ ._ = 0, __VA_ARGS__ })
 
 /**
     @brief Allocates and initializes a new instance of the GameName mini-game.
@@ -87,7 +87,7 @@ typedef struct {
     @note If configs is NULL, the game uses default settings from gameConfig.h.
           Games should check configs->video and configs->audio pointers before accessing.
 */
-Error_Et gameName_initGame__full(GameNameGame_St** game, const GameNameConfigs_St* configs);
+Error_Et gameName_initGame__full(GameNameGame_St** game, const GameNameConfigs_St configs);
 
 /**
     @brief Executes one full frame of the game: process input → update state → render.

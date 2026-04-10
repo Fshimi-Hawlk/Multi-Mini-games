@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Only *important* changes go here (new game started, big shared code added, lobby progress, big refactor, etc.)
 - We write in the **[Unreleased]** section until we decide it's time for a version (for example 0.1.0 when lobby + first few games work together)
 
+## [v6.0.0] - 2026-03-28
+
+### Added
+- Merged `full_fixed/sgit_v5/` and `sgit_v5/` to create version v6.0.0
+- New thirdpartyvide folder (to be filled manually with libraries)
+
+### Changed
+- (none)
+
+### Fixed
+- (none)
+
+### Removed
+- (none)
+
 ## [Unreleased]
 
 ### Added
@@ -22,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Configuration system**: `gameConfig.h` with `GameConfig_St`, `AudioConfig_St`, `VideoConfig_St` and default macros
 - **Solitaire API**: `solitaireAPI.h` following the standard mini-game pattern (by Maxime CHAUVEAU)
 - **Tetris API stub**: `tetrisAPI.h` for future implementation
+- **`.gitignore` update**: Added rule to ignore Windows Zone Identifier files (`:Zone.Identifier`) (by Maxime CHAUVEAU)
 
 ### Changed
 - Updated root README with clearer explanations and Git commands suited for beginners
@@ -41,5 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Credits
 
 **Created: January 15, 2025**  
-**Last updated: March 02, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: March 17, 2026**  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+- Maxime CHAUVEAU

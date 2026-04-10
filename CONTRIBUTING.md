@@ -59,7 +59,7 @@ It helps a lot when scrolling through `git log --oneline` or GitHub commit lists
 
 Good example (recent one):
 
-[code block]text
+```text
 Docs update/less globals/temporary pause menu removal/fixes/new font
 - docs: Updated the creation date and last updated dates
 - chore: Removed unused windowRect and appFont off globals
@@ -68,16 +68,16 @@ Docs update/less globals/temporary pause menu removal/fixes/new font
 - fix: Font warning font size wasn't correctly displaying
 - fix: Can now place daub right when the ball's text appear without penalizing te player.
 - chore: Changed font to NotoSansMono-Bold.ttf
-[code block]
+```
 
 Compared to older style (still okay, but harder to grasp quickly):
 
-[code block]text
+```text
 - refactor: Moved all the lobby initialization, gameloop and freeing logic into dedicated lobbyAPI .c and .h file to factorize the code and comply with every other game on the structure.
 - fix: Corrected the variable name of GameScene_Et
 - refactor: Added PlayerTexture_Et to correctly name what texture id correspond to which texture
 ...
-[code block]
+```
 
 The top summary line is optional but recommended — especially when a commit touches many things.
 
@@ -243,5 +243,6 @@ Thanks for working together - take your time, ask questions, and enjoy making th
 ## Credits
 
 **Created: January 15, 2026**  
-**Last updated: March 01, 2026**  
-**Author: [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)**
+**Last updated: March 17, 2026**  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)

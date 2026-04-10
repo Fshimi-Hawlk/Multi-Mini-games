@@ -1,5 +1,5 @@
-# ───────────────────────────────────────────────────────────────
-# Top-Level Makefile ─ Project build system
+# ==============================================================================
+# Top-Level Makefile - Project build system
 #
 #     Main targets: see 'make help' for the full list and descriptions
 #     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
@@ -7,11 +7,11 @@
 #     Quick usage   ->  make help
 #
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 # Configuration
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
 MODE ?= release
 VERBOSE ?= 0
@@ -28,13 +28,16 @@ endif
 MAKEFLAGS += --no-print-directory
 
 # Excluded directories
-EXCLUDED_DIRS := assets build docs firstparty lobby logs thirdparty sub-project-example
+EXCLUDED_DIRS := assets build docs jeux logs thirdparty sub-project-example lt-env
 
 # Detect modules (normalize by removing trailing /)
-MODULES := $(patsubst %/,%,$(wildcard */))
-MODULES := $(filter-out $(EXCLUDED_DIRS), $(MODULES))
+ROOT_MODULES := $(patsubst %/,%,$(wildcard */))
+ROOT_MODULES := $(filter-out $(EXCLUDED_DIRS), $(ROOT_MODULES))
 
-SUBDIRS := $(MODULES) lobby
+# jeux/ sub-project modules (e.g. jeux/tetris, jeux/solitaire, ...)
+JEUX_MODULES := $(patsubst %/,%,$(wildcard jeux/*/))
+
+MODULES := $(ROOT_MODULES) $(JEUX_MODULES)
 
 FIRSTPARTY_API_DIR := firstparty/APIs
 
@@ -44,8 +47,9 @@ LIB_DIR   := $(BUILD_DIR)/lib
 BIN_DIR   := $(BUILD_DIR)/bin
 
 # Computed lib names (flattened lowercase, no - or _)
+# Uses notdir to handle paths like jeux/tetris → tetris
 define compute-lib-name
-$(shell echo '$(1)' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
+$(shell echo '$(notdir $(1))' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
 endef
 
 define compute-api-name
@@ -58,9 +62,9 @@ LIBS := $(foreach mod,$(MODULES),$(LIB_DIR)/lib$(call compute-lib-name,$(mod)).a
 # Lib paths for linking (relative from lobby/ -> ../../build/lib/...)
 LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 # Main Targets
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
 all: bin
 
@@ -68,10 +72,13 @@ all: bin
 libs: $(LIBS)
 
 $(LIB_DIR)/lib%.a:
-	$(eval MOD_DIR := $(filter %$*,$(MODULES)))
+	$(eval MOD_DIR := $(strip $(foreach m,$(MODULES),$(if $(filter $(call compute-lib-name,$m),$*),$m))))
+	
+	$(if $(MOD_DIR),,$(error Could not find module directory for lib$*.a - check MODULES and compute-lib-name))
+
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
-	@echo "Building library for $(MOD_DIR)"
+	@echo "[$* => $(MOD_DIR)] Building library for \"$(MOD_DIR)\" (lib$(LIB_NAME).a)"
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
@@ -103,34 +110,16 @@ bin: libs
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
-# Force rebuild of lobby executable only (removes exe first)
-rebuild-exe: libs
-	@echo "Force rebuilding lobby executable..."
-	$(SILENT_PREFIX)rm -f $(BIN_DIR)/$(MAIN_NAME)
-	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
-	$(SILENT_PREFIX)$(MAKE) -C lobby \
-		MODE=$(MODE) \
-		VERBOSE=$(VERBOSE) \
-		BIN_DIR=../$(BIN_DIR) \
-		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
-		EXTRA_LDFLAGS="$(LIBS_REL)" \
-		rebuild
-
-# Run the lobby executable
+# Run the lobby executable (./ so the shell runs a path, not a PATH lookup)
 run-exe:
-	@if [ -f $(BIN_DIR)/$(MAIN_NAME) ]; then \
-		$(BIN_DIR)/$(MAIN_NAME); \
-	else \
-		echo "No executable found at $(BIN_DIR)/$(MAIN_NAME)"; \
-		echo "Run 'make bin' or 'make rebuild-exe' first."; \
-	fi
+	@if [ -f $(BIN_DIR)/main ]; then $(BIN_DIR)/main; else echo "Executable not found at $(BIN_DIR)/main"; fi
 
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 # Test Targets
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
 tests:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Building tests in $$dir ..."; \
 			$(MAKE) -C "$$dir" tests MODE=$(MODE) VERBOSE=$(VERBOSE) || exit 1; \
@@ -142,11 +131,11 @@ tests:
 run-tests: tests
 	@echo ""
 	@echo "Running all tests across modules..."
-	@echo "───────────────────────────────────────────────"
+	@echo "====================================================="
 	$(SILENT_PREFIX)all_passed=1; \
 	total_modules=0; \
 	failed_modules=0; \
-	for dir in $(SUBDIRS); do \
+	for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "-> Module: $$dir"; \
 			$(MAKE) -C "$$dir" run-tests MODE=$(MODE) VERBOSE=$(VERBOSE) \
@@ -155,7 +144,7 @@ run-tests: tests
 			echo ""; \
 		fi; \
 	done
-	@echo "───────────────────────────────────────────────"
+	@echo "-----------------------------------------------"
 	$(SILENT_PREFIX)if [ $$all_passed -eq 1 ]; then \
 		echo "ALL TESTS PASSED across $$total_modules module(s)."; \
 	else \
@@ -163,12 +152,12 @@ run-tests: tests
 		exit 1; \
 	fi
 
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 # Clean and Rebuild
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
 clean-libs:
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
 		fi; \
@@ -182,7 +171,7 @@ clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
 clean-all: clean
-	$(SILENT_PREFIX)for dir in $(SUBDIRS); do \
+	$(SILENT_PREFIX)for dir in $(MODULES); do \
 		if [ -d "$$dir" ] && [ -f "$$dir/Makefile" ]; then \
 			echo "Cleaning $$dir ..."; \
 			$(MAKE) -C "$$dir" clean VERBOSE=$(VERBOSE); \
@@ -193,37 +182,65 @@ rebuild: clean-all all
 
 rebuild-libs: clean-libs libs
 
+# Wipe lobby binary output only, then relink (keeps libs — faster than full rebuild)
 rebuild-exe: clean-exe bin
 
 rebuild-tests: clean tests
 
-docs:
+# ==============================================================================
+# Documentation
+# ==============================================================================
+
+# FIX: target renamed 'docs' (was announced as 'docs-root' in help but didn't exist).
+# Both names are now valid aliases.
+docs: docs-root
+
+docs-root:
 	@./generate-root-docs.sh
 
-# ───────────────────────────────────────────────────────────────
+# FIX: guard on LANG — displays a clear message if the variable is not provided.
+# docs-translate depends on docs — ensures html/ (EN doc) exists before translating.
+# Without this, the English button in index.php points to a non-existent folder.
+docs-translate: docs
+	@if [ -z "$(LANG)" ]; then \
+		echo "Usage: make docs-translate LANG=fr,de,es"; \
+		exit 1; \
+	fi
+	@./translate-root-docs.sh $(LANG)
+
+# Removes all generated translations: html-XX/, src-XX/ folders
+# and corresponding Doxyfile.<lang> files (all except the base EN Doxyfile).
+docs-translate-free:
+	$(SILENT_PREFIX)rm -rf docs/doxygen/html-* docs/doxygen/src-*
+	$(SILENT_PREFIX)find docs/doxygen -maxdepth 1 -name 'Doxyfile.*' -delete
+	@echo "Translated documentation removed."
+
+# ==============================================================================
 # Help
-# ───────────────────────────────────────────────────────────────
+# ==============================================================================
 
 help:
 	@echo "Usage: make [OPTIONS] [TARGET]"
 	@echo ""
 	@echo "TARGETS:"
-	@echo "    help             Print this help message"
-	@echo "    all              Build libs + lobby executable"
-	@echo "    rebuild          Clean everything (root + subdirs) and rebuild all"
-	@echo "    clean            Remove root-level build/ folder only"
-	@echo "    clean-all        Remove root build/ + clean every submodule"
-	@echo "    clean-libs       Clean only libraries (root + subdirs)"
-	@echo "    clean-exe        Clean only lobby executable"
-	@echo "    libs             Build module static libs if needed"
-	@echo "    rebuild-libs     Clean libraries and force rebuild"
-	@echo "    bin              Build lobby executable if needed"
-	@echo "    rebuild-exe      Force rebuild lobby executable only"
-	@echo "    run-exe          Run the lobby executable"
-	@echo "    tests            Build all test executables"
-	@echo "    rebuild-tests    Clean and rebuild test executables"
-	@echo "    run-tests        Run all tests"
-	@echo "    docs-root        Build the root documentation"
+	@echo "    help                         Print this help message"
+	@echo "    all                          Build libs + lobby executable"
+	@echo "    rebuild                      Clean everything (root + subdirs) and rebuild all"
+	@echo "    clean                        Remove root-level build/ folder only"
+	@echo "    clean-all                    Remove root build/ + clean every submodule"
+	@echo "    clean-libs                   Clean only libraries (root + subdirs)"
+	@echo "    clean-exe                    Clean only lobby executable"
+	@echo "    libs                         Build module static libs if needed"
+	@echo "    rebuild-libs                 Clean libraries and force rebuild"
+	@echo "    bin                          Build lobby executable if needed"
+	@echo "    rebuild-exe                  Force rebuild lobby executable only"
+	@echo "    run-exe                      Run the lobby executable"
+	@echo "    tests                        Build all test executables"
+	@echo "    rebuild-tests                Clean and rebuild test executables"
+	@echo "    run-tests                    Run all tests"
+	@echo "    docs / docs-root             Build the root documentation (EN)"
+	@echo "    docs-translate LANG=fr,de    Translate documentation to given languages"
+	@echo "    docs-translate-free          Remove all translated documentation folders"
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
@@ -236,4 +253,7 @@ help:
 	@echo "  - clean only affects root build/ - use clean-all for full reset"
 	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
 
-.PHONY: all libs bin rebuild-exe run-exe tests run-tests clean clean-all clean-libs clean-exe rebuild rebuild-libs rebuild-tests docs docs-root help
+.PHONY: all libs bin rebuild-exe run-exe tests run-tests \
+        clean clean-all clean-libs clean-exe \
+        rebuild rebuild-libs rebuild-tests \
+        docs docs-root docs-translate docs-translate-free help

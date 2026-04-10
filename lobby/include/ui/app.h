@@ -39,9 +39,9 @@
 
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Skin selection UI rendering
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Draws the skin selection menu overlay when open.
@@ -56,7 +56,7 @@
 
     @param game  Pointer to the lobby game state (provides textures and default rect)
 */
-void drawMenuTextures(const LobbyGame_St* const game);
+void lobby_drawMenuTextures(const LobbyGame_St* const game);
 
 /**
     @brief Draws the skin-menu toggle button (usually an icon in a corner).
@@ -67,6 +67,6 @@ void drawMenuTextures(const LobbyGame_St* const game);
     This button is always visible and serves as the entry point to open/close
     the skin selection menu.
 */
-void drawSkinButton(void);
+void lobby_drawSkinButton(void);
 
 #endif // UI_APP_H

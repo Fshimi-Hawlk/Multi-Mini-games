@@ -2,7 +2,7 @@
     @file core/game.c
     @author Fshimi-Hawlk
     @date 2026-02-08
-    @date 2026-02-23
+    @date 2026-04-08
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
 
     Contributors:
@@ -33,7 +33,7 @@
     Rendering-related helpers (getPlayerCollisionBox, getPlayerCenter) are used
     by draw routines and assume the player's collision shape is always a circle.
 
-    @see `utils/userTypes.h`     for `Player_st`, `LobbyGame_St`, `PlayerTexture_Et`
+    @see `utils/userTypes.h`     for `Player_St`, `LobbyGame_St`, `PlayerTexture_Et`
     @see `utils/configs.h`       for `FRICTION`, `COYOTE_TIME`, `JUMP_BUFFER_TIME`, `MAX_JUMPS`,
     @see `utils/globals.h`       for `skinButtonRect`
     @see `core/game.h`           for `resolveCircleRectCollision()` declaration
@@ -41,41 +41,120 @@
 
 #include "core/game.h"
 
-#include "utils/utils.h"
 #include "utils/globals.h"
 
-Rectangle getPlayerCollisionBox(const Player_st* const player) {
+#include "sharedUtils/mathUtils.h"
+
+Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
-        player->position.x,
-        player->position.y,
+        player->position.x, //  - player->radius
+        player->position.y, //  - player->radius
         player->radius * 2,
         player->radius * 2
     };
 }
 
-Vector2 getPlayerCenter(const Player_st* const player) {
+Vector2 lobby_getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const f32 dt) {
+/**
+    @brief Resolves collision between player's circle and a single axis-aligned rectangle.
 
+    Performs:
+        - closest-point calculation
+        - penetration depth computation
+        - position correction (push out)
+        - velocity nulling along dominant axis
+        - ground detection (sets onGround, resets jumps/coyote when landing from above)
+
+    @param player  Player state (position and velocity are modified)
+    @param rect    Rectangle to collide against
+*/
+static void resolveCircleRectCollision(Player_St* player, const Rectangle rect) {
+    f32 centerX = player->position.x;
+    f32 centerY = player->position.y;
+    f32 r       = player->radius;
+
+    // Search the position that is closest to the circle on the rectangle
+    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
+    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
+
+    f32 dx = centerX - closestX;
+    f32 dy = centerY - closestY;
+    f32 distSq = dx * dx + dy * dy;
+
+    if (distSq > 0.0f) {
+        /* Cas 1 : centre hors du rect */
+        if (distSq >= r * r) return;
+
+        f32 dist        = sqrtf(distSq);
+        f32 penetration = r - dist;
+        f32 nx = dx / dist;
+        f32 ny = dy / dist;
+
+        player->position.x += nx * penetration;
+        player->position.y += ny * penetration;
+
+        if (fabsf(nx) > fabsf(ny)) {
+            player->velocity.x = 0;
+        } else {
+            player->velocity.y = 0;
+            if (ny < 0) {
+                player->onGround    = true;
+                player->nbJumps     = 0;
+                player->coyoteTimer = COYOTE_TIME;
+            }
+        }
+    } else {
+        /* Cas 2 : tunneling — centre à l'intérieur du rectangle */
+        f32 overlapLeft   = centerX - rect.x;
+        f32 overlapRight  = rect.x + rect.width  - centerX;
+        f32 overlapTop    = centerY - rect.y;
+        f32 overlapBottom = rect.y  + rect.height - centerY;
+
+        f32 minOverlap = overlapLeft;
+        f32 nx = -1.0f, ny = 0.0f;
+
+        if (overlapRight  < minOverlap) { minOverlap = overlapRight;  nx =  1.0f; ny =  0.0f; }
+        if (overlapTop    < minOverlap) { minOverlap = overlapTop;    nx =  0.0f; ny = -1.0f; }
+        if (overlapBottom < minOverlap) { minOverlap = overlapBottom; nx =  0.0f; ny =  1.0f; }
+
+        player->position.x += nx * (minOverlap + r);
+        player->position.y += ny * (minOverlap + r);
+
+        if (fabsf(nx) > fabsf(ny)) {
+            player->velocity.x = 0;
+        } else {
+            player->velocity.y = 0;
+            if (ny < 0) {
+                player->onGround    = true;
+                player->nbJumps     = 0;
+                player->coyoteTimer = COYOTE_TIME;
+            }
+        }
+    }
+}
+
+void lobby_updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
         player->velocity.x = -300;
-    }
-    else if (IsKeyDown(KEY_D)) {
+    } else if (IsKeyDown(KEY_D)) {
         player->velocity.x = 300;
-    }
-    // Apply friction
-    else {
+    } else {
         if (player->velocity.x > 0) {
             player->velocity.x -= FRICTION * dt;
             if (player->velocity.x < 0) player->velocity.x = 0;
-        }
-        else if (player->velocity.x < 0) {
+        } else if (player->velocity.x < 0) {
             player->velocity.x += FRICTION * dt;
             if (player->velocity.x > 0) player->velocity.x = 0;
         }
+    }
+
+    if (IsKeyPressed(KEY_R)) {
+        player->position = (f32Vector2) {PLAYER_SPAWN_X, PLAYER_SPAWN_Y};
+        player->velocity = (f32Vector2) {0};
     }
 
     // Rotate depending on the player's direction
@@ -89,13 +168,22 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     // Buffered jump input
     if (IsKeyPressed(KEY_SPACE)) {
         player->jumpBuffer = JUMP_BUFFER_TIME;
-    }
-    else if (player->jumpBuffer > 0) {
+    } else if (player->jumpBuffer > 0) {
         player->jumpBuffer = max(0, player->jumpBuffer - dt);
     }
 
     // Gravity
     player->velocity.y += 1200 * dt;
+
+    // Air resistance + terminal velocity when in air
+    // Fixes tunneling through floor from high jumps and slows down y-speed as requested
+    if (!player->onGround && player->velocity.y > 0) {
+        if (player->velocity.y > MAX_FALL_SPEED) {
+            player->velocity.y = MAX_FALL_SPEED;
+        }
+        // Gentle linear drag for natural falling feel (very light)
+        player->velocity.y *= (1.0f - AIR_DRAG * dt);
+    }
 
     // Collision
     player->position.x += player->velocity.x * dt;
@@ -106,26 +194,33 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
         resolveCircleRectCollision(player, platforms[i].rect);
     }
 
+    // Left border
+    if (player->position.x - player->radius < -X_LIMIT) {
+        player->position.x = -X_LIMIT + player->radius;
+        player->velocity.x = 0;
+    }
+
+    // Right border
+    if (player->position.x + player->radius > X_LIMIT) {
+        player->position.x = X_LIMIT - player->radius;
+        player->velocity.x = 0;
+    }
+
     // Coyote time
     if (player->onGround) {
         player->coyoteTimer = COYOTE_TIME;
         player->nbJumps = 0;
-    }
-    else {
+    } else {
         player->coyoteTimer -= dt;
         if (player->coyoteTimer < 0)
             player->coyoteTimer = 0;
     }
 
-    // Jump => buffer + coyote + air jump(s)
+    // Jump
     if (player->jumpBuffer > 0) {
-        // Ground/Coyote Jump/Double jump
         if (player->onGround || player->coyoteTimer > 0 || player->nbJumps < MAX_JUMPS) {
-            // adding: `player->nbJumps >= 1` to the cond makes that player can't
-            // air jump if they haven't already jump previously
-
-            player->velocity.y = -500;
-            player->onGround = false;
+            player->velocity.y  = -JUMP_FORCE;
+            player->onGround    = false;
             player->coyoteTimer = 0;
             player->nbJumps++;
             player->jumpBuffer = 0;
@@ -133,51 +228,7 @@ void updatePlayer(Player_st* const player, const Platform_st* const platforms, c
     }
 }
 
-void resolveCircleRectCollision(Player_st* player, Rectangle rect) {
-    // Search the position that is closest to the circle on the rectangle
-    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
-
-    f32 dx = player->position.x - closestX;
-    f32 dy = player->position.y - closestY;
-
-    f32 distSq = dx*dx + dy*dy;
-    f32 r = player->radius;
-
-    if (distSq >= r * r)
-        return;
-
-    f32 dist = sqrtf(distSq);
-    if (dist == 0)
-        return;
-
-    f32 penetration = r - dist;
-
-    f32 nx = dx / dist;
-    f32 ny = dy / dist;
-
-    // Position correction
-    player->position.x += nx * penetration;
-    player->position.y += ny * penetration;
-
-    // Speed resolution along the dominant axis
-    if (fabsf(nx) > fabsf(ny)) {
-        player->velocity.x = 0;
-    }
-    else {
-        player->velocity.y = 0;
-
-        // Ground
-        if (ny < 0) {
-            player->onGround = true;
-            player->nbJumps = 0;
-            player->coyoteTimer = COYOTE_TIME;
-        }
-    }
-}
-
-
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
+void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
         Rectangle destRect = game->playerVisuals.defaultTextureRect;
@@ -201,9 +252,9 @@ void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
         u32 keybind;
         u32 textureId;
     } keybindTextureIdAssociations[__playerTextureCount] = {
-        {KEY_ONE, PLAYER_TEXTURE_DEFAULT},
-        {KEY_TWO, PLAYER_TEXTURE_EARTH},
-        {KEY_THREE, PLAYER_TEXTURE_TROLL_FACE},
+        { KEY_ONE,   PLAYER_TEXTURE_DEFAULT    },
+        { KEY_TWO,   PLAYER_TEXTURE_EARTH      },
+        { KEY_THREE, PLAYER_TEXTURE_TROLL_FACE },
     };
 
     u32 pressedKey = GetKeyPressed();
@@ -215,21 +266,15 @@ void choosePlayerTexture(Player_st* player, LobbyGame_St* const game) {
         }
     }
 
-    if (selectedId == __playerTextureCount) {
-        /// TODO: Display Error Message if necessary
-        return;
-    }
+    if (selectedId == __playerTextureCount) return;
 
-    if (!player->unlockedTextures[selectedId]) {
-        /// TODO: Display Warning Message that the texture is locked
-        return;
-    }
+    if (!player->unlockedTextures[selectedId]) return;
 
     player->textureId = selectedId;
     game->playerVisuals.isTextureMenuOpen = false;
 }
 
-void toggleSkinMenu(LobbyGame_St* const game) {
+void lobby_toggleSkinMenu(LobbyGame_St* const game) {
     bool cond = (
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)

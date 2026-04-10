@@ -2,7 +2,7 @@
     @file utils/configs.h
     @author Fshimi-Hawlk
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-04-09
     @brief Central place for compile-time and tuning constants used throughout the game.
 
     This header defines:
@@ -23,9 +23,9 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Asset paths
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 #ifndef ASSET_PATH
 /**
@@ -35,13 +35,17 @@
 #define ASSET_PATH "assets/"
 #endif
 
-#define IMAGES_PATH ASSET_PATH "images/"            ///< Subdirectory containing all image files.
+#define FONTS_PATH "assets/fonts/"          ///< `assets` shared folder is not to be confused lobby's own assets
 
-// ────────────────────────────────────────────────
+#define IMAGES_PATH ASSET_PATH "images/"    ///< Subdirectory containing all image files.
+#define SKINS_PATH  IMAGES_PATH "skins/"    ///< Subdirectory containing all texture files.
+#define SOUNDS_PATH ASSET_PATH "sounds/"    ///< Subdirectory containing all sound files.
+
+// ------------------------------------------------
 // Window & display
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
-#define WINDOW_WIDTH    1000        ///< Default client-area width of the application window (pixels).
+#define WINDOW_WIDTH    800         ///< Default client-area width of the application window (pixels).
 #define WINDOW_HEIGHT   600         ///< Default client-area height of the application window (pixels).
 
 #define WINDOW_TITLE    "Lobby"     ///< Window title shown in the title bar / task manager.
@@ -57,18 +61,5 @@
            Other sizes are usually derived from this via the fonts[] array.
 */
 #define APP_TEXT_FONT_SIZE 32
-
-// ────────────────────────────────────────────────
-// Physics & movement tuning (lobby platformer)
-// ────────────────────────────────────────────────
-
-#define GRAVITY         1200.0f     ///< Downward acceleration applied every frame (pixels/second²).
-#define MOVE_SPEED      300.0f      ///< Horizontal movement speed when holding left/right (pixels/second).
-#define JUMP_FORCE      500.0f      ///< Upward velocity applied on jump (pixels/second).
-#define GROUND_Y        50.0f       ///< Y-position considered "ground level" for initial spawn / debug.
-#define COYOTE_TIME     0.1f        ///< Time window (seconds) after leaving ground where jump is still allowed.
-#define JUMP_BUFFER_TIME 0.1f       ///< Time window (seconds) before landing where a pressed jump is still accepted.
-#define MAX_JUMPS       2           ///< Maximum number of jumps allowed without touching ground (includes ground jump).
-#define FRICTION        2000.0f     ///< Horizontal deceleration rate when no input is given (pixels/second²).
 
 #endif // CONFIGS_H

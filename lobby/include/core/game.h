@@ -25,7 +25,7 @@
       choosePlayerTexture(&game->player, game);
 
     @see `core/game.c`        for implementation details
-    @see `utils/userTypes.h`  for Player_st, LobbyGame_St, Platform_st definitions
+    @see `utils/userTypes.h`  for Player_St, LobbyGame_St, Platform_St definitions
     @see `utils/globals.h`    for skinButtonRect (used in toggleSkinMenu)
  */
 
@@ -34,9 +34,9 @@
 
 #include "utils/userTypes.h"
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Player shape / rendering helpers
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Computes the axis-aligned bounding box that fully encloses the player's circle.
@@ -47,7 +47,7 @@
     @param player  Pointer to player state (uses position and radius)
     @return Rectangle centered on player->position with width/height = 2 radius
  */
-Rectangle getPlayerCollisionBox(const Player_st* const player);
+Rectangle lobby_getPlayerCollisionBox(const Player_St* const player);
 
 /**
     @brief Returns the local offset from the top-left of the collision box to its center.
@@ -58,11 +58,11 @@ Rectangle getPlayerCollisionBox(const Player_st* const player);
     @param player  Pointer to player state
     @return Vector2 {radius, radius}
  */
-Vector2 getPlayerCenter(const Player_st* const player);
+Vector2 lobby_getPlayerCenter(const Player_St* const player);
 
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Player physics & update
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Updates player position, velocity, angle, jump state, and performs collisions.
@@ -79,26 +79,11 @@ Vector2 getPlayerCenter(const Player_st* const player);
     @param nbPlatforms  Number of platforms
     @param dt           Delta time in seconds
  */
-void updatePlayer(Player_st* const player, const Platform_st* const platforms, const int nbPlatforms, const float dt);
+void lobby_updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt);
 
-/**
-    @brief Resolves collision between player's circle and a single axis-aligned rectangle.
-
-    Performs:
-        - closest-point calculation
-        - penetration depth computation
-        - position correction (push out)
-        - velocity nulling along dominant axis
-        - ground detection (sets onGround, resets jumps/coyote when landing from above)
-
-    @param player  Player state (position and velocity are modified)
-    @param rect    Rectangle to collide against
- */
-void resolveCircleRectCollision(Player_st* player, const Rectangle rect);
-
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 // Skin / texture selection
-// ────────────────────────────────────────────────
+// ------------------------------------------------
 
 /**
     @brief Handles skin selection via mouse clicks on preview rectangles or number keybinds.
@@ -110,7 +95,7 @@ void resolveCircleRectCollision(Player_st* player, const Rectangle rect);
     @param player  Player whose textureId will be updated
     @param game    Lobby game state (to close the menu via playerVisuals)
  */
-void choosePlayerTexture(Player_st* player, LobbyGame_St* const game);
+void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
 
 /**
     @brief Toggles the skin selection menu visibility.
@@ -121,6 +106,6 @@ void choosePlayerTexture(Player_st* player, LobbyGame_St* const game);
 
     @param game  Lobby game state (modifies playerVisuals.isTextureMenuOpen)
  */
-void toggleSkinMenu(LobbyGame_St* const game);
+void lobby_toggleSkinMenu(LobbyGame_St* const game);
 
 #endif // CORE_GAME_H

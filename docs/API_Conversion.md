@@ -162,5 +162,6 @@ Check logs if something breaks.
 ## Credits
 
 **Created:** February 10, 2026  
-**Last updated:** March 16, 2026  
-**Author:** [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
+**Last updated:** March 17, 2026  
+**Authors:**
+- [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
