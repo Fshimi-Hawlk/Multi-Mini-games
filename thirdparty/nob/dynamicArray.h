@@ -79,6 +79,7 @@ typedef struct { \
         }                                                                                   \
     } while (0)
 #endif
+
 // Append an item to a dynamic array
 #define da_append(da, item)                \
     do {                                       \
@@ -124,9 +125,9 @@ typedef struct { \
 // da_append(&xs, 1337);
 //
 // da_foreach(int, x, &xs) {
-//     // `x` here is a pointer to the current element. You can get its index by taking a difference
-//     // between `x` and the start of the array which is `x.items`.
-//     size_t index = x - xs.items;
+// // `x` here is a pointer to the current element. You can get its index by taking a difference
+// // between `x` and the start of the array which is `x.items`.
+// size_t index = x - xs.items;
 // }
 // ```
 #define da_foreach(Type, it, da) for (Type *it = (da)->items; it < (da)->items + (da)->count; ++it)

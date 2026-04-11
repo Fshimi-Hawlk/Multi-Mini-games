@@ -28,41 +28,44 @@
 */
 
 #include "core/game.h"
+#include "APIs/generalAPI.h"
+#include "baseTypes.h"
 #include "ui/game.h"
 
 #include "utils/globals.h"
 
 #include "sharedUtils/geometry.h"
+#include "utils/userTypes.h"
 
-void lobby_drawPlayer(const LobbyGame_St* const game) {
-    float r = game->player.radius;
+void lobby_drawPlayer(const PlayerVisuals_St* const visuals, const Player_St* const player) {
+    float r = player->radius;
 
     // Shadow
     Vector2 shadowOffset = Vector2Scale(moonLightDir, -r * 0.45f);
     Color shadowColor = Fade(BLACK, 0.28f);
 
     DrawCircleV((Vector2) {
-            game->player.position.x + shadowOffset.x,
-            game->player.position.y + shadowOffset.y
+            player->position.x + shadowOffset.x,
+            player->position.y + shadowOffset.y
         }, r, shadowColor
     );
 
-    if (game->player.textureId == PLAYER_TEXTURE_DEFAULT) {
-        DrawCircleV(game->player.position, r, BLUE);
+    if (player->textureId == PLAYER_TEXTURE_DEFAULT) {
+        DrawCircleV(player->position, r, BLUE);
     } else {
         DrawTexturePro(
-            game->playerVisuals.textures[game->player.textureId],
-            getTextureRec(game->playerVisuals.textures[game->player.textureId]),
-            lobby_getPlayerCollisionBox(&game->player),
-            lobby_getPlayerCenter(&game->player),
-            game->player.angle, WHITE
+            visuals->textures[player->textureId],
+            getTextureRec(visuals->textures[player->textureId]),
+            lobby_getPlayerCollisionBox(player),
+            lobby_getPlayerCenter(player),
+            player->angle, WHITE
         );
     }
 
     // Moonlight glow
     Vector2 glowPos = {
-        game->player.position.x + moonLightDir.x * r * 0.38f,
-        game->player.position.y + moonLightDir.y * r * 0.38f
+        player->position.x + moonLightDir.x * r * 0.38f,
+        player->position.y + moonLightDir.y * r * 0.38f
     };
     Color glowBase = (Color){180, 220, 255, 255};
     DrawCircleV(glowPos, r * 0.72f, Fade(glowBase, 0.09f));
@@ -105,6 +108,65 @@ void lobby_drawPlatforms(const Platform_St* const platforms, const int count) {
         // Add grass or other solid types here later if needed
     }
 }
+
+// void drawLobbyTerrains(void) {
+//     // FPS Optimization: Pre-calculate some values
+//     float time = (float)GetTime();
+    
+//     for (u32 i = 0; i < terrains.count; i++) {
+//         const LobbyTerrain_St* t = &terrains.items[i];
+        
+//         // Visibility check (basic culling)
+//         // Note: For simplicity we assume they are somewhat near the player
+        
+//         switch (t->type) {
+//             case TERRAIN_WATER: {
+//                 Color waterColor = (Color){ 30, 120, 250, 140 };
+//                 DrawRectangleRec(t->rect, waterColor);
+//                 // Simple wave effect (no Rounded call)
+//                 float wave = sinf(time * 2.0f + t->rect.x * 0.01f) * 4.0f;
+//                 DrawLineEx((Vector2){t->rect.x, t->rect.y + wave}, (Vector2){t->rect.x + t->rect.width, t->rect.y + wave}, 3.0f, (Color){150, 220, 255, 200});
+//             } break;
+
+//             case TERRAIN_BOUNCY:
+//                 DrawRectangleRec(t->rect, (Color){255, 50, 255, 255});
+//                 DrawRectangleLinesEx(t->rect, 2.0f, WHITE);
+//                 break;
+
+//             case TERRAIN_ICE:
+//                 DrawRectangleRec(t->rect, (Color){200, 240, 255, 255});
+//                 DrawRectangleLinesEx(t->rect, 1.0f, Fade(WHITE, 0.5f));
+//                 break;
+
+//             case TERRAIN_PORTAL: {
+//                 float pulse = (sinf(time * 5.0f) + 1.0f) * 0.5f;
+//                 DrawRectangleRec(t->rect, (Color){100, 0, 200, 200});
+//                 DrawRectangleLinesEx(t->rect, 2.0f + pulse * 3.0f, PURPLE);
+//                 DrawCircleV(getRectCenterPos(t->rect), 5 + pulse * 10, WHITE);
+//             } break;
+
+//             case TERRAIN_WOOD:
+//                 DrawRectangleRec(t->rect, (Color){100, 60, 20, 255});
+//                 DrawRectangleLinesEx(t->rect, 1.0f, (Color){60, 30, 10, 255});
+//                 break;
+
+//             case TERRAIN_STONE:
+//                 DrawRectangleRec(t->rect, (Color){120, 120, 120, 255});
+//                 DrawRectangleLinesEx(t->rect, 1.5f, DARKGRAY);
+//                 break;
+
+//             case TERRAIN_DECORATIVE:
+//                 // Use Rounded ONLY for decoration to save FPS on static platforms
+//                 DrawRectangleRounded(t->rect, t->roundness, 6, t->color);
+//                 break;
+
+//             default: // TERRAIN_NORMAL
+//                 DrawRectangleRec(t->rect, t->color);
+//                 DrawRectangleLinesEx(t->rect, 1.0f, Fade(BLACK, 0.2f));
+//                 break;
+//         }
+//     }
+// }
 
 void lobby_drawTree(void) {
     if (!IsTextureValid(treeTexture)) return;
@@ -161,19 +223,24 @@ void lobby_drawWorldBoundaries(const Player_St* const player) {
     }
 }
 
-void lobby_drawGameZones(const LobbyGame_St* const game) {
+void lobby_drawGameZones(const Player_St* const player) {
     for (u8 i = 1; i < __miniGameIdCount; ++i) {
-        GameCollisionZone_St gameZone = game->subGameManager.gameZones[i];
+        if (i == MINI_GAME_ID_LOBBY) continue;
+
+        GameInteractionZone_St gameZone = gameZones[i];
         if (gameZone.name == NULL) continue;
+        if (gameZone.hitbox.width == 0) continue; 
 
         bool playerNear = CheckCollisionCircleRec(
-            game->player.position, game->player.radius, gameZone.hitbox);
+            player->position, player->radius, gameZone.hitbox);
+        
+        // Glowing effect for game zones
+        float glow = (sinf(time(NULL) * 3.0f) + 1.0f) * 0.5f;
+        Color edgeColor = playerNear ? GOLD : WHITE;
 
-        /* Portal: fond coloré + bordure blanche si proche */
-        DrawRectangleRec(gameZone.hitbox, gameZone.color);
-        if (playerNear) DrawRectangleLinesEx(gameZone.hitbox, 3, WHITE);
+        DrawRectangleRounded(gameZone.hitbox, 0.3f, 8, gameZone.color);
+        DrawRectangleRoundedLinesEx(gameZone.hitbox, 0.3f, 8, 2.0f + glow * 2.0f, edgeColor);
 
-        /* Icône centrale (flèche vers le haut) */
         f32 cx = gameZone.hitbox.x + gameZone.hitbox.width / 2.0f;
         f32 cy = gameZone.hitbox.y + gameZone.hitbox.height / 2.0f;
         DrawTriangle(
@@ -182,13 +249,15 @@ void lobby_drawGameZones(const LobbyGame_St* const game) {
             (Vector2){cx + 12,   cy + 8},
             WHITE);
 
-        /* Nom du jeu au-dessus du portail */
-        f32Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT24], gameZone.name, 18, 0);
-        DrawTextEx(lobby_fonts[FONT24], gameZone.name, (Vector2) {
-                gameZone.hitbox.x + (gameZone.hitbox.width - nameSize.x) / 2.0f,
-                gameZone.hitbox.y - 20
-            }, 18, 0, WHITE
-        );
+        const char* gameName = gameZone.name;
+
+        f32Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT24], gameName, 22, 0);
+        f32Vector2 namePosition = {
+            .x = gameZone.hitbox.x + (gameZone.hitbox.width - nameSize.x) / 2.0f,
+            .y = gameZone.hitbox.y - 30.0f - glow * 5.0f
+        };
+
+        DrawTextEx(lobby_fonts[FONT24], gameName, namePosition, nameSize.y, 0, edgeColor);
 
         /* "[ E ]" en dessous si proche */
         if (playerNear) {

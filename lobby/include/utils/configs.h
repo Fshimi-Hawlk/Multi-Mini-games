@@ -23,9 +23,9 @@
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Asset paths
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 #ifndef ASSET_PATH
 /**
@@ -41,12 +41,12 @@
 #define SKINS_PATH  IMAGES_PATH "skins/"    ///< Subdirectory containing all texture files.
 #define SOUNDS_PATH ASSET_PATH "sounds/"    ///< Subdirectory containing all sound files.
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Window & display
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
-#define WINDOW_WIDTH    800         ///< Default client-area width of the application window (pixels).
-#define WINDOW_HEIGHT   600         ///< Default client-area height of the application window (pixels).
+#define WINDOW_WIDTH    1280         ///< Default client-area width of the application window (pixels).
+#define WINDOW_HEIGHT   720         ///< Default client-area height of the application window (pixels).
 
 #define WINDOW_TITLE    "Lobby"     ///< Window title shown in the title bar / task manager.
 
@@ -55,11 +55,5 @@
            Dark gray (#121212).
 */
 #define APP_BACKGROUND_COLOR ((Color){18, 18, 18, 255})
-
-/**
-    @brief Default base font size for most UI text and in-game labels.
-           Other sizes are usually derived from this via the fonts[] array.
-*/
-#define APP_TEXT_FONT_SIZE 32
 
 #endif // CONFIGS_H

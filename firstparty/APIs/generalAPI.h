@@ -1,7 +1,7 @@
 /**
     @file generalAPI.h
     @author Fshimi Hawlk
-    @author i-Charlys (CAILLON Charles)
+    @author i-Charlys
     @author Maxime-CHAUVEAU
     @date 2026-01-08
     @date 2026-03-23
@@ -65,18 +65,28 @@ typedef enum {
     @brief Available font sizes used for in-game UI and text rendering.
 
     Values are listed in ascending order.  
-    `_fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
+    `__fontSizeCount` is **not** a valid font size - it serves as array dimension / loop boundary.
 */
 typedef enum {
-    FONT16, FONT24, FONT32, 
-    FONT48, FONT64, FONT96, 
-    FONT128,
+                      FONT4,   FONT6,   FONT8,
+    FONT10,  FONT12,  FONT14,  FONT16,  FONT18,
+    FONT20,  FONT22,  FONT24,  FONT26,  FONT28,
+    FONT30,  FONT32,  FONT34,  FONT36,  FONT38,
+    FONT40,  FONT42,  FONT44,  FONT46,  FONT48,
+    FONT50,  FONT52,  FONT54,  FONT56,  FONT58,
+    FONT60,  FONT62,  FONT64,  FONT66,  FONT68,
+    FONT70,  FONT72,  FONT74,  FONT76,  FONT78,
+    FONT80,  FONT82,  FONT84,  FONT86,  FONT88,
+    FONT90,  FONT92,  FONT94,  FONT96,  FONT98,
+    FONT100, FONT102, FONT104, FONT106, FONT108,
+    FONT110, FONT112, FONT114, FONT116, FONT118,
+    FONT120, FONT122, FONT124, FONT126, FONT128,
     __fontSizeCount
 } FontSize_Et;
 
-// ────────────────────────────────────────────────
+// 
 // Game interface
-// ────────────────────────────────────────────────
+// 
 
 /**
     @brief Identifiers of the different playable scenes / mini-games.
@@ -84,21 +94,24 @@ typedef enum {
     Used both as array indices and as state identifiers.
 */
 typedef enum {
-    MINI_GAME_ID_LOBBY,       ///< Main lobby / hub world with platformer movement
-    MINI_GAME_ID_TETRIS,
-    MINI_GAME_ID_SOLITAIRE,
-    MINI_GAME_ID_SUIKA,
-    MINI_GAME_ID_BOWLING,
-    MINI_GAME_ID_GOLF,
-    MINI_GAME_ID_SNAKE,
-    MINI_GAME_ID_BINGO,
-    MINI_GAME_ID_POLY_BLAST,
     MINI_GAME_ID_BATTLESHIP,
+    MINI_GAME_ID_BINGO,
+    MINI_GAME_ID_BOWLING,
+    MINI_GAME_ID_CHESS,
     MINI_GAME_ID_CONNECT_4,
+    MINI_GAME_ID_CUBE,
+    MINI_GAME_ID_EDITOR,      ///< Level editor integrated as a mini-game
+    MINI_GAME_ID_GOLF,
     MINI_GAME_ID_KFF,
+    MINI_GAME_ID_LOBBY,       ///< Main lobby / hub world with platformer movement
     MINI_GAME_ID_MINIGOLF,
     MINI_GAME_ID_MORPION,
     MINI_GAME_ID_OTHELLO,
+    MINI_GAME_ID_POLY_BLAST,
+    MINI_GAME_ID_SNAKE,
+    MINI_GAME_ID_SOLITAIRE,
+    MINI_GAME_ID_SUIKA,
+    MINI_GAME_ID_TETRIS,
     __miniGameIdCount
 } MiniGameId_Et;
 

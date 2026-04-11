@@ -39,9 +39,9 @@
 
 #include "utils/userTypes.h"
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Skin selection UI rendering
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Draws the skin selection menu overlay when open.
@@ -68,5 +68,27 @@ void lobby_drawMenuTextures(const LobbyGame_St* const game);
     the skin selection menu.
 */
 void lobby_drawSkinButton(void);
+
+/**
+    @brief Draws the real-time physics debug panel (toggle with F2).
+*/
+void lobby_drawPhysicsDebugPanel(LobbyGame_St* const game);
+
+/**
+    @brief Handles keyboard input for live editing of physics constants in the debug panel.
+*/
+void lobby_updatePhysicsDebugPanel(LobbyGame_St* const game);
+
+/**
+    @brief Recomputes all screen-space UI rectangles when the window is resized.
+
+    Call this whenever the window size changes (in the main loop after WindowShouldClose check).
+    It updates:
+      - skinButtonRect
+      - defaultTextureRect (for the skin menu)
+      - physics debug panel position
+      - (future: connection screen elements, editor panels, etc.)
+*/
+void lobby_updateUIOnResize(void);
 
 #endif // UI_APP_H

@@ -146,13 +146,8 @@ else
 	$(error Unknown MODE=$(MODE). Use release, debug, strict-debug, clang-debug, valgrind-debug)
 endif
 
-# Combine with base
-CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
-
-# Allow extras from command line
-CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+CFLAGS  := $(MODE_CFLAGS) $(EXTRA_CFLAGS) $(BASE_CFLAGS)
+LDFLAGS := $(MODE_LDFLAGS) $(EXTRA_LDFLAGS) $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
 LIB_NAME := lobby
@@ -164,7 +159,7 @@ TEST_DIR := tests
 BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
-BIN_DIR := $(BUILD_DIR)/bin
+BIN_DIR ?= $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
 
 STATIC_LIB  ?= $(LIB_DIR)/lib$(LIB_NAME).a

@@ -8,24 +8,24 @@ The root `Makefile` is kept minimal - it only includes the modular pieces in a s
 ## Directory Layout
 ```
 sub-project-root/
-├-- Makefile                  # <- very short: just includes + .PHONY
-├-- make/
-│   ├-- 00-config.mk          # Compiler, modes, flags, directories, OS detection
-│   ├-- 10-sources.mk         # Source file discovery (src/, tests/), object & binary lists
-│   ├-- 20-build-rules.mk     # Pattern rules (.o <- .c, linking main/tests/static-lib)
-│   ├-- 30-targets-main.mk    # Main binary targets: all, rebuild, run-main, run-gdb, static-lib
-│   ├-- 40-targets-tests.mk   # Test targets: tests, run-tests (with detailed logging)
-│   ├-- 50-tools.mk           # Verbosity, dependency tracking, clean, help, stdbuf logic
-│   ├-- 99-overrides.mk       # Optional, git-ignored local overrides
-│   └-- platform/             # <- platform-specific configuration (added later)
-│       ├-- linux.mk
-│       ├-- darwin.mk
-│       └-- mingw.mk
-├-- makefile.md               # User-facing build instructions ("make help", modes, examples)
-├-- src/
-├-- tests/
-├-- build/                    # generated
-└-- ...
+├── Makefile                  # <- very short: just includes + .PHONY
+├── make/
+│   ├── 00-config.mk          # Compiler, modes, flags, directories, OS detection
+│   ├── 10-sources.mk         # Source file discovery (src/, tests/), object & binary lists
+│   ├── 20-build-rules.mk     # Pattern rules (.o <- .c, linking main/tests/static-lib)
+│   ├── 30-targets-main.mk    # Main binary targets: all, rebuild, run-main, run-gdb, static-lib
+│   ├── 40-targets-tests.mk   # Test targets: tests, run-tests (with detailed logging)
+│   ├── 50-tools.mk           # Verbosity, dependency tracking, clean, help, stdbuf logic
+│   ├── 99-overrides.mk       # Optional, git-ignored local overrides
+│   └── platform/             # <- platform-specific configuration (added later)
+│       ├── linux.mk
+│       ├── darwin.mk
+│       └── mingw.mk
+├── makefile.md               # User-facing build instructions ("make help", modes, examples)
+├── src/
+├── tests/
+├── build/                    # generated
+└── ...
 ```
 ## Inclusion Order (important!)
 

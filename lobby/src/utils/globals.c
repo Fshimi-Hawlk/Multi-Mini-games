@@ -2,7 +2,7 @@
     @file utils/globals.c
     @author LeandreB8
     @date 2026-01-12
-    @date 2026-02-23
+    @date 2026-04-10
     @brief Definitions of program-wide global variables.
 
     Contributors:
@@ -29,13 +29,25 @@
 */
 
 #include "utils/globals.h"
-#include "utils/userTypes.h"
+
+// ────────────────────────────────────────────────
+// General Globals
+// ────────────────────────────────────────────────
 
 LobbyGame_St game = {0};
 
 Font lobby_fonts[__fontSizeCount] = {0};
 
-float gameTime = 0.0f;
+f32 gameTime = 0.0f;
+
+PlayerProgress_St g_progress = {0};
+Chat_St gameChat = {0};
+
+// ────────────────────────────────────────────────
+// Platforms / Terrains
+// ────────────────────────────────────────────────
+
+TerrainVec_St terrains = {0};
 
 Platform_St platforms[] = {
     // --- SOL ---
@@ -75,13 +87,180 @@ Platform_St platforms[] = {
 
 u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 
+Texture2D platformTextures[__platformTypeCount] = {0};
+
+GameInteractionZone_St gameZones[__miniGameIdCount] = {
+    [MINI_GAME_ID_TETRIS] = {
+        .hitbox = {
+            .x      = -800,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Tetris",
+        .color = {0, 120, 220, 200},
+    },
+
+    [MINI_GAME_ID_SOLITAIRE] = {
+        .hitbox = {
+            .x      = -575,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Solitaire",
+        .color = {0, 160, 80,  200},
+    },
+
+    [MINI_GAME_ID_SUIKA] = {
+        .hitbox = {
+            .x      = -350,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Suika",
+        .color = {220, 80, 0,  200},
+    },
+
+    [MINI_GAME_ID_BOWLING] = {
+        .hitbox = {
+            .x      = -125,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Bowling",
+        .color = {140, 0, 200, 200},
+    },
+
+    [MINI_GAME_ID_GOLF] = {
+        .hitbox = {
+            .x      = 100,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Golf 3D",
+        .color = { 20, 160,  50, 200},
+    },
+
+    [MINI_GAME_ID_SNAKE] = {
+        .hitbox = {
+            .x      = 325,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Snake",
+        .color = {  0, 200,  80, 200},
+    },
+
+    [MINI_GAME_ID_POLY_BLAST] = {
+        .hitbox = {
+            .x      = 550,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "BlockBlast",
+        .color = { 60,  60, 200, 200},
+    },
+
+    [MINI_GAME_ID_KFF] = {
+        .hitbox = { 
+            .x      = -350.0f, 
+            .y      =  340.0f, 
+            .width  =  100.0f, 
+            .height =  60.0f 
+        },
+        .name = "King For Four"
+    },
+
+    [MINI_GAME_ID_CHESS] = {
+        .hitbox = { 
+            .x      =  250.0f, 
+            .y      =  340.0f, 
+            .width  =  100.0f, 
+            .height =  60.0f 
+        },
+        .name = "Chess"
+    },
+
+    [MINI_GAME_ID_CUBE] = {
+        .hitbox = { 
+            .x      = -200.0f, 
+            .y      =  240.0f, 
+            .width  =  100.0f, 
+            .height =  60.0f 
+        },
+        .name = "Rubik Cube"
+    },
+
+    [MINI_GAME_ID_BINGO] = {
+        .hitbox = { 
+            .x      =  100.0f, 
+            .y      =  240.0f, 
+            .width  =  100.0f, 
+            .height =  60.0f 
+        },
+        .name = "Bingo"
+    },
+
+    [MINI_GAME_ID_EDITOR] = {
+        .hitbox = { 
+            .x      =  -50.0f, 
+            .y      =  140.0f, 
+            .width  =  100.0f, 
+            .height =  60.0f 
+        },
+        .name = "Level Editor"
+    },
+
+    // Hide others for now
+    [MINI_GAME_ID_BATTLESHIP] = {
+        .hitbox = {0},
+        .name = "Battleship" 
+    },
+
+    [MINI_GAME_ID_CONNECT_4]  = {
+        .hitbox = {0},
+        .name = "Connect 4" 
+    },
+
+    [MINI_GAME_ID_MINIGOLF]   = {
+        .hitbox = {0},
+        .name = "Mini Golf" 
+    },
+
+    [MINI_GAME_ID_MORPION]    = {
+        .hitbox = {0},
+        .name = "Morpion" 
+    },
+
+    [MINI_GAME_ID_OTHELLO]    = {
+        .hitbox = {0},
+        .name = "Othello" 
+    },
+};
+
+// ────────────────────────────────────────────────
+// Skin stuff
+// ────────────────────────────────────────────────
+
 Rectangle skinButtonRect = { WINDOW_WIDTH - 70, WINDOW_HEIGHT / 2.0f - 25, 50, 50 };
 
 Texture2D logoSkinButton = {0};
 
-Texture2D platformTextures[__platformTypeCount] = {0};
+// ────────────────────────────────────────────────
+// Parameters Menu
+// ────────────────────────────────────────────────
 
 ParamsMenu_St paramsMenu;
+
+// ────────────────────────────────────────────────
+// Textures / Ambiant
+// ────────────────────────────────────────────────
 
 Texture2D treeTexture;
 Texture2D backgroundTexture;
@@ -91,8 +270,19 @@ int grassCount = 0;
 
 const Vector2 moonLightDir = {-0.6f, -0.8f};
 
+// ────────────────────────────────────────────────
+// Sounds
+// ────────────────────────────────────────────────
+
 Sound sound_jump;
 Sound sound_doubleJump;
 Sound sound_gameLaunch;
 
 Sound sound_doubleJumpMeme;
+
+// ────────────────────────────────────────────────
+// Physics Debug Panel
+// ────────────────────────────────────────────────
+
+bool showPhysicsDebugPanel = false;
+f32 panelScrollY = 0.0f;

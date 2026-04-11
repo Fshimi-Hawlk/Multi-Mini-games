@@ -18,14 +18,14 @@
 #include "dynamicArray.h"
 
 #if defined(__GNUC__) || defined(__clang__)
-//   https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
+// https://gcc.gnu.org/onlinedocs/gcc-4.7.2/gcc/Function-Attributes.html
 #    ifdef __MINGW_PRINTF_FORMAT
 #        define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK) __attribute__ ((format (__MINGW_PRINTF_FORMAT, STRING_INDEX, FIRST_TO_CHECK)))
 #    else
 #        define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK) __attribute__ ((format (printf, STRING_INDEX, FIRST_TO_CHECK)))
 #    endif // __MINGW_PRINTF_FORMAT
 #else
-//   TODO: implement PRINTF_FORMAT for MSVC
+// TODO: implement PRINTF_FORMAT for MSVC
 #    define PRINTF_FORMAT(STRING_INDEX, FIRST_TO_CHECK)
 #endif
 
@@ -35,11 +35,11 @@ int sb_appendf(StringBuilder_St* sb, const char *fmt, ...) PRINTF_FORMAT(2, 3);
 // Pads the StringBuilder_St (sb) to the desired word size boundary with 0s.
 // Imagine we have sb that contains 5 `a`-s:
 //
-//   aaaa|a
+// aaaa|a
 //
 // If we pad align it by size 4 it will look like this:
 //
-//   aaaa|a000| <- padded with 0s to the next size 4 boundary
+// aaaa|a000| <- padded with 0s to the next size 4 boundary
 //
 // Useful when you are building some sort of binary format using StringBuilder_St.
 void sb_padAlign(StringBuilder_St* sb, size_t size);

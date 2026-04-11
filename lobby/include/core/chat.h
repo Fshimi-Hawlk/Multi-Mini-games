@@ -1,0 +1,18 @@
+/**
+ * @file chat.h
+ * @author i-Charlys
+ * @author Fshimi Hawlk
+ * @date 2026-03-18
+ * @date 2026-03-19
+ * @brief Multiplayer chat header.
+ */
+
+#ifndef LOBBY_CHAT_H
+#define LOBBY_CHAT_H
+
+void addChatMessage(const char* sender, const char* text);
+void updateChat(void);
+
+void drawChat(void);
+
+#endif // LOBBY_CHAT_H

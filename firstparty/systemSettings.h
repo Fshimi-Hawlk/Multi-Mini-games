@@ -22,9 +22,13 @@
 #include "baseTypes.h"
 #include "APIs/generalAPI.h"
 
+#include "raylib.h"
+#include "logger.h"
+
 // ────────────────────────────────────────────────────────────────────────────
 // Default values
 // ────────────────────────────────────────────────────────────────────────────
+
 
 #define DEFAULT_VIDEO_SETTING_FPS           60
 #define DEFAULT_VIDEO_SETTING_WIDTH         800

@@ -32,91 +32,91 @@ cd docs
 doxygen Doxyfile
 ```
 
-The documentation will be generated in `docs/doxygen/html/`.
+La documentation sera generee dans `docs/doxygen/html/`.
 
-Open `docs/doxygen/html/index.html` in a browser.
+Ouvrir `docs/doxygen/html/index.html` dans un navigateur.
 
-## Documentation Structure
+## Structure de la documentation
 
 ```
 docs/
-├-- Doxyfile              # Main Doxygen configuration
-├-- mainpage.dox          # Documentation homepage
-├-- README.md             # This file
-├-- API_Conversion.md     # API conversion guide
-├-- makefile.md           # Makefile documentation
-└-- doxygen/              # Generated documentation (gitignored)
-    └-- html/
-        └-- index.html    # Entry page
+├── Doxyfile              # Configuration Doxygen principale
+├── mainpage.dox          # Page d'accueil de la documentation
+├── README.md             # Ce fichier
+├── API_Conversion.md     # Guide de conversion API
+├── makefile.md           # Documentation Makefile
+└── doxygen/              # Documentation generee (gitignore)
+    └── html/
+        └── index.html    # Page d'entree
 ```
 
-## Documentation Content
+## Contenu de la documentation
 
-- **Main Page**: Project description, structure, compilation
-- **Lobby Module**: Architecture, API, mini-games integration
-- **Tetris Module**: Rules, architecture (example)
-- **API Reference**: Documentation of all functions and structures
-- **Graphics**: Dependencies, collaborations, hierarchies
+- **Page principale**: Description du projet, structure, compilation
+- **Module Lobby**: Architecture, API, integration des mini-jeux
+- **Module Tetris**: Regles, architecture (exemple)
+- **API Reference**: Documentation de toutes les fonctions et structures
+- **Graphiques**: Dependances, collaborations, hierarchies
 
-## Doxygen Configuration
+## Configuration Doxygen
 
-The main `Doxyfile` is configured as follows:
+Le `Doxyfile` principal est configure pour:
 
-| Option | Value | Description |
-|--------|-------|-------------|
-| `PROJECT_NAME` | Multi-Mini-Games Template | Project name |
-| `PROJECT_BRIEF` | Template to create mini-games... | Short description |
-| `INPUT` | lobby, tetris, firstparty | Sources to document |
-| `RECURSIVE` | YES | Traverse subdirectories |
-| `EXTRACT_ALL` | YES | Document even without comments |
-| `GENERATE_HTML` | YES | Generate HTML documentation |
-| `HAVE_DOT` | YES | Use Graphviz |
-| `CALL_GRAPH` | YES | Generate call graphs |
+| Option | Valeur | Description |
+|--------|--------|-------------|
+| `PROJECT_NAME` | Multi-Mini-Games Template | Nom du projet |
+| `PROJECT_BRIEF` | Template pour creer des mini-jeux... | Description courte |
+| `INPUT` | lobby, tetris, firstparty | Sources a documenter |
+| `RECURSIVE` | YES | Parcourir les sous-dossiers |
+| `EXTRACT_ALL` | YES | Documenter meme sans commentaires |
+| `GENERATE_HTML` | YES | Generer la documentation HTML |
+| `HAVE_DOT` | YES | Utiliser Graphviz |
+| `CALL_GRAPH` | YES | Generer les graphes d'appels |
 
-## Documentation Conventions
+## Conventions de documentation
 
-### Doxygen Comments
+### Commentaires Doxygen
 
-Use Javadoc style:
+Utiliser le style Javadoc:
 
 ```c
 /**
-    @file myFile.c
-    @brief Short description of the file
+    @file monFichier.c
+    @brief Description courte du fichier
     @author Maxime CHAUVEAU
-    @date February 2026
+    @date Fevrier 2026
 
-    Detailed description of the file...
+    Description detaillee du fichier...
 */
 
 /**
-    @brief Short description of the function
+    @brief Description courte de la fonction
 
-    Detailed description if necessary.
+    Description detaillee si necessaire.
 
-    @param param1 Description of parameter 1
-    @param param2 Description of parameter 2
-    @return Description of the return value
+    @param param1 Description du parametre 1
+    @param param2 Description du parametre 2
+    @return Description de la valeur de retour
 */
-int myFunction(int param1, const char* param2);
+int maFonction(int param1, const char* param2);
 ```
 
-### Common Tags
+### Tags courants
 
 | Tag | Usage |
 |-----|-------|
-| `@file` | File name and description |
-| `@brief` | Short description |
-| `@author` | Code author |
-| `@date` | Creation/modification date |
-| `@param` | Parameter description |
-| `@return` | Return value description |
-| `@see` | Cross reference |
-| `@note` | Important note |
-| `@warning` | Warning |
-| `@todo` | Task to do |
+| `@file` | Nom et description du fichier |
+| `@brief` | Description courte |
+| `@author` | Auteur du code |
+| `@date` | Date de creation/modification |
+| `@param` | Description d'un parametre |
+| `@return` | Description de la valeur de retour |
+| `@see` | Reference croisee |
+| `@note` | Note importante |
+| `@warning` | Avertissement |
+| `@todo` | Tache a faire |
 
-## Author
+## Auteur
 
 **Maxime CHAUVEAU**  
 Maxime.Chauveau.Etu@univ-lemans.fr

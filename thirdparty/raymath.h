@@ -80,9 +80,9 @@
 #endif
 
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Defines and Macros
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #ifndef PI
     #define PI 3.14159265358979323846f
 #endif
@@ -109,9 +109,9 @@
     #define Vector3ToFloat(vec) (Vector3ToFloatV(vec).v)
 #endif
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Types and Structures Definition
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if !defined(RL_VECTOR2_TYPE)
 // Vector2 type
 typedef struct Vector2 {
@@ -170,9 +170,9 @@ typedef struct float16 {
 
 #include <math.h>       // Required for: sinf(), cosf(), tan(), atan2f(), sqrtf(), floor(), fminf(), fmaxf(), fabsf()
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Utils math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Clamp float value
 RMAPI float Clamp(float value, float min, float max)
@@ -228,9 +228,9 @@ RMAPI int FloatEquals(float x, float y)
     return result;
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Vector2 math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Vector with components value 0.0f
 RMAPI Vector2 Vector2Zero(void)
@@ -553,7 +553,7 @@ RMAPI int Vector2Equals(Vector2 p, Vector2 q)
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 RMAPI Vector2 Vector2Refract(Vector2 v, Vector2 n, float r)
 {
     Vector2 result = { 0 };
@@ -574,9 +574,9 @@ RMAPI Vector2 Vector2Refract(Vector2 v, Vector2 n, float r)
 }
 
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Vector3 math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Vector with components value 0.0f
 RMAPI Vector3 Vector3Zero(void)
@@ -1203,7 +1203,7 @@ RMAPI int Vector3Equals(Vector3 p, Vector3 q)
 // v: normalized direction of the incoming ray
 // n: normalized normal vector of the interface of two optical media
 // r: ratio of the refractive index of the medium from where the ray comes
-//    to the refractive index of the medium on the other side of the surface
+// to the refractive index of the medium on the other side of the surface
 RMAPI Vector3 Vector3Refract(Vector3 v, Vector3 n, float r)
 {
     Vector3 result = { 0 };
@@ -1225,9 +1225,9 @@ RMAPI Vector3 Vector3Refract(Vector3 v, Vector3 n, float r)
 }
 
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Vector4 math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 RMAPI Vector4 Vector4Zero(void)
 {
@@ -1451,9 +1451,9 @@ RMAPI int Vector4Equals(Vector4 p, Vector4 q)
 }
 
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Matrix math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Compute matrix determinant
 RMAPI float MatrixDeterminant(Matrix mat)
@@ -2006,9 +2006,9 @@ RMAPI float16 MatrixToFloatV(Matrix mat)
     return result;
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Quaternion math
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Add two quaternions
 RMAPI Quaternion QuaternionAdd(Quaternion q1, Quaternion q2)
@@ -2591,7 +2591,7 @@ RMAPI void MatrixDecompose(Matrix mat, Vector3 *translation, Quaternion *rotatio
 #if defined(__cplusplus) && !defined(RAYMATH_DISABLE_CPP_OPERATORS)
 
 // Optional C++ math operators
-//-------------------------------------------------------------------------------
+//────────────────────────────────────────────────-------------------------------
 
 // Vector2 operators
 static constexpr Vector2 Vector2Zeros = { 0, 0 };
@@ -2935,7 +2935,7 @@ inline const Matrix& operator *= (Matrix& lhs, const Matrix& rhs)
     lhs = MatrixMultiply(lhs, rhs);
     return lhs;
 }
-//-------------------------------------------------------------------------------
+//────────────────────────────────────────────────-------------------------------
 #endif  // C++ operators
 
 #endif  // RAYMATH_H

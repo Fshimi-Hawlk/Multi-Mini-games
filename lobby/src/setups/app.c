@@ -21,7 +21,7 @@ void lobby_freeFonts(void) {
     }
 }
 
-void lobby_initApp(void) {
+Error_Et lobby_initApp(void) {
     srand(time(NULL));
 
     SetTraceLogLevel(LOG_WARNING);
@@ -30,15 +30,18 @@ void lobby_initApp(void) {
     SetTargetFPS(60);
 
     lobby_initFonts();
-
     lobby_initAudio();
 
     paramsMenu_init(&paramsMenu);
+
+    return OK;
 }
 
 void lobby_freeApp(void) {
-    lobby_freeAudio();
+    arena_free(&globalArena);
+    arena_free(&tempArena);
 
+    lobby_freeAudio();
     lobby_freeFonts();
 
     CloseWindow();

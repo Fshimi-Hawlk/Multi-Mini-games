@@ -44,6 +44,7 @@
 #include "utils/globals.h"
 
 #include "sharedUtils/mathUtils.h"
+#include "utils/userTypes.h"
 
 Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
@@ -56,6 +57,29 @@ Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
 
 Vector2 lobby_getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
+}
+
+static bool isTerrainSolid(TerrainType_Et type) {
+    switch (type) {
+        case TERRAIN_NORMAL:
+        case TERRAIN_WOOD:
+        case TERRAIN_STONE:
+        case TERRAIN_ICE:
+        case TERRAIN_BOUNCY:
+        case TERRAIN_MOVING_H:
+        case TERRAIN_MOVING_V:
+            return true;
+        default:
+            return false;
+    }
+}
+
+f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect) {
+    f32 playerBottom = player->position.y + player->radius;
+    f32 waterTop     = waterRect.y;
+    if (playerBottom <= waterTop) return 0.0f;
+    f32 submergedDepth = playerBottom - waterTop;
+    return clamp(submergedDepth / (player->radius * 2.0f), 0.0f, 1.0f);
 }
 
 /**
@@ -71,22 +95,41 @@ Vector2 lobby_getPlayerCenter(const Player_St* const player) {
     @param player  Player state (position and velocity are modified)
     @param rect    Rectangle to collide against
 */
-static void resolveCircleRectCollision(Player_St* player, const Rectangle rect) {
+static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* t) {
     f32 centerX = player->position.x;
     f32 centerY = player->position.y;
     f32 r       = player->radius;
 
-    // Search the position that is closest to the circle on the rectangle
-    f32 closestX = Clamp(player->position.x, rect.x, rect.x + rect.width);
-    f32 closestY = Clamp(player->position.y, rect.y, rect.y + rect.height);
+    TerrainType_Et type = t->type;
+    
+    f32 closestX = clamp(centerX, t->rect.x, t->rect.x + t->rect.width);
+    f32 closestY = clamp(centerY, t->rect.y, t->rect.y + t->rect.height);
 
     f32 dx = centerX - closestX;
     f32 dy = centerY - closestY;
+    
     f32 distSq = dx * dx + dy * dy;
 
-    if (distSq > 0.0f) {
-        /* Cas 1 : centre hors du rect */
+    if (distSq > 0.0f) { // First Case : player center outside of terrain
         if (distSq >= r * r) return;
+
+        if (type == TERRAIN_WATER) {
+            player->isInWater = true;
+            return;
+        }
+
+        if (!isTerrainSolid(type)) {
+            // Portals
+            if (t->type != TERRAIN_PORTAL || t->isOnlyReceiverPortal) return;
+            if (player->portalTeleportCooldown <= 0.0f) {
+                if (!CheckCollisionCircleRec(player->position, player->radius, t->rect)) return;
+
+                player->position = t->portalTargetPosition;
+                player->portalTeleportCooldown = 0.4f;
+            }
+
+            return;
+        }
 
         f32 dist        = sqrtf(distSq);
         f32 penetration = r - dist;
@@ -104,14 +147,25 @@ static void resolveCircleRectCollision(Player_St* player, const Rectangle rect) 
                 player->onGround    = true;
                 player->nbJumps     = 0;
                 player->coyoteTimer = COYOTE_TIME;
+
+                switch (type) {
+                    case TERRAIN_BOUNCY: {
+                        player->velocity.y = -700.0f; 
+                        player->onGround = false;
+                    } break;
+
+                    case TERRAIN_ICE: player->onIce = true; break;
+
+                    default: break;
+                }
             }
         }
     } else {
         /* Cas 2 : tunneling — centre à l'intérieur du rectangle */
-        f32 overlapLeft   = centerX - rect.x;
-        f32 overlapRight  = rect.x + rect.width  - centerX;
-        f32 overlapTop    = centerY - rect.y;
-        f32 overlapBottom = rect.y  + rect.height - centerY;
+        f32 overlapLeft   = centerX - t->rect.x;
+        f32 overlapRight  = t->rect.x + t->rect.width  - centerX;
+        f32 overlapTop    = centerY - t->rect.y;
+        f32 overlapBottom = t->rect.y  + t->rect.height - centerY;
 
         f32 minOverlap = overlapLeft;
         f32 nx = -1.0f, ny = 0.0f;
@@ -136,20 +190,51 @@ static void resolveCircleRectCollision(Player_St* player, const Rectangle rect) 
     }
 }
 
-void lobby_updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const f32 dt) {
+static void resolvePlayerVsAllTerrains(Player_St* player) {
+    player->isInWater = false;
+    player->onIce     = false;
+
+    for (u32 i = 0; i < terrains.count; i++) {
+        resolvePlayerCircleVsTerrain(player, &terrains.items[i]);
+    }
+}
+
+void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* const pc, const f32 dt) {
+    if (player->portalTeleportCooldown > 0.0f) {
+        player->portalTeleportCooldown -= dt;
+    }
+
+    f32 submersion = 0.0f;
+    if (player->isInWater) {
+        for (u32 i = 0; i < terrains.count; ++i) {
+            if (terrains.items[i].type == TERRAIN_WATER) {
+                f32 s = getWaterSubmersion(player, terrains.items[i].rect);
+                if (s > submersion) submersion = s;
+            }
+        }
+    }
+
+    f32 moveSpeed = pc->moveSpeed;
+    if (IsKeyDown(KEY_A)) player->velocity.x = -moveSpeed;
+    else if (IsKeyDown(KEY_D)) player->velocity.x = moveSpeed;
+    else {
+        f32 f = player->onIce ? pc->iceFriction : pc->friction;
+        if (player->velocity.x > 0) player->velocity.x = max(0, player->velocity.x - f * dt);
+        else if (player->velocity.x < 0) player->velocity.x = min(0, player->velocity.x + f * dt);
+    }
+
     // Horizontal Input
     if (IsKeyDown(KEY_A)) {
-        player->velocity.x = -300;
+        player->velocity.x = -pc->moveSpeed;
+
     } else if (IsKeyDown(KEY_D)) {
-        player->velocity.x = 300;
+        player->velocity.x = pc->moveSpeed;
+
     } else {
-        if (player->velocity.x > 0) {
-            player->velocity.x -= FRICTION * dt;
-            if (player->velocity.x < 0) player->velocity.x = 0;
-        } else if (player->velocity.x < 0) {
-            player->velocity.x += FRICTION * dt;
-            if (player->velocity.x > 0) player->velocity.x = 0;
-        }
+        f32 friction = player->onIce ? pc->iceFriction : pc->friction;
+        friction = player->velocity.x > 0 ? friction : -friction; // change friction sign based on player velocity sign
+
+        player->velocity.x = max(0, player->velocity.x - friction * dt);
     }
 
     if (IsKeyPressed(KEY_R)) {
@@ -158,31 +243,36 @@ void lobby_updatePlayer(Player_St* const player, const Platform_St* const platfo
     }
 
     // Rotate depending on the player's direction
-    if (player->velocity.x > 0) {
-        player->angle += 360 * dt; // Clockwise
-    }
-    else if (player->velocity.x < 0) {
-        player->angle -= 360 * dt; // Anti-clockwise
-    }
+    player->angle += (player->velocity.x > 0 ? 360 : -360) * dt;
 
+    
     // Buffered jump input
+    player->jumpBuffer = max(0, player->jumpBuffer - dt);
+
     if (IsKeyPressed(KEY_SPACE)) {
-        player->jumpBuffer = JUMP_BUFFER_TIME;
-    } else if (player->jumpBuffer > 0) {
-        player->jumpBuffer = max(0, player->jumpBuffer - dt);
+        player->jumpBuffer = pc->jumpBufferTime;
     }
 
-    // Gravity
-    player->velocity.y += 1200 * dt;
+    if (submersion > 0.0f) {
+        player->velocity.x *= pc->waterHorizDrag;
+        player->velocity.y *= pc->waterVertDrag;
 
-    // Air resistance + terminal velocity when in air
-    // Fixes tunneling through floor from high jumps and slows down y-speed as requested
-    if (!player->onGround && player->velocity.y > 0) {
-        if (player->velocity.y > MAX_FALL_SPEED) {
-            player->velocity.y = MAX_FALL_SPEED;
+        f32 sink = IsKeyDown(KEY_S) ? pc->waterSinkWithS : pc->waterDefaultSink;
+        f32 buoyancy = pc->waterBuoyancy * submersion * submersion;
+
+        player->velocity.y += (buoyancy - sink) * dt;
+
+    } else { // outside water => apply gravity + air resistance + terminal velocity when in air
+        player->velocity.y += pc->gravity * dt;
+
+        // Fixes tunneling through floor from high jumps and slows down y-speed as requested
+        if (!player->onGround && player->velocity.y > 0) {
+            if (player->velocity.y > MAX_FALL_SPEED) {
+                player->velocity.y = MAX_FALL_SPEED;
+            }
+            // Gentle linear drag for natural falling feel (very light)
+            player->velocity.y *= (1.0f - AIR_DRAG * dt);
         }
-        // Gentle linear drag for natural falling feel (very light)
-        player->velocity.y *= (1.0f - AIR_DRAG * dt);
     }
 
     // Collision
@@ -190,9 +280,7 @@ void lobby_updatePlayer(Player_St* const player, const Platform_St* const platfo
     player->position.y += player->velocity.y * dt;
     player->onGround = false;
 
-    for (int i = 0; i < nbPlatforms; i++) {
-        resolveCircleRectCollision(player, platforms[i].rect);
-    }
+    resolvePlayerVsAllTerrains(player);
 
     // Left border
     if (player->position.x - player->radius < -X_LIMIT) {
@@ -208,22 +296,23 @@ void lobby_updatePlayer(Player_St* const player, const Platform_St* const platfo
 
     // Coyote time
     if (player->onGround) {
-        player->coyoteTimer = COYOTE_TIME;
+        player->coyoteTimer = pc->coyoteTime;
         player->nbJumps = 0;
-    } else {
-        player->coyoteTimer -= dt;
-        if (player->coyoteTimer < 0)
-            player->coyoteTimer = 0;
+    } else if (player->coyoteTimer > 0) {
+        player->coyoteTimer = max(0, player->coyoteTimer - dt);
     }
 
     // Jump
-    if (player->jumpBuffer > 0) {
-        if (player->onGround || player->coyoteTimer > 0 || player->nbJumps < MAX_JUMPS) {
-            player->velocity.y  = -JUMP_FORCE;
-            player->onGround    = false;
+    if (player->jumpBuffer > 0.0f) {
+        bool canJump = (player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < pc->maxJumps);
+        bool inWaterJump = (player->isInWater && pc->waterInfiniteJump);
+
+        if (canJump || inWaterJump) {
+            player->velocity.y = pc->jumpForce;
+            player->onGround = false;
             player->coyoteTimer = 0;
-            player->nbJumps++;
             player->jumpBuffer = 0;
+            player->nbJumps++;
         }
     }
 }
@@ -246,32 +335,18 @@ void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
         if (!game->playerVisuals.isTextureMenuOpen) return;
     }
 
-    PlayerTextureId_Et selectedId = __playerTextureCount;
-
-    struct {
-        u32 keybind;
-        u32 textureId;
-    } keybindTextureIdAssociations[__playerTextureCount] = {
-        { KEY_ONE,   PLAYER_TEXTURE_DEFAULT    },
-        { KEY_TWO,   PLAYER_TEXTURE_EARTH      },
-        { KEY_THREE, PLAYER_TEXTURE_TROLL_FACE },
+    static const int skinKeys[] = {
+        KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE,
+        KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE
     };
 
-    u32 pressedKey = GetKeyPressed();
-
-    for (u32 i = 0; i < __playerTextureCount; ++i) {
-        if (pressedKey == keybindTextureIdAssociations[i].keybind) {
-            selectedId = keybindTextureIdAssociations[i].textureId;
+    for (u32 i = 0; i < __playerTextureCount && i < 9; ++i) {
+        if (IsKeyPressed(skinKeys[i]) && game->player.unlockedTextures[i]) {
+            game->player.textureId = (PlayerTextureId_Et)i;
+            game->playerVisuals.isTextureMenuOpen = false;
             break;
         }
     }
-
-    if (selectedId == __playerTextureCount) return;
-
-    if (!player->unlockedTextures[selectedId]) return;
-
-    player->textureId = selectedId;
-    game->playerVisuals.isTextureMenuOpen = false;
 }
 
 void lobby_toggleSkinMenu(LobbyGame_St* const game) {

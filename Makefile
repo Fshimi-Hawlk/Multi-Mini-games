@@ -9,13 +9,34 @@
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 # ==============================================================================
 
+# External libraries
+RAYLIB_VERSION := 5.5
+UNAME_S := $(shell uname -s)
+
+# OS and specific flags
+ifeq ($(UNAME_S),Linux)
+    OS := linux
+    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11
+    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_linux_amd64
+endif
+ifeq ($(UNAME_S),Darwin)
+    OS := darwin
+    LDFLAGS_PLATFORM := -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
+    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_macos
+endif
+ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
+    OS := mingw
+    EXE_EXT := .exe
+    LDFLAGS_PLATFORM := -lopengl32 -lgdi32 -lwinmm
+    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_win64_mingw
+endif
+
 # ==============================================================================
 # Configuration
 # ==============================================================================
 
 MODE ?= release
 VERBOSE ?= 0
-MAIN_NAME ?= main
 
 # Verbose mode (default silent)
 ifeq ($(VERBOSE),1)
@@ -27,8 +48,15 @@ endif
 # Suppress subdirectory messages
 MAKEFLAGS += --no-print-directory
 
-# Excluded directories
-EXCLUDED_DIRS := assets build docs jeux logs thirdparty sub-project-example lt-env
+# Directories to exclude when discovering modules
+EXCLUDED_DIRS := \
+    assets       \
+    build        \
+    docs         \
+    jeux         \
+    logs         \
+    thirdparty   \
+    tui-ver
 
 # Detect modules (normalize by removing trailing /)
 ROOT_MODULES := $(patsubst %/,%,$(wildcard */))
@@ -66,7 +94,11 @@ LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 # Main Targets
 # ==============================================================================
 
-all: bin
+all: client server
+
+# Ensure directories exist
+$(BIN_DIR) $(LIB_DIR) $(OBJ_DIR) $(API_DIR):
+	$(SILENT_PREFIX)mkdir -p $@
 
 # Lazy build of module libraries (only if sources changed)
 libs: $(LIBS)
@@ -99,8 +131,38 @@ $(LIB_DIR)/lib%.a:
 		echo "  Warning: $(API_HEADER) not found in $(MOD_DIR)/include/"; \
 	fi
 
+# Don't know which version to keep...
+
+# Module build rule
+# module-%: | $(LIB_DIR) $(API_DIR)
+# 	@echo "Building static library -> $* (lib$*.a)"
+# 	$(SILENT_PREFIX)$(MAKE) -j1 -C $* static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=$(subst -,,$*) EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"
+# 	$(SILENT_PREFIX)if [ "$*" = "chess" ]; then \
+# 		$(MAKE) -j1 -C chess static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=chess MAIN_NAME=chess_core EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"; \
+# 	fi
+# 	$(SILENT_PREFIX)if cmp -s "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a" 2>/dev/null; then \
+# 		echo "  lib$(subst -,,$*).a unchanged"; \
+# 	else \
+# 		echo "  Updating lib$(subst -,,$*).a"; \
+# 		cp "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a"; \
+# 	fi
+# 	$(SILENT_PREFIX)mkdir -p $(API_DIR)
+# 	$(SILENT_PREFIX)if [ -f "$*/include/$*API.h" ]; then \
+# 		echo "  Updating API header -> $*API.h"; \
+# 		cp "$*/include/$*API.h" "$(API_DIR)/"; \
+# 	elif [ -f "$*/include/$(shell echo $* | sed -E 's/(-[a-z])/\U\1/g' | sed 's/-//g')API.h" ]; then \
+# 		api_h="$(shell echo $* | sed -E 's/(-[a-z])/\U\1/g' | sed 's/-//g')API.h"; \
+# 		echo "  Updating API header -> $$api_h"; \
+# 		cp "$*/include/$$api_h" "$(API_DIR)/"; \
+# 	else \
+# 		echo "  Warning: API header not found for $*"; \
+# 	fi
+
+# # Specific module targets
+# modules: $(foreach mod,$(ORDERED_MODULES),module-$(mod))
+
 # Normal incremental build of lobby executable
-bin: libs
+client: libs
 	@echo "Building lobby executable (if needed)..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
 	$(SILENT_PREFIX)$(MAKE) -C lobby \
@@ -110,9 +172,32 @@ bin: libs
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
-# Run the lobby executable (./ so the shell runs a path, not a PATH lookup)
-run-exe:
-	@if [ -f $(BIN_DIR)/main ]; then $(BIN_DIR)/main; else echo "Executable not found at $(BIN_DIR)/main"; fi
+# Build server binary
+server: modules | $(BIN_DIR)
+	@echo "Building server executable..."
+	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group -lm"
+	$(SILENT_PREFIX)install -m 755 reseau/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
+
+run-client: bin
+	$(SILENT_PREFIX)if [ -f "$(BIN_DIR)/client$(EXE_EXT)" ]; then \
+		echo "===> Starting client..."; \
+		$(BIN_DIR)/client$(EXE_EXT); \
+	else \
+		echo "No executable found: $(BIN_DIR)/client$(EXE_EXT)"; \
+		echo "Run 'make rebuild' first."; \
+	fi
+
+run-server: server
+	$(SILENT_PREFIX)if [ -f "$(BIN_DIR)/server$(EXE_EXT)" ]; then \
+		echo "===> Starting server..."; \
+		$(BIN_DIR)/server$(EXE_EXT); \
+	else \
+		echo "No executable found: $(BIN_DIR)/server$(EXE_EXT)"; \
+		echo "Run 'make rebuild' first."; \
+	fi
+
+run-multi: all
+	$(SILENT_PREFIX)./test-multi.sh 2 $(MODE)
 
 # ==============================================================================
 # Test Targets
@@ -167,6 +252,13 @@ clean-libs:
 clean-exe:
 	$(SILENT_PREFIX)rm -rf $(BIN_DIR)
 
+clean-client:
+	$(BIN_DIR)/client$(EXE_EXT); \
+
+clean-server:
+	$(BIN_DIR)/server$(EXE_EXT); \
+
+
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
 
@@ -182,8 +274,8 @@ rebuild: clean-all all
 
 rebuild-libs: clean-libs libs
 
-# Wipe lobby binary output only, then relink (keeps libs — faster than full rebuild)
-rebuild-exe: clean-exe bin
+rebuild-client: clean-client client
+rebuild-server: clean-server server
 
 rebuild-tests: clean tests
 
@@ -233,8 +325,8 @@ help:
 	@echo "    libs                         Build module static libs if needed"
 	@echo "    rebuild-libs                 Clean libraries and force rebuild"
 	@echo "    bin                          Build lobby executable if needed"
-	@echo "    rebuild-exe                  Force rebuild lobby executable only"
-	@echo "    run-exe                      Run the lobby executable"
+	@echo "    run-client                   Run the lobby client"
+	@echo "    run-server                   Run the game server"
 	@echo "    tests                        Build all test executables"
 	@echo "    rebuild-tests                Clean and rebuild test executables"
 	@echo "    run-tests                    Run all tests"
@@ -244,14 +336,13 @@ help:
 	@echo ""
 	@echo "OPTIONS:"
 	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
-	@echo "    MAIN_NAME=<str>  Custom executable name (default: main)"
 	@echo "    VERBOSE=1        Show all commands (default: silent)"
 	@echo ""
 	@echo "Notes:"
 	@echo "  - libs are built lazily (only when sources change)"
 	@echo "  - rebuild-exe forces relinking of the lobby executable"
 	@echo "  - clean only affects root build/ - use clean-all for full reset"
-	@echo "  - Output: build/lib/lib*.a and build/bin/$(MAIN_NAME)"
+	@echo "  - Output: build/lib/lib*.a and build/bin/{client|server}"
 
 .PHONY: all libs bin rebuild-exe run-exe tests run-tests \
         clean clean-all clean-libs clean-exe \

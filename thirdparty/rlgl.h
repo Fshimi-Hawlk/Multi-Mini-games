@@ -194,9 +194,9 @@
 // NOTE: Some driver implementation do not support it, despite they should
 #define RLGL_RENDER_TEXTURES_HINT
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Defines and Macros
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Default internal render batch elements limits
 #ifndef RL_DEFAULT_BATCH_BUFFER_ELEMENTS
@@ -356,9 +356,9 @@
 #endif
 #endif
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Types and Structures Definition
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if (defined(__STDC__) && __STDC_VERSION__ >= 199901L) || (defined(_MSC_VER) && _MSC_VER >= 1800)
     #include <stdbool.h>
 #elif !defined(__cplusplus) && !defined(bool) && !defined(RL_BOOL_TYPE)
@@ -589,9 +589,9 @@ typedef enum {
     RL_CULL_FACE_BACK
 } rlCullMode;
 
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 // Functions Declaration - Matrix operations
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 
 #if defined(__cplusplus)
 extern "C" {            // Prevents name mangling of functions
@@ -612,9 +612,9 @@ RLAPI void rlSetClipPlanes(double nearPlane, double farPlane);    // Set clip pl
 RLAPI double rlGetCullDistanceNear(void);               // Get cull plane distance near
 RLAPI double rlGetCullDistanceFar(void);                // Get cull plane distance far
 
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 // Functions Declaration - Vertex level operations
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 RLAPI void rlBegin(int mode);                           // Initialize drawing mode (how to organize vertex)
 RLAPI void rlEnd(void);                                 // Finish vertex providing
 RLAPI void rlVertex2i(int x, int y);                    // Define one vertex (position) - 2 int
@@ -626,11 +626,11 @@ RLAPI void rlColor4ub(unsigned char r, unsigned char g, unsigned char b, unsigne
 RLAPI void rlColor3f(float x, float y, float z);        // Define one vertex (color) - 3 float
 RLAPI void rlColor4f(float x, float y, float z, float w); // Define one vertex (color) - 4 float
 
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 // Functions Declaration - OpenGL style functions (common to 1.1, 3.3+, ES2)
 // NOTE: This functions are used to completely abstract raylib code from OpenGL layer,
 // some of them are direct wrappers over OpenGL calls, some others are custom
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 
 // Vertex buffers state
 RLAPI bool rlEnableVertexArray(unsigned int vaoId);     // Enable vertex array (VAO, if supported)
@@ -699,9 +699,9 @@ RLAPI void rlSetBlendMode(int mode);                    // Set blending mode
 RLAPI void rlSetBlendFactors(int glSrcFactor, int glDstFactor, int glEquation); // Set blending mode factor and equation (using OpenGL factors)
 RLAPI void rlSetBlendFactorsSeparate(int glSrcRGB, int glDstRGB, int glSrcAlpha, int glDstAlpha, int glEqRGB, int glEqAlpha); // Set blending mode factors and equations separately (using OpenGL factors)
 
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 // Functions Declaration - rlgl functionality
-//------------------------------------------------------------------------------------
+//────────────────────────────────────────────────------------------------------------
 // rlgl initialization functions
 RLAPI void rlglInit(int width, int height);             // Initialize rlgl (buffers, shaders, textures, states)
 RLAPI void rlglClose(void);                             // De-initialize rlgl (buffers, shaders, textures)
@@ -728,7 +728,7 @@ RLAPI bool rlCheckRenderBatchLimit(int vCount);         // Check internal buffer
 
 RLAPI void rlSetTexture(unsigned int id);               // Set current texture for render batch and check buffers limits
 
-//------------------------------------------------------------------------------------------------------------------------
+//────────────────────────────────────────────────────────────────────────────────────────────────------------------------
 
 // Vertex buffers management
 RLAPI unsigned int rlLoadVertexArray(void);             // Load vertex array (vao) if supported
@@ -888,9 +888,9 @@ RLAPI void rlLoadDrawQuad(void);     // Load and draw a quad
 #include <string.h>                     // Required for: strcmp(), strlen() [Used in rlglInit(), on extensions loading]
 #include <math.h>                       // Required for: sqrtf(), sinf(), cosf(), floor(), log()
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Defines and Macros
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #ifndef PI
     #define PI 3.14159265358979323846f
 #endif
@@ -1030,9 +1030,9 @@ RLAPI void rlLoadDrawQuad(void);     // Load and draw a quad
     #define RL_DEFAULT_SHADER_SAMPLER2D_NAME_TEXTURE2  "texture2"          // texture2 (texture slot active 2)
 #endif
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Types and Structures Definition
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
 typedef struct rlglData {
     rlRenderBatch *currentBatch;            // Current render batch
@@ -1111,9 +1111,9 @@ typedef void *(*rlglLoadProc)(const char *name);   // OpenGL extension functions
 
 #endif  // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Global Variables Definition
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 static double rlCullDistanceNear = RL_CULL_DISTANCE_NEAR;
 static double rlCullDistanceFar = RL_CULL_DISTANCE_FAR;
 
@@ -1133,9 +1133,9 @@ static PFNGLDRAWELEMENTSINSTANCEDEXTPROC glDrawElementsInstanced = NULL;
 static PFNGLVERTEXATTRIBDIVISOREXTPROC glVertexAttribDivisor = NULL;
 #endif
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module specific Functions Declaration
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
 static void rlLoadShaderDefault(void);      // Load default shader
 static void rlUnloadShaderDefault(void);    // Unload default shader
@@ -1157,9 +1157,9 @@ static Matrix rlMatrixMultiply(Matrix left, Matrix right);  // Multiply two matr
 static Matrix rlMatrixTranspose(Matrix mat);                // Transposes provided matrix
 static Matrix rlMatrixInvert(Matrix mat);                   // Invert provided matrix
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Matrix operations
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 #if defined(GRAPHICS_API_OPENGL_11)
 // Fallback to OpenGL 1.1 function calls
@@ -1417,9 +1417,9 @@ double rlGetCullDistanceFar(void)
     return rlCullDistanceFar;
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - Vertex level operations
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if defined(GRAPHICS_API_OPENGL_11)
 // Fallback to OpenGL 1.1 function calls
 //---------------------------------------
@@ -1621,9 +1621,9 @@ void rlColor3f(float x, float y, float z)
 
 #endif
 
-//--------------------------------------------------------------------------------------
+//────────────────────────────────────────────────--------------------------------------
 // Module Functions Definition - OpenGL style functions (common to 1.1, 3.3+, ES2)
-//--------------------------------------------------------------------------------------
+//────────────────────────────────────────────────--------------------------------------
 
 // Set current texture to use
 void rlSetTexture(unsigned int id)
@@ -1916,9 +1916,9 @@ void rlActiveDrawBuffers(int count)
 #endif
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // General render state configuration
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Enable color blending
 void rlEnableColorBlend(void) { glEnable(GL_BLEND); }
@@ -2169,9 +2169,9 @@ void rlSetBlendFactorsSeparate(int glSrcRGB, int glDstRGB, int glSrcAlpha, int g
 #endif
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - OpenGL Debug
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if defined(RLGL_ENABLE_OPENGL_DEBUG_CONTEXT) && defined(GRAPHICS_API_OPENGL_43)
 static void GLAPIENTRY rlDebugMessageCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, const void *userParam)
 {
@@ -2179,10 +2179,10 @@ static void GLAPIENTRY rlDebugMessageCallback(GLenum source, GLenum type, GLuint
     // NOTE: Here there are the details with a sample output:
     // - #131169 - Framebuffer detailed info: The driver allocated storage for renderbuffer 2. (severity: low)
     // - #131185 - Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_ENUM_88e4)
-    //             will use VIDEO memory as the source for buffer object operations. (severity: low)
+    // will use VIDEO memory as the source for buffer object operations. (severity: low)
     // - #131218 - Program/shader state performance warning: Vertex shader in program 7 is being recompiled based on GL state. (severity: medium)
     // - #131204 - Texture state usage warning: The texture object (0) bound to texture image unit 0 does not have
-    //             a defined base level and cannot be used for texture mapping. (severity: low)
+    // a defined base level and cannot be used for texture mapping. (severity: low)
     if ((id == 131169) || (id == 131185) || (id == 131218) || (id == 131204)) return;
 
     const char *msgSource = NULL;
@@ -2229,9 +2229,9 @@ static void GLAPIENTRY rlDebugMessageCallback(GLenum source, GLenum type, GLuint
 }
 #endif
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module Functions Definition - rlgl functionality
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 
 // Initialize rlgl: OpenGL extensions, default buffers/shaders/textures, OpenGL states
 void rlglInit(int width, int height)
@@ -2244,8 +2244,8 @@ void rlglInit(int width, int height)
         // glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_ERROR, GL_DEBUG_SEVERITY_HIGH, 0, 0, GL_TRUE);
 
         // Debug context options:
-        //  - GL_DEBUG_OUTPUT - Faster version but not useful for breakpoints
-        //  - GL_DEBUG_OUTPUT_SYNCHRONUS - Callback is in sync with errors, so a breakpoint can be placed on the callback in order to get a stacktrace for the GL error
+        // - GL_DEBUG_OUTPUT - Faster version but not useful for breakpoints
+        // - GL_DEBUG_OUTPUT_SYNCHRONUS - Callback is in sync with errors, so a breakpoint can be placed on the callback in order to get a stacktrace for the GL error
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
     }
@@ -2283,7 +2283,7 @@ void rlglInit(int width, int height)
 #endif  // GRAPHICS_API_OPENGL_33 || GRAPHICS_API_OPENGL_ES2
 
     // Initialize OpenGL default states
-    //----------------------------------------------------------
+    //────────────────────────────────────────────────----------
     // Init state: Depth test
     glDepthFunc(GL_LEQUAL);                                 // Type of depth testing to apply
     glDisable(GL_DEPTH_TEST);                               // Disable depth testing for 2D (only used for 3D)
@@ -2315,7 +2315,7 @@ void rlglInit(int width, int height)
     RLGL.State.framebufferHeight = height;
 
     TRACELOG(RL_LOG_INFO, "RLGL: Default OpenGL state initialized successfully");
-    //----------------------------------------------------------
+    //────────────────────────────────────────────────----------
 #endif
 
     // Init state: Color/Depth buffers clear
@@ -2562,7 +2562,7 @@ void rlLoadExtensions(void *loader)
 #endif  // GRAPHICS_API_OPENGL_ES2
 
     // Check OpenGL information and capabilities
-    //------------------------------------------------------------------------------
+    //────────────────────────────────────────────────------------------------------
     // Show current OpenGL and GLSL version
     TRACELOG(RL_LOG_INFO, "GL: OpenGL device information:");
     TRACELOG(RL_LOG_INFO, "    > Vendor:   %s", glGetString(GL_VENDOR));
@@ -2719,7 +2719,7 @@ int *rlGetShaderLocsDefault(void)
 }
 
 // Render batch management
-//------------------------------------------------------------------------------------------------
+//────────────────────────────────────────────────────────────────────────────────────────────────
 // Load render batch
 rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
 {
@@ -2727,7 +2727,7 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
 
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
     // Initialize CPU (RAM) vertex buffers (position, texcoord, color data and indexes)
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
     batch.vertexBuffer = (rlVertexBuffer *)RL_MALLOC(numBuffers*sizeof(rlVertexBuffer));
 
     for (int i = 0; i < numBuffers; i++)
@@ -2769,10 +2769,10 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
     }
 
     TRACELOG(RL_LOG_INFO, "RLGL: Render batch vertex buffers loaded successfully in RAM (CPU)");
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
 
     // Upload to GPU (VRAM) vertex data and initialize VAOs/VBOs
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
     for (int i = 0; i < numBuffers; i++)
     {
         if (RLGL.ExtSupported.vao)
@@ -2826,10 +2826,10 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
 
     // Unbind the current VAO
     if (RLGL.ExtSupported.vao) glBindVertexArray(0);
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
 
     // Init draw calls tracking system
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
     batch.draws = (rlDrawCall *)RL_MALLOC(RL_DEFAULT_BATCH_DRAWCALLS*sizeof(rlDrawCall));
 
     for (int i = 0; i < RL_DEFAULT_BATCH_DRAWCALLS; i++)
@@ -2847,7 +2847,7 @@ rlRenderBatch rlLoadRenderBatch(int numBuffers, int bufferElements)
     batch.bufferCount = numBuffers;    // Record buffer count
     batch.drawCounter = 1;             // Reset draws counter
     batch.currentDepth = -1.0f;         // Reset depth value
-    //--------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────--------------------------------------------
 #endif
 
     return batch;
@@ -2905,7 +2905,7 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
 {
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
     // Update batch vertex buffers
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
     // NOTE: If there is not vertex data, buffers doesn't need to be updated (vertexCount > 0)
     // TODO: If no data changed on the CPU arrays --> No need to re-update GPU arrays (use a change detector flag?)
     if (RLGL.State.vertexCounter > 0)
@@ -2951,10 +2951,10 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
         // Unbind the current VAO
         if (RLGL.ExtSupported.vao) glBindVertexArray(0);
     }
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
 
     // Draw batch vertex buffers (considering VR stereo if required)
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
     Matrix matProjection = RLGL.State.projection;
     Matrix matModelView = RLGL.State.modelview;
 
@@ -3090,10 +3090,10 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
 
     // Restore viewport to default measures
     if (eyeCount == 2) rlViewport(0, 0, RLGL.State.framebufferWidth, RLGL.State.framebufferHeight);
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
 
     // Reset batch buffers
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
     // Reset vertex counter for next frame
     RLGL.State.vertexCounter = 0;
 
@@ -3117,7 +3117,7 @@ void rlDrawRenderBatch(rlRenderBatch *batch)
 
     // Reset draws counter to one draw for the batch
     batch->drawCounter = 1;
-    //------------------------------------------------------------------------------------------------------------
+    //────────────────────────────────────────────────────────────────────────────────────────────────------------
 
     // Change to next buffer in the list (in case of multi-buffering)
     batch->currentBuffer++;
@@ -3172,7 +3172,7 @@ bool rlCheckRenderBatchLimit(int vCount)
 }
 
 // Textures data management
-//-----------------------------------------------------------------------------------------
+//────────────────────────────────────────────────-----------------------------------------
 // Convert image data to OpenGL texture (returns OpenGL valid Id)
 unsigned int rlLoadTexture(const void *data, int width, int height, int format, int mipmapCount)
 {
@@ -3701,7 +3701,7 @@ unsigned char *rlReadScreenPixels(int width, int height)
 }
 
 // Framebuffer management (fbo)
-//-----------------------------------------------------------------------------------------
+//────────────────────────────────────────────────-----------------------------------------
 // Load a framebuffer to be used for rendering
 // NOTE: No textures attached
 unsigned int rlLoadFramebuffer(void)
@@ -3820,7 +3820,7 @@ void rlUnloadFramebuffer(unsigned int id)
 }
 
 // Vertex data management
-//-----------------------------------------------------------------------------------------
+//────────────────────────────────────────────────-----------------------------------------
 // Load a new attributes buffer
 unsigned int rlLoadVertexBuffer(const void *buffer, int size, bool dynamic)
 {
@@ -4017,8 +4017,8 @@ void rlSetVertexAttribute(unsigned int index, int compSize, int type, bool norma
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
     // NOTE: Data type could be: GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT, GL_INT, GL_UNSIGNED_INT
     // Additional types (depends on OpenGL version or extensions):
-    //  - GL_HALF_FLOAT, GL_FLOAT, GL_DOUBLE, GL_FIXED,
-    //  - GL_INT_2_10_10_10_REV, GL_UNSIGNED_INT_2_10_10_10_REV, GL_UNSIGNED_INT_10F_11F_11F_REV
+    // - GL_HALF_FLOAT, GL_FLOAT, GL_DOUBLE, GL_FIXED,
+    // - GL_INT_2_10_10_10_REV, GL_UNSIGNED_INT_2_10_10_10_REV, GL_UNSIGNED_INT_10F_11F_11F_REV
 
     size_t offsetNative = offset;
     glVertexAttribPointer(index, compSize, type, normalized, stride, (void *)offsetNative);
@@ -4056,7 +4056,7 @@ void rlUnloadVertexBuffer(unsigned int vboId)
 }
 
 // Shaders management
-//-----------------------------------------------------------------------------------------------
+//────────────────────────────────────────────────-----------------------------------------------
 // Load shader from code strings
 // NOTE: If shader string is NULL, using default vertex/fragment shaders
 unsigned int rlLoadShaderCode(const char *vsCode, const char *fsCode)
@@ -4560,7 +4560,7 @@ void rlBindImageTexture(unsigned int id, unsigned int index, int format, bool re
 }
 
 // Matrix state management
-//-----------------------------------------------------------------------------------------
+//────────────────────────────────────────────────-----------------------------------------
 // Get internal modelview matrix
 Matrix rlGetMatrixModelview(void)
 {
@@ -4839,9 +4839,9 @@ const char *rlGetPixelFormatName(unsigned int format)
     }
 }
 
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 // Module specific Functions Definition
-//----------------------------------------------------------------------------------
+//────────────────────────────────────────────────----------------------------------
 #if defined(GRAPHICS_API_OPENGL_33) || defined(GRAPHICS_API_OPENGL_ES2)
 // Load default shader (just vertex positioning and texture coloring)
 // NOTE: This shader program is used for internal buffers

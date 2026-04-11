@@ -22,6 +22,13 @@
 #define UTILS_GLOBALS_H
 
 #include "utils/userTypes.h"
+#include "progress.h"
+
+// ────────────────────────────────────────────────
+// General Globals
+// ────────────────────────────────────────────────
+
+extern LobbyGame_St game;
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
@@ -30,87 +37,86 @@
 */
 extern Font lobby_fonts[__fontSizeCount];
 
-// ------------------------------------------------
-// Lobby world content
-// ------------------------------------------------
+extern f32 gameTime; ///< Accumulated lobby time since launch (seconds). Used for animations.
 
-extern LobbyGame_St game;
+extern PlayerProgress_St g_progress; ///< Global player progress.
+extern Chat_St gameChat;
+
+// ────────────────────────────────────────────────
+// Platforms / Terrains / Game Zones
+// ────────────────────────────────────────────────
+
+extern TerrainVec_St terrains; ///< List of terrains in the lobby.
 
 /**
-    brief Static array of platform definitions for the lobby scene.
-          Size is determined by platformCount.
-          @note Consider moving to dynamic allocation or level data file in the future.
+    @brief Static array of platform definitions for the lobby scene.
+           Size is determined by platformCount.
+           @note Consider moving to dynamic allocation or level data file in the future.
 */
 extern Platform_St platforms[];
 
-/**
-    brief Number of valid entries in the platforms array.
-*/
-extern u32 platformCount;
+extern u32 platformCount; ///< Number of valid entries in the platforms array.
 
-extern Texture2D platformTextures[__platformTypeCount];
+extern Texture2D platformTextures[__platformTypeCount]; ///< Platform texture atlas entries.
 
-extern Texture2D treeTexture;
-extern Texture2D backgroundTexture;
+extern GameInteractionZone_St gameZones[__miniGameIdCount];
 
 // ────────────────────────────────────────────────
 // Skin selection UI
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
-    brief Screen-space rectangle where the "change skin" button is drawn and clickable.
-          Used both for rendering and input detection.
+    @brief Screen-space rectangle where the "change skin" button is drawn and clickable.
+           Used both for rendering and input detection.
 */
 extern Rectangle skinButtonRect;
 
 /**
-    brief Texture used for the skin selection menu toggle button.
-          Usually a gear icon, palette symbol or similar.
+    @brief Texture used for the skin selection menu toggle button.
+           Usually a gear icon, palette symbol or similar.
 */
 extern Texture2D logoSkinButton;
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Parameters menu (settings/resolution)
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Global parameters menu state (settings button + resolution selector).
 */
 extern ParamsMenu_St paramsMenu;
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
+// Textures
+// ────────────────────────────────────────────────
+
+extern Texture2D treeTexture;
+extern Texture2D backgroundTexture;
+
+// ────────────────────────────────────────────────
 // Visual / atmospheric state
-// ------------------------------------------------
-
-/** @brief Shared moonlight direction vector (normalized). Used for shadows/glow. */
-extern const Vector2 moonLightDir;
-
-/** @brief Pre-loaded tree texture used in the lobby background. */
-extern Texture2D texTree;
-
-/** @brief Pre-loaded starry-background texture. */
-extern Texture2D texBackground;
-
-/** @brief Platform texture atlas entries (grass, wood plank). */
-extern Texture2D platformTextures[2];
-
-/** @brief Accumulated lobby time since launch (seconds). Used for animations. */
-extern float gameTime;
-
-extern float gameTime;
+// ────────────────────────────────────────────────
 
 extern GrassBlade_St grassBlades[MAX_GRASS_BLADES];
 extern int grassCount;
 
-extern const Vector2 moonLightDir;
+extern const Vector2 moonLightDir; ///< Shared moonlight direction vector (normalized). Used for shadows/glow.
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Audio handles
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 extern Sound sound_jump;
 extern Sound sound_doubleJump;
 extern Sound sound_gameLaunch;
 extern Sound sound_doubleJumpMeme;
+
+// ────────────────────────────────────────────────
+// Physics Debug Panel
+// ────────────────────────────────────────────────
+
+extern bool showPhysicsDebugPanel; ///< Whether the physics debug panel is visible (toggle with F2).
+
+extern f32 panelScrollY; ///< Scroll position for panels.
 
 #endif // UTILS_GLOBALS_H

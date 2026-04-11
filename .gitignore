@@ -42,9 +42,15 @@ dkms.conf
 # debug information files
 *.dwo
 
+# TrueType Font
+*.ttf
+
 # Build artifacts
 build/
 ./*/build/
+dev.sh
+bin/
+obj/
 main
 
 # Logs / temp
@@ -54,6 +60,10 @@ main
 .clangd/
 
 # Other
+repomix-output.xml
+compile_commands.json
+compile_flags.txt
+
 docs/doxygen/html
 docs/doxygen/html-*/
 docs/doxygen/src-*/

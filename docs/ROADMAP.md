@@ -59,4 +59,3 @@ If you want to help with any of this — jump in! Open issues, Draft PRs, ask in
 **Last updated: March 17, 2026**  
 **Authors:**
 - [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
-- Maxime CHAUVEAU

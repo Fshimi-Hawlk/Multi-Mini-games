@@ -142,9 +142,9 @@ Longer bodies must use multi-line formatting with braces on separate lines.
 
 - Space around binary operators (`= + - < > * / % | & ^`).
 
-- Pointer Semantic hints:  
-`Type* var` -> **a pointer to the type**.  
-`Type *array` -> **array of `Type`**.  
+- Pointer Semantic hints:
+`Type* var` -> **a pointer to the type**.
+`Type *array` -> **array of `Type`**.
 
 - const placement:
 
@@ -181,7 +181,7 @@ if (flags & MASK == VALUE) { ... }
 
 ### Macros and Preprocessor
 
-- Naming: 
+- Naming:
     - SCREAMING_CASE for constants (`#define MAX_PLAYERS 4`).
     - camelCase or prefixed for function-like macros (e.g., `alignUpPow2`, `castTo`, `da_printContent`, `log_warn`).
 
@@ -199,12 +199,12 @@ if (flags & MASK == VALUE) { ... }
 
 ### Header Files
 
-- **Guards**: `#ifndef PATH_LIKE_NAME_H` / `#define` / `#endif // PATH_LIKE_NAME_H`.  
+- **Guards**: `#ifndef PATH_LIKE_NAME_H` / `#define` / `#endif // PATH_LIKE_NAME_H`.
 Example: `#ifndef CORE_GAME_BOARD_H`.
 
 - **Self-containment**: Headers include what they need; avoid forward declarations.
 
-- Content split:  
+- Content split:
     - .h: Public types, function declarations, shared macros/constants, extern globals.
     - .c: Function definitions, file-static variables/functions, module-private types.
 
@@ -233,7 +233,7 @@ Example in a .c file:
 
 ## Comments & Documentation
 
-Good documentation is what makes the difference between "this code is readable for a week" and "this code is still understandable six months later when someone new has to fix a bug at 2 a.m.".  
+Good documentation is what makes the difference between "this code is readable for a week" and "this code is still understandable six months later when someone new has to fix a bug at 2 a.m.".
 Most of us are not documentation wizards - that's fine. Just follow these patterns consistently and we'll all save each other a lot of time.
 
 ### File Headers - the mandatory part at the top
@@ -247,13 +247,13 @@ Every single `.h` and `.c` file starts with exactly this block. No exceptions.
     @date YYYY-MM-DD              // Creation date - never touch this one again
     @date YYYY-MM-DD              // Last time someone meaningfully changed this file (update only when needed)
     @brief One clear sentence that tells what this file is actually for.
-  
+
     Contributors:
         - <Name>:
             - What you added / changed / fixed (keep it short)
         - <Name>:
             - ...
-  
+
     If the file needs more context than fits in @brief, write 2-5 lines here.
     @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
 
@@ -265,11 +265,11 @@ Every single `.h` and `.c` file starts with exactly this block. No exceptions.
 
 Important notes so nobody gets confused:
 - **Second date** => only update when you do **something important** (new feature, big refactor, removing dead code, serious bugfix). Don't bump it for typo fixes or reformatting.
-- `@brief` => one line, no fluff. 
-    *Good*: "Central tuning constants for physics and window setup." 
+- `@brief` => one line, no fluff.
+    *Good*: "Central tuning constants for physics and window setup."
     *Bad*: "This file contains many useful defines that are used everywhere in the game."
-- **Contributors block** => optional. If multiple people did real work, list them. 
-    In *pure-header files* (`configs.h`, `userTypes.h`, `common.h`, `globals.h`, etc.) it's fine to have contributors here. 
+- **Contributors block** => optional. If multiple people did real work, list them.
+    In *pure-header files* (`configs.h`, `userTypes.h`, `common.h`, `globals.h`, etc.) it's fine to have contributors here.
     In *files that have a `.c` counterpart* (`globals.c`, `utils.c`, etc.), put the detailed contributor list in the `.c` file instead.
 - `@note` => use it when something is surprising or fragile (example: "hardcoded platform positions - will be replaced by level files later").
 
@@ -302,7 +302,7 @@ Quick cheat-sheet:
 - `@return` - always explain what success/failure looks like, especially when returning Error_Et.
 - `@pre` / `@post` / `@note` - add only when not calling the function correctly would crash or do something very wrong.
 
-Static functions inside `.c` files usually only need a short `//` comment above them, or none if the name is obvious.  
+Static functions inside `.c` files usually only need a short `//` comment above them, or none if the name is obvious.
 *But that doesn't mean you can skip it entirely*.
 
 ### Structs, enums, typedefs - explain the why and the ownership
@@ -326,15 +326,13 @@ Enum example:
 /**
     @brief All available font sizes - used to index fonts[] array.
 
-    The sentinel _fontSizeCount is not a real size - it's just the array length.
+    The sentinel __fontSizeCount is not a real size - it's just the array length.
 */
 typedef enum {
-    FONT8,
-    FONT10, FONT12, FONT14, FONT16, FONT18,
-    FONT20, FONT22, FONT24, FONT26, FONT28,
-    FONT30, FONT32, FONT34, FONT36, FONT38,
-    FONT40, FONT42, FONT44, FONT46, FONT48,
-    _fontSizeCount
+    FONT16, FONT28, FONT32,
+    FONT48, FONT64, FONT96,
+    FONT128,
+    __fontSizeCount
 } FontSize_Et;
 ```
 
@@ -343,12 +341,12 @@ typedef enum {
 - Extern globals or file-scope statics -> prefer short `///<` comment on the same line when the meaning is obvious
 - When more explanation is needed (units, ownership, future plans, conditional compilation context), use a full multi-line `/** ... */` block just above the declaration
 
-**Short single-line style** (globals.h style):  
+**Short single-line style** (globals.h style):
 ```
 extern Rectangle skinButtonRect;        ///< Clickable area for the skin menu toggle button
 ```
 
-**Multi-line style when more description helps** (configs.h style):  
+**Multi-line style when more description helps** (configs.h style):
 ```
 /**
     @brief Default base font size for most UI text and in-game labels.
@@ -357,7 +355,7 @@ extern Rectangle skinButtonRect;        ///< Clickable area for the skin menu to
 #define APP_TEXT_FONT_SIZE 32
 ```
 
-**Conditional compilation case** - place the documentation inside the block if the define is conditional:  
+**Conditional compilation case** - place the documentation inside the block if the define is conditional:
 ```
 #ifndef ASSET_PATH
 /**
@@ -368,7 +366,7 @@ extern Rectangle skinButtonRect;        ///< Clickable area for the skin menu to
 #endif
 ```
 
-**Macro-like helper** (utils.h style):  
+**Macro-like helper** (utils.h style):
 ```
 /**
     @brief Returns the full texture rectangle {0, 0, w, h}.
@@ -403,7 +401,7 @@ Rectangle getTextureRec(const Texture texture);
 
 ## Credits
 
-**Created: January 15, 2025**  
-**Last updated: March 17, 2026**  
+**Created: January 15, 2025**
+**Last updated: March 17, 2026**
 **Authors:**
 - [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)

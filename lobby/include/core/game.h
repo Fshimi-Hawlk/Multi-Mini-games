@@ -34,9 +34,9 @@
 
 #include "utils/userTypes.h"
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Player shape / rendering helpers
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Computes the axis-aligned bounding box that fully encloses the player's circle.
@@ -60,9 +60,9 @@ Rectangle lobby_getPlayerCollisionBox(const Player_St* const player);
  */
 Vector2 lobby_getPlayerCenter(const Player_St* const player);
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Player physics & update
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Updates player position, velocity, angle, jump state, and performs collisions.
@@ -74,16 +74,15 @@ Vector2 lobby_getPlayerCenter(const Player_St* const player);
         - jump buffering + coyote time + limited air jumps
         - collision resolution against all platforms
 
-    @param player       Player state to modify
-    @param platforms    Array of static platforms
-    @param nbPlatforms  Number of platforms
-    @param dt           Delta time in seconds
+    @param player   Player state to modify
+    @param pc       Physics Constants relative to player's current skin
+    @param dt       Delta time in seconds
  */
-void lobby_updatePlayer(Player_St* const player, const Platform_St* const platforms, const int nbPlatforms, const float dt);
+void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* const pc, const f32 dt);
 
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 // Skin / texture selection
-// ------------------------------------------------
+// ────────────────────────────────────────────────
 
 /**
     @brief Handles skin selection via mouse clicks on preview rectangles or number keybinds.

@@ -55,8 +55,8 @@ void lobby_drawMenuTextures(const LobbyGame_St* const game) {
         destRect.x = 20 + i * 60;
         DrawTexturePro(
             game->playerVisuals.textures[i],
-            getTextureRec(game->playerVisuals.textures[i]), // source
-            destRect, // destination
+            getTextureRec(game->playerVisuals.textures[i]),
+            destRect,
             Vector2Zero(),
             0,
             textureTint
@@ -73,4 +73,44 @@ void lobby_drawSkinButton(void) {
         0,
         WHITE
     );
+}
+
+// ────────────────────────────────────────────────
+// Physics Debug Panel
+// ────────────────────────────────────────────────
+
+void drawPhysicsDebugPanel(LobbyGame_St* game) {
+    if (!showPhysicsDebugPanel) return;
+
+    const f32 panelW = 350.0f;
+    const f32 panelH = 500.0f;
+    const f32 panelX = (f32)GetScreenWidth() - panelW - 20.0f;
+    const f32 panelY = 80.0f;
+
+    DrawRectangleRounded((Rectangle){panelX, panelY, panelW, panelH}, 0.1f, 10, Fade(BLACK, 0.85f));
+    DrawRectangleLinesEx((Rectangle){panelX, panelY, panelW, panelH}, 2, SKYBLUE);
+    DrawText("PHYSICS SETTINGS (Skin)", (int)panelX + 20, (int)panelY + 15, 20, SKYBLUE);
+
+    const char* skinName = "Default";
+    if (game->player.textureId == PLAYER_TEXTURE_EARTH) skinName = "Earth";
+    else if (game->player.textureId == PLAYER_TEXTURE_TROLL_FACE) skinName = "Troll";
+    else if (game->player.textureId == PLAYER_TEXTURE_BINGO) skinName = "Bingo";
+    else if (game->player.textureId == PLAYER_TEXTURE_KFF) skinName = "King";
+
+    DrawText(TextFormat("Skin: %s", skinName), (int)panelX + 20, (int)panelY + 45, 18, GOLD);
+    
+    // ... List of constants would go here ...
+    DrawText("Press F2 to close", (int)panelX + 20, (int)panelY + panelH - 30, 16, GRAY);
+}
+
+// 
+// Level Code Generator Overlay
+// 
+
+void drawCodeGenOverlay(void) {
+    const f32 w = (f32)GetScreenWidth();
+    const f32 h = (f32)GetScreenHeight();
+    DrawRectangle(0, 0, (int)w, (int)h, Fade(BLACK, 0.7f));
+    DrawText("GENERATING C CODE...", (int)w/2 - 150, (int)h/2 - 20, 30, GOLD);
+    DrawText("Check lobby/assets/levels/", (int)w/2 - 150, (int)h/2 + 30, 20, LIGHTGRAY);
 }

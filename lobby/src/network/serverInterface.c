@@ -1,0 +1,59 @@
+/**
+ * @file network/serverInterface.c
+ * @author i-Charlys (CAILLON Charles)
+ * @author Fshimi-Hawlk
+ * @date 2026-03-30
+ * @brief Server-side implementation of the Lobby module.
+ */
+
+#include "utils/common.h"
+#include "networkInterface.h"
+#include "APIs/generalAPI.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    int dummy;
+} LobbyServerState;
+
+void* lobby_create(void) {
+    LobbyServerState* s = malloc(sizeof(LobbyServerState));
+    if (s) s->dummy = 0;
+    return s;
+}
+
+void lobby_on_action(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+    UNUSED(state);
+    if (action == ACTION_CODE_GAME_DATA && len >= sizeof(GameTLVHeader_St)) {
+        GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
+        if (tlv->game_id == MINI_GAME_LOBBY) {
+            if (tlv->action == ACTION_CODE_LOBBY_MOVE || tlv->action == ACTION_CODE_LOBBY_CHAT) {
+                // Broadcast movement and chat to everyone
+                broadcast(room_id, player_id, action, payload, len);
+            }
+        }
+    }
+}
+
+void lobby_tick(void* state) {
+    UNUSED(state);
+}
+
+void lobby_on_player_leave(void* state, s32 player_id) {
+    UNUSED(state);
+    UNUSED(player_id);
+}
+
+void lobby_destroy(void* state) {
+    if (state) free(state);
+}
+
+GameServerInterface_St lobbyServerInterface = {
+    .game_name = "lobby",
+    .create_instance = lobby_create,
+    .on_action = lobby_on_action,
+    .on_tick = lobby_tick,
+    .on_player_leave = lobby_on_player_leave,
+    .destroy_instance = lobby_destroy
+};
