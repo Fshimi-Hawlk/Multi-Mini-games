@@ -79,8 +79,6 @@ Platform_St platforms[] = {
     // --- LE SOMMET DU FEUILLAGE ---
     { .rect = { -490, GROUND_Y - 1350, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
     { .rect = {  180, GROUND_Y - 1280, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
-
-    // --- LA CIME ABSOLUE ---
     { .rect = { -100, GROUND_Y - 1480, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK},
     { .rect = {  340, GROUND_Y - 1600, 200, PLAT_H}, .type = PLATFORM_TYPE_WOODPLANK}
 };
@@ -97,7 +95,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
             .width  = 75,
             .height = 75
         },
-        .name = "Tetris",
+        .name = "Tetromino Fall",
         .color = {0, 120, 220, 200},
     },
 
@@ -108,7 +106,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
             .width  = 75,
             .height = 75
         },
-        .name = "Solitaire",
+        .name = "Solo Cards",
         .color = {0, 160, 80,  200},
     },
 
@@ -141,7 +139,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
             .width  = 75,
             .height = 75
         },
-        .name = "Golf 3D",
+        .name = "3D Mini-Golf",
         .color = { 20, 160,  50, 200},
     },
 
@@ -163,7 +161,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
             .width  = 75,
             .height = 75
         },
-        .name = "BlockBlast",
+        .name = "Poly Blast!",
         .color = { 60,  60, 200, 200},
     },
 
@@ -194,7 +192,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
             .width  =  100.0f, 
             .height =  60.0f 
         },
-        .name = "Rubik Cube"
+        .name = "Twist Cube"
     },
 
     [MINI_GAME_ID_BINGO] = {
@@ -226,11 +224,6 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_CONNECT_4]  = {
         .hitbox = {0},
         .name = "Connect 4" 
-    },
-
-    [MINI_GAME_ID_MINIGOLF]   = {
-        .hitbox = {0},
-        .name = "Mini Golf" 
     },
 
     [MINI_GAME_ID_MORPION]    = {

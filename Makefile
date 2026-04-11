@@ -4,7 +4,7 @@
 #     Main targets: see 'make help' for the full list and descriptions
 #     Modes:        release, debug, strict-debug, clang-debug, valgrind-debug
 #
-#     Quick usage   ->  make help
+#     Quick usage:  make help
 #
 # Author: Fshimi Hawlk <https://github.com/Fshimi-Hawlk>
 # ==============================================================================
@@ -13,22 +13,8 @@
 RAYLIB_VERSION := 5.5
 UNAME_S := $(shell uname -s)
 
-# OS and specific flags
-ifeq ($(UNAME_S),Linux)
-    OS := linux
-    LDFLAGS_PLATFORM := -lGL -lm -lpthread -ldl -lrt -lX11
-    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_linux_amd64
-endif
-ifeq ($(UNAME_S),Darwin)
-    OS := darwin
-    LDFLAGS_PLATFORM := -framework CoreVideo -framework IOKit -framework Cocoa -framework GLUT -framework OpenGL
-    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_macos
-endif
 ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
-    OS := mingw
     EXE_EXT := .exe
-    LDFLAGS_PLATFORM := -lopengl32 -lgdi32 -lwinmm
-    RAYLIB_LIB_DIR := ./thirdparty/libs/raylib-$(RAYLIB_VERSION)_win64_mingw
 endif
 
 # ==============================================================================
@@ -45,7 +31,7 @@ else
 	SILENT_PREFIX := @
 endif
 
-# Suppress subdirectory messages
+# Suppress subdirectory messages from recursive make
 MAKEFLAGS += --no-print-directory
 
 # Directories to exclude when discovering modules
@@ -53,7 +39,7 @@ EXCLUDED_DIRS := \
     assets       \
     build        \
     docs         \
-    jeux         \
+    games        \
     logs         \
     thirdparty   \
     tui-ver
@@ -62,10 +48,9 @@ EXCLUDED_DIRS := \
 ROOT_MODULES := $(patsubst %/,%,$(wildcard */))
 ROOT_MODULES := $(filter-out $(EXCLUDED_DIRS), $(ROOT_MODULES))
 
-# jeux/ sub-project modules (e.g. jeux/tetris, jeux/solitaire, ...)
-JEUX_MODULES := $(patsubst %/,%,$(wildcard jeux/*/))
+GAMES_MODULES := $(patsubst %/,%,$(wildcard games/*/))
 
-MODULES := $(ROOT_MODULES) $(JEUX_MODULES)
+MODULES := $(ROOT_MODULES) $(GAMES_MODULES)
 
 FIRSTPARTY_API_DIR := firstparty/APIs
 
@@ -75,7 +60,7 @@ LIB_DIR   := $(BUILD_DIR)/lib
 BIN_DIR   := $(BUILD_DIR)/bin
 
 # Computed lib names (flattened lowercase, no - or _)
-# Uses notdir to handle paths like jeux/tetris → tetris
+# Uses notdir to handle paths like games/tetris → tetris
 define compute-lib-name
 $(shell echo '$(notdir $(1))' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
 endef
@@ -97,12 +82,13 @@ LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 all: client server
 
 # Ensure directories exist
-$(BIN_DIR) $(LIB_DIR) $(OBJ_DIR) $(API_DIR):
+$(BIN_DIR) $(LIB_DIR):
 	$(SILENT_PREFIX)mkdir -p $@
 
-# Lazy build of module libraries (only if sources changed)
+# Lazy build of module libraries (only rebuild if sources changed)
 libs: $(LIBS)
 
+# Generic rule to build a static library for any module
 $(LIB_DIR)/lib%.a:
 	$(eval MOD_DIR := $(strip $(foreach m,$(MODULES),$(if $(filter $(call compute-lib-name,$m),$*),$m))))
 	
@@ -131,37 +117,7 @@ $(LIB_DIR)/lib%.a:
 		echo "  Warning: $(API_HEADER) not found in $(MOD_DIR)/include/"; \
 	fi
 
-# Don't know which version to keep...
-
-# Module build rule
-# module-%: | $(LIB_DIR) $(API_DIR)
-# 	@echo "Building static library -> $* (lib$*.a)"
-# 	$(SILENT_PREFIX)$(MAKE) -j1 -C $* static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=$(subst -,,$*) EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"
-# 	$(SILENT_PREFIX)if [ "$*" = "chess" ]; then \
-# 		$(MAKE) -j1 -C chess static-lib MODE=$(MODE) VERBOSE=$(VERBOSE) LIB_NAME=chess MAIN_NAME=chess_core EXTRA_CFLAGS="-I$(CURDIR)/firstparty -I$(CURDIR)/thirdparty"; \
-# 	fi
-# 	$(SILENT_PREFIX)if cmp -s "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a" 2>/dev/null; then \
-# 		echo "  lib$(subst -,,$*).a unchanged"; \
-# 	else \
-# 		echo "  Updating lib$(subst -,,$*).a"; \
-# 		cp "$*/build/lib/lib$(subst -,,$*).a" "$(LIB_DIR)/lib$(subst -,,$*).a"; \
-# 	fi
-# 	$(SILENT_PREFIX)mkdir -p $(API_DIR)
-# 	$(SILENT_PREFIX)if [ -f "$*/include/$*API.h" ]; then \
-# 		echo "  Updating API header -> $*API.h"; \
-# 		cp "$*/include/$*API.h" "$(API_DIR)/"; \
-# 	elif [ -f "$*/include/$(shell echo $* | sed -E 's/(-[a-z])/\U\1/g' | sed 's/-//g')API.h" ]; then \
-# 		api_h="$(shell echo $* | sed -E 's/(-[a-z])/\U\1/g' | sed 's/-//g')API.h"; \
-# 		echo "  Updating API header -> $$api_h"; \
-# 		cp "$*/include/$$api_h" "$(API_DIR)/"; \
-# 	else \
-# 		echo "  Warning: API header not found for $*"; \
-# 	fi
-
-# # Specific module targets
-# modules: $(foreach mod,$(ORDERED_MODULES),module-$(mod))
-
-# Normal incremental build of lobby executable
+# Normal incremental build of lobby (client) executable
 client: libs
 	@echo "Building lobby executable (if needed)..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
@@ -172,13 +128,17 @@ client: libs
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
 
-# Build server binary
-server: modules | $(BIN_DIR)
+# Build server binary (links against all libs)
+server: libs | $(BIN_DIR)
 	@echo "Building server executable..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group -llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty -Wl,--end-group -lm"
+	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) \
+		EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group \
+			-llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty \
+			-Wl,--end-group -lm"
 	$(SILENT_PREFIX)install -m 755 reseau/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
 
-run-client: bin
+# Run targets
+run-client: client
 	$(SILENT_PREFIX)if [ -f "$(BIN_DIR)/client$(EXE_EXT)" ]; then \
 		echo "===> Starting client..."; \
 		$(BIN_DIR)/client$(EXE_EXT); \
@@ -238,7 +198,7 @@ run-tests: tests
 	fi
 
 # ==============================================================================
-# Clean and Rebuild
+# Clean and Rebuild Targets
 # ==============================================================================
 
 clean-libs:
@@ -249,15 +209,14 @@ clean-libs:
 	done
 	$(SILENT_PREFIX)rm -rf $(LIB_DIR)
 
-clean-exe:
+clean-bins:
 	$(SILENT_PREFIX)rm -rf $(BIN_DIR)
 
 clean-client:
-	$(BIN_DIR)/client$(EXE_EXT); \
+	$(SILENT_PREFIX)rm -rf $(BIN_DIR)/client$(EXE_EXT)
 
 clean-server:
-	$(BIN_DIR)/server$(EXE_EXT); \
-
+	$(SILENT_PREFIX)rm -rf $(BIN_DIR)/server$(EXE_EXT)
 
 clean:
 	$(SILENT_PREFIX)rm -rf $(BUILD_DIR)
@@ -280,19 +239,17 @@ rebuild-server: clean-server server
 rebuild-tests: clean tests
 
 # ==============================================================================
-# Documentation
+# Documentation Targets
 # ==============================================================================
 
-# FIX: target renamed 'docs' (was announced as 'docs-root' in help but didn't exist).
-# Both names are now valid aliases.
+# Build root documentation (English)
 docs: docs-root
 
 docs-root:
 	@./generate-root-docs.sh
 
-# FIX: guard on LANG — displays a clear message if the variable is not provided.
-# docs-translate depends on docs — ensures html/ (EN doc) exists before translating.
-# Without this, the English button in index.php points to a non-existent folder.
+# Translate documentation to specified languages
+# Depends on docs-root to ensure English version exists first
 docs-translate: docs
 	@if [ -z "$(LANG)" ]; then \
 		echo "Usage: make docs-translate LANG=fr,de,es"; \
@@ -300,15 +257,14 @@ docs-translate: docs
 	fi
 	@./translate-root-docs.sh $(LANG)
 
-# Removes all generated translations: html-XX/, src-XX/ folders
-# and corresponding Doxyfile.<lang> files (all except the base EN Doxyfile).
+# Remove all generated translations and related files
 docs-translate-free:
 	$(SILENT_PREFIX)rm -rf docs/doxygen/html-* docs/doxygen/src-*
 	$(SILENT_PREFIX)find docs/doxygen -maxdepth 1 -name 'Doxyfile.*' -delete
 	@echo "Translated documentation removed."
 
 # ==============================================================================
-# Help
+# Help Target
 # ==============================================================================
 
 help:
@@ -316,35 +272,48 @@ help:
 	@echo ""
 	@echo "TARGETS:"
 	@echo "    help                         Print this help message"
-	@echo "    all                          Build libs + lobby executable"
-	@echo "    rebuild                      Clean everything (root + subdirs) and rebuild all"
-	@echo "    clean                        Remove root-level build/ folder only"
-	@echo "    clean-all                    Remove root build/ + clean every submodule"
-	@echo "    clean-libs                   Clean only libraries (root + subdirs)"
-	@echo "    clean-exe                    Clean only lobby executable"
-	@echo "    libs                         Build module static libs if needed"
-	@echo "    rebuild-libs                 Clean libraries and force rebuild"
-	@echo "    bin                          Build lobby executable if needed"
+	@echo "    all                          Build all libraries + lobby client + server"
+	@echo "    client                       Build lobby client executable (depends on libs)"
+	@echo "    server                       Build game server executable"
+	@echo "    libs                         Build module static libraries (incremental)"
+	@echo ""
 	@echo "    run-client                   Run the lobby client"
 	@echo "    run-server                   Run the game server"
-	@echo "    tests                        Build all test executables"
-	@echo "    rebuild-tests                Clean and rebuild test executables"
-	@echo "    run-tests                    Run all tests"
-	@echo "    docs / docs-root             Build the root documentation (EN)"
-	@echo "    docs-translate LANG=fr,de    Translate documentation to given languages"
-	@echo "    docs-translate-free          Remove all translated documentation folders"
+	@echo "    run-multi                    Run multi-instance test script"
+	@echo ""
+	@echo "    tests                        Build test executables in all modules"
+	@echo "    run-tests                    Run all tests across modules"
+	@echo ""
+	@echo "    rebuild                      Clean everything and perform full rebuild"
+	@echo "    rebuild-libs                 Clean and rebuild only libraries"
+	@echo "    rebuild-client               Clean and rebuild only client"
+	@echo "    rebuild-server               Clean and rebuild only server"
+	@echo "    rebuild-tests                Clean and rebuild tests"
+	@echo ""
+	@echo "    clean                        Remove root build/ directory only"
+	@echo "    clean-all                    Clean root + all submodule build artifacts"
+	@echo "    clean-libs                   Clean only libraries (root + subdirs)"
+	@echo "    clean-bins                   Clean only bin/ directory"
+	@echo "    clean-client                 Clean only client executable"
+	@echo "    clean-server                 Clean only server executable"
+	@echo ""
+	@echo "    docs / docs-root             Build root documentation (English)"
+	@echo "    docs-translate LANG=...      Translate docs (e.g. LANG=fr,de,es)"
+	@echo "    docs-translate-free          Remove all translated documentation"
 	@echo ""
 	@echo "OPTIONS:"
-	@echo "    MODE=<str>       release | debug | strict-debug | clang-debug | valgrind-debug"
-	@echo "    VERBOSE=1        Show all commands (default: silent)"
+	@echo "    MODE=<mode>      release | debug | strict-debug | clang-debug | valgrind-debug"
+	@echo "    VERBOSE=1        Show full command output (default: silent)"
 	@echo ""
 	@echo "Notes:"
-	@echo "  - libs are built lazily (only when sources change)"
-	@echo "  - rebuild-exe forces relinking of the lobby executable"
-	@echo "  - clean only affects root build/ - use clean-all for full reset"
-	@echo "  - Output: build/lib/lib*.a and build/bin/{client|server}"
+	@echo "  - Libraries are built lazily using timestamp comparison"
+	@echo "  - Server links all libraries using --start-group / --end-group"
+	@echo "  - clean affects only root build/; use clean-all for a full reset"
+	@echo "  - Output goes to: build/lib/lib*.a and build/bin/{client|server}"
 
-.PHONY: all libs bin rebuild-exe run-exe tests run-tests \
-        clean clean-all clean-libs clean-exe \
-        rebuild rebuild-libs rebuild-tests \
+.PHONY: all client server libs \
+        run-client run-server run-multi \
+        tests run-tests \
+        clean clean-all clean-libs clean-bins clean-client clean-server \
+        rebuild rebuild-libs rebuild-client rebuild-server rebuild-tests \
         docs docs-root docs-translate docs-translate-free help
