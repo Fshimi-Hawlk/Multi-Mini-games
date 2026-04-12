@@ -6,9 +6,7 @@
 #ifndef ROOM_SELECTOR_H
 #define ROOM_SELECTOR_H
 
-#include "baseTypes.h"
-#include "raylib.h"
-#include "networkInterface.h"
+#include "utils/userTypes.h"
 
 /**
  * @brief Initializes the room selector.

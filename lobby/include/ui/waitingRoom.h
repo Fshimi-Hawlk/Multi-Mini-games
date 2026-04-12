@@ -6,8 +6,7 @@
 #ifndef WAITING_ROOM_H
 #define WAITING_ROOM_H
 
-#include "baseTypes.h"
-#include "raylib.h"
+#include "utils/userTypes.h"
 
 /**
  * @brief Initializes the waiting room UI.

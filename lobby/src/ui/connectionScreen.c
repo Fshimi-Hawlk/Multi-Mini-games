@@ -1,19 +1,18 @@
 /**
-    @file ui/connection_screen.c
+    @file ui/connectionScreen.c
     @author i-Charlys (CAILLON Charles)
     @author Fshimi-Hawlk
     @date 2026-03-30
     @brief Modern connection screen using the enhanced reusable widget system.
 */
 
-#include "ui/connection_screen.h"
-#include "widgets/textBox.h"
-#include "widgets/button.h"
-#include "widgets/types.h"
+#include "ui/connectionScreen.h"
+
 #include "utils/globals.h"
-#include "systemSettings.h"
-#include <string.h>
-#include <stdio.h>
+
+#include "sharedWidgets/textBox.h"
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/types.h"
 
 #define MAX_ROOMS_DISPLAY 5
 
@@ -66,7 +65,7 @@ void initConnectionScreen(void) {
         .baseColor = (Color) {80, 180, 255, 255},
         .roundness = 0.4f
     };
-    strncpy(refreshButton.text, "Refresh", 63);
+    refreshButton.text = "Refresh";
 
     ipTextBox = (TextBox_St) {
         .bounds      = {centerX - 185.0f, titleY + 105.0f, 370.0f, 50.0f},
@@ -97,7 +96,7 @@ void initConnectionScreen(void) {
         .baseColor = (Color) {70, 130, 255, 255},
         .roundness = 0.4f
     };
-    strncpy(connectButton.text, "Connect", 63);
+    connectButton.text = "Connect";
 
     for (int i = 0; i < MAX_ROOMS_DISPLAY; ++i) discoveredRooms[i].active = false;
     roomsCount = 0;
@@ -115,7 +114,7 @@ void addDiscoveredRoom(const char* ip, const char* name) {
         .baseColor = (Color) {55, 55, 70, 255},
         .roundness = 0.4f
     };
-    strncpy(discoveredRooms[roomsCount].button.text, discoveredRooms[roomsCount].name, 63);
+    discoveredRooms[roomsCount].button.text = discoveredRooms[roomsCount].name;
     discoveredRooms[roomsCount].active = true;
     ++roomsCount;
 }
@@ -167,8 +166,8 @@ void drawConnectionScreen(void) {
     DrawRectangleLinesEx(listR, 3.0f, (Color) {75, 85, 115, 255});
     for (int i = 0; i < roomsCount; i++) {
         if (discoveredRooms[i].active) {
-            textButtonDraw(&discoveredRooms[i].button, lobby_fonts[FONT20], 20.0f);
-            DrawTextEx(lobby_fonts[FONT18], discoveredRooms[i].ip, (Vector2) {(float)w - 215.0f, discoveredRooms[i].button.bounds.y + 14.0f}, 18, 1, (Color) {165, 175, 195, 255});
+            textButtonDraw(&discoveredRooms[i].button, lobby_fonts[FONT24], 20.0f);
+            DrawTextEx(lobby_fonts[FONT24], discoveredRooms[i].ip, (Vector2) {(float)w - 215.0f, discoveredRooms[i].button.bounds.y + 14.0f}, 18, 1, (Color) {165, 175, 195, 255});
         }
     }
 }

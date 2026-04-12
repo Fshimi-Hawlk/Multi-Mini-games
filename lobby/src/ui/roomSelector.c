@@ -1,14 +1,13 @@
 /**
- * @file room_selector.c
- * @brief Room Selection UI Implementation.
- */
+    @file ui/connectionScreen.c
+    @author i-Charlys (CAILLON Charles)
+    @author Fshimi-Hawlk
+    @date 2026-04-08
+    @date 2026-04-11
+    @brief Modern connection screen using the enhanced reusable widget system.
+*/
 
-#include "ui/room_selector.h"
-#include "networkInterface.h"
-#include "utils/userTypes.h"
-#include <string.h>
-#include <stdio.h>
-#include <arpa/inet.h>
+#include "ui/roomSelector.h"
 
 #define MAX_ROOMS_UI 16
 
@@ -32,12 +31,12 @@ void openRoomSelector(int gameId) {
     extern LobbyGame_St lobby_game;
     RUDPHeader_St h;
     rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_ROOM_QUERY, &h);
-    h.sender_id = htons((u16)lobby_game.id);
+    h.sender_id = htons((u16)lobby_game.clientId);
     u8 buf[64];
     memcpy(buf, &h, sizeof(h));
     
     // gameId -1 means ALL rooms (for Layer 2)
-    buf[sizeof(h)] = (gameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)gameId; 
+    buf[sizeof(h)] = (gameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)gameId; 
 
     printf("[NET] Sending ROOM_QUERY\n");
     send(networkSocket, buf, sizeof(h) + 1, 0);
@@ -77,20 +76,20 @@ bool updateRoomSelector(void) {
         if (roomsCount > 0) {
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
-            h.sender_id = htons((u16)lobby_game.id);
+            h.sender_id = htons((u16)lobby_game.clientId);
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
-            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId;
+            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)currentGameId;
             buf[sizeof(h) + 1] = (s8)discoveredRooms[0].id;
             send(networkSocket, buf, sizeof(h) + 2, 0);
         } else {
             // Create a new room
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
-            h.sender_id = htons((u16)lobby_game.id);
+            h.sender_id = htons((u16)lobby_game.clientId);
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
-            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId;
+            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)currentGameId;
             buf[sizeof(h) + 1] = (s8)-1;
             send(networkSocket, buf, sizeof(h) + 2, 0);
         }
@@ -104,10 +103,10 @@ bool updateRoomSelector(void) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnLobby)) {
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
-            h.sender_id = htons((u16)lobby_game.id);
+            h.sender_id = htons((u16)lobby_game.clientId);
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
-            buf[sizeof(h)] = (u8)MINI_GAME_LOBBY;
+            buf[sizeof(h)] = (u8)MINI_GAME_ID_LOBBY;
             buf[sizeof(h) + 1] = (s8)0;
 
             send(networkSocket, buf, sizeof(h) + 2, 0);
@@ -119,16 +118,16 @@ bool updateRoomSelector(void) {
     }
 
     // Check for "New Room" (+) — désactivé en mode global (currentGameId == -1)
-    // car envoyer MINI_GAME_LOBBY avec targetRoomId=-1 est rejeté par le serveur
+    // car envoyer MINI_GAME_ID_LOBBY avec targetRoomId=-1 est rejeté par le serveur
     Rectangle btnNew = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 150, 200, 40 };
     if (currentGameId != -1 && IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnNew)) {
         RUDPHeader_St h;
         rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
-        h.sender_id = htons((u16)lobby_game.id);
+        h.sender_id = htons((u16)lobby_game.clientId);
         u8 buf[64];
         memcpy(buf, &h, sizeof(h));
         // If global, we create a Lobby by default (to enter the world)
-        buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId;
+        buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)currentGameId;
         buf[sizeof(h) + 1] = (s8)-1;
 
         send(networkSocket, buf, sizeof(h) + 2, 0);
@@ -142,11 +141,11 @@ bool updateRoomSelector(void) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), r)) {
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
-            h.sender_id = htons((u16)lobby_game.id);
+            h.sender_id = htons((u16)lobby_game.clientId);
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
             // We use the gameId from the discovered room if global
-            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_LOBBY : (u8)currentGameId; // Need to store gameId in RoomInfo_St for full global support
+            buf[sizeof(h)] = (currentGameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)currentGameId; // Need to store gameId in RoomInfo_St for full global support
             buf[sizeof(h) + 1] = (s8)discoveredRooms[i].id;
 
             send(networkSocket, buf, sizeof(h) + 2, 0);

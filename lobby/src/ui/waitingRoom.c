@@ -3,11 +3,7 @@
  * @brief Waiting Room Overlay Implementation.
  */
 
-#include "ui/waiting_room.h"
-#include "networkInterface.h"
-#include <stdio.h>
-#include <string.h>
-#include <arpa/inet.h>
+#include "ui/waitingRoom.h"
 
 static bool isPanelVisible = false;
 static bool isInRoom = false;
