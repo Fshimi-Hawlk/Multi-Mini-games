@@ -8,8 +8,8 @@
 #ifndef GAME_REGISTRY_H
 #define GAME_REGISTRY_H
 
-#include "../networkInterface.h"
-#include "generalAPI.h"
+#include "networkInterface.h"
+#include "APIs/generalAPI.h"
 
 // Uniform naming convention for all game module interfaces
 extern GameServerInterface_St lobbyServerInterface;
@@ -23,6 +23,6 @@ extern GameServerInterface_St rubikServerInterface;
  * @param gameId The game identifier (MiniGame_Et).
  * @return A pointer to the interface, or NULL if not found.
  */
-const GameServerInterface_St* getGameServerInterface(MiniGame_Et gameId);
+const GameServerInterface_St* getGameServerInterface(MiniGameId_Et gameId);
 
 #endif // GAME_REGISTRY_H

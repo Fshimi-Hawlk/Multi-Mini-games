@@ -15,6 +15,16 @@
 #define RUDP_CORE_H
 
 #include "baseTypes.h"
+#include <arpa/inet.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <ctype.h>
+
+#ifndef _WIN32
+#include <signal.h>
+#include <sys/types.h>
+#endif
 
 /**
     @name RUDP protocol tuning constants

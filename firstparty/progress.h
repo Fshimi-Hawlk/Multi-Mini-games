@@ -22,7 +22,7 @@ typedef enum {
 #define MAX_GAMES_PROGRESS 16
 #define MAX_VARIANTS 8
 #define MAX_DIFFICULTIES 4
-#define PROGRESS_FILE "progress.dat"
+#define PROGRESS_FILE "assets/gameData/progress.dat"
 
 typedef struct {
     u8 game_id;

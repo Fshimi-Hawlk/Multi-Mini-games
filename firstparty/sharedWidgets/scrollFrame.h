@@ -13,12 +13,12 @@
 /**
     @brief Initializes a ScrollFrame_St with sensible defaults.
     @param frame         Pointer to the scroll frame
-    @param scrollSpeed   Pixels per wheel unit (0 = use default 60.0f)
     @param visibleArea   Screen-space rectangle of the visible region
-    @param contentHeight Total virtual height of the content
+    @param contentSize   Total virtual size of the content
+    @param scrollSpeed   Pixels per wheel unit (0 = use default 60.0f)
     @param roundness     Visible area rectangle roundness
 */
-void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32 contentHeight, f32 scrollSpeed, f32 roundness);
+void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32Vector2 contentSize, f32 scrollSpeed, f32 roundness);
 
 /**
     @brief Updates scroll offset from mouse wheel when mouse is inside the area.

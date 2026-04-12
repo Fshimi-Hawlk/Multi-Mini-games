@@ -15,12 +15,6 @@
 #include "sharedUtils/geometry.h"
 #include "sharedUtils/debug.h"
 
-Rectangle getTextureRec(const Texture texture) {
-    return (Rectangle) {
-        .width = texture.width,
-        .height = texture.height
-    };
-}
 
 Rectangle getAnchoredRect(Rectangle rect, Anchor_Et anchor) {
     switch (anchor) {

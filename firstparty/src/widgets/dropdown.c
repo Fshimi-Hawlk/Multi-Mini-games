@@ -17,7 +17,7 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-bool dropdownUpdate(DropDown_St* dd, Vector2 mouseScreen, u32 optionCount) {
+bool dropdownUpdate(DropDown_St* dd, Vector2 mouseScreen) {
     if (dd->state == WIDGET_STATE_DISABLED) {
         return false;
     }
@@ -44,12 +44,12 @@ bool dropdownUpdate(DropDown_St* dd, Vector2 mouseScreen, u32 optionCount) {
     // When open: check clicks on the list items
     Rectangle listBounds = dd->bounds;
     listBounds.y += dd->bounds.height;
-    listBounds.height = (f32)optionCount * 28.0f;   // 28px per item
+    listBounds.height = (f32)dd->count * 28.0f;   // 28px per item
 
     if (CheckCollisionPointRec(mouseScreen, listBounds)) {
         s32 hoveredIndex = (s32)((mouseScreen.y - listBounds.y) / 28.0f);
 
-        if (hoveredIndex >= 0 && (u32)hoveredIndex < optionCount) {
+        if (hoveredIndex >= 0 && (u32)hoveredIndex < dd->count) {
             if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                 if (dd->selectedIndex != hoveredIndex) {
                     dd->selectedIndex = hoveredIndex;
@@ -68,7 +68,7 @@ bool dropdownUpdate(DropDown_St* dd, Vector2 mouseScreen, u32 optionCount) {
     return changed;
 }
 
-void dropdownDraw(const DropDown_St* dd, const char** options, u32 optionCount, Font font, f32 fontSize) {
+void dropdownDraw(const DropDown_St* dd, Font font, f32 fontSize) {
     // ── Main button ────────────────────────────────────────────────────────
     Color bgColor = (dd->state == WIDGET_STATE_ACTIVE || dd->isOpen) ? Fade(SKYBLUE, 0.95f)
                   : (dd->state == WIDGET_STATE_HOVER) ? Fade(LIGHTGRAY, 0.9f)
@@ -78,8 +78,8 @@ void dropdownDraw(const DropDown_St* dd, const char** options, u32 optionCount, 
     DrawRectangleLinesEx(dd->bounds, 2.0f, (dd->isOpen) ? YELLOW : DARKGRAY);
 
     // Selected text
-    if (dd->selectedIndex >= 0 && (u32)dd->selectedIndex < optionCount) {
-        const char* text = options[dd->selectedIndex];
+    if (dd->selectedIndex >= 0 && (u32)dd->selectedIndex < dd->count) {
+        const char* text = dd->options[dd->selectedIndex];
         Vector2 textSize = MeasureTextEx(font, text, fontSize, 0.0f);
         Vector2 pos = {
             dd->bounds.x + 8.0f,
@@ -111,12 +111,12 @@ void dropdownDraw(const DropDown_St* dd, const char** options, u32 optionCount, 
 
     Rectangle listRect = dd->bounds;
     listRect.y += dd->bounds.height;
-    listRect.height = (f32)optionCount * 28.0f;
+    listRect.height = (f32)dd->count * 28.0f;
 
     DrawRectangleRec(listRect, Fade(WHITE, 0.98f));
     DrawRectangleLinesEx(listRect, 2.0f, SKYBLUE);
 
-    for (u32 i = 0; i < optionCount; ++i) {
+    for (u32 i = 0; i < dd->count; ++i) {
         Rectangle itemRect = {
             listRect.x,
             listRect.y + (f32)i * 28.0f,
@@ -132,7 +132,7 @@ void dropdownDraw(const DropDown_St* dd, const char** options, u32 optionCount, 
 
         DrawRectangleRec(itemRect, itemColor);
 
-        if (i < optionCount - 1) {
+        if (i < dd->count - 1) {
             DrawLine((int)itemRect.x, (int)(itemRect.y + 28.0f),
                      (int)(itemRect.x + itemRect.width), (int)(itemRect.y + 28.0f),
                      LIGHTGRAY);
@@ -142,6 +142,6 @@ void dropdownDraw(const DropDown_St* dd, const char** options, u32 optionCount, 
             itemRect.x + 8.0f,
             itemRect.y + (28.0f - fontSize) * 0.5f
         };
-        DrawTextEx(font, options[i], textPos, fontSize, 0.0f, BLACK);
+        DrawTextEx(font, dd->options[i], textPos, fontSize, 0.0f, BLACK);
     }
 }

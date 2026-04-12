@@ -46,9 +46,9 @@ typedef enum {
 */
 typedef struct {
     Rectangle visibleArea;  ///< Scissor area (updated each frame)
+    f32Vector2 contentSize; ///< Total virtual size of the content
     f32 roundness;
-    f32 scrollY;            ///< Current scroll offset (negative = content moved up)
-    f32 contentHeight;      ///< Total virtual height of the content
+    f32Vector2 scroll;      ///< Current scroll offset (negative = content moved up)
     f32 scrollSpeed;        ///< Pixels per wheel unit (default 60.0f)
 } ScrollFrame_St;
 
@@ -101,6 +101,8 @@ typedef struct {
 typedef struct {
     Rectangle      bounds;
     WidgetState_Et state;
+    const char   **options;
+    u32            count;
     s32            selectedIndex;
     bool           isOpen;
     f32            roundness;

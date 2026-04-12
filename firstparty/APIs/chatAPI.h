@@ -36,4 +36,6 @@ typedef struct {
     bool            isOpen; // indique si le chat est ouvert
 } Chat_St;
 
+extern Chat_St generalGameChat;
+
 #endif // CHAT_API_H

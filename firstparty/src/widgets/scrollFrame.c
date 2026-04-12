@@ -16,12 +16,12 @@
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32 contentHeight, f32 scrollSpeed, f32 roundness) {
-    frame->visibleArea   = visibleArea;
-    frame->scrollY       = 0.0f;
-    frame->contentHeight = contentHeight;
-    frame->scrollSpeed   = (scrollSpeed > 0.0f) ? scrollSpeed : 60.0f;
-    frame->roundness     = (roundness > 0.0f) ? roundness : 1.0f;
+void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32Vector2 contentSize, f32 scrollSpeed, f32 roundness) {
+    frame->visibleArea  = visibleArea;
+    frame->scroll       = (f32Vector2) {0};
+    frame->contentSize  = contentSize;
+    frame->scrollSpeed  = (scrollSpeed > 0.0f) ? scrollSpeed : 60.0f;
+    frame->roundness    = (roundness > 0.0f) ? roundness : 1.0f;
 }
 
 bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen) {
@@ -34,13 +34,13 @@ bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen) {
         return false;
     }
 
-    frame->scrollY -= wheel * frame->scrollSpeed;
+    frame->scroll.y -= wheel * frame->scrollSpeed;
 
     // Clamp scroll so we never show empty space when content is smaller than view
-    f32 maxScroll = frame->contentHeight - frame->visibleArea.height;
+    f32 maxScroll = frame->contentSize.y - frame->visibleArea.height;
     if (maxScroll < 0.0f) maxScroll = 0.0f;   // content fits entirely
 
-    frame->scrollY = clamp(frame->scrollY, 0.0f, maxScroll);
+    frame->scroll.y = clamp(frame->scroll.y, 0.0f, maxScroll);
 
     return true;
 }

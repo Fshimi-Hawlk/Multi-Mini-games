@@ -5,12 +5,10 @@
  * @brief Implementation of player progress saving/loading.
  */
 
-#include "APIs/progressAPI.h"
+#include "progress.h"
 #include <stdio.h>
 #include <string.h>
 #include <arpa/inet.h>
-
-#define PROGRESS_FILE "progress.dat"
 
 // Helper to write a boolean as a byte
 static void write_bool(FILE* f, bool b) {

@@ -41,15 +41,9 @@ typedef enum {
 */
 #define createRect(pos, size) (Rectangle) { .x = (pos).x, .y = (pos).y, .width = (size).x, .height = (size).y }
 
-#define getRectPos(rec) (Vector2) {.x = (rec).x, .y = (rec).y}
-#define getRectSize(rec) (Vector2) {.x = (rec).width, .y = (rec).height}
-
-#define scaleRec(rec, scalor) (Rectangle) { \
-    .x = (rec).x,                           \
-    .y = (rec).y,                           \
-    .width = (rec).width * scalor,          \
-    .height = (rec).height * scalor,        \
-}
+#define getRectPos(rect) (Vector2) {.x = (rect).x, .y = (rect).y}
+#define getRectSize(rect) (Vector2) {.x = (rect).width, .y = (rect).height}
+#define getRectCenterPos(rect) (Vector2) {(rect).x + (rect).width / 2.0f, (rect).y + (rect).height / 2.0f}
 
 /**
     @brief Returns the full source rectangle of a texture ({0, 0, w, h}).
@@ -60,7 +54,16 @@ typedef enum {
     @param texture Valid Raylib Texture2D
     @return Rectangle spanning the entire texture
 */
-Rectangle getTextureRec(const Texture texture);
+#define getTextureRec(texture) (Rectangle) { 0, 0, (f32) (texture).width, (f32) (texture).height }
+
+#define scaleRect(rect, scalor) (Rectangle) { \
+    .x = (rect).x,                           \
+    .y = (rect).y,                           \
+    .width = (rect).width * scalor,          \
+    .height = (rect).height * scalor,        \
+}
+
+Rectangle getAnchoredRect(Rectangle rect, Anchor_Et anchor);
 
 /**
     @brief Draws text with the given anchor point.
