@@ -72,100 +72,93 @@ void lobby_drawPlayer(const PlayerVisuals_St* const visuals, const Player_St* co
     DrawCircleV(glowPos, r * 0.26f, Fade(glowBase, 0.11f));
 }
 
-void lobby_drawPlatforms(const Platform_St* const platforms, const int count) {
-    for (int i = 0; i < count; ++i) {
-        const Platform_St* p = &platforms[i];
-        Rectangle r = p->rect;
+void lobby_drawTerrains(void) {
+    // FPS Optimization: Pre-calculate some values
+    float time = (float)GetTime();
+    
+    for (u32 i = 0; i < terrains.count; i++) {
+        const LobbyTerrain_St* t = &terrains.items[i];
+        
+        // Visibility check (basic culling)
+        // Note: For simplicity we assume they are somewhat near the player
+        
+        switch (t->kind) {
+            case TERRAIN_KIND_GRASS: {
+                Texture2D tex = terrainTextures[TERRAIN_KIND_GRASS];
+                DrawTextureRec(tex, getTextureRec(tex), getRectPos(t->rect), WHITE);
+            } break;
 
-        if (p->type == PLATFORM_TYPE_WOODPLANK && IsTextureValid(platformTextures[PLATFORM_TYPE_WOODPLANK])) {
-            Texture2D tex = platformTextures[PLATFORM_TYPE_WOODPLANK];
+            case TERRAIN_KIND_WOOD_PLANK: {
+                Texture2D tex = terrainTextures[TERRAIN_KIND_WOOD_PLANK];
 
-            // Stable random wood clip
-            f32 hash = (r.x * 13.0f + r.y * 17.0f + r.width * 19.0f);
-            uint h = *(uint*)&hash;
-            h = (h ^ 0xDEADBEEF) * 2654435761u;
+                // Stable random wood clip
+                f32 hash = (t->rect.x * 13.0f + t->rect.y * 17.0f + t->rect.width * 19.0f);
+                uint h = *(uint*)&hash;
+                h = (h ^ 0xDEADBEEF) * 2654435761u;
 
-            Rectangle source = {
-                .x      = (f32)(h % (uint)(tex.width - r.width  + 1)),
-                .y      = (f32)((h >> 16) % (uint)(tex.height - r.height + 1)),
-                .width  = r.width,
-                .height = r.height
-            };
+                Rectangle source = {
+                    .x      = (f32)(h % (uint)(tex.width - t->rect.width  + 1)),
+                    .y      = (f32)((h >> 16) % (uint)(tex.height - t->rect.height + 1)),
+                    .width  = t->rect.width,
+                    .height = t->rect.height
+                };
 
-            // Soft drop shadow
-            Vector2 shadowOffset = {moonLightDir.x * -12.0f, moonLightDir.y * -8.0f};
-            DrawRectangleRec((Rectangle){r.x + shadowOffset.x, r.y + shadowOffset.y, r.width, r.height}, Fade(BLACK, 0.28f));
+                // Soft drop shadow
+                Vector2 shadowOffset = {moonLightDir.x * -12.0f, moonLightDir.y * -8.0f};
+                DrawRectangleRec((Rectangle){t->rect.x + shadowOffset.x, t->rect.y + shadowOffset.y, t->rect.width, t->rect.height}, Fade(BLACK, 0.28f));
 
-            // Main wood texture
-            DrawTextureRec(tex, source, (Vector2){r.x, r.y}, WHITE);
+                // Main wood texture
+                DrawTextureRec(tex, source, getRectPos(t->rect), WHITE);
 
-            // Subtle shading
-            DrawRectangleRec(r, Fade(BLACK, 0.18f));
-            // Light rim
-            DrawRectangleLinesEx((Rectangle){r.x - 2, r.y - 2, r.width + 4, r.height + 4}, 3.0f, Fade(WHITE, 0.09f));
+                // Subtle shading
+                DrawRectangleRec(t->rect, Fade(BLACK, 0.18f));
+
+                // Light rim
+                DrawRectangleLinesEx((Rectangle){t->rect.x - 2, t->rect.y - 2, t->rect.width + 4, t->rect.height + 4}, 3.0f, Fade(WHITE, 0.09f));
+            } break;
+
+            case TERRAIN_KIND_WATER: {
+                Color waterColor = (Color){ 30, 120, 250, 140 };
+                DrawRectangleRec(t->rect, waterColor);
+                // Simple wave effect (no Rounded call)
+                float wave = sinf(time * 2.0f + t->rect.x * 0.01f) * 4.0f;
+                DrawLineEx((Vector2){t->rect.x, t->rect.y + wave}, (Vector2){t->rect.x + t->rect.width, t->rect.y + wave}, 3.0f, (Color){150, 220, 255, 200});
+            } break;
+
+            case TERRAIN_KIND_BOUNCY:
+                DrawRectangleRec(t->rect, (Color){255, 50, 255, 255});
+                DrawRectangleLinesEx(t->rect, 2.0f, WHITE);
+                break;
+
+            case TERRAIN_KIND_ICE:
+                DrawRectangleRec(t->rect, (Color){200, 240, 255, 255});
+                DrawRectangleLinesEx(t->rect, 1.0f, Fade(WHITE, 0.5f));
+                break;
+
+            case TERRAIN_KIND_PORTAL: {
+                float pulse = (sinf(time * 5.0f) + 1.0f) * 0.5f;
+                DrawRectangleRec(t->rect, (Color){100, 0, 200, 200});
+                DrawRectangleLinesEx(t->rect, 2.0f + pulse * 3.0f, PURPLE);
+                DrawCircleV(getRectCenterPos(t->rect), 5 + pulse * 10, WHITE);
+            } break;
+
+            case TERRAIN_KIND_STONE:
+                DrawRectangleRec(t->rect, (Color){120, 120, 120, 255});
+                DrawRectangleLinesEx(t->rect, 1.5f, DARKGRAY);
+                break;
+
+            case TERRAIN_KIND_DECORATIVE:
+                // Use Rounded ONLY for decoration to save FPS on static platforms
+                DrawRectangleRounded(t->rect, t->roundness, 6, t->color);
+                break;
+
+            default: // TERRAIN_KIND_NORMAL
+                DrawRectangleRec(t->rect, t->color);
+                DrawRectangleLinesEx(t->rect, 1.0f, Fade(BLACK, 0.2f));
+                break;
         }
-        // Add grass or other solid types here later if needed
     }
 }
-
-// void drawLobbyTerrains(void) {
-//     // FPS Optimization: Pre-calculate some values
-//     float time = (float)GetTime();
-    
-//     for (u32 i = 0; i < terrains.count; i++) {
-//         const LobbyTerrain_St* t = &terrains.items[i];
-        
-//         // Visibility check (basic culling)
-//         // Note: For simplicity we assume they are somewhat near the player
-        
-//         switch (t->type) {
-//             case TERRAIN_WATER: {
-//                 Color waterColor = (Color){ 30, 120, 250, 140 };
-//                 DrawRectangleRec(t->rect, waterColor);
-//                 // Simple wave effect (no Rounded call)
-//                 float wave = sinf(time * 2.0f + t->rect.x * 0.01f) * 4.0f;
-//                 DrawLineEx((Vector2){t->rect.x, t->rect.y + wave}, (Vector2){t->rect.x + t->rect.width, t->rect.y + wave}, 3.0f, (Color){150, 220, 255, 200});
-//             } break;
-
-//             case TERRAIN_BOUNCY:
-//                 DrawRectangleRec(t->rect, (Color){255, 50, 255, 255});
-//                 DrawRectangleLinesEx(t->rect, 2.0f, WHITE);
-//                 break;
-
-//             case TERRAIN_ICE:
-//                 DrawRectangleRec(t->rect, (Color){200, 240, 255, 255});
-//                 DrawRectangleLinesEx(t->rect, 1.0f, Fade(WHITE, 0.5f));
-//                 break;
-
-//             case TERRAIN_PORTAL: {
-//                 float pulse = (sinf(time * 5.0f) + 1.0f) * 0.5f;
-//                 DrawRectangleRec(t->rect, (Color){100, 0, 200, 200});
-//                 DrawRectangleLinesEx(t->rect, 2.0f + pulse * 3.0f, PURPLE);
-//                 DrawCircleV(getRectCenterPos(t->rect), 5 + pulse * 10, WHITE);
-//             } break;
-
-//             case TERRAIN_WOOD:
-//                 DrawRectangleRec(t->rect, (Color){100, 60, 20, 255});
-//                 DrawRectangleLinesEx(t->rect, 1.0f, (Color){60, 30, 10, 255});
-//                 break;
-
-//             case TERRAIN_STONE:
-//                 DrawRectangleRec(t->rect, (Color){120, 120, 120, 255});
-//                 DrawRectangleLinesEx(t->rect, 1.5f, DARKGRAY);
-//                 break;
-
-//             case TERRAIN_DECORATIVE:
-//                 // Use Rounded ONLY for decoration to save FPS on static platforms
-//                 DrawRectangleRounded(t->rect, t->roundness, 6, t->color);
-//                 break;
-
-//             default: // TERRAIN_NORMAL
-//                 DrawRectangleRec(t->rect, t->color);
-//                 DrawRectangleLinesEx(t->rect, 1.0f, Fade(BLACK, 0.2f));
-//                 break;
-//         }
-//     }
-// }
 
 void lobby_drawTree(void) {
     if (!IsTextureValid(treeTexture)) return;

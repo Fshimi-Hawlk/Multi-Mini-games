@@ -10,21 +10,24 @@
 #include "nob/dynamicArray.h"
 #include "utils/globals.h"
 #include "utils/userTypes.h"
-#include "utils/utils.h"
 
-static const char* terrainTypeComment(TerrainType_Et type) {
-    switch (type) {
-        case TERRAIN_NORMAL:      return "Normal";
-        case TERRAIN_WOOD:        return "Wood";
-        case TERRAIN_STONE:       return "Stone";
-        case TERRAIN_ICE:         return "Ice";
-        case TERRAIN_BOUNCY:      return "Bouncy";
-        case TERRAIN_MOVING_H:    return "Moving Horizontal";
-        case TERRAIN_MOVING_V:    return "Moving Vertical";
-        case TERRAIN_WATER:       return "Water";
-        case TERRAIN_DECORATIVE:  return "Decorative";
-        case TERRAIN_PORTAL:      return "Portal";
-        default:                  return "Unknown";
+#include "sharedUtils/debug.h"
+#include "sharedUtils/container.h"
+
+static const char* terrainTypeComment(TerrainKind_Et kind) {
+    switch (kind) {
+        case TERRAIN_KIND_NORMAL:       return "Normal";
+        case TERRAIN_KIND_GRASS:        return "Grass";
+        case TERRAIN_KIND_WOOD_PLANK:   return "Wood Plank";
+        case TERRAIN_KIND_STONE:        return "Stone";
+        case TERRAIN_KIND_ICE:          return "Ice";
+        case TERRAIN_KIND_BOUNCY:       return "Bouncy";
+        case TERRAIN_KIND_MOVING_H:     return "Moving Horizontal";
+        case TERRAIN_KIND_MOVING_V:     return "Moving Vertical";
+        case TERRAIN_KIND_WATER:        return "Water";
+        case TERRAIN_KIND_DECORATIVE:   return "Decorative";
+        case TERRAIN_KIND_PORTAL:       return "Portal";
+        default:                        return "Unknown";
     }
 }
 
@@ -37,11 +40,11 @@ bool editorGenerateCode(const LobbyGame_St* const game, const char* filename) {
         return false;
     }
 
-    TerrainVec_St terrainGroups[__terrainTypeCount] = {0};
+    TerrainVec_St terrainGroups[__terrainKindCount] = {0};
 
     for (size_t i = 0; i < terrains.count; ++i) {
         const LobbyTerrain_St* t = &terrains.items[i];
-        da_append(&terrainGroups[t->type], *t);
+        da_append(&terrainGroups[t->kind], *t);
     }
 
     fprintf(f, "/**\n");
@@ -52,15 +55,15 @@ bool editorGenerateCode(const LobbyGame_St* const game, const char* filename) {
 
     fprintf(f, "static LobbyTerrain_St _generatedTerrainContent[] = {\n");
 
-    // Group by type for nice comments
+    // Group by kind for nice comments
 
-    for (TerrainType_Et type = 0; type < __terrainTypeCount; ++type) {
-        const TerrainVec_St group = terrainGroups[type];
+    for (TerrainKind_Et kind = 0; kind < __terrainKindCount; ++kind) {
+        const TerrainVec_St group = terrainGroups[kind];
         if (group.count == 0) continue;
 
-        if (type > 0) fprintf(f, "\n");
+        if (kind > 0) fprintf(f, "\n");
         fprintf(f, "    // ==================================================================\n");
-        fprintf(f, "    // %s\n", terrainTypeComment(type));
+        fprintf(f, "    // %s\n", terrainTypeComment(kind));
         fprintf(f, "    // ==================================================================\n");
 
         for (u32 i = 0; i < group.count; ++i) {
@@ -73,12 +76,12 @@ bool editorGenerateCode(const LobbyGame_St* const game, const char* filename) {
                     t->roundness);
 
             // Extra fields when relevant
-            if (t->type == TERRAIN_MOVING_H || t->type == TERRAIN_MOVING_V) {
+            if (t->kind == TERRAIN_KIND_MOVING_H || t->kind == TERRAIN_KIND_MOVING_V) {
                 fprintf(f, ", .velocity = {%.1ff, %.1ff}, .moveDistance = %.1ff",
                         t->velocity.x, t->velocity.y, t->moveDistance);
             }
 
-            if (t->type == TERRAIN_PORTAL) {
+            if (t->kind == TERRAIN_KIND_PORTAL) {
                 fprintf(
                     f, ", .portalTargetPosition = {%.1ff, %.1ff}, .isTwoWayPortal = %s, .isOnlyReceiverPortal = %s",
                     t->portalTargetPosition.x, t->portalTargetPosition.y,

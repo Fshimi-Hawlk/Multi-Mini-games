@@ -46,8 +46,6 @@
 */
 void lobby_drawPlayer(const PlayerVisuals_St* const visuals, const Player_St* const player);
 
-void lobby_drawPlatforms(const Platform_St *const platforms, const int count);
-
 /**
     @brief Draws the lobby's terrains.
 */

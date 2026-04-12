@@ -1,11 +1,6 @@
-#include "utils/globals.h"
-#include "networkInterface.h"
 #include "core/chat.h"
-#include "APIs/generalAPI.h"
-#include <string.h>
-#include <stdio.h>
-#include <sys/socket.h>
-#include <arpa/inet.h>
+
+#include "utils/globals.h"
 
 static float msgVisibleTimer = 0.0f;
 
@@ -59,7 +54,7 @@ void updateChat(void) {
                 u16 payloadLen = (u16)strlen(lobby_game.chat.inputBuffer) + 1;
                 GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = htons(payloadLen) };
                 RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons((u16)lobby_game.id);
+                h.sender_id = htons((u16)lobby_game.clientId);
                 
                 u8 buffer[2048];
                 size_t offset = 0;

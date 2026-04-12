@@ -57,17 +57,38 @@ static void initGrass(void) {
 /**
     @brief Fallback terrain content - Restored from 22-03 branch 
 */
-static LobbyTerrain_St __fallbackTerrainContent[] = {
-    { .rect = {-1000, 500, 2000, 1000}, .color = {0, 228, 48, 255}, .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
-    { .rect = {-1000, 0, 500, 500},     .color = {0, 0, 0, 255},     .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
-    { .rect = {500, 0, 500, 500},       .color = {0, 0, 0, 255},     .roundness = 0.0f, .type = TERRAIN_NORMAL, .velocity = {0,0} },
-    { .rect = {-350, 400, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {250, 400, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {-200, 300, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {100, 300, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {-50, 200, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {-350, 150, 100, 30},     .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
-    { .rect = {250, 150, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
+static LobbyTerrain_St __fallbackTerrainContent[] =  {
+    // --- SOL ---
+    { .rect = {-X_LIMIT, GROUND_Y, X_LIMIT * 2, 1000}, .kind = TERRAIN_KIND_GRASS},
+
+    // --- BAS DU TRONC (Fini l'escalier droit, on zigzag) ---
+    { .rect = { -100, GROUND_Y -  100, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Centre
+    { .rect = {  100, GROUND_Y -  220, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Décalé droite
+    { .rect = { -280, GROUND_Y -  340, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Décalé gauche
+
+    // --- PREMIER GROS ÉCARTEMENT (Les grosses branches du bas) ---
+    { .rect = {    0, GROUND_Y -  500, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Centre-droit
+
+    // --- EXTÉRIEURS HAUTS (On exploite vraiment la largeur) ---
+    { .rect = { -600, GROUND_Y -  650, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Tout au bout à gauche
+    { .rect = { -150, GROUND_Y -  700, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Retour vers le centre
+    { .rect = {  350, GROUND_Y -  850, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Tout au bout à droite
+
+    // --- ON GRIMPE VERS LA CANOPÉE ---
+    { .rect = { -920, GROUND_Y -  940, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Haut gauche
+    { .rect = { -100, GROUND_Y -  960, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Jonction centrale
+
+    // --- LES BRANCHES SUPÉRIEURES ---
+    { .rect = { -650, GROUND_Y - 1180, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Haut gauche
+    { .rect = {  250, GROUND_Y - 1050, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Haut droite
+    { .rect = { -220, GROUND_Y - 1140, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Centre-gauche
+    { .rect = {  620, GROUND_Y - 1200, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK},
+
+    // --- LE SOMMET DU FEUILLAGE ---
+    { .rect = { -490, GROUND_Y - 1350, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK},
+    { .rect = {  180, GROUND_Y - 1280, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK},
+    { .rect = { -100, GROUND_Y - 1480, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK},
+    { .rect = {  340, GROUND_Y - 1600, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}
 };
 
 Error_Et lobby_gameInit(void) {

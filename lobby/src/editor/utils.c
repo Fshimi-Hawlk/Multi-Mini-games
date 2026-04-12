@@ -41,33 +41,33 @@ s32 findTerrainAtPoint(Vector2 point) {
     return -1;
 }
 
-Color getTerrainTypeColor(TerrainType_Et type) {
-    Color typeColor = {0};
+Color getTerrainTypeColor(TerrainKind_Et kind) {
+    Color kindColor = {0};
 
-    switch (type) {
-        case TERRAIN_NORMAL:        typeColor = (Color) {139, 69, 19, 255};   break;
-        case TERRAIN_WOOD:          typeColor = (Color) {139, 69, 19, 255};   break;
-        case TERRAIN_STONE:         typeColor = (Color) {160, 160, 160, 255}; break;
-        case TERRAIN_ICE:           typeColor = (Color) {180, 220, 255, 255}; break;
-        case TERRAIN_BOUNCY:        typeColor = (Color) {255, 100, 0, 255};   break;
-        case TERRAIN_MOVING_H:
-        case TERRAIN_MOVING_V:      typeColor = (Color) {70, 130, 180, 255};  break;
-        case TERRAIN_WATER:         typeColor = (Color) {30, 100, 200, 180};  break;
-        case TERRAIN_DECORATIVE:    typeColor = (Color) {34, 139, 34, 80};   break;
-        case TERRAIN_PORTAL:        typeColor = (Color) {200, 0, 255, 180};   break;
-        default:                    log_warn("TerrainType_Et");
+    switch (kind) {
+        case TERRAIN_KIND_NORMAL:        kindColor = (Color) {139, 69, 19, 255};   break;
+        case TERRAIN_KIND_WOOD_PLANK:    kindColor = (Color) {139, 69, 19, 255};   break;
+        case TERRAIN_KIND_STONE:         kindColor = (Color) {160, 160, 160, 255}; break;
+        case TERRAIN_KIND_ICE:           kindColor = (Color) {180, 220, 255, 255}; break;
+        case TERRAIN_KIND_BOUNCY:        kindColor = (Color) {255, 100, 0, 255};   break;
+        case TERRAIN_KIND_MOVING_H:
+        case TERRAIN_KIND_MOVING_V:      kindColor = (Color) {70, 130, 180, 255};  break;
+        case TERRAIN_KIND_WATER:         kindColor = (Color) {30, 100, 200, 180};  break;
+        case TERRAIN_KIND_DECORATIVE:    kindColor = (Color) {34, 139, 34, 80};   break;
+        case TERRAIN_KIND_PORTAL:        kindColor = (Color) {200, 0, 255, 180};   break;
+        default:                    log_warn("TerrainKind_Et");
     }
 
-    return typeColor;
+    return kindColor;
 }
 
-LobbyTerrain_St createDefaultTerrain(TerrainType_Et type, Vector2 position) {
+LobbyTerrain_St createDefaultTerrain(TerrainKind_Et kind, Vector2 position) {
     LobbyTerrain_St t = {0};
     t.rect = (Rectangle) {position.x, position.y, 200.0f, 30.0f};
     t.roundness = 0.0f;
-    t.type = type;
+    t.kind = kind;
 
-    t.color = getTerrainTypeColor(type);
+    t.color = getTerrainTypeColor(kind);
     
     return t;
 }
@@ -196,7 +196,7 @@ f32 snapToGrid(f32 v) {
 
 void drawPortalHighlight(s32 idx, Color color, const Camera2D* cam) {
     if (idx < 0 || (size_t)idx >= terrains.count) return;
-    if (terrains.items[idx].type != TERRAIN_PORTAL) return;
+    if (terrains.items[idx].kind != TERRAIN_KIND_PORTAL) return;
 
     const Rectangle r = terrains.items[idx].rect;
     f32 thickness = r.width / 2 * cam->zoom;

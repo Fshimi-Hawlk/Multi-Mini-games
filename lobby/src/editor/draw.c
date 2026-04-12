@@ -2,8 +2,11 @@
     @file editor/draw.c
     @author Fshimi-Hawlk
     @date 2026-03-30
+    @date 2026-04-11
     @brief Implementation of the level editor drawing functions.
 */
+
+#include "ui/game.h"
 
 #include "editor/editor.h"
 #include "editor/types.h"
@@ -18,8 +21,8 @@
 #include "sharedWidgets/dropdown.h"
 #include "sharedWidgets/scrollFrame.h"
 
-static const char* terrainTypeNames[] = {
-    "NORMAL", "WOOD", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
+static const char* terrainKindNames[] = {
+    "NORMAL", "GRASS", "WOOD PLANK", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
 };
 
 void drawEditor(const LobbyGame_St* const game) {
@@ -38,9 +41,8 @@ void drawEditor(const LobbyGame_St* const game) {
     }
 
     // Draw world entities
-    BeginMode2D(game->cam);
-    {
-        drawLobbyTerrains();
+    BeginMode2D(game->cam); {
+        lobby_drawTerrains();
 
         for (u32 i = 0; i < terrains.count; i++) {
             LobbyTerrain_St* t = &terrains.items[i];
@@ -51,7 +53,7 @@ void drawEditor(const LobbyGame_St* const game) {
             }
             if (isSelected) DrawRectangleLinesEx(t->rect, 3.0f, YELLOW);
             
-            if (t->type == TERRAIN_PORTAL) {
+            if (t->kind == TERRAIN_KIND_PORTAL) {
                 Vector2 center = getRectCenterPos(t->rect);
                 DrawLineV(center, t->portalTargetPosition, Fade(PURPLE, 0.5f));
                 DrawCircleV(t->portalTargetPosition, 10, PURPLE);
@@ -77,14 +79,14 @@ void drawEditor(const LobbyGame_St* const game) {
 
     // Palette
     scrollFrameBegin(&paletteScroll);
-    for (int i = 0; i < __terrainTypeCount; i++) {
+    for (int i = 0; i < __terrainKindCount; i++) {
         Rectangle r = { 20, 100 + i * 40 - paletteScroll.scroll.y, 210, 30 };
         if (CheckCollisionPointRec(GetMousePosition(), r)) {
             DrawRectangleRec(r, Fade(WHITE, 0.2f));
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) currentPaletteType = (TerrainType_Et)i;
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) currentPaletteKind = (TerrainKind_Et)i;
         }
-        if (currentPaletteType == (TerrainType_Et)i) DrawRectangleLinesEx(r, 2, GOLD);
-        DrawText(terrainTypeNames[i], (int)r.x + 10, (int)r.y + 5, 18, WHITE);
+        if (currentPaletteKind == (TerrainKind_Et)i) DrawRectangleLinesEx(r, 2, GOLD);
+        DrawText(terrainKindNames[i], (int)r.x + 10, (int)r.y + 5, 18, WHITE);
     }
     scrollFrameEnd();
 

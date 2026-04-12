@@ -173,37 +173,23 @@ typedef struct {
     Vector2 targetPosition; // Network sync
 } Player_St;
 
-
-typedef enum {
-    PLATFORM_TYPE_GRASS,
-    PLATFORM_TYPE_WOODPLANK,
-    __platformTypeCount
-} PlatformType_Et;
-
-typedef struct {
-    Rectangle rect;         ///< Position and size (world coordinates)
-    Color     color;        ///< Debug / placeholder rendering color
-    float     roundness;    ///< Corner roundness factor (0 = sharp, 1 = fully round)
-    PlatformType_Et type;
-} Platform_St;
-
-
 /**
     @brief Terrain/platform types in the lobby world.
 */
 typedef enum {
-    TERRAIN_NORMAL,
-    TERRAIN_WOOD,
-    TERRAIN_STONE,
-    TERRAIN_ICE,
-    TERRAIN_BOUNCY,
-    TERRAIN_MOVING_H,
-    TERRAIN_MOVING_V,
-    TERRAIN_WATER,
-    TERRAIN_DECORATIVE,
-    TERRAIN_PORTAL,
-    __terrainTypeCount
-} TerrainType_Et;
+    TERRAIN_KIND_NORMAL,
+    TERRAIN_KIND_GRASS,
+    TERRAIN_KIND_WOOD_PLANK,
+    TERRAIN_KIND_STONE,
+    TERRAIN_KIND_ICE,
+    TERRAIN_KIND_BOUNCY,
+    TERRAIN_KIND_MOVING_H,
+    TERRAIN_KIND_MOVING_V,
+    TERRAIN_KIND_WATER,
+    TERRAIN_KIND_DECORATIVE,
+    TERRAIN_KIND_PORTAL,
+    __terrainKindCount
+} TerrainKind_Et;
 
 /**
     @brief One piece of terrain in the lobby world.
@@ -212,7 +198,7 @@ typedef struct {
     Rectangle      rect;
     Color          color;
     f32            roundness;
-    TerrainType_Et type;
+    TerrainKind_Et kind;
 
     Vector2        velocity;
     f32            moveDistance;
@@ -237,7 +223,7 @@ typedef struct {
     BaseGame_St         base;
     GameState_Et        currentState;
 
-    s32                 id;
+    s32                 clientId;
 
     Chat_St             chat;
     Player_St           otherPlayers[MAX_CLIENTS];

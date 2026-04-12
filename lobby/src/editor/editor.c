@@ -43,7 +43,7 @@ ScrollFrame_St propertiesScroll = {0};
 
 Camera2D editorCameraBackup = {0};
 
-TerrainType_Et currentPaletteType = TERRAIN_NORMAL;
+TerrainKind_Et currentPaletteKind = TERRAIN_KIND_NORMAL;
 
 // Dynamic arrays (instantiated here)
 SelectedIndices_St selectedIndices = {0};
@@ -130,7 +130,7 @@ void initEditor(LobbyGame_St* const game) {
     game->cam.zoom = 0.5f;
 
     // Default palette selection
-    currentPaletteType = TERRAIN_NORMAL;
+    currentPaletteKind = TERRAIN_KIND_NORMAL;
 
     portalTargetPickMode = false;
     portalBeingConfigured = -1;

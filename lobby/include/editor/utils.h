@@ -28,7 +28,7 @@ bool pointInTerrain(const LobbyTerrain_St* const terrain, Vector2 point);
 */
 s32 findTerrainAtPoint(Vector2 point);
 
-Color getTerrainTypeColor(TerrainType_Et type);
+Color getTerrainTypeColor(TerrainKind_Et type);
 
 /**
     @brief Creates a new terrain with default size and per-type defaults.
@@ -37,7 +37,7 @@ Color getTerrainTypeColor(TerrainType_Et type);
     @param position  Top-left corner of the new terrain
     @return          Fully initialized `LobbyTerrain_St` with sensible defaults
 */
-LobbyTerrain_St createDefaultTerrain(TerrainType_Et type, Vector2 position);
+LobbyTerrain_St createDefaultTerrain(TerrainKind_Et type, Vector2 position);
 
 /**
     @brief Returns true if two terrain rectangles overlap.

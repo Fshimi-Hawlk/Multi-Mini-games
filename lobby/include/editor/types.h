@@ -68,7 +68,7 @@ extern f32  highlightTimer;              ///< Seconds left for the highlight
 
 extern Camera2D editorCameraBackup;
 
-extern TerrainType_Et currentPaletteType;
+extern TerrainKind_Et currentPaletteKind;
 
 extern SelectedIndices_St selectedIndices;
 extern Clipboard_St clipboard;

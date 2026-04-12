@@ -44,7 +44,6 @@
 #include "utils/globals.h"
 
 #include "sharedUtils/mathUtils.h"
-#include "utils/userTypes.h"
 
 Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
@@ -59,15 +58,16 @@ Vector2 lobby_getPlayerCenter(const Player_St* const player) {
     return (Vector2) {player->radius, player->radius};
 }
 
-static bool isTerrainSolid(TerrainType_Et type) {
-    switch (type) {
-        case TERRAIN_NORMAL:
-        case TERRAIN_WOOD:
-        case TERRAIN_STONE:
-        case TERRAIN_ICE:
-        case TERRAIN_BOUNCY:
-        case TERRAIN_MOVING_H:
-        case TERRAIN_MOVING_V:
+static bool isTerrainSolid(TerrainKind_Et kind) {
+    switch (kind) {
+        case TERRAIN_KIND_NORMAL:
+        case TERRAIN_KIND_GRASS:
+        case TERRAIN_KIND_WOOD_PLANK:
+        case TERRAIN_KIND_STONE:
+        case TERRAIN_KIND_ICE:
+        case TERRAIN_KIND_BOUNCY:
+        case TERRAIN_KIND_MOVING_H:
+        case TERRAIN_KIND_MOVING_V:
             return true;
         default:
             return false;
@@ -100,7 +100,7 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const PhysicsConstan
     f32 centerY = player->position.y;
     f32 r       = player->radius;
 
-    TerrainType_Et type = t->type;
+    TerrainKind_Et kind = t->kind;
     
     f32 closestX = clamp(centerX, t->rect.x, t->rect.x + t->rect.width);
     f32 closestY = clamp(centerY, t->rect.y, t->rect.y + t->rect.height);
@@ -113,14 +113,14 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const PhysicsConstan
     if (distSq > 0.0f) { // First Case : player center outside of terrain
         if (distSq >= r * r) return;
 
-        if (type == TERRAIN_WATER) {
+        if (kind == TERRAIN_KIND_WATER) {
             player->isInWater = true;
             return;
         }
 
-        if (!isTerrainSolid(type)) {
+        if (!isTerrainSolid(kind)) {
             // Portals
-            if (t->type != TERRAIN_PORTAL || t->isOnlyReceiverPortal) return;
+            if (t->kind != TERRAIN_KIND_PORTAL || t->isOnlyReceiverPortal) return;
             if (player->portalTeleportCooldown <= 0.0f) {
                 if (!CheckCollisionCircleRec(player->position, player->radius, t->rect)) return;
 
@@ -146,15 +146,15 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const PhysicsConstan
             if (ny < 0) {
                 player->onGround    = true;
                 player->nbJumps     = 0;
-                player->coyoteTimer = COYOTE_TIME;
+                player->coyoteTimer = pc->coyoteTime;
 
-                switch (type) {
-                    case TERRAIN_BOUNCY: {
+                switch (kind) {
+                    case TERRAIN_KIND_BOUNCY: {
                         player->velocity.y = -700.0f; 
                         player->onGround = false;
                     } break;
 
-                    case TERRAIN_ICE: player->onIce = true; break;
+                    case TERRAIN_KIND_ICE: player->onIce = true; break;
 
                     default: break;
                 }

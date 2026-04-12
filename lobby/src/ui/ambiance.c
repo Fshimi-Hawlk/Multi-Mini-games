@@ -67,11 +67,11 @@ static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_St* player) {
     @brief Checks for landing on the *top surface only* of any platform.
     Side or bottom contacts are ignored. Landing is now softer (no hard snap).
 */
-static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf, Platform_St* platforms, int count) {
+static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf) {
     float leafRadius = 11.0f * leaf->scale;
 
-    for (int i = 0; i < count; ++i) {
-        Rectangle r = platforms[i].rect;
+    da_foreach(LobbyTerrain_St, t, &terrains) {
+        Rectangle r = t->rect;
 
         if (CheckCollisionCircleRec(leaf->position, leafRadius, r)) {
             // Only accept as "top landing" if coming from above and close to the top edge
@@ -373,7 +373,7 @@ void lobby_updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
             }
 
             // Intelligent platform top landing (soft)
-            if (leafLandedOnPlatformTop(l, platforms, platformCount)) {
+            if (leafLandedOnPlatformTop(l)) {
                 l->onGround = true;
                 l->groundTimer = LEAF_GROUND_TIME + (float)(rand() % 650) / 100.0f;
                 l->rotationSpeed *= 0.35f;

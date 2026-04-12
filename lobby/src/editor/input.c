@@ -137,7 +137,7 @@ void updateEditor(LobbyGame_St* game, float dt) {
                 refreshPropertyBuffers(game);
                 
                 // Start placing new terrain
-                LobbyTerrain_St nt = createDefaultTerrain(currentPaletteType, mouseWorld);
+                LobbyTerrain_St nt = createDefaultTerrain(currentPaletteKind, mouseWorld);
                 da_append(&terrains, nt);
                 game->selectedTerrainIndex = (s32)terrains.count - 1;
                 da_append(&selectedIndices, game->selectedTerrainIndex);

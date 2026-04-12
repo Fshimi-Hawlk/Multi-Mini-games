@@ -1,6 +1,5 @@
 #include "setups/app.h"
 #include "setups/audio.h"
-
 #include "utils/globals.h"
 
 void lobby_initFonts(void) {
@@ -44,6 +43,8 @@ void lobby_freeApp(void) {
 
     lobby_freeAudio();
     lobby_freeFonts();
+
+    CloseAudioDevice();
 
     CloseWindow();
 }

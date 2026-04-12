@@ -28,7 +28,7 @@
 // General Globals
 // ────────────────────────────────────────────────
 
-extern LobbyGame_St game;
+extern LobbyGame_St lobby_game;
 
 /**
     @brief Array of pre-loaded fonts at different sizes.
@@ -40,7 +40,6 @@ extern Font lobby_fonts[__fontSizeCount];
 extern f32 gameTime; ///< Accumulated lobby time since launch (seconds). Used for animations.
 
 extern PlayerProgress_St g_progress; ///< Global player progress.
-extern Chat_St gameChat;
 
 // ────────────────────────────────────────────────
 // Platforms / Terrains / Game Zones
@@ -48,16 +47,7 @@ extern Chat_St gameChat;
 
 extern TerrainVec_St terrains; ///< List of terrains in the lobby.
 
-/**
-    @brief Static array of platform definitions for the lobby scene.
-           Size is determined by platformCount.
-           @note Consider moving to dynamic allocation or level data file in the future.
-*/
-extern Platform_St platforms[];
-
-extern u32 platformCount; ///< Number of valid entries in the platforms array.
-
-extern Texture2D platformTextures[__platformTypeCount]; ///< Platform texture atlas entries.
+extern Texture2D terrainTextures[__terrainKindCount]; ///< Platform texture atlas entries.
 
 extern GameInteractionZone_St gameZones[__miniGameIdCount];
 

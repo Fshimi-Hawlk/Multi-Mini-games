@@ -37,20 +37,21 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
         error =  ERROR_TEXTURE_LOAD;
     }
 
-    const char *platformTexturePaths[__platformTypeCount] = {
-        [PLATFORM_TYPE_GRASS]     = IMAGES_PATH "grass.png",
-        [PLATFORM_TYPE_WOODPLANK] = IMAGES_PATH "wood_plank.png",
+    const char *platformTexturePaths[__terrainKindCount] = {
+        [TERRAIN_KIND_GRASS]     = TEXTURES_PATH "grass.png",
+        [TERRAIN_KIND_WOOD_PLANK] = TEXTURES_PATH "wood_plank.png",
     };
 
-    for (u32 i = 0; i < __platformTypeCount; ++i) {
-        platformTextures[i] = LoadTexture(platformTexturePaths[i]);
-        if(!IsTextureValid(platformTextures[i])) {
+    for (u32 i = 0; i < __terrainKindCount; ++i) {
+        if (platformTexturePaths[i] == NULL) continue;
+        terrainTextures[i] = LoadTexture(platformTexturePaths[i]);
+        if(!IsTextureValid(terrainTextures[i])) {
             error = ERROR_TEXTURE_LOAD;
         }
     }
 
-    SetTextureWrap(platformTextures[PLATFORM_TYPE_GRASS], TEXTURE_WRAP_REPEAT);
-    SetTextureWrap(platformTextures[PLATFORM_TYPE_WOODPLANK], TEXTURE_WRAP_REPEAT);
+    SetTextureWrap(terrainTextures[TERRAIN_KIND_GRASS], TEXTURE_WRAP_REPEAT);
+    SetTextureWrap(terrainTextures[TERRAIN_KIND_WOOD_PLANK], TEXTURE_WRAP_REPEAT);
     
     treeTexture = LoadTexture(TEXTURES_PATH "tree.png");
     GenTextureMipmaps(&treeTexture);
@@ -73,10 +74,10 @@ void lobby_freeTextures(Texture2D playerTextures[__playerTextureCount]) {
         UnloadTexture(playerTextures[i]);
     }
 
-    for (u8 i = 0; i < __platformTypeCount; ++i) {
-        if (!IsTextureValid(platformTextures[i])) continue;
+    for (u8 i = 0; i < __terrainKindCount; ++i) {
+        if (!IsTextureValid(terrainTextures[i])) continue;
 
-        UnloadTexture(platformTextures[i]);
+        UnloadTexture(terrainTextures[i]);
     }
 
     if (IsTextureValid(treeTexture))        UnloadTexture(treeTexture);

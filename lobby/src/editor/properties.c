@@ -17,7 +17,7 @@ TextBox_St   tbPosX, tbPosY, tbWidth, tbHeight, tbRoundness;
 TextBox_St   tbVelX, tbVelY, tbMoveDist;
 TextBox_St   tbTargetX, tbTargetY;
 Slider_St    sliderRoundness;
-Dropdown_St  dropdownType;
+DropDown_St  dropdownType;
 TextButton_St btnExitFocus;
 TextButton_St btnPickTarget;
 CheckBox_St   cbTwoWay;
@@ -27,8 +27,8 @@ bool propertiesGridSnapEnabled = true;
 f32  propertiesGridStep = 25.0f;
 s32  focusedTerrainIndex = -1;
 
-static const char* terrainTypeNames[] = {
-    "NORMAL", "WOOD", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
+static const char* terrainKindNames[] = {
+    "NORMAL", "GRASS", "WOOD PLANK", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
 };
 
 void propertiesInit(void) {
@@ -37,15 +37,15 @@ void propertiesInit(void) {
     tbPosX = (TextBox_St){ .bounds = {x, 100, 100, 30}, .isValid = true };
     tbPosY = (TextBox_St){ .bounds = {x + 110, 100, 100, 30}, .isValid = true };
     
-    dropdownType = (Dropdown_St){
+    dropdownType = (DropDown_St){
         .bounds = {x, 180, 210, 30},
-        .options = terrainTypeNames,
-        .count = __terrainTypeCount,
+        .options = terrainKindNames,
+        .count = __terrainKindCount,
         .selectedIndex = 0
     };
     
     btnExitFocus = (TextButton_St){ .bounds = {x, 500, 210, 40}, .baseColor = RED, .roundness = 0.2f };
-    strncpy(btnExitFocus.text, "Back to List", 63);
+    btnExitFocus.text = "Back to List";
 }
 
 void refreshPropertyBuffers(const LobbyGame_St* const game) {
@@ -55,7 +55,7 @@ void refreshPropertyBuffers(const LobbyGame_St* const game) {
     
     snprintf(tbPosX.buffer, 255, "%.1f", t->rect.x);
     snprintf(tbPosY.buffer, 255, "%.1f", t->rect.y);
-    dropdownType.selectedIndex = (s32)t->type;
+    dropdownType.selectedIndex = (s32)t->kind;
 }
 
 void updatePropertiesPanel(LobbyGame_St* const game) {
@@ -66,7 +66,7 @@ void updatePropertiesPanel(LobbyGame_St* const game) {
         if (textBoxUpdate(&tbPosY, m)) terrains.items[focusedTerrainIndex].rect.y = (float)atof(tbPosY.buffer);
         
         if (dropdownUpdate(&dropdownType, m)) {
-            terrains.items[focusedTerrainIndex].type = (TerrainType_Et)dropdownType.selectedIndex;
+            terrains.items[focusedTerrainIndex].kind = (TerrainKind_Et)dropdownType.selectedIndex;
         }
         
         if (textButtonUpdate(&btnExitFocus, m)) exitSingleTerrainFocusMode(game);
