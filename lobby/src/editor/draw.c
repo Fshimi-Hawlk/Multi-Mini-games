@@ -8,17 +8,15 @@
 #include "editor/editor.h"
 #include "editor/types.h"
 #include "editor/properties.h"
+
 #include "utils/globals.h"
-#include "utils/utils.h"
-#include "widgets/button.h"
-#include "widgets/textBox.h"
-#include "widgets/dropdown.h"
-#include "widgets/slider.h"
-#include "widgets/checkBox.h"
-#include "widgets/scrollFrame.h"
-#include "ui/game.h"
-#include <stdio.h>
-#include <math.h>
+
+#include "sharedUtils/geometry.h"
+
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/textBox.h"
+#include "sharedWidgets/dropdown.h"
+#include "sharedWidgets/scrollFrame.h"
 
 static const char* terrainTypeNames[] = {
     "NORMAL", "WOOD", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
@@ -73,9 +71,9 @@ void drawEditor(const LobbyGame_St* const game) {
     DrawRectangle(0, 0, 250, GetScreenHeight(), Fade(BLACK, 0.8f));
     DrawText("EDITOR MODE", 20, 20, 20, GOLD);
 
-    textButtonDraw(&btnLoad, lobby_fonts[FONT20], 20);
-    textButtonDraw(&btnSave, lobby_fonts[FONT20], 20);
-    textButtonDraw(&btnGenerate, lobby_fonts[FONT20], 20);
+    textButtonDraw(&btnLoad, lobby_fonts[FONT24], 20);
+    textButtonDraw(&btnSave, lobby_fonts[FONT24], 20);
+    textButtonDraw(&btnGenerate, lobby_fonts[FONT24], 20);
 
     // Palette
     scrollFrameBegin(&paletteScroll);
@@ -101,10 +99,10 @@ void drawEditor(const LobbyGame_St* const game) {
         if (focusedTerrainIndex != -1) {
             DrawText(TextFormat("ID: %d", focusedTerrainIndex), GetScreenWidth() - 280, y, 18, WHITE);
             y += 30;
-            textBoxDraw(&tbPosX, lobby_fonts[FONT18], 18);
-            textBoxDraw(&tbPosY, lobby_fonts[FONT18], 18);
+            textBoxDraw(&tbPosX, lobby_fonts[FONT24], 18);
+            textBoxDraw(&tbPosY, lobby_fonts[FONT24], 18);
             y += 80;
-            dropdownDraw(&dropdownType, lobby_fonts[FONT18], 18);
+            dropdownDraw(&dropdownType, lobby_fonts[FONT24], 18);
         } else {
             DrawText("Multiple Selection", GetScreenWidth() - 280, y, 18, GRAY);
         }

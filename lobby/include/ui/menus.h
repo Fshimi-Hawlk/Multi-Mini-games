@@ -6,8 +6,7 @@
 #ifndef MENUS_H
 #define MENUS_H
 
-#include "raylib.h"
-#include "firstparty/APIs/generalAPI.h"
+#include "utils/userTypes.h"
 
 typedef enum {
     MENU_NONE,

@@ -11,14 +11,12 @@
 #include "editor/utils.h"
 #include "editor/io.h"
 #include "editor/codegen.h"
+
 #include "utils/globals.h"
-#include "utils/utils.h"
-#include "widgets/button.h"
-#include "widgets/scrollFrame.h"
-#include "widgets/checkBox.h"
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
+
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/scrollFrame.h"
+// #include "sharedWidgets/checkBox.h"
 
 void updateEditor(LobbyGame_St* game, float dt) {
     if (!game->editorMode) return;
@@ -62,7 +60,7 @@ void updateEditor(LobbyGame_St* game, float dt) {
     
     if (IsKeyPressed(KEY_ESCAPE)) {
         extern void switch_minigame(u8 game_id);
-        switch_minigame(MINI_GAME_LOBBY);
+        switch_minigame(MINI_GAME_ID_LOBBY);
         return;
     }
 
@@ -112,8 +110,7 @@ void updateEditor(LobbyGame_St* game, float dt) {
                 portalBeingConfigured = -1;
                 refreshPropertyBuffers(game);
             }
-        }
-        else if (hit != -1) {
+        } else if (hit != -1) {
             // Selection logic
             bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
             if (!shift) da_clear(&selectedIndices);
@@ -131,8 +128,7 @@ void updateEditor(LobbyGame_St* game, float dt) {
             editorDragMode = DRAG_MOVING;
             dragStartWorld = mouseWorld;
             refreshPropertyBuffers(game);
-        }
-        else {
+        } else {
             // Clicked on empty space: Start placing new or deselect
             bool shift = IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
             if (!shift) {

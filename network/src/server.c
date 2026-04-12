@@ -7,14 +7,9 @@
 */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/time.h>
@@ -23,9 +18,8 @@
 #include <signal.h>
 
 #include "APIs/generalAPI.h"
-#include "APIs/gameRegistry.h"
+#include "gameRegistry.h"
 #include "networkInterface.h"
-#include "rudp_core.h"
 #include "logger.h"
 
 // 
@@ -61,7 +55,7 @@ typedef struct {
 typedef struct {
     bool                          active;     ///< True when room is in use
     int                           id;         ///< Room index
-    MiniGame_Et                   gameId;     ///< Type of game (BINGO, CHESS, etc.)
+    MiniGameId_Et                 gameId;     ///< Type of game (BINGO, CHESS, etc.)
     const GameServerInterface_St* module;     ///< Pointer to game logic interface
     void*                         state;      ///< Opaque pointer to game instance data
     char                          name[32];   ///< Display name (e.g. "Room #1")
@@ -215,7 +209,7 @@ static void sendRoomList(int clientId) {
 
 int main(int argc, char* argv[]) {
     (void)argc; (void)argv;
-    init_logger();
+    initLogger();
     log_info("SERVER STARTING...");
 
     masterSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -232,8 +226,8 @@ int main(int argc, char* argv[]) {
 
     rooms[0].active = true;
     rooms[0].id = 0;
-    rooms[0].gameId = MINI_GAME_LOBBY;
-    rooms[0].module = getGameServerInterface(MINI_GAME_LOBBY);
+    rooms[0].gameId = MINI_GAME_ID_LOBBY;
+    rooms[0].module = getGameServerInterface(MINI_GAME_ID_LOBBY);
     if (rooms[0].module) rooms[0].state = rooms[0].module->create_instance();
     strncpy(rooms[0].name, "Lobby Central", 31);
     rooms[0].name[31] = '\0';
@@ -313,11 +307,11 @@ int main(int argc, char* argv[]) {
                     }
                     else if (h->action == ACTION_CODE_LOBBY_SWITCH_GAME) {
                         if (received >= (ssize_t)(sizeof(RUDPHeader_St) + 2)) {
-                            MiniGame_Et targetGameId = (MiniGame_Et)buf[sizeof(RUDPHeader_St)];
+                            MiniGameId_Et targetGameId = (MiniGameId_Et)buf[sizeof(RUDPHeader_St)];
                             s8 targetRoomId = (s8)buf[sizeof(RUDPHeader_St) + 1];
 
                             if (targetRoomId == -1) {
-                                if (targetGameId > MINI_GAME_LOBBY && targetGameId < __miniGameCount) {
+                                if (targetGameId > MINI_GAME_ID_LOBBY && targetGameId < __miniGameIdCount) {
                                     for (int i = 1; i < MAX_ROOMS; i++) {
                                         if (!rooms[i].active) {
                                             rooms[i].active = true;

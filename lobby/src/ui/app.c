@@ -40,6 +40,7 @@
 #include "utils/globals.h"
 
 #include "sharedUtils/geometry.h"
+#include "sharedUtils/debug.h"
 
 void lobby_drawMenuTextures(const LobbyGame_St* const game) {
     Rectangle destRect = game->playerVisuals.defaultTextureRect;
@@ -79,8 +80,10 @@ void lobby_drawSkinButton(void) {
 // Physics Debug Panel
 // ────────────────────────────────────────────────
 
-void drawPhysicsDebugPanel(LobbyGame_St* game) {
+void drawPhysicsDebugPanel(const Player_St* const player, const PhysicsConstants_St* const pc) {
     if (!showPhysicsDebugPanel) return;
+
+    UNUSED(pc);
 
     const f32 panelW = 350.0f;
     const f32 panelH = 500.0f;
@@ -91,26 +94,29 @@ void drawPhysicsDebugPanel(LobbyGame_St* game) {
     DrawRectangleLinesEx((Rectangle){panelX, panelY, panelW, panelH}, 2, SKYBLUE);
     DrawText("PHYSICS SETTINGS (Skin)", (int)panelX + 20, (int)panelY + 15, 20, SKYBLUE);
 
-    const char* skinName = "Default";
-    if (game->player.textureId == PLAYER_TEXTURE_EARTH) skinName = "Earth";
-    else if (game->player.textureId == PLAYER_TEXTURE_TROLL_FACE) skinName = "Troll";
-    else if (game->player.textureId == PLAYER_TEXTURE_BINGO) skinName = "Bingo";
-    else if (game->player.textureId == PLAYER_TEXTURE_KFF) skinName = "King";
+    const char *skinNames[__playerTextureCount] = {
+        [PLAYER_TEXTURE_DEFAULT]        = "Default",
+        [PLAYER_TEXTURE_BINGO]          = "Bingo",
+        [PLAYER_TEXTURE_BOWLING]        = "Bowling",
+        [PLAYER_TEXTURE_CHESS]          = "Chess",
+        [PLAYER_TEXTURE_DROP_FOUR]      = "Drop Four",
+        [PLAYER_TEXTURE_TWIST_CUBE]     = "Twist Cube",
+        [PLAYER_TEXTURE_EDITOR]         = "Editor",
+        [PLAYER_TEXTURE_KING_FOR_FOUR]  = "King for Four",
+        [PLAYER_TEXTURE_LOBBY]          = "Earth",
+        [PLAYER_TEXTURE_MINI_GOLF]      = "Mini Golf",
+        [PLAYER_TEXTURE_DISC_REVERSAL]  = "Disc Reversal",
+        [PLAYER_TEXTURE_POLY_BLAST]     = "Poly Blast",
+        [PLAYER_TEXTURE_SNAKE]          = "Snake",
+        [PLAYER_TEXTURE_SOLO_CARDS]     = "Solo Cards",
+        [PLAYER_TEXTURE_SUIKA]          = "Suika",
+        [PLAYER_TEXTURE_TETROMINO_FALL] = "Tetromino Fall",
+    };
+
+    const char *skinName = skinNames[player->textureId];
 
     DrawText(TextFormat("Skin: %s", skinName), (int)panelX + 20, (int)panelY + 45, 18, GOLD);
     
     // ... List of constants would go here ...
     DrawText("Press F2 to close", (int)panelX + 20, (int)panelY + panelH - 30, 16, GRAY);
-}
-
-// 
-// Level Code Generator Overlay
-// 
-
-void drawCodeGenOverlay(void) {
-    const f32 w = (f32)GetScreenWidth();
-    const f32 h = (f32)GetScreenHeight();
-    DrawRectangle(0, 0, (int)w, (int)h, Fade(BLACK, 0.7f));
-    DrawText("GENERATING C CODE...", (int)w/2 - 150, (int)h/2 - 20, 30, GOLD);
-    DrawText("Check lobby/assets/levels/", (int)w/2 - 150, (int)h/2 + 30, 20, LIGHTGRAY);
 }

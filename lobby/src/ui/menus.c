@@ -1,13 +1,16 @@
 /**
- * @file menus.c
- * @brief Implémentation du système de menus.
- */
+    @file ui/connectionScreen.c
+    @author i-Charlys (CAILLON Charles)
+    @author Fshimi-Hawlk
+    @date 2026-04-08
+    @date 2026-04-11
+    @brief Modern connection screen using the enhanced reusable widget system.
+*/
+
+#include "utils/userTypes.h"
 
 #include "ui/menus.h"
-#include "firstparty/systemSettings.h"
-#include "firstparty/leaderboard.h"
-#include "utils/userTypes.h"
-#include <stddef.h>
+#include "leaderboard.h"
 
 MenuType_Et g_currentMenu = MENU_MAIN;
 MenuType_Et g_previousMenu = MENU_MAIN;
@@ -63,15 +66,15 @@ void DrawMenu(void) {
 
 void UpdateMainMenu(void) {
     Vector2 m = GetMousePosition();
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
 
-    int bw = 200;
-    int bh = 50;
-    Rectangle btnPlay = { sw/2 - bw/2, sh/2 - 100, bw, bh };
-    Rectangle btnLB   = { sw/2 - bw/2, sh/2 - 30,  bw, bh };
-    Rectangle btnSet  = { sw/2 - bw/2, sh/2 + 40,  bw, bh };
-    Rectangle btnExit = { sw/2 - bw/2, sh/2 + 110, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    Rectangle btnPlay = { sw/2.0f - bw/2.0f, sh/2.0f - 100, bw, bh };
+    Rectangle btnLB   = { sw/2.0f - bw/2.0f, sh/2.0f - 30,  bw, bh };
+    Rectangle btnSet  = { sw/2.0f - bw/2.0f, sh/2.0f + 40,  bw, bh };
+    Rectangle btnExit = { sw/2.0f - bw/2.0f, sh/2.0f + 110, bw, bh };
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(m, btnPlay)) g_currentMenu = MENU_PLAY_CHOICE;
@@ -83,15 +86,15 @@ void UpdateMainMenu(void) {
 
 void UpdatePlayChoiceMenu(void) {
     Vector2 m = GetMousePosition();
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
 
-    int bw = 200;
-    int bh = 50;
-    Rectangle btnSolo  = { sw/2 - bw/2, sh/2 - 100, bw, bh };
-    Rectangle btnMulti = { sw/2 - bw/2, sh/2 - 30,  bw, bh };
-    Rectangle btnHost  = { sw/2 - bw/2, sh/2 + 40,  bw, bh };
-    Rectangle btnBack  = { sw/2 - bw/2, sh/2 + 110, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    Rectangle btnSolo  = { sw/2.0f - bw/2.0f, sh/2.0f - 100, bw, bh };
+    Rectangle btnMulti = { sw/2.0f - bw/2.0f, sh/2.0f - 30,  bw, bh };
+    Rectangle btnHost  = { sw/2.0f - bw/2.0f, sh/2.0f + 40,  bw, bh };
+    Rectangle btnBack  = { sw/2.0f - bw/2.0f, sh/2.0f + 110, bw, bh };
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(m, btnSolo)) {
@@ -112,51 +115,51 @@ void UpdatePlayChoiceMenu(void) {
 }
 
 void DrawPlayChoiceMenu(void) {
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
     DrawRectangleGradientV(0, 0, sw, sh, DARKBLUE, BLACK);
-    DrawText("CHOOSE MODE", sw/2 - MeasureText("CHOOSE MODE", 40)/2, sh/4, 40, GOLD);
+    DrawText("CHOOSE MODE", sw/2.0f - MeasureText("CHOOSE MODE", 40)/2.0f, sh/4, 40, GOLD);
 
     char* labels[] = {"SOLO MODE", "JOIN MULTI", "HOST SERVER", "BACK"};
-    int bw = 200;
-    int bh = 50;
-    for (int i=0; i<4; i++) {
-        Rectangle r = { sw/2 - bw/2, sh/2 - 100 + i*70, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    for (s32 i=0; i<4; i++) {
+        Rectangle r = { sw/2.0f - bw/2.0f, sh/2.0f - 100 + i*70, bw, bh };
         bool hover = CheckCollisionPointRec(GetMousePosition(), r);
         DrawRectangleRounded(r, 0.2f, 10, hover ? LIGHTGRAY : GRAY);
-        DrawText(labels[i], r.x + bw/2 - MeasureText(labels[i], 20)/2, r.y + 15, 20, hover ? BLACK : WHITE);
+        DrawText(labels[i], r.x + bw/2.0f - MeasureText(labels[i], 20)/2.0f, r.y + 15, 20, hover ? BLACK : WHITE);
     }
 }
 
 void DrawMainMenu(void) {
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
     DrawRectangleGradientV(0, 0, sw, sh, DARKBLUE, BLACK);
 
-    DrawText("MULTI MINI-GAMES", sw/2 - MeasureText("MULTI MINI-GAMES", 50)/2, sh/4, 50, GOLD);
+    DrawText("MULTI MINI-GAMES", sw/2.0f - MeasureText("MULTI MINI-GAMES", 50)/2.0f, sh/4, 50, GOLD);
 
     char* labels[] = {"PLAY", "LEADERBOARD", "SETTINGS", "EXIT"};
-    int bw = 200;
-    int bh = 50;
-    for (int i=0; i<4; i++) {
-        Rectangle r = { sw/2 - bw/2, sh/2 - 100 + i*70, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    for (s32 i=0; i<4; i++) {
+        Rectangle r = { sw/2.0f - bw/2.0f, sh/2.0f - 100 + i*70, bw, bh };
         bool hover = CheckCollisionPointRec(GetMousePosition(), r);
         DrawRectangleRounded(r, 0.2f, 10, hover ? LIGHTGRAY : GRAY);
-        DrawText(labels[i], r.x + bw/2 - MeasureText(labels[i], 20)/2, r.y + 15, 20, hover ? BLACK : WHITE);
+        DrawText(labels[i], r.x + bw/2.0f - MeasureText(labels[i], 20)/2.0f, r.y + 15, 20, hover ? BLACK : WHITE);
     }
 }
 
 void UpdatePauseMenu(void) {
     Vector2 m = GetMousePosition();
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
 
-    int bw = 200;
-    int bh = 50;
-    Rectangle btnResume = { sw/2 - bw/2, sh/2 - 100, bw, bh };
-    Rectangle btnSet    = { sw/2 - bw/2, sh/2 - 30,  bw, bh };
-    Rectangle btnAbandon= { sw/2 - bw/2, sh/2 + 40,  bw, bh };
-    Rectangle btnQuit   = { sw/2 - bw/2, sh/2 + 110, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    Rectangle btnResume = { sw/2.0f - bw/2.0f, sh/2.0f - 100, bw, bh };
+    Rectangle btnSet    = { sw/2.0f - bw/2.0f, sh/2.0f - 30,  bw, bh };
+    Rectangle btnAbandon= { sw/2.0f - bw/2.0f, sh/2.0f + 40,  bw, bh };
+    Rectangle btnQuit   = { sw/2.0f - bw/2.0f, sh/2.0f + 110, bw, bh };
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         if (CheckCollisionPointRec(m, btnResume)) g_currentMenu = MENU_NONE;
@@ -181,20 +184,20 @@ void UpdatePauseMenu(void) {
 }
 
 void DrawPauseMenu(void) {
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
     DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.6f));
-    DrawRectangleRounded((Rectangle){sw/2 - 150, sh/2 - 150, 300, 370}, 0.1f, 10, DARKGRAY);
-    DrawText("PAUSE", sw/2 - MeasureText("PAUSE", 30)/2, sh/2 - 130, 30, WHITE);
+    DrawRectangleRounded((Rectangle){sw/2.0f - 150, sh/2.0f - 150, 300, 370}, 0.1f, 10, DARKGRAY);
+    DrawText("PAUSE", sw/2.0f - MeasureText("PAUSE", 30)/2.0f, sh/2.0f - 130, 30, WHITE);
 
     char* labels[] = {"RESUME", "SETTINGS", "ABANDON", "QUIT GAME"};
-    int bw = 200;
-    int bh = 50;
-    for (int i=0; i<4; i++) {
-        Rectangle r = { sw/2 - bw/2, sh/2 - 100 + i*70, bw, bh };
+    s32 bw = 200;
+    s32 bh = 50;
+    for (s32 i=0; i<4; i++) {
+        Rectangle r = { sw/2.0f - bw/2.0f, sh/2.0f - 100 + i*70, bw, bh };
         bool hover = CheckCollisionPointRec(GetMousePosition(), r);
         DrawRectangleRounded(r, 0.2f, 10, hover ? LIGHTGRAY : GRAY);
-        DrawText(labels[i], r.x + bw/2 - MeasureText(labels[i], 20)/2, r.y + 15, 20, (i >= 2) ? MAROON : (hover ? BLACK : WHITE));
+        DrawText(labels[i], r.x + bw/2.0f - MeasureText(labels[i], 20)/2.0f, r.y + 15, 20, (i >= 2) ? MAROON : (hover ? BLACK : WHITE));
     }
 }
 
@@ -203,25 +206,25 @@ void UpdateSettingsMenu(void) {
     if (systemSettings.audio.musicVolume > 1.0f) systemSettings.audio.musicVolume = 0.0f;
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        int sw = GetScreenWidth();
-        int sh = GetScreenHeight();
-        Rectangle btnBack = { sw/2 - 100, sh - 120, 200, 50 };
+        s32 sw = GetScreenWidth();
+        s32 sh = GetScreenHeight();
+        Rectangle btnBack = { sw/2.0f - 100, sh - 120, 200, 50 };
         if (CheckCollisionPointRec(GetMousePosition(), btnBack)) g_currentMenu = g_previousMenu;
     }
 }
 
 void DrawSettingsMenu(void) {
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
     DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.8f));
-    DrawText("SETTINGS", sw/2 - 100, 100, 40, WHITE);
+    DrawText("SETTINGS", sw/2.0f - 100, 100, 40, WHITE);
     DrawText(TextFormat("Music Volume: %.1f  (M)", systemSettings.audio.musicVolume), 100, 200, 25, LIGHTGRAY);
     DrawText(TextFormat("Windowed Fullscreen: %s (Ctrl+F)", systemSettings.video.fullscreen ? "ON" : "OFF"), 100, 250, 25, LIGHTGRAY);
     
-    Rectangle btnBack = { sw/2 - 100, sh - 120, 200, 50 };
+    Rectangle btnBack = { sw/2.0f - 100, sh - 120, 200, 50 };
     bool hover = CheckCollisionPointRec(GetMousePosition(), btnBack);
     DrawRectangleRounded(btnBack, 0.2f, 10, hover ? LIGHTGRAY : GRAY);
-    DrawText("BACK", btnBack.x + 100 - MeasureText("BACK", 20)/2, btnBack.y + 15, 20, hover ? BLACK : WHITE);
+    DrawText("BACK", btnBack.x + 100 - MeasureText("BACK", 20)/2.0f, btnBack.y + 15, 20, hover ? BLACK : WHITE);
 
     DrawText("ESC pour retour", 100, sh - 50, 20, GRAY);
 }
@@ -230,30 +233,30 @@ void UpdateLeaderboardMenu(void) {
     if (IsKeyPressed(KEY_ESCAPE)) g_currentMenu = MENU_MAIN;
     
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-        int sw = GetScreenWidth();
-        int sh = GetScreenHeight();
-        Rectangle btnBack = { sw/2 - 100, sh - 120, 200, 50 };
+        s32 sw = GetScreenWidth();
+        s32 sh = GetScreenHeight();
+        Rectangle btnBack = { sw/2.0f - 100, sh - 120, 200, 50 };
         if (CheckCollisionPointRec(GetMousePosition(), btnBack)) g_currentMenu = MENU_MAIN;
     }
 }
 
 void DrawLeaderboardMenu(void) {
-    int sw = GetScreenWidth();
-    int sh = GetScreenHeight();
+    s32 sw = GetScreenWidth();
+    s32 sh = GetScreenHeight();
     DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.9f));
-    DrawText("TOP 10 - KING FOR FOUR", sw/2 - 200, 80, 40, GOLD);
+    DrawText("TOP 10 - KING FOR FOUR", sw/2.0f - 200, 80, 40, GOLD);
     
-    Leaderboard_St lb = LoadLeaderboard(1);
-    int startY = 160;
-    for (int i=0; i<10 && i<lb.count; i++) {
-        DrawText(TextFormat("%d. %s", i+1, lb.entries[i].name), 150, startY + i*35, 25, (i == 0) ? GOLD : WHITE);
-        DrawText(TextFormat("%d pts", lb.entries[i].score), sw - 350, startY + i*35, 25, (i == 0) ? GOLD : WHITE);
+    Leaderboard_St lb = leaderboard_load(1);
+    s32 startY = 160;
+    for (u32 i = 0; i < 10 && i < lb.count; i++) {
+        DrawText(TextFormat("%d. %s", i+1, lb.items[i].name), 150, startY + i*35, 25, (i == 0) ? GOLD : WHITE);
+        DrawText(TextFormat("%d pts", lb.items[i].score), sw - 350, startY + i*35, 25, (i == 0) ? GOLD : WHITE);
     }
 
-    Rectangle btnBack = { sw/2 - 100, sh - 120, 200, 50 };
+    Rectangle btnBack = { sw/2.0f - 100, sh - 120, 200, 50 };
     bool hover = CheckCollisionPointRec(GetMousePosition(), btnBack);
     DrawRectangleRounded(btnBack, 0.2f, 10, hover ? LIGHTGRAY : GRAY);
-    DrawText("BACK", btnBack.x + 100 - MeasureText("BACK", 20)/2, btnBack.y + 15, 20, hover ? BLACK : WHITE);
+    DrawText("BACK", btnBack.x + 100 - MeasureText("BACK", 20)/2.0f, btnBack.y + 15, 20, hover ? BLACK : WHITE);
 
-    DrawText("ESC pour retour", sw/2 - 100, sh - 50, 20, GRAY);
+    DrawText("ESC pour retour", sw/2.0f - 100, sh - 50, 20, GRAY);
 }

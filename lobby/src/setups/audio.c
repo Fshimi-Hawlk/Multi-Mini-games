@@ -6,8 +6,6 @@ static bool audioInitialized = false;
 void lobby_initAudio(void) {
     if (audioInitialized) return;
 
-    InitAudioDevice();
-
     sound_jump = LoadSound(SOUNDS_PATH "lobby_jump.wav");
     sound_doubleJump = LoadSound(SOUNDS_PATH "lobby_jump.wav");
     SetSoundPitch(sound_doubleJump, 1.35);
@@ -20,13 +18,11 @@ void lobby_initAudio(void) {
 
 void lobby_freeAudio(void) {
     if (!audioInitialized) return;
+    audioInitialized = false;
 
     if (IsSoundValid(sound_jump)) UnloadSound(sound_jump);
     if (IsSoundValid(sound_doubleJump)) UnloadSound(sound_doubleJump);
     if (IsSoundValid(sound_gameLaunch)) UnloadSound(sound_gameLaunch);
 
     if (IsSoundValid(sound_doubleJumpMeme)) UnloadSound(sound_doubleJumpMeme);
-
-
-    CloseAudioDevice();
 }

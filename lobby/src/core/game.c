@@ -95,7 +95,7 @@ f32 getWaterSubmersion(const Player_St* player, const Rectangle waterRect) {
     @param player  Player state (position and velocity are modified)
     @param rect    Rectangle to collide against
 */
-static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_St* t) {
+static void resolvePlayerCircleVsTerrain(Player_St* player, const PhysicsConstants_St* pc, const LobbyTerrain_St* t) {
     f32 centerX = player->position.x;
     f32 centerY = player->position.y;
     f32 r       = player->radius;
@@ -190,12 +190,12 @@ static void resolvePlayerCircleVsTerrain(Player_St* player, const LobbyTerrain_S
     }
 }
 
-static void resolvePlayerVsAllTerrains(Player_St* player) {
+static void resolvePlayerVsAllTerrains(Player_St* player, const PhysicsConstants_St* const pc) {
     player->isInWater = false;
     player->onIce     = false;
 
     for (u32 i = 0; i < terrains.count; i++) {
-        resolvePlayerCircleVsTerrain(player, &terrains.items[i]);
+        resolvePlayerCircleVsTerrain(player, pc, &terrains.items[i]);
     }
 }
 
@@ -204,26 +204,18 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
         player->portalTeleportCooldown -= dt;
     }
 
+    // ── Compute water submersion ─────────────────────────────
     f32 submersion = 0.0f;
     if (player->isInWater) {
         for (u32 i = 0; i < terrains.count; ++i) {
-            if (terrains.items[i].type == TERRAIN_WATER) {
+            if (terrains.items[i].kind == TERRAIN_KIND_WATER) {
                 f32 s = getWaterSubmersion(player, terrains.items[i].rect);
                 if (s > submersion) submersion = s;
             }
         }
     }
 
-    f32 moveSpeed = pc->moveSpeed;
-    if (IsKeyDown(KEY_A)) player->velocity.x = -moveSpeed;
-    else if (IsKeyDown(KEY_D)) player->velocity.x = moveSpeed;
-    else {
-        f32 f = player->onIce ? pc->iceFriction : pc->friction;
-        if (player->velocity.x > 0) player->velocity.x = max(0, player->velocity.x - f * dt);
-        else if (player->velocity.x < 0) player->velocity.x = min(0, player->velocity.x + f * dt);
-    }
-
-    // Horizontal Input
+    // ── Horizontal input + friction ───────────────
     if (IsKeyDown(KEY_A)) {
         player->velocity.x = -pc->moveSpeed;
 
@@ -232,9 +224,12 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
 
     } else {
         f32 friction = player->onIce ? pc->iceFriction : pc->friction;
-        friction = player->velocity.x > 0 ? friction : -friction; // change friction sign based on player velocity sign
-
-        player->velocity.x = max(0, player->velocity.x - friction * dt);
+        
+        if (player->velocity.x > 0.0f) {
+            player->velocity.x = max(0.0f, player->velocity.x - friction * dt);
+        } else if (player->velocity.x < 0.0f) {
+            player->velocity.x = min(0.0f, player->velocity.x + friction * dt);
+        }
     }
 
     if (IsKeyPressed(KEY_R)) {
@@ -242,17 +237,19 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
         player->velocity = (f32Vector2) {0};
     }
 
-    // Rotate depending on the player's direction
-    player->angle += (player->velocity.x > 0 ? 360 : -360) * dt;
-
-    
-    // Buffered jump input
-    player->jumpBuffer = max(0, player->jumpBuffer - dt);
-
-    if (IsKeyPressed(KEY_SPACE)) {
-        player->jumpBuffer = pc->jumpBufferTime;
+    // ── Visual rotation ───────────────────────────────────────
+    if (player->velocity.x != 0) {
+        player->angle += (player->velocity.x > 0 ? 360 : -360) * dt;
     }
 
+    // ── Jump buffering ────────────────────────────────────────────────────
+    if (IsKeyPressed(KEY_SPACE)) {
+        player->jumpBuffer = pc->jumpBufferTime;
+    } else if (player->jumpBuffer > 0.0f) {
+        player->jumpBuffer = max(0.0f, player->jumpBuffer - dt);
+    }
+
+    // ── Vertical forces (gravity / water) ─────────────────────────────────
     if (submersion > 0.0f) {
         player->velocity.x *= pc->waterHorizDrag;
         player->velocity.y *= pc->waterVertDrag;
@@ -267,20 +264,23 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
 
         // Fixes tunneling through floor from high jumps and slows down y-speed as requested
         if (!player->onGround && player->velocity.y > 0) {
-            if (player->velocity.y > MAX_FALL_SPEED) {
-                player->velocity.y = MAX_FALL_SPEED;
+            if (player->velocity.y > pc->maxFallSpeed) {
+                player->velocity.y = pc->maxFallSpeed;
             }
             // Gentle linear drag for natural falling feel (very light)
             player->velocity.y *= (1.0f - AIR_DRAG * dt);
         }
     }
 
-    // Collision
+    // ── Integrate position ──────────────
     player->position.x += player->velocity.x * dt;
     player->position.y += player->velocity.y * dt;
     player->onGround = false;
 
-    resolvePlayerVsAllTerrains(player);
+    // ── Collision Resolutions ───────────────
+    resolvePlayerVsAllTerrains(player, pc);
+
+    // ── World boundaries ──────────────────────────────────────────────────
 
     // Left border
     if (player->position.x - player->radius < -X_LIMIT) {
@@ -294,7 +294,7 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
         player->velocity.x = 0;
     }
 
-    // Coyote time
+    // ── Coyote time ───────────────────────────────────────────────────────
     if (player->onGround) {
         player->coyoteTimer = pc->coyoteTime;
         player->nbJumps = 0;
@@ -302,13 +302,13 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
         player->coyoteTimer = max(0, player->coyoteTimer - dt);
     }
 
-    // Jump
+    // ── Jump ────────
     if (player->jumpBuffer > 0.0f) {
         bool canJump = (player->onGround || player->coyoteTimer > 0.0f || player->nbJumps < pc->maxJumps);
         bool inWaterJump = (player->isInWater && pc->waterInfiniteJump);
 
         if (canJump || inWaterJump) {
-            player->velocity.y = pc->jumpForce;
+            player->velocity.y = -pc->jumpForce;
             player->onGround = false;
             player->coyoteTimer = 0;
             player->jumpBuffer = 0;
@@ -317,22 +317,22 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
     }
 }
 
-void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
+void lobby_choosePlayerTexture(PlayerVisuals_St* const visuals, Player_St* const player) {
     if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
         Vector2 mousePos = GetMousePosition();
-        Rectangle destRect = game->playerVisuals.defaultTextureRect;
+        Rectangle destRect = visuals->defaultTextureRect;
 
         for (int i = 0; i < __playerTextureCount; i++) {
             destRect.x = 20 + i * 60;
             if (!player->unlockedTextures[i]) continue;
             if (CheckCollisionPointRec(mousePos, destRect)) {
                 player->textureId = i;
-                game->playerVisuals.isTextureMenuOpen = false;
+                visuals->isTextureMenuOpen = false;
                 break;
             }
         }
 
-        if (!game->playerVisuals.isTextureMenuOpen) return;
+        if (!visuals->isTextureMenuOpen) return;
     }
 
     static const int skinKeys[] = {
@@ -341,21 +341,21 @@ void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game) {
     };
 
     for (u32 i = 0; i < __playerTextureCount && i < 9; ++i) {
-        if (IsKeyPressed(skinKeys[i]) && game->player.unlockedTextures[i]) {
-            game->player.textureId = (PlayerTextureId_Et)i;
-            game->playerVisuals.isTextureMenuOpen = false;
+        if (IsKeyPressed(skinKeys[i]) && player->unlockedTextures[i]) {
+            player->textureId = (PlayerTextureId_Et)i;
+            visuals->isTextureMenuOpen = false;
             break;
         }
     }
 }
 
-void lobby_toggleSkinMenu(LobbyGame_St* const game) {
+void lobby_toggleSkinMenu(PlayerVisuals_St* const visuals) {
     bool cond = (
         IsMouseButtonPressed(MOUSE_BUTTON_LEFT) &&
         CheckCollisionPointRec(GetMousePosition(), skinButtonRect)
     ) || IsKeyPressed(KEY_P);
 
     if (cond) {
-        game->playerVisuals.isTextureMenuOpen = !game->playerVisuals.isTextureMenuOpen;
+        visuals->isTextureMenuOpen = !visuals->isTextureMenuOpen;
     }
 }

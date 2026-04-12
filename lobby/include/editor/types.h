@@ -11,7 +11,7 @@
 #ifndef EDITOR_TYPES_H
 #define EDITOR_TYPES_H
 
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 #include "utils/userTypes.h"
 

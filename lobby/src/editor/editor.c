@@ -8,9 +8,10 @@
 #include "editor/editor.h"
 #include "editor/types.h"
 #include "editor/properties.h"
-#include "widgets/scrollFrame.h"
-#include "systemSettings.h"
+
 #include "utils/globals.h"
+
+#include "sharedWidgets/scrollFrame.h"
 
 // Editor state 
 EditorDragMode_Et editorDragMode = DRAG_NONE;
@@ -58,25 +59,24 @@ extern LobbyGame_St lobby_game;
 extern void updateEditor(LobbyGame_St* game, float dt);
 extern void drawEditor(const LobbyGame_St* const game);
 
-static void editor_interface_init(void) {
+static void editor_init(void) {
     initEditor(&lobby_game);
 }
 
-static void editor_interface_update(float dt) {
+static void editor_update(float dt) {
     updateEditor(&lobby_game, dt);
 }
 
-static void editor_interface_draw(void) {
+static void editor_draw(void) {
     drawEditor(&lobby_game);
 }
 
 GameClientInterface_St editorClientInterface = {
-    .id      = MINI_GAME_EDITOR,
+    .id      = MINI_GAME_ID_EDITOR,
     .name    = "Level Editor",
-    .init    = editor_interface_init,
-    .update  = editor_interface_update,
-    .draw    = editor_interface_draw,
-    .on_data = NULL
+    .init    = editor_init,
+    .update  = editor_update,
+    .draw    = editor_draw,
 };
 
 void initEditor(LobbyGame_St* const game) {
@@ -98,9 +98,26 @@ void initEditor(LobbyGame_St* const game) {
     game->showPropertiesPanel = false;
 
     // Initialize scroll frames
-    scrollFrameInit(&paletteScroll, (Rectangle){0, 80, 250, GetScreenHeight() - 80}, (Rectangle){0, 0, 250, 1000});
-    scrollFrameInit(&helpScroll, (Rectangle){260, 80, 400, 500}, (Rectangle){0, 0, 400, 2000});
-    scrollFrameInit(&propertiesScroll, (Rectangle){GetScreenWidth() - 300, 80, 300, GetScreenHeight() - 80}, (Rectangle){0, 0, 300, 2000});
+    scrollFrameInit(
+        &paletteScroll, 
+        (Rectangle) {0, 80, 250, systemSettings.video.height - 80},
+        (f32Vector2) {250, 1000}, 
+        60.0f, 0.1f
+    );
+
+    scrollFrameInit(
+        &helpScroll, 
+        (Rectangle) {260, 80, 400, 500},
+        (f32Vector2) {400, 2000}, 
+        60.0f, 0.1f
+    );
+
+    scrollFrameInit(
+        &propertiesScroll, 
+        (Rectangle) {systemSettings.video.width - 300, 80, 300, systemSettings.video.height - 80},
+        (f32Vector2) {300, 2000}, 
+        60.0f, 0.1f
+    );
 
     propertiesInit();
 
@@ -108,8 +125,8 @@ void initEditor(LobbyGame_St* const game) {
     editorCameraBackup = game->cam;
 
     // Start with an empty centered canvas
-    game->cam.target = (Vector2){0.0f, 0.0f};
-    game->cam.offset = (Vector2){(float)GetScreenWidth() / 2.0f, (float)GetScreenHeight() / 2.0f};
+    game->cam.target = (f32Vector2) {0.0f, 0.0f};
+    game->cam.offset = (f32Vector2) {systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f};
     game->cam.zoom = 0.5f;
 
     // Default palette selection

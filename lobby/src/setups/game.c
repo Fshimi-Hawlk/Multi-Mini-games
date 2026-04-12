@@ -7,8 +7,6 @@
     @brief Implementation of central game state management and level loading.
 */
 
-#include "setups/game.h"
-
 #include "editor/io.h"
 
 #include "utils/globals.h"
@@ -16,8 +14,8 @@
 #include "sharedUtils/mathUtils.h"
 #include "sharedUtils/container.h"
 
-void lobby_initGrass(void) {
-    Rectangle floor = platforms[0].rect;
+static void initGrass(void) {
+    Rectangle floor = terrains.items[0].rect;
     grassCount = 0;
 
     float stepX = 3.0f;
@@ -72,7 +70,7 @@ static LobbyTerrain_St __fallbackTerrainContent[] = {
     { .rect = {250, 150, 100, 30},      .color = {127, 106, 79, 255}, .roundness = 0.5f, .type = TERRAIN_WOOD,   .velocity = {0,0} },
 };
 
-Error_Et gameInit(void) {
+Error_Et lobby_gameInit(void) {
     skinButtonRect.x = GetScreenWidth() - 70;
     skinButtonRect.y = GetScreenHeight() / 2.0f - 25;
     skinButtonRect.width = 50;
@@ -92,6 +90,8 @@ Error_Et gameInit(void) {
     }
 
     log_info("Game initialized with %zu dynamic terrains", terrains.count);
+
+    initGrass();
 
     return OK;
 }

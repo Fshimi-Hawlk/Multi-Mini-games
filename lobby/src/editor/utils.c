@@ -23,11 +23,10 @@
 #include "editor/properties.h"
 #include "editor/utils.h"
 
-#include "raylib.h"
-#include "utils/common.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
-#include "utils/utils.h"
+
+#include "sharedUtils/mathUtils.h"
+#include "sharedUtils/geometry.h"
 
 bool pointInTerrain(const LobbyTerrain_St* const terrain, Vector2 point) {
     return CheckCollisionPointRec(point, terrain->rect);

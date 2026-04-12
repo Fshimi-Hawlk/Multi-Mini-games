@@ -9,13 +9,13 @@
 #define EDITOR_PROPERTIES_H
 
 #include "utils/userTypes.h"
-#include "widgets/types.h"
+#include "sharedWidgets/types.h"
 
 extern TextBox_St   tbPosX, tbPosY, tbWidth, tbHeight, tbRoundness;
 extern TextBox_St   tbVelX, tbVelY, tbMoveDist;
 extern TextBox_St   tbTargetX, tbTargetY;
 extern Slider_St    sliderRoundness;
-extern Dropdown_St  dropdownType;
+extern DropDown_St  dropdownType;
 extern TextButton_St btnExitFocus;
 extern TextButton_St btnPickTarget;
 extern CheckBox_St   cbTwoWay;

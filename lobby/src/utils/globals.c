@@ -34,7 +34,7 @@
 // General Globals
 // ────────────────────────────────────────────────
 
-LobbyGame_St game = {0};
+LobbyGame_St lobby_game = {0};
 
 Font lobby_fonts[__fontSizeCount] = {0};
 
@@ -88,7 +88,37 @@ u32 platformCount = sizeof(platforms) / sizeof(platforms[0]);
 Texture2D platformTextures[__platformTypeCount] = {0};
 
 GameInteractionZone_St gameZones[__miniGameIdCount] = {
-    [MINI_GAME_ID_TETRIS] = {
+    [MINI_GAME_ID_BINGO] = {
+        .hitbox = { 
+            .x      = -1475,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Bingo"
+    },
+
+    [MINI_GAME_ID_CHESS] = {
+        .hitbox = { 
+            .x      = -1250,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Chess"
+    },
+
+    [MINI_GAME_ID_DROP_FOUR]  = {
+        .hitbox = {
+            .x      = -1025,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Drop Four" 
+    },
+
+    [MINI_GAME_ID_TETROMINO_FALL] = {
         .hitbox = {
             .x      = -800,
             .y      = 425,
@@ -99,7 +129,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
         .color = {0, 120, 220, 200},
     },
 
-    [MINI_GAME_ID_SOLITAIRE] = {
+    [MINI_GAME_ID_SOLO_CARDS] = {
         .hitbox = {
             .x      = -575,
             .y      = 425,
@@ -132,7 +162,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
         .color = {140, 0, 200, 200},
     },
 
-    [MINI_GAME_ID_GOLF] = {
+    [MINI_GAME_ID_MINI_GOLF] = {
         .hitbox = {
             .x      = 100,
             .y      = 425,
@@ -165,75 +195,44 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
         .color = { 60,  60, 200, 200},
     },
 
-    [MINI_GAME_ID_KFF] = {
+    [MINI_GAME_ID_DISC_REVERSAL]    = {
+        .hitbox = {
+            .x      = 775,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
+        },
+        .name = "Disc Reversal" 
+    },
+
+    [MINI_GAME_ID_KING_FOR_FOUR] = {
         .hitbox = { 
-            .x      = -350.0f, 
-            .y      =  340.0f, 
-            .width  =  100.0f, 
-            .height =  60.0f 
+            .x      = 1000,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
         },
         .name = "King For Four"
     },
 
-    [MINI_GAME_ID_CHESS] = {
+    [MINI_GAME_ID_TWIST_CUBE] = {
         .hitbox = { 
-            .x      =  250.0f, 
-            .y      =  340.0f, 
-            .width  =  100.0f, 
-            .height =  60.0f 
-        },
-        .name = "Chess"
-    },
-
-    [MINI_GAME_ID_CUBE] = {
-        .hitbox = { 
-            .x      = -200.0f, 
-            .y      =  240.0f, 
-            .width  =  100.0f, 
-            .height =  60.0f 
+            .x      = 1225,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
         },
         .name = "Twist Cube"
     },
 
-    [MINI_GAME_ID_BINGO] = {
-        .hitbox = { 
-            .x      =  100.0f, 
-            .y      =  240.0f, 
-            .width  =  100.0f, 
-            .height =  60.0f 
-        },
-        .name = "Bingo"
-    },
-
     [MINI_GAME_ID_EDITOR] = {
         .hitbox = { 
-            .x      =  -50.0f, 
-            .y      =  140.0f, 
-            .width  =  100.0f, 
-            .height =  60.0f 
+            .x      = 1450,
+            .y      = 425,
+            .width  = 75,
+            .height = 75
         },
         .name = "Level Editor"
-    },
-
-    // Hide others for now
-    [MINI_GAME_ID_BATTLESHIP] = {
-        .hitbox = {0},
-        .name = "Battleship" 
-    },
-
-    [MINI_GAME_ID_CONNECT_4]  = {
-        .hitbox = {0},
-        .name = "Connect 4" 
-    },
-
-    [MINI_GAME_ID_MORPION]    = {
-        .hitbox = {0},
-        .name = "Morpion" 
-    },
-
-    [MINI_GAME_ID_OTHELLO]    = {
-        .hitbox = {0},
-        .name = "Othello" 
     },
 };
 

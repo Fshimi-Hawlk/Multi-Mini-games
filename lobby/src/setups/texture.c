@@ -5,8 +5,21 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     Error_Et error = OK;
 
     const char *playerTexturePaths[__playerTextureCount] = {
-        [PLAYER_TEXTURE_EARTH] = SKINS_PATH "earth.png",
-        [PLAYER_TEXTURE_TROLL_FACE] = SKINS_PATH "trollFace.png",
+        [PLAYER_TEXTURE_BINGO] =            SKINS_PATH "bingo.png",
+        [PLAYER_TEXTURE_BOWLING] =          SKINS_PATH "bowling.png",
+        [PLAYER_TEXTURE_CHESS] =            SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_DROP_FOUR] =        SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_TWIST_CUBE] =       SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_EDITOR] =           SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_KING_FOR_FOUR] =    SKINS_PATH "king.png",
+        [PLAYER_TEXTURE_LOBBY] =            SKINS_PATH "earth.png",
+        [PLAYER_TEXTURE_MINI_GOLF] =        SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_DISC_REVERSAL] =    SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_POLY_BLAST] =       SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_SNAKE] =            SKINS_PATH "snake.png",
+        [PLAYER_TEXTURE_SOLO_CARDS] =       SKINS_PATH "todo.png",
+        [PLAYER_TEXTURE_SUIKA] =            SKINS_PATH "suika.png",
+        [PLAYER_TEXTURE_TETROMINO_FALL] =   SKINS_PATH "todo.png",
     };
 
     for (u8 i = 0; i < __playerTextureCount; ++i) {
@@ -18,9 +31,9 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     }
 
     // Load shared UI textures
-    logoSkinButton = LoadTexture(IMAGES_PATH "logoSkin.png");
+    logoSkinButton = LoadTexture(TEXTURES_PATH "logoSkin.png");
     if (!IsTextureValid(logoSkinButton)) {
-        log_warn("%s couldn't be loaded proprely.", IMAGES_PATH "logoSkin.png");
+        log_warn("%s couldn't be loaded proprely.", TEXTURES_PATH "logoSkin.png");
         error =  ERROR_TEXTURE_LOAD;
     }
 
@@ -39,12 +52,12 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     SetTextureWrap(platformTextures[PLATFORM_TYPE_GRASS], TEXTURE_WRAP_REPEAT);
     SetTextureWrap(platformTextures[PLATFORM_TYPE_WOODPLANK], TEXTURE_WRAP_REPEAT);
     
-    treeTexture = LoadTexture(IMAGES_PATH "tree.png");
+    treeTexture = LoadTexture(TEXTURES_PATH "tree.png");
     GenTextureMipmaps(&treeTexture);
     SetTextureFilter(treeTexture, TEXTURE_FILTER_BILINEAR);
     SetTextureFilter(treeTexture, TEXTURE_FILTER_TRILINEAR);
 
-    backgroundTexture = LoadTexture(IMAGES_PATH "starry-background.png");
+    backgroundTexture = LoadTexture(TEXTURES_PATH "starry-background.png");
     GenTextureMipmaps(&backgroundTexture);
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_BILINEAR);
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_TRILINEAR);

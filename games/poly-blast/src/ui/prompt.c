@@ -190,11 +190,11 @@ static void promptInitLoadList(void) {
 
     scrollFrameInit(
         &saveListScroll, (Rectangle) {100, 200, 800, 300},
-        saveList.count * increment,
+        (Vector2) {0, saveList.count * increment},
         60.0f, 0.025f
     );
 
-    f32 y = saveListScroll.scrollY + saveListScroll.visibleArea.y + 10;
+    f32 y = saveListScroll.scroll.y + saveListScroll.visibleArea.y + 10;
 
     for (u32 i = 0; i < saveList.count; ++i) {
         SaveEntry_St* entry = &saveList.items[i];

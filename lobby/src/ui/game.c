@@ -28,8 +28,7 @@
 */
 
 #include "core/game.h"
-#include "APIs/generalAPI.h"
-#include "baseTypes.h"
+
 #include "ui/game.h"
 
 #include "utils/globals.h"

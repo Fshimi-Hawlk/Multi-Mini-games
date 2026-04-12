@@ -50,10 +50,10 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
         f32 cellW = innerCard.width / 5.0f;
 
         for (u8 i = 0; i < 5; ++i) {
-            Vector2 textSize = MeasureTextEx(bingo_fonts[FONT14], LETTERS[i], 14, 0);
+            Vector2 textSize = MeasureTextEx(bingo_fonts[FONT16], LETTERS[i], 14, 0);
             f32 lx = innerCard.x + cellW * (i + 0.5f) - textSize.x / 2.0f;
             f32 ly = innerCard.y + cellW / 7.5;
-            DrawTextEx(bingo_fonts[FONT14], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
+            DrawTextEx(bingo_fonts[FONT16], LETTERS[i], (Vector2) {lx, ly}, 14, 0, BLACK);
         }
 
         for (u8 row = 0; row < 5; ++row) {

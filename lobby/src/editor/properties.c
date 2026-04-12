@@ -6,15 +6,12 @@
 */
 
 #include "editor/properties.h"
-#include "editor/types.h"
+
 #include "utils/globals.h"
-#include "widgets/button.h"
-#include "widgets/textBox.h"
-#include "widgets/dropdown.h"
-#include "widgets/slider.h"
-#include "widgets/checkBox.h"
-#include <stdio.h>
-#include <string.h>
+
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/textBox.h"
+#include "sharedWidgets/dropdown.h"
 
 TextBox_St   tbPosX, tbPosY, tbWidth, tbHeight, tbRoundness;
 TextBox_St   tbVelX, tbVelY, tbMoveDist;

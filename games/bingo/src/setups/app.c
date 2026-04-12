@@ -8,7 +8,6 @@
 
 #include "setups/app.h"
 #include "utils/globals.h"
-#include "utils/common.h"
 
 static bool loadFontIdForSize(u64 fontId, f32 fontSize) {
     bingo_fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
@@ -36,16 +35,12 @@ void bingo_freeFonts(void) {
 }
 
 bool bingo_initApp(void) {
-    u64 seeds[2] = { 0 };
-    plat_get_entropy(seeds, sizeof(seeds));
-    prng_seed(seeds[0], seeds[1]);
-
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     SetTargetFPS(60);
 
 #ifdef LOGGER_H
-    init_logger();
+    initLogger();
 #endif
 
     if (!bingo_initFonts()) {

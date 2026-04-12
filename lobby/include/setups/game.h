@@ -9,6 +9,8 @@
 #ifndef SETUPS_GAME_H
 #define SETUPS_GAME_H
 
-void lobby_initGrass(void);
+#include "APIs/generalAPI.h"
+
+Error_Et lobby_gameInit(void);
 
 #endif // SETUPS_GAME_H

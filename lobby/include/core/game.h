@@ -91,10 +91,10 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
     or key presses (1,2,3...) and applies the selected texture if unlocked.
     Closes the menu on successful selection.
 
+    @param visual  Player's textures manager
     @param player  Player whose textureId will be updated
-    @param game    Lobby game state (to close the menu via playerVisuals)
  */
-void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
+void lobby_choosePlayerTexture(PlayerVisuals_St* const visuals, Player_St* const player);
 
 /**
     @brief Toggles the skin selection menu visibility.
@@ -103,8 +103,8 @@ void lobby_choosePlayerTexture(Player_St* player, LobbyGame_St* const game);
         - left mouse button is pressed on skinButtonRect, or
         - P key is pressed
 
-    @param game  Lobby game state (modifies playerVisuals.isTextureMenuOpen)
+    @param visual  Player's textures manager
  */
-void lobby_toggleSkinMenu(LobbyGame_St* const game);
+void lobby_toggleSkinMenu(PlayerVisuals_St* const visuals);
 
 #endif // CORE_GAME_H

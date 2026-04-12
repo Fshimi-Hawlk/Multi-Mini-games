@@ -72,15 +72,21 @@ typedef enum {
 
 typedef enum {
     PLAYER_TEXTURE_DEFAULT,
-    PLAYER_TEXTURE_EARTH,
-    PLAYER_TEXTURE_TROLL_FACE,
-    PLAYER_TEXTURE_BATTLESHIP_TODO,
     PLAYER_TEXTURE_BINGO,
-    PLAYER_TEXTURE_CONNECT_4_TODO,
-    PLAYER_TEXTURE_KFF,
-    PLAYER_TEXTURE_MINIGOLF_TODO,
-    PLAYER_TEXTURE_MORPION_TODO,
-    PLAYER_TEXTURE_OTHELLO_TODO,
+    PLAYER_TEXTURE_BOWLING,
+    PLAYER_TEXTURE_CHESS,
+    PLAYER_TEXTURE_DROP_FOUR,
+    PLAYER_TEXTURE_TWIST_CUBE,
+    PLAYER_TEXTURE_EDITOR,      ///< Level editor integrated as a mini-game
+    PLAYER_TEXTURE_KING_FOR_FOUR,
+    PLAYER_TEXTURE_LOBBY,       ///< Main lobby / hub world with platformer movement
+    PLAYER_TEXTURE_MINI_GOLF,
+    PLAYER_TEXTURE_DISC_REVERSAL,
+    PLAYER_TEXTURE_POLY_BLAST,
+    PLAYER_TEXTURE_SNAKE,
+    PLAYER_TEXTURE_SOLO_CARDS,
+    PLAYER_TEXTURE_SUIKA,
+    PLAYER_TEXTURE_TETROMINO_FALL,
     __playerTextureCount,
 } PlayerTextureId_Et;
 
@@ -88,12 +94,17 @@ typedef enum {
     @brief Runtime-editable physics & water parameters for the lobby.
 */
 typedef struct {
-    f32 gravity;
     f32 moveSpeed;
+
+    f32 gravity;
+    f32 maxFallSpeed;
+    f32 airDrag;
+
     f32 jumpForce;
     f32 coyoteTime;
     f32 jumpBufferTime;
     s32 maxJumps;
+
     f32 friction;
     f32 iceFriction;
 
@@ -151,7 +162,6 @@ typedef struct {
     bool    onGround;
     s32     nbJumps;
 
-    f32     coyoteTime;
     f32     coyoteTimer;
     f32     jumpBuffer;
 
