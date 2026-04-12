@@ -42,8 +42,7 @@ static Error_Et solitaire_freeGameWrapper(void* game) {
 
 /* ── Lifecycle ──────────────────────────────────────────────── */
 
-Error_Et solitaire_initGame__full(SolitaireGame_St** game_ptr,
-                                  const GameConfig_St* config) {
+Error_Et solitaire_initGame__full(SolitaireGame_St** game_ptr, const SoloCardsConfig_St config) {
     (void)config;
     if (!game_ptr) return ERROR_NULL_POINTER;
 

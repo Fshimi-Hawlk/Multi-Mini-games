@@ -21,16 +21,8 @@
 #include "ui/game.h"
 
 #include "utils/globals.h"
-#include "utils/utils.h"
 
-#include "networkInterface.h"
-#include "rudp_core.h"
-#include "logger.h"
-
-#include "APIs/generalAPI.h"
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <string.h>
+#include "sharedUtils/random.h"
 
 // 
 // Action codes (must stay in sync with server)
@@ -87,7 +79,7 @@ static bool         cardsGenerated = false;
 */
 static void sendToServer(u8 action, const void* data, u16 len) {
     GameTLVHeader_St tlv = {
-        .game_id = MINI_GAME_BINGO,
+        .game_id = MINI_GAME_ID_BINGO,
         .action  = action,
         .length  = htons(len)
     };
@@ -241,7 +233,7 @@ static void bingo_initBallsSolo(void) {
     for (uint n = 0; n < 100; ++n)
         for (uint col = 1; col <= 5; ++col)
             localGame.balls.encodedBalls[b++] = 100 * col + n;
-    shuffleArray(uint, localGame.balls.encodedBalls, 500, prng_rand);
+    shuffleArrayT(uint, localGame.balls.encodedBalls, 500, rand);
     localGame.balls.remainingCount = 500;
     localGame.balls.choiceDelay    = 3.5f;
     localGame.balls.showDelay      = 1.5f;
@@ -418,7 +410,7 @@ void bingo_draw(void) {
 }
 
 GameClientInterface_St bingoClientInterface = {
-    .id      = MINI_GAME_BINGO,
+    .id      = MINI_GAME_ID_BINGO,
     .name    = "Bingo",
     .init    = bingo_init,
     .on_data = bingo_onData,

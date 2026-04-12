@@ -6,19 +6,16 @@
 */
 
 #include "core/game.h"
+
 #include "setups/game.h"
+
 #include "utils/globals.h"
-#include "utils/utils.h"
-#include <arpa/inet.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-#include "networkInterface.h"
+#include "sharedUtils/random.h"
 
-// 
+// ────────────────────────────────────────────────
 // Action codes
-// 
+// ────────────────────────────────────────────────
 
 enum {
     ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
@@ -77,9 +74,10 @@ typedef struct {
     u32                 seed;                       ///< Common seed for card generation
 } BingoServerState_St;
 
-// 
+// ────────────────────────────────────────────────
 // Helper to find slot from player_id
-// 
+// ────────────────────────────────────────────────
+
 static s32 bingo_getSlot(BingoServerState_St* srv, s32 player_id) {
     for (u32 i = 0; i < srv->numPlayers; i++) {
         if (srv->playerNetworkIds[i] == player_id) return (s32)i;
@@ -87,9 +85,9 @@ static s32 bingo_getSlot(BingoServerState_St* srv, s32 player_id) {
     return -1;
 }
 
-// 
+// ────────────────────────────────────────────────
 // Instance Management
-// 
+// ────────────────────────────────────────────────
 
 void* bingo_createInstance(void) {
     BingoServerState_St* srv = calloc(1, sizeof(BingoServerState_St));
@@ -121,7 +119,8 @@ void* bingo_createInstance(void) {
             game->balls.encodedBalls[b++] = 100 * col + n;
         }
     }
-    shuffleArray(uint, game->balls.encodedBalls, 500, prng_rand);
+
+    shuffleArrayT(uint, game->balls.encodedBalls, 500, rand);
 
     game->balls.choiceDelay = 3.5f;
     game->balls.showDelay   = 1.5f;
@@ -151,7 +150,7 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
     }
 
     GameTLVHeader_St tlv = {
-        .game_id = MINI_GAME_BINGO,
+        .game_id = MINI_GAME_ID_BINGO,
         .action  = ACTION_CODE_BINGO_SYNC_STATE,
         .length  = htons(sizeof(BingoSyncPayload_St))
     };
@@ -168,7 +167,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
     if (action != ACTION_CODE_GAME_DATA || len < sizeof(GameTLVHeader_St)) return;
 
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_BINGO) return;
+    if (tlv->game_id != MINI_GAME_ID_BINGO) return;
 
     u8 realAction = tlv->action;
     void* realPayload = (u8*)payload + sizeof(GameTLVHeader_St);
@@ -196,7 +195,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
 
             u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_BINGO, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_BINGO, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
             u16 net_id = htons((u16)slot);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
             memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));

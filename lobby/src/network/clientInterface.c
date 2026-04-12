@@ -9,52 +9,86 @@
 
 #include "core/game.h"
 #include "core/chat.h"
-#include "ui/game.h"
+
+#include "setups/app.h"
+#include "setups/audio.h"
+#include "setups/game.h"
+#include "setups/texture.h"
+
 #include "ui/app.h"
+#include "ui/game.h"
+#include "ui/grass.h"
+#include "ui/background.h"
+#include "ui/ambiance.h"
+
 #include "editor/editor.h"
+
 #include "utils/globals.h"
-#include "utils/utils.h"
-#include "systemSettings.h"
-#include <string.h>
-#include <stdio.h>
-#include <arpa/inet.h>
+
+#include "sharedUtils/mathUtils.h"
 
 static f32Vector2 lastSentPos = {0};
 static bool firstFrame = true;
 static bool isFirstInit = true;
 
+static void updateCameraOnWindowResize(LobbyGame_St* const game) {
+    const f32 originalWidth  = 800;
+    const f32 originalHeight = 600;
+
+    // Always keep camera perfectly centered on the new window size
+    game->cam.offset = (Vector2){
+        systemSettings.video.width  / 2.0f,
+        systemSettings.video.height / 2.0f
+    };
+
+    // ── Zoom adaptation when width OR height changes ─────────────────────
+    f32 zoomX = (f32)systemSettings.video.width  / originalWidth;
+    f32 zoomY = (f32)systemSettings.video.height / originalHeight;
+
+    game->cam.zoom = min(zoomX, zoomY);
+}
+
 void lobby_init(void) {
+    Error_Et error = OK;
+
     log_debug("[LOBBY]: Initializing client lobby");
     firstFrame = true;
 
-    s32 savedId = isFirstInit ? -1 : lobby_game.id;    isFirstInit = false;
+    s32 savedId = isFirstInit ? -1 : lobby_game.clientId;
+    isFirstInit = false;
 
     // Preserve the player name across lobby re-inits
     char savedName[32] = {0};
     strncpy(savedName, lobby_game.player.name, 31);
 
     memset(&lobby_game, 0, sizeof(lobby_game));
+    lobby_game.clientId = savedId;
 
     // Video settings persist across lobby re-init.
-    applySystemSettings();
+    systemSettings = DEFAULT_SYSTEM_SETTING;
+    systemSettings.video.title = "Lobby";
+    error = applySystemSettings();
+    if (error != OK) {
+        log_error("System settings couldn't be applied correctly");
+    }
 
     lobby_game.player = (Player_St) {
-        .position           = {0, 0},
         .radius             = 20,
-        .coyoteTime         = 0.1f,
-        .coyoteTimer        = 0.1f,
+        .position           = {PLAYER_SPAWN_X, PLAYER_SPAWN_Y},
+        .onGround           = true,
         .active             = true,
         .unlockedTextures   = {
-            [PLAYER_TEXTURE_DEFAULT] = true,
-            [PLAYER_TEXTURE_EARTH] = true,
-            [PLAYER_TEXTURE_TROLL_FACE] = true,
-            [PLAYER_TEXTURE_KFF] = true,
-            [PLAYER_TEXTURE_BINGO] = true,
+            [PLAYER_TEXTURE_DEFAULT]        = true,
+            [PLAYER_TEXTURE_BINGO]          = true,
+            [PLAYER_TEXTURE_BOWLING]        = true,
+            [PLAYER_TEXTURE_CHESS]          = true,
+            [PLAYER_TEXTURE_KING_FOR_FOUR]  = true,
+            [PLAYER_TEXTURE_LOBBY]          = true,
+            [PLAYER_TEXTURE_SNAKE]          = true,
+            [PLAYER_TEXTURE_SUIKA]          = true,
         },
-        .isInWater        = false,
-        .waterFastDescent = false,
-        .onIce            = false
     };
+
     // Restore the preserved name, or use the pseudo from the connection screen
     if (savedName[0] != '\0') {
         strncpy(lobby_game.player.name, savedName, 31);
@@ -65,7 +99,11 @@ void lobby_init(void) {
     }
 
     lobby_game.cam = (Camera2D) {
-        .offset = {GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f},
+        .offset = { systemSettings.video.width / 2.0f, systemSettings.video.height / 2.0f },
+        .target = {
+            .x = lobby_game.player.position.x, 
+            .y = lobby_game.player.position.y - lobby_game.player.radius * 1.5f
+        },
         .zoom   = 1.0f,
     };
     
@@ -73,32 +111,25 @@ void lobby_init(void) {
         .x = 20, .y = 60, .width = 50, .height = 50
     };
 
-    const char* playerTextureImagePaths[__playerTextureCount] = {
-        [PLAYER_TEXTURE_EARTH]      = "lobby/assets/images/earth.png",
-        [PLAYER_TEXTURE_TROLL_FACE] = "lobby/assets/images/trollFace.png",
-        [PLAYER_TEXTURE_BINGO]      = "lobby/assets/images/bingo69.png",
-        [PLAYER_TEXTURE_KFF]        = "lobby/assets/images/king67.png",
-    };
+    lobby_gameInit();
+    lobby_initBackgroundScale();
+    updateCameraOnWindowResize(&lobby_game);
 
+    error = lobby_initTextures(lobby_game.playerVisuals.textures);
 
-    for (u8 i = 0; i < __playerTextureCount; ++i) {
-        if (playerTextureImagePaths[i]) {
-            lobby_game.playerVisuals.textures[i] = LoadTexture(playerTextureImagePaths[i]);
-        }
-    }
-    
-    logoSkinButton = LoadTexture("lobby/assets/images/logoSkin.png");
-    lobby_game.currentState = GAME_STATE_LOBBY;
-    lobby_game.id = savedId; // Restore valid ID if we had one
+    // Initialize parameters menu (settings button)
+    paramsMenu_init(&paramsMenu);
 
     // Physics constants for each skin
-    for(int i=0; i<__playerTextureCount; i++) {
+    for (s32 i = 0; i < __playerTextureCount; i++) {
         lobby_game.physics[i] = (PhysicsConstants_St){
-            .gravity = GRAVITY, .moveSpeed = MOVE_SPEED, .jumpForce = JUMP_FORCE,
-            .coyoteTime = COYOTE_TIME, .jumpBufferTime = JUMP_BUFFER_TIME,
-            .maxJumps = MAX_JUMPS, .friction = FRICTION, .iceFriction = 500.0f,
-            .waterHorizDrag = 0.8f, .waterVertDrag = 0.5f, .waterJumpForce = 300.0f,
-            .waterMaxSubmersion = 1.0f, .waterCanJump = true
+            .gravity = GRAVITY, .airDrag = AIR_DRAG, .maxFallSpeed = MAX_FALL_SPEED,
+            .moveSpeed = MOVE_SPEED, 
+            .jumpForce = JUMP_FORCE, .coyoteTime = COYOTE_TIME, .jumpBufferTime = JUMP_BUFFER_TIME, .maxJumps = MAX_JUMPS,
+            .friction = FRICTION, .iceFriction = ICE_FRICTION,
+            .waterMaxSubmersion = 1.0f,
+            .waterHorizDrag = WATER_HORIZ_DRAG, .waterVertDrag = WATER_VERT_DRAG, 
+            .waterJumpForce = WATER_JUMP_FORCE, .waterCanJump = true,
         };
     }
 
@@ -112,12 +143,12 @@ void lobby_on_data(s32 playerID, u8 action, const void* data, u16 len) {
         if (action == ACTION_CODE_JOIN_ACK && len >= sizeof(u16)) {
             u16 tempID;
             memcpy(&tempID, data, sizeof(u16));
-            lobby_game.id = ntohs(tempID);
-            log_info("[LOBBY] My assigned ID: %d", lobby_game.id);
+            lobby_game.clientId = ntohs(tempID);
+            log_info("[LOBBY] My assigned ID: %d", lobby_game.clientId);
         }
         return;
     }
-    if (playerID == lobby_game.id) return;
+    if (playerID == lobby_game.clientId) return;
 
     if (playerID >= MAX_CLIENTS && action != ACTION_CODE_JOIN_ACK && action != ACTION_CODE_LOBBY_ROOM_INFO) {
         return; // Prevent OOB for server playerID (999)
@@ -127,7 +158,7 @@ void lobby_on_data(s32 playerID, u8 action, const void* data, u16 len) {
         case ACTION_CODE_JOIN_ACK: {
             u16 tempID;
             memcpy(&tempID, data, sizeof(u16)); 
-            lobby_game.id = ntohs(tempID);
+            lobby_game.clientId = ntohs(tempID);
         } break;
 
         case ACTION_CODE_LOBBY_MOVE: {
@@ -174,7 +205,7 @@ void lobby_on_data(s32 playerID, u8 action, const void* data, u16 len) {
     }
 }
 
-void lobby_update(float dt) {
+void lobby_update(f32 dt) {
     updateChat();
     // toggleEditorMode removed: now handled by interaction zone in main.c
 
@@ -188,15 +219,42 @@ void lobby_update(float dt) {
         return;
     }
 
-    if (IsKeyPressed(KEY_R)) lobby_game.player.position = (Vector2) {0, 0};
+    gameTime += dt;
 
-    updatePlayer(&lobby_game, dt);
-    lobby_game.cam.target = lobby_game.player.position;
-    lobby_game.cam.offset = (Vector2){ GetScreenWidth() / 2.0f, GetScreenHeight() / 2.0f };
+    if (IsWindowResized()) {
+        systemSettings.video.width = GetScreenWidth();
+        systemSettings.video.height = GetScreenHeight();
+
+        skinButtonRect = (Rectangle) {
+            .x = systemSettings.video.width - 70,
+            .y = systemSettings.video.height / 2.0f - 25,
+            .width = 50, 
+            .height = 50
+        };
+
+        updateCameraOnWindowResize(&lobby_game);
+    }
+
+    lobby_updatePlayer(&lobby_game.player, &lobby_game.physics[lobby_game.player.textureId], dt);
+
+    Vector2 desiredTarget = lobby_game.player.position;
+    if (lobby_game.player.onGround && lobby_game.player.position.y > GROUND_Y - 70.0f) {
+        desiredTarget.y -= 135.0f;
+    } else {
+        desiredTarget.y -= lobby_game.player.radius * 1.5f;
+    }
+
+    lobby_game.cam.target = Vector2Lerp(
+        lobby_game.cam.target,
+        desiredTarget,
+        0.05f
+    );
+
+    paramsMenu_update(&paramsMenu);
 
     // Interpolate other players
-    for (int i = 0; i < MAX_CLIENTS; i++) {
-        if (lobby_game.otherPlayers[i].active && i != lobby_game.id) {
+    for (s32 i   = 0;   i < MAX_CLIENTS; i++) {
+        if (lobby_game.otherPlayers[i].active && i != lobby_game.clientId) {
             Player_St* p = &lobby_game.otherPlayers[i];
             // Simple lerp for smooth movement
             p->position.x += (p->targetPosition.x - p->position.x) * 15.0f * dt;
@@ -209,10 +267,15 @@ void lobby_update(float dt) {
         }
     }
 
-    toggleSkinMenu(&lobby_game);
+    lobby_toggleSkinMenu(&lobby_game.playerVisuals);
+
     if (lobby_game.playerVisuals.isTextureMenuOpen) {
-        choosePlayerTexture(&lobby_game);
+        lobby_choosePlayerTexture(&lobby_game.playerVisuals, &lobby_game.player);
     }
+
+    lobby_updateGrass(&lobby_game.player, GetFrameTime(), gameTime, lobby_game.cam);
+    lobby_updateAtmosphericEffects(dt, &lobby_game.player, lobby_game.cam);
+
 
     if (lobby_game.player.position.x != lastSentPos.x || lobby_game.player.position.y != lastSentPos.y || firstFrame) {
         PlayerNet_St net = {
@@ -222,9 +285,9 @@ void lobby_update(float dt) {
         };
         strncpy(net.name, lobby_game.player.name, 31);
 
-        GameTLVHeader_St tlv = { .game_id = MINI_GAME_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = htons(sizeof(PlayerNet_St)) };
+        GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = htons(sizeof(PlayerNet_St)) };
         RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-        h.sender_id = htons((u16)lobby_game.id);
+        h.sender_id = htons((u16)lobby_game.clientId);
         
         u8 buffer[1024];
         memcpy(buffer, &h, sizeof(h));
@@ -239,44 +302,55 @@ void lobby_update(float dt) {
 
 void lobby_draw(void) {
     BeginMode2D(lobby_game.cam); {
-        drawLobbyTerrains();
-        drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
-        for (int i = 0; i < MAX_CLIENTS; i++) {
+        lobby_drawStarryBackground(lobby_game.player.position, lobby_game.cam);
+        lobby_drawTree();
+
+        lobby_drawTerrains();
+        lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
+
+        for (s32 i   = 0;   i < MAX_CLIENTS; i++) {
             if (lobby_game.otherPlayers[i].active)
-                drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
+                lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
         }
+
+        lobby_drawWorldBoundaries(&lobby_game.player);
+        lobby_drawGrass(&lobby_game.player, lobby_game.cam);
+        lobby_drawGameZones(&lobby_game.player);
+        lobby_drawAtmosphericEffects();
     } EndMode2D();
     
+    lobby_drawScreenEffects(&lobby_game.player);
+
     if (lobby_game.editorMode) {
         drawEditor(&lobby_game);
         return;
     }
 
-    DrawText("Multi-Mini-Games", (GetScreenWidth() - MeasureText("Multi-Mini-Games", 20)) / 2, 20, 20, PURPLE);
-    drawSkinButton();
-    if (lobby_game.playerVisuals.isTextureMenuOpen) drawMenuTextures(&lobby_game);
-    drawChat();
+    f32 lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
+        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
+
+        lobby_drawSkinButton();
+        if (lobby_game.playerVisuals.isTextureMenuOpen) {
+            lobby_drawMenuTextures(&lobby_game);
+        }
+        
+        drawChat();
 }
 
-void lobby_client_destroy(void) {
-    for (u8 i = 0; i < __playerTextureCount; ++i) {
-        if (lobby_game.playerVisuals.textures[i].id != 0) {
-            UnloadTexture(lobby_game.playerVisuals.textures[i]);
-            lobby_game.playerVisuals.textures[i] = (Texture){0};
-        }
-    }
-    if (logoSkinButton.id != 0) {
-        UnloadTexture(logoSkinButton);
-        logoSkinButton = (Texture){0};
-    }
+void lobby_clientDestroy(void) {
+    lobby_freeAudio();
+    lobby_freeTextures(lobby_game.playerVisuals.textures);
+
+    // Cleanup params menu
+    paramsMenu_free(&paramsMenu);
 }
 
 GameClientInterface_St lobbyClientInterface = {
-    .id         = MINI_GAME_LOBBY,
+    .id         = MINI_GAME_ID_LOBBY,
     .name       = "Lobby",
     .init       = lobby_init,
     .on_data    = lobby_on_data,
     .update     = lobby_update,
     .draw       = lobby_draw,
-    .destroy    = lobby_client_destroy
+    .destroy    = lobby_clientDestroy
 };

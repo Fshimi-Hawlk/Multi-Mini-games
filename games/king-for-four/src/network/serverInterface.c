@@ -12,7 +12,8 @@
 #include "core/bot.h"
 
 #include "networkInterface.h"
-#include "rand.h"
+
+#include "sharedUtils/random.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,7 +80,7 @@ void* king_create_instance(void) {
         ks->status = 0; // WAITING
         ks->requested_players = 4;
         ks->bot_timer = 0;
-        ks->bot_target_time = 1.0f + prng_randf() * 2.0f; 
+        ks->bot_target_time = 1.0f + randfloat() * 2.0f; 
         ks->last_player_id = -1;
         ks->last_action = -1;
         ks->broadcast = NULL;
@@ -111,7 +112,7 @@ static void broadcast_sync(KingServerState* ks, s32 room_id, BroadcastMessage_Ft
 
     u8 buf[2048];
     memset(buf, 0, sizeof(buf));
-    GameTLVHeader_St tlv_sync = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_SYNC_GAME, .length = htons(sizeof(GameSyncPayload)) };
+    GameTLVHeader_St tlv_sync = { .game_id = MINI_GAME_ID_KING_FOR_FOUR, .action = ACTION_CODE_SYNC_GAME, .length = htons(sizeof(GameSyncPayload)) };
     memcpy(buf, &tlv_sync, sizeof(tlv_sync));
     memcpy(buf + sizeof(tlv_sync), &sync, sizeof(sync));
     broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv_sync) + sizeof(sync)));
@@ -128,7 +129,7 @@ static void broadcast_sync(KingServerState* ks, s32 room_id, BroadcastMessage_Ft
             cards[j] = g->players[i].hand.cards[j];
         }
         
-        GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_KFF_SYNC_HAND, .length = htons((u16)(hand_count * sizeof(Card))) };
+        GameTLVHeader_St tlv_hand = { .game_id = MINI_GAME_ID_KING_FOR_FOUR, .action = ACTION_CODE_KFF_SYNC_HAND, .length = htons((u16)(hand_count * sizeof(Card))) };
         memset(buf, 0, sizeof(buf));
         memcpy(buf, &tlv_hand, sizeof(tlv_hand));
         memcpy(buf + sizeof(tlv_hand), cards, (size_t)hand_count * sizeof(Card));
@@ -144,7 +145,7 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
     if (action != ACTION_CODE_GAME_DATA || len < sizeof(GameTLVHeader_St)) return;
 
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_KFF) return; 
+    if (tlv->game_id != MINI_GAME_ID_KING_FOR_FOUR) return; 
     
     u8 real_action = tlv->action;
     void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
@@ -173,7 +174,7 @@ void king_on_action(void *state, s32 room_id, s32 player_id, u8 action, const vo
         if (real_action == ACTION_CODE_JOIN_GAME) {
             u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_KFF, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_KING_FOR_FOUR, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
             u16 net_id = htons((u16)internal_id);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
             memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
@@ -264,7 +265,7 @@ void king_on_tick(void* state) {
         ks->bot_timer += 0.016f; // Simulated delta
         if (ks->bot_timer > ks->bot_target_time) { 
             ks->bot_timer = 0;
-            ks->bot_target_time = 1.0f + prng_randf() * 1.5f; 
+            ks->bot_target_time = 1.0f + randfloat() * 1.5f; 
             
             int card_idx = -1;
             calculate_best_move(g, cp, &card_idx);
@@ -275,7 +276,7 @@ void king_on_tick(void* state) {
                     if (try_play_card(g, cp, card_idx)) {
                         ks->last_player_id = cp;
                         ks->last_action = 0; 
-                        if (toPlay.color == CARD_BLACK) g->active_color = (int)(prng_rand() % 4);
+                        if (toPlay.color == CARD_BLACK) g->active_color = (int)(rand() % 4);
                         
                         // Bot win detection
                         if (g->players[cp].hand.size == 0) {

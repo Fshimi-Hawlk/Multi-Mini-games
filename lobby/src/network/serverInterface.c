@@ -7,11 +7,8 @@
  */
 
 #include "utils/common.h"
-#include "networkInterface.h"
-#include "APIs/generalAPI.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include "sharedUtils/debug.h"
 
 typedef struct {
     int dummy;
@@ -27,7 +24,7 @@ void lobby_on_action(void* state, s32 room_id, s32 player_id, u8 action, const v
     UNUSED(state);
     if (action == ACTION_CODE_GAME_DATA && len >= sizeof(GameTLVHeader_St)) {
         GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-        if (tlv->game_id == MINI_GAME_LOBBY) {
+        if (tlv->game_id == MINI_GAME_ID_LOBBY) {
             if (tlv->action == ACTION_CODE_LOBBY_MOVE || tlv->action == ACTION_CODE_LOBBY_CHAT) {
                 // Broadcast movement and chat to everyone
                 broadcast(room_id, player_id, action, payload, len);

@@ -1,13 +1,12 @@
 #include "rubikAPI.h"
-#include "networkInterface.h"
-#include "rudp_core.h"
+
 #include "raylib.h"
+
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 // We'll include the original main.c content by refactoring it later or just using local copies
 // For now, let's define the necessary structures and functions based on the original main.c
@@ -138,7 +137,7 @@ void rubik_client_update(float dt) {
             static float join_timer = 0;
             join_timer += dt;
             if (join_timer > 1.0f) {
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
+                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
                 h.sender_id = htons(0);
@@ -175,7 +174,7 @@ void rubik_client_update(float dt) {
         static float sync_timer = 0;
         sync_timer += dt;
         if (sync_timer > 0.5f) {
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
+            GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
             h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
@@ -200,7 +199,7 @@ void rubik_client_update(float dt) {
                 is_solved = false;
                 solve_start_time = GetTime();
             } else {
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
+                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
                 h.sender_id = htons((u16)my_id_internal);
@@ -242,7 +241,7 @@ void rubik_client_draw(void) {
 }
 
 GameClientInterface_St RubikClientModule = {
-    .id = MINI_GAME_CUBE,
+    .id = MINI_GAME_ID_TWIST_CUBE,
     .name = "RubiksCube",
     .init = rubik_client_init,
     .on_data = rubik_client_on_data,

@@ -37,9 +37,10 @@
 
 #define FONTS_PATH "assets/fonts/"          ///< `assets` shared folder is not to be confused lobby's own assets
 
-#define IMAGES_PATH ASSET_PATH "images/"    ///< Subdirectory containing all image files.
-#define SKINS_PATH  IMAGES_PATH "skins/"    ///< Subdirectory containing all texture files.
-#define SOUNDS_PATH ASSET_PATH "sounds/"    ///< Subdirectory containing all sound files.
+#define IMAGES_PATH ASSET_PATH "images/"        ///< Subdirectory containing all image files.
+#define SKINS_PATH  IMAGES_PATH "skins/"        ///< Subdirectory containing all texture files.
+#define TEXTURES_PATH IMAGES_PATH "textures/"   ///< Subdirectory containing all texture files.
+#define SOUNDS_PATH ASSET_PATH "sounds/"        ///< Subdirectory containing all sound files.
 
 // ────────────────────────────────────────────────
 // Window & display

@@ -46,14 +46,11 @@
 #include <time.h>
 #include <math.h>
 #include <assert.h>
-#include <ctype.h>
-#include <fcntl.h>
 
-// 
+
+// ────────────────────────────────────────────────
 // Third-party / single-header libraries
-// 
-
-#include "rand.h"                // custom PRNG - used in lobby
+// ────────────────────────────────────────────────
 
 #include "contextArena.h"
 

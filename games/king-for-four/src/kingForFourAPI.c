@@ -19,7 +19,6 @@
 #include "kingForFourAPI.h"
 
 #include "logger.h"
-#include "rand.h"
 
 /**
  * @enum AppState
@@ -73,12 +72,7 @@ Error_Et kingforfour_initGame__full(KingForFourGame_St** game, KingForFourConfig
     g->base.freeGame = kingforfour_freeGameWrapper;
     g->base.running  = true;
     g->base.score    = 0;
-
     // 2. Initialisation Environnement
-    u64 seeds[2] = { 0 };
-    plat_get_entropy(seeds, sizeof(seeds));
-    prng_seed(seeds[0], seeds[1]);
-    
     // Le Lobby a déjà appelé InitWindow(), on peut donc charger les assets en sécurité
     g->assets = LoadAssets();
     g->currentState = STATE_MENU;

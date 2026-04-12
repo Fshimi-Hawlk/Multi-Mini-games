@@ -15,16 +15,20 @@
 #define SOLITAIRE_API_H
 
 #include "APIs/generalAPI.h"
-#include "APIs/gameConfig.h"
+#include "systemSettings.h"
 #include <stdbool.h>
 
 typedef struct SolitaireGame_St SolitaireGame_St;
+
+typedef struct {
+    char _;
+} SoloCardsConfig_St;
 
 /**
  * @brief Convenience macro using C99 compound literal syntax.
  */
 #define solitaire_initGame(game, ...) \
-    solitaire_initGame__full((game), NULL)
+    solitaire_initGame__full((game), (SoloCardsConfig_St) {._ = 0, __VA_ARGS__})
 
 /**
  * @brief Allocates and initializes a new Solitaire game instance.
@@ -36,7 +40,7 @@ typedef struct SolitaireGame_St SolitaireGame_St;
  * @return ERROR_ALLOC on allocation failure
  * @return ERROR_ASSET_LOAD if card assets cannot be loaded
  */
-Error_Et solitaire_initGame__full(SolitaireGame_St** game_ptr, const GameConfig_St* config);
+Error_Et solitaire_initGame__full(SolitaireGame_St** game_ptr, const SoloCardsConfig_St config);
 
 /**
  * @brief Runs one frame: update + render.

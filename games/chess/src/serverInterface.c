@@ -1,7 +1,5 @@
-#include "networkInterface.h"
-#include "APIs/generalAPI.h"
-#include "APIs/chessAPI.h"
-#include <stdio.h>
+#include "chessAPI.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <arpa/inet.h>
@@ -37,7 +35,7 @@ void chess_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
     if (len < sizeof(GameTLVHeader_St)) return;
     
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_CHESS) return;
+    if (tlv->game_id != MINI_GAME_ID_CHESS) return;
     
     ChessServerState* cs = (ChessServerState*)state;
     u8 real_action = tlv->action;
@@ -60,7 +58,7 @@ void chess_on_action(void *state, s32 room_id, s32 player_id, u8 action, const v
         if (internal_id != -1) {
             u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
             u16 net_internal_id = htons((u16)internal_id);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
             memcpy(buf_ack + sizeof(tlv_ack), &net_internal_id, sizeof(u16));

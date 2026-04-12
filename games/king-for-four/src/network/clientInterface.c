@@ -10,7 +10,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <string.h>
-#include <stdio.h>
 #include <math.h>
 
 #include "core/game.h"
@@ -65,7 +64,7 @@ static int pending_card_index = -1;
 static bool show_info_window = false;
 
 static void send_to_server(u8 action, void* data, u16 len) {
-    GameTLVHeader_St tlv = { .game_id = MINI_GAME_KFF, .action = action, .length = htons(len) };
+    GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_KING_FOR_FOUR, .action = action, .length = htons(len) };
     RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
     h.sender_id = htons((u16)(my_internal_id != -1 ? my_internal_id : 0));
     u8 buffer[1024];
@@ -318,7 +317,7 @@ void king_client_draw(void) {
 }
 
 GameClientInterface_St kingForFourClientInterface = {
-    .id = MINI_GAME_KFF,
+    .id = MINI_GAME_ID_KING_FOR_FOUR,
     .name = "King For Four",
     .init = king_client_init,
     .on_data = king_client_on_data,
