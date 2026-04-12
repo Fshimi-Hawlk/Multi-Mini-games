@@ -2,11 +2,17 @@
 # OS detection (runs on the machine where "make" is invoked)
 # ───────────────────────────────────────────────────────────────
 UNAME_S := $(shell uname -s)
+UNAME_R := $(shell uname -r)
 
 ifeq ($(findstring Darwin,$(UNAME_S)),Darwin)
     OS := darwin
 else ifeq ($(findstring Linux,$(UNAME_S)),Linux)
-    OS := linux
+    # WSL reports Linux but contains "microsoft" in the kernel release string
+    ifneq ($(findstring microsoft,$(UNAME_R)),)
+        OS := wsl
+    else
+        OS := linux
+    endif
 else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
     OS := mingw
 else ifeq ($(findstring MSYS,$(UNAME_S)),MSYS)
@@ -25,37 +31,34 @@ else
     EXE_EXT :=
 endif
 
-# Compiler and flags
-
 # Modes
 MODE ?= release
 ifeq ($(MODE),release)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-O2
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-O2
 	TOOL := 
 else ifeq ($(MODE),debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Wall \
 		-Wextra \
 		-g \
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
 	TOOL := 
 else ifeq ($(MODE),strict-debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -64,10 +67,10 @@ else ifeq ($(MODE),strict-debug)
 		-O0 \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
-		-Wno-macro-redefined \
+		-Wno-unused-variable \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -76,14 +79,13 @@ else ifeq ($(MODE),strict-debug)
 else ifeq ($(MODE),clang-debug)
 	ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
 		CC := clang
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
 		-pedantic \
 		-g \
 		-O0 \
-		-Wno-macro-redefined \
 		-Wno-newline-eof \
 		-Wno-unused-function \
 		-Wno-deprecated-declarations \
@@ -93,7 +95,7 @@ else ifeq ($(MODE),clang-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -109,11 +111,13 @@ else ifeq ($(MODE),clang-debug)
 	endif
 else ifeq ($(MODE),valgrind-debug)
 	ifneq ($(OS),linux)
-        $(error valgrind-debug mode is only supported on Linux (native Valgrind unavailable on $(OS)))
+		ifneq ($(OS),wsl)
+			$(error valgrind-debug mode is only supported on Linux/WSL (native Valgrind unavailable on $(OS)))
+		endif
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -126,7 +130,7 @@ else ifeq ($(MODE),valgrind-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
@@ -142,16 +146,11 @@ else
 	$(error Unknown MODE=$(MODE). Use release, debug, strict-debug, clang-debug, valgrind-debug)
 endif
 
-# Combine with base
-CFLAGS += $(BASE_CFLAGS)
-LDFLAGS += $(BASE_LDFLAGS)
-
-# Allow extras from command line
-CFLAGS += $(EXTRA_CFLAGS)
-LDFLAGS += $(EXTRA_LDFLAGS)
+CFLAGS  := $(MODE_CFLAGS) $(EXTRA_CFLAGS) $(BASE_CFLAGS)
+LDFLAGS := $(MODE_LDFLAGS) $(EXTRA_LDFLAGS) $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
-LIB_NAME := lobby
+LIB_NAME ?= bingo
 
 SRC_DIR := src
 TEST_DIR := tests
@@ -160,8 +159,8 @@ TEST_DIR := tests
 BUILD_DIR := build
 OBJ_DIR := $(BUILD_DIR)/obj
 LIB_DIR := $(BUILD_DIR)/lib
-BIN_DIR := $(BUILD_DIR)/bin
+BIN_DIR ?= $(BUILD_DIR)/bin
 TEST_BIN_DIR := $(BUILD_DIR)/bin/tests
 
-STATIC_LIB  ?= $(LIB_DIR)/lib$(LIB_NAME).a
+STATIC_LIB := $(LIB_DIR)/lib$(LIB_NAME).a
 BIN := $(BIN_DIR)/$(MAIN_NAME)$(EXE_EXT)

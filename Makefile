@@ -13,6 +13,7 @@
 RAYLIB_VERSION := 5.5
 UNAME_S := $(shell uname -s)
 
+# Platform-specific settings
 ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
     EXE_EXT := .exe
 endif
@@ -34,23 +35,15 @@ endif
 # Suppress subdirectory messages from recursive make
 MAKEFLAGS += --no-print-directory
 
-# Directories to exclude when discovering modules
-EXCLUDED_DIRS := \
-    assets       \
-    build        \
-    docs         \
-    games        \
-    logs         \
-    thirdparty   \
-    tui-ver
+# ==============================================================================
+# Module discovery
+# ==============================================================================
 
-# Detect modules (normalize by removing trailing /)
-ROOT_MODULES := $(patsubst %/,%,$(wildcard */))
-ROOT_MODULES := $(filter-out $(EXCLUDED_DIRS), $(ROOT_MODULES))
-
+# Game modules - automatically discovered from games/ folder
 GAMES_MODULES := $(patsubst %/,%,$(wildcard games/*/))
 
-MODULES := $(ROOT_MODULES) $(GAMES_MODULES)
+# All modules - always built in this specific order
+MODULES :=  firstparty $(GAMES_MODULES) lobby network
 
 FIRSTPARTY_API_DIR := firstparty/APIs
 
@@ -60,7 +53,7 @@ LIB_DIR   := $(BUILD_DIR)/lib
 BIN_DIR   := $(BUILD_DIR)/bin
 
 # Computed lib names (flattened lowercase, no - or _)
-# Uses notdir to handle paths like games/tetris → tetris
+# Example: games/snake → snake, firstparty → firstparty
 define compute-lib-name
 $(shell echo '$(notdir $(1))' | tr '[:upper:]' '[:lower:]' | tr -d '_-')
 endef
@@ -69,10 +62,10 @@ define compute-api-name
 $(shell echo '$(1)API.h')
 endef
 
-# Absolute lib paths (used for dependency tracking)
+# Absolute paths to all static libraries
 LIBS := $(foreach mod,$(MODULES),$(LIB_DIR)/lib$(call compute-lib-name,$(mod)).a)
 
-# Lib paths for linking (relative from lobby/ -> ../../build/lib/...)
+# Relative paths for lobby linking (from lobby/ directory)
 LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 
 # ==============================================================================
@@ -81,27 +74,30 @@ LIBS_REL := $(foreach lib,$(LIBS),../$(lib))
 
 all: client server
 
-# Ensure directories exist
+# Ensure output directories exist
 $(BIN_DIR) $(LIB_DIR):
 	$(SILENT_PREFIX)mkdir -p $@
 
-# Lazy build of module libraries (only rebuild if sources changed)
+# Build all static libraries (incremental / lazy)
 libs: $(LIBS)
 
-# Generic rule to build a static library for any module
+# Generic rule: build static library for any module
 $(LIB_DIR)/lib%.a:
 	$(eval MOD_DIR := $(strip $(foreach m,$(MODULES),$(if $(filter $(call compute-lib-name,$m),$*),$m))))
 	
-	$(if $(MOD_DIR),,$(error Could not find module directory for lib$*.a - check MODULES and compute-lib-name))
+	$(if $(MOD_DIR),,$(error Could not find module directory for lib$*.a))
 
 	$(eval LIB_NAME := $(call compute-lib-name,$(MOD_DIR)))
 	$(eval API_HEADER := $(call compute-api-name,$(LIB_NAME)))
+
 	@echo "[$* => $(MOD_DIR)] Building library for \"$(MOD_DIR)\" (lib$(LIB_NAME).a)"
+
 	$(SILENT_PREFIX)$(MAKE) -C $(MOD_DIR) static-lib \
 		MODE=$(MODE) \
 		VERBOSE=$(VERBOSE) \
 		LIB_NAME=$(LIB_NAME) \
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"$(MOD_DIR)/assets/\\\""
+
 	$(SILENT_PREFIX)mkdir -p $(LIB_DIR)
 	$(SILENT_PREFIX)if cmp -s $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@ 2>/dev/null; then \
 		echo "  lib$(LIB_NAME).a unchanged"; \
@@ -109,6 +105,7 @@ $(LIB_DIR)/lib%.a:
 		echo "  Updating lib$(LIB_NAME).a"; \
 		cp $(MOD_DIR)/build/lib/lib$(LIB_NAME).a $@; \
 	fi
+
 	$(SILENT_PREFIX)mkdir -p $(FIRSTPARTY_API_DIR)
 	$(SILENT_PREFIX)if [ -f "$(MOD_DIR)/include/$(API_HEADER)" ]; then \
 		echo "  Updating API header: $(API_HEADER)"; \
@@ -117,7 +114,7 @@ $(LIB_DIR)/lib%.a:
 		echo "  Warning: $(API_HEADER) not found in $(MOD_DIR)/include/"; \
 	fi
 
-# Normal incremental build of lobby (client) executable
+# Build lobby client (depends on all libs)
 client: libs
 	@echo "Building lobby executable (if needed)..."
 	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
@@ -127,17 +124,23 @@ client: libs
 		BIN_DIR=../$(BIN_DIR) \
 		EXTRA_CFLAGS="-DASSET_PATH=\\\"lobby/assets/\\\"" \
 		EXTRA_LDFLAGS="$(LIBS_REL)"
+	$(SILENT_PREFIX) mv $(BIN_DIR)/main $(BIN_DIR)/client
 
-# Build server binary (links against all libs)
-server: libs | $(BIN_DIR)
+# Build server (links against all libraries)
+server: libs
 	@echo "Building server executable..."
-	$(SILENT_PREFIX)$(MAKE) -C reseau MODE=$(MODE) VERBOSE=$(VERBOSE) \
-		EXTRA_LDFLAGS="-L../build/lib -Wl,--start-group \
-			-llobby -lbingo -lkingforfour -lchess -lrubik -lfirstparty \
-			-Wl,--end-group -lm"
-	$(SILENT_PREFIX)install -m 755 reseau/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
+	$(SILENT_PREFIX)mkdir -p $(BIN_DIR)
+	$(SILENT_PREFIX)$(MAKE) -C network \
+		MODE=$(MODE) \
+		VERBOSE=$(VERBOSE) \
+		BIN_DIR=../$(BIN_DIR) \
+		EXTRA_LDFLAGS="$(LIBS_REL)"
+# 	$(SILENT_PREFIX)install -m 755 network/build/bin/server$(EXE_EXT) $(BIN_DIR)/server$(EXE_EXT)
 
-# Run targets
+# ==============================================================================
+# Run Targets
+# ==============================================================================
+
 run-client: client
 	$(SILENT_PREFIX)if [ -f "$(BIN_DIR)/client$(EXE_EXT)" ]; then \
 		echo "===> Starting client..."; \
@@ -242,14 +245,11 @@ rebuild-tests: clean tests
 # Documentation Targets
 # ==============================================================================
 
-# Build root documentation (English)
 docs: docs-root
 
 docs-root:
 	@./generate-root-docs.sh
 
-# Translate documentation to specified languages
-# Depends on docs-root to ensure English version exists first
 docs-translate: docs
 	@if [ -z "$(LANG)" ]; then \
 		echo "Usage: make docs-translate LANG=fr,de,es"; \
@@ -257,7 +257,6 @@ docs-translate: docs
 	fi
 	@./translate-root-docs.sh $(LANG)
 
-# Remove all generated translations and related files
 docs-translate-free:
 	$(SILENT_PREFIX)rm -rf docs/doxygen/html-* docs/doxygen/src-*
 	$(SILENT_PREFIX)find docs/doxygen -maxdepth 1 -name 'Doxyfile.*' -delete
@@ -275,7 +274,7 @@ help:
 	@echo "    all                          Build all libraries + lobby client + server"
 	@echo "    client                       Build lobby client executable (depends on libs)"
 	@echo "    server                       Build game server executable"
-	@echo "    libs                         Build module static libraries (incremental)"
+	@echo "    libs                         Build all module static libraries (incremental)"
 	@echo ""
 	@echo "    run-client                   Run the lobby client"
 	@echo "    run-server                   Run the game server"
@@ -306,10 +305,11 @@ help:
 	@echo "    VERBOSE=1        Show full command output (default: silent)"
 	@echo ""
 	@echo "Notes:"
-	@echo "  - Libraries are built lazily using timestamp comparison"
-	@echo "  - Server links all libraries using --start-group / --end-group"
-	@echo "  - clean affects only root build/; use clean-all for a full reset"
-	@echo "  - Output goes to: build/lib/lib*.a and build/bin/{client|server}"
+	@echo "  - Build order: firstparty → games → lobby → network"
+	@echo "  - Libraries are built lazily (only when sources change)"
+	@echo "  - Server uses --start-group / --end-group to handle circular references"
+	@echo "  - clean affects only root build/; use clean-all for full reset"
+	@echo "  - Output: build/lib/lib*.a and build/bin/{client|server}"
 
 .PHONY: all client server libs \
         run-client run-server run-multi \

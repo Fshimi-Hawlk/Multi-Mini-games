@@ -1,10 +1,9 @@
-RAYLIB_LIB_DIR := ../thirdparty/libs/raylib-5.5_macos
+RAYLIB_LIB_DIR := ../../thirdparty/libs/raylib-5.5_macos
 
 BASE_CFLAGS := \
-	-Iinclude \
-	-I../thirdparty \
-	-I../firstparty \
-	-I../lobby/include \
+    -Iinclude \
+    -I../../thirdparty \
+    -I../../firstparty
 
 BASE_LDFLAGS := \
     -L$(RAYLIB_LIB_DIR) \

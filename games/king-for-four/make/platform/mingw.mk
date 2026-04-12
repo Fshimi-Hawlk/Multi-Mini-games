@@ -1,10 +1,10 @@
-RAYLIB_LIB_DIR := ../thirdparty/libs/raylib-5.5_win64_mingw
+RAYLIB_LIB_DIR := ../../thirdparty/libs/raylib-5.5_win64_mingw
 
 BASE_CFLAGS := \
-	-Iinclude \
-	-I../thirdparty \
-	-I../firstparty \
-	-I../lobby/include \    -DPLATFORM_DESKTOP   # raylib sometimes needs this on Windows
+    -Iinclude \
+    -I../../thirdparty \
+    -I../../firstparty \
+    -DPLATFORM_DESKTOP   # raylib sometimes needs this on Windows
 
 BASE_LDFLAGS := \
     -L$(RAYLIB_LIB_DIR) \

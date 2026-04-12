@@ -35,14 +35,14 @@ endif
 MODE ?= release
 ifeq ($(MODE),release)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-O2
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-O2
 	TOOL := 
 else ifeq ($(MODE),debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Wall \
 		-Wextra \
 		-g \
@@ -51,14 +51,14 @@ else ifeq ($(MODE),debug)
 		-Wno-deprecated-declarations \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0
 	TOOL := 
 else ifeq ($(MODE),strict-debug)
 	CC := gcc
-	CFLAGS := \
+	MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -70,7 +70,7 @@ else ifeq ($(MODE),strict-debug)
 		-Wno-unused-variable \
 		-D_STACK_TRACE \
 		-D_DEBUG
-	LDFLAGS := \
+	MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -79,7 +79,7 @@ else ifeq ($(MODE),strict-debug)
 else ifeq ($(MODE),clang-debug)
 	ifeq ($(shell command -v clang >/dev/null 2>&1; echo $$?),0)
 		CC := clang
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -95,7 +95,7 @@ else ifeq ($(MODE),clang-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0 \
@@ -117,7 +117,7 @@ else ifeq ($(MODE),valgrind-debug)
     endif
 	ifeq ($(shell command -v valgrind >/dev/null 2>&1; echo $$?),0)
 		CC := gcc
-		CFLAGS := \
+		MODE_CFLAGS := \
 		-Werror \
 		-Wall \
 		-Wextra \
@@ -130,7 +130,7 @@ else ifeq ($(MODE),valgrind-debug)
 		-D_STACK_TRACE \
 		-D_DEBUG
 
-		LDFLAGS := \
+		MODE_LDFLAGS := \
 		-g \
 		-rdynamic \
 		-O0

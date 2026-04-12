@@ -150,7 +150,7 @@ CFLAGS  := $(MODE_CFLAGS) $(EXTRA_CFLAGS) $(BASE_CFLAGS)
 LDFLAGS := $(MODE_LDFLAGS) $(EXTRA_LDFLAGS) $(BASE_LDFLAGS)
 
 MAIN_NAME ?= main
-LIB_NAME ?= kingforfour
+LIB_NAME ?= twistCube
 
 SRC_DIR := src
 TEST_DIR := tests
