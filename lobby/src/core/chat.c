@@ -52,9 +52,9 @@ void updateChat(void) {
         if (IsKeyPressed(KEY_ENTER)) {
             if (lobby_game.chat.inputPos > 0 && networkSocket != -1) {
                 u16 payloadLen = (u16)strlen(lobby_game.chat.inputBuffer) + 1;
-                GameTLVHeader_St tlv = { .game_id = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = htons(payloadLen) };
+                GameTLVHeader_St tlv = { .gameId = 0, .action = ACTION_CODE_LOBBY_CHAT, .length = htons(payloadLen) };
                 RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons((u16)lobby_game.clientId);
+                h.senderId = htons((u16)lobby_game.clientId);
                 
                 u8 buffer[2048];
                 size_t offset = 0;

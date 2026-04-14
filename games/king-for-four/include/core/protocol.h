@@ -8,7 +8,6 @@
 #ifndef KING_PROTOCOL_H
 #define KING_PROTOCOL_H
 
-#include "networkInterface.h"
 #include "core/card.h"
 #include "baseTypes.h"
 
@@ -18,7 +17,7 @@
 typedef struct {
     s32 current_player;     /**< Index of the current player (0-3) */
     s32 active_color;       /**< Current active color (-1:None, 0:Red, 1:Yellow, 2:Green, 3:Blue) */
-    Card top_card;          /**< Card currently on top of the discard pile */
+    Card_St top_card;          /**< Card currently on top of the discard pile */
     s32 hand_sizes[4];      /**< Card count in each player's hand */
     s32 status;             /**< Game status (0: WAITING, 1: PLAYING, 2: GAME_OVER) */
     s32 host_id;            /**< ID of the host player (id 0) */

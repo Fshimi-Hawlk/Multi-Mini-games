@@ -57,9 +57,9 @@ static inline bool sequenceMoreRecent(u16 s1, u16 s2) {
 void rudpGenerateHeader(RUDPConnection_St *conn, u8 action, RUDPHeader_St *out_h) {
     out_h->sequence     = htons(conn->local_sequence++);
     out_h->ack          = htons(conn->remote_sequence);
-    out_h->ack_bitfield = htonl(conn->receive_history);
+    out_h->ackBitfield = htonl(conn->receive_history);
     out_h->action       = action;
-    out_h->sender_id    = 0; // Défini ultérieurement par le serveur ou le main client
+    out_h->senderId    = 0; // Défini ultérieurement par le serveur ou le main client
 }
 
 /**
@@ -77,7 +77,7 @@ void rudpGenerateHeader(RUDPConnection_St *conn, u8 action, RUDPHeader_St *out_h
 bool rudpProcessIncoming(RUDPConnection_St *conn, const RUDPHeader_St *in_h) {
     u16 seq = ntohs(in_h->sequence);
     u16 ack = ntohs(in_h->ack);
-    u32 bitfield = ntohl(in_h->ack_bitfield);
+    u32 bitfield = ntohl(in_h->ackBitfield);
 
     /* 
        Traitement des ACKs du pair :

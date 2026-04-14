@@ -28,7 +28,7 @@ extern s32 networkSocket;
 extern RUDPConnection_St serverConnection;
 
 static Cube my_cube;
-static int my_id_internal = -1;
+static int myIdInternal = -1;
 static bool eliminated = false;
 static float solve_progress = 0.0f;
 static bool game_started = false;
@@ -49,9 +49,9 @@ static float angleX = 1.0f;
 static float angleY = 0.5f;
 static float radius = 8.0f;
 
-void rubik_client_init(void) {
+void rubik_clientInit(void) {
     initCube(&my_cube);
-    my_id_internal = -1;
+    myIdInternal = -1;
     eliminated = false;
     solve_progress = 0.0f;
     game_started = false;
@@ -66,10 +66,10 @@ void rubik_client_init(void) {
     camera.projection = CAMERA_PERSPECTIVE;
 }
 
-void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
+void rubik_client_on_data(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
-        if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
-            printf("[RUBIK] Data received from invalid player ID: %d\n", (int)player_id);
+        if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
+            printf("[RUBIK] Data received from invalid player ID: %d\n", (int)playerId);
             return;
         }
     }
@@ -77,9 +77,9 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
 
     if (action == ACTION_CODE_JOIN_ACK) {
         if (len >= sizeof(u16)) {
-            u16 net_id;
-            memcpy(&net_id, data, sizeof(u16));
-            my_id_internal = (int)ntohs(net_id);
+            u16 netId;
+            memcpy(&netId, data, sizeof(u16));
+            myIdInternal = (int)ntohs(netId);
         }
     }
     else if (action == ACTION_CODE_RUBIK_SCRAMBLE) {
@@ -97,9 +97,9 @@ void rubik_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
         printf("[RUBIK] Rubik's scramble started with seed %u\n", ntohl(seed));
     }
     else if (action == ACTION_CODE_RUBIK_ELIMINATE) {
-        int target_id;
-        memcpy(&target_id, data, sizeof(int));
-        if ((int)ntohl(target_id) == my_id_internal) {
+        int targetId;
+        memcpy(&targetId, data, sizeof(int));
+        if ((int)ntohl(targetId) == myIdInternal) {
             eliminated = true;
         }
     }
@@ -129,18 +129,18 @@ static float calculate_progress(Cube* c) {
 }
 
 void rubik_client_update(float dt) {
-    if (my_id_internal == -1) {
+    if (myIdInternal == -1) {
         if (networkSocket < 0) {
             // Solo mode: no server, auto-assign ID so we can play immediately
-            my_id_internal = 0;
+            myIdInternal = 0;
         } else {
             static float join_timer = 0;
             join_timer += dt;
             if (join_timer > 1.0f) {
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
+                GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons(0);
+                h.senderId = htons(0);
                 u8 buf[64];
                 memcpy(buf, &h, sizeof(h));
                 memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
@@ -174,10 +174,10 @@ void rubik_client_update(float dt) {
         static float sync_timer = 0;
         sync_timer += dt;
         if (sync_timer > 0.5f) {
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
+            GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_RUBIK_PROGRESS, .length = htons(sizeof(float)) };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-            h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+            h.senderId = htons((u16)(myIdInternal != -1 ? myIdInternal : 0));
             u8 buf[128];
             memset(buf, 0, sizeof(buf));
             memcpy(buf, &h, sizeof(h));
@@ -199,10 +199,10 @@ void rubik_client_update(float dt) {
                 is_solved = false;
                 solve_start_time = GetTime();
             } else {
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
+                GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_START_GAME, .length = 0 };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons((u16)my_id_internal);
+                h.senderId = htons((u16)myIdInternal);
                 u8 buf[128];
                 memset(buf, 0, sizeof(buf));
                 memcpy(buf, &h, sizeof(h));
@@ -226,7 +226,7 @@ void rubik_client_draw(void) {
     
     if (!game_started) {
         DrawText("RUBIK BATTLE ROYALE", 10, 10, 30, GOLD);
-        if (my_id_internal != -1) DrawText("Appuyez sur M pour lancer", 10, 50, 20, GREEN);
+        if (myIdInternal != -1) DrawText("Appuyez sur M pour lancer", 10, 50, 20, GREEN);
         else DrawText("En attente de l'hôte...", 10, 50, 20, LIGHTGRAY);
     } else {
         DrawText(TextFormat("PROGRÈS: %.1f%%", solve_progress), 10, 10, 20, SKYBLUE);
@@ -243,13 +243,13 @@ void rubik_client_draw(void) {
 GameClientInterface_St RubikClientModule = {
     .id = MINI_GAME_ID_TWIST_CUBE,
     .name = "RubiksCube",
-    .init = rubik_client_init,
+    .init = rubik_clientInit,
     .on_data = rubik_client_on_data,
     .update = rubik_client_update,
     .draw = rubik_client_draw
 };
 
-Error_Et rubik_initGame(RubikGame_St** game) {
+Error_Et rubikInitGame(RubikGame_St** game) {
     *game = malloc(sizeof(RubikGame_St));
     if (!*game) return ERROR_ALLOC;
     (*game)->base.running = true;

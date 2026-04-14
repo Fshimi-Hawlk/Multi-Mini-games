@@ -68,19 +68,19 @@ typedef struct {
     BingoGame_St        game;                       ///< Shared state (MUST be first)
     u32                 numPlayers;                 ///< Current number of players
     PlayerCard_St       playerCards[MAX_PLAYER];    ///< Per-player cards
-    s32                 playerNetworkIds[MAX_PLAYER]; ///< slot -> network player_id mapping
+    s32                 playerNetworkIds[MAX_PLAYER]; ///< slot -> network playerId mapping
     BingoStatus_Et      status;                     ///< Current phase
     BroadcastMessage_Ft serverBroadcastCallback;    ///< Broadcast function
     u32                 seed;                       ///< Common seed for card generation
 } BingoServerState_St;
 
 // ────────────────────────────────────────────────
-// Helper to find slot from player_id
+// Helper to find slot from playerId
 // ────────────────────────────────────────────────
 
-static s32 bingo_getSlot(BingoServerState_St* srv, s32 player_id) {
+static s32 bingo_getSlot(BingoServerState_St* srv, s32 playerId) {
     for (u32 i = 0; i < srv->numPlayers; i++) {
-        if (srv->playerNetworkIds[i] == player_id) return (s32)i;
+        if (srv->playerNetworkIds[i] == playerId) return (s32)i;
     }
     return -1;
 }
@@ -131,7 +131,7 @@ void* bingo_createInstance(void) {
     return srv;
 }
 
-static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, BroadcastMessage_Ft broadcast) {
+static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 roomId, BroadcastMessage_Ft broadcast) {
     if (!broadcast) return;
 
     BingoGame_St* game = &srv->game;
@@ -150,7 +150,7 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
     }
 
     GameTLVHeader_St tlv = {
-        .game_id = MINI_GAME_ID_BINGO,
+        .gameId = MINI_GAME_ID_BINGO,
         .action  = ACTION_CODE_BINGO_SYNC_STATE,
         .length  = htons(sizeof(BingoSyncPayload_St))
     };
@@ -160,14 +160,14 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 room_id, Bro
     memcpy(buf, &tlv, sizeof(tlv));
     memcpy(buf + sizeof(tlv), &payload, sizeof(payload));
 
-    broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv) + sizeof(payload)));
+    broadcast(roomId, -1, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv) + sizeof(payload)));
 }
 
-void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+void bingo_onAction(void* state, s32 roomId, s32 playerId, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA || len < sizeof(GameTLVHeader_St)) return;
 
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_ID_BINGO) return;
+    if (tlv->gameId != MINI_GAME_ID_BINGO) return;
 
     u8 realAction = tlv->action;
     void* realPayload = (u8*)payload + sizeof(GameTLVHeader_St);
@@ -180,26 +180,26 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
     switch (realAction) {
         case ACTION_CODE_JOIN_GAME: {
             if (srv->numPlayers >= MAX_PLAYER) {
-                log_warn("Bingo room full, rejecting player %d", player_id);
+                log_warn("Bingo room full, rejecting player %d", playerId);
                 break;
             }
-            if (bingo_getSlot(srv, player_id) != -1) break; // Already in
+            if (bingo_getSlot(srv, playerId) != -1) break; // Already in
 
             u32 slot = srv->numPlayers++;
-            srv->playerNetworkIds[slot] = player_id;
+            srv->playerNetworkIds[slot] = playerId;
             u32 randomCard = rand() % 12;
 
             memcpy(&srv->playerCards[slot], &game->layout.choiceCards[randomCard].values, sizeof(Card_t));
             srv->playerCards[slot].daubs[2][2] = true; // Free space
-            log_info("Player %d joined Bingo (slot %u)", player_id, slot);
+            log_info("Player %d joined Bingo (slot %u)", playerId, slot);
 
             u8 buf_ack[64];
             memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_BINGO, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
-            u16 net_id = htons((u16)slot);
+            GameTLVHeader_St tlv_ack = { .gameId = MINI_GAME_ID_BINGO, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            u16 netId = htons((u16)slot);
             memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
-            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
+            memcpy(buf_ack + sizeof(tlv_ack), &netId, sizeof(u16));
+            broadcast(UNICAST, playerId, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
         } break;
 
         case ACTION_CODE_BINGO_CHOOSE_CARD: {
@@ -207,11 +207,11 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
             ActionChooseCardPayload_St p;
             memcpy(&p, realPayload, sizeof(p));
 
-            s32 slot = bingo_getSlot(srv, player_id);
+            s32 slot = bingo_getSlot(srv, playerId);
             if (slot != -1 && p.cardIndex < 12) {
                 memcpy(&srv->playerCards[slot], &game->layout.choiceCards[p.cardIndex].values, sizeof(Card_t));
                 srv->playerCards[slot].daubs[2][2] = true; // Free space
-                log_info("Player %d chose card %u (slot %d)", player_id, p.cardIndex, slot);
+                log_info("Player %d chose card %u (slot %d)", playerId, p.cardIndex, slot);
             }
         } break;
 
@@ -222,7 +222,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
             ActionDaubSquarePayload_St p;
             memcpy(&p, realPayload, sizeof(p));
             if (p.row >= 5 || p.col >= 5) break; 
-            s32 slot = bingo_getSlot(srv, player_id);
+            s32 slot = bingo_getSlot(srv, playerId);
             if (slot == -1) break;
 
             if (bingo_isValidDaub(&game->currentCall, &srv->playerCards[slot], p.row, p.col)) {
@@ -233,8 +233,8 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
                 if (bingo_hasBingo(&srv->playerCards[slot])) {
                     srv->status = BINGO_STATUS_ENDED;
                     game->progress.scene = GAME_SCENE_END;
-                    snprintf(game->progress.resultMessage, 63, "BINGO! Player %d wins!", player_id);
-                    log_info("Bingo: Player %d wins in room %d", player_id, room_id);
+                    snprintf(game->progress.resultMessage, 63, "BINGO! Player %d wins!", playerId);
+                    log_info("Bingo: Player %d wins in room %d", playerId, roomId);
                 }
             } else {
                 srv->playerCards[slot].misclicks[p.row][p.col]++;
@@ -244,7 +244,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
         case ACTION_CODE_START_GAME:
         case ACTION_CODE_BINGO_START_GAME: {
             if (srv->status != BINGO_STATUS_WAITING_CARD_CHOICE) break;
-            game->room_id = room_id;
+            game->roomId = roomId;
             srv->status = BINGO_STATUS_LAUNCHING;
             game->progress.scene = GAME_SCENE_LAUNCHING; // Tell clients to transition from card choice
             game->currentCall.timer = 6.5f;
@@ -252,7 +252,7 @@ void bingo_onAction(void* state, s32 room_id, s32 player_id, u8 action, const vo
         } break;
     }
 
-    bingo_serverBroadcastSync(srv, room_id, broadcast);
+    bingo_serverBroadcastSync(srv, roomId, broadcast);
 }
 
 void bingo_onTick(void* state) {
@@ -270,7 +270,7 @@ void bingo_onTick(void* state) {
             srv->status = BINGO_STATUS_PLAYING;
             game->progress.scene = GAME_SCENE_PLAYING;
         }
-        bingo_serverBroadcastSync(srv, game->room_id, srv->serverBroadcastCallback);
+        bingo_serverBroadcastSync(srv, game->roomId, srv->serverBroadcastCallback);
         return;
     }
 
@@ -301,12 +301,12 @@ void bingo_onTick(void* state) {
         srv->status = BINGO_STATUS_ENDED;
     }
 
-    bingo_serverBroadcastSync(srv, game->room_id, srv->serverBroadcastCallback);
+    bingo_serverBroadcastSync(srv, game->roomId, srv->serverBroadcastCallback);
 }
 
-void bingo_onPlayerLeave(void* state, s32 player_id) {
+void bingo_onPlayerLeave(void* state, s32 playerId) {
     BingoServerState_St* srv = (BingoServerState_St*)state;
-    s32 slot = bingo_getSlot(srv, player_id);
+    s32 slot = bingo_getSlot(srv, playerId);
     if (slot == -1) return;
 
     for (u32 i = (u32)slot; i < srv->numPlayers - 1; ++i) {
@@ -314,7 +314,7 @@ void bingo_onPlayerLeave(void* state, s32 player_id) {
         srv->playerNetworkIds[i] = srv->playerNetworkIds[i + 1];
     }
     srv->numPlayers--;
-    log_info("Player %d left (slot %d vacated)", player_id, slot);
+    log_info("Player %d left (slot %d vacated)", playerId, slot);
 }
 
 void bingo_destroyInstance(void* state) {
@@ -322,10 +322,10 @@ void bingo_destroyInstance(void* state) {
 }
 
 GameServerInterface_St bingoServerInterface = {
-    .game_name        = "Bingo",
-    .create_instance  = bingo_createInstance,
-    .on_action        = bingo_onAction,
-    .on_tick          = bingo_onTick,
-    .on_player_leave  = bingo_onPlayerLeave,
-    .destroy_instance = bingo_destroyInstance
+    .gameName        = "Bingo",
+    .createInstance  = bingo_createInstance,
+    .onAction        = bingo_onAction,
+    .onTick          = bingo_onTick,
+    .onPlayerLeave  = bingo_onPlayerLeave,
+    .destroyInstance = bingo_destroyInstance
 };

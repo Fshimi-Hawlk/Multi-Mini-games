@@ -79,14 +79,14 @@ static bool         cardsGenerated = false;
 */
 static void sendToServer(u8 action, const void* data, u16 len) {
     GameTLVHeader_St tlv = {
-        .game_id = MINI_GAME_ID_BINGO,
+        .gameId = MINI_GAME_ID_BINGO,
         .action  = action,
         .length  = htons(len)
     };
 
     RUDPHeader_St header;
     rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &header);
-    header.sender_id = htons((u16)(localGame.clientID != -1 ? localGame.clientID : 0));
+    header.senderId = htons((u16)(localGame.clientID != -1 ? localGame.clientID : 0));
 
     u8 buffer[2048];
     memset(buffer, 0, sizeof(buffer));
@@ -210,8 +210,8 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
                 }
             }
 
-            extern void updateWaitingRoomInfo(int players, int max, bool host);
-            updateWaitingRoomInfo((int)payload.numPlayers, 4, (localGame.clientID == 0));
+            extern void lobby_updateWaitingRoomInfo(int players, int max, bool host);
+            lobby_updateWaitingRoomInfo((int)payload.numPlayers, 4, (localGame.clientID == 0));
 
             strncpy(localGame.progress.resultMessage, payload.resultMessage, 63);
 

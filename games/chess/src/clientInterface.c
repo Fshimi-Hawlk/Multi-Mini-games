@@ -107,10 +107,10 @@ void chess_client_update(float dt) {
         static f32 join_timer = 0;
         join_timer += dt;
         if (join_timer > 1.0f) {
-            GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
+            GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_CHESS, .action = ACTION_CODE_JOIN_GAME, .length = 0 };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-            h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+            h.senderId = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
             u8 buf[128];
             memset(buf, 0, sizeof(buf));
             u8* ptr = buf;
@@ -129,10 +129,10 @@ void chess_client_update(float dt) {
             
             if (IsKeyPressed(KEY_ENTER)) {
                 printf("[CHESS] Host sending START_GAME...\n");
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_START_GAME, .length = htons(sizeof(s32)) };
+                GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_CHESS, .action = ACTION_CODE_START_GAME, .length = htons(sizeof(s32)) };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+                h.senderId = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
                 u8 buf[128];
                 memset(buf, 0, sizeof(buf));
                 u8* ptr = buf;
@@ -153,10 +153,10 @@ void chess_client_update(float dt) {
                     .to_x = (u8)previousMoveCell[1].x, .to_y = (u8)previousMoveCell[1].y,
                     .promotion = 0
                 };
-                GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_CHESS_MOVE, .length = htons(sizeof(payload)) };
+                GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_CHESS, .action = ACTION_CODE_CHESS_MOVE, .length = htons(sizeof(payload)) };
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+                h.senderId = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
                 u8 buf[128];
                 memset(buf, 0, sizeof(buf));
                 u8* ptr = buf;
@@ -192,10 +192,10 @@ void chess_client_update(float dt) {
                         playerTurn = !playerTurn;
                         
                         // Broadcast to others
-                        GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_CHESS_MOVE, .length = htons(sizeof(payload)) };
+                        GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_CHESS, .action = ACTION_CODE_CHESS_MOVE, .length = htons(sizeof(payload)) };
                         RUDPHeader_St h;
                         rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-                        h.sender_id = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
+                        h.senderId = htons((u16)(my_id_internal != -1 ? my_id_internal : 0));
                         u8 buf[128];
                         memset(buf, 0, sizeof(buf));
                         u8* ptr = buf;

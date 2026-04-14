@@ -20,6 +20,7 @@
 #include "ui/grass.h"
 #include "ui/background.h"
 #include "ui/ambiance.h"
+#include "ui/connectionScreen.h"
 
 #include "editor/editor.h"
 
@@ -93,8 +94,7 @@ void lobby_init(void) {
     if (savedName[0] != '\0') {
         strncpy(lobby_game.player.name, savedName, 31);
     } else {
-        extern const char* getEnteredPseudo(void);
-        const char* _pseudo = getEnteredPseudo();
+        const char* _pseudo = lobby_getEnteredPseudo();
         strncpy(lobby_game.player.name, (_pseudo && _pseudo[0]) ? _pseudo : "Joueur", 31);
     }
 
@@ -114,8 +114,6 @@ void lobby_init(void) {
     lobby_gameInit();
     lobby_initBackgroundScale();
     updateCameraOnWindowResize(&lobby_game);
-
-    error = lobby_initTextures(lobby_game.playerVisuals.textures);
 
     // Initialize parameters menu (settings button)
     paramsMenu_init(&paramsMenu);
@@ -239,7 +237,7 @@ void lobby_update(f32 dt) {
 
     Vector2 desiredTarget = lobby_game.player.position;
     if (lobby_game.player.onGround && lobby_game.player.position.y > GROUND_Y - 70.0f) {
-        desiredTarget.y -= 135.0f;
+        desiredTarget.y -= 200.0f;
     } else {
         desiredTarget.y -= lobby_game.player.radius * 1.5f;
     }
@@ -276,7 +274,6 @@ void lobby_update(f32 dt) {
     lobby_updateGrass(&lobby_game.player, GetFrameTime(), gameTime, lobby_game.cam);
     lobby_updateAtmosphericEffects(dt, &lobby_game.player, lobby_game.cam);
 
-
     if (lobby_game.player.position.x != lastSentPos.x || lobby_game.player.position.y != lastSentPos.y || firstFrame) {
         PlayerNet_St net = {
             .x = lobby_game.player.position.x, .y = lobby_game.player.position.y,
@@ -285,9 +282,9 @@ void lobby_update(f32 dt) {
         };
         strncpy(net.name, lobby_game.player.name, 31);
 
-        GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = htons(sizeof(PlayerNet_St)) };
+        GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_LOBBY, .action = ACTION_CODE_LOBBY_MOVE, .length = htons(sizeof(PlayerNet_St)) };
         RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-        h.sender_id = htons((u16)lobby_game.clientId);
+        h.senderId = htons((u16)lobby_game.clientId);
         
         u8 buffer[1024];
         memcpy(buffer, &h, sizeof(h));
@@ -339,7 +336,6 @@ void lobby_draw(void) {
 
 void lobby_clientDestroy(void) {
     lobby_freeAudio();
-    lobby_freeTextures(lobby_game.playerVisuals.textures);
 
     // Cleanup params menu
     paramsMenu_free(&paramsMenu);

@@ -228,9 +228,6 @@
 
 #include "utils/globals.h"
 
-#include "leaderboard.h"
-
-
 s32 networkSocket = -1;
 RUDPConnection_St serverConnection; 
 
@@ -310,7 +307,7 @@ void discoverServers(void) {
     localAddr.sin_port = htons(8080);
     localAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
 
-    RUDPHeader_St h_disc = { .action = ACTION_CODE_DISCOVERY_QUERY, .sequence = 0, .ack = 0, .ack_bitfield = 0, .sender_id = 0 };
+    RUDPHeader_St h_disc = { .action = ACTION_CODE_DISCOVERY_QUERY, .sequence = 0, .ack = 0, .ackBitfield = 0, .senderId = 0 };
     sendto(networkSocket, &h_disc, sizeof(h_disc), 0, (struct sockaddr*)&broadcastAddr, sizeof(broadcastAddr));
     sendto(networkSocket, &h_disc, sizeof(h_disc), 0, (struct sockaddr*)&localAddr, sizeof(localAddr));
 
@@ -377,31 +374,27 @@ void receiveNetworkData(void) {
             memcpy(&header, buffer, sizeof(RUDPHeader_St));
             
             // Handle discovery outside of RUDP state machine
-            if (header.action == ACTION_CODE_DISCOVERY_INFO && ntohs(header.sender_id) == 999) {
+            if (header.action == ACTION_CODE_DISCOVERY_INFO && ntohs(header.senderId) == 999) {
                 char* info = (char*)buffer + sizeof(RUDPHeader_St);
                 log_info("[DISCOVERY] Found Server at %s: %s", inet_ntoa(fromAddr.sin_addr), info);
-                extern void addDiscoveredRoom(const char* ip, const char* name);
-                addDiscoveredRoom(inet_ntoa(fromAddr.sin_addr), info);
+                lobby_addDiscoveredServer(inet_ntoa(fromAddr.sin_addr), info);
                 continue;
             }
 
             if (rudpProcessIncoming(&serverConnection, &header)) {
                 u8* payload = buffer + sizeof(RUDPHeader_St);
                 u16 payloadLen = (u16) (bytesRead - sizeof(RUDPHeader_St));
-                u16 senderId = ntohs(header.sender_id);
+                u16 senderId = ntohs(header.senderId);
 
                 if (header.action == ACTION_CODE_JOIN_ERROR) {
                     log_error("[NET] Join rejected by server: %s", (char*)payload);
-                    setConnectionError((char*)payload);
+                    lobby_setConnectionError((char*)payload);
                     lobby_game.currentState = GAME_STATE_CONNECTION;
                     // Reset network state if needed
                     rudpInitConnection(&serverConnection);
-                }
-                else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
-                    extern void handleRoomList(const void* data, int count);
-                    handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
-                }
-                else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
+                } else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
+                    lobby_handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
+                } else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
                     if (payloadLen >= 2) {
                         u8 nextGame = payload[0];
                         u8 roomId = payload[1];
@@ -415,26 +408,24 @@ void receiveNetworkData(void) {
                             currentMiniGame = miniGameInterfaces[currentMiniGameID];
                             if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
                             
-                            closeRoomSelector();
+                            lobby_closeRoomSelector();
                             lobby_game.currentState = (nextGame == MINI_GAME_ID_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
-                            if (nextGame == MINI_GAME_ID_LOBBY) initWaitingRoom();
+                            if (nextGame == MINI_GAME_ID_LOBBY) lobby_initWaitingRoom();
                         }
                     }
-                }
-                else if (header.action == ACTION_CODE_GAME_DATA) {
+                } else if (header.action == ACTION_CODE_GAME_DATA) {
                     if (payloadLen >= sizeof(GameTLVHeader_St)) {
                         GameTLVHeader_St tlv;
                         memcpy(&tlv, payload, sizeof(tlv));
                         u16 tlv_data_len = ntohs(tlv.length);
                         
                         if (tlv_data_len <= payloadLen - sizeof(GameTLVHeader_St)) {
-                            if (tlv.game_id < __miniGameIdCount && miniGameInterfaces[tlv.game_id]) {
-                                miniGameInterfaces[tlv.game_id]->on_data(senderId, tlv.action, payload + sizeof(tlv), tlv_data_len);
+                            if (tlv.gameId < __miniGameIdCount && miniGameInterfaces[tlv.gameId]) {
+                                miniGameInterfaces[tlv.gameId]->on_data(senderId, tlv.action, payload + sizeof(tlv), tlv_data_len);
                             }
                         }
                     }
-                } 
-                else if (currentMiniGame && currentMiniGame->on_data) {
+                } else if (currentMiniGame && currentMiniGame->on_data) {
                     if (header.action < firstAvailableActionCode || header.action == ACTION_CODE_JOIN_ACK) {
                         currentMiniGame->on_data(senderId, header.action, payload, payloadLen);
                     }
@@ -469,14 +460,14 @@ void spawn_server(void) {
 // Backup of lobby terrains before entering editor (so editor changes don't persist in lobby)
 static TerrainVec_St lobbyTerrainBackup = {0};
 
-void switch_minigame(u8 game_id) {
-    if (game_id < __miniGameIdCount && miniGameInterfaces[game_id]) {
+void switchMinigame(u8 gameId) {
+    if (gameId < __miniGameIdCount && miniGameInterfaces[gameId]) {
         // Notify server that we are leaving the current minigame room (if any)
-        if (currentMiniGameID != MINI_GAME_ID_LOBBY && currentMiniGameID != MINI_GAME_ID_EDITOR && game_id == MINI_GAME_ID_LOBBY) {
-            GameTLVHeader_St tlv = { .game_id = currentMiniGameID, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
+        if (currentMiniGameID != MINI_GAME_ID_LOBBY && currentMiniGameID != MINI_GAME_ID_EDITOR && gameId == MINI_GAME_ID_LOBBY) {
+            GameTLVHeader_St tlv = { .gameId = currentMiniGameID, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-            h.sender_id = htons((u16) lobby_game.clientId);
+            h.senderId = htons((u16) lobby_game.clientId);
             u8 buf[64];
             memcpy(buf, &h, sizeof(h));
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
@@ -484,13 +475,13 @@ void switch_minigame(u8 game_id) {
         }
 
         // Leaving editor → restore lobby terrains
-        if (currentMiniGameID == MINI_GAME_ID_EDITOR && game_id != MINI_GAME_ID_EDITOR) {
+        if (currentMiniGameID == MINI_GAME_ID_EDITOR && gameId != MINI_GAME_ID_EDITOR) {
             da_clear(&terrains);
             if (lobbyTerrainBackup.count > 0)
                 da_append_many(&terrains, lobbyTerrainBackup.items, lobbyTerrainBackup.count);
         }
         // Entering editor → backup lobby terrains
-        if (game_id == MINI_GAME_ID_EDITOR) {
+        if (gameId == MINI_GAME_ID_EDITOR) {
             da_clear(&lobbyTerrainBackup);
             if (terrains.count > 0)
                 da_append_many(&lobbyTerrainBackup, terrains.items, terrains.count);
@@ -499,23 +490,23 @@ void switch_minigame(u8 game_id) {
         if (currentMiniGame && currentMiniGame->destroy) {
             currentMiniGame->destroy();
         }
-        currentMiniGameID = (MiniGameId_Et) game_id;
+        currentMiniGameID = (MiniGameId_Et) gameId;
         currentMiniGame = miniGameInterfaces[currentMiniGameID];
         if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
 
         // Ensure UI state is cleared when switching
         lobby_game.currentState = GAME_STATE_GAMEPLAY;
-        closeRoomSelector();
+        lobby_closeRoomSelector();
 
-        if (game_id == MINI_GAME_ID_LOBBY) {
+        if (gameId == MINI_GAME_ID_LOBBY) {
             lobby_game.currentState = GAME_STATE_GAMEPLAY;
             lobby_game.editorMode = false;
-            initWaitingRoom(); // Réinitialise l'overlay pour éviter qu'il reste visible au retour lobby
+            lobby_initWaitingRoom(); // Réinitialise l'overlay pour éviter qu'il reste visible au retour lobby
         } else {
             lobby_game.currentState = GAME_STATE_INGAME;
-            if (game_id == MINI_GAME_ID_EDITOR) lobby_game.editorMode = true;
+            if (gameId == MINI_GAME_ID_EDITOR) lobby_game.editorMode = true;
         }
-        log_info("Switched to mini-game ID: %d", game_id);
+        log_info("Switched to mini-game ID: %d", gameId);
     }
 }
 
@@ -524,17 +515,17 @@ int main(void) {
     
     if (lobby_initApp() != OK) return 1;
 
-    InitMenus();
+    lobby_initMenus();
 
     miniGameInterfaces[MINI_GAME_ID_LOBBY]->init();
     currentMiniGame = miniGameInterfaces[MINI_GAME_ID_LOBBY];
     
-    initConnectionScreen();
+    lobby_initConnectionScreen();
     // Use the default pseudo from the connection screen as the initial player name
-    strncpy(lobby_game.player.name, getEnteredPseudo(), 31);
+    strncpy(lobby_game.player.name, lobby_getEnteredPseudo(), 31);
 
-    initRoomSelector();
-    initWaitingRoom();
+    lobby_initRoomSelector();
+    lobby_initWaitingRoom();
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -547,36 +538,33 @@ int main(void) {
             systemSettings.video.height = GetScreenHeight();
         }
 
-        UpdateMenu();
-        bool selectorActive = updateRoomSelector();
+        lobby_updateMenu();
+        bool selectorActive = lobby_updateRoomSelector();
         // L'overlay "salle d'attente" du lobby n'est actif qu'en lobby :
         // chaque module de jeu gère sa propre phase pré-partie.
-        if (currentMiniGameID == MINI_GAME_ID_LOBBY) updateWaitingRoom();
+        if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_updateWaitingRoom();
 
         BeginDrawing();
         ClearBackground(SKYBLUE);
 
-        if (g_currentMenu != MENU_NONE) {
-            DrawMenu();
-        } 
-        else if (lobby_game.currentState == GAME_STATE_CONNECTION) {
+        if (lobby_currentMenu != MENU_NONE) {
+            lobby_drawMenu();
+        } else if (lobby_game.currentState == GAME_STATE_CONNECTION) {
             static f32 disc_timer = 0;
             disc_timer += dt;
             if (disc_timer > 2.0f) { discoverServers(); disc_timer = 0; }
             
-            if (updateConnectionScreen()) {
-                const char* pseudo = getEnteredPseudo();
-                initNetwork(getEnteredIP(), pseudo);
+            if (lobby_updateConnectionScreen()) {
+                const char* pseudo = lobby_getEnteredPseudo();
+                initNetwork(lobby_getEnteredIP(), pseudo);
                 strncpy(lobby_game.player.name, pseudo, 31);
                 lobby_game.currentState = GAME_STATE_ROOM_LIST;
-                openRoomSelector(-1); // Open global room list
+                lobby_openRoomSelector(-1); // Open global room list
             }
-            drawConnectionScreen();
-        } 
-        else if (lobby_game.currentState == GAME_STATE_ROOM_LIST) {
-            drawRoomSelector();
-        }
-        else {
+            lobby_drawConnectionScreen();
+        } else if (lobby_game.currentState == GAME_STATE_ROOM_LIST) {
+            lobby_drawRoomSelector();
+        } else {
             // Gameplay loop
             static MiniGameId_Et lastTriggerID = MINI_GAME_ID_LOBBY;
 
@@ -592,7 +580,7 @@ int main(void) {
 
                 if (triggerID != MINI_GAME_ID_LOBBY) {
                     if (lastTriggerID != triggerID) {
-                        log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
+                        // log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
                         lastTriggerID = triggerID;
                     }
 
@@ -601,17 +589,17 @@ int main(void) {
                              GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 20)/2, 
                              GetScreenHeight() - 100, 20, GREEN);
 
-                    if (IsKeyPressed(KEY_ENTER)) {
+                    if (IsKeyPressed(KEY_E)) {
                         // Solo mode (no server) or editor: switch directly without room selector
                         if (triggerID == MINI_GAME_ID_EDITOR || networkSocket < 0) {
-                            switch_minigame(triggerID);
+                            switchMinigame(triggerID);
                         } else {
-                            openRoomSelector(triggerID);
+                            lobby_openRoomSelector(triggerID);
                         }
                     }
                 } else {
                     if (lastTriggerID != MINI_GAME_ID_LOBBY) {
-                        closeRoomSelector();
+                        lobby_closeRoomSelector();
                         lastTriggerID = MINI_GAME_ID_LOBBY;
                     }
                 }
@@ -622,8 +610,8 @@ int main(void) {
                 currentMiniGame->draw();
             }
             
-            drawRoomSelector();
-            if (currentMiniGameID == MINI_GAME_ID_LOBBY) drawWaitingRoom();
+            lobby_drawRoomSelector();
+            if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_drawWaitingRoom();
         }
 
         DrawFPS(10, 10);
@@ -635,7 +623,7 @@ int main(void) {
     if (networkSocket != -1) {
         RUDPHeader_St h;
         rudpGenerateHeader(&serverConnection, ACTION_CODE_QUIT_GAME, &h);
-        h.sender_id = htons((u16)lobby_game.clientId);
+        h.senderId = htons((u16)lobby_game.clientId);
         send(networkSocket, &h, sizeof(h), 0);
     }
 

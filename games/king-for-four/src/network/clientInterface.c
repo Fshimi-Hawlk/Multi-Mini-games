@@ -1,5 +1,5 @@
 /**
- * @file king_client_module.c
+ * @file kingClient_module.c
  * @author i-Charlys
  * @author Fshimi-Hawlk
  * @date 2026-03-18
@@ -27,46 +27,46 @@ enum {
 
 #pragma pack(push, 1)
 typedef struct {
-    int current_player;
-    int active_color;
-    Card top_card;
-    int hand_sizes[4];
+    int currentPlayer;
+    int activeColor;
+    Card_St topCard;
+    int handSizes[4];
     int status;
-    int host_id;
-    int last_player_id;
+    int hostId;
+    int lastPlayerId;
     int last_action;
-    int num_players;
-    int requested_players;
+    int numPlayers;
+    int requestedPlayers;
 } GameSyncPayload;
 
 typedef struct {
-    int card_index;
-    int chosen_color; 
+    int cardIndex;
+    int chosenColor; 
 } ActionPlayPayload_St;
 #pragma pack(pop)
 
-static GameState local_state;
-static GameAssets assets;
+static KingForFourGameState_St kingForFour_localState;
+static GameAssets_St assets;
 static bool assets_loaded = false;
-static int my_internal_id = -1;
-static int game_status = 0;
+static int myInternalId = -1;
+static int gameStatus = 0;
 static float join_retry_timer = 0;
 
 static float turn_overlay_timer = 0;
-static int winner_id = -1;
+static int winnerId = -1;
 static float last_move_timer = 0;
-static int last_player_who_moved = -1;
+static int lastPlayer_who_moved = -1;
 static int last_action_type = -1;
-static Card last_seen_top_card = {CARD_BLACK, ZERO};
-static float card_pop_timer = 0;
-static bool is_choosing_color = false;
-static int pending_card_index = -1;
-static bool show_info_window = false;
+static Card_St lastSeen_topCard = {CARD_BLACK, ZERO};
+static float cardPop_timer = 0;
+static bool isChoosingColor = false;
+static int pendingCardIndex = -1;
+static bool showInfo_window = false;
 
-static void send_to_server(u8 action, void* data, u16 len) {
-    GameTLVHeader_St tlv = { .game_id = MINI_GAME_ID_KING_FOR_FOUR, .action = action, .length = htons(len) };
+static void send_toServer(u8 action, void* data, u16 len) {
+    GameTLVHeader_St tlv = { .gameId = MINI_GAME_ID_KING_FOR_FOUR, .action = action, .length = htons(len) };
     RUDPHeader_St h; rudpGenerateHeader(&serverConnection, ACTION_CODE_GAME_DATA, &h);
-    h.sender_id = htons((u16)(my_internal_id != -1 ? my_internal_id : 0));
+    h.senderId = htons((u16)(myInternalId != -1 ? myInternalId : 0));
     u8 buffer[1024];
     memset(buffer, 0, sizeof(buffer));
     memcpy(buffer, &h, sizeof(h));
@@ -75,115 +75,115 @@ static void send_to_server(u8 action, void* data, u16 len) {
     send(networkSocket, buffer, sizeof(h) + sizeof(tlv) + len, 0);
 }
 
-void king_client_init(void) {
+void kingClientInit(void) {
     if (!assets_loaded) {
-        assets = LoadAssets();
+        assets = kingForFour_loadAssets();
         assets_loaded = true;
     }
-    memset(&local_state, 0, sizeof(GameState));
-    init_game_logic(&local_state);
-    my_internal_id = -1;
-    game_status = 0;
-    winner_id = -1;
+    memset(&kingForFour_localState, 0, sizeof(KingForFourGameState_St));
+    kingForFour_initGameLogic(&kingForFour_localState);
+    myInternalId = -1;
+    gameStatus = 0;
+    winnerId = -1;
     join_retry_timer = 0;
-    is_choosing_color = false;
-    pending_card_index = -1;
-    show_info_window = false;
+    isChoosingColor = false;
+    pendingCardIndex = -1;
+    showInfo_window = false;
 }
 
-static int selected_players = 4;
+static int selectedPlayers = 4;
 
-void king_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
+void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
-        if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
-            log_warn("[KING] Data received from invalid player ID: %d", player_id);
+        if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
+            log_warn("[KING] Data received from invalid player ID: %d", playerId);
             return;
         }
     }
     if (data == NULL) return;
     if (action == ACTION_CODE_JOIN_ACK) {
         if (len >= sizeof(u16)) {
-            u16 net_id;
-            memcpy(&net_id, data, sizeof(u16));
-            my_internal_id = (int)ntohs(net_id);
-            log_info("[KING] Mon ID interne: %d", my_internal_id);
+            u16 netId;
+            memcpy(&netId, data, sizeof(u16));
+            myInternalId = (int)ntohs(netId);
+            log_info("[KING] Mon ID interne: %d", myInternalId);
         }
     } else if (action == ACTION_CODE_SYNC_GAME) {
         if (len >= (u16) sizeof(GameSyncPayload)) {
             GameSyncPayload sync;
             memcpy(&sync, data, sizeof(GameSyncPayload));
 
-            selected_players = sync.requested_players;
+            selectedPlayers = sync.requestedPlayers;
 
-            if (sync.current_player != local_state.current_player && sync.current_player == my_internal_id) {
+            if (sync.currentPlayer != kingForFour_localState.currentPlayer && sync.currentPlayer == myInternalId) {
                 turn_overlay_timer = 2.0f;
             }
-            local_state.current_player = sync.current_player;
-            local_state.active_color = sync.active_color;
-            local_state.num_players = sync.num_players;
-            game_status = sync.status;
+            kingForFour_localState.currentPlayer = sync.currentPlayer;
+            kingForFour_localState.activeColor = sync.activeColor;
+            kingForFour_localState.numPlayers = sync.numPlayers;
+            gameStatus = sync.status;
 
-            extern void updateWaitingRoomInfo(int players, int max, bool host);
-            updateWaitingRoomInfo(sync.num_players, 4, (my_internal_id == 0));
+            extern void lobby_updateWaitingRoomInfo(int players, int max, bool host);
+            lobby_updateWaitingRoomInfo(sync.numPlayers, 4, (myInternalId == 0));
 
-            if (sync.last_player_id != -1) {
-                last_player_who_moved = sync.last_player_id;
+            if (sync.lastPlayerId != -1) {
+                lastPlayer_who_moved = sync.lastPlayerId;
                 last_action_type = sync.last_action;
                 last_move_timer = 1.5f;
-                if (sync.top_card.color != last_seen_top_card.color || sync.top_card.value != last_seen_top_card.value) {
-                    card_pop_timer = 0.5f;
-                    last_seen_top_card = sync.top_card;
+                if (sync.topCard.color != lastSeen_topCard.color || sync.topCard.value != lastSeen_topCard.value) {
+                    cardPop_timer = 0.5f;
+                    lastSeen_topCard = sync.topCard;
                 }
             }
-            if (local_state.discard_pile.size == 0) push_card(&local_state.discard_pile, sync.top_card);
-            else local_state.discard_pile.cards[local_state.discard_pile.size - 1] = sync.top_card;
+            if (kingForFour_localState.discardPile.size == 0) kingForFour_pushCard(&kingForFour_localState.discardPile, sync.topCard);
+            else kingForFour_localState.discardPile.cards[kingForFour_localState.discardPile.size - 1] = sync.topCard;
             
-            for (int i = 0; i < sync.num_players; i++) {
-                local_state.players[i].hand.size = sync.hand_sizes[i];
+            for (int i = 0; i < sync.numPlayers; i++) {
+                kingForFour_localState.players[i].hand.size = sync.handSizes[i];
             }
-            if (game_status == 1) {
-                for (int i = 0; i < sync.num_players; i++) {
-                    if (sync.hand_sizes[i] == 0) winner_id = i;
+            if (gameStatus == 1) {
+                for (int i = 0; i < sync.numPlayers; i++) {
+                    if (sync.handSizes[i] == 0) winnerId = i;
                 }
             }
         }
     } else if (action == ACTION_CODE_KFF_SYNC_HAND) {
-        int count = len / sizeof(Card);
-        if (my_internal_id >= 0 && my_internal_id < 4) {
-            clear_deck(&local_state.players[my_internal_id].hand);
+        int count = len / sizeof(Card_St);
+        if (myInternalId >= 0 && myInternalId < 4) {
+            kingForFour_clearDeck(&kingForFour_localState.players[myInternalId].hand);
             for (int i = 0; i < count; i++) {
-                Card c; memcpy(&c, (u8*)data + (i * sizeof(Card)), sizeof(Card));
-                push_card(&local_state.players[my_internal_id].hand, c);
+                Card_St c; memcpy(&c, (u8*)data + (i * sizeof(Card_St)), sizeof(Card_St));
+                kingForFour_pushCard(&kingForFour_localState.players[myInternalId].hand, c);
             }
         }
     }
 }
 
-void king_client_update(float dt) {
+void kingClient_update(float dt) {
     if (!assets_loaded) return;
-    if (my_internal_id == -1) {
+    if (myInternalId == -1) {
         join_retry_timer += dt;
         if (join_retry_timer > 1.0f) {
-            send_to_server(ACTION_CODE_JOIN_GAME, NULL, 0);
+            send_toServer(ACTION_CODE_JOIN_GAME, NULL, 0);
             join_retry_timer = 0;
         }
     }
     if (turn_overlay_timer > 0) turn_overlay_timer -= dt;
     if (last_move_timer > 0) last_move_timer -= dt;
-    if (card_pop_timer > 0) card_pop_timer -= dt;
+    if (cardPop_timer > 0) cardPop_timer -= dt;
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         Vector2 m = GetMousePosition();
         Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
         if (CheckCollisionPointRec(m, infoIconRect)) {
-            show_info_window = !show_info_window;
-        } else if (show_info_window) {
-            show_info_window = false; // Close when clicking elsewhere
+            showInfo_window = !showInfo_window;
+        } else if (showInfo_window) {
+            showInfo_window = false; // Close when clicking elsewhere
         }
     }
 
-    if (game_status == 1) {
-        if (is_choosing_color) {
+    if (gameStatus == 1) {
+        if (isChoosingColor) {
             if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
                 Vector2 m = GetMousePosition();
                 int sw = GetScreenWidth(); int sh = GetScreenHeight();
@@ -193,83 +193,83 @@ void king_client_update(float dt) {
                 };
                 for (int i = 0; i < 4; i++) {
                     if (CheckCollisionPointRec(m, colors[i])) {
-                        ActionPlayPayload_St payload = { .card_index = pending_card_index, .chosen_color = i };
-                        send_to_server(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
-                        is_choosing_color = false;
+                        ActionPlayPayload_St payload = { .cardIndex = pendingCardIndex, .chosenColor = i };
+                        send_toServer(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
+                        isChoosingColor = false;
                         break;
                     }
                 }
             }
         }
-        else if (local_state.current_player == my_internal_id && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            if (my_internal_id >= 0 && my_internal_id < 4) {
-                int clickedHandIndex = GetHoveredCardIndex(&local_state.players[my_internal_id], assets);
+        else if (kingForFour_localState.currentPlayer == myInternalId && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (myInternalId >= 0 && myInternalId < 4) {
+                int clickedHandIndex = kingForFour_getHoveredCardIndex(&kingForFour_localState.players[myInternalId], assets);
                 if (clickedHandIndex != -1) {
-                    if (local_state.players[my_internal_id].hand.cards[clickedHandIndex].color == CARD_BLACK) {
-                        is_choosing_color = true; pending_card_index = clickedHandIndex;
+                    if (kingForFour_localState.players[myInternalId].hand.cards[clickedHandIndex].color == CARD_BLACK) {
+                        isChoosingColor = true; pendingCardIndex = clickedHandIndex;
                     } else {
-                        ActionPlayPayload_St payload = { .card_index = clickedHandIndex, .chosen_color = -1 };
-                        send_to_server(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
+                        ActionPlayPayload_St payload = { .cardIndex = clickedHandIndex, .chosenColor = -1 };
+                        send_toServer(ACTION_CODE_KFF_PLAY_CARD, &payload, sizeof(payload));
                     }
-                } else if (CheckCollisionPointRec(GetMousePosition(), GetDeckRect(assets))) {
-                    send_to_server(ACTION_CODE_KFF_DRAW_CARD, NULL, 0);
+                } else if (CheckCollisionPointRec(GetMousePosition(), kingForFour_getDeckRect(assets))) {
+                    send_toServer(ACTION_CODE_KFF_DRAW_CARD, NULL, 0);
                 }
             }
         }
     }
-    if (game_status == 0 && my_internal_id == 0) {
+    if (gameStatus == 0 && myInternalId == 0) {
         bool changed = false;
-        if (IsKeyPressed(KEY_UP) && selected_players < 4) { selected_players++; changed = true; }
-        if (IsKeyPressed(KEY_DOWN) && selected_players > 2) { selected_players--; changed = true; }
+        if (IsKeyPressed(KEY_UP) && selectedPlayers < 4) { selectedPlayers++; changed = true; }
+        if (IsKeyPressed(KEY_DOWN) && selectedPlayers > 2) { selectedPlayers--; changed = true; }
         
         if (changed) {
-            send_to_server(ACTION_CODE_KFF_SET_PLAYER_COUNT, &selected_players, sizeof(int));
+            send_toServer(ACTION_CODE_KFF_SET_PLAYER_COUNT, &selectedPlayers, sizeof(int));
         }
 
-        if (IsKeyPressed(KEY_ENTER)) send_to_server(ACTION_CODE_START_GAME, &selected_players, sizeof(int));
+        if (IsKeyPressed(KEY_ENTER)) send_toServer(ACTION_CODE_START_GAME, &selectedPlayers, sizeof(int));
     }
     // removed local ESC handler to use lobby pause menu instead
 }
 
-void king_client_draw(void) {
+void kingClient_draw(void) {
     if (!assets_loaded) return;
-    if (game_status == 0) {
+    if (gameStatus == 0) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
-        if (my_internal_id != -1) {
-            DrawText(TextFormat("Vous êtes le JOUEUR %d", my_internal_id), 100, 180, 30, WHITE);
-            DrawText(TextFormat("Joueurs connectés : %d", local_state.num_players), 100, 215, 22, LIGHTGRAY);
-            if (my_internal_id == 0) {
-                DrawText(TextFormat("HÔTE: Flèches HAUT/BAS : %d JOUEURS (dont bots)", selected_players), 100, 250, 25, GREEN);
+        if (myInternalId != -1) {
+            DrawText(TextFormat("Vous êtes le JOUEUR %d", myInternalId), 100, 180, 30, WHITE);
+            DrawText(TextFormat("Joueurs connectés : %d", kingForFour_localState.numPlayers), 100, 215, 22, LIGHTGRAY);
+            if (myInternalId == 0) {
+                DrawText(TextFormat("HÔTE: Flèches HAUT/BAS : %d JOUEURS (dont bots)", selectedPlayers), 100, 250, 25, GREEN);
                 DrawText("Appuyez sur ENTRÉE pour lancer.", 100, 285, 25, GREEN);
             } else {
-                DrawText(TextFormat("En attente de l'hôte... (%d JOUEURS)", selected_players), 100, 250, 30, LIGHTGRAY);
+                DrawText(TextFormat("En attente de l'hôte... (%d JOUEURS)", selectedPlayers), 100, 250, 30, LIGHTGRAY);
             }
         } else DrawText("Connexion au serveur...", 100, 180, 30, GRAY);
         return;
     }
-    RenderTable(&local_state, assets, card_pop_timer > 0 ? (card_pop_timer * 0.2f) : 0);
-    RenderOpponents(&local_state, assets, my_internal_id);
-    if (my_internal_id >= 0 && my_internal_id < 4) {
-        RenderHand(&local_state.players[my_internal_id], assets);
+    kingForFour_renderTable(&kingForFour_localState, assets, cardPop_timer > 0 ? (cardPop_timer * 0.2f) : 0);
+    kingForFour_renderOpponents(&kingForFour_localState, assets, myInternalId);
+    if (myInternalId >= 0 && myInternalId < 4) {
+        kingForFour_renderHand(&kingForFour_localState.players[myInternalId], assets);
     }
-    if (last_move_timer > 0 && last_player_who_moved != -1) {
-        const char* pName = (last_player_who_moved == my_internal_id) ? "VOUS" : TextFormat("JOUEUR %d", last_player_who_moved);
+    if (last_move_timer > 0 && lastPlayer_who_moved != -1) {
+        const char* pName = (lastPlayer_who_moved == myInternalId) ? "VOUS" : TextFormat("JOUEUR %d", lastPlayer_who_moved);
         const char* actionName = (last_action_type == 0) ? "a JOUÉ une carte" : "a PIOCHÉ une carte";
         float alpha = last_move_timer > 0.5f ? 1.0f : last_move_timer * 2.0f;
         DrawText(TextFormat("%s %s", pName, actionName), GetScreenWidth()/2 - 100, GetScreenHeight()/2 + 80, 20, Fade(GOLD, alpha));
     }
-    if (local_state.current_player == my_internal_id) {
+    if (kingForFour_localState.currentPlayer == myInternalId) {
         float pulse = (sinf(GetTime() * 10.0f) + 1.0f) * 0.5f;
         DrawText("C'EST VOTRE TOUR !", 10, 40, 25, Fade(GREEN, 0.5f + pulse * 0.5f));
-    } else DrawText(TextFormat("Tour du Joueur %d", local_state.current_player), 10, 40, 25, YELLOW);
-    if (local_state.active_color != -1) {
+    } else DrawText(TextFormat("Tour du Joueur %d", kingForFour_localState.currentPlayer), 10, 40, 25, YELLOW);
+    if (kingForFour_localState.activeColor != -1) {
         Color c = RED; const char* name = "ROUGE";
-        if (local_state.active_color == 1) { c = YELLOW; name = "JAUNE"; }
-        else if (local_state.active_color == 2) { c = GREEN; name = "VERT"; }
-        else if (local_state.active_color == 3) { c = BLUE; name = "BLEU"; }
+        if (kingForFour_localState.activeColor == 1) { c = YELLOW; name = "JAUNE"; }
+        else if (kingForFour_localState.activeColor == 2) { c = GREEN; name = "VERT"; }
+        else if (kingForFour_localState.activeColor == 3) { c = BLUE; name = "BLEU"; }
         DrawText(TextFormat("COULEUR DEMANDÉE : %s", name), 10, 70, 20, c);
     }
-    if (is_choosing_color) {
+    if (isChoosingColor) {
         int sw = GetScreenWidth(); int sh = GetScreenHeight();
         DrawRectangle(0, 0, sw, sh, Fade(BLACK, 0.7f));
         DrawText("CHOISISSEZ UNE COULEUR", sw / 2.0f - 150, sh / 2.0f - 150, 25, WHITE);
@@ -283,10 +283,10 @@ void king_client_draw(void) {
         DrawRectangle(0, GetScreenHeight()/2 - 60, GetScreenWidth(), 120, Fade(GOLD, alpha));
         DrawText("C'EST VOTRE TOUR", GetScreenWidth()/2 - MeasureText("C'EST VOTRE TOUR", 60)/2, GetScreenHeight()/2 - 30, 60, WHITE);
     }
-    if (winner_id != -1) {
+    if (winnerId != -1) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
-        const char* txt = (winner_id == my_internal_id) ? "VICTOIRE !" : TextFormat("JOUEUR %d A GAGNÉ !", winner_id);
-        DrawText(txt, GetScreenWidth()/2 - MeasureText(txt, 80)/2, GetScreenHeight()/2 - 100, 80, winner_id == my_internal_id ? GREEN : RED);
+        const char* txt = (winnerId == myInternalId) ? "VICTOIRE !" : TextFormat("JOUEUR %d A GAGNÉ !", winnerId);
+        DrawText(txt, GetScreenWidth()/2 - MeasureText(txt, 80)/2, GetScreenHeight()/2 - 100, 80, winnerId == myInternalId ? GREEN : RED);
         DrawText("Appuyez sur ESC pour quitter", GetScreenWidth()/2 - 150, GetScreenHeight()/2 + 50, 20, GRAY);
     }
 
@@ -296,7 +296,7 @@ void king_client_draw(void) {
     DrawCircleV((Vector2){infoIconRect.x + 15, infoIconRect.y + 15}, 15, hoverInfo ? SKYBLUE : BLUE);
     DrawText("i", (int)infoIconRect.x + 11, (int)infoIconRect.y + 5, 25, WHITE);
 
-    if (show_info_window) {
+    if (showInfo_window) {
         int sw = GetScreenWidth(); int sh = GetScreenHeight();
         Rectangle win = { sw/2.0f - 250, sh/2.0f - 200, 500, 400 };
         DrawRectangleRec(win, Fade(DARKGRAY, 0.95f));
@@ -319,8 +319,8 @@ void king_client_draw(void) {
 GameClientInterface_St kingForFourClientInterface = {
     .id = MINI_GAME_ID_KING_FOR_FOUR,
     .name = "King For Four",
-    .init = king_client_init,
-    .on_data = king_client_on_data,
-    .update = king_client_update,
-    .draw = king_client_draw
+    .init = kingClientInit,
+    .on_data = kingClient_on_data,
+    .update = kingClient_update,
+    .draw = kingClient_draw
 };

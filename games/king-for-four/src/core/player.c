@@ -7,6 +7,7 @@
 
 #include "core/player.h"
 #include <string.h>
+#include <stdio.h>
 
 /**
  * @brief Initializes a player's data.
@@ -14,11 +15,11 @@
  * @param id Unique ID.
  * @param name Nickname.
  */
-void init_player(Player* p, int id, const char* name) {
+void kingForFour_initPlayer(Player_St* p, int id, const char* name) {
     if (p == NULL) return; 
 
     // Eliminate memory garbage
-    memset(p, 0, sizeof(Player));
+    memset(p, 0, sizeof(Player_St));
 
     p->id = id;
     p->is_local = 1; // Default value
@@ -31,14 +32,14 @@ void init_player(Player* p, int id, const char* name) {
 /**
  * @brief Transfers a card from the draw pile to the player's hand.
  * @param p Pointer to the player.
- * @param draw_pile Pointer to the draw pile.
+ * @param drawPile Pointer to the draw pile.
  */
-void draw_to_hand(Player* p, Deck* draw_pile) {
-    if (!p || !draw_pile) return;
+void kingForFour_drawToHand(Player_St* p, Deck_St* drawPile) {
+    if (!p || !drawPile) return;
     
-    if (draw_pile->size > 0) {
-        Card c = pop_card(draw_pile);
-        push_card(&(p->hand), c);
+    if (drawPile->size > 0) {
+        Card_St c = kingForFour_popCard(drawPile);
+        kingForFour_pushCard(&(p->hand), c);
     } else {
         printf("Plus de cartes dans la pioche pour %s !\n", p->name);
     }

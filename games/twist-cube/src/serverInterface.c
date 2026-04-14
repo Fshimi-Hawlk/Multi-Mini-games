@@ -16,70 +16,70 @@ typedef struct {
 typedef struct {
     RubikPlayer players[MAX_CLIENTS];
     int status; // 0: WAITING, 1: PLAYING
-    float elimination_timer;
+    float eliminationTimer;
     int seed;
 } RubikServerState;
 
-void* rubik_create_instance(void) {
+void* rubik_createInstance(void) {
     RubikServerState* rs = calloc(1, sizeof(RubikServerState));
     if (rs) {
         rs->status = 0;
         rs->seed = (int)time(NULL);
-        rs->elimination_timer = 0;
+        rs->eliminationTimer = 0;
     }
     return rs;
 }
 
-void rubik_on_action(void *state, s32 room_id, s32 player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+void rubik_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
     
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_ID_TWIST_CUBE) return;
+    if (tlv->gameId != MINI_GAME_ID_TWIST_CUBE) return;
     
     RubikServerState* rs = (RubikServerState*)state;
-    u8 real_action = tlv->action;
-    void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
-    (void)real_payload;
+    u8 realAction = tlv->action;
+    void* realPayload = (u8*)payload + sizeof(GameTLVHeader_St);
+    (void)realPayload;
 
-    if (real_action == ACTION_CODE_JOIN_GAME) {
-        if (player_id < 0 || player_id >= MAX_CLIENTS) return;
-        rs->players[player_id].active = true;
-        rs->players[player_id].id = player_id;
-        rs->players[player_id].progress = 0;
-        rs->players[player_id].eliminated = false;
+    if (realAction == ACTION_CODE_JOIN_GAME) {
+        if (playerId < 0 || playerId >= MAX_CLIENTS) return;
+        rs->players[playerId].active = true;
+        rs->players[playerId].id = playerId;
+        rs->players[playerId].progress = 0;
+        rs->players[playerId].eliminated = false;
         
-        int internal_id = player_id; // Simple mapping
-        u16 net_id = htons((u16)internal_id);
-        u8 buf_ack[64];
-        memset(buf_ack, 0, sizeof(buf_ack));
-        GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
-        memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-        memcpy(buf_ack + sizeof(tlv_ack), &net_id, sizeof(u16));
-        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
+        int internalId = playerId; // Simple mapping
+        u16 netId = htons((u16)internalId);
+        u8 bufAck[64];
+        memset(bufAck, 0, sizeof(bufAck));
+        GameTLVHeader_St tlvAck = { .gameId = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+        memcpy(bufAck, &tlvAck, sizeof(tlvAck));
+        memcpy(bufAck + sizeof(tlvAck), &netId, sizeof(u16));
+        broadcast(UNICAST, playerId, ACTION_CODE_GAME_DATA, bufAck, sizeof(tlvAck) + sizeof(u16));
     }
-    else if (real_action == ACTION_CODE_START_GAME) {
-        log_info("[RUBIK] Room %d: Game starting (triggered by player %d)", room_id, player_id);
+    else if (realAction == ACTION_CODE_START_GAME) {
+        log_info("[RUBIK] Room %d: Game starting (triggered by player %d)", roomId, playerId);
         rs->status = 1;
-        rs->elimination_timer = 30.0f;
+        rs->eliminationTimer = 30.0f;
         rs->seed = (int)time(NULL);
         u32 net_seed = htonl((u32)rs->seed);
 
         u8 buf[64];
         memset(buf, 0, sizeof(buf));
-        GameTLVHeader_St tlv_scr = { .game_id = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = htons(sizeof(u32)) };
+        GameTLVHeader_St tlv_scr = { .gameId = MINI_GAME_ID_TWIST_CUBE, .action = ACTION_CODE_RUBIK_SCRAMBLE, .length = htons(sizeof(u32)) };
         memcpy(buf, &tlv_scr, sizeof(tlv_scr));
         memcpy(buf + sizeof(tlv_scr), &net_seed, sizeof(u32));
-        broadcast(room_id, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(u32));    }
-    else if (real_action == ACTION_CODE_RUBIK_PROGRESS) {
-        if (player_id < 0 || player_id >= MAX_CLIENTS) return;
+        broadcast(roomId, -1, ACTION_CODE_GAME_DATA, buf, sizeof(tlv_scr) + sizeof(u32));    }
+    else if (realAction == ACTION_CODE_RUBIK_PROGRESS) {
+        if (playerId < 0 || playerId >= MAX_CLIENTS) return;
         if (len >= sizeof(GameTLVHeader_St) + sizeof(float)) {
-            memcpy(&rs->players[player_id].progress, real_payload, sizeof(float));
+            memcpy(&rs->players[playerId].progress, realPayload, sizeof(float));
         }
     }
 }
 
-void rubik_on_tick(void* state) {
+void rubik_onTick(void* state) {
     RubikServerState* rs = (RubikServerState*)state;
     if (rs->status != 1) return;
     
@@ -87,21 +87,21 @@ void rubik_on_tick(void* state) {
     // Simplified for now: just a placeholder logic
 }
 
-void rubik_on_player_leave(void* state, s32 player_id) {
-    if (player_id < 0 || player_id >= MAX_CLIENTS) return;
+void rubik_onPlayerLeave(void* state, s32 playerId) {
+    if (playerId < 0 || playerId >= MAX_CLIENTS) return;
     RubikServerState* rs = (RubikServerState*)state;
-    rs->players[player_id].active = false;
+    rs->players[playerId].active = false;
 }
 
-void rubik_destroy_instance(void *state) {
+void rubik_destroyInstance(void *state) {
     free(state);
 }
 
 GameServerInterface_St rubikServerInterface = {
-    .game_name = "rubik",
-    .create_instance = rubik_create_instance,
-    .on_action = rubik_on_action,
-    .on_tick = rubik_on_tick,
-    .on_player_leave = rubik_on_player_leave,
-    .destroy_instance = rubik_destroy_instance
+    .gameName = "rubik",
+    .createInstance = rubik_createInstance,
+    .onAction = rubik_onAction,
+    .onTick = rubik_onTick,
+    .onPlayerLeave = rubik_onPlayerLeave,
+    .destroyInstance = rubik_destroyInstance
 };

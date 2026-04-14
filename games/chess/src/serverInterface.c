@@ -14,90 +14,90 @@ typedef struct {
 
 typedef struct {
     int players[2]; // IDs of white and black players
-    int num_players;
+    int numPlayers;
     int turn; // 0 or 1
     // Board state could be here too if we wanted authoritative server
 } ChessServerState;
 
-void* chess_create_instance(void) {
+void* chess_createInstance(void) {
     ChessServerState* cs = calloc(1, sizeof(ChessServerState));
     if (cs) {
         cs->players[0] = -1;
         cs->players[1] = -1;
-        cs->num_players = 0;
+        cs->numPlayers = 0;
         cs->turn = 0;
     }
     return cs;
 }
 
-void chess_on_action(void *state, s32 room_id, s32 player_id, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+void chess_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
     
     GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-    if (tlv->game_id != MINI_GAME_ID_CHESS) return;
+    if (tlv->gameId != MINI_GAME_ID_CHESS) return;
     
     ChessServerState* cs = (ChessServerState*)state;
-    u8 real_action = tlv->action;
-    void* real_payload = (u8*)payload + sizeof(GameTLVHeader_St);
-    (void)real_payload;
+    u8 realAction = tlv->action;
+    void* realPayload = (u8*)payload + sizeof(GameTLVHeader_St);
+    (void)realPayload;
 
-    if (real_action == ACTION_CODE_JOIN_GAME) {
-        int internal_id = -1;
+    if (realAction == ACTION_CODE_JOIN_GAME) {
+        int internalId = -1;
         // Assign white then black
         if (cs->players[0] == -1) {
-            cs->players[0] = player_id;
-            internal_id = 0;
-            cs->num_players++;
-        } else if (cs->players[1] == -1 && cs->players[0] != player_id) {
-            cs->players[1] = player_id;
-            internal_id = 1;
-            cs->num_players++;
+            cs->players[0] = playerId;
+            internalId = 0;
+            cs->numPlayers++;
+        } else if (cs->players[1] == -1 && cs->players[0] != playerId) {
+            cs->players[1] = playerId;
+            internalId = 1;
+            cs->numPlayers++;
         }
         
-        if (internal_id != -1) {
-            u8 buf_ack[64];
-            memset(buf_ack, 0, sizeof(buf_ack));
-            GameTLVHeader_St tlv_ack = { .game_id = MINI_GAME_ID_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
-            u16 net_internal_id = htons((u16)internal_id);
-            memcpy(buf_ack, &tlv_ack, sizeof(tlv_ack));
-            memcpy(buf_ack + sizeof(tlv_ack), &net_internal_id, sizeof(u16));
-            broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, buf_ack, sizeof(tlv_ack) + sizeof(u16));
+        if (internalId != -1) {
+            u8 bufAck[64];
+            memset(bufAck, 0, sizeof(bufAck));
+            GameTLVHeader_St tlvAck = { .gameId = MINI_GAME_ID_CHESS, .action = ACTION_CODE_JOIN_ACK, .length = htons(sizeof(u16)) };
+            u16 netInternalId = htons((u16)internalId);
+            memcpy(bufAck, &tlvAck, sizeof(tlvAck));
+            memcpy(bufAck + sizeof(tlvAck), &netInternalId, sizeof(u16));
+            broadcast(UNICAST, playerId, ACTION_CODE_GAME_DATA, bufAck, sizeof(tlvAck) + sizeof(u16));
         }
     }
-    else if (real_action == ACTION_CODE_START_GAME) {
+    else if (realAction == ACTION_CODE_START_GAME) {
         // Broadcast game start to everyone else
-        broadcast(room_id, player_id, ACTION_CODE_GAME_DATA, payload, len);
+        broadcast(roomId, playerId, ACTION_CODE_GAME_DATA, payload, len);
         // Also send back to host so they start the game too
-        broadcast(UNICAST, player_id, ACTION_CODE_GAME_DATA, payload, len);
+        broadcast(UNICAST, playerId, ACTION_CODE_GAME_DATA, payload, len);
     }
-    else if (real_action == ACTION_CODE_CHESS_MOVE) {
+    else if (realAction == ACTION_CODE_CHESS_MOVE) {
         // Broadcast move to all (including sender for simplicity or excluding)
         // In our case, we broadcast to everyone so the other player sees it.
-        broadcast(room_id, player_id, ACTION_CODE_GAME_DATA, payload, len);
+        broadcast(roomId, playerId, ACTION_CODE_GAME_DATA, payload, len);
         cs->turn = !cs->turn;
     }
 }
 
-void chess_on_tick(void* state) {
+void chess_onTick(void* state) {
     (void)state;
 }
 
-void chess_on_player_leave(void* state, s32 player_id) {
+void chess_onPlayerLeave(void* state, s32 playerId) {
     ChessServerState* cs = (ChessServerState*)state;
-    if (cs->players[0] == player_id) { cs->players[0] = -1; cs->num_players--; }
-    if (cs->players[1] == player_id) { cs->players[1] = -1; cs->num_players--; }
+    if (cs->players[0] == playerId) { cs->players[0] = -1; cs->numPlayers--; }
+    if (cs->players[1] == playerId) { cs->players[1] = -1; cs->numPlayers--; }
 }
 
-void chess_destroy_instance(void *state) {
+void chess_destroyInstance(void *state) {
     free(state);
 }
 
 GameServerInterface_St chessServerInterface = {
-    .game_name = "chess",
-    .create_instance = chess_create_instance,
-    .on_action = chess_on_action,
-    .on_tick = chess_on_tick,
-    .on_player_leave = chess_on_player_leave,
-    .destroy_instance = chess_destroy_instance
+    .gameName = "chess",
+    .createInstance = chess_createInstance,
+    .onAction = chess_onAction,
+    .onTick = chess_onTick,
+    .onPlayerLeave = chess_onPlayerLeave,
+    .destroyInstance = chess_destroyInstance
 };

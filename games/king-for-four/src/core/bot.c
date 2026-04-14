@@ -16,23 +16,23 @@ typedef enum {
     SCORE_WIN_BONUS   = 500
 } AIScore_Et;
 
-int evaluate_state(GameState* g, int player_id) {
-    if (!g || player_id < 0 || player_id >= g->num_players) return -1000;
+int kingForFour_evaluateState(KingForFourGameState_St* g, int playerId) {
+    if (!g || playerId < 0 || playerId >= g->numPlayers) return -1000;
 
     int score = 0;
-    Player* p = &g->players[player_id];
+    Player_St* p = &g->players[playerId];
     
     // Penalize having cards in hand (points)
     for (int i = 0; i < p->hand.size; i++) {
-        Card c = p->hand.cards[i];
+        Card_St c = p->hand.cards[i];
         if (c.value >= SKIP && c.value <= PLUS_TWO) score -= 20;
         else if (c.value >= JOKER) score -= SCORE_WILD_CARD;
         else score -= (int)c.value;
     }
 
     // Reward having fewer cards than others
-    for (int i = 0; i < g->num_players; i++) {
-        if (i != player_id) {
+    for (int i = 0; i < g->numPlayers; i++) {
+        if (i != playerId) {
             score += g->players[i].hand.size * 5;
         }
     }
@@ -43,36 +43,36 @@ int evaluate_state(GameState* g, int player_id) {
     return score;
 }
 
-int calculate_best_move(GameState* g, int player_id, int* out_card_index) {
-    if (!g || player_id < 0 || player_id >= g->num_players || !out_card_index) return INT_MIN;
+int kingForFour_calculateBestMove(KingForFourGameState_St* g, int playerId, int* outCardIndex) {
+    if (!g || playerId < 0 || playerId >= g->numPlayers || !outCardIndex) return INT_MIN;
 
-    int best_score = INT_MIN;
-    int best_move = -1; // -1 means draw
+    int bestScore = INT_MIN;
+    int bestMove = -1; // -1 means draw
     
-    Card top_card = {CARD_BLACK, ZERO};
-    if (g->discard_pile.size > 0) {
-        top_card = g->discard_pile.cards[g->discard_pile.size - 1];
+    Card_St topCard = {CARD_BLACK, ZERO};
+    if (g->discardPile.size > 0) {
+        topCard = g->discardPile.cards[g->discardPile.size - 1];
     }
 
-    Player* p = &g->players[player_id];
+    Player_St* p = &g->players[playerId];
     
     for (int i = 0; i < p->hand.size; i++) {
-        Card c = p->hand.cards[i];
-        if (is_move_valid(g->active_color, c, top_card)) {
+        Card_St c = p->hand.cards[i];
+        if (kingForFour_isMoveValid(g->activeColor, c, topCard)) {
             // Try this move (hypothetically)
-            // Since we don't have a full copy_game_state, we evaluate the card itself
-            int move_score = 0;
-            if (c.value >= JOKER) move_score += SCORE_WILD_CARD;
-            else if (c.value >= SKIP) move_score += SCORE_ACTION_CARD; // Prioritize actions
-            else move_score += (int)c.value;
+            // Since we don't have a full copy_gameState, we evaluate the card itself
+            int moveScore = 0;
+            if (c.value >= JOKER) moveScore += SCORE_WILD_CARD;
+            else if (c.value >= SKIP) moveScore += SCORE_ACTION_CARD; // Prioritize actions
+            else moveScore += (int)c.value;
 
-            if (move_score > best_score) {
-                best_score = move_score;
-                best_move = i;
+            if (moveScore > bestScore) {
+                bestScore = moveScore;
+                bestMove = i;
             }
         }
     }
 
-    *out_card_index = best_move;
-    return best_score;
+    *outCardIndex = bestMove;
+    return bestScore;
 }

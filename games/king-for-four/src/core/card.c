@@ -7,6 +7,7 @@
 
 #include "core/card.h"
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 /**
@@ -15,7 +16,7 @@
  * @param c The card to push.
  * @return 1 on success, 0 if full.
  */
-int push_card(Deck* d, Card c) {
+int kingForFour_pushCard(Deck_St* d, Card_St c) {
     if (!d || d->size >= MAX_UNO_CARDS) return 0;
     d->cards[d->size++] = c;
     return 1;
@@ -28,15 +29,15 @@ int push_card(Deck* d, Card c) {
  * @param index Index of the card to remove.
  * @return The removed card, or a black zero card if invalid.
  */
-Card remove_at(Deck* d, int index) {
+Card_St kingForFour_removeAt(Deck_St* d, int index) {
     if (!d || index < 0 || index >= d->size) 
-        return (Card){CARD_BLACK, ZERO};
+        return (Card_St){CARD_BLACK, ZERO};
 
-    Card c = d->cards[index];
+    Card_St c = d->cards[index];
     
     // Shift elements left to maintain contiguous array
     if (index < d->size - 1) {
-        memmove(&d->cards[index], &d->cards[index + 1], (d->size - 1 - index) * sizeof(Card));
+        memmove(&d->cards[index], &d->cards[index + 1], (d->size - 1 - index) * sizeof(Card_St));
     }
     
     d->size--;
@@ -48,8 +49,8 @@ Card remove_at(Deck* d, int index) {
  * @param d Pointer to the deck.
  * @return The top card.
  */
-Card pop_card(Deck* d) {
-    if (!d || d->size == 0) return (Card){CARD_BLACK, ZERO};
+Card_St kingForFour_popCard(Deck_St* d) {
+    if (!d || d->size == 0) return (Card_St){CARD_BLACK, ZERO};
     return d->cards[--d->size]; 
 }
 
@@ -57,7 +58,7 @@ Card pop_card(Deck* d) {
  * @brief Clears all cards from the deck.
  * @param d Pointer to the deck.
  */
-void clear_deck(Deck* d) {
+void kingForFour_clearDeck(Deck_St* d) {
     if (d) d->size = 0;
 }
 
@@ -65,12 +66,12 @@ void clear_deck(Deck* d) {
  * @brief Shuffles the deck using the Fisher-Yates algorithm in-place.
  * @param d Pointer to the deck.
  */
-void shuffle_deck(Deck* d) {
+void kingForFour_shuffleDeck(Deck_St* d) {
     if (!d || d->size <= 1) return;
 
     for (int i = d->size - 1; i > 0; i--) {
         int j = rand() % (i + 1);
-        Card temp = d->cards[i];
+        Card_St temp = d->cards[i];
         d->cards[i] = d->cards[j];
         d->cards[j] = temp;
     }
@@ -81,7 +82,7 @@ void shuffle_deck(Deck* d) {
  * @param array Array of cards to shuffle.
  * @param count Number of cards in the array.
  */
-static void _perform_single_riffle(Card* array, int count) {
+static void _perform_single_riffle(Card_St* array, int count) {
     if (count <= 1) return;
 
     // Cut roughly in the middle, +/- 10%
@@ -92,11 +93,11 @@ static void _perform_single_riffle(Card* array, int count) {
     if (cutPoint < 0) cutPoint = 0;
     if (cutPoint > count) cutPoint = count;
 
-    Card leftPile[MAX_UNO_CARDS];
-    Card rightPile[MAX_UNO_CARDS];
+    Card_St leftPile[MAX_UNO_CARDS];
+    Card_St rightPile[MAX_UNO_CARDS];
 
-    memcpy(leftPile, array, cutPoint * sizeof(Card));
-    memcpy(rightPile, array + cutPoint, (count - cutPoint) * sizeof(Card));
+    memcpy(leftPile, array, cutPoint * sizeof(Card_St));
+    memcpy(rightPile, array + cutPoint, (count - cutPoint) * sizeof(Card_St));
 
     int l = 0, r = 0, main_idx = 0;
     int sizeL = cutPoint;
@@ -124,7 +125,7 @@ static void _perform_single_riffle(Card* array, int count) {
  * @brief Shuffles the deck using a human-like riffle shuffle algorithm.
  * @param d Pointer to the deck.
  */
-void human_shuffle_deck(Deck* d) {
+void kingForFour_humanShuffleDeck(Deck_St* d) {
     if (!d || d->size <= 1) return;
 
     int numberOfShuffles = 5; 
@@ -138,24 +139,24 @@ void human_shuffle_deck(Deck* d) {
  * @brief Initializes a standard 108-card Uno deck.
  * @param d Pointer to the deck.
  */
-void init_uno_deck(Deck* d) {
+void kingForFour_initUnoDeck(Deck_St* d) {
     if (!d) return;
     d->size = 0;
 
     for (int c = CARD_RED; c <= CARD_BLUE; c++) {
-        push_card(d, (Card){c, ZERO}); // One 0 per color
+        kingForFour_pushCard(d, (Card_St){c, ZERO}); // One 0 per color
         for (int v = ONE; v <= NINE; v++) {
-            push_card(d, (Card){c, v}); 
-            push_card(d, (Card){c, v}); // Two of 1-9
+            kingForFour_pushCard(d, (Card_St){c, v}); 
+            kingForFour_pushCard(d, (Card_St){c, v}); // Two of 1-9
         }
         for (int i = 0; i < 2; i++) {
-            push_card(d, (Card){c, SKIP});
-            push_card(d, (Card){c, REVERSE});
-            push_card(d, (Card){c, PLUS_TWO});
+            kingForFour_pushCard(d, (Card_St){c, SKIP});
+            kingForFour_pushCard(d, (Card_St){c, REVERSE});
+            kingForFour_pushCard(d, (Card_St){c, PLUS_TWO});
         }
     }
     for (int i = 0; i < 4; i++) {
-        push_card(d, (Card){CARD_BLACK, JOKER});
-        push_card(d, (Card){CARD_BLACK, PLUS_FOUR});
+        kingForFour_pushCard(d, (Card_St){CARD_BLACK, JOKER});
+        kingForFour_pushCard(d, (Card_St){CARD_BLACK, PLUS_FOUR});
     }
 }

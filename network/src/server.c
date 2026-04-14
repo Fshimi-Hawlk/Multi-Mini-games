@@ -21,6 +21,7 @@
 #include "gameRegistry.h"
 #include "networkInterface.h"
 #include "logger.h"
+#include "raylib.h"
 
 // 
 // Configuration constants
@@ -58,7 +59,7 @@ typedef struct {
     MiniGameId_Et                 gameId;     ///< Type of game (BINGO, CHESS, etc.)
     const GameServerInterface_St* module;     ///< Pointer to game logic interface
     void*                         state;      ///< Opaque pointer to game instance data
-    char                          name[32];   ///< Display name (e.g. "Room #1")
+    const char                   *name;       ///< Display name (e.g. "Room #1")
     char                          creatorName[32]; ///< Name of the player who created it
     int                           hostId;     ///< Client ID of the host
 } Room_St;
@@ -130,7 +131,7 @@ static void serverSendAck(int clientId) {
     if (clientId < 0 || clientId >= MAX_CLIENTS || !clients[clientId].active) return;
     RUDPHeader_St header;
     rudpGenerateHeader(&clients[clientId].rudpState, ACTION_CODE_ACK_ONLY, &header);
-    header.sender_id = htons(999);
+    header.senderId = htons(999);
     sendto(masterSocket, &header, sizeof(RUDPHeader_St), 0,
            (struct sockaddr*)&clients[clientId].address, sizeof(struct sockaddr_in));
 }
@@ -147,7 +148,7 @@ static void serverBroadcast(int roomId, int excludeId, u8 action, const void* pa
             RUDPHeader_St header;
             rudpGenerateHeader(&clients[i].rudpState, action, &header);
             u16 finalSenderId = (roomId == UNICAST || excludeId == -1) ? 999 : (u16)excludeId;
-            header.sender_id = htons(finalSenderId); 
+            header.senderId = htons(finalSenderId); 
             memcpy(buffer, &header, sizeof(RUDPHeader_St));
             if (len > 0 && payload != NULL) memcpy(buffer + sizeof(RUDPHeader_St), payload, len);
             sendto(masterSocket, buffer, sizeof(RUDPHeader_St) + len, 0,
@@ -160,7 +161,7 @@ static void handleDiscovery(struct sockaddr_in* clientAddr) {
     RUDPHeader_St response;
     memset(&response, 0, sizeof(response));
     response.action = ACTION_CODE_DISCOVERY_INFO;
-    response.sender_id = htons(999);
+    response.senderId = htons(999);
     u8 buffer[512];
     memcpy(buffer, &response, sizeof(RUDPHeader_St));
     const char* info = SERVER_DISPLAY_NAME;
@@ -178,8 +179,8 @@ static void checkTimeouts(void) {
             if (diff > CLIENT_TIMEOUT_US) {
                 log_info("Client %d timed out", i);
                 int rId = clients[i].roomId;
-                if (rId > 0 && rooms[rId].active && rooms[rId].module && rooms[rId].module->on_player_leave) {
-                    rooms[rId].module->on_player_leave(rooms[rId].state, i);
+                if (rId > 0 && rooms[rId].active && rooms[rId].module && rooms[rId].module->onPlayerLeave) {
+                    rooms[rId].module->onPlayerLeave(rooms[rId].state, i);
                 }
                 clients[i].active = false;
                 serverBroadcast(rId, i, ACTION_CODE_QUIT_GAME, NULL, 0);
@@ -228,9 +229,8 @@ int main(int argc, char* argv[]) {
     rooms[0].id = 0;
     rooms[0].gameId = MINI_GAME_ID_LOBBY;
     rooms[0].module = getGameServerInterface(MINI_GAME_ID_LOBBY);
-    if (rooms[0].module) rooms[0].state = rooms[0].module->create_instance();
-    strncpy(rooms[0].name, "Lobby Central", 31);
-    rooms[0].name[31] = '\0';
+    if (rooms[0].module) rooms[0].state = rooms[0].module->createInstance();
+    rooms[0].name = "Central Lobby";
 
     signal(SIGINT, handle_sigint);
     long long next_tick = getTimeUs() + TICK_US;
@@ -240,8 +240,8 @@ int main(int argc, char* argv[]) {
         if (now >= next_tick) {
             checkTimeouts();
             for (int i = 0; i < MAX_ROOMS; i++) {
-                if (rooms[i].active && rooms[i].module && rooms[i].module->on_tick && rooms[i].state) {
-                    rooms[i].module->on_tick(rooms[i].state);
+                if (rooms[i].active && rooms[i].module && rooms[i].module->onTick && rooms[i].state) {
+                    rooms[i].module->onTick(rooms[i].state);
                 }
             }
             next_tick += TICK_US;
@@ -272,8 +272,8 @@ int main(int argc, char* argv[]) {
 
                     if (h->action == ACTION_CODE_LOBBY_ROOM_QUERY) sendRoomList(clientId);
                     else if (h->action == ACTION_CODE_QUIT_GAME) {
-                        if (currentRoomId > 0 && rooms[currentRoomId].active && rooms[currentRoomId].module && rooms[currentRoomId].module->on_player_leave) {
-                            rooms[currentRoomId].module->on_player_leave(rooms[currentRoomId].state, clientId);
+                        if (currentRoomId > 0 && rooms[currentRoomId].active && rooms[currentRoomId].module && rooms[currentRoomId].module->onPlayerLeave) {
+                            rooms[currentRoomId].module->onPlayerLeave(rooms[currentRoomId].state, clientId);
                         }
                         clients[clientId].roomId = 0;
                         serverBroadcast(currentRoomId, clientId, ACTION_CODE_QUIT_GAME, NULL, 0);
@@ -319,10 +319,10 @@ int main(int argc, char* argv[]) {
                                             rooms[i].gameId = targetGameId;
                                             rooms[i].module = getGameServerInterface(targetGameId);
                                             if (rooms[i].module) {
-                                                rooms[i].state = rooms[i].module->create_instance();
+                                                rooms[i].state = rooms[i].module->createInstance();
                                                 rooms[i].hostId = clientId;
                                                 strncpy(rooms[i].creatorName, clients[clientId].name, 31);
-                                                snprintf(rooms[i].name, 31, "Room #%d", i);
+                                                rooms[i].name = TextFormat("Room #%d", i);
                                                 clients[clientId].roomId = i;
                                                 u8 resp[2] = { (u8)targetGameId, (u8)i };
                                                 serverBroadcast(UNICAST, clientId, ACTION_CODE_LOBBY_SWITCH_GAME, resp, 2);
@@ -340,8 +340,8 @@ int main(int argc, char* argv[]) {
                     }
                     else {
                         Room_St* r = &rooms[currentRoomId];
-                        if (r->active && r->module && r->module->on_action && r->state != NULL) {
-                            r->module->on_action(r->state, currentRoomId, clientId, h->action, buf + sizeof(RUDPHeader_St), (u16)(received - sizeof(RUDPHeader_St)), serverBroadcast);
+                        if (r->active && r->module && r->module->onAction && r->state != NULL) {
+                            r->module->onAction(r->state, currentRoomId, clientId, h->action, buf + sizeof(RUDPHeader_St), (u16)(received - sizeof(RUDPHeader_St)), serverBroadcast);
                         }
                     }
                     serverSendAck(clientId);

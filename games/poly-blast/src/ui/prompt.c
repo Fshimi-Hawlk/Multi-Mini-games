@@ -281,7 +281,7 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
         } break;
 
         case PROMPT_SAVES_LIST: {
-            scrollFrameUpdate(&saveListScroll, mouseScreen);
+            scrollFrameUpdate(&saveListScroll, saveListScroll.visibleArea, mouseScreen);
 
             if (textButtonUpdate(&btnCancelLoad, mouseScreen)) {
                 polyBlast_resetGame(game);

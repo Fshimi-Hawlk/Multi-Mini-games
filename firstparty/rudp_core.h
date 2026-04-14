@@ -45,8 +45,8 @@
 typedef struct __attribute__((packed)) {
     u16 sequence;       ///< This packet's unique sequence number
     u16 ack;            ///< Highest sequence number received in-order
-    u32 ack_bitfield;   ///< Bitfield of the previous 32 packets (1 = received)
-    u16 sender_id;      ///< Unique sender identifier (assigned by server)
+    u32 ackBitfield;   ///< Bitfield of the previous 32 packets (1 = received)
+    u16 senderId;      ///< Unique sender identifier (assigned by server)
     u8  action;         ///< RUDP control action or game-specific command
 } RUDPHeader_St;
 

@@ -1,85 +1,352 @@
 /**
     @file editor/properties.c
     @author Fshimi-Hawlk
-    @date 2026-03-30
-    @brief Implementation of the level editor properties panel logic.
+    @date 2026-03-28
+    @date 2026-04-13
+    @brief Full implementation of the level editor properties panel using the reusable widget system.
+
+    Contributors:
+        - Fshimi-Hawlk:
+            - Complete widget-based property editing
+            - Multi-select list with TextButton_St + hover/click
+            - Single-terrain focus mode with red "X" exit button
+            - All fields (position, size, roundness, kind, moving, portal)
+            - Grid snap toggle + step selector
+            - Live preview + immediate application of changes
+
+    @see `editor/properties.h`
+    @see `widgets/types.h`
 */
 
+#include "editor/types.h"
+#include "editor/editor.h"
 #include "editor/properties.h"
+#include "editor/utils.h"
+
+#include "sharedUtils/container.h"
+#include "sharedWidgets/textBox.h"
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/slider.h"
+#include "sharedWidgets/dropdown.h"
+#include "sharedWidgets/scrollFrame.h"
+#include "sharedWidgets/checkBox.h"
 
 #include "utils/globals.h"
 
-#include "sharedWidgets/button.h"
-#include "sharedWidgets/textBox.h"
-#include "sharedWidgets/dropdown.h"
+#include "sharedUtils/debug.h"
+#include "sharedUtils/mathUtils.h"
+#include "sharedUtils/geometry.h"
+
+// ── Local widget instances ──────────────────────────────────────────────────
 
 TextBox_St   tbPosX, tbPosY, tbWidth, tbHeight, tbRoundness;
 TextBox_St   tbVelX, tbVelY, tbMoveDist;
 TextBox_St   tbTargetX, tbTargetY;
+
 Slider_St    sliderRoundness;
-DropDown_St  dropdownType;
+DropDown_St  dropdownKind;
 TextButton_St btnExitFocus;
+
 TextButton_St btnPickTarget;
 CheckBox_St   cbTwoWay;
 CheckBox_St   cbOnlyReceiver;
 
 bool propertiesGridSnapEnabled = true;
-f32  propertiesGridStep = 25.0f;
-s32  focusedTerrainIndex = -1;
+f32  propertiesGridStep        = 25.0f;
 
-static const char* terrainKindNames[] = {
-    "NORMAL", "GRASS", "WOOD PLANK", "STONE", "ICE", "BOUNCY", "MOV_H", "MOV_V", "WATER", "DECOR", "PORTAL"
-};
+s32  focusedTerrainIndex       = -1;   // -1 = multi-select list mode
 
-void propertiesInit(void) {
-    float x = (float)GetScreenWidth() - 280.0f;
-    
-    tbPosX = (TextBox_St){ .bounds = {x, 100, 100, 30}, .isValid = true };
-    tbPosY = (TextBox_St){ .bounds = {x + 110, 100, 100, 30}, .isValid = true };
-    
-    dropdownType = (DropDown_St){
-        .bounds = {x, 180, 210, 30},
-        .options = terrainKindNames,
-        .count = __terrainKindCount,
-        .selectedIndex = 0
-    };
-    
-    btnExitFocus = (TextButton_St){ .bounds = {x, 500, 210, 40}, .baseColor = RED, .roundness = 0.2f };
-    btnExitFocus.text = "Back to List";
+// ── Helper functions ────────────────────────────────────────────────────────
+
+static void refreshSingleTerrainBuffers(s32 idx) {
+    if (idx < 0 || (size_t)idx >= terrains.count) {
+        tbPosX.buffer[0] = tbPosY.buffer[0] = tbWidth.buffer[0] = tbHeight.buffer[0] = '\0';
+        tbRoundness.buffer[0] = tbVelX.buffer[0] = tbVelY.buffer[0] = tbMoveDist.buffer[0] = '\0';
+        tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
+        sliderRoundness.value = 0.0f;
+        return;
+    }
+
+    const LobbyTerrain_St* t = &terrains.items[idx];
+
+    snprintf(tbPosX.buffer,     sizeof(tbPosX.buffer),     "%.1f", t->rect.x);
+    snprintf(tbPosY.buffer,     sizeof(tbPosY.buffer),     "%.1f", t->rect.y);
+    snprintf(tbWidth.buffer,    sizeof(tbWidth.buffer),    "%.1f", t->rect.width);
+    snprintf(tbHeight.buffer,   sizeof(tbHeight.buffer),   "%.1f", t->rect.height);
+    snprintf(tbRoundness.buffer,sizeof(tbRoundness.buffer),"%.2f", t->roundness);
+
+    sliderRoundness.value = t->roundness;
+
+    if (t->kind == TERRAIN_KIND_MOVING_H || t->kind == TERRAIN_KIND_MOVING_V) {
+        snprintf(tbVelX.buffer, sizeof(tbVelX.buffer), "%.1f", t->velocity.x);
+        snprintf(tbVelY.buffer, sizeof(tbVelY.buffer), "%.1f", t->velocity.y);
+        snprintf(tbMoveDist.buffer, sizeof(tbMoveDist.buffer), "%.1f", t->moveDistance);
+    } else {
+        tbVelX.buffer[0] = tbVelY.buffer[0] = tbMoveDist.buffer[0] = '\0';
+    }
+
+    if (t->kind == TERRAIN_KIND_PORTAL) {
+        snprintf(tbTargetX.buffer, sizeof(tbTargetX.buffer), "%.1f", t->portalTargetPosition.x);
+        snprintf(tbTargetY.buffer, sizeof(tbTargetY.buffer), "%.1f", t->portalTargetPosition.y);
+        cbTwoWay.checked = t->isTwoWayPortal;
+        cbOnlyReceiver.checked = t->isOnlyReceiverPortal;
+    } else {
+        tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
+    }
+
+    // Sync dropdown
+    dropdownKind.selectedIndex = (s32)t->kind;
 }
 
-void refreshPropertyBuffers(const LobbyGame_St* const game) {
-    (void)game;
-    if (focusedTerrainIndex == -1 || focusedTerrainIndex >= (s32)terrains.count) return;
-    LobbyTerrain_St* t = &terrains.items[focusedTerrainIndex];
-    
-    snprintf(tbPosX.buffer, 255, "%.1f", t->rect.x);
-    snprintf(tbPosY.buffer, 255, "%.1f", t->rect.y);
-    dropdownType.selectedIndex = (s32)t->kind;
-}
+static void applyPropertyChanges(LobbyTerrain_St* t) {
+    if (tbPosX.buffer[0])  t->rect.x      = snapToGrid(atof(tbPosX.buffer));
+    if (tbPosY.buffer[0])  t->rect.y      = snapToGrid(atof(tbPosY.buffer));
+    if (tbWidth.buffer[0]) t->rect.width  = atof(tbWidth.buffer);
+    if (tbHeight.buffer[0])t->rect.height = atof(tbHeight.buffer);
+    if (tbRoundness.buffer[0]) t->roundness = clamp(atof(tbRoundness.buffer), 0.0f, 1.0f);
 
-void updatePropertiesPanel(LobbyGame_St* const game) {
-    Vector2 m = GetMousePosition();
-    
-    if (focusedTerrainIndex != -1) {
-        if (textBoxUpdate(&tbPosX, m)) terrains.items[focusedTerrainIndex].rect.x = (float)atof(tbPosX.buffer);
-        if (textBoxUpdate(&tbPosY, m)) terrains.items[focusedTerrainIndex].rect.y = (float)atof(tbPosY.buffer);
-        
-        if (dropdownUpdate(&dropdownType, m)) {
-            terrains.items[focusedTerrainIndex].kind = (TerrainKind_Et)dropdownType.selectedIndex;
-        }
-        
-        if (textButtonUpdate(&btnExitFocus, m)) exitSingleTerrainFocusMode(game);
+    if (t->kind == TERRAIN_KIND_MOVING_H || t->kind == TERRAIN_KIND_MOVING_V) {
+        if (tbVelX.buffer[0]) t->velocity.x = atof(tbVelX.buffer);
+        if (tbVelY.buffer[0]) t->velocity.y = atof(tbVelY.buffer);
+        if (tbMoveDist.buffer[0]) t->moveDistance = atof(tbMoveDist.buffer);
+    }
+
+    if (t->kind == TERRAIN_KIND_PORTAL) {
+        if (tbTargetX.buffer[0]) t->portalTargetPosition.x = atof(tbTargetX.buffer);
+        if (tbTargetY.buffer[0]) t->portalTargetPosition.y = atof(tbTargetY.buffer);
+        t->isTwoWayPortal = cbTwoWay.checked;
+        t->isOnlyReceiverPortal = cbOnlyReceiver.checked;
     }
 }
 
-void exitSingleTerrainFocusMode(LobbyGame_St* const game) {
-    (void)game;
-    focusedTerrainIndex = -1;
+// ── Public API ──────────────────────────────────────────────────────────────
+
+void refreshPropertyBuffers(const LobbyGame_St* const game) {
+    UNUSED(game);
+
+    if (focusedTerrainIndex != -1) {
+        refreshSingleTerrainBuffers(focusedTerrainIndex);
+    } else if (selectedIndices.count == 1) {
+        refreshSingleTerrainBuffers(selectedIndices.items[0]);
+    } else {
+        // multi-select → clear edit fields
+        tbPosX.buffer[0] = tbPosY.buffer[0] = tbWidth.buffer[0] = tbHeight.buffer[0] = '\0';
+        tbRoundness.buffer[0] = tbVelX.buffer[0] = tbVelY.buffer[0] = tbMoveDist.buffer[0] = '\0';
+        tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
+        sliderRoundness.value = 0.0f;
+        cbTwoWay.checked = false;
+        cbOnlyReceiver.checked = false;
+    }
 }
 
 void focusCameraOnTerrain(LobbyGame_St* const game, s32 terrainIndex) {
-    if (terrainIndex < 0 || terrainIndex >= (s32)terrains.count) return;
-    focusedTerrainIndex = terrainIndex;
-    refreshPropertyBuffers(game);
+    if (terrainIndex < 0 || (size_t)terrainIndex >= terrains.count) return;
+
+    const Rectangle r = terrains.items[terrainIndex].rect;
+    game->cam.target.x = r.x + r.width  * 0.5f;
+    game->cam.target.y = r.y + r.height * 0.5f;
+
+    f32 zoomX = systemSettings.video.width  / (r.width  * 1.8f);
+    f32 zoomY = systemSettings.video.height / (r.height * 1.8f);
+    game->cam.zoom = min(zoomX, zoomY);
+    game->cam.zoom = clamp(game->cam.zoom, 0.4f, 4.0f);
+}
+
+void exitSingleTerrainFocusMode(LobbyGame_St* const game) {
+    UNUSED(game);
+    focusedTerrainIndex = -1;
+}
+
+void handlePropertiesMultiSelectClick(LobbyGame_St* const game, Vector2 mouseScreen) {
+    if (focusedTerrainIndex != -1 || selectedIndices.count <= 1) return;
+
+    f32 startY = 140.0f;   // after title
+    f32 lineHeight = 28.0f;
+
+    for (size_t i = 0; i < selectedIndices.count; ++i) {
+        s32 idx = selectedIndices.items[i];
+        if (idx < 0 || (size_t)idx >= terrains.count) continue;
+
+        Rectangle itemRect = {
+            systemSettings.video.width - 260.0f + 20.0f,
+            startY + i * lineHeight - propertiesScroll.scroll.y,
+            220.0f,
+            lineHeight
+        };
+
+        if (CheckCollisionPointRec(mouseScreen, itemRect)) {
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                focusedTerrainIndex = idx;
+                refreshPropertyBuffers(game);
+                focusCameraOnTerrain(game, idx);
+            }
+            return;
+        }
+    }
+}
+
+void updatePropertiesPanel(LobbyGame_St* const game) {
+    if (!game->showPropertiesPanel) return;
+
+    Vector2 mouse = GetMousePosition();
+    Rectangle propArea = {
+        systemSettings.video.width - 260.0f,
+        50.0f,
+        260.0f,
+        systemSettings.video.height - 80.0f
+    };
+
+    scrollFrameUpdate(&propertiesScroll, propArea, mouse);
+
+    if (focusedTerrainIndex != -1 || selectedIndices.count == 1) {
+        // ── SINGLE TERRAIN EDIT MODE ───────────────────────────────────────
+
+        s32 idx = (focusedTerrainIndex != -1) ? focusedTerrainIndex : selectedIndices.items[0];
+        if (idx < 0 || (size_t) idx >= terrains.count) {
+            exitSingleTerrainFocusMode(game);
+            return;
+        }
+
+        LobbyTerrain_St* t = &terrains.items[idx];
+
+        propertiesBeingEdited = false;
+
+        // Update widgets
+        if (textBoxUpdate(&tbPosX, mouse))      applyPropertyChanges(t);
+        if (textBoxUpdate(&tbPosY, mouse))      applyPropertyChanges(t);
+        if (textBoxUpdate(&tbWidth, mouse))     applyPropertyChanges(t);
+        if (textBoxUpdate(&tbHeight, mouse))    applyPropertyChanges(t);
+        if (textBoxUpdate(&tbRoundness, mouse)) applyPropertyChanges(t);
+
+        propertiesBeingEdited = propertiesBeingEdited || tbPosX.editMode || tbPosY.editMode || tbWidth.editMode || tbHeight.editMode || tbRoundness.editMode;
+
+        if (sliderUpdate(&sliderRoundness, mouse)) {
+            t->roundness = sliderRoundness.value;
+            snprintf(tbRoundness.buffer, sizeof(tbRoundness.buffer), "%.2f", t->roundness);
+        }
+
+        if (dropdownUpdate(&dropdownKind, mouse)) {
+            t->kind = (TerrainKind_Et)dropdownKind.selectedIndex;
+            refreshSingleTerrainBuffers(idx);   // refresh kind-specific fields
+        }
+
+        propertiesBeingEdited = propertiesBeingEdited || dropdownKind.isOpen;
+
+        if (textBoxUpdate(&tbVelX, mouse) || textBoxUpdate(&tbVelY, mouse) || textBoxUpdate(&tbMoveDist, mouse)) {
+            applyPropertyChanges(t);
+        }
+
+        propertiesBeingEdited = propertiesBeingEdited || tbVelX.editMode || tbVelY.editMode || tbMoveDist.editMode;
+
+        if (textBoxUpdate(&tbTargetX, mouse) || textBoxUpdate(&tbTargetY, mouse)) {
+            applyPropertyChanges(t);
+        }
+
+        propertiesBeingEdited = propertiesBeingEdited || tbTargetX.editMode || tbTargetY.editMode;
+
+        if (t->kind == TERRAIN_KIND_PORTAL) {
+            // Pick target button
+            if (textButtonUpdate(&btnPickTarget, mouse)) {
+                portalTargetPickMode = true;
+                portalBeingConfigured = idx;
+            }
+
+            // Two-way checkbox
+            if (checkBoxUpdate(&cbTwoWay, mouse)) {
+                applyPropertyChanges(t);   // sync immediately
+            }
+
+            // Only-receiver checkbox
+            if (checkBoxUpdate(&cbOnlyReceiver, mouse)) {
+                applyPropertyChanges(t);
+                // When "only receiver" is enabled, we disable target editing
+                if (cbOnlyReceiver.checked) {
+                    tbTargetX.buffer[0] = tbTargetY.buffer[0] = '\0';
+                    t->portalTargetPosition = getRectCenterPos(t->rect);
+                }
+            }
+        }
+
+        propertiesBeingEdited = propertiesBeingEdited || portalTargetPickMode;
+
+        // Red X button
+        if (textButtonUpdate(&btnExitFocus, mouse)) {
+            exitSingleTerrainFocusMode(game);
+            refreshPropertyBuffers(game);
+        }
+
+    } else if (selectedIndices.count > 1) {
+        handlePropertiesMultiSelectClick(game, mouse);
+    }
+}
+
+// ── Initialization (call from initEditor) ───────────────────────────────────
+void propertiesInit(void) {
+    Rectangle propArea = {
+        systemSettings.video.width - 260.0f,
+        50.0f,
+        260.0f,
+        systemSettings.video.height - 80.0f
+    };
+
+    scrollFrameInit(&propertiesScroll, propArea, Vector2Zero(), 30.0f, 0);
+
+    // Text boxes
+    tbPosX.bounds     = (Rectangle) {0,0,180,28};
+    tbPosX.state = WIDGET_STATE_NORMAL;
+
+    tbPosY.bounds     = (Rectangle) {0,0,180,28};
+    tbPosY.state = WIDGET_STATE_NORMAL;
+
+    tbWidth.bounds    = (Rectangle) {0,0,180,28};
+    tbWidth.state = WIDGET_STATE_NORMAL;
+
+    tbHeight.bounds   = (Rectangle) {0,0,180,28};
+    tbHeight.state = WIDGET_STATE_NORMAL;
+
+    tbRoundness.bounds= (Rectangle) {0,0,180,28};
+    tbRoundness.state = WIDGET_STATE_NORMAL;
+
+    tbVelX.bounds     = (Rectangle) {0,0,180,28};
+    tbVelY.bounds     = (Rectangle) {0,0,180,28};
+    tbMoveDist.bounds = (Rectangle) {0,0,180,28};
+    tbTargetX.bounds  = (Rectangle) {0,0,180,28};
+    tbTargetY.bounds  = (Rectangle) {0,0,180,28};
+
+    // Slider
+    sliderRoundness.bounds = (Rectangle) {0,0,180,24};
+    sliderRoundness.minValue = 0.0f;
+    sliderRoundness.maxValue = 1.0f;
+    sliderRoundness.value = 0.0f;
+
+    // Dropdown
+    dropdownKind.bounds = (Rectangle) {0,0,180,28};
+    dropdownKind.selectedIndex = 0;
+    dropdownKind.options = terrainKindNames;
+    dropdownKind.count = ARRAY_LEN(terrainKindNames);
+    dropdownKind.isOpen = false;
+
+    // Red X button
+    btnExitFocus.bounds = (Rectangle) {0,0,30,30};
+    btnExitFocus.baseColor = RED;
+    btnExitFocus.text = "X";
+    btnExitFocus.state = WIDGET_STATE_NORMAL;
+
+    // Portal target button
+    btnPickTarget.bounds = (Rectangle){0,0,220,28};
+    btnPickTarget.baseColor = SKYBLUE;
+    btnPickTarget.text = "Pick Target Location";
+    btnPickTarget.state = WIDGET_STATE_NORMAL;
+
+    // Two-way checkbox
+    cbTwoWay.bounds = (Rectangle){0,0,24,24};
+    cbTwoWay.checked = false;
+    cbTwoWay.label = "Two-way";
+    cbTwoWay.state = WIDGET_STATE_NORMAL;
+
+    // Only-receiver checkbox
+    cbOnlyReceiver.bounds = (Rectangle){0,0,24,24};
+    cbOnlyReceiver.checked = false;
+    cbOnlyReceiver.label = "Only Receiver";
+    cbOnlyReceiver.state = WIDGET_STATE_NORMAL;
 }

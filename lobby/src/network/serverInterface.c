@@ -20,11 +20,11 @@ void* lobby_create(void) {
     return s;
 }
 
-void lobby_on_action(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
+void lobby_onAction(void* state, s32 room_id, s32 player_id, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
     UNUSED(state);
     if (action == ACTION_CODE_GAME_DATA && len >= sizeof(GameTLVHeader_St)) {
         GameTLVHeader_St* tlv = (GameTLVHeader_St*)payload;
-        if (tlv->game_id == MINI_GAME_ID_LOBBY) {
+        if (tlv->gameId == MINI_GAME_ID_LOBBY) {
             if (tlv->action == ACTION_CODE_LOBBY_MOVE || tlv->action == ACTION_CODE_LOBBY_CHAT) {
                 // Broadcast movement and chat to everyone
                 broadcast(room_id, player_id, action, payload, len);
@@ -37,7 +37,7 @@ void lobby_tick(void* state) {
     UNUSED(state);
 }
 
-void lobby_on_player_leave(void* state, s32 player_id) {
+void lobby_onPlayerLeave(void* state, s32 player_id) {
     UNUSED(state);
     UNUSED(player_id);
 }
@@ -47,10 +47,10 @@ void lobby_destroy(void* state) {
 }
 
 GameServerInterface_St lobbyServerInterface = {
-    .game_name = "lobby",
-    .create_instance = lobby_create,
-    .on_action = lobby_on_action,
-    .on_tick = lobby_tick,
-    .on_player_leave = lobby_on_player_leave,
-    .destroy_instance = lobby_destroy
+    .gameName = "lobby",
+    .createInstance = lobby_create,
+    .onAction = lobby_onAction,
+    .onTick = lobby_tick,
+    .onPlayerLeave = lobby_onPlayerLeave,
+    .destroyInstance = lobby_destroy
 };

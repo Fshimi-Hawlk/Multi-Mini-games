@@ -6,7 +6,6 @@
  */
 
 #include <math.h>
-#include <stdio.h>
 #include "raylib.h"
 #include "ui/renderer.h"
 #include "logger.h"
@@ -28,12 +27,12 @@
  * @brief Loads textures for cards from various possible paths.
  * @return The loaded assets.
  */
-GameAssets LoadAssets(void) {
-    GameAssets assets;
+GameAssets_St kingForFour_loadAssets(void) {
+    GameAssets_St assets;
     
     // Chargement via le chemin relatif correct dans le monorepo
-    assets.cardSheet = LoadTexture("king-for-four/assets/textures/playingCards.png");
-    assets.cardBack = LoadTexture("king-for-four/assets/textures/cardBack_blue5.png");
+    assets.cardSheet = LoadTexture( TEXTURES_PATH "playingCards.png");
+    assets.cardBack = LoadTexture( TEXTURES_PATH "cardBack_blue5.png");
     
     // Vérifications de sécurité
     if (!IsTextureValid(assets.cardSheet)) log_error("Texture playingCards.png introuvable à king-for-four/assets/textures/");
@@ -46,7 +45,7 @@ GameAssets LoadAssets(void) {
  * @brief Frees GPU memory for textures.
  * @param assets The assets to unload.
  */
-void UnloadAssets(GameAssets assets) {
+void kingForFour_unloadAssets(GameAssets_St assets) {
     UnloadTexture(assets.cardSheet);
     UnloadTexture(assets.cardBack);
 }
@@ -57,7 +56,7 @@ void UnloadAssets(GameAssets assets) {
  * @param sheet The texture sheet.
  * @return The source rectangle.
  */
-Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
+Rectangle kingForFour_getCardSourceRec(Card_St c, Texture2D sheet) {
     float cellWidth = sheet.width / (float)SHEET_COLS;
     float cellHeight = sheet.height / (float)SHEET_ROWS;
     
@@ -105,7 +104,7 @@ Rectangle GetCardSourceRec(Card c, Texture2D sheet) {
  * @param assets Graphical assets.
  * @param cardScalePop Additional scale for animation.
  */
-void RenderTable(GameState *g, GameAssets assets, float cardScalePop) {
+void kingForFour_renderTable(KingForFourGameState_St *g, GameAssets_St assets, float cardScalePop) {
     float scale = 1.0f;
     
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
@@ -127,16 +126,16 @@ void RenderTable(GameState *g, GameAssets assets, float cardScalePop) {
     DrawRectangleLinesEx(deckPos, 2, Fade(WHITE, 0.3f)); 
 
     // --- 2. DESSIN DU TALON (La carte jouée) ---
-    if (g->discard_pile.size > 0) {
-        Card topCard = g->discard_pile.cards[g->discard_pile.size - 1]; 
+    if (g->discardPile.size > 0) {
+        Card_St topCard = g->discardPile.cards[g->discardPile.size - 1]; 
 
-        Rectangle source = GetCardSourceRec(topCard, assets.cardSheet);
+        Rectangle source = kingForFour_getCardSourceRec(topCard, assets.cardSheet);
         
         float finalScale = 1.0f + cardScalePop;
         float finalW = cardW * finalScale;
         float finalH = cardH * finalScale;
         
-        Rectangle dest = { centerX + 20 - (finalW - cardW)/2, centerY - (finalH/2), finalW, finalH };
+        Rectangle dest = { centerX + 20 - (finalW - cardW)/2.0f, centerY - (finalH/2), finalW, finalH };
         
         // Glow effect based on color
         Color glowColor = WHITE;
@@ -147,7 +146,7 @@ void RenderTable(GameState *g, GameAssets assets, float cardScalePop) {
             case CARD_BLUE:   glowColor = BLUE; break;
             case CARD_BLACK:  glowColor = PURPLE; break;
         }
-        DrawCircleGradient(dest.x + cardW/2, dest.y + cardH/2, 120, Fade(glowColor, 0.4f), (Color){0,0,0,0});
+        DrawCircleGradient(dest.x + cardW/2.0f, dest.y + cardH/2.0f, 120, Fade(glowColor, 0.4f), (Color){0,0,0,0});
 
         // Shadow
         DrawRectangleRounded((Rectangle){dest.x + 5, dest.y + 5, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.4f));
@@ -163,10 +162,10 @@ void RenderTable(GameState *g, GameAssets assets, float cardScalePop) {
 
 /**
  * @brief Draws the cards in the player's hand, including hover effects.
- * @param p Player.
+ * @param p Player_St.
  * @param assets Graphical assets.
  */
-void RenderHand(Player *p, GameAssets assets) {
+void kingForFour_renderHand(Player_St *p, GameAssets_St assets) {
     if (p->hand.size == 0) return;
 
     // --- CONFIGURATION ---
@@ -178,11 +177,11 @@ void RenderHand(Player *p, GameAssets assets) {
     int startY = GetScreenHeight() - cardH - 20;
 
     // --- PASSE 1 : DÉTECTION DE LA CARTE SURVOLÉE ---
-    int hoveredIndex = GetHoveredCardIndex(p, assets);
+    int hoveredIndex = kingForFour_getHoveredCardIndex(p, assets);
 
     // --- PASSE 2 : DESSIN ---
     for (int i = 0; i < p->hand.size; i++) {
-        Card current = p->hand.cards[i];
+        Card_St current = p->hand.cards[i];
         Rectangle dest = { (float)startX + (i * padding), (float)startY, cardW, cardH };
 
         // Animation de survol
@@ -192,10 +191,10 @@ void RenderHand(Player *p, GameAssets assets) {
             DrawRectangleRounded((Rectangle){dest.x - 5, dest.y - 5, dest.width + 10, dest.height + 10}, 0.1f, 10, Fade(GOLD, 0.5f));
         }
 
-        // Card shadow
+        // Card_St shadow
         DrawRectangleRounded((Rectangle){dest.x + 3, dest.y + 3, dest.width, dest.height}, 0.1f, 10, Fade(BLACK, 0.3f));
 
-        Rectangle source = GetCardSourceRec(current, assets.cardSheet);
+        Rectangle source = kingForFour_getCardSourceRec(current, assets.cardSheet);
         DrawTexturePro(assets.cardSheet, source, dest, (Vector2){0,0}, 0.0f, WHITE);
 
         // Help text
@@ -222,7 +221,7 @@ void RenderHand(Player *p, GameAssets assets) {
  * @param assets Graphical assets.
  * @param my_id Local player's internal ID.
  */
-void RenderOpponents(GameState *g, GameAssets assets, int my_id) {
+void kingForFour_renderOpponents(KingForFourGameState_St *g, GameAssets_St assets, int my_id) {
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * 0.5f; // Smaller cards for opponents
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * 0.5f;
     Rectangle sourceBack = { 0, 0, (float)assets.cardBack.width, (float)assets.cardBack.height };
@@ -230,36 +229,36 @@ void RenderOpponents(GameState *g, GameAssets assets, int my_id) {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
 
-    for (int i = 0; i < g->num_players; i++) {
+    for (int i = 0; i < g->numPlayers; i++) {
         if (i == my_id) continue;
 
         int handSize = g->players[i].hand.size;
         if (handSize <= 0) continue;
 
         // Position based on relative index
-        int relIdx = (i - my_id + g->num_players) % g->num_players;
+        int relIdx = (i - my_id + g->numPlayers) % g->numPlayers;
         
         Vector2 startPos = {0};
         Vector2 step = {0};
         float rotation = 0;
 
         if (relIdx == 1) { // Left (vertical)
-            startPos = (Vector2){ 50, (float)sh/2 - (handSize * 15)/2 };
+            startPos = (Vector2){ 50, (float)sh/2.0f - (handSize * 15)/2.0f };
             step = (Vector2){ 0, 15 };
             rotation = 90;
         } else if (relIdx == 2) { // Top (horizontal)
-            startPos = (Vector2){ (float)sw/2 - (handSize * 25)/2, 50 };
+            startPos = (Vector2){ (float)sw/2.0f - (handSize * 25)/2.0f, 50 };
             step = (Vector2){ 25, 0 };
             rotation = 0;
         } else if (relIdx == 3) { // Right (vertical)
-            startPos = (Vector2){ (float)sw - 50, (float)sh/2 - (handSize * 15)/2 };
+            startPos = (Vector2){ (float)sw - 50, (float)sh/2.0f - (handSize * 15)/2.0f };
             step = (Vector2){ 0, 15 };
             rotation = -90;
         }
 
         for (int j = 0; j < handSize; j++) {
             Rectangle dest = { startPos.x + j * step.x, startPos.y + j * step.y, cardW, cardH };
-            DrawTexturePro(assets.cardBack, sourceBack, dest, (Vector2){cardW/2, cardH/2}, rotation, WHITE);
+            DrawTexturePro(assets.cardBack, sourceBack, dest, (Vector2){cardW/2.0f, cardH/2}, rotation, WHITE);
         }
         
         DrawText(TextFormat("P%d: %d", i, handSize), (int)startPos.x - 20, (int)startPos.y - 30, 20, WHITE);
@@ -269,7 +268,7 @@ void RenderOpponents(GameState *g, GameAssets assets, int my_id) {
 /**
  * @brief Returns the index of the card under the mouse cursor.
  */
-int GetHoveredCardIndex(Player *p, GameAssets assets) {
+int kingForFour_getHoveredCardIndex(Player_St *p, GameAssets_St assets) {
     if (p->hand.size == 0) return -1;
 
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * CARD_SCALE;
@@ -297,7 +296,7 @@ int GetHoveredCardIndex(Player *p, GameAssets assets) {
  * @param assets Assets.
  * @return The rectangle.
  */
-Rectangle GetDeckRect(GameAssets assets) {
+Rectangle kingForFour_getDeckRect(GameAssets_St assets) {
     float scale = 1.0f; 
     float cardW = (assets.cardSheet.width / (float)SHEET_COLS) * scale;
     float cardH = (assets.cardSheet.height / (float)SHEET_ROWS) * scale;
@@ -310,7 +309,7 @@ Rectangle GetDeckRect(GameAssets assets) {
 /**
  * @brief Renders the main menu screen.
  */
-void RenderMenu(void) {
+void kingForFour_renderMenu(void) {
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
 
@@ -321,7 +320,7 @@ void RenderMenu(void) {
     const char* title = "KING FOR FOUR";
     int titleSize = 80;
     int titleW = MeasureText(title, titleSize);
-    DrawText(title, (sw - titleW)/2, sh/4, titleSize, GOLD);
+    DrawText(title, (sw - titleW)/2.0f, sh/4, titleSize, GOLD);
 
     // Bouton Jouer
     const char* sub = "Cliquez pour JOUER";
@@ -330,9 +329,9 @@ void RenderMenu(void) {
     
     // Animation simple de clignotement
     if ((GetTime() * 2.0) - (int)(GetTime() * 2.0) < 0.5) {
-        DrawText(sub, (sw - subW)/2, sh/2, subSize, WHITE);
+        DrawText(sub, (sw - subW)/2.0f, sh/2.0f, subSize, WHITE);
     } else {
-        DrawText(sub, (sw - subW)/2, sh/2, subSize, LIGHTGRAY);
+        DrawText(sub, (sw - subW)/2.0f, sh/2.0f, subSize, LIGHTGRAY);
     }
     
     DrawText("v1.0 - Raylib", 10, sh - 30, 20, DARKGRAY);

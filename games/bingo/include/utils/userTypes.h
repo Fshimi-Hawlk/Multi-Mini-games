@@ -95,7 +95,7 @@ typedef struct {
 typedef struct BingoGame_St {
     BaseGame_St     base;
 
-    s32             room_id;
+    s32             roomId;
     s32             clientID;
     CardUI_St*      previouslySelectedCard;     ///< Only relevant during card choice phase (client)
     PlayerCard_St   player;

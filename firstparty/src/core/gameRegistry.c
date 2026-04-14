@@ -7,12 +7,16 @@
 
 #include "gameRegistry.h"
 
+/*
+    @brief Array of the multi-player game server interfaces.
+    @note The solo-player game doesn't implement a server interface, so they will always be NULL.
+*/
 static const GameServerInterface_St* gameInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_BINGO]            = &bingoServerInterface,
     [MINI_GAME_ID_BOWLING]          = NULL,
     [MINI_GAME_ID_CHESS]            = &chessServerInterface,
-    [MINI_GAME_ID_DISC_REVERSAL]    = NULL,
-    [MINI_GAME_ID_DROP_FOUR]        = NULL,
+    [MINI_GAME_ID_DISC_REVERSAL]    = NULL, // TODO
+    [MINI_GAME_ID_DROP_FOUR]        = NULL, // TODO
     [MINI_GAME_ID_EDITOR]           = NULL,
     [MINI_GAME_ID_KING_FOR_FOUR]    = &kingServerInterface,
     [MINI_GAME_ID_LOBBY]            = &lobbyServerInterface,

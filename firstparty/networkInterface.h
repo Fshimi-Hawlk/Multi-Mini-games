@@ -56,10 +56,10 @@ enum BaseActionCodes_e {
     @brief Type-Length-Value header used on the network for mini-game messages
 */
 typedef struct {
-    u8   game_id;        ///< 0 = lobby, otherwise mini-game identifier
+    u8   gameId;         ///< 0 = lobby, otherwise mini-game identifier
     u8   action;         ///< game-specific command / event code
     u16  length;         ///< size of the payload that follows (not including this header)
-    bool is_reliable;    ///< true if the message must be delivered reliably
+    bool isReliable;     ///< true if the message must be delivered reliably
 } GameTLVHeader_St;
 
 /**
@@ -113,13 +113,13 @@ typedef void (*BroadcastMessage_Ft)(
     @brief Server-side game module interface (per-room game instance)
 */
 typedef struct {
-    char* game_name;            ///< Identifier / debug name (e.g. "lobby", "race", "tag")
+    char* gameName;            ///< Identifier / debug name (e.g. "lobby", "race", "tag")
 
     /**
         @brief Creates and initializes a fresh game state for a new room
         @return Allocated and initialized game-specific state
     */
-    void* (*create_instance)(void);
+    void* (*createInstance)(void);
 
     /**
         @brief Handles an incoming player action / event
@@ -131,30 +131,30 @@ typedef struct {
         @param len          Payload size in bytes
         @param broadcast    Function to send messages to other players in the room
     */
-    void (*on_action)(
+    void (*onAction)(
         void*               state,
-        s32                 room_id,
-        s32                 player_id,
+        s32                 roomId,
+        s32                 playerId,
         u8                  action,
         const void*         payload,
         u16                 len,
         BroadcastMessage_Ft broadcast
     );
 
-    void (*on_tick)(void* state);               ///< Main server tick / simulation step
+    void (*onTick)(void* state);               ///< Main server tick / simulation step
 
     /**
         @brief Called when a player disconnects or leaves the room
         @param state        Game instance
         @param player_id    ID of the player who left
     */
-    void (*on_player_leave)(void* state, s32 player_id);
+    void (*onPlayerLeave)(void* state, s32 player_id);
 
     /**
         @brief Destroys the game instance and frees all owned memory
         @param state        Pointer previously returned by create_instance
     */
-    void (*destroy_instance)(void* state);
+    void (*destroyInstance)(void* state);
 } GameServerInterface_St;
 
 #endif // NETWORK_INTERFACE_H
