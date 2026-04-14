@@ -1,5 +1,7 @@
 #include "setups/app.h"
 #include "setups/audio.h"
+#include "setups/texture.h"
+
 #include "utils/globals.h"
 
 void lobby_initFonts(void) {
@@ -21,6 +23,7 @@ void lobby_freeFonts(void) {
 }
 
 Error_Et lobby_initApp(void) {
+    Error_Et error = OK;
     srand(time(NULL));
 
     SetTraceLogLevel(LOG_WARNING);
@@ -32,9 +35,14 @@ Error_Et lobby_initApp(void) {
     lobby_initFonts();
     lobby_initAudio();
 
+    error = lobby_initTextures(lobby_game.playerVisuals.textures);
+    if (error != OK) {
+        log_warn("[Lobby] Textures didn't load properly.");
+    }
+
     paramsMenu_init(&paramsMenu);
 
-    return OK;
+    return error;
 }
 
 void lobby_freeApp(void) {
@@ -43,6 +51,8 @@ void lobby_freeApp(void) {
 
     lobby_freeAudio();
     lobby_freeFonts();
+
+    lobby_freeTextures(lobby_game.playerVisuals.textures);
 
     CloseAudioDevice();
 

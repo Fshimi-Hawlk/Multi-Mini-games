@@ -2,6 +2,7 @@
     @file editor/editor.c
     @author Fshimi-Hawlk
     @date 2026-03-28
+    @date 2026-04-14
     @brief Central editor initialization and high-level orchestration.
 */
 
@@ -9,11 +10,9 @@
 #include "editor/types.h"
 #include "editor/properties.h"
 
-#include "utils/globals.h"
-
 #include "sharedWidgets/scrollFrame.h"
 
-// Editor state 
+// ── Editor initialization ───────────────────────────────────────────────────
 EditorDragMode_Et editorDragMode = DRAG_NONE;
 ResizeHandle_Et activeHandle = HANDLE_NONE;
 Vector2 dragStartWorld = {0.0f, 0.0f};
@@ -51,33 +50,11 @@ Clipboard_St clipboard = {0};
 bool clipboardHasData = false;
 s32 pasteAnchorIndex = 4;   // default = center (index 4 in 3x3 grid)
 
-TextButton_St btnLoad  = { .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, .text = "Load",  .baseColor = BLUE };
-TextButton_St btnSave  = { .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, .text = "Save",  .baseColor = GREEN };
-TextButton_St btnGenerate  = { .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, .text = "Code",  .baseColor = PURPLE };
+TextButton_St btnLoad  = { .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, .text = "Load", .textColor = WHITE, .baseColor = BLUE };
+TextButton_St btnSave  = { .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, .text = "Save", .textColor = WHITE, .baseColor = GREEN };
+TextButton_St btnGenerate  = { .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, .text = "Code", .textColor = WHITE, .baseColor = PURPLE };
 
-extern LobbyGame_St lobby_game;
-extern void updateEditor(LobbyGame_St* game, float dt);
-extern void drawEditor(const LobbyGame_St* const game);
-
-static void editor_init(void) {
-    initEditor(&lobby_game);
-}
-
-static void editor_update(float dt) {
-    updateEditor(&lobby_game, dt);
-}
-
-static void editor_draw(void) {
-    drawEditor(&lobby_game);
-}
-
-GameClientInterface_St editorClientInterface = {
-    .id      = MINI_GAME_ID_EDITOR,
-    .name    = "Level Editor",
-    .init    = editor_init,
-    .update  = editor_update,
-    .draw    = editor_draw,
-};
+s32 selectedZoneIndex = -1;
 
 void initEditor(LobbyGame_St* const game) {
     // Reset drag & selection state
@@ -89,11 +66,12 @@ void initEditor(LobbyGame_St* const game) {
 
     da_clear(&selectedIndices);
     da_clear(&clipboard);
-    da_clear(&terrains);
     clipboardHasData = false;
     pasteAnchorIndex = 4;                     // center anchor
 
     game->selectedTerrainIndex = -1;
+    selectedZoneIndex = -1;
+
     game->showLeftPalette = true;
     game->showPropertiesPanel = false;
 

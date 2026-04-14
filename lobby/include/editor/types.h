@@ -2,7 +2,7 @@
     @file editor/types.h
     @author Fshimi-Hawlk
     @date 2026-03-27
-    @date 2026-03-27
+    @date 2026-04-14
     @brief Private types and enums used internally by the level editor.
 
     This header should only be included by files inside the editor module.
@@ -11,9 +11,8 @@
 #ifndef EDITOR_TYPES_H
 #define EDITOR_TYPES_H
 
-#include "sharedWidgets/types.h"
-
 #include "utils/userTypes.h"
+#include "sharedWidgets/types.h"
 
 // Dynamic array of selected terrain indices
 typeDA(s32, SelectedIndices_St);
@@ -26,7 +25,8 @@ typedef enum {
     DRAG_PLACING_NEW,
     DRAG_MOVING,
     DRAG_RESIZING,
-    DRAG_MULTI_SELECT
+    DRAG_MULTI_SELECT,
+    DRAG_MOVING_ZONE
 } EditorDragMode_Et;
 
 typedef enum {
@@ -40,6 +40,20 @@ typedef enum {
     HANDLE_BOTTOM_LEFT,
     HANDLE_LEFT
 } ResizeHandle_Et;
+
+static const char* terrainKindNames[__terrainKindCount] = {
+    "Normal",
+    "Grass",
+    "Wood Plank",
+    "Stone",
+    "Ice",
+    "Bouncy",
+    "Moving H",
+    "Moving V",
+    "Water",
+    "Decorative",
+    "Portal"
+};
 
 extern EditorDragMode_Et editorDragMode;
 extern ResizeHandle_Et activeHandle;
@@ -78,5 +92,11 @@ extern s32 pasteAnchorIndex;
 extern TextButton_St btnLoad;
 extern TextButton_St btnSave;
 extern TextButton_St btnGenerate;
+
+/**
+    @brief Index of the currently selected game interaction zone (-1 = none).
+           Used for dragging the mini-game entry zones.
+*/
+extern s32 selectedZoneIndex;
 
 #endif // EDITOR_TYPES_H

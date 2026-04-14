@@ -2,32 +2,30 @@
     @file editor/codegen.c
     @author Fshimi-Hawlk
     @date 2026-03-30
+    @date 2026-04-13
     @brief Code generator that turns the current editor level into clean C source code.
 */
 
 #include "editor/codegen.h"
 
-#include "nob/dynamicArray.h"
 #include "utils/globals.h"
-#include "utils/userTypes.h"
 
 #include "sharedUtils/debug.h"
 #include "sharedUtils/container.h"
 
-static const char* terrainTypeComment(TerrainKind_Et kind) {
+static const char* terrainKindComment(TerrainKind_Et kind) {
     switch (kind) {
-        case TERRAIN_KIND_NORMAL:       return "Normal";
-        case TERRAIN_KIND_GRASS:        return "Grass";
-        case TERRAIN_KIND_WOOD_PLANK:   return "Wood Plank";
-        case TERRAIN_KIND_STONE:        return "Stone";
-        case TERRAIN_KIND_ICE:          return "Ice";
-        case TERRAIN_KIND_BOUNCY:       return "Bouncy";
-        case TERRAIN_KIND_MOVING_H:     return "Moving Horizontal";
-        case TERRAIN_KIND_MOVING_V:     return "Moving Vertical";
-        case TERRAIN_KIND_WATER:        return "Water";
-        case TERRAIN_KIND_DECORATIVE:   return "Decorative";
-        case TERRAIN_KIND_PORTAL:       return "Portal";
-        default:                        return "Unknown";
+        case TERRAIN_KIND_NORMAL:      return "Normal";
+        case TERRAIN_KIND_WOOD_PLANK:  return "Wood Plank";
+        case TERRAIN_KIND_STONE:       return "Stone";
+        case TERRAIN_KIND_ICE:         return "Ice";
+        case TERRAIN_KIND_BOUNCY:      return "Bouncy";
+        case TERRAIN_KIND_MOVING_H:    return "Moving Horizontal";
+        case TERRAIN_KIND_MOVING_V:    return "Moving Vertical";
+        case TERRAIN_KIND_WATER:       return "Water";
+        case TERRAIN_KIND_DECORATIVE:  return "Decorative";
+        case TERRAIN_KIND_PORTAL:      return "Portal";
+        default:                  return "Unknown";
     }
 }
 
@@ -63,7 +61,7 @@ bool editorGenerateCode(const LobbyGame_St* const game, const char* filename) {
 
         if (kind > 0) fprintf(f, "\n");
         fprintf(f, "    // ==================================================================\n");
-        fprintf(f, "    // %s\n", terrainTypeComment(kind));
+        fprintf(f, "    // %s\n", terrainKindComment(kind));
         fprintf(f, "    // ==================================================================\n");
 
         for (u32 i = 0; i < group.count; ++i) {

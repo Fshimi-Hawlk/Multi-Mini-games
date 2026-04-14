@@ -2,6 +2,7 @@
     @file editor/io.c
     @author Fshimi-Hawlk
     @date 2026-03-29
+    @date 2026-04-13
     @brief Level editor file I/O with native dialogs and backup.
 */
 
@@ -9,8 +10,6 @@
 #include "editor/types.h"
 
 #include "utils/globals.h"
-
-#include "systemSettings.h"
 
 // Magic for our .dat files
 #define LEVEL_FILE_MAGIC 0x4C4F4242u   // "LOBB"

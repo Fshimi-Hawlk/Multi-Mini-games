@@ -1,6 +1,6 @@
 /**
     @file editor/utils.h
-    @author Grok (assisted) + Fshimi-Hawlk
+    @author Fshimi-Hawlk
     @date 2026-03-27
     @date 2026-03-27
     @brief Pure logic utilities used only by the level editor module.
@@ -142,5 +142,11 @@ f32 snapToGrid(f32 v);
     @param cam      Current camera (to scale line thickness)
 */
 void drawPortalHighlight(s32 idx, Color color, const Camera2D* cam);
+
+/**
+    @brief Returns the index of the first game interaction zone that contains the world point.
+    @return zone index (>=1) or -1 if none found.
+*/
+s32 findZoneAtPoint(Vector2 point);
 
 #endif // EDITOR_UTILS_H

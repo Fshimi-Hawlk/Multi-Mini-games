@@ -1,8 +1,8 @@
 /**
     @file editor/utils.c
-    @author Grok (assisted) + Fshimi-Hawlk
+    @author Fshimi-Hawlk
     @date 2026-03-27
-    @date 2026-03-27
+    @date 2026-04-13
     @brief Pure logic utilities used only by the level editor.
 
     Contributors:
@@ -41,33 +41,33 @@ s32 findTerrainAtPoint(Vector2 point) {
     return -1;
 }
 
-Color getTerrainTypeColor(TerrainKind_Et kind) {
-    Color kindColor = {0};
+Color getTerrainKindColor(TerrainKind_Et type) {
+    Color typeColor = {0};
 
-    switch (kind) {
-        case TERRAIN_KIND_NORMAL:        kindColor = (Color) {139, 69, 19, 255};   break;
-        case TERRAIN_KIND_WOOD_PLANK:    kindColor = (Color) {139, 69, 19, 255};   break;
-        case TERRAIN_KIND_STONE:         kindColor = (Color) {160, 160, 160, 255}; break;
-        case TERRAIN_KIND_ICE:           kindColor = (Color) {180, 220, 255, 255}; break;
-        case TERRAIN_KIND_BOUNCY:        kindColor = (Color) {255, 100, 0, 255};   break;
+    switch (type) {
+        case TERRAIN_KIND_NORMAL:        typeColor = (Color) {139, 69, 19, 255};   break;
+        case TERRAIN_KIND_WOOD_PLANK:    typeColor = (Color) {139, 69, 19, 255};   break;
+        case TERRAIN_KIND_STONE:         typeColor = (Color) {160, 160, 160, 255}; break;
+        case TERRAIN_KIND_ICE:           typeColor = (Color) {180, 220, 255, 255}; break;
+        case TERRAIN_KIND_BOUNCY:        typeColor = (Color) {255, 100, 0, 255};   break;
         case TERRAIN_KIND_MOVING_H:
-        case TERRAIN_KIND_MOVING_V:      kindColor = (Color) {70, 130, 180, 255};  break;
-        case TERRAIN_KIND_WATER:         kindColor = (Color) {30, 100, 200, 180};  break;
-        case TERRAIN_KIND_DECORATIVE:    kindColor = (Color) {34, 139, 34, 80};   break;
-        case TERRAIN_KIND_PORTAL:        kindColor = (Color) {200, 0, 255, 180};   break;
+        case TERRAIN_KIND_MOVING_V:      typeColor = (Color) {70, 130, 180, 255};  break;
+        case TERRAIN_KIND_WATER:         typeColor = (Color) {30, 100, 200, 180};  break;
+        case TERRAIN_KIND_DECORATIVE:    typeColor = (Color) {34, 139, 34, 80};   break;
+        case TERRAIN_KIND_PORTAL:        typeColor = (Color) {200, 0, 255, 180};   break;
         default:                    log_warn("TerrainKind_Et");
     }
 
-    return kindColor;
+    return typeColor;
 }
 
-LobbyTerrain_St createDefaultTerrain(TerrainKind_Et kind, Vector2 position) {
+LobbyTerrain_St createDefaultTerrain(TerrainKind_Et type, Vector2 position) {
     LobbyTerrain_St t = {0};
     t.rect = (Rectangle) {position.x, position.y, 200.0f, 30.0f};
     t.roundness = 0.0f;
-    t.kind = kind;
+    t.kind = type;
 
-    t.color = getTerrainTypeColor(kind);
+    t.color = getTerrainKindColor(type);
     
     return t;
 }
@@ -76,7 +76,7 @@ bool terrainsOverlap(const LobbyTerrain_St* const a, const LobbyTerrain_St* cons
     return CheckCollisionRecs(a->rect, b->rect);
 }
 
-/*  Editor-specific helpers  */
+/* ── Editor-specific helpers ─────────────────────────────────────────────── */
 
 Vector2 getMouseWorld(const LobbyGame_St* const game) {
     return GetScreenToWorld2D(GetMousePosition(), game->cam);
@@ -202,4 +202,14 @@ void drawPortalHighlight(s32 idx, Color color, const Camera2D* cam) {
     f32 thickness = r.width / 2 * cam->zoom;
 
     DrawCircleLinesV(getRectCenterPos(r), thickness, color);
+}
+
+s32 findZoneAtPoint(Vector2 point) {
+    for (u8 i = 1; i < __miniGameIdCount; ++i) {
+        if (i == MINI_GAME_ID_LOBBY) continue;
+        if (CheckCollisionPointRec(point, gameZones[i].hitbox)) {
+            return (s32)i;
+        }
+    }
+    return -1;
 }
