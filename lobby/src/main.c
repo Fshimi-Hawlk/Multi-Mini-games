@@ -444,8 +444,14 @@ void spawn_server(void) {
 // Backup of lobby terrains before entering editor (so editor changes don't persist in lobby)
 static TerrainVec_St lobbyTerrainBackup = {0};
 
+void launchSoloGame(u8 gameId);
+void setCurrentMiniGame(GameClientInterface_St* iface);
+
 void switchMinigame(u8 gameId) {
-    if (gameId < __miniGameIdCount && miniGameInterfaces[gameId]) {
+    if (gameId >= __miniGameIdCount) return;
+
+    if (miniGameInterfaces[gameId]) {
+        // Jeu avec interface réseau existante (Bingo, Chess, KingForFour, etc.)
         // Notify server that we are leaving the current minigame room (if any)
         if (currentMiniGameID != MINI_GAME_ID_LOBBY && currentMiniGameID != MINI_GAME_ID_EDITOR && gameId == MINI_GAME_ID_LOBBY) {
             GameTLVHeader_St tlv = { .gameId = currentMiniGameID, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
@@ -491,7 +497,21 @@ void switchMinigame(u8 gameId) {
             if (gameId == MINI_GAME_ID_EDITOR) lobby_game.editorMode = true;
         }
         log_info("Switched to mini-game ID: %d", gameId);
+    } else {
+        // Jeu solo sans interface réseau
+        if (currentMiniGame && currentMiniGame->destroy) {
+            currentMiniGame->destroy();
+        }
+        currentMiniGameID = (MiniGameId_Et) gameId;
+        lobby_game.currentState = GAME_STATE_INGAME;
+        lobby_closeRoomSelector();
+        launchSoloGame(gameId);
     }
+}
+
+void setCurrentMiniGame(GameClientInterface_St* iface) {
+    currentMiniGame = iface;
+    if (iface && iface->init) iface->init();
 }
 
 int main(void) {
@@ -574,11 +594,16 @@ int main(void) {
                              GetScreenHeight() - 100, 20, GREEN);
 
                     if (IsKeyPressed(KEY_E)) {
-                        // Solo mode (no server) or editor: switch directly without room selector
-                        if (triggerID == MINI_GAME_ID_EDITOR || networkSocket < 0) {
-                            switchMinigame(triggerID);
+                        // Logique solo/multi basée sur l'interface réseau du jeu
+                        // Si le jeu a une interface réseau ET qu'on est connecté → multi
+                        // Sinon → solo
+                        bool hasMulti = miniGameInterfaces[triggerID] != NULL;
+                        bool isConnected = networkSocket >= 0;
+                        
+                        if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
+                            lobby_openRoomSelector(triggerID);  // multi
                         } else {
-                            lobby_openRoomSelector(triggerID);
+                            switchMinigame(triggerID);          // solo
                         }
                     }
                 } else {

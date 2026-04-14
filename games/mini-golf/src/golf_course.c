@@ -6,6 +6,7 @@
     @brief Terrain generation and course layout for Golf 3D.
 */
 #include "golf.h"
+#include "rlgl.h"
 
 /* ─── Bruit de Perlin 2D (simplifié, déterministe) ───────────────────────── */
 
@@ -343,7 +344,7 @@ Vector3 Golf_GetTerrainNormal(GolfGame *g, float x, float z) {
     return Vector3Normalize(n);
 }
 
-/* ─── Dessin du terrain ──────────────────────────────────────────────────── */
+/* ─── Dessin du terrain avec textures ─────────────────────────────────────────── */
 #define GRID_N 60
 
 void Golf_DrawTerrain(GolfGame *g) {
@@ -363,22 +364,43 @@ void Golf_DrawTerrain(GolfGame *g) {
             float y01 = Golf_GetTerrainHeight(g, x0, z1);
             float y11 = Golf_GetTerrainHeight(g, x1, z1);
             float cx  = (x0+x1)*0.5f, cz = (z0+z1)*0.5f;
+            float cy  = Golf_GetTerrainHeight(g, cx, cz);
             SurfaceType surf = Golf_GetSurface(g, cx, cz);
-            Color col = h->rough_color;
+            
+            Texture2D tex;
             switch (surf) {
-                case SURF_FAIRWAY: col = h->fairway_color;            break;
-                case SURF_GREEN:   col = (Color){ 60,180, 60,255};    break;
-                case SURF_SAND:    col = (Color){220,200,140,255};    break;
-                case SURF_WATER:   col = (Color){ 40,100,200,200};    break;
-                case SURF_OOB:     col = (Color){120, 80, 50,255};    break;
-                default: break;
+                case SURF_FAIRWAY: tex = g->tex_fairway; break;
+                case SURF_GREEN:   tex = g->tex_green;   break;
+                case SURF_SAND:    tex = g->tex_sand;    break;
+                case SURF_WATER:  tex = g->tex_water;  break;
+                case SURF_ROUGH: tex = g->tex_rough;  break;
+                default:        tex = g->tex_rough;  break;
             }
-            DrawTriangle3D((Vector3){x0,y00,z0},
-                           (Vector3){x0,y01,z1},
-                           (Vector3){x1,y11,z1}, col);
-            DrawTriangle3D((Vector3){x0,y00,z0},
-                           (Vector3){x1,y11,z1},
-                           (Vector3){x1,y10,z0}, col);
+            
+            if (tex.id == 0) {
+                Color col = h->rough_color;
+                switch (surf) {
+                    case SURF_FAIRWAY: col = h->fairway_color; break;
+                    case SURF_GREEN:   col = (Color){ 60,180, 60,255}; break;
+                    case SURF_SAND:    col = (Color){220,200,140,255}; break;
+                    case SURF_WATER:   col = (Color){ 40,100,200,200}; break;
+                    case SURF_OOB:     col = (Color){120, 80, 50,255}; break;
+                    default: break;
+                }
+                DrawTriangle3D((Vector3){x0,y00,z0}, (Vector3){x0,y01,z1}, (Vector3){x1,y11,z1}, col);
+                DrawTriangle3D((Vector3){x0,y00,z0}, (Vector3){x1,y11,z1}, (Vector3){x1,y10,z0}, col);
+                continue;
+            }
+            
+            rlSetTexture(tex.id);
+            rlBegin(RL_QUADS);
+                rlColor4ub(255, 255, 255, 255);
+                rlTexCoord2f(0, 0); rlVertex3f(x0, y00, z0);
+                rlTexCoord2f(1, 0); rlVertex3f(x0, y01, z1);
+                rlTexCoord2f(1, 1); rlVertex3f(x1, y11, z1);
+                rlTexCoord2f(0, 1); rlVertex3f(x1, y10, z0);
+            rlEnd();
+            rlSetTexture(0);
         }
     }
 }

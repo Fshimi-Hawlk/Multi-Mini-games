@@ -1,9 +1,16 @@
 /**
     @file suikaAPI.h
-    @author Maxime CHAUVEAU
-    @date 2026-02-01
-    @date 2026-04-14
+    @author Multi Mini-Games Team
+    @date February 2026
     @brief Public API for the Suika (Watermelon Game) mini-game.
+
+    Defines the opaque game handle and the minimal lifecycle functions
+    required to integrate Suika into the lobby.
+
+    @note The internal structure `SuikaGame_St` is **opaque** outside this module.
+          Direct field access from the lobby or other modules is forbidden.
+
+    @see generalAPI.h for the required `BaseGame_St` base structure and `Error_Et` codes
 */
 #ifndef SUIKA_API_H
 #define SUIKA_API_H

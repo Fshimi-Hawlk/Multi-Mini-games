@@ -231,8 +231,13 @@ typedef struct {
     Wind       wind;        ///< Wind conditions
     GolfCamera gcam;        ///< The 3D camera
 
-    Texture2D  tex_ball;    ///< Ball texture
-    Texture2D  tex_club;    ///< Club icon/texture
+Texture2D  tex_ball;
+    Texture2D  tex_club;
+    Texture2D  tex_fairway;
+    Texture2D  tex_rough;
+    Texture2D  tex_green;
+    Texture2D  tex_sand;
+    Texture2D  tex_water;
 
     ScoreCard  score;       ///< The scorecard
 
