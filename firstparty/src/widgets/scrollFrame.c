@@ -24,7 +24,9 @@ void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32Vector2 co
     frame->roundness    = (roundness > 0.0f) ? roundness : 1.0f;
 }
 
-bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen) {
+bool scrollFrameUpdate(ScrollFrame_St* frame, Rectangle visibleArea, Vector2 mouseScreen) {
+    frame->visibleArea = visibleArea;
+
     if (!CheckCollisionPointRec(mouseScreen, frame->visibleArea)) {
         return false;
     }
@@ -45,7 +47,7 @@ bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen) {
     return true;
 }
 
-void scrollFrameBegin(ScrollFrame_St* frame) {
+void scrollFrameBegin(const ScrollFrame_St* frame) {
     BeginScissorMode((int)frame->visibleArea.x,
                      (int)frame->visibleArea.y,
                      (int)frame->visibleArea.width,

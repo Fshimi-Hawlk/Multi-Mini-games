@@ -3,11 +3,6 @@
     @author Fshimi-Hawlk
     @date 2026-03-28
     @brief Core types and enums for the reusable widget system.
-
-    All widget-related public types live here following project typedef rules:
-      - No suffix for primitive-feeling types
-      - _St for structs
-      - _Et for enums
 */
 
 #ifndef WIDGETS_TYPES_H
@@ -24,6 +19,7 @@ typedef Vector2 f32Vector2;
 #endif
 
 #include "baseTypes.h"
+#include "nob/stringBuilder.h"
 
 // ── Common widget states ─────────────────────────────────────────────────────
 
@@ -120,5 +116,26 @@ typedef struct {
     const char*    label;        ///< Optional label text to the right of the box
     f32            roundness;
 } CheckBox_St;
+
+// ── TextArea ─────────────────────────────────────────────────────────────────
+
+/**
+    @brief Multi-line text area (editable or display-only) with word-wrap + scrollbars.
+           Uses StringBuilder_St internally so it grows automatically.
+           Perfect for chat messages, logs, long descriptions, etc.
+*/
+typedef struct {
+    Rectangle        bounds;
+    WidgetState_Et   state;
+    ScrollFrame_St   scrollFrame;     ///< Embedded scroll frame (vertical + horizontal)
+    StringBuilder_St buffer;          ///< Dynamic buffer (grows with StringBuilder_St macros)
+    u32              cursorPos;       ///< Byte offset in buffer (only when editable)
+    bool             editMode;        ///< Only meaningful when editable == true
+    bool             editable;        ///< false = pure display mode (chat history)
+    f32              roundness;
+    const char      *placeholder;     ///< Shown when buffer empty and not active
+    bool             isValid;
+    bool             wordWrap;        ///< Always true for TextArea (configurable via init)
+} TextArea_St;
 
 #endif // WIDGETS_TYPES_H

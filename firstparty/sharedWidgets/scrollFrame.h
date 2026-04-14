@@ -27,14 +27,14 @@ void scrollFrameInit(ScrollFrame_St* frame, Rectangle visibleArea, f32Vector2 co
     @param mouseScreen  Current mouse position
     @return true if scrolling occurred this frame
 */
-bool scrollFrameUpdate(ScrollFrame_St* frame, Vector2 mouseScreen);
+bool scrollFrameUpdate(ScrollFrame_St* frame, Rectangle visibleArea, Vector2 mouseScreen);
 
 /**
     @brief Begins scissor mode and applies scroll transform.
            Call this before drawing the scrollable content.
     @param frame        Scroll frame
 */
-void scrollFrameBegin(ScrollFrame_St* frame);
+void scrollFrameBegin(const ScrollFrame_St* frame);
 
 /**
     @brief Ends the scissor mode. Must be paired with scrollFrameBegin().

@@ -2,7 +2,7 @@
     @file widgets/textBox.c
     @author Fshimi-Hawlk
     @date 2026-03-28
-    @date 2026-03-30
+    @date 2026-04-13
     @brief Implementation of the single-line TextBox widget
 
     Contributors:
@@ -12,6 +12,9 @@
             - Blinking cursor when active
             - Proper state machine (normal/hover/active)
             - Added roundness, placeholder support and validation border coloring
+            - Fixed character insertion at arbitrary cursor position (now properly shifts suffix right instead of overwriting with \0)
+            - Fixed backspace/delete when cursor is in the middle of text (now shifts correctly)
+            - Guaranteed buffer safety (never exceeds 255 chars, always null-terminated)
 */
 
 #include <string.h>
@@ -55,31 +58,41 @@ bool textBoxUpdate(TextBox_St* box, Vector2 mouseScreen) {
 
     bool committed = false;
 
-    // ── Typing ─────────────────────────────────────────────────────────────
+    size_t len = strlen(box->buffer);
+
+    // ── Typing (proper insertion - shifts remaining text right) ────────────
     int key = GetCharPressed();
     while (key > 0) {
-        if ((key >= 32 && key <= 125) && box->cursorPos < 255) {  // printable ASCII
-            box->buffer[box->cursorPos++] = (char)key;
-            box->buffer[box->cursorPos] = '\0';
+        if (key >= 32 && key <= 125 && len < 255) {  // printable ASCII, room available
+            // Shift tail right (including the null terminator)
+            memmove(box->buffer + box->cursorPos + 1,
+                    box->buffer + box->cursorPos,
+                    len - box->cursorPos + 1);
+            box->buffer[box->cursorPos] = (char)key;
+            box->cursorPos++;
+            len++;
         }
         key = GetCharPressed();
     }
 
-    // ── Backspace / Delete ─────────────────────────────────────────────────
+    // ── Backspace (now works anywhere - shifts left) ───────────────────────
     if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressedRepeat(KEY_BACKSPACE)) {
         if (box->cursorPos > 0) {
+            memmove(box->buffer + box->cursorPos - 1,
+                    box->buffer + box->cursorPos,
+                    len - box->cursorPos + 1);
             box->cursorPos--;
-            box->buffer[box->cursorPos] = '\0';
+            len--;
         }
     }
 
+    // ── Delete ─────────────────────────────────────────────────────────────
     if (IsKeyPressed(KEY_DELETE) || IsKeyPressedRepeat(KEY_DELETE)) {
-        if (box->cursorPos < strlen(box->buffer)) {
-            // shift remaining characters left
-            for (u32 i = box->cursorPos; i < 255 && box->buffer[i + 1]; ++i) {
-                box->buffer[i] = box->buffer[i + 1];
-            }
-            box->buffer[strlen(box->buffer) - 1] = '\0';
+        if (box->cursorPos < len) {
+            memmove(box->buffer + box->cursorPos,
+                    box->buffer + box->cursorPos + 1,
+                    len - box->cursorPos);
+            len--;
         }
     }
 
@@ -88,7 +101,7 @@ bool textBoxUpdate(TextBox_St* box, Vector2 mouseScreen) {
         if (box->cursorPos > 0) box->cursorPos--;
     }
     if (IsKeyPressed(KEY_RIGHT) || IsKeyPressedRepeat(KEY_RIGHT)) {
-        if (box->cursorPos < strlen(box->buffer)) box->cursorPos++;
+        if (box->cursorPos < len) box->cursorPos++;
     }
 
     // ── Commit on Enter ────────────────────────────────────────────────────
@@ -103,7 +116,7 @@ bool textBoxUpdate(TextBox_St* box, Vector2 mouseScreen) {
         // Simple cursor placement near click position (can be refined later)
         f32 clickX = mouseScreen.x - box->bounds.x - 8.0f;
 
-        box->cursorPos = (u32) clamp(clickX / strlen(box->buffer), 0, strlen(box->buffer));
+        box->cursorPos = (u32) clamp(clickX / (len > 0 ? len : 1), 0, len);
     }
 
     return committed;
