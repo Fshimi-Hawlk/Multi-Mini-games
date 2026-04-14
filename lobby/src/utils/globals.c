@@ -52,9 +52,9 @@ Texture2D terrainTextures[__terrainKindCount] = {0};
 
 GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_BINGO] = {
-        .hitbox = { 
-            .x      = -1475,
-            .y      = 425,
+        .hitbox = {
+            .x      = -1475.00,
+            .y      = 425.00,
             .width  = 75,
             .height = 75
         },
@@ -63,8 +63,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_CHESS] = {
         .hitbox = { 
-            .x      = -1250,
-            .y      = 425,
+            .x      = 651.67,
+            .y      = -803.00,
             .width  = 75,
             .height = 75
         },
@@ -73,8 +73,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_DROP_FOUR]  = {
         .hitbox = {
-            .x      = -1025,
-            .y      = 425,
+            .x      = -594.00,
+            .y      = -771.67,
             .width  = 75,
             .height = 75
         },
@@ -83,30 +83,30 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_TETROMINO_FALL] = {
         .hitbox = {
-            .x      = -800,
-            .y      = 425,
+            .x      = -85.00,
+            .y      = -271.67,
             .width  = 75,
             .height = 75
         },
         .name = "Tetromino Fall",
         .color = {0, 120, 220, 200},
     },
-
-    [MINI_GAME_ID_SOLO_CARDS] = {
+    
+    [MINI_GAME_ID_EDITOR] = {
         .hitbox = {
-            .x      = -575,
-            .y      = 425,
+            .x      = -161.67,
+            .y      = -731.67,
             .width  = 75,
             .height = 75
         },
-        .name = "Solo Cards",
+        .name = "Level Editor",
         .color = {0, 160, 80,  200},
     },
 
     [MINI_GAME_ID_SUIKA] = {
         .hitbox = {
-            .x      = -350,
-            .y      = 425,
+            .x      = 379.00,
+            .y      = -1206.30,
             .width  = 75,
             .height = 75
         },
@@ -116,8 +116,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_BOWLING] = {
         .hitbox = {
-            .x      = -125,
-            .y      = 425,
+            .x      = -416.33,
+            .y      = -943.00,
             .width  = 75,
             .height = 75
         },
@@ -127,8 +127,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_MINI_GOLF] = {
         .hitbox = {
-            .x      = 100,
-            .y      = 425,
+            .x      = -506.67,
+            .y      = -258.33,
             .width  = 75,
             .height = 75
         },
@@ -138,8 +138,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_SNAKE] = {
         .hitbox = {
-            .x      = 325,
-            .y      = 425,
+            .x      = -60.00,
+            .y      = -545.00,
             .width  = 75,
             .height = 75
         },
@@ -149,8 +149,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_POLY_BLAST] = {
         .hitbox = {
-            .x      = 550,
-            .y      = 425,
+            .x      = 311.67,
+            .y      = -631.00,
             .width  = 75,
             .height = 75
         },
@@ -160,8 +160,8 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_DISC_REVERSAL]    = {
         .hitbox = {
-            .x      = 775,
-            .y      = 425,
+            .x      = -23.33,
+            .y      = -1081.6,
             .width  = 75,
             .height = 75
         },
@@ -169,9 +169,9 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     },
 
     [MINI_GAME_ID_KING_FOR_FOUR] = {
-        .hitbox = { 
-            .x      = 1000,
-            .y      = 425,
+        .hitbox = {
+            .x      =  63.33,
+            .y      = -78.33,
             .width  = 75,
             .height = 75
         },
@@ -180,22 +180,22 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_TWIST_CUBE] = {
         .hitbox = { 
-            .x      = 1225,
-            .y      = 425,
+            .x      = -870.00,
+            .y      = -538.33,
             .width  = 75,
             .height = 75
         },
         .name = "Twist Cube"
     },
 
-    [MINI_GAME_ID_EDITOR] = {
-        .hitbox = { 
-            .x      = 1450,
-            .y      = 425,
+    [MINI_GAME_ID_SOLO_CARDS] = {
+        .hitbox = {
+            .x      =  218.33,
+            .y      = -871.67,
             .width  = 75,
             .height = 75
         },
-        .name = "Level Editor"
+        .name = "Solo Cards"
     },
 };
 
