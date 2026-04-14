@@ -38,9 +38,4 @@ void kingForFour_initPlayer(Player_St* p, int id, const char* name);
  */
 void kingForFour_drawToHand(Player_St* p, Deck_St* draw_pile);
 
-    @param[in,out] p         Pointer to the player.
-    @param[in,out] draw_pile Pointer to the deck to draw from.
-*/
-void draw_to_hand(Player_St* p, Deck* draw_pile);
-
 #endif // PLAYER_H

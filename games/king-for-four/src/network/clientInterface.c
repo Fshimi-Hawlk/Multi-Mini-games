@@ -43,24 +43,16 @@ typedef struct {
     int last_action;
     int numPlayers;
     int requestedPlayers;
-} GameSyncPayload;
+} GameSyncPayload_St;
 
 /**
     @brief Payload for a player playing a card.
 */
 typedef struct {
-/**
-    @brief Sends a game-specific action message to the server.
-
-    @param[in] action The action code.
-    @param[in] data   Pointer to the payload data.
-    @param[in] len    Length of the payload data.
-*/
-int cardIndex;
-    int chosenColor; 
+    int cardIndex;
+    int chosenColor;
 } ActionPlayPayload_St;
 #pragma pack(pop)
-
 static KingForFourGameState_St kingForFour_localState;
 static GameAssets_St assets;
 static bool assets_loaded = false;

@@ -11,6 +11,14 @@
 #include "game.h"
 
 /**
+    @brief Evaluates the game state for a specific player.
+    
+    @param g Pointer to the KingForFourGameState_St.
+    @param player_id Index of the player.
+    @return The score of the state (higher is better).
+*/
+int kingForFour_evaluateState(KingForFourGameState_St* g, int player_id);
+
 /**
     @brief Calculates the best move for a bot using a simplified Negamax/Minimax.
 
@@ -19,14 +27,6 @@
     @param[out]    out_card_index  Pointer to store the index of the card to play (-1 for draw).
     @return                        The evaluation score of the chosen move.
 */
-* @brief Evaluates the game state for a specific player.
- * @param g Pointer to the KingForFourGameState_St.
- * @param player_id Index of the player.
- * @return The score of the state (higher is better).
- */
-int kingForFour_evaluateState(KingForFourGameState_St* g, int player_id);
-
-
 int kingForFour_calculateBestMove(KingForFourGameState_St* g, int player_id, int* out_card_index);
 
 #endif // BOT_H

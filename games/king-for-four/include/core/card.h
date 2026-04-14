@@ -62,12 +62,22 @@ typedef struct {
 // --- PROTOTYPES ---
 
 /**
+    @brief Adds a card to the top of the deck.
+
+    @param[in,out] d Pointer to the deck.
+    @param[in]     c The card to add.
+    @return          1 on success, 0 if deck is full.
+*/
+int kingForFour_pushCard(Deck_St* d, Card_St c);
+
 /**
     @brief Removes and returns the top card from the deck.
 
     @param[in,out] d Pointer to the deck.
     @return          The card that was removed. Returns a {CARD_BLACK, ZERO} card if empty.
 */
+Card_St kingForFour_popCard(Deck_St* d);
+
 /**
     @brief Removes and returns a card at a specific index in the deck.
 
@@ -75,49 +85,34 @@ typedef struct {
     @param[in]     index The index of the card to remove.
     @return              The card that was removed. Returns a {CARD_BLACK, ZERO} card if invalid index.
 */
+Card_St kingForFour_removeAt(Deck_St* d, int index);
+
 /**
     @brief Clears all cards from the deck.
 
     @param[in,out] d Pointer to the deck to clear.
 */
+void kingForFour_clearDeck(Deck_St* d);
+
 /**
     @brief Shuffles the deck using the Fisher-Yates algorithm.
 
     @param[in,out] d Pointer to the deck to shuffle.
 */
+void kingForFour_shuffleDeck(Deck_St* d);
+
 /**
     @brief Shuffles the deck using a human-like riffle shuffle.
 
     @param[in,out] d Pointer to the deck to shuffle.
 */
+void kingForFour_humanShuffleDeck(Deck_St* d);
+
 /**
     @brief Initializes a standard 108-card Uno deck.
 
     @param[out]    d Pointer to the deck to initialize.
 */
-* @brief Adds a card to the top of the deck.
- * @param d Pointer to the deck.
- * @param c The card to add.
- * @return 1 on success, 0 if deck is full.
- */
-int kingForFour_pushCard(Deck_St* d, Card_St c);
-
-
-Card_St kingForFour_popCard(Deck_St* d);
-
-
-Card_St kingForFour_removeAt(Deck_St* d, int index);
-
-
-void kingForFour_clearDeck(Deck_St* d);
-
-
-void kingForFour_shuffleDeck(Deck_St* d);
-
-
-void kingForFour_humanShuffleDeck(Deck_St* d);
-
-
 void kingForFour_initUnoDeck(Deck_St* d);
 
 #endif // CARD_H
