@@ -1,9 +1,10 @@
 /**
     @file ui/connectionScreen.h
+    @author i-Charlys (CAILLON Charles)
     @author Fshimi-Hawlk
-    @author i-Charlys
-    @date 2026-03-30
-    @brief Public interface for the lobby connection screen.
+    @date 2026-04-13
+    @date 2026-04-13
+    @brief Two-layer connection screen (Server List → Room List) using shared widgets.
 */
 
 #ifndef UI_CONNECTION_SCREEN_H
@@ -11,53 +12,40 @@
 
 #include "utils/userTypes.h"
 
-//
-// Getter
-//
+/**
+    @brief Initializes connection screen widgets.
+*/
+void lobby_initConnectionScreen(void);
 
 /**
- * @brief Gets the IP entered by the user.
- */
-const char* getEnteredIP(void);
+    @brief Updates connection screen logic.
+    @return true if connect button was pressed and IP is valid.
+*/
+bool lobby_updateConnectionScreen(void);
 
 /**
- * @brief Gets the pseudo entered by the user.
- */
-const char* getEnteredPseudo(void);
-
-//
-// Setter
-//
+    @brief Draws the connection screen UI.
+*/
+void lobby_drawConnectionScreen(void);
 
 /**
- * @brief Sets an error message to be displayed on the connection screen.
- */
-void setConnectionError(const char* error);
-
-//
-// Rest
-//
+    @brief Adds a discovered server to the list.
+*/
+void lobby_addDiscoveredServer(const char* ip, const char* name);
 
 /**
- * @brief Initializes connection screen widgets.
- */
-void initConnectionScreen(void);
+    @brief Sets an error message to be displayed.
+*/
+void lobby_setConnectionError(const char* error);
 
 /**
- * @brief Updates connection screen logic.
- * @return true if connect button was pressed and IP is valid.
- */
-bool updateConnectionScreen(void);
+    @brief Gets the IP entered by the user.
+*/
+const char* lobby_getEnteredIP(void);
 
 /**
- * @brief Draws the connection screen UI.
- */
-void drawConnectionScreen(void);
-
-/**
- * @brief Adds a discovered room to the list.
- */
-void addDiscoveredRoom(const char* ip, const char* name);
-
+    @brief Gets the player name entered by the user.
+*/
+const char* lobby_getEnteredPseudo(void);
 
 #endif // UI_CONNECTION_SCREEN_H

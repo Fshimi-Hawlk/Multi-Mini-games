@@ -2,8 +2,14 @@
     @file ui/connectionScreen.c
     @author i-Charlys (CAILLON Charles)
     @author Fshimi-Hawlk
-    @date 2026-03-30
-    @brief Modern connection screen using the enhanced reusable widget system.
+    @date 2026-04-13
+    @date 2026-04-13
+    @brief Two-layer connection screen (Server List → Room List) using shared widgets.
+
+    Contributors:
+        - i-Charlys: Original discovery logic
+        - Fshimi-Hawlk: Two-layer architecture, player name, instance support,
+                        full widget migration, textColor fix, lobby_ prefix
 */
 
 #include "ui/connectionScreen.h"
@@ -14,30 +20,35 @@
 #include "sharedWidgets/button.h"
 #include "sharedWidgets/types.h"
 
-#define MAX_ROOMS_DISPLAY 5
+#define MAX_SERVERS_DISPLAY 8
+#define MAX_INSTANCES_DISPLAY 8
 
 typedef struct {
     char          ip[16];
     char          name[32];
     TextButton_St button;
     bool          active;
-} RoomEntry_St;
+} ServerEntry_St;
 
-static TextBox_St    ipTextBox;
-static TextBox_St    pseudoTextBox;
-static TextButton_St refreshButton;
-static TextButton_St connectButton;
+static TextBox_St    lobby_playerNameTextBox;
+static TextBox_St    lobby_ipTextBox;
+static TextButton_St lobby_refreshButton;
+static TextButton_St lobby_connectButton;
 
-static RoomEntry_St discoveredRooms[MAX_ROOMS_DISPLAY];
-static int          roomsCount = 0;
-static char         errorMessage[128] = "";
-static float        errorTimer = 0.0f;
+static ServerEntry_St lobby_discoveredServers[MAX_SERVERS_DISPLAY];
+static s32            lobby_serversCount = 0;
+
+static char           lobby_errorMessage[128] = "";
+static f32            lobby_errorTimer = 0.0f;
+
+// static bool           lobby_playerInfoOverlayOpen = false;
+// static Texture2D      lobby_playerIconTexture;   // initialized in lobby startup
 
 static bool isValidIPv4(const char* ip) {
     if (ip == NULL || ip[0] == '\0') return false;
-    int octet = 0, num = 0, dots = 0;
+    s32 octet = 0, num = 0, dots = 0;
     bool hasDigit = false;
-    for (int i = 0; ip[i]; ++i) {
+    for (s32 i = 0; ip[i]; ++i) {
         char c = ip[i];
         if (c == '.') {
             if (!hasDigit || octet > 255 || dots >= 3) return false;
@@ -53,131 +64,155 @@ static bool isValidIPv4(const char* ip) {
     return (dots == 3 && hasDigit && octet <= 255);
 }
 
-void initConnectionScreen(void) {
-    int w = systemSettings.video.width;
-    int h = systemSettings.video.height;
-    float centerX = (float)w / 2.0f;
-    float titleY  = (float)h * 0.09f;
+void lobby_initConnectionScreen(void) {
+    s32 w = systemSettings.video.width;
+    s32 h = systemSettings.video.height;
+    f32 centerX = (f32)w / 2.0f;
+    f32 titleY  = (f32)h * 0.09f;
 
-    refreshButton = (TextButton_St) {
+    lobby_playerNameTextBox = (TextBox_St) {
+        .bounds      = {centerX - 185.0f, titleY + 80.0f, 370.0f, 46.0f},
+        .state       = WIDGET_STATE_NORMAL,
+        .roundness   = 0.4f,
+        .placeholder = "Enter your player name",
+        .isValid     = true
+    };
+    strncpy(lobby_playerNameTextBox.buffer, "unnamed", 31);
+
+    lobby_refreshButton = (TextButton_St) {
         .bounds    = {w - 90.0f - 135.0f, titleY + 220.0f, 170.0f, 46.0f},
         .state     = WIDGET_STATE_NORMAL,
-        .baseColor = (Color) {80, 180, 255, 255},
-        .roundness = 0.4f
+        .baseColor = (Color){80, 180, 255, 255},
+        .roundness = 0.4f,
+        .text      = "Refresh",
+        .textColor = WHITE
     };
-    refreshButton.text = "Refresh";
 
-    ipTextBox = (TextBox_St) {
-        .bounds      = {centerX - 185.0f, titleY + 105.0f, 370.0f, 50.0f},
+    lobby_ipTextBox = (TextBox_St) {
+        .bounds      = {centerX - 185.0f, titleY + 145.0f, 370.0f, 50.0f},
         .state       = WIDGET_STATE_NORMAL,
-        .cursorPos   = 0,
-        .editMode    = false,
         .roundness   = 0.4f,
         .placeholder = "Enter server IP",
         .isValid     = false
     };
-    ipTextBox.buffer[0] = '\0';
 
-    pseudoTextBox = (TextBox_St) {
-        .bounds      = {centerX - 185.0f, titleY + 40.0f, 370.0f, 50.0f},
-        .state       = WIDGET_STATE_NORMAL,
-        .cursorPos   = 0,
-        .editMode    = false,
-        .roundness   = 0.4f,
-        .placeholder = "Enter your Pseudo",
-        .isValid     = true
-    };
-    strncpy(pseudoTextBox.buffer, "Joueur", 31);
-    pseudoTextBox.cursorPos = 6;
-
-    connectButton = (TextButton_St) {
-        .bounds    = {centerX - 105.0f, titleY + 170.0f, 210.0f, 50.0f},
+    lobby_connectButton = (TextButton_St) {
+        .bounds    = {centerX - 105.0f, titleY + 210.0f, 210.0f, 50.0f},
         .state     = WIDGET_STATE_NORMAL,
-        .baseColor = (Color) {70, 130, 255, 255},
-        .roundness = 0.4f
+        .baseColor = (Color){70, 130, 255, 255},
+        .roundness = 0.4f,
+        .text      = "Connect",
+        .textColor = WHITE
     };
-    connectButton.text = "Connect";
 
-    for (int i = 0; i < MAX_ROOMS_DISPLAY; ++i) discoveredRooms[i].active = false;
-    roomsCount = 0;
+    for (s32 i = 0; i < MAX_SERVERS_DISPLAY; ++i) lobby_discoveredServers[i].active = false;
+    lobby_serversCount = 0;
 }
 
-void addDiscoveredRoom(const char* ip, const char* name) {
-    if (roomsCount >= MAX_ROOMS_DISPLAY) return;
-    for (int i = 0; i < roomsCount; ++i) if (strcmp(discoveredRooms[i].ip, ip) == 0) return;
-    strncpy(discoveredRooms[roomsCount].ip, ip, 15);
-    strncpy(discoveredRooms[roomsCount].name, name, 31);
-    float listStartY = systemSettings.video.height * 0.09f + 285.0f;
-    discoveredRooms[roomsCount].button = (TextButton_St) {
-        .bounds    = {55.0f, listStartY + (roomsCount * 52.0f), systemSettings.video.width - 110.0f, 46.0f},
+void lobby_addDiscoveredServer(const char* ip, const char* name) {
+    if (lobby_serversCount >= MAX_SERVERS_DISPLAY) return;
+    for (s32 i = 0; i < lobby_serversCount; ++i) {
+        if (strcmp(lobby_discoveredServers[i].ip, ip) == 0) return;
+    }
+
+    strncpy(lobby_discoveredServers[lobby_serversCount].ip, ip, 15);
+    strncpy(lobby_discoveredServers[lobby_serversCount].name, name, 31);
+
+    f32 listStartY = systemSettings.video.height * 0.09f + 285.0f;
+
+    lobby_discoveredServers[lobby_serversCount].button = (TextButton_St) {
+        .bounds    = {55.0f, listStartY + (lobby_serversCount * 52.0f), systemSettings.video.width - 110.0f, 46.0f},
         .state     = WIDGET_STATE_NORMAL,
-        .baseColor = (Color) {55, 55, 70, 255},
-        .roundness = 0.4f
+        .baseColor = (Color){55, 55, 70, 255},
+        .roundness = 0.4f,
+        .text      = lobby_discoveredServers[lobby_serversCount].name,
+        .textColor = WHITE
     };
-    discoveredRooms[roomsCount].button.text = discoveredRooms[roomsCount].name;
-    discoveredRooms[roomsCount].active = true;
-    ++roomsCount;
+    lobby_discoveredServers[lobby_serversCount].active = true;
+    ++lobby_serversCount;
 }
 
 extern void discoverServers(void);
 
-bool updateConnectionScreen(void) {
-    if (errorTimer > 0) errorTimer -= GetFrameTime();
-    else errorMessage[0] = '\0';
+bool lobby_updateConnectionScreen(void) {
+    if (lobby_errorTimer > 0.0f) lobby_errorTimer -= GetFrameTime();
+    else lobby_errorMessage[0] = '\0';
 
     Vector2 m = GetMousePosition();
-    textBoxUpdate(&ipTextBox, m);
-    textBoxUpdate(&pseudoTextBox, m);
-    ipTextBox.isValid = isValidIPv4(ipTextBox.buffer);
-    if (textButtonUpdate(&refreshButton, m)) discoverServers();
-    for (int i = 0; i < roomsCount; i++) {
-        if (discoveredRooms[i].active && textButtonUpdate(&discoveredRooms[i].button, m)) {
-            strncpy(ipTextBox.buffer, discoveredRooms[i].ip, 15);
-            ipTextBox.cursorPos = strlen(ipTextBox.buffer);
-            ipTextBox.isValid = true;
+
+    textBoxUpdate(&lobby_playerNameTextBox, m);
+    textBoxUpdate(&lobby_ipTextBox, m);
+    lobby_ipTextBox.isValid = isValidIPv4(lobby_ipTextBox.buffer);
+
+    if (textButtonUpdate(&lobby_refreshButton, m)) discoverServers();
+
+    for (s32 i = 0; i < lobby_serversCount; ++i) {
+        if (lobby_discoveredServers[i].active && textButtonUpdate(&lobby_discoveredServers[i].button, m)) {
+            strncpy(lobby_ipTextBox.buffer, lobby_discoveredServers[i].ip, 15);
+            lobby_ipTextBox.cursorPos = (s32)strlen(lobby_ipTextBox.buffer);
+            lobby_ipTextBox.isValid = true;
         }
     }
-    bool ipValid = ipTextBox.isValid;
-    if (connectButton.state != WIDGET_STATE_CLICK) connectButton.state = ipValid ? WIDGET_STATE_NORMAL : WIDGET_STATE_DISABLED;
-    if (textButtonUpdate(&connectButton, m) && ipValid) return true;
+
+    bool ipValid = lobby_ipTextBox.isValid;
+    if (lobby_connectButton.state != WIDGET_STATE_CLICK) {
+        lobby_connectButton.state = ipValid ? WIDGET_STATE_NORMAL : WIDGET_STATE_DISABLED;
+    }
+
+    if (textButtonUpdate(&lobby_connectButton, m) && ipValid) return true;
     return false;
 }
 
-void drawConnectionScreen(void) {
-    ClearBackground((Color) {18, 18, 24, 255});
-    int w = systemSettings.video.width;
-    int h = systemSettings.video.height;
-    float cX = (float)w / 2.0f;
-    float tY = (float)h * 0.09f;
-    DrawTextEx(lobby_fonts[FONT48], "CONNECT TO SERVER", (Vector2) {cX - MeasureTextEx(lobby_fonts[FONT48], "CONNECT TO SERVER", 48, 2).x / 2.0f, tY}, 48, 2, (Color) {235, 235, 255, 255});
-    
-    if (errorMessage[0] != '\0') {
-        DrawTextEx(lobby_fonts[FONT24], errorMessage, (Vector2) {cX - MeasureTextEx(lobby_fonts[FONT24], errorMessage, 24, 0).x / 2.0f, tY + 60.0f}, 24, 0, RED);
+void lobby_drawConnectionScreen(void) {
+    ClearBackground((Color){18, 18, 24, 255});
+    s32 w = systemSettings.video.width;
+    s32 h = systemSettings.video.height;
+    f32 cX = (f32)w / 2.0f;
+    f32 tY = (f32)h * 0.09f;
+
+    DrawTextEx(
+        lobby_fonts[FONT48], "CONNECT TO SERVER",
+        (Vector2){cX - MeasureTextEx(lobby_fonts[FONT48], "CONNECT TO SERVER", 48, 2).x / 2.0f, tY},
+        48, 2, (Color){235, 235, 255, 255}
+    );
+
+    if (lobby_errorMessage[0] != '\0') {
+        DrawTextEx(
+            lobby_fonts[FONT24], lobby_errorMessage,
+            (Vector2){cX - MeasureTextEx(lobby_fonts[FONT24], lobby_errorMessage, 24, 0).x / 2.0f, tY + 60.0f},
+            24, 0, RED
+        );
     }
 
     Font uiF = lobby_fonts[FONT24];
-    textBoxDraw(&ipTextBox, uiF, 24.0f);
-    textBoxDraw(&pseudoTextBox, uiF, 24.0f);
-    textButtonDraw(&refreshButton, uiF, 24.0f);
-    textButtonDraw(&connectButton, uiF, 24.0f);
-    float listY = tY + 275.0f;
-    Rectangle listR = { 45.0f, listY, (float)w - 90.0f, 220.0f };
-    DrawRectangleRec(listR, (Color) {28, 28, 38, 255});
-    DrawRectangleLinesEx(listR, 3.0f, (Color) {75, 85, 115, 255});
-    for (int i = 0; i < roomsCount; i++) {
-        if (discoveredRooms[i].active) {
-            textButtonDraw(&discoveredRooms[i].button, lobby_fonts[FONT24], 20.0f);
-            DrawTextEx(lobby_fonts[FONT24], discoveredRooms[i].ip, (Vector2) {(float)w - 215.0f, discoveredRooms[i].button.bounds.y + 14.0f}, 18, 1, (Color) {165, 175, 195, 255});
+    textBoxDraw(&lobby_playerNameTextBox, uiF, 24.0f);
+    textBoxDraw(&lobby_ipTextBox, uiF, 24.0f);
+    textButtonDraw(&lobby_refreshButton, uiF, 24.0f);
+    textButtonDraw(&lobby_connectButton, uiF, 24.0f);
+
+    f32 listY = tY + 275.0f;
+    Rectangle listR = {45.0f, listY, (f32)w - 90.0f, 220.0f};
+    DrawRectangleRec(listR, (Color){28, 28, 38, 255});
+    DrawRectangleLinesEx(listR, 3.0f, (Color){75, 85, 115, 255});
+
+    for (s32 i = 0; i < lobby_serversCount; ++i) {
+        if (lobby_discoveredServers[i].active) {
+            textButtonDraw(&lobby_discoveredServers[i].button, lobby_fonts[FONT24], 20.0f);
+            DrawTextEx(
+                lobby_fonts[FONT24], lobby_discoveredServers[i].ip,
+                (Vector2){(f32)w - 215.0f, lobby_discoveredServers[i].button.bounds.y + 14.0f},
+                18, 1, (Color){165, 175, 195, 255}
+            );
         }
     }
 }
 
-void setConnectionError(const char* error) {
+void lobby_setConnectionError(const char* error) {
     if (error) {
-        strncpy(errorMessage, error, 127);
-        errorTimer = 5.0f;
+        strncpy(lobby_errorMessage, error, 127);
+        lobby_errorTimer = 5.0f;
     }
 }
 
-const char* getEnteredIP(void) { return ipTextBox.buffer; }
-const char* getEnteredPseudo(void) { return pseudoTextBox.buffer; }
+const char* lobby_getEnteredIP(void) { return lobby_ipTextBox.buffer; }
+const char* lobby_getEnteredPseudo(void) { return lobby_playerNameTextBox.buffer; }

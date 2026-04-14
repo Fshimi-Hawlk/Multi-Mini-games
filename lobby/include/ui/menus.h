@@ -1,10 +1,14 @@
 /**
- * @file menus.h
- * @brief Système de menus du lobby (Principal, Pause, Paramètres).
- */
+    @file ui/menus.h
+    @author i-Charlys (CAILLON Charles)
+    @author Fshimi-Hawlk
+    @date 2026-04-13
+    @date 2026-04-13
+    @brief Menu system for the lobby (Main, Play Choice, Pause, Settings, Leaderboard).
+*/
 
-#ifndef MENUS_H
-#define MENUS_H
+#ifndef UI_MENUS_H
+#define UI_MENUS_H
 
 #include "utils/userTypes.h"
 
@@ -17,24 +21,22 @@ typedef enum {
     MENU_PLAY_CHOICE
 } MenuType_Et;
 
-extern MenuType_Et g_currentMenu;
+extern MenuType_Et lobby_currentMenu;
 
-void InitMenus(void);
-void UpdateMenu(void);
-void DrawMenu(void);
+void lobby_initMenus(void);
+void lobby_updateMenu(void);
+void lobby_drawMenu(void);
 
-// Utils de rendu
-void DrawMainMenu(void);
-void DrawPauseMenu(void);
-void DrawSettingsMenu(void);
-void DrawLeaderboardMenu(void);
-void DrawPlayChoiceMenu(void);
+void lobby_updateMainMenu(void);
+void lobby_updatePlayChoiceMenu(void);
+void lobby_updatePauseMenu(void);
+void lobby_updateSettingsMenu(void);
+void lobby_updateLeaderboardMenu(void);
 
-// Logique
-void UpdateMainMenu(void);
-void UpdatePauseMenu(void);
-void UpdateSettingsMenu(void);
-void UpdateLeaderboardMenu(void);
-void UpdatePlayChoiceMenu(void);
+void lobby_drawMainMenu(void);
+void lobby_drawPlayChoiceMenu(void);
+void lobby_drawPauseMenu(void);
+void lobby_drawSettingsMenu(void);
+void lobby_drawLeaderboardMenu(void);
 
 #endif

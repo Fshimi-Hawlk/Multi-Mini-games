@@ -1,138 +1,201 @@
 /**
- * @file waiting_room.c
- * @brief Waiting Room Overlay Implementation.
- */
+    @file ui/waitingRoom.c
+    @author i-Charlys (CAILLON Charles)
+    @author Fshimi-Hawlk
+    @date 2026-04-13
+    @date 2026-04-13
+    @brief Overlay UI for waiting rooms (modal panel + status text).
+
+    Contributors:
+        - i-Charlys: Original waiting room logic
+        - Fshimi-Hawlk: Full widget migration, lobby_ prefix, CSC compliance
+*/
 
 #include "ui/waitingRoom.h"
 
-static bool isPanelVisible = false;
-static bool isInRoom = false;
-static bool isHost = false;
-static int curGameId = 0;
-static int curRoomId = 0;
-static int playerCount = 1;
-static int maxPlayers = 4;
+#include "utils/globals.h"
 
-void initWaitingRoom(void) {
-    isPanelVisible = false;
-    isInRoom = false;
+#include "sharedWidgets/button.h"
+#include "sharedWidgets/types.h"
+
+static bool lobby_waitingRoomIsPanelVisible = false;
+static bool lobby_waitingRoomIsInRoom = false;
+static bool lobby_waitingRoomIsHost = false;
+static s32  lobby_waitingRoomCurGameId = 0;
+static s32  lobby_waitingRoomCurRoomId = 0;
+static s32  lobby_waitingRoomPlayerCount = 1;
+static s32  lobby_waitingRoomMaxPlayers = 4;
+
+void lobby_initWaitingRoom(void) {
+    lobby_waitingRoomIsPanelVisible = false;
+    lobby_waitingRoomIsInRoom = false;
 }
 
-void showWaitingRoom(int gameId, int roomId, bool host) {
-    isInRoom = true;
-    isPanelVisible = true;
-    curGameId = gameId;
-    curRoomId = roomId;
-    isHost = host;
+void lobby_showWaitingRoom(s32 gameId, s32 roomId, bool host) {
+    lobby_waitingRoomIsInRoom = true;
+    lobby_waitingRoomIsPanelVisible = true;
+    lobby_waitingRoomCurGameId = gameId;
+    lobby_waitingRoomCurRoomId = roomId;
+    lobby_waitingRoomIsHost = host;
 }
 
-void updateWaitingRoomInfo(int players, int max, bool host) {
-    playerCount = players;
-    maxPlayers = max;
-    isHost = host;
+void lobby_updateWaitingRoomInfo(s32 players, s32 max, bool host) {
+    lobby_waitingRoomPlayerCount = players;
+    lobby_waitingRoomMaxPlayers = max;
+    lobby_waitingRoomIsHost = host;
 }
 
-void setWaitingRoomPanelVisible(bool visible) {
-    isPanelVisible = visible;
+void lobby_setWaitingRoomPanelVisible(bool visible) {
+    lobby_waitingRoomIsPanelVisible = visible;
 }
 
-void updateWaitingRoom(void) {
-    if (!isInRoom) return;
+void lobby_updateWaitingRoom(void) {
+    if (!lobby_waitingRoomIsInRoom) return;
 
-    if (isPanelVisible) {
-        // Handle X button
+    if (lobby_waitingRoomIsPanelVisible) {
+        // X button
         Rectangle btnX = { (float)GetScreenWidth()/2 + 170, (float)GetScreenHeight()/2 - 190, 30, 30 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnX)) {
-            isPanelVisible = false;
+            lobby_waitingRoomIsPanelVisible = false;
         }
 
-        // Handle Ready/Start Button
+        // Ready / Start button
         Rectangle btnAction = { (float)GetScreenWidth()/2 + 50, (float)GetScreenHeight()/2 + 150, 140, 40 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnAction)) {
-            if (isHost) {
-                // Send Start Game to server
+            if (lobby_waitingRoomIsHost) {
                 RUDPHeader_St h;
                 rudpGenerateHeader(&serverConnection, ACTION_CODE_START_GAME, &h);
                 u8 buf[64];
                 memcpy(buf, &h, sizeof(h));
-                int requestedPlayers = maxPlayers; 
-                memcpy(buf + sizeof(h), &requestedPlayers, sizeof(int));
+                s32 requestedPlayers = lobby_waitingRoomMaxPlayers;
+                memcpy(buf + sizeof(h), &requestedPlayers, sizeof(s32));
 
-                send(networkSocket, buf, sizeof(h) + sizeof(int), 0);
-                
-                isPanelVisible = false;
+                send(networkSocket, buf, sizeof(h) + sizeof(s32), 0);
+                lobby_waitingRoomIsPanelVisible = false;
             } else {
-                // Send Ready to server
-                // For now, just close panel
-                isPanelVisible = false;
+                lobby_waitingRoomIsPanelVisible = false;
             }
         }
 
-        // Handle Quit Button
+        // Quit button
         Rectangle btnQuit = { (float)GetScreenWidth()/2 - 190, (float)GetScreenHeight()/2 + 150, 140, 40 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnQuit)) {
-            isInRoom = false;
-            isPanelVisible = false;
-            // Switching back to lobby is handled by menus/pause
+            lobby_waitingRoomIsInRoom = false;
+            lobby_waitingRoomIsPanelVisible = false;
         }
 
-        // Handle host max players selection
-        if (isHost) {
-            if (IsKeyPressed(KEY_UP) && maxPlayers < 4) maxPlayers++;
-            if (IsKeyPressed(KEY_DOWN) && maxPlayers > 2) maxPlayers--;
+        // Host max players selection
+        if (lobby_waitingRoomIsHost) {
+            if (IsKeyPressed(KEY_UP) && lobby_waitingRoomMaxPlayers < 4) lobby_waitingRoomMaxPlayers++;
+            if (IsKeyPressed(KEY_DOWN) && lobby_waitingRoomMaxPlayers > 2) lobby_waitingRoomMaxPlayers--;
         }
     } else {
-        // Handle clicking status text to reopen
+        // Click status text to reopen
         Rectangle statusRect = { (float)GetScreenWidth()/2 - 120, 10, 240, 35 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), statusRect)) {
-            isPanelVisible = true;
+            lobby_waitingRoomIsPanelVisible = true;
         }
     }
 }
 
-void drawWaitingRoom(void) {
-    if (!isInRoom) return;
+void lobby_drawWaitingRoom(void) {
+    if (!lobby_waitingRoomIsInRoom) return;
 
-    if (isPanelVisible) {
-        // Draw overlay
+    if (lobby_waitingRoomIsPanelVisible) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.4f));
         
         Rectangle panel = { (float)GetScreenWidth()/2 - 200, (float)GetScreenHeight()/2 - 200, 400, 400 };
         DrawRectangleRec(panel, RAYWHITE);
         DrawRectangleLinesEx(panel, 2, DARKGRAY);
         
-        DrawText("SALLE D'ATTENTE", (int)panel.x + 100, (int)panel.y + 20, 20, BLACK);
-        DrawText(TextFormat("Jeu ID: %d | Salon: %d", curGameId, curRoomId), (int)panel.x + 20, (int)panel.y + 50, 14, GRAY);
+        DrawTextEx(
+            lobby_fonts[FONT24], "WAITING ROOM",
+            (Vector2){panel.x + 100, panel.y + 20}, 24, 0, BLACK
+        );
+
+        DrawTextEx(
+            lobby_fonts[FONT24],
+            TextFormat("Game ID: %d | Room: %d", lobby_waitingRoomCurGameId, lobby_waitingRoomCurRoomId),
+            (Vector2){panel.x + 20, panel.y + 50}, 18, 0, GRAY
+        );
 
         // X Button
-        DrawRectangle((int)panel.x + 370, (int)panel.y + 10, 20, 20, RED);
-        DrawText("X", (int)panel.x + 375, (int)panel.y + 12, 16, WHITE);
+        Rectangle btnX = { panel.x + 370, panel.y + 10, 30, 30 };
+        bool hoverX = CheckCollisionPointRec(GetMousePosition(), btnX);
+        TextButton_St xBtn = {
+            .bounds    = btnX,
+            .state     = hoverX ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+            .baseColor = RED,
+            .roundness = 0.2f,
+            .text      = "X",
+            .textColor = WHITE
+        };
+        textButtonDraw(&xBtn, lobby_fonts[FONT24], 20.0f);
 
-        // Player List (Placeholder)
-        DrawText("Joueurs:", (int)panel.x + 20, (int)panel.y + 80, 18, BLACK);
-        DrawRectangle((int)panel.x + 20, (int)panel.y + 105, 360, 220, LIGHTGRAY);
-        DrawText(TextFormat("- Vous (%s)", isHost ? "Hôte" : "Invité"), (int)panel.x + 30, (int)panel.y + 120, 18, DARKGRAY);
-        if (playerCount > 1) {
-            for (int i = 1; i < playerCount; i++) {
-                DrawText(TextFormat("- Joueur %d", i + 1), (int)panel.x + 30, (int)panel.y + 120 + (i * 25), 18, DARKGRAY);
-            }
+        // Player List
+        DrawTextEx(lobby_fonts[FONT24], "Players:", (Vector2){panel.x + 20, panel.y + 80}, 20, 0, BLACK);
+        DrawRectangle(panel.x + 20, panel.y + 105, 360, 220, LIGHTGRAY);
+
+        DrawTextEx(
+            lobby_fonts[FONT24],
+            TextFormat("- You (%s)", lobby_waitingRoomIsHost ? "Host" : "Guest"),
+            (Vector2){panel.x + 30, panel.y + 120}, 18, 0, DARKGRAY
+        );
+
+        for (s32 i = 1; i < lobby_waitingRoomPlayerCount; i++) {
+            DrawTextEx(
+                lobby_fonts[FONT24],
+                TextFormat("- Player %d", i + 1),
+                (Vector2){panel.x + 30, panel.y + 120 + (i * 25)}, 18, 0, DARKGRAY
+            );
         }
 
-        // Buttons
-        DrawRectangle((int)panel.x + 10, (int)panel.y + 350, 140, 40, ORANGE);
-        DrawText("QUITTER", (int)panel.x + 40, (int)panel.y + 360, 18, WHITE);
+        // Quit button
+        Rectangle btnQuit = { panel.x + 10, panel.y + 350, 140, 40 };
+        bool hoverQuit = CheckCollisionPointRec(GetMousePosition(), btnQuit);
+        TextButton_St quitBtn = {
+            .bounds    = btnQuit,
+            .state     = hoverQuit ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+            .baseColor = ORANGE,
+            .roundness = 0.2f,
+            .text      = "QUIT",
+            .textColor = WHITE
+        };
+        textButtonDraw(&quitBtn, lobby_fonts[FONT24], 18.0f);
 
-        DrawRectangle((int)panel.x + 250, (int)panel.y + 350, 140, 40, isHost ? GOLD : GREEN);
-        DrawText(isHost ? "LANCER" : "PRÊT", (int)panel.x + (isHost ? 275 : 290), (int)panel.y + 360, 18, WHITE);
-        
-        if (isHost) {
-            DrawText("↑↓ pour changer max joueurs", (int)panel.x + 100, (int)panel.y + 330, 14, DARKGRAY);
-            DrawText(TextFormat("Max: %d", maxPlayers), (int)panel.x + 300, (int)panel.y + 80, 18, BLUE);
+        // Ready / Start button
+        Rectangle btnAction = { panel.x + 250, panel.y + 350, 140, 40 };
+        bool hoverAction = CheckCollisionPointRec(GetMousePosition(), btnAction);
+        TextButton_St actionBtn = {
+            .bounds    = btnAction,
+            .state     = hoverAction ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+            .baseColor = lobby_waitingRoomIsHost ? GOLD : GREEN,
+            .roundness = 0.2f,
+            .text      = lobby_waitingRoomIsHost ? "START" : "READY",
+            .textColor = WHITE
+        };
+        textButtonDraw(&actionBtn, lobby_fonts[FONT24], 18.0f);
+
+        if (lobby_waitingRoomIsHost) {
+            DrawTextEx(
+                lobby_fonts[FONT16],
+                "↑↓ to change max players",
+                (Vector2){panel.x + 100, panel.y + 330}, 16, 0, DARKGRAY
+            );
+            DrawTextEx(
+                lobby_fonts[FONT24],
+                TextFormat("Max: %d", lobby_waitingRoomMaxPlayers),
+                (Vector2){panel.x + 300, panel.y + 80}, 18, 0, BLUE
+            );
         }
     } else {
-        // Status text top center
-        DrawRectangle(GetScreenWidth()/2 - 120, 10, 240, 35, Fade(RED, 0.8f));
-        DrawText(TextFormat("Attente joueurs... (%d/%d)", playerCount, maxPlayers), 
-                 GetScreenWidth()/2 - 110, 20, 18, WHITE);
+        // Status text when panel is hidden
+        Rectangle statusRect = { (float)GetScreenWidth()/2 - 120, 10, 240, 35 };
+        DrawRectangleRec(statusRect, Fade(RED, 0.8f));
+        DrawTextEx(
+            lobby_fonts[FONT24],
+            TextFormat("Waiting for players... (%d/%d)", lobby_waitingRoomPlayerCount, lobby_waitingRoomMaxPlayers),
+            (Vector2){GetScreenWidth()/2.0f - 110, 20}, 18, 0, WHITE
+        );
     }
 }
