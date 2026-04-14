@@ -1,8 +1,10 @@
 /**
- * @file test_slots_shuffling.c
- * @brief Unit tests for active slots and shuffling.
- */
-
+    @file test_slot_shuffling.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for active slots and shuffling.
+*/
 #include "setups/shape.h"
 #include "core/shape.h"
 #include "utils/utils.h"

@@ -1,11 +1,16 @@
 /**
     @file golf_standalone.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
     @brief Standalone entry point for Golf 3D (direct execution, not via lobby).
-           Only compiled for the standalone binary — not included in libgolf.a.
 */
-
 #include "golf.h"
 
+/**
+    @brief Main entry point for the standalone mini-golf application.
+    @return 0 on successful execution.
+*/
 int main(void) {
     GolfGame game;
 

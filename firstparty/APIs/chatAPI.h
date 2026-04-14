@@ -1,10 +1,10 @@
 /**
- * @file chatAPI.h
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Common chat structures for the whole project.
- */
-
+    @file chatAPI.h
+    @author Multi Mini-Games Team
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Common chat structures for the whole project.
+*/
 #ifndef CHAT_API_H
 #define CHAT_API_H
 
@@ -36,6 +36,9 @@ typedef struct {
     bool            isOpen; // indique si le chat est ouvert
 } Chat_St;
 
+/**
+    @brief Global variable generalGameChat
+*/
 extern Chat_St generalGameChat;
 
 #endif // CHAT_API_H

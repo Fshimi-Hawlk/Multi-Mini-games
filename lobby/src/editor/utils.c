@@ -4,21 +4,7 @@
     @date 2026-03-27
     @date 2026-04-13
     @brief Pure logic utilities used only by the level editor.
-
-    Contributors:
-    - Fshimi-Hawlk:
-            - Original helper functions
-            - Refactored group box, anchor offset, and mouse helpers
-            - Integration and documentation
-            - Fixed computeSelectedGroupBox() to correctly compute tight AABB
-              regardless of selection order (Shift+click, multi-select, etc.)
-
-    All functions here have no side effects (except reading global `terrains` where necessary)
-    and are used by both input and draw modules.
-
-    @see `editor/utils.h`
 */
-
 #include "editor/types.h"
 #include "editor/properties.h"
 #include "editor/utils.h"

@@ -1,10 +1,10 @@
 /**
-    @file widgets/checkBox.c
-    @author Fshimi-Hawlk
+    @file checkBox.c
+    @author Multi Mini-Games Team
     @date 2026-03-29
+    @date 2026-04-14
     @brief Implementation of the CheckBox widget.
 */
-
 #include "sharedWidgets/checkBox.h"
 
 // ─────────────────────────────────────────────────────────────────────────────

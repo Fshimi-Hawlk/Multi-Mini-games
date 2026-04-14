@@ -1,13 +1,10 @@
 /**
-    @file utils/configs.h
-    @author Multi Mini-Games Team
-    @date February 2026
+    @file configs.h
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
     @brief Configuration constants for the Suika mini-game.
-
-    Defines screen dimensions, container geometry, and game parameters.
-    These values can be adjusted to customize the game appearance and behavior.
 */
-
 #ifndef SUIKA_UTILS_CONFIGS_H
 #define SUIKA_UTILS_CONFIGS_H
 
@@ -35,10 +32,19 @@
 /** @brief Y position of the game over line - fruits above this cause game over */
 #define SUIKA_DROP_LINE_Y       200
 
-/** @brief Helper macro to create a Color from RGB values (alpha = 255) */
+/**
+    @brief Helper macro to create a Color from RGB values (alpha = 255)
+
+    @param r Red component (0-255)
+    @param g Green component (0-255)
+    @param b Blue component (0-255)
+    @return Color structure
+*/
 #define RGB(r, g, b) (Color) {r, g, b, 255}
 
-/** @brief Sound assets path — overridable at compile time via -DASSET_PATH */
+/**
+    @brief Sound assets path — overridable at compile time via -DASSET_PATH.
+*/
 #ifdef ASSET_PATH
 #  define SOUNDS_PATH ASSET_PATH "sounds/"
 #else

@@ -1,16 +1,10 @@
 /**
-    @file rudpCore.h
-    @author i-Charlys
+    @file rudp_core.h
+    @author Multi Mini-Games Team
     @date 2026-03-18              // Creation date
-    @date 2026-03-20              // Last meaningful change: applied project code style
+    @date 2026-04-14
     @brief Core structures and functions of the simplified Reliable UDP (RUDP) protocol
-    
-    Provides packet header format, connection state tracking, 
-    sequence numbering and basic duplicate / out-of-order detection.
-    
-    @note Designed to be layered under the game TLV messages (see networkInterface.h)
 */
-
 #ifndef RUDP_CORE_H
 #define RUDP_CORE_H
 

@@ -1,8 +1,10 @@
 /**
- * @file progress.h
- * @brief Gestion de la progression, des skins et de l'Ability Potential (AP).
- */
-
+    @file progress.h
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Gestion de la progression, des skins et de l'Ability Potential (AP).
+*/
 #ifndef PROGRESS_H
 #define PROGRESS_H
 
@@ -24,6 +26,9 @@ typedef enum {
 #define MAX_DIFFICULTIES 4
 #define PROGRESS_FILE "assets/gameData/progress.dat"
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     u8 game_id;
     u8 variant_id;
@@ -32,6 +37,9 @@ typedef struct {
     char ability_name[32];
 } Skin_St;
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     bool skin_unlocked[MAX_GAMES_PROGRESS][MAX_VARIANTS][MAX_DIFFICULTIES];
     s32 high_scores[MAX_GAMES_PROGRESS][MAX_VARIANTS][MAX_DIFFICULTIES];

@@ -1,11 +1,10 @@
 /**
     @file main.c
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-07
+    @date 2026-04-14
     @brief Program entry point and main loop.
 */
-
 #include "core/shape.h"
 #include "core/placement.h"
 #include "core/game.h"
@@ -40,7 +39,7 @@ int main(void) {
             windowShouldClose = true;
         }
 
-        if (currentPrompt == PROMPT_NONE && !polyBlast_mainGameState.gameOver) {
+        if (polyBlast_currentPrompt == PROMPT_NONE && !polyBlast_mainGameState.gameOver) {
             bool allPlaced = true;
             for (u8 i = 0; i < 3; ++i) {
                 polyBlast_handleShape(&polyBlast_mainGameState, &polyBlast_mainGameState.prefabManager.slots[i]);
@@ -74,8 +73,8 @@ int main(void) {
         if (IsKeyPressed(KEY_R)) polyBlast_resetGame(&polyBlast_mainGameState);
 
         if (WindowShouldClose()) {
-            if (currentPrompt == PROMPT_NONE && !polyBlast_mainGameState.gameOver) {
-                currentPrompt = PROMPT_SAVE_QUIT;
+            if (polyBlast_currentPrompt == PROMPT_NONE && !polyBlast_mainGameState.gameOver) {
+                polyBlast_currentPrompt = PROMPT_SAVE_QUIT;
             } else {
                 windowShouldClose = true;
             }
@@ -84,7 +83,7 @@ int main(void) {
         BeginDrawing(); {
             ClearBackground(APP_BACKGROUND_COLOR);
 
-            if (currentPrompt == PROMPT_NONE) {
+            if (polyBlast_currentPrompt == PROMPT_NONE) {
                 polyBlast_drawUI(&polyBlast_mainGameState);
             }
 

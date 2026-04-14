@@ -1,11 +1,10 @@
 /**
     @file server.c
-    @author i-Charlys (CAILLON Charles)
-    @author Fshimi-Hawlk
+    @author Charles CAILLON
     @date 2026-03-31
+    @date 2026-04-14
     @brief Authoritative RUDP server with multi-module support.
 */
-
 #include <stdio.h>
 #include <stdbool.h>
 #include <string.h>

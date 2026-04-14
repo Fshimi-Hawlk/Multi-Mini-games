@@ -1,10 +1,10 @@
 /**
     @file userTypes.h
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Core type definitions used throughout the game.
 */
-
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
 
@@ -15,15 +15,15 @@
     @brief Colors available for blocks in the game.
 */
 typedef enum {
-    BLOCK_COLOR_RED,
-    BLOCK_COLOR_ORANGE,
-    BLOCK_COLOR_YELLOW,
-    BLOCK_COLOR_GREEN,
-    BLOCK_COLOR_CYAN,
-    BLOCK_COLOR_BLUE,
-    BLOCK_COLOR_PURPLE,
-    BLOCK_COLOR_PINK,
-    _blockColorCount
+    BLOCK_COLOR_RED,        ///< Red color.
+    BLOCK_COLOR_ORANGE,     ///< Orange color.
+    BLOCK_COLOR_YELLOW,     ///< Yellow color.
+    BLOCK_COLOR_GREEN,      ///< Green color.
+    BLOCK_COLOR_CYAN,       ///< Cyan color.
+    BLOCK_COLOR_BLUE,       ///< Blue color.
+    BLOCK_COLOR_PURPLE,     ///< Purple color.
+    BLOCK_COLOR_PINK,       ///< Pink color.
+    _blockColorCount        ///< Total number of block colors.
 } BlockColor_Et;
 
 /**
@@ -32,22 +32,22 @@ typedef enum {
     These are used to index into the global prefabs array.
 */
 enum {
-    PREFAB_1x1,
-    PREFAB_1x2,
-    PREFAB_1x3,
-    PREFAB_L3,
-    PREFAB_1x4,
-    PREFAB_2x2,
-    PREFAB_T,
-    PREFAB_L4,
-    PREFAB_Z,
-    PREFAB_1x5,
-    PREFAB_PLUS,
-    PREFAB_L5,
-    PREFAB_1x6,
-    PREFAB_2x3,
-    PREFAB_3x3,
-    _prefabNameCount
+    PREFAB_1x1,             ///< 1x1 block.
+    PREFAB_1x2,             ///< 1x2 block.
+    PREFAB_1x3,             ///< 1x3 block.
+    PREFAB_L3,              ///< L-shape with 3 blocks.
+    PREFAB_1x4,             ///< 1x4 block.
+    PREFAB_2x2,             ///< 2x2 block.
+    PREFAB_T,               ///< T-shape.
+    PREFAB_L4,              ///< L-shape with 4 blocks.
+    PREFAB_Z,               ///< Z-shape.
+    PREFAB_1x5,             ///< 1x5 block.
+    PREFAB_PLUS,            ///< Plus shape.
+    PREFAB_L5,              ///< L-shape with 5 blocks.
+    PREFAB_1x6,             ///< 1x6 block.
+    PREFAB_2x3,             ///< 2x3 block.
+    PREFAB_3x3,             ///< 3x3 block.
+    _prefabNameCount        ///< Total number of prefabs.
 };
 
 /**
@@ -59,7 +59,7 @@ typedef enum {
     GAME_PREFAB_VARIANT_DEFAULT,    ///< Basic set of shapes, suitable for standard play.
     GAME_PREFAB_VARIANT_COMPLETE,   ///< Includes all possible shapes and variants for variety.
     GAME_PREFAB_VARIANT_EXTRA,      ///< Additional experimental shapes.
-    _gamePrefabVariantCount         ///< sentinel for array sizing and looping, not a valid variant.
+    _gamePrefabVariantCount         ///< Sentinel for array sizing and looping, not a valid variant.
 } GamePrefabVariant_Et;
 
 /**
@@ -76,7 +76,7 @@ typedef struct {
         hitsLeft < 0: Not render block.
    */
     s8 hitsLeft;                ///< Remaining hits before the block is cleared (0 = empty).
-    u8 colorIndex;   ///< Color of the block.
+    u8 colorIndex;              ///< Color index of the block.
 } Block_St;
 
 /**
@@ -90,7 +90,7 @@ typedef struct {
 typedef struct {
     u8 blockCount;                          ///< Number of blocks in the shape.
     s8 orientations;                        ///< Number of unique rotations (computed at init).
-    bool canMirror;                        ///< Whether the shape has a distinct mirror variant.
+    bool canMirror;                         ///< Whether the shape has a distinct mirror variant.
     u8Vector2 offsets[MAX_SHAPE_SIZE];      ///< Relative offsets from center.
     u8 width, height;                       ///< Bounding box for quick collision checks.
 } Prefab_St;
@@ -120,9 +120,9 @@ typeDA(u32, PrefabIndexBagVec_St);
 typedef struct {
     const Prefab_St* prefab;    ///< Pointer to the static prefab definition.
     f32Vector2 center;          ///< Current screen position center.
-    bool placed;               ///< Whether this shape has been placed this turn.
+    bool placed;                ///< Whether this shape has been placed this turn.
     BlockColor_Et colorIndex;   ///< Color assigned to this instance.
-    bool dragging;             ///< Whether the player is currently dragging it.
+    bool dragging;              ///< Whether the player is currently dragging it.
     u8 id;                      ///< Slot index (0-2).
 } Shape_St;
 
@@ -139,8 +139,8 @@ typedef Shape_St ShapeSlots_t[3];
     during play to balance difficulty or variety.
 */
 typedef struct {
-    f32 baseWeights[MAX_SHAPE_SIZE];    ///< Initial probabilities per size
-    f32 runTimeWeights[MAX_SHAPE_SIZE]; ///< Runtime-adjusted weights
+    f32 baseWeights[MAX_SHAPE_SIZE];    ///< Initial probabilities per size.
+    f32 runTimeWeights[MAX_SHAPE_SIZE]; ///< Runtime-adjusted weights.
 } SizeWeight_St;
 
 /**
@@ -182,7 +182,7 @@ typedef struct {
    */
     f32Vector2 pos;
 
-    u8 width, height;       ///< Logical dimensions
+    u8 width, height;       ///< Logical dimensions.
 
     /**
         Array of flags indicating which rows/columns are full and
@@ -203,9 +203,9 @@ typeDA(u8Vector2, AnchorVec_St);
     @brief Possible scene states for the application.
 */
 typedef enum {
-    SCENE_STATE_GAME,
-    SCENE_STATE_ALL_PREFABS,
-    _sceneStateCount
+    SCENE_STATE_GAME,           ///< Gameplay scene.
+    SCENE_STATE_ALL_PREFABS,    ///< Debug scene showing all prefabs.
+    _sceneStateCount            ///< Total number of scenes.
 } SceneState_Et;
 
 /**
@@ -215,8 +215,8 @@ typedef enum {
     Text fields are performance optimization - only valid after formatting.
 */
 typedef struct {
-    u64  score;                 ///< Total score
-    u8   streakCount;           ///< Current combo length
+    u64  score;                 ///< Total score.
+    u8   streakCount;           ///< Current combo length.
     
     /**
         @brief Remaining placements without a clear before streak resets.
@@ -225,20 +225,20 @@ typedef struct {
         Decremented on non-clearing placements.
    */
     u8   streakGrace;
-    char scoreText[32];         ///< "Score: %lu"
-    char streakText[32];        ///< "Streak: %u"
+    char scoreText[32];         ///< "Score: %lu" formatted text.
+    char streakText[32];        ///< "Streak: %u" formatted text.
 } ScoringState_St;
 
 /**
     @brief Prompt / modal state for save/load UI.
 */
 typedef enum {
-    PROMPT_NONE,
-    PROMPT_START_LOAD,          ///< Startup: New Game vs Load Save
+    PROMPT_NONE,                ///< No prompt active.
+    PROMPT_START_LOAD,          ///< Startup: New Game vs Load Save.
     PROMPT_SAVE_QUIT,           ///< On window close: Save before leaving?
-    PROMPT_SAVE_FILENAME,       ///< Filename input after choosing to save
-    PROMPT_SAVES_LIST,          ///< Scrollable save list table
-    PROMPT_CONFIRM_DELETE       ///< Confirmation before deleting a save
+    PROMPT_SAVE_FILENAME,       ///< Filename input after choosing to save.
+    PROMPT_SAVES_LIST,          ///< Scrollable save list table.
+    PROMPT_CONFIRM_DELETE       ///< Confirmation before deleting a save.
 } PromptState_Et;
 
 /**
@@ -250,19 +250,14 @@ typedef enum {
 */
 typedef struct {
     Board_St board;                     ///< Current board state.
-    ScoringState_St scoring;
-    PrefabManager_St prefabManager;     ///< All prefab-related data (bag, per-size bags, current slots, size weights).
+    ScoringState_St scoring;            ///< Scoring and streak state.
+    PrefabManager_St prefabManager;     ///< All prefab-related data.
 
     bool gameOver;                      ///< Game over flag.
     SceneState_Et sceneState;           ///< Current scene/view.
 
-    bool hasBeenLost;                   ///< Anti-cheat: true if this save already reached gameOver once
-    const char *loadFilename;
+    bool hasBeenLost;                   ///< Anti-cheat: true if this save already reached gameOver once.
+    const char *loadFilename;           ///< Filename to load game from.
 } GameState_St;
-
-// typedef struct {
-//     s8 board[UINT8_MAX];
-//     u8 columnCount, rowCount;
-// } Map_St;
 
 #endif // USER_TYPES_H

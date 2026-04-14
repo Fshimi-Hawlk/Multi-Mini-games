@@ -1,24 +1,35 @@
 /**
-    @file core/game.h
-    @author Fshimi-Hawlk
+    @file game.h
+    @author Kimi BERGE
     @date 2026-03-02
-    @date 2026-03-19
-    @brief One clear sentence that tells what this file is actually for.
-
-    If the file needs more context than fits in @brief, write 2-5 lines here.
-    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
-
-    // Try to align the `for` for better readability
-    // Try to keep the same order of the includes
-    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+    @date 2026-04-14
+    @brief Shared gameplay logic for bingo validation and win condition checks.
 */
-
 #ifndef CORE_GAME_GAME_H
 #define CORE_GAME_GAME_H
 
 #include "utils/userTypes.h"
 
+/**
+    @brief Checks if a daub (mark) on a specific square is valid given the current call.
+    
+    A daub is valid if the number at the specified row and column matches the 
+    currently called number, or if it's the free space (center).
+
+    @param[in]     state        The current call state containing the called number.
+    @param[in]     playerCard   The player's card containing the numbers.
+    @param[in]     row          The row index (0-4).
+    @param[in]     col          The column index (0-4).
+    @return                     True if the daub is valid, false otherwise.
+*/
 bool bingo_isValidDaub(const CallState_St* const state, const PlayerCard_St* playerCard, uint row, uint col);
+
+/**
+    @brief Checks if the player has achieved a Bingo (5 in a row, column, or diagonal).
+
+    @param[in]     playerCard   The player's card to check.
+    @return                     True if a Bingo is found, false otherwise.
+*/
 bool bingo_hasBingo(const PlayerCard_St* const playerCard);
 
 #endif // CORE_GAME_GAME_H

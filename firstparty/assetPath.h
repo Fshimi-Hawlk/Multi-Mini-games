@@ -1,9 +1,10 @@
 /**
     @file assetPath.h
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
     @brief Utility to locate asset files from multiple candidate paths.
-    Uses standard C (stdio.h) — no raylib dependency, works before window init.
 */
-
 #ifndef FIRSTPARTY_ASSET_PATH_H
 #define FIRSTPARTY_ASSET_PATH_H
 

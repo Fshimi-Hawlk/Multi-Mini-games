@@ -16,11 +16,18 @@
 #include "APIs/generalAPI.h"
 #include "nob/dynamicArray.h"
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     char name[32];
     s32  score;
 } LeaderboardEntry_St;
 
+/**
+    @brief Description for typeDA
+    @return Success/failure or the result of the function
+*/
 typeDA(LeaderboardEntry_St, Leaderboard_St);
 
 // ────────────────────────────────────────────────

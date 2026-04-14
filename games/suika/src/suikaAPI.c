@@ -1,10 +1,10 @@
 /**
- * @file suikaAPI.c
- * @author Multi Mini-Games Team
- * @date February 2026
- * @brief Implementation of the Suika mini-game API.
- */
-
+    @file suikaAPI.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of the Suika mini-game API.
+*/
 #include "suikaAPI.h"  // Must be first - defines SuikaGame_St opaque type
 #include "utils/types.h"  // Includes raylib and defines SuikaGame_St struct
 
@@ -13,16 +13,27 @@
 #include "logger.h"
 #include "utils/audio.h"
 #include <time.h>
+#include <stdlib.h>
+#include <string.h>
+
 /**
- * @brief Wrapper function for freeGame callback.
- * @param game Double pointer to game state (as void* for callback signature)
- * @return Error code
- */
-Error_Et suika_freeGameWrapper(void* game)
+    @brief Wrapper function for freeGame callback.
+
+    @param[in,out] game Double pointer to game state (as void* for callback signature)
+    @return             Error_Et code
+*/
+static Error_Et suika_freeGameWrapper(void* game)
 {
     return suika_freeGame((SuikaGame_St**) game);
 }
 
+/**
+    @brief Core initialization function for the Suika game.
+
+    @param[out]    game_ptr Double pointer to the game handle to be allocated
+    @param[in]     configs  Initial game configurations
+    @return                 Error_Et code
+*/
 Error_Et suika_initGame__full(SuikaGame_St** game_ptr, SuikaConfigs_St configs)
 {
     (void)configs;
@@ -61,6 +72,12 @@ Error_Et suika_initGame__full(SuikaGame_St** game_ptr, SuikaConfigs_St configs)
     return OK;
 }
 
+/**
+    @brief Main loop for the Suika game.
+
+    @param[in,out] game Pointer to the game handle
+    @return             Error_Et code
+*/
 Error_Et suika_gameLoop(SuikaGame_St* const game)
 {
     if (game == NULL)
@@ -91,6 +108,12 @@ Error_Et suika_gameLoop(SuikaGame_St* const game)
     return OK;
 }
 
+/**
+    @brief Free all resources associated with the Suika game.
+
+    @param[in,out] game_ptr Double pointer to the game handle to be freed
+    @return                 Error_Et code
+*/
 Error_Et suika_freeGame(SuikaGame_St** game_ptr)
 {
     if (game_ptr == NULL || *game_ptr == NULL)

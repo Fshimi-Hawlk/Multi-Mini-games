@@ -1,15 +1,21 @@
 /**
-    @file game.h (setups)
-    @author Fshimi Hawlk
+    @file game.c
+    @author Kimi BERGE
     @date 2026-03-02
-    @date 2026-03-19
-    @brief Full game state initialization implementation.
+    @date 2026-04-14
+    @brief Bingo game state initialization and layout computation.
 */
-
 #include "setups/game.h"
 
 #include "sharedUtils/random.h"
 
+/**
+    @brief Computes the visual layout for the Bingo game.
+
+    Calculates positions and rectangles for the main card, choice cards, and UI elements.
+
+    @param[out]    layout       The layout structure to populate.
+*/
 void bingo_computeLayout(Layout_St* layout) {
     layout->windowCenter = (Vector2) {
         WINDOW_WIDTH / 2.0f,
@@ -98,6 +104,14 @@ void bingo_computeLayout(Layout_St* layout) {
     }
 }
 
+/**
+    @brief Randomly generates a Bingo card from a pool of available numbers.
+
+    @param[out]    card         The card matrix to fill.
+    @param[in,out] available    An array of available numbers to pick from.
+    @param[in]     count        The number of available elements.
+    @return                     True if the card was generated successfully, false otherwise.
+*/
 bool bingo_generateCard(Card_t card, uint *available, uint count) {
     if (available == NULL || count == 0) return false;
     shuffleArrayT(uint, available, count, rand);

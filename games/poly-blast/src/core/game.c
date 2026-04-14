@@ -1,10 +1,10 @@
 /**
-    @file game.h (core/game)
-    @author Fshimi Hawlk
+    @file game.c
+    @author Kimi BERGE
     @date 2026-01-07
-    @brief Score management functions implementatuion.
+    @date 2026-04-14
+    @brief Score management functions implementation.
 */
-
 #include "core/game.h"
 #include "core/board.h"
 #include "core/placement.h"
@@ -22,6 +22,12 @@
         );                 \
     } while (0)
 
+/**
+    @brief Creates a deep copy of a PrefabManager_St.
+
+    @param[in]     manager      Source manager to copy.
+    @return                     Independent deep copy of the prefab manager.
+*/
 PrefabManager_St polyBlast_deepcopyPrefabManager(const PrefabManager_St* const manager) {
     PrefabManager_St copy = {0};
     memcpy(&copy.sizeWeights, &manager->sizeWeights, sizeof(SizeWeight_St));
@@ -35,6 +41,13 @@ PrefabManager_St polyBlast_deepcopyPrefabManager(const PrefabManager_St* const m
     return copy;
 }
 
+/**
+    @brief Finds all valid anchor positions where a shape can be placed on the board.
+
+    @param[in]     board        Pointer to the board.
+    @param[in]     shape        Pointer to the shape to test.
+    @return                     Vector of valid anchor positions.
+*/
 AnchorVec_St polyBlast_getAnchorCandidates(const Board_St* const board, const Shape_St* const shape) {
     AnchorVec_St anchors = {0};
 
@@ -55,6 +68,13 @@ AnchorVec_St polyBlast_getAnchorCandidates(const Board_St* const board, const Sh
     return anchors;
 }
 
+/**
+    @brief Tests if any of the shapes in the slots can be placed on the board.
+
+    @param[in]     board        Current board state (copied by value for simulation).
+    @param[in]     slots        The three active prefab slots.
+    @return                     true if no shapes can be placed (Game Over), false otherwise.
+*/
 bool polyBlast_testGameOver(Board_St board, const ShapeSlots_t slots) {
     static const u8 permutations[6][3] = {
         {0, 1, 2}, {0, 2, 1},
@@ -74,6 +94,11 @@ bool polyBlast_testGameOver(Board_St board, const ShapeSlots_t slots) {
     return !allPlaced;
 }
 
+/**
+    @brief Builds the score and streak text strings.
+
+    @param[in,out] scoringState Pointer to the scoring state to update.
+*/
 void polyBlast_buildScoreRelatedTexts(ScoringState_St* const scoringState) {
     // build score text
     snprintf(scoringState->scoreText, sizeof(scoringState->scoreText), "Score: %lu", scoringState->score);
@@ -88,17 +113,9 @@ void polyBlast_buildScoreRelatedTexts(ScoringState_St* const scoringState) {
     Scoring rules (as currently implemented):
       - Base: SCORE_PER_LINE_CLEAR per cleared line (row or column)
       - Multiplier: 1.0 + 0.5 × (number of lines cleared - 1) when ≥ 2 lines
-        -> 1 line  = ×1.0
-        -> 2 lines = ×1.5
-        -> 3 lines = ×2.0
-        -> etc.
 
-    Counts both row clears and column clears independently.
-    Does **not** include the per-block-placed bonus — that's handled separately
-    in manageScore().
-
-    @param board  Board after placement but before clearBoard() is called
-    @return       Score to add from line clears only (float because of multiplier)
+    @param[in]     board        Board after placement but before clearBoard() is called.
+    @return                     Score to add from line clears only.
 */
 static f32 calculateBoardClearingScore(const Board_St* const board) {
     u8 linesCleared = 0;
@@ -114,6 +131,13 @@ static f32 calculateBoardClearingScore(const Board_St* const board) {
     return linesCleared * SCORE_PER_LINE_CLEAR * multiBonus;
 }
 
+/**
+    @brief Manages score and streak updates after a shape is placed.
+
+    @param[in,out] scoringState Pointer to the scoring state.
+    @param[in]     board        Pointer to the board.
+    @param[in]     prefabBlockCount Number of blocks in the placed prefab.
+*/
 void polyBlast_manageScoreAndStreak(ScoringState_St* const scoringState, const Board_St* const board, const u8 prefabBlockCount) {
     scoringState->score += prefabBlockCount * SCORE_PER_UNIT_PLACED;
 
@@ -133,6 +157,12 @@ void polyBlast_manageScoreAndStreak(ScoringState_St* const scoringState, const B
     polyBlast_buildScoreRelatedTexts(scoringState);
 }
 
+/**
+    @brief Adjusts the dynamic probability weights for prefab sizes.
+
+    @param[in,out] game         Pointer to the current game state.
+    @param[in]     scoreDelta   The score gained this turn.
+*/
 void polyBlast_adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
     // ─────────────────────────────────────────────────────────────
     // Tuning constants

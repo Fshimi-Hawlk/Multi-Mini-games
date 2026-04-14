@@ -1,9 +1,10 @@
 /**
-    @file generatedLevel.c
+    @file generated_level.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
     @brief Auto-generated level data from editor.
-    Generated on Apr  9 2026
 */
-
 static LobbyTerrain_St _generatedTerrainContent[] = {
     // ==================================================================
     // Normal

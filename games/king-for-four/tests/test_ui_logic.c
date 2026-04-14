@@ -1,8 +1,10 @@
 /**
- * @file test_ui_logic.c
- * @brief TDD: Verification of card selection logic (topmost card picking).
- */
-
+    @file test_ui_logic.c
+    @author Charles CAILLON
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief TDD: Verification of card selection logic (topmost card picking).
+*/
 #include <stdio.h>
 #include <assert.h>
 #include "include/core/player.h"

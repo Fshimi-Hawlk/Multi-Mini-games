@@ -1,10 +1,10 @@
 /**
- * @file game.c
- * @brief Core Suika game logic - rendering and state management
- * @author Multi Mini-Games Team
- * @date February 2026
- */
-
+    @file game.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Core Suika game logic - rendering and state management.
+*/
 #include "core/game.h"
 #include "core/physics.h"
 #include "utils/audio.h"
@@ -12,9 +12,16 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include "raymath.h"
 #include "logger.h"
 
+/**
+    @brief Resolves the base path for Suika assets.
+
+    @param[in,out] game Pointer to the game state
+    @return             Pointer to the resolved asset path string
+*/
 static const char* suika_resolveAssetPath(SuikaGame_St* game)
 {
     if (game->assetPath[0] != '\0')
@@ -33,6 +40,12 @@ static const char* suika_resolveAssetPath(SuikaGame_St* game)
     return game->assetPath;
 }
 
+/**
+    @brief Loads a texture from the given path.
+
+    @param[in]     path Path to the texture file
+    @return             Loaded Texture2D object
+*/
 static Texture2D suika_loadTexture(const char* path)
 {
     Texture2D tex = LoadTexture(path);
@@ -43,6 +56,9 @@ static Texture2D suika_loadTexture(const char* path)
     return tex;
 }
 
+/**
+    @brief Static array containing physical and visual properties for each fruit type.
+*/
 static const FruitProperties_St FRUIT_PROPS[FRUIT_TYPE_COUNT] = {
     {15.0f,  {220,  50,  50, 255},    10,   { 44, 130,  45,  70}},
     {19.0f,  {128,   0, 128, 255},    30,   {116, 136,  44,  64}},
@@ -57,6 +73,12 @@ static const FruitProperties_St FRUIT_PROPS[FRUIT_TYPE_COUNT] = {
     {84.0f,  { 34, 139,  34, 255},   150,   {672, 272, 168, 200}}
 };
 
+/**
+    @brief Gets the properties for a specific fruit type.
+
+    @param[in]     type The fruit type
+    @return             Pointer to the FruitProperties_St for the given type
+*/
 const FruitProperties_St* suika_getFruitProperties(FruitType_Et type)
 {
     if (type >= 0 && type < FRUIT_TYPE_COUNT)
@@ -66,6 +88,12 @@ const FruitProperties_St* suika_getFruitProperties(FruitType_Et type)
     return &FRUIT_PROPS[0];
 }
 
+/**
+    @brief Updates all active particles.
+
+    @param[in,out] game      Pointer to the game state
+    @param[in]     deltaTime Time elapsed since last frame
+*/
 static void suika_updateParticles(SuikaGame_St* game, float deltaTime)
 {
     for (int i = 0; i < game->particleCount; i++)
@@ -102,6 +130,11 @@ static void suika_updateParticles(SuikaGame_St* game, float deltaTime)
     game->particleCount = write;
 }
 
+/**
+    @brief Draws all active particles.
+
+    @param[in]     game Pointer to the game state
+*/
 static void suika_drawParticles(const SuikaGame_St* game)
 {
     for (int i = 0; i < game->particleCount; i++)
@@ -117,6 +150,11 @@ static void suika_drawParticles(const SuikaGame_St* game)
     }
 }
 
+/**
+    @brief Loads all required textures for Suika.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_loadAssets(SuikaGame_St* game)
 {
     const char* assetPath = suika_resolveAssetPath(game);
@@ -125,6 +163,11 @@ void suika_loadAssets(SuikaGame_St* game)
     game->fruitAtlas = suika_loadTexture(fullPath);
 }
 
+/**
+    @brief Unloads all Suika assets.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_unloadAssets(SuikaGame_St* game)
 {
     if (game->fruitAtlas.id != 0)
@@ -134,6 +177,11 @@ void suika_unloadAssets(SuikaGame_St* game)
     }
 }
 
+/**
+    @brief Initializes the game state.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_init(SuikaGame_St* game)
 {
     memset(game->fruits, 0, sizeof(game->fruits));
@@ -165,6 +213,11 @@ void suika_init(SuikaGame_St* game)
     suika_spawnNextFruit(game);
 }
 
+/**
+    @brief Spawns a new preview fruit.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_spawnNextFruit(SuikaGame_St* game)
 {
     FruitType_Et type = (FruitType_Et)(rand() % 5);
@@ -181,6 +234,11 @@ void suika_spawnNextFruit(SuikaGame_St* game)
     game->nextFruit.id = game->nextFruitId++;
 }
 
+/**
+    @brief Drops the current preview fruit into the container.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_dropFruit(SuikaGame_St* game)
 {
     if (!game->canDrop || game->isGameOver)
@@ -202,6 +260,12 @@ void suika_dropFruit(SuikaGame_St* game)
 
 }
 
+/**
+    @brief Main update function for game logic.
+
+    @param[in,out] game      Pointer to the game state
+    @param[in]     deltaTime Time elapsed since last frame
+*/
 void suika_update(SuikaGame_St* game, float deltaTime)
 {
     if (game->isGameOver)
@@ -255,6 +319,11 @@ void suika_update(SuikaGame_St* game, float deltaTime)
     }
 }
 
+/**
+    @brief Resets the game to its initial state.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_reset(SuikaGame_St* game)
 {
     game->score = 0;
@@ -277,6 +346,13 @@ void suika_reset(SuikaGame_St* game)
     suika_spawnNextFruit(game);
 }
 
+/**
+    @brief Helper function to draw a single fruit.
+
+    @param[in]     game  Pointer to the game state
+    @param[in]     fruit Pointer to the fruit instance to draw
+    @param[in]     alpha Opacity of the fruit
+*/
 static void suika_drawFruit(const SuikaGame_St* game, const Fruit_St* fruit, float alpha)
 {
     const FruitProperties_St* props = suika_getFruitProperties(fruit->type);
@@ -308,6 +384,9 @@ static void suika_drawFruit(const SuikaGame_St* game, const Fruit_St* fruit, flo
     DrawTexturePro(game->fruitAtlas, src, dest, origin, fruit->rotation * RAD2DEG, tint);
 }
 
+/**
+    @brief Draws the gradient background.
+*/
 static void suika_drawGradientBackground(void)
 {
     Color topColor = (Color){20, 20, 40, 255};
@@ -320,6 +399,9 @@ static void suika_drawGradientBackground(void)
     DrawRectangleRec(bottomRect, bottomColor);
 }
 
+/**
+    @brief Draws the container and boundaries.
+*/
 static void suika_drawContainer(void)
 {
     Rectangle container = {SUIKA_CONTAINER_X, SUIKA_CONTAINER_Y, 
@@ -341,6 +423,11 @@ static void suika_drawContainer(void)
              dropLineColor);
 }
 
+/**
+    @brief Main draw function.
+
+    @param[in]     game Pointer to the game state
+*/
 void suika_draw(const SuikaGame_St* game)
 {
     suika_drawGradientBackground();
@@ -364,12 +451,26 @@ void suika_draw(const SuikaGame_St* game)
     suika_drawHUD(game);
 }
 
+/**
+    @brief Draws a styled panel.
+
+    @param[in]     x       X coordinate
+    @param[in]     y       Y coordinate
+    @param[in]     width   Width of the panel
+    @param[in]     height  Height of the panel
+    @param[in]     bgColor Background color
+*/
 static void suika_drawPanel(int x, int y, int width, int height, Color bgColor)
 {
     DrawRectangle(x, y, width, height, bgColor);
     DrawRectangleLinesEx((Rectangle){x, y, width, height}, 2.0f, (Color){150, 150, 180, 255});
 }
 
+/**
+    @brief Draws the Head-Up Display (HUD).
+
+    @param[in]     game Pointer to the game state
+*/
 void suika_drawHUD(const SuikaGame_St* game)
 {
     suika_drawPanel(10, 10, 200, 100, (Color){30, 30, 50, 200});
@@ -396,6 +497,11 @@ void suika_drawHUD(const SuikaGame_St* game)
     }
 }
 
+/**
+    @brief Cleanup function for Suika game state.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_cleanup(SuikaGame_St* game)
 {
     (void)game;

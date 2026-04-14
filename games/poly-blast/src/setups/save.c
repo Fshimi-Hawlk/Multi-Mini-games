@@ -1,17 +1,10 @@
 /**
     @file save.c
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-02-27
-    @date 2026-04-09
+    @date 2026-04-14
     @brief Implementation of game state serialization and file I/O.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Fixed broken deserializeDA macro
-            - Added hasBeenLost flag (anti-cheat for leaderboards)
-            - Full file-based save/load + directory listing + delete
 */
-
 #include "setups/save.h"
 
 #include "setups/shape.h"

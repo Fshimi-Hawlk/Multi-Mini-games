@@ -1,11 +1,10 @@
 /**
-    @file firstparty/utils/container.h
-    @author Fshimi-Hawlk
+    @file container.h
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Container and array utilities (print macros, defer, cast helpers, etc.).
 */
-
 #ifndef FIRSTPARTY_UTILS_CONTAINER_H
 #define FIRSTPARTY_UTILS_CONTAINER_H
 

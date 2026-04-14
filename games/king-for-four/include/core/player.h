@@ -1,10 +1,10 @@
 /**
- * @file player.h
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Header file for player management in King for Four.
- */
-
+    @file player.h
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Header file for player management in King for Four.
+*/
 #ifndef PLAYER_H
 #define PLAYER_H
 
@@ -38,4 +38,9 @@ void kingForFour_initPlayer(Player_St* p, int id, const char* name);
  */
 void kingForFour_drawToHand(Player_St* p, Deck_St* draw_pile);
 
-#endif
+    @param[in,out] p         Pointer to the player.
+    @param[in,out] draw_pile Pointer to the deck to draw from.
+*/
+void draw_to_hand(Player_St* p, Deck* draw_pile);
+
+#endif // PLAYER_H

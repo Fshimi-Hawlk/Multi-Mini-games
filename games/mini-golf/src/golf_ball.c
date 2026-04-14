@@ -1,20 +1,19 @@
+/**
+    @file golf_ball.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Ball physics, input handling, and rendering for Golf 3D.
+*/
 #include "golf.h"
 
-/* ─── Init ───────────────────────────────────────────────────────────────── */
-void Ball_Init(Ball *b, Vector3 pos) {
-    b->pos       = pos;
-    b->pos.y    += BALL_R;
-    b->vel       = Vector3Zero();
-    b->state     = BALL_IDLE;
-    b->surface   = SURF_FAIRWAY;
-    b->spin      = 0.0f;
-    b->rot_angle = 0.0f;
-    b->strokes   = 0;
-    b->penalty   = 0;
-    b->last_valid = pos;
-}
 
 /* ─── Tir ────────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Performs a golf shot by setting the ball's velocity.
+    @param[in,out] g Game state.
+*/
 void Ball_Shoot(GolfGame *g) {
     const ClubSpec *cs = &CLUBS[g->club];
     Ball           *b  = &g->ball;
@@ -45,13 +44,25 @@ void Ball_Shoot(GolfGame *g) {
 }
 
 /* ─── Vent en vol ────────────────────────────────────────────────────────── */
+
+/**
+    @brief Applies wind effect to the ball's velocity.
+    @param[in,out] g  Game state.
+    @param[in]     dt Delta time.
+*/
 void Ball_ApplyWindEffect(GolfGame *g, float dt) {
-    float wind_ms = g->wind.speed_kmh / 3.6f;
+    float wind_ms = g->wind.speed / 3.6f;
     g->ball.vel.x += g->wind.vec.x * wind_ms * 0.002f * dt;
     g->ball.vel.z += g->wind.vec.z * wind_ms * 0.002f * dt;
 }
 
 /* ─── Physique ───────────────────────────────────────────────────────────── */
+
+/**
+    @brief Updates the ball's position and physics state.
+    @param[in,out] g  Game state.
+    @param[in]     dt Delta time.
+*/
 void Ball_Update(GolfGame *g, float dt) {
     Ball  *b = &g->ball;
     float  terrain_y, ground_y;
@@ -163,6 +174,12 @@ void Ball_Update(GolfGame *g, float dt) {
 }
 
 /* ─── Dans le trou ? ─────────────────────────────────────────────────────── */
+
+/**
+    @brief Checks if the ball is inside the hole.
+    @param[in] g Game state.
+    @return True if the ball is in the hole, false otherwise.
+*/
 bool Ball_IsInHole(GolfGame *g) {
     HoleData *h     = &g->holes[g->current_hole];
     float     d     = Vector3Distance(g->ball.pos, h->hole_pos);
@@ -171,6 +188,11 @@ bool Ball_IsInHole(GolfGame *g) {
 }
 
 /* ─── Dessin balle ───────────────────────────────────────────────────────── */
+
+/**
+    @brief Renders the golf ball and its shadow.
+    @param[in] g Game state.
+*/
 void Ball_Draw(GolfGame *g) {
     Ball  *b        = &g->ball;
     float  terrain_y;
@@ -191,6 +213,11 @@ void Ball_Draw(GolfGame *g) {
 }
 
 /* ─── Trajectoire prédictive ─────────────────────────────────────────────── */
+
+/**
+    @brief Renders a predictive trajectory for the current shot.
+    @param[in] g Game state.
+*/
 void Ball_DrawTrajectory(GolfGame *g) {
     const ClubSpec *cs;
     float  rad, loft, speed, vx, vy, vz;
@@ -238,3 +265,4 @@ void Ball_DrawTrajectory(GolfGame *g) {
         if (i % 2 == 0) DrawSphere(pos, 0.035f, c);
     }
 }
+

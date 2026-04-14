@@ -1,8 +1,10 @@
 /**
- * @file test_board_clearing.c
- * @brief Unit tests for row/column detection and clearing.
- */
-
+    @file test_board_clearing.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for row/column detection and clearing.
+*/
 #include "core/board.h"
 
 #include <assert.h>

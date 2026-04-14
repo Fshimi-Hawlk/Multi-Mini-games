@@ -1,3 +1,10 @@
+/**
+    @file systemSettings.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief systemSettings.c implementation/header file
+*/
 #include "systemSettings.h"
 #include "logger.h"
 #include "raylib.h"

@@ -1,8 +1,8 @@
 /**
-    @file core/game.c
-    @author Fshimi-Hawlk
+    @file game.c
+    @author Léandre BAUDET
     @date 2026-02-08
-    @date 2026-04-08
+    @date 2026-04-14
     @brief Player physics, collision, input handling and skin selection logic in the lobby.
 
     Contributors:
@@ -38,7 +38,6 @@
     @see `utils/globals.h`       for `skinButtonRect`
     @see `core/game.h`           for `resolveCircleRectCollision()` declaration
 */
-
 #include "core/game.h"
 
 #include "utils/globals.h"

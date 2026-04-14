@@ -1,3 +1,10 @@
+/**
+    @file utils.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief utils.c implementation/header file
+*/
 #include "logger.h"
 
 ColorString_t logger_black = "\033[38;2;255;255;255m";

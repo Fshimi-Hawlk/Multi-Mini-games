@@ -1,22 +1,11 @@
-# Sub-Project Name
+# Twist Cube
 
-**Sub-Project Brief**
+**Author:** Léandre BAUDET
 
 ## Overview
-
-Some overview
-
-### Core Gameplay 
-
-The sub-project core gameplay description
-
-[some link]()
-
-## Project Goals
-
-sub-project goals
+A 3D Rubik's Cube simulator.
 
 ## Tech / Structure Notes
 - Language: C
 - Folders: `src/`, `include/`, `tests/`, `assets/`, etc.
-- Documentation: Generated via Doxygen → see [`docs/html/index.html`](./docs/html/index.html) (after running `doxygen`)
+- Documentation: Generated via Doxygen -> see [`docs/html/index.html`](./docs/html/index.html) (after running `doxygen`)

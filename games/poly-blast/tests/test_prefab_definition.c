@@ -1,8 +1,10 @@
 /**
- * @file test_prefab_definition.c
- * @brief Unit tests for prefab shapes and variants.
- */
-
+    @file test_prefab_definition.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for prefab shapes and variants.
+*/
 #include "setups/shape.h"
 #include "core/shape.h"
 #include "utils/globals.h"

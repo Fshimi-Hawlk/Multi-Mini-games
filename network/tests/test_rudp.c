@@ -1,9 +1,10 @@
 /**
- * @file test_rudp.c
- * @brief Unit tests for RUDP implementation.
- * @author i-Charlys
- */
-
+    @file test_rudp.c
+    @author Charles CAILLON
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for RUDP implementation.
+*/
 #include "rudp_core.h"
 #include "networkInterface.h"
 #include <stdio.h>

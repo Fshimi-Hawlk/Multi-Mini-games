@@ -1,11 +1,10 @@
 /**
-    @file shape.c (setups)
-    @author Fshimi Hawlk
+    @file shape.c
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-09
+    @date 2026-04-14
     @brief Prefab initialization and variant computation.
 */
-
 #include "setups/shape.h"
 
 #include "core/prefab.h"

@@ -1,3 +1,10 @@
+/**
+    @file main.c
+    @author Léandre BAUDET
+    @date 2026-03-10
+    @date 2026-04-14
+    @brief Entry point for the Snake mini-game (standalone mode).
+*/
 #include "APIs/generalAPI.h"
 #include "raylib.h"
 #include "utils/common.h"

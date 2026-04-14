@@ -1,39 +1,10 @@
 /**
-    @file ui/app.h
-    @author Fshimi-Hawlk
+    @file app.h
+    @author Léandre BAUDET
     @date 2026-01-30
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Public interface for drawing lobby UI overlay elements (skin selection menu).
-
-    This header declares the rendering functions responsible for the skin/character
-    selection interface that appears on top of the lobby scene.
-
-    All functions:
-        - operate in **screen-space** coordinates
-        - should be called during the UI render pass (after world rendering,
-          typically inside BeginDrawing() / EndDrawing() but outside BeginMode2D())
-        - perform no state changes - they are pure draw calls
-        - rely on pre-loaded textures and global rectangle definitions
-
-    Typical usage in the main render loop:
-    BeginDrawing(); {
-        ClearBackground(APP_BACKGROUND_COLOR);
-
-        BeginMode2D(game->cam);
-        // world rendering: platforms, player, etc.
-        EndMode2D();
-
-        // UI overlay
-        if (game->playerVisuals.isTextureMenuOpen)
-            drawMenuTextures(game);
-        drawSkinButton();
-    } EndDrawing();
-
-    @see `ui/app.c`           for implementation
-    @see `utils/globals.h`    for logoSkinButton, skinButtonRect
-    @see `utils/userTypes.h`  for LobbyGame_St, PlayerVisuals_St
 */
-
 #ifndef UI_APP_H
 #define UI_APP_H
 

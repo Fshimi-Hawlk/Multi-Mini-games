@@ -1,28 +1,10 @@
 /**
     @file gameNameAPI.h
-    @author Fshimi-Hawlk
-    @author Maxime-CHAUVEAU
+    @author Multi Mini-Games Team
     @date 2026-02-07
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Public API for the GameName mini-game.
-
-    This header defines the opaque game handle type and the minimal set of functions
-    required to integrate and control the mini-game from the lobby.
-
-    Design principles:
-      - The internal structure `GameNameGame_St` is **completely opaque** outside this module.
-      - The lobby interacts only through this API - never accesses fields directly.
-      - All functions follow the `gameName_*` naming prefix.
-      - Errors are reported using the shared `Error_Et` codes from generalAPI.h.
-      - The game state embeds `Game_St` as its first member (for type-safe casting).
-
-    @note Window creation, OpenGL context, and main loop timing are **not** managed by the game.
-          The lobby is responsible for BeginDrawing()/EndDrawing(), BeginMode2D(), etc.
-
-    @see generalAPI.h for the required `Game_St` base structure and error codes
-    @see gameConfig.h for configuration options
 */
-
 #ifndef GAME_NAME_API_H
 #define GAME_NAME_API_H
 

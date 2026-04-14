@@ -1,3 +1,10 @@
+/**
+    @file ball.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief ball.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 void Ball_Draw(GolfGame *g) {

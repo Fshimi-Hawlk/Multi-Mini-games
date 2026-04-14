@@ -1,10 +1,10 @@
 /**
-    @file prompt.c (ui)
-    @author Fshimi Hawlk
+    @file prompt.c
+    @author Kimi BERGE
     @date 2026-04-07
+    @date 2026-04-14
     @brief Save/load modal UI implementation using widgets.
 */
-
 #include "core/game.h"
 
 #include "ui/prompt.h"
@@ -26,8 +26,8 @@
     @brief One save-file entry for the UI list (lightweight metadata only).
 */
 typedef struct {
-    TextButton_St button;       ///< Widget base;
-    ImageButton_St delButton;   ///< delete button
+    TextButton_St button;       ///< Widget base
+    ImageButton_St delButton;   ///< Delete button
     char filename[64];          ///< Base name only (e.g. "mygame.sav")
     u64  score;                 ///< Current score
     u8   streakCount;           ///< Current streak
@@ -233,26 +233,26 @@ static void promptInitLoadList(void) {
 }
 
 bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
-    if (currentPrompt == PROMPT_NONE) return false;
+    if (polyBlast_currentPrompt == PROMPT_NONE) return false;
 
     bool shouldCloseWindow = false;
 
-    switch (currentPrompt) {
+    switch (polyBlast_currentPrompt) {
         case PROMPT_START_LOAD: {
             if (textButtonUpdate(&btnNewGame, mouseScreen)) {
                 polyBlast_resetGame(game);
-                currentPrompt = PROMPT_NONE;
+                polyBlast_currentPrompt = PROMPT_NONE;
             }
 
             if (textButtonUpdate(&btnLoadSave, mouseScreen)) {
                 promptInitLoadList();
-                currentPrompt = PROMPT_SAVES_LIST;
+                polyBlast_currentPrompt = PROMPT_SAVES_LIST;
             }
         } break;
 
         case PROMPT_SAVE_QUIT: {
             if (textButtonUpdate(&btnYesSave, mouseScreen)) {
-                currentPrompt = PROMPT_SAVE_FILENAME;
+                polyBlast_currentPrompt = PROMPT_SAVE_FILENAME;
                 textBoxUpdate(&filenameBox, mouseScreen); // init box
             }
 
@@ -271,7 +271,7 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
                     log_info("Game saved as \"%s\"", filename);
                 }
 
-                currentPrompt = PROMPT_NONE;
+                polyBlast_currentPrompt = PROMPT_NONE;
                 shouldCloseWindow = true;
             }
 
@@ -286,7 +286,7 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
             if (textButtonUpdate(&btnCancelLoad, mouseScreen)) {
                 polyBlast_resetGame(game);
                 freeSaveList(&saveList);
-                currentPrompt = PROMPT_NONE;
+                polyBlast_currentPrompt = PROMPT_NONE;
             }
 
             bool canLoad = (saveList.count > 0 && selectedSaveIndex != -1);
@@ -295,7 +295,7 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
                     log_info("Loaded save: %s", saveList.items[selectedSaveIndex].filename);
                 }
                 freeSaveList(&saveList);
-                currentPrompt = PROMPT_NONE;
+                polyBlast_currentPrompt = PROMPT_NONE;
             }
 
             bool anySaveSelected = false;
@@ -311,7 +311,7 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
 
                 if (imageButtonUpdate(&e->delButton, mouseScreen)) {
                     pendingDeleteIndex = i;
-                    currentPrompt = PROMPT_CONFIRM_DELETE;
+                    polyBlast_currentPrompt = PROMPT_CONFIRM_DELETE;
 
                     return shouldCloseWindow;
                 }
@@ -334,11 +334,11 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
                     log_info("Deleted save: %s", filename);
                 }
                 listSaves(&saveList);
-                currentPrompt = PROMPT_SAVES_LIST;
+                polyBlast_currentPrompt = PROMPT_SAVES_LIST;
             }
 
             if (textButtonUpdate(&btnNoDelete, mouseScreen)) {
-                currentPrompt = PROMPT_SAVES_LIST;
+                polyBlast_currentPrompt = PROMPT_SAVES_LIST;
             }
         } break;
 
@@ -351,11 +351,11 @@ bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
 }
 
 void polyBlast_promptDraw(void) {
-    if (currentPrompt == PROMPT_NONE) return;
+    if (polyBlast_currentPrompt == PROMPT_NONE) return;
 
     DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.7f));
 
-    switch (currentPrompt) {
+    switch (polyBlast_currentPrompt) {
         case PROMPT_START_LOAD: {
             polyBlast_drawText("Do you want to load a previous save?", polyBlast_fonts[FONT48], 36,
                      (f32Vector2){WINDOW_WIDTH / 2.0f, 200}, WHITE);

@@ -1,11 +1,10 @@
 /**
-    @file polyblast.c
-    @author Fshimi-Hawlk
+    @file polyBlastAPI.c
+    @author Kimi BERGE
     @date 2026-02-07
-    @date 2026-04-09
+    @date 2026-04-14
     @brief Implementation of the PolyBlast mini-game.
 */
-
 #include "core/shape.h"
 #include "core/placement.h"
 #include "core/game.h"
@@ -100,7 +99,7 @@ Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game) {
         game->base.running = true;
     }
 
-    if (currentPrompt == PROMPT_NONE && !game->state.gameOver) {
+    if (polyBlast_currentPrompt == PROMPT_NONE && !game->state.gameOver) {
         bool allPlaced = true;
         for (u8 i = 0; i < 3; ++i) {
             polyBlast_handleShape(&game->state, &game->state.prefabManager.slots[i]);
@@ -134,8 +133,8 @@ Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game) {
     if (IsKeyPressed(KEY_R)) polyBlast_resetGame(&game->state);
 
     if (WindowShouldClose()) {
-        if (currentPrompt == PROMPT_NONE && !game->state.gameOver) {
-            currentPrompt = PROMPT_SAVE_QUIT;
+        if (polyBlast_currentPrompt == PROMPT_NONE && !game->state.gameOver) {
+            polyBlast_currentPrompt = PROMPT_SAVE_QUIT;
         } else {
             game->base.running = true;
         }
@@ -144,7 +143,7 @@ Error_Et polyBlast_gameLoop(PolyBlastGame_St* const game) {
     BeginDrawing(); {
         ClearBackground(APP_BACKGROUND_COLOR);
 
-        if (currentPrompt == PROMPT_NONE) {
+        if (polyBlast_currentPrompt == PROMPT_NONE) {
             polyBlast_drawUI(&game->state);
         }
 

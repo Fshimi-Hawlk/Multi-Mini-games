@@ -1,10 +1,10 @@
 /**
- * @file game.c
- * @brief Core Solitaire game logic
- * @author Maxime CHAUVEAU
- * @date February 2026
- */
-
+    @file game.c
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
+    @brief Core Solitaire game logic
+*/
 #include "core/game.h"
 #include "ui/renderer.h"
 #include "solitaire.h"
@@ -18,7 +18,7 @@
 #include "utils/audio.h"
 
 
-void solitaire_init(SolitaireGameState* game) {
+void solitaire_init(SolitaireGameState_St* game) {
     /* FIX: free existing assets before memset wipes the pointer.
      * When called via KEY_N "new game", game->assets is already allocated
      * and textures are GPU-resident. memset would silently lose the pointer,
@@ -29,11 +29,11 @@ void solitaire_init(SolitaireGameState* game) {
         game->assets = NULL;
     }
 
-    memset(game, 0, sizeof(SolitaireGameState));
+    memset(game, 0, sizeof(SolitaireGameState_St));
 
     srand((unsigned int)time(NULL));
 
-    game->assets = malloc(sizeof(GameAssets));
+    game->assets = malloc(sizeof(GameAssets_St));
     if (game->assets) {
         *game->assets = solitaire_LoadAssets();
     }
@@ -81,7 +81,7 @@ void solitaire_init(SolitaireGameState* game) {
     solitaire_dealCards(game);
 }
 
-void solitaire_dealCards(SolitaireGameState* game) {
+void solitaire_dealCards(SolitaireGameState_St* game) {
     // Mélanger le paquet avec l'algorithme Fisher-Yates
     // On parcourt les cartes de la fin vers le début
     for (int i = NUM_CARDS - 1; i > 0; i--) {
@@ -144,7 +144,7 @@ bool solitaire_isValidMove(const Card_St* card, const Pile_St* targetPile) {
     return false;
 }
 
-void gestionStock(SolitaireGameState* game) {
+void gestionStock(SolitaireGameState_St* game) {
     if (game->stock.count > 0) {
         // Tirer une carte de la pioche et la placer dans la défausse
         Card_St* card = game->stock.cards[game->stock.count - 1];
@@ -166,7 +166,7 @@ void gestionStock(SolitaireGameState* game) {
     }
 }
 
-void solitaire_update(SolitaireGameState* game, float deltaTime) {
+void solitaire_update(SolitaireGameState_St* game, float deltaTime) {
     if (!game->isWon) {
         game->gameTime += deltaTime;
     }
@@ -361,7 +361,7 @@ void solitaire_update(SolitaireGameState* game, float deltaTime) {
     }
 }
 
-void solitaire_checkWin(SolitaireGameState* game) {
+void solitaire_checkWin(SolitaireGameState_St* game) {
     int totalCards = 0;
     for (int i = 0; i < NUM_FOUNDATION_PILES; i++) {
         totalCards += game->foundation[i].count;
@@ -372,7 +372,7 @@ void solitaire_checkWin(SolitaireGameState* game) {
     }
 }
 
-void solitaire_checkLose(SolitaireGameState* game) {
+void solitaire_checkLose(SolitaireGameState_St* game) {
     if (game->isWon) return;
 
     /* FIX: if the stock still has cards the player can draw, it is never a
@@ -436,7 +436,7 @@ Color solitaire_getSuitColor(Suit_Et suit) {
     }
 }
 
-void solitaire_cleanup(SolitaireGameState* game) {
+void solitaire_cleanup(SolitaireGameState_St* game) {
     if (game->assets) {
         solitaire_UnloadAssets(*game->assets);
         free(game->assets);
@@ -444,7 +444,7 @@ void solitaire_cleanup(SolitaireGameState* game) {
     }
 }
 
-void solitaire_draw(const SolitaireGameState* game) {
+void solitaire_draw(const SolitaireGameState_St* game) {
     if (game->assets) {
         RenderGame(game, *game->assets);
         solitaire_RenderMenu(game, *game->assets);

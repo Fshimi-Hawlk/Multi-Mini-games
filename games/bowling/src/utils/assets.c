@@ -1,16 +1,22 @@
 /**
- * @file assets.c
- * @author Maxime CHAUVEAU
- * @date February 2026
- * @brief Asset loading and unloading for the Bowling mini-game.
- */
-
+    @file assets.c
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
+    @brief Asset loading and unloading for the Bowling mini-game.
+*/
 #include "raylib.h"
 #include "utils/assets.h"
 #include "assetPath.h"
 #include "utils/configs.h"
 #include "logger.h"
 
+/**
+    @brief Detects and extracts individual ball textures from a spritesheet.
+    @param[out] textures Bowling textures structure to fill
+    @param[in]  image    Spritesheet image
+    @return Number of balls successfully extracted
+*/
 static int detectAndExtractBalls(BowlingTextures_St* textures, Image image) {
     if (image.width <= 0 || image.height <= 0) {
         log_error("Invalid image dimensions: %dx%d", image.width, image.height);
@@ -91,6 +97,11 @@ static int detectAndExtractBalls(BowlingTextures_St* textures, Image image) {
     return ballCount;
 }
 
+/**
+    @brief Loads all textures and models for the bowling game.
+    @param[out] textures Bowling textures structure to fill
+    @return Error_Et status
+*/
 Error_Et bowling_loadTextures(BowlingTextures_St* textures) {
     textures->ballTextureCount = 0;
     textures->ballModelCount   = 0;
@@ -128,7 +139,7 @@ Error_Et bowling_loadTextures(BowlingTextures_St* textures) {
     int extractedCount = detectAndExtractBalls(textures, ballImage);
 
     if (extractedCount <= 0) {
-        log_error("Ball extraction failed: no valid ball sprites found in %s", BALL_TEXTURE);
+        log_error("Ball extraction failed: no valid ball sprites found in %s", ballTexPath);
         UnloadImage(ballImage);
         return ERROR_ASSET_LOAD;
     }
@@ -162,6 +173,10 @@ Error_Et bowling_loadTextures(BowlingTextures_St* textures) {
     return OK;
 }
 
+/**
+    @brief Unloads all preloaded textures and models.
+    @param[in,out] textures Bowling textures structure to clean up
+*/
 void bowling_unloadTextures(BowlingTextures_St* textures) {
     for (int i = 0; i < textures->ballTextureCount; i++) {
         if (IsTextureValid(textures->ballTextures[i])) {
@@ -195,7 +210,10 @@ void bowling_unloadTextures(BowlingTextures_St* textures) {
     log_info("Textures unloaded");
 }
 
-// Remplir les textures des boules avec leurs couleurs après l'écran d'accueil
+/**
+    @brief Fills the transparent parts of ball textures with their center color.
+    @param[in,out] textures Bowling textures structure
+*/
 void bowling_fillBallTextures(BowlingTextures_St* textures) {
     for (int i = 0; i < textures->ballTextureCount; i++) {
         if (!IsTextureValid(textures->ballTextures[i])) continue;

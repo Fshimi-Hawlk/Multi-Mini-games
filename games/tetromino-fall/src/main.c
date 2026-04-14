@@ -1,3 +1,10 @@
+/**
+    @file main.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief main.c implementation/header file
+*/
 #include "core/algo.h"
 #include "core/board.h"
 #include "core/game.h"

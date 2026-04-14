@@ -1,10 +1,10 @@
 /**
- * @file main.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Standalone entry point for testing the King-for-Four game.
- */
-
+    @file main.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Standalone entry point for testing the King-for-Four game.
+*/
 #include <stddef.h>
 #include "raylib.h"
 

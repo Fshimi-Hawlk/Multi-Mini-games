@@ -1,13 +1,10 @@
 /**
- * @file utils.h
- * @author Maxime CHAUVEAU
- * @brief Utility functions for Echecs.
- * @version 1.0
- * @date 2024
- *
- * This file contains utility macros and functions for the game.
- */
-
+    @file utils.h
+    @author Léandre BAUDET
+    @date 2024
+    @date 2026-04-14
+    @brief Utility functions for Echecs.
+*/
 #ifndef UTILS_H
 #define UTILS_H
 

@@ -1,8 +1,14 @@
+/**
+    @file leaderboard.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief leaderboard.c implementation/header file
+*/
 #include "contextArena.h"
 
 #define REALLOC context_realloc     // arena-aware realloc (3-arg)
 #define FREE                        // future arena-aware free (disabled for now)
-
 #include "leaderboard.h"
 #include "APIs/generalAPI.h"
 #include "logger.h"

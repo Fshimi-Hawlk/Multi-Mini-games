@@ -1,11 +1,10 @@
 /**
-    @file editor/io.c
-    @author Fshimi-Hawlk
+    @file io.c
+    @author Léandre BAUDET
     @date 2026-03-29
     @date 2026-04-13
     @brief Level editor file I/O with native dialogs and backup.
 */
-
 #include "editor/io.h"
 #include "editor/types.h"
 

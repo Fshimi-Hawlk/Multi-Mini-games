@@ -1,14 +1,10 @@
 /**
- * @file common.h
- * @author Maxime CHAUVEAU
- * @brief Common includes for the Echecs (Chess) game.
- * @version 1.0
- * @date 2024
- *
- * This file contains all common standard library includes and
- * external library dependencies used throughout the game.
- */
-
+    @file common.h
+    @author Léandre BAUDET
+    @date 2024-01-01
+    @date 2026-04-14
+    @brief Common includes for the chess game.
+*/
 #ifndef COMMON_H
 #define COMMON_H
 

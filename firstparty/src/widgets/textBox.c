@@ -1,6 +1,6 @@
 /**
-    @file widgets/textBox.c
-    @author Fshimi-Hawlk
+    @file textBox.c
+    @author Multi Mini-Games Team
     @date 2026-03-28
     @date 2026-04-13
     @brief Implementation of the single-line TextBox widget
@@ -16,7 +16,6 @@
             - Fixed backspace/delete when cursor is in the middle of text (now shifts correctly)
             - Guaranteed buffer safety (never exceeds 255 chars, always null-terminated)
 */
-
 #include <string.h>
 
 #include "sharedWidgets/textBox.h"

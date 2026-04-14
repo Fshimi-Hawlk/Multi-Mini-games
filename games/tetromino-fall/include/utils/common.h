@@ -1,3 +1,10 @@
+/**
+    @file common.h
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Common includes and basic type aliases for the Tetromino Fall game.
+*/
 #ifndef UTILS_COMMON_H
 #define UTILS_COMMON_H
 

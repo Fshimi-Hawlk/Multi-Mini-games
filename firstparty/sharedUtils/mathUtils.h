@@ -1,11 +1,10 @@
 /**
-    @file firstparty/utils/mathUtils.h
-    @author Fshimi-Hawlk
+    @file mathUtils.h
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Basic math macros and vector construction helpers.
 */
-
 #ifndef FIRSTPARTY_UTILS_MATHUTILS_H
 #define FIRSTPARTY_UTILS_MATHUTILS_H
 

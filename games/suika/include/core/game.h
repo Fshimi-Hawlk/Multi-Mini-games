@@ -1,13 +1,10 @@
 /**
     @file game.h
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
     @brief Core Suika game logic header
-    @author Multi Mini-Games Team
-    @date February 2026
-
-    Declares core game functions for the Suika (Watermelon Game) mini-game.
-    These functions handle initialization, update, rendering, and cleanup.
 */
-
 #ifndef SUIKA_CORE_GAME_H
 #define SUIKA_CORE_GAME_H
 
@@ -19,7 +16,8 @@
     Sets up initial game state including score, fruit pool, and first fruit.
     Must be called after suika_loadAssets().
 
-    @param game Pointer to the game state to initialize
+    @param[in,out] game Pointer to the game state to initialize
+    @return            void
 */
 void suika_init(SuikaGame_St* game);
 
@@ -28,8 +26,9 @@ void suika_init(SuikaGame_St* game);
 
     Handles input, physics simulation, collision detection, and game over checks.
 
-    @param game Pointer to the game state
-    @param deltaTime Time elapsed since last frame in seconds
+    @param[in,out] game      Pointer to the game state
+    @param[in]     deltaTime Time elapsed since last frame in seconds
+    @return                  void
 */
 void suika_update(SuikaGame_St* game, float deltaTime);
 
@@ -38,7 +37,8 @@ void suika_update(SuikaGame_St* game, float deltaTime);
 
     Draws background, container, all active fruits, and HUD.
 
-    @param game Pointer to the game state (const - does not modify)
+    @param[in]     game Pointer to the game state (const - does not modify)
+    @return             void
 */
 void suika_draw(const SuikaGame_St* game);
 
@@ -48,7 +48,8 @@ void suika_draw(const SuikaGame_St* game);
     Releases any resources held by the game state.
     Called before freeing the game structure.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_cleanup(SuikaGame_St* game);
 
@@ -57,8 +58,8 @@ void suika_cleanup(SuikaGame_St* game);
 
     Returns radius, color, points, and sprite rectangle for the given fruit type.
 
-    @param type The fruit type to query
-    @return Pointer to the properties structure (valid for program lifetime)
+    @param[in]     type The fruit type to query
+    @return             Pointer to the properties structure (valid for program lifetime)
 */
 const FruitProperties_St* suika_getFruitProperties(FruitType_Et type);
 
@@ -67,7 +68,8 @@ const FruitProperties_St* suika_getFruitProperties(FruitType_Et type);
 
     Randomly selects a small fruit type (0-4) and prepares it for dropping.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_spawnNextFruit(SuikaGame_St* game);
 
@@ -76,7 +78,8 @@ void suika_spawnNextFruit(SuikaGame_St* game);
 
     Activates the preview fruit and places it at the current drop position.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_dropFruit(SuikaGame_St* game);
 
@@ -85,7 +88,8 @@ void suika_dropFruit(SuikaGame_St* game);
 
     Detects if fruits have been above the drop line for too long.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_checkGameOver(SuikaGame_St* game);
 
@@ -95,7 +99,8 @@ void suika_checkGameOver(SuikaGame_St* game);
     Clears all fruits, resets score, and prepares for a new game.
     Keeps high score intact.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_reset(SuikaGame_St* game);
 
@@ -104,7 +109,8 @@ void suika_reset(SuikaGame_St* game);
 
     Renders score, high score, game over message, and instructions.
 
-    @param game Pointer to the game state (const - does not modify)
+    @param[in]     game Pointer to the game state (const - does not modify)
+    @return             void
 */
 void suika_drawHUD(const SuikaGame_St* game);
 
@@ -113,7 +119,8 @@ void suika_drawHUD(const SuikaGame_St* game);
 
     Loads the fruit sprite atlas texture from disk.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_loadAssets(SuikaGame_St* game);
 
@@ -122,7 +129,8 @@ void suika_loadAssets(SuikaGame_St* game);
 
     Releases the fruit sprite atlas texture.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_unloadAssets(SuikaGame_St* game);
 

@@ -1,30 +1,10 @@
 /**
     @file configs.h
-    @author Fshimi-Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-03-05
+    @date 2026-04-14
     @brief Central place for compile-time and tuning constants used throughout the game.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Added documentation start-up
-            - Added base configs
-
-    This header defines:
-        - Paths to asset directories
-        - Window / display settings
-        - Visual defaults (colors, font sizes)
-        - <Game's configs>
-
-    All values here are intended to be easily tweakable without touching logic code.
-    When a constant is used in many places or affects feel significantly, it belongs here.
-
-    Guidelines:
-        - Prefer named constants over magic numbers in .c files
-        - Use this file for values that are unlikely to change per build/environment
-        - For runtime-configurable settings (e.g. via file or menu), use globals or a config struct instead
 */
-
 #ifndef CONFIGS_H
 #define CONFIGS_H
 
@@ -40,6 +20,9 @@
 #define ASSET_PATH "../assets/"
 #endif
 
+/**
+    @brief Path to font assets.
+*/
 #define FONT_PATH "assets/fonts/"
 
 /**
@@ -76,6 +59,9 @@
 // Game Configs
 // 
 
+/**
+    @brief Maximum number of players in the game.
+*/
 #define MAX_PLAYER 4
 
 

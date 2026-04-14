@@ -1,37 +1,10 @@
 /**
     @file contextArena.h
-    @author Fshimi-Hawlk
+    @author Multi Mini-Games Team
     @date 2026-01-14
-    @date 2026-02-18
+    @date 2026-04-14
     @brief Thin context-aware wrapper around a generic arena allocator.
-
-    Provides a single "current" arena pointer (`contextArena`) that can be switched
-    between different arenas (global, temporary, per-frame, per-level, etc.) at runtime.
-
-    Main goals:
-      - Centralize allocation calls without passing Arena* everywhere
-      - Allow easy switching of allocation context (e.g. global for persistent data,
-        temp for per-frame scratch memory)
-      - Offer familiar string/formatting helpers backed by arena allocation
-
-    Current implementation:
-      - Two static arenas: `globalArena` (persistent) and `tempArena` (scratch)
-      - `contextArena` defaults to `globalArena`
-      - All functions forward to the corresponding `arena_xxx` function from arena.h
-
-    Usage pattern:
-      - Call arena_init() on globalArena/tempArena during startup
-      - Switch context when needed: contextArena = &tempArena;
-      - Use context_alloc(), context_strdup(), context_sprintf() in hot paths
-      - Reset temp arena at end of frame: arena_reset(&tempArena);
-
-    Important notes:
-      - No automatic reset or freeing - caller must manage arena lifetime
-      - All allocations are bump-style (linear, no individual free)
-
-    @see arena.h for the underlying arena implementation
 */
-
 #ifndef CONTEXT_ARENA_H
 #define CONTEXT_ARENA_H
 

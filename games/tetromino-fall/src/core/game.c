@@ -1,8 +1,23 @@
+/**
+    @file game.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of game logic and movement for Tetris.
+*/
 #include "core/game.h"
 #include "core/board.h"
 #include "core/shape.h"
 #include "utils/configs.h"
+#include <stdio.h>
 
+/**
+    @brief Moves a shape automatically towards a target position and rotation.
+
+    @param[in,out] speed        The current game speed/timing state.
+    @param[in,out] boardShape   The shape to move.
+    @param[in]     targetMove   The target position and rotation.
+*/
 void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove) {
     speed->t += GetFrameTime();
     speed->tDrop = fminf(speed->t / speed->duration, 1.0f);
@@ -20,6 +35,12 @@ void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoRes
         rotationCW(boardShape);
 }
 
+/**
+    @brief Handles manual player movement based on input.
+
+    @param[in]     board       The current board state for collision checks.
+    @param[in,out] boardShape  The shape to move.
+*/
 void mouvement(board_t board, boardShape_st* boardShape) {
     float dt = GetFrameTime();
 
@@ -73,6 +94,11 @@ void mouvement(board_t board, boardShape_st* boardShape) {
     }
 }
 
+/**
+    @brief Reads the high score from a file.
+
+    @param[out] highScore  Pointer to store the high score.
+*/
 void readHighScore(int *highScore) {
     FILE* fd = fopen(ASSET_PATH "data/highScore.txt", "r");
 
@@ -91,6 +117,12 @@ void readHighScore(int *highScore) {
     fclose(fd);
 }
 
+/**
+    @brief Writes the score to the high score file if it's a new record.
+
+    @param[in] highScore  Current high score.
+    @param[in] score      Current game score.
+*/
 void writeHighScore(int highScore, int score) {
     if (score <= highScore) return;
 

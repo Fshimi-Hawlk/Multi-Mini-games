@@ -1,21 +1,10 @@
 /**
     @file main.c
-    @author Fshimi-Hawlk
+    @author Kimi BERGE
     @date 2026-03-02
-    @date 2026-03-16
-    @brief One clear sentence that tells what this file is actually for.
-    
-    Contributors:
-        - Fshimi-Hawlk:
-            - Provided documentation start-up
-            - Initial implementation
-            - Refactored into structured state and helper functions
-
-    @note Uses Raylib for rendering and input.
-          Numbers 0-99 placed randomly without column restrictions.
-          Calls use B/I/N/G/O format but do not enforce column ranges.
+    @date 2026-04-14
+    @brief Entry point for the Bingo game application.
 */
-
 #include "setups/app.h"
 
 #include "utils/common.h"
@@ -23,10 +12,11 @@
 #include "bingoAPI.h"
 #include "logger.h"
 
-// 
-// Entry point
-// 
-
+/**
+    @brief Entry point for the Bingo game.
+    @param[in]     void
+    @return                    Exit code (0 for success, 1 for failure)
+*/
 s32 main(void) {
     if (!initApp()) {
         log_fatal("Application initialization failed. Aborting.");

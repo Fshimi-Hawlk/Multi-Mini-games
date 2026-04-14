@@ -1,16 +1,23 @@
 /**
-    @file board.c (core)
-    @author Fshimi Hawlk
+    @file board.c
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Board clearing logic implementation.
 */
-
 #include "core/board.h"
 
 #include "utils/globals.h"
 
 #include "sharedUtils/debug.h"
 
+/**
+    @brief Checks if a position is within the board bounds.
+
+    @param[in]     pos          The position to check.
+    @param[in]     board        Pointer to the board.
+    @return                     true if in bounds, false otherwise.
+*/
 bool polyBlast_isInBound(const s8Vector2 pos, const Board_St* const board) {
     return (0 <= pos.x) && (pos.x < board->width)
         && (0 <= pos.y) && (pos.y < board->height);
@@ -19,11 +26,9 @@ bool polyBlast_isInBound(const s8Vector2 pos, const Board_St* const board) {
 /**
     @brief Checks if a specific row on the board is completely filled.
 
-    A row is full if every block in it has hitsLeft > 0.
-
-    @param board Pointer to the constant board structure.
-    @param row   Row index to check (0 to BOARD_HEIGHT-1).
-    @return true if the row is full, false otherwise.
+    @param[in]     board        Pointer to the board.
+    @param[in]     row          Row index to check.
+    @return                     true if the row is full, false otherwise.
 */
 static bool isRowFull(const Board_St* const board, const u8 row) {
     if (board == NULL) {
@@ -40,11 +45,9 @@ static bool isRowFull(const Board_St* const board, const u8 row) {
 /**
     @brief Checks if a specific column on the board is completely filled.
 
-    A column is full if every block in it has hitsLeft > 0.
-
-    @param board Pointer to the constant board structure.
-    @param col   Column index to check (0 to BOARD_WIDTH-1).
-    @return true if the column is full, false otherwise.
+    @param[in]     board        Pointer to the board.
+    @param[in]     col          Column index to check.
+    @return                     true if the column is full, false otherwise.
 */
 static bool isColumnFull(const Board_St* const board, const u8 col) {
     if (board == NULL) {
@@ -59,10 +62,10 @@ static bool isColumnFull(const Board_St* const board, const u8 col) {
 }
 
 /**
-    @brief Clears all blocks in a specific row by setting hitsLeft to 0.
+    @brief Clears all blocks in a specific row.
 
-    @param board Pointer to the board structure.
-    @param row   Row index to clear.
+    @param[in,out] board        Pointer to the board.
+    @param[in]     row          Row index to clear.
 */
 static void clearRow(Board_St* const board, const u8 row) {
     if (board == NULL) {
@@ -76,10 +79,10 @@ static void clearRow(Board_St* const board, const u8 row) {
 }
 
 /**
-    @brief Clears all blocks in a specific column by setting hitsLeft to 0.
+    @brief Clears all blocks in a specific column.
 
-    @param board Pointer to the board structure.
-    @param col   Column index to clear.
+    @param[in,out] board        Pointer to the board.
+    @param[in]     col          Column index to clear.
 */
 static void clearColumn(Board_St* const board, const u8 col) {
     if (board == NULL) {
@@ -92,6 +95,11 @@ static void clearColumn(Board_St* const board, const u8 col) {
     }
 }
 
+/**
+    @brief Scans the board and marks full rows and columns for clearing.
+
+    @param[in,out] board        Pointer to the board.
+*/
 void polyBlast_updateBoardClearing(Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
@@ -107,6 +115,12 @@ void polyBlast_updateBoardClearing(Board_St* const board) {
     }
 }
 
+/**
+    @brief Scans the board's rows/cols to clear arrays.
+
+    @param[in]     board        Pointer to the board.
+    @return                     true if at least one row or column is full, false otherwise.
+*/
 bool polyBlast_checkBoardForClearing(const Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
@@ -125,6 +139,11 @@ bool polyBlast_checkBoardForClearing(const Board_St* const board) {
     return needClearing;
 }
 
+/**
+    @brief Clears marked rows and columns on the board.
+
+    @param[in,out] board        Pointer to the board.
+*/
 void polyBlast_clearBoard(Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
@@ -140,6 +159,12 @@ void polyBlast_clearBoard(Board_St* const board) {
     }
 }
 
+/**
+    @brief Counts empty cells (hitsLeft == 0) on the board.
+
+    @param[in]     board        Pointer to the board.
+    @return                     Amount of empty cells.
+*/
 u32 polyBlast_getEmptyCellCount(const Board_St* const board) {
     if (board == NULL) {
         log_warn("Received NULL pointer");
@@ -158,6 +183,11 @@ u32 polyBlast_getEmptyCellCount(const Board_St* const board) {
     return empty_cells;
 }
 
+/**
+    @brief Prints the positions of empty cells to the debug log.
+
+    @param[in]     cells        Vector of anchor positions.
+*/
 void polyBlast_printEmptyCells(const AnchorVec_St cells) {
     bool grid[8][8] = {false};
     for (u8 i = 0; i < cells.count; ++i) {
@@ -179,6 +209,11 @@ void polyBlast_printEmptyCells(const AnchorVec_St cells) {
     }
 }
 
+/**
+    @brief Prints the current state of the board to the console.
+
+    @param[in]     board        Pointer to the board.
+*/
 void polyBlast_printBoard(const Board_St* const board) {
     for (u8 r = 0; r < board->height; ++r) {
         for (u8 c = 0; c < board->width; ++c) {

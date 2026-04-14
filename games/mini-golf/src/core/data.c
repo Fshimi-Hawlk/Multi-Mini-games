@@ -1,3 +1,10 @@
+/**
+    @file data.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief data.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 const ClubSpec CLUBS[CLUB_COUNT] = {

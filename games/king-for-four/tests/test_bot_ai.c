@@ -1,8 +1,10 @@
 /**
- * @file test_bot_ai.c
- * @brief Unit tests for Bot decision making in Uno.
- */
-
+    @file test_bot_ai.c
+    @author Charles CAILLON
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for Bot decision making in Uno.
+*/
 #include <stdio.h>
 #include <assert.h>
 #include "core/bot.h"

@@ -1,14 +1,10 @@
 /**
     @file golfAPI.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-01
+    @date 2026-04-14
     @brief Lobby-compatible lifecycle wrapper for Golf 3D.
-
-    Exposes golf_initGame / golf_gameLoop / golf_freeGame following the
-    same contract as every other mini-game (bowlingAPI.c, tetrisAPI.c …).
-
-    The concrete type `GolfGame_St` has `BaseGame_St base` as its first
-    member, which allows the lobby to safely cast `BaseGame_St* ↔ GolfGame_St*`.
 */
-
 #include "golfAPI.h"
 #include "golf.h"
 
@@ -17,13 +13,22 @@
 
 /* ─── Concrete (private) type ────────────────────────────────────────────── */
 
+/**
+    @brief Concrete implementation of the opaque GolfGame_St handle.
+*/
 struct GolfGame_St {
-    BaseGame_St base;   /* MUST be first — lobby casts through this */
-    GolfGame    game;   /* full internal golf state                  */
+    BaseGame_St base;   ///< MUST be first — lobby casts through this
+    GolfGame    game;   ///< full internal golf state
 };
 
 /* ─── Cleanup callback (stored in base.freeGame) ────────────────────────── */
 
+/**
+    @brief Internal callback to free the game instance, compatible with BaseGame_St.
+    
+    @param[in,out] g Generic pointer to the GolfGame_St instance.
+    @return OK on success, ERROR_NULL_POINTER if g is NULL.
+*/
 static Error_Et golf_free_callback(void *g) {
     GolfGame_St *self = (GolfGame_St *)g;
     if (!self) return ERROR_NULL_POINTER;
@@ -34,6 +39,13 @@ static Error_Et golf_free_callback(void *g) {
 
 /* ─── API implementation ─────────────────────────────────────────────────── */
 
+/**
+    @brief Allocates and initializes a new Golf 3D game instance.
+
+    @param[out] out      Double pointer receiving the new game handle.
+    @param[in]  configs  Initialization options.
+    @return              OK on success, ERROR_ALLOC on memory failure, ERROR_NULL_POINTER if out is NULL.
+*/
 Error_Et golf_initGame__full(GolfGame_St **out, GolfConfigs_St configs) {
     GolfGame_St *g;
 
@@ -56,6 +68,12 @@ Error_Et golf_initGame__full(GolfGame_St **out, GolfConfigs_St configs) {
     return OK;
 }
 
+/**
+    @brief Runs one complete frame: input → logic → rendering.
+
+    @param[in,out] g  Valid game instance handle.
+    @return           OK on success, ERROR_NULL_POINTER if g is NULL.
+*/
 Error_Et golf_gameLoop(GolfGame_St *const g) {
     float dt;
 
@@ -79,6 +97,12 @@ Error_Et golf_gameLoop(GolfGame_St *const g) {
     return OK;
 }
 
+/**
+    @brief Frees all resources and releases the handle.
+
+    @param[in,out] g  Pointer to game handle (set to NULL after cleanup).
+    @return           OK on success, ERROR_NULL_POINTER if *g is invalid.
+*/
 Error_Et golf_freeGame(GolfGame_St **g) {
     if (!g || !*g) return ERROR_NULL_POINTER;
     Game_Cleanup(&(*g)->game);

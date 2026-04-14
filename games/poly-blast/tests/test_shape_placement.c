@@ -1,8 +1,10 @@
 /**
- * @file test_shape_placement.c
- * @brief Unit tests for shape validation and placement.
- */
-
+    @file test_shape_placement.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for shape validation and placement.
+*/
 #include "core/shape.h"
 #include "utils/globals.h"
 

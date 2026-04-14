@@ -1,11 +1,10 @@
 /**
-    @file app.h (setups)
-    @author Fshimi Hawlk
+    @file app.h
+    @author Léandre BAUDET
     @date 2026-01-07
-    @date 2026-04-10
+    @date 2026-04-14
     @brief Application initialization and cleanup.
 */
-
 #include "APIs/generalAPI.h"
 
 #ifndef SETUPS_APP_H

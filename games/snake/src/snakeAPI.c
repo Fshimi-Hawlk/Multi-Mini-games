@@ -1,12 +1,10 @@
 /**
     @file snakeAPI.c
-    @author Fshimi-Hawlk
     @author Léandre BAUDET
     @date 2026-02-07
-    @date 2026-03-17
+    @date 2026-04-14
     @brief Implementation of the Snake mini-game.
 */
-
 #include "core/game.h"
 #include "ui/game.h"
 
@@ -16,33 +14,46 @@
 #include "snakeAPI.h"
 
 /**
- * @brief Concrete Snake game state
- */
+    @brief Concrete Snake game state
+*/
 struct SnakeGame_St {
-    BaseGame_St base;               // Must be first - allows safe cast to BaseGame_St*
+    BaseGame_St base;               ///< Common game interface - must be first member
 
-    Snake_St snake;
+    Snake_St snake;                 ///< Snake body and metadata
 
-    Board_t board;
-    int highScore;
+    Board_t board;                  ///< Current game board tiles
+    int highScore;                  ///< Player's record score read from disk
 
-    iVector2 direction;
-    iVector2 nextDirection;
-    SnakeAnimationData_St anim;
-    iVector2 nextPos;
+    iVector2 direction;             ///< Current movement direction
+    iVector2 nextDirection;         ///< Buffered direction for the next move
+    SnakeAnimationData_St anim;     ///< Animation timers and configuration
+    iVector2 nextPos;               ///< Pre-calculated next position
 
-    bool move;
-    int nbApple;
+    bool move;                      ///< Flag indicating if a movement was requested this frame
+    int nbApple;                    ///< Number of apples collected in current session
 };
 
 /* ────────────────────────────────────────────────────────────────────────────
    Lifecycle implementation
    ──────────────────────────────────────────────────────────────────────────── */
 
+/**
+    @brief Wrapper for snake_freeGame to match the generic void* signature.
+
+    @param[in,out] game      Pointer to the game handle (passed as void*)
+    @return                  OK on success, ERROR_NULL_POINTER if game is invalid
+*/
 Error_Et snake_freeGameWrapper(void* game) {
     return snake_freeGame((SnakeGame_St**) game);
 }
 
+/**
+    @brief Allocates and initializes a new instance of the Snake mini-game.
+
+    @param[out] game         Double pointer to receive the new game handle.
+    @param[in]  configs      Configuration parameters (currently unused).
+    @return                  OK on success, ERROR_ALLOC on memory failure
+*/
 Error_Et snake_initGame__full(SnakeGame_St** game, SnakeConfigs_St configs) {
     (void)configs; // Currently unused - future: difficulty, etc.
 
@@ -77,6 +88,12 @@ Error_Et snake_initGame__full(SnakeGame_St** game, SnakeConfigs_St configs) {
     return OK;
 }
 
+/**
+    @brief Executes one frame of the Snake game (input, update, render).
+
+    @param[in,out] game      The game instance handle.
+    @return                  OK on success, ERROR_NULL_POINTER if game is NULL
+*/
 Error_Et snake_gameLoop(SnakeGame_St* const game) {
     if (game == NULL) {
         log_error("NULL game pointer in gameLoop");
@@ -152,6 +169,12 @@ Error_Et snake_gameLoop(SnakeGame_St* const game) {
     return OK;
 }
 
+/**
+    @brief Releases all resources and memory associated with the Snake game.
+
+    @param[in,out] game      Pointer to the game handle to be freed and nulled.
+    @return                  OK on success, ERROR_NULL_POINTER if game handle is invalid
+*/
 Error_Et snake_freeGame(SnakeGame_St** game) {
     if (game == NULL || *game == NULL) return ERROR_NULL_POINTER;
     SnakeGame_St* gameRef = *game;
@@ -162,4 +185,14 @@ Error_Et snake_freeGame(SnakeGame_St** game) {
     *game = NULL;
 
     return OK;
+}
+
+/**
+    @brief Checks if the Snake game is still running.
+
+    @param[in] game      Game instance handle (may be NULL).
+    @return              true if game is valid and running, false otherwise.
+*/
+bool snake_isRunning(const SnakeGame_St* game) {
+    return (game != NULL && game->base.running);
 }

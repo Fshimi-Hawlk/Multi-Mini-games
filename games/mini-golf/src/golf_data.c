@@ -1,6 +1,15 @@
+/**
+    @file golf_data.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Official golf club data specifications.
+*/
 #include "golf.h"
 
-/* ─── Données officielles des clubs (R&A / USGA) ────────────────────────── */
+/**
+    @brief Official data for each golf club (R&A / USGA compliant).
+*/
 const ClubSpec CLUBS[CLUB_COUNT] = {
     /* name      max_power  loft_deg  accuracy  max_dist_m */
     { "Driver",  95.0f,     10.5f,    0.55f,    300.0f },

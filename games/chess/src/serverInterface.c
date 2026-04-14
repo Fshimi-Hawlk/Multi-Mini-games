@@ -1,3 +1,10 @@
+/**
+    @file serverInterface.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Server-side implementation of the chess game.
+*/
 #include "chessAPI.h"
 
 #include <stdlib.h>
@@ -5,15 +12,25 @@
 #include <arpa/inet.h>
 
 #pragma pack(push, 1)
+/**
+    @brief Struct representing a chess move payload for networking.
+*/
 typedef struct {
-    u8 from_x, from_y;
-    u8 to_x, to_y;
-    u8 promotion;
+    u8 from_x, from_y;  ///< Source coordinates
+    u8 to_x, to_y;      ///< Destination coordinates
+    u8 promotion;       ///< Piece name to promote to (if applicable)
 } ChessMovePayload_St;
 #pragma pack(pop)
 
+/**
+    @brief State of a chess server instance.
+*/
 typedef struct {
-    int players[2]; // IDs of white and black players
+/**
+    @brief Creates a new chess game instance.
+    @return Pointer to the allocated server state.
+*/
+int players[2]; // IDs of white and black players
     int numPlayers;
     int turn; // 0 or 1
     // Board state could be here too if we wanted authoritative server
@@ -30,6 +47,16 @@ void* chess_createInstance(void) {
     return cs;
 }
 
+/**
+    @brief Handles actions from players in the chess game.
+    @param[in,out] state      Pointer to the chess server state
+    @param[in]     room_id    ID of the room
+    @param[in]     player_id  ID of the player sending the action
+    @param[in]     action     The action code
+    @param[in]     payload    The action payload
+    @param[in]     len        Length of the payload
+    @param[in]     broadcast  Function pointer for broadcasting messages
+*/
 void chess_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
@@ -79,6 +106,15 @@ void chess_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void
     }
 }
 
+/**
+    @brief Called on every server tick for the chess game.
+    @param[in,out] state Pointer to the chess server state
+*/
+/**
+    @brief Handles player disconnection from the chess game.
+    @param[in,out] state     Pointer to the chess server state
+    @param[in]     player_id ID of the player who left
+*/
 void chess_onTick(void* state) {
     (void)state;
 }
@@ -89,10 +125,17 @@ void chess_onPlayerLeave(void* state, s32 playerId) {
     if (cs->players[1] == playerId) { cs->players[1] = -1; cs->numPlayers--; }
 }
 
+/**
+    @brief Destroys a chess game instance.
+    @param[in,out] state Pointer to the chess server state to be destroyed
+*/
 void chess_destroyInstance(void *state) {
     free(state);
 }
 
+/**
+    @brief Server interface definition for the chess game.
+*/
 GameServerInterface_St chessServerInterface = {
     .gameName = "chess",
     .createInstance = chess_createInstance,

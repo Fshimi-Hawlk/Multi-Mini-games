@@ -1,10 +1,10 @@
 /**
-    @file shape.h (ui)
-    @author Fshimi Hawlk
+    @file shape.h
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Shape/slot rendering functions.
 */
-
 #ifndef UI_SHAPE_H
 #define UI_SHAPE_H
 
@@ -13,14 +13,14 @@
 /**
     @brief Draws a single active prefab shape.
 
-    @param shape The active prefab shape to draw.
+    @param[in]     shape        The active prefab shape to draw.
 */
 void polyBlast_drawShape(const Shape_St shape);
 
 /**
     @brief Draws all prefab slots, skipping placed ones.
 
-    @param slots Array of prefab slots.
+    @param[in]     slots        Array of prefab slots.
 */
 void polyBlast_drawSlots(const ShapeSlots_t slots);
 

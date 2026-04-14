@@ -1,10 +1,10 @@
 /**
-    @file app.h (setups)
-    @author Fshimi Hawlk
+    @file app.h
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Application initialization and cleanup.
 */
-
 #ifndef SETUPS_APP_H
 #define SETUPS_APP_H
 

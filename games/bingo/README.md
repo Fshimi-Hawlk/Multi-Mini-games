@@ -1,20 +1,9 @@
-# Sub-Project Name
+# Bingo
 
-**Sub-Project Brief**
+**Author:** Kimi BERGE
 
 ## Overview
-
-Some overview
-
-### Core Gameplay 
-
-The sub-project core gameplay description
-
-[some link]()
-
-## Project Goals
-
-sub-project goals
+A classic Bingo game with multiplayer support.
 
 ## Tech / Structure Notes
 - Language: C

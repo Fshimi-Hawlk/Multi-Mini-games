@@ -1,3 +1,10 @@
+/**
+    @file board.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of the Tetris board UI.
+*/
 #include "ui/board.h"
 
 void drawBoard(board_t board) {

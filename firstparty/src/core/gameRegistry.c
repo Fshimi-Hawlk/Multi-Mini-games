@@ -1,10 +1,10 @@
 /**
- * @file gameRegistry.c
- * @author i-Charlys
- * @date 2026-04-07
- * @brief Implementation of the unified static registry for server-side game modules.
- */
-
+    @file gameRegistry.c
+    @author Multi Mini-Games Team
+    @date 2026-04-07
+    @date 2026-04-14
+    @brief Implementation of the unified static registry for server-side game modules.
+*/
 #include "gameRegistry.h"
 
 /*

@@ -1,11 +1,10 @@
 /**
-    @file board.c (ui)
-    @author Fshimi Hawlk
+    @file board.c
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-09
+    @date 2026-04-14
     @brief Board rendering implementation.
 */
-
 #include "ui/board.h"
 #include "utils/globals.h"
 

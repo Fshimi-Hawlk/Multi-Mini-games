@@ -1,10 +1,10 @@
 /**
-    @file editor/codegen.h
-    @author Fshimi-Hawlk
+    @file codegen.h
+    @author Léandre BAUDET
     @date 2026-03-30
+    @date 2026-04-14
     @brief Generates clean C source code from current editor terrain data.
 */
-
 #ifndef EDITOR_CODEGEN_H
 #define EDITOR_CODEGEN_H
 

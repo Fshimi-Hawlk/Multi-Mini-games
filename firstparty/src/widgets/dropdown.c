@@ -1,18 +1,10 @@
 /**
-    @file widgets/dropdown.c
-    @author Fshimi-Hawlk
+    @file dropdown.c
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Implementation of the DropDown widget.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Click to open/close
-            - Mouse selection from expanded list
-            - Visual feedback for hover/active states
-            - Proper list bounds and outside-click close
-            - Arrow that points down/up
 */
-
 #include "sharedWidgets/dropdown.h"
 
 // ─────────────────────────────────────────────────────────────────────────────

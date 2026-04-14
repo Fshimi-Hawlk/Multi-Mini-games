@@ -1,11 +1,10 @@
 /**
-    @file firstparty/utils/debug.h
-    @author Fshimi-Hawlk
+    @file debug.h
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Debug utilities and development macros (TODO, UNREACHABLE, UNUSED, etc.).
 */
-
 #ifndef FIRSTPARTY_UTILS_DEBUG_H
 #define FIRSTPARTY_UTILS_DEBUG_H
 

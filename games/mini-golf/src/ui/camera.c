@@ -1,3 +1,10 @@
+/**
+    @file camera.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief camera.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 #define CAM_PITCH_MIN  5.0f

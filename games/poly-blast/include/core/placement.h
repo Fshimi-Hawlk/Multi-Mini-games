@@ -1,3 +1,10 @@
+/**
+    @file placement.h
+    @author Kimi BERGE
+    @date 2026-01-07
+    @date 2026-04-14
+    @brief Shape placement and simulation logic.
+*/
 #ifndef CORE_PLACEMENT_H
 #define CORE_PLACEMENT_H
 
@@ -6,21 +13,31 @@
 /**
     @brief Checks if the shape can be placed on the board without overlap.
 
-    @param shape Pointer to the active shape.
-    @param pos Position, on the board, of the shape to be placed.
-    @return true if placeable, false otherwise.
+    @param[in]     shape        Pointer to the active shape.
+    @param[in]     pos          Position, on the board, of the shape to be placed.
+    @param[in]     board        Pointer to the board.
+    @return                     true if placeable, false otherwise.
 */
 bool polyBlast_isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board);
 
 /**
     @brief Places the shape on the board.
 
-    @param shape Pointer to the active shape.
-    @param pos   Top left position of the shape.
-    @param board Pointer to the board.
+    @param[in]     shape        Pointer to the active shape.
+    @param[in]     pos          Top-left position of the shape.
+    @param[in,out] board        Pointer to the board.
 */
 void polyBlast_placeShape(const Shape_St* const shape, const u8Vector2 pos, Board_St* const board);
 
+/**
+    @brief Recursively checks if all shapes in slots can be placed in a specific order.
+
+    @param[in,out] board        Pointer to the board (simulated state).
+    @param[in]     slots        The three active prefab slots.
+    @param[in]     order        Array of indices representing placement order.
+    @param[in]     idx          Current index in the order array.
+    @return                     true if all remaining shapes can be placed.
+*/
 bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 order[3], u8 idx);
 
 /**
@@ -31,36 +48,28 @@ bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 o
       - Each attempt draws a fresh shuffled set of slots into a temporary game copy.
       - For each of the 6 placement permutations, simulates placing all three shapes
         while tracking the produced score.
-      - Remembers the prefab combination that produced the highest recorded score
-        (base score + large streak bonus).
+      - Remembers the prefab combination that produced the highest recorded score.
 
-    After all attempts the best three prefabs (in random order) are written back
-    into the real `game->prefabManager.slots`.
-
-    Temporarily redirects `contextArena` to `tempArena` and resets it when finished.
-
-    @param[in,out] game  Game state whose slots will be replaced by the best
-                         simulated set. Board and current score are not modified.
+    @param[in,out] game         Game state whose slots will be replaced by the best
+                                simulated set.
 */
 void polyBlast_placementSimulation(GameState_St* const game);
-
 
 /**
     @brief Releases a shape at a precise position, placing it if valid or resetting position.
 
-    @param shape Pointer to the active shape.
-    @param pos   Position on the board
-    @param board Pointer to the board.
+    @param[in,out] shape        Pointer to the active shape.
+    @param[in]     pos          Position on the board.
+    @param[in,out] board        Pointer to the board.
 */
 void polyBlast_releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board);
 
 /**
     @brief Releases a dragged shape, placing it if valid or resetting position.
 
-    @param shape Pointer to the active shape.
-    @param board Pointer to the board.
+    @param[in,out] shape        Pointer to the active shape.
+    @param[in,out] board        Pointer to the board.
 */
 void polyBlast_releaseShape(Shape_St* const shape, Board_St* const board);
-
 
 #endif // CORE_PLACEMENT_H

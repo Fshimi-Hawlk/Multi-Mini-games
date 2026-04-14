@@ -1,3 +1,10 @@
+/**
+    @file app.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief app.c implementation/header file
+*/
 #include "setups/app.h"
 #include "setups/audio.h"
 #include "setups/texture.h"

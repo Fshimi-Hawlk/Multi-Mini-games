@@ -1,12 +1,10 @@
 /**
-    @file setups/game.c
-    @author Fshimi-Hawlk
-    @author i-Charlys
+    @file game.c
+    @author Léandre BAUDET
     @date 2026-03-30
-    @date 2026-04-10
+    @date 2026-04-14
     @brief Implementation of central game state management and level loading.
 */
-
 #include "editor/io.h"
 
 #include "utils/globals.h"

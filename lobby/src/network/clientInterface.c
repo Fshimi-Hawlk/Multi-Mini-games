@@ -1,12 +1,10 @@
 /**
     @file clientInterface.c
-    @author i-Charlys (CAILLON Charles)
-    @author Fshimi-Hawlk
+    @author Léandre BAUDET
     @date 2026-03-18
-    @date 2026-03-30
+    @date 2026-04-14
     @brief Implementation of the Lobby mini-game module with Editor and Advanced Physics.
 */
-
 #include "core/game.h"
 #include "core/chat.h"
 

@@ -1,3 +1,10 @@
+/**
+    @file common.h
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
+    @brief Common includes for Solitaire
+*/
 #ifndef UTILS_COMMON_H
 #define UTILS_COMMON_H
 
@@ -11,4 +18,4 @@
 
 #include "raylib.h"
 
-#endif
+#endif // UTILS_COMMON_H

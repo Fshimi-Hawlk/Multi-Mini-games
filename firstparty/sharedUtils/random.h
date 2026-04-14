@@ -1,11 +1,10 @@
 /**
-    @file firstparty/utils/random.h
-    @author Fshimi-Hawlk
+    @file random.h
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Random number generation and array shuffling utilities.
 */
-
 #ifndef FIRSTPARTY_UTILS_RANDOM_H
 #define FIRSTPARTY_UTILS_RANDOM_H
 

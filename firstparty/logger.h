@@ -1,34 +1,10 @@
 /**
     @file logger.h
-    @author Fshimi-Hawlk
+    @author Multi Mini-Games Team
     @date 2025-07-14
-    @date 2026-02-18
+    @date 2026-04-14
     @brief Flexible, colored console + file logger with stack trace support (Linux-focused).
-
-    Provides a set of logging macros (`log_info`, `log_warn`, `log_error`, etc.) that:
-      - output to stderr with ANSI color coding
-      - optionally append to a file (debug builds only)
-      - can include file/line/function information
-      - support optional stack traces on errors (when _STACK_TRACE defined)
-
-    Features:
-      - 7 logging levels (LOG, TRACE, DEBUG, INFO, WARN, ERROR, FATAL)
-      - runtime-configurable extra info (hide location, enable trace, trace depth)
-      - debug-only file logging + symbol resolution via addr2line (Linux)
-      - no-op in release builds for most heavy operations
-
-    Usage guidelines:
-      - Call init_logger() early in main() (usually after window init)
-      - Call cleanup_logger() before exit
-      - Use macros instead of direct logMessage() calls
-      - Stack traces require _STACK_TRACE define and addr2line in PATH
-
-    Platform notes:
-      - Full functionality (colors + file + stack trace) on Linux in debug builds
-      - Colors and console output work on Windows (with ANSI support) but no stack trace
-      - File logging and symbol resolution are #ifdef _DEBUG guarded
 */
-
 #ifndef LOGGER_H
 #define LOGGER_H
 
@@ -142,6 +118,11 @@ extern LogExtraInfoOpt_St _logExtraInfoOptions;  ///< Global logging options.
 
 extern ColorString_t getLevelString(LoggingLevel_Et level);
 
+/**
+    @brief Description for getLevelColor
+    @param[in,out] level The level parameter
+    @return Success/failure or the result of the function
+*/
 extern ColorString_t getLevelColor(LoggingLevel_Et level);
 
 // ────────────────────────────────────────────────
@@ -150,6 +131,11 @@ extern ColorString_t getLevelColor(LoggingLevel_Et level);
 
 extern ColorString_t getLevelString(LoggingLevel_Et level);
 
+/**
+    @brief Description for getLevelColor
+    @param[in,out] level The level parameter
+    @return Success/failure or the result of the function
+*/
 extern ColorString_t getLevelColor(LoggingLevel_Et level);
 
 /**

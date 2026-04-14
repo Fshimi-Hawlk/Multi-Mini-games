@@ -1,10 +1,10 @@
 /**
-    @file shape.h (setups)
-    @author Fshimi Hawlk
+    @file shape.h
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Prefab initialization and variant handling.
 */
-
 #ifndef SETUPS_SHAPE_H
 #define SETUPS_SHAPE_H
 

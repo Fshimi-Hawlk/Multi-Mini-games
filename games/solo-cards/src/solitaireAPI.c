@@ -1,11 +1,10 @@
 /**
- * @file solitaireAPI.c
- * @brief Solitaire public API — mirrors tetrisAPI pattern exactly.
- *
- * The lobby owns the window. This file: malloc, init, draw, free.
- * No InitWindow, no CloseWindow, no SetWindowSize.
- */
-
+    @file solitaireAPI.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Solitaire public API — mirrors tetrisAPI pattern exactly.
+*/
 #include "solitaireAPI.h"
 #include "solitaire.h"
 
@@ -15,7 +14,7 @@
 // Define struct before params menu
 struct SolitaireGame_St {
     BaseGame_St        base;   /* MUST be first — safe cast to BaseGame_St* */
-    SolitaireGameState state;
+    SolitaireGameState_St state;
 };
 
 #include "utils/audio.h"

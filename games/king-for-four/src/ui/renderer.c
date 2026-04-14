@@ -1,26 +1,40 @@
 /**
- * @file renderer.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Implementation of UI rendering functions using Raylib.
- */
-
+    @file renderer.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Implementation of UI rendering functions using Raylib.
+*/
 #include <math.h>
 #include "raylib.h"
 #include "ui/renderer.h"
 #include "logger.h"
 
-/** @brief Number of columns in the card texture sheet. */
+/**
+    @brief Number of columns in the card texture sheet.
+*/
 #define SHEET_COLS 5
-/** @brief Number of rows in the card texture sheet. */
+
+/**
+    @brief Number of rows in the card texture sheet.
+*/
 #define SHEET_ROWS 13
-/** @brief Scale factor for rendering cards. */
+
+/**
+    @brief Scale factor for rendering cards.
+*/
 #define CARD_SCALE 0.8f
 
 #ifndef ASSET_PATH
+/**
+    @brief Root directory for all game assets.
+*/
 #define ASSET_PATH "assets/"
 #endif
 
+/**
+    @brief Path to the textures folder.
+*/
 #define TEXTURES_PATH ASSET_PATH "textures/"
 
 /**

@@ -1,18 +1,10 @@
 /**
-    @file game.c (setups)
-    @author Fshimi Hawlk
+    @file game.c
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-07
+    @date 2026-04-14
     @brief Full game state initialization implementation.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Added initGame() / initSizeWeights()
-            - Added initBoard() / initPrefabManager()
-            - Added game loading logic
-            - Added resetGame() / new-game logic
 */
-
 #include "setups/game.h"
 #include "setups/shape.h"
 

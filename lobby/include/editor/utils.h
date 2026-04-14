@@ -3,11 +3,9 @@
     @author Fshimi-Hawlk
     @date 2026-03-27
     @date 2026-03-27
+    @date 2026-04-14
     @brief Pure logic utilities used only by the level editor module.
-
-    All functions here are side-effect free where possible.
 */
-
 #ifndef EDITOR_UTILS_H
 #define EDITOR_UTILS_H
 
@@ -28,6 +26,11 @@ bool pointInTerrain(const LobbyTerrain_St* const terrain, Vector2 point);
 */
 s32 findTerrainAtPoint(Vector2 point);
 
+/**
+    @brief Description for getTerrainTypeColor
+    @param[in,out] type The type parameter
+    @return Success/failure or the result of the function
+*/
 Color getTerrainTypeColor(TerrainKind_Et type);
 
 /**
@@ -133,6 +136,11 @@ void moveSelectedByOffset(Vector2 offset);
 */
 Rectangle getEditedTerrainPreviewRect(s32 idx);
 
+/**
+    @brief Description for snapToGrid
+    @param[in,out] v The v parameter
+    @return Success/failure or the result of the function
+*/
 f32 snapToGrid(f32 v);
 
 /**

@@ -1,3 +1,10 @@
+/**
+    @file ui.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief ui.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 static void draw_panel(float x, float y, float w, float h,
@@ -29,10 +36,10 @@ void UI_DrawWindIndicator(GolfGame *g) {
     DrawCircle(cx, cy, (float)r, (Color){20,40,80,180});
     DrawCircleLines(cx, cy, (float)r, (Color){100,150,255,100});
 
-    wr       = g->wind.direction_deg * DEG2RAD;
+    wr       = g->wind.direction * DEG2RAD;
     wx       = sinf(wr) * r * 0.8f;
     wy       = -cosf(wr) * r * 0.8f;
-    spd_norm = Clamp(g->wind.speed_kmh / 40.0f, 0.0f, 1.0f);
+    spd_norm = Clamp(g->wind.speed / 40.0f, 0.0f, 1.0f);
     wc       = ColorFromHSV(120.0f*(1.0f-spd_norm), 0.8f, 1.0f);
 
     DrawLineEx((Vector2){(float)cx,(float)cy},

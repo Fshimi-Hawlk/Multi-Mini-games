@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/types.h
-    @author Fshimi-Hawlk
+    @file types.h
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Core types and enums for the reusable widget system.
 */
-
 #ifndef WIDGETS_TYPES_H
 #define WIDGETS_TYPES_H
 
@@ -72,6 +72,9 @@ typedef struct {
     Color          textColor;
 } TextButton_St;
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     WidgetState_Et state;
     Rectangle      bounds;

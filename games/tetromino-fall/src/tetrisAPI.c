@@ -1,11 +1,10 @@
 /**
- * @file tetris.c
- * @author Fshimi-Hawlk
- * @date 2026-02-07
- * @date 2026-02-18
- * @brief Implementation of the Tetris mini-game.
- */
-
+    @file tetrisAPI.c
+    @author Léandre BAUDET
+    @date 2026-02-07
+    @date 2026-04-14
+    @brief Implementation of the Tetris mini-game.
+*/
 #include "core/board.h"
 #include "core/game.h"
 #include "core/shape.h"

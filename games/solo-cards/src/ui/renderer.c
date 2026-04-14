@@ -1,10 +1,10 @@
 /**
- * @file renderer.c
- * @brief Solitaire rendering functions
- * @author Maxime CHAUVEAU
- * @date February 2026
- */
-
+    @file renderer.c
+    @author Maxime CHAUVEAU
+    @date February 2026
+    @date 2026-04-14
+    @brief Solitaire rendering functions
+*/
 #include "ui/renderer.h"
 #include "assetPath.h"
 #include <string.h>
@@ -23,7 +23,7 @@
 #define CARD_TEX_HEIGHT 190
 #define WASTE_SPREAD_WIDTH 150
 
-static const CardRegion card_atlas[] = {
+static const CardRegion_St card_atlas[] = {
     { "cardHeartsA.png",   140, 1330, 140, 190 },
     { "cardHearts2.png",   700,  380, 140, 190 },
     { "cardHearts3.png",   280,  950, 140, 190 },
@@ -81,10 +81,10 @@ static const CardRegion card_atlas[] = {
     { "cardSpadesK.png",     0,  190, 140, 190 },
 };
 
-const int CARD_COUNT = (sizeof(card_atlas) / sizeof(CardRegion));
+const int CARD_COUNT = (sizeof(card_atlas) / sizeof(CardRegion_St));
 
-GameAssets solitaire_LoadAssets(void) {
-    GameAssets assets;
+GameAssets_St solitaire_LoadAssets(void) {
+    GameAssets_St assets;
 
     /* Asset path resolution — ASSET_PATH is set by Makefile (e.g. "jeux/solitaire/assets/") */
     static const char* baseCandidates[] = {
@@ -112,14 +112,14 @@ GameAssets solitaire_LoadAssets(void) {
     return assets;
 }
 
-void solitaire_UnloadAssets(GameAssets assets) {
+void solitaire_UnloadAssets(GameAssets_St assets) {
     UnloadTexture(assets.cardSheet);
     UnloadTexture(assets.cardBack);
 }
 
-static void DrawCardFromAtlasTinted(GameAssets assets, int index, Vector2 position, Color tint) {
+static void DrawCardFromAtlasTinted(GameAssets_St assets, int index, Vector2 position, Color tint) {
     if (index >= 0 && index < CARD_COUNT) {
-        CardRegion region = card_atlas[index];
+        CardRegion_St region = card_atlas[index];
         Rectangle source = {region.x, region.y, region.width, region.height};
         Rectangle dest = {position.x, position.y, CARD_WIDTH, CARD_HEIGHT};
         Vector2 origin = {0, 0};
@@ -127,12 +127,12 @@ static void DrawCardFromAtlasTinted(GameAssets assets, int index, Vector2 positi
     }
 }
 
-static void DrawCardFromAtlas(GameAssets assets, int index, Vector2 position, float scale) {
+static void DrawCardFromAtlas(GameAssets_St assets, int index, Vector2 position, float scale) {
     (void)scale;
     DrawCardFromAtlasTinted(assets, index, position, WHITE);
 }
 
-static void DrawCardBack(GameAssets assets, Vector2 position) {
+static void DrawCardBack(GameAssets_St assets, Vector2 position) {
     Rectangle source = {0, 0, assets.cardBack.width, assets.cardBack.height};
     Rectangle dest = {position.x, position.y, CARD_WIDTH, CARD_HEIGHT};
     Vector2 origin = {0, 0};
@@ -144,7 +144,7 @@ static void DrawEmptySlot(Vector2 position, Color borderColor) {
     DrawRectangleRoundedLines((Rectangle){position.x, position.y, CARD_WIDTH, CARD_HEIGHT}, 0.1f, 8, borderColor);
 }
 
-static void RenderSingleCard(const Card_St *card, GameAssets assets, Vector2 position) {
+static void RenderSingleCard(const Card_St *card, GameAssets_St assets, Vector2 position) {
     if (card->isFaceUp) {
         int index = card->suit * NUM_RANKS + (card->rank - 1);
         DrawCardFromAtlas(assets, index, position, 1.0f);
@@ -158,7 +158,7 @@ static void DrawEmptySlotWide(Vector2 position, int width, Color borderColor) {
     DrawRectangleRoundedLines((Rectangle){position.x, position.y, width, CARD_HEIGHT}, 0.1f, 8, borderColor);
 }
 
-static void RenderStock(const Pile_St *stock, GameAssets assets) {
+static void RenderStock(const Pile_St *stock, GameAssets_St assets) {
     DrawEmptySlot(stock->position, (Color){100, 150, 100, 255});
     
     if (stock->count > 0) {
@@ -166,7 +166,7 @@ static void RenderStock(const Pile_St *stock, GameAssets assets) {
     }
 }
 
-static void RenderWaste(const Pile_St *waste, GameAssets assets, bool isDragSource) {
+static void RenderWaste(const Pile_St *waste, GameAssets_St assets, bool isDragSource) {
     DrawEmptySlotWide(waste->position, WASTE_ZONE_WIDTH, (Color){100, 150, 100, 255});
     
     if (waste->count > 0) {
@@ -183,7 +183,7 @@ static void RenderWaste(const Pile_St *waste, GameAssets assets, bool isDragSour
     }
 }
 
-static void RenderFoundation(const Pile_St *foundation, GameAssets assets, int index) {
+static void RenderFoundation(const Pile_St *foundation, GameAssets_St assets, int index) {
     DrawEmptySlot(foundation->position, (Color){200, 180, 100, 255});
     
     int aceIndices[] = {0, 13, 26, 39};
@@ -201,7 +201,7 @@ static void RenderFoundation(const Pile_St *foundation, GameAssets assets, int i
     }
 }
 
-static void RenderTableauPile(const Pile_St *pile, GameAssets assets, bool isDragSource, int dragIndex, int dragCount) {
+static void RenderTableauPile(const Pile_St *pile, GameAssets_St assets, bool isDragSource, int dragIndex, int dragCount) {
     DrawEmptySlot(pile->position, (Color){100, 150, 100, 255});
     
     for (int i = 0; i < pile->count; i++) {
@@ -214,7 +214,7 @@ static void RenderTableauPile(const Pile_St *pile, GameAssets assets, bool isDra
     }
 }
 
-void RenderGame(const SolitaireGameState *game, GameAssets assets) {
+void RenderGame(const SolitaireGameState_St *game, GameAssets_St assets) {
     ClearBackground((Color){34, 85, 51, 255});
 
     bool isDraggingFromWaste = game->dragState.isDragging && game->dragState.sourcePile == &game->waste;
@@ -250,7 +250,7 @@ void RenderGame(const SolitaireGameState *game, GameAssets assets) {
     DrawText(scoreText, 10, SCREEN_HEIGHT - 30, 20, WHITE);
 }
 
-void solitaire_RenderMenu(const SolitaireGameState *game, GameAssets assets) {
+void solitaire_RenderMenu(const SolitaireGameState_St *game, GameAssets_St assets) {
     (void)assets;
     /* FIX: removed ClearBackground — it was called inside BeginDrawing after
      * RenderGame already drew all the cards, wiping the entire framebuffer and
@@ -274,11 +274,11 @@ void solitaire_RenderMenu(const SolitaireGameState *game, GameAssets assets) {
     }
 }
 
-void RenderCard(const Card_St *card, GameAssets assets, Vector2 position) {
+void RenderCard(const Card_St *card, GameAssets_St assets, Vector2 position) {
     RenderSingleCard(card, assets, position);
 }
 
-void RenderPile(const Pile_St *pile, GameAssets assets) {
+void RenderPile(const Pile_St *pile, GameAssets_St assets) {
     for (int i = 0; i < pile->count; i++) {
         Vector2 pos = {
             pile->position.x,

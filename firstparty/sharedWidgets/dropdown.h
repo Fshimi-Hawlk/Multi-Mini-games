@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/dropdown.h
-    @author Fshimi-Hawlk
+    @file dropdown.h
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Dropdown widget for the reusable UI system.
 */
-
 #ifndef WIDGETS_DROPDOWN_H
 #define WIDGETS_DROPDOWN_H
 

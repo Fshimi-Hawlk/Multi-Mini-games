@@ -1,3 +1,10 @@
+/**
+    @file clientInterface.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief clientInterface.c implementation/header file
+*/
 #include "rubikAPI.h"
 
 #include "raylib.h"

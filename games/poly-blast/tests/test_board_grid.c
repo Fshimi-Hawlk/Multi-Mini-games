@@ -1,8 +1,10 @@
 /**
- * @file test_board_grid.c
- * @brief Unit tests for 8x8 grid and board data.
- */
-
+    @file test_board_grid.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for 8x8 grid and board data.
+*/
 #include "core/board.h"
 #include "setups/game.h"
 

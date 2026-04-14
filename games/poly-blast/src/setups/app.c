@@ -1,10 +1,10 @@
 /**
     @file app.c
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Application setup and teardown.
 */
-
 #include "utils/globals.h"
 
 #include "setups/app.h"

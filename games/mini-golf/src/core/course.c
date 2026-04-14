@@ -1,3 +1,10 @@
+/**
+    @file course.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief course.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 void Golf_InitCourse(GolfGame *g) {

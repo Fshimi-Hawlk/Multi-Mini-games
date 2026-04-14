@@ -1,17 +1,10 @@
 /**
-    @file widgets/slider.c
-    @author Fshimi-Hawlk
+    @file slider.c
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Implementation of the horizontal Slider widget.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Drag-to-change value with proper clamping
-            - Visual feedback for hover/active states
-            - Filled progress bar + circular knob
-            - Optional value label
 */
-
 #include <stdio.h>
 
 #include "sharedWidgets/slider.h"

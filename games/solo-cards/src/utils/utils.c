@@ -1,3 +1,10 @@
+/**
+    @file utils.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief utils.c implementation/header file
+*/
 #include "utils/utils.h"
 
 bool compareColor(Color c1, Color c2) {

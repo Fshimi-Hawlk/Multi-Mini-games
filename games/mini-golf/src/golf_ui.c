@@ -1,12 +1,36 @@
+/**
+    @file golf_ui.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief UI rendering for the mini-golf game.
+*/
 #include "golf.h"
 
 /* ─── Helpers ────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws a rounded rectangle panel with a background and border.
+    @param[in] x      X coordinate.
+    @param[in] y      Y coordinate.
+    @param[in] w      Width.
+    @param[in] h      Height.
+    @param[in] bg     Background color.
+    @param[in] border Border color.
+*/
 static void draw_panel(float x, float y, float w, float h,
                        Color bg, Color border) {
     DrawRectangleRounded((Rectangle){x,y,w,h}, 0.15f, 8, bg);
     DrawRectangleRoundedLines((Rectangle){x,y,w,h}, 0.15f, 8, border);
 }
 
+/**
+    @brief Draws horizontally centered text with a shadow.
+    @param[in] txt  Text string.
+    @param[in] y    Y coordinate.
+    @param[in] sz   Font size.
+    @param[in] c    Text color.
+*/
 static void draw_text_center(const char *txt, int y, int sz, Color c) {
     int sw = GetScreenWidth();
     int tw = MeasureText(txt, sz);
@@ -14,12 +38,25 @@ static void draw_text_center(const char *txt, int y, int sz, Color c) {
     DrawText(txt, sw/2 - tw/2,     y,   sz, c);
 }
 
+/**
+    @brief Draws text with a shadow at a specific position.
+    @param[in] txt  Text string.
+    @param[in] x    X coordinate.
+    @param[in] y    Y coordinate.
+    @param[in] sz   Font size.
+    @param[in] c    Text color.
+*/
 static void draw_text_sh(const char *txt, int x, int y, int sz, Color c) {
     DrawText(txt, x+1, y+1, sz, (Color){0,0,0,120});
     DrawText(txt, x,   y,   sz, c);
 }
 
 /* ─── Indicateur vent ────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the wind indicator (compass and speed).
+    @param[in] g Golf game state.
+*/
 void UI_DrawWindIndicator(GolfGame *g) {
     int   cx = 120, cy = 90, r = 40;
     float wr, wx, wy, spd_norm;
@@ -31,10 +68,10 @@ void UI_DrawWindIndicator(GolfGame *g) {
     DrawCircle(cx, cy, (float)r, (Color){20,40,80,180});
     DrawCircleLines(cx, cy, (float)r, (Color){100,150,255,100});
 
-    wr       = g->wind.direction_deg * DEG2RAD;
+    wr       = g->wind.direction * DEG2RAD;
     wx       = sinf(wr) * r * 0.8f;
     wy       = -cosf(wr) * r * 0.8f;
-    spd_norm = Clamp(g->wind.speed_kmh / 40.0f, 0.0f, 1.0f);
+    spd_norm = Clamp(g->wind.speed / 40.0f, 0.0f, 1.0f);
     wc       = ColorFromHSV(120.0f*(1.0f-spd_norm), 0.8f, 1.0f);
 
     DrawLineEx((Vector2){(float)cx,(float)cy},
@@ -44,11 +81,16 @@ void UI_DrawWindIndicator(GolfGame *g) {
     DrawText("E", cx+r+4,    cy-6,    12, WHITE);
     DrawText("O", cx-r-16,   cy-6,    12, WHITE);
 
-    snprintf(buf, sizeof(buf), "%.0f km/h", g->wind.speed_kmh);
+    snprintf(buf, sizeof(buf), "%.0f km/h", g->wind.speed);
     draw_text_sh(buf, cx-25, cy+r+18, 14, wc);
 }
 
 /* ─── Jauge de puissance ─────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the power meter during the shot preparation.
+    @param[in] g Golf game state.
+*/
 void UI_DrawPower(GolfGame *g) {
     int   sw = g->screen_w, sh = g->screen_h;
     int   bw = 28, bh = 240;
@@ -80,6 +122,11 @@ void UI_DrawPower(GolfGame *g) {
 }
 
 /* ─── HUD ────────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the main in-game HUD (strokes, par, distance, etc.).
+    @param[in] g Golf game state.
+*/
 void UI_DrawHUD(GolfGame *g) {
     HoleData   *h;
     int         sw;
@@ -198,6 +245,11 @@ void UI_DrawHUD(GolfGame *g) {
 }
 
 /* ─── Minimap ────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the 2D minimap showing the hole layout and ball position.
+    @param[in] g Golf game state.
+*/
 void UI_DrawMinimap(GolfGame *g) {
     HoleData *h   = &g->holes[g->current_hole];
     int       mx  = 10, my = g->screen_h-175, mw = 130, mh = 155;
@@ -244,6 +296,11 @@ void UI_DrawMinimap(GolfGame *g) {
 }
 
 /* ─── Sélecteur club ─────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the club selection bar at the bottom of the screen.
+    @param[in] g Golf game state.
+*/
 void UI_DrawClubSelector(GolfGame *g) {
     int cx, cy, cw, ch, gap, total_w, sx, i;
 
@@ -273,6 +330,11 @@ void UI_DrawClubSelector(GolfGame *g) {
 }
 
 /* ─── Menu principal ─────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the main menu screen.
+    @param[in,out] g Golf game state.
+*/
 void UI_DrawMenu(GolfGame *g) {
     int   sw = g->screen_w, sh = g->screen_h;
     float t  = (float)GetTime();
@@ -339,6 +401,11 @@ void UI_DrawMenu(GolfGame *g) {
 }
 
 /* ─── Intro trou ─────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the introductory screen for a new hole.
+    @param[in] g Golf game state.
+*/
 void UI_DrawHoleIntro(GolfGame *g) {
     HoleData   *h  = &g->holes[g->current_hole];
     int         sw = g->screen_w, sh = g->screen_h;
@@ -366,6 +433,11 @@ void UI_DrawHoleIntro(GolfGame *g) {
 }
 
 /* ─── Résultat trou ──────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the result screen after finishing a hole.
+    @param[in] g Golf game state.
+*/
 void UI_DrawHoleResult(GolfGame *g) {
     HoleData   *h       = &g->holes[g->current_hole];
     int         sw      = g->screen_w, sh = g->screen_h;
@@ -410,6 +482,11 @@ void UI_DrawHoleResult(GolfGame *g) {
 }
 
 /* ─── Scorecard ──────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the complete scorecard for all holes.
+    @param[in,out] g Golf game state.
+*/
 void UI_DrawScorecard(GolfGame *g) {
     int  sw = g->screen_w, sh = g->screen_h;
     int  tx = sw/2 - 400, ty = 100;
@@ -513,6 +590,11 @@ void UI_DrawScorecard(GolfGame *g) {
 }
 
 /* ─── Pause ──────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the pause overlay.
+    @param[in] g Golf game state.
+*/
 void UI_DrawPaused(GolfGame *g) {
     DrawRectangle(0,0,g->screen_w,g->screen_h,(Color){0,0,0,140});
     draw_text_center("PAUSE  —  Echap pour reprendre",

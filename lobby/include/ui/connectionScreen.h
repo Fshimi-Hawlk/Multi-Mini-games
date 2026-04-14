@@ -6,7 +6,6 @@
     @date 2026-04-13
     @brief Two-layer connection screen (Server List → Room List) using shared widgets.
 */
-
 #ifndef UI_CONNECTION_SCREEN_H
 #define UI_CONNECTION_SCREEN_H
 

@@ -1,7 +1,8 @@
 /**
     @file prompt.h
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-04-07
+    @date 2026-04-14
     @brief Save/load modal UI using the widget system.
 */
 #ifndef UI_PROMPT_H
@@ -11,6 +12,10 @@
 
 /**
     @brief Updates all active prompts and returns true if the window should close.
+
+    @param[in,out] game         Pointer to the current game state.
+    @param[in]     mouse        The current mouse position.
+    @return                     true if the window should close, false otherwise.
 */
 bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouse);
 

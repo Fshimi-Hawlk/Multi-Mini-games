@@ -1,10 +1,10 @@
 /**
- * @file main.c
- * @brief Suika game entry point for standalone mode
- * @author Multi Mini-Games Team
- * @date February 2026
- */
-
+    @file main.c
+    @author Maxime CHAUVEAU
+    @date February 2026
+    @date 2026-04-14
+    @brief Suika game entry point for standalone mode
+*/
 #include "core/gameAPI.h"
 #include "core/game.h"
 #include "utils/types.h"

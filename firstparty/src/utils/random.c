@@ -1,3 +1,10 @@
+/**
+    @file random.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief random.c implementation/header file
+*/
 #include "sharedUtils/random.h"
 #include <stdlib.h>
 

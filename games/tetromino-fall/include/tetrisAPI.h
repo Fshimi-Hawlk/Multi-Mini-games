@@ -1,19 +1,10 @@
 /**
     @file tetrisAPI.h
-    @author Fshimi-Hawlk
+    @author Léandre BAUDET
     @date 2026-02-07
-    @date 2026-02-18
+    @date 2026-04-14
     @brief Public API for the Tetris mini-game.
-
-    Defines the opaque game handle and the minimal lifecycle functions
-    required to integrate Tetris into the lobby.
-
-    @note The internal structure `TetrisGame_St` is **opaque** outside this module.
-          Direct field access from the lobby or other modules is forbidden.
-
-    @see generalAPI.h for the required `Game_St` base structure and `Error_Et` codes
 */
-
 #ifndef TETRIS_API_H
 #define TETRIS_API_H
 

@@ -1,10 +1,10 @@
 /**
- * @file game.c
- * @author Maxime CHAUVEAU
- * @date March 2026
- * @brief Bowling mini-game – full 3D rendering, confetti, audience, animated results.
- */
-
+    @file game.c
+    @author Maxime CHAUVEAU
+    @date 2026-03-01
+    @date 2026-04-14
+    @brief Bowling mini-game – full 3D rendering, confetti, audience, animated results.
+*/
 #include "core/game.h"
 #include "APIs/generalAPI.h"
 #include "utils/types.h"
@@ -27,16 +27,18 @@
 // Constants – mesures officielles World Bowling / USBC
 // 1 unité = 1 mètre
 // 
-#define LANE_WIDTH      1.05f    // largeur piste officielle
-#define LANE_LENGTH     18.29f   // ligne de faute → quille de tête
-#define GUTTER_WIDTH    0.23f    // largeur d'une gouttière (23 cm)
-#define APPROACH_LEN    4.57f    // zone d'élan (15 pieds)
-#define BOWLING_WALL_Z  -20.5f   // mur arrière physique + visuel
-#define BALL_RADIUS     0.1092f  // rayon max boule (diamètre 21.83 cm)
-#define MAX_CONFETTI  200
-#define RESULTS_STEPS 7
+#define LANE_WIDTH      1.05f    ///< Largeur piste officielle
+#define LANE_LENGTH     18.29f   ///< Ligne de faute → quille de tête
+#define GUTTER_WIDTH    0.23f    ///< Largeur d'une gouttière (23 cm)
+#define APPROACH_LEN    4.57f    ///< Zone d'élan (15 pieds)
+#define BOWLING_WALL_Z  -20.5f   ///< Mur arrière physique + visuel
+#define BALL_RADIUS     0.1092f  ///< Rayon max boule (diamètre 21.83 cm)
+#define MAX_CONFETTI    200      ///< Nombre maximum de confettis à l'écran
+#define RESULTS_STEPS   7        ///< Nombre d'étapes d'animation des résultats
 
-// Global params menu state for bowling
+/**
+    @brief Global params menu state for bowling.
+*/
 static ParamsMenu_St bowlingParamsMenu = {0};
 
 #if defined(__GNUC__) || defined(__clang__)
@@ -53,6 +55,9 @@ static ParamsMenu_St bowlingParamsMenu = {0};
 // Ball skin palette
 // 
 #define NUM_BALL_SKINS 8
+/**
+    @brief Fallback color palette for ball skins when textures are not used.
+*/
 static const Color BALL_SKIN_RING[NUM_BALL_SKINS] = {
     { 60,  80, 200, 140},
     {200,  60,  60, 140},
@@ -63,168 +68,189 @@ static const Color BALL_SKIN_RING[NUM_BALL_SKINS] = {
     { 40, 190, 210, 140},
     {220,  80, 150, 140},
 };
-// supprime le warning unused : BALL_SKIN_RING reste disponible pour le fallback procédural
+
+/**
+    @brief Returns the ring color for a given skin index.
+    @param skin Skin index
+    @return Color for the ring
+*/
 static inline Color bowling_getRingColor(int skin) {
     return BALL_SKIN_RING[skin % NUM_BALL_SKINS];
 }
+
+/**
+    @brief Human-readable names for the ball skins.
+*/
 static const char* BALL_SKIN_NAMES[NUM_BALL_SKINS] = {
     "Bleu nuit", "Rouge", "Vert", "Violet",
     "Noir", "Orange", "Cyan", "Rose"
 };
 
-// 
-// Title screen state
-// 
+/**
+    @brief State of the title screen.
+*/
 typedef struct {
-    bool showTitle;
-    bool bumpers;
-    bool showAimGuide;
-    int  selectedSkin;
-    Rectangle playBtn;
-    Rectangle bumperBtn;
-    Rectangle aimGuideBtn;
-    Rectangle skinPrev;
-    Rectangle skinNext;
+    bool showTitle;      ///< Whether the title screen is currently shown
+    bool bumpers;        ///< Whether bumpers are enabled
+    bool showAimGuide;   ///< Whether the aim guide is visible
+    int  selectedSkin;   ///< Index of the selected ball skin
+    Rectangle playBtn;      ///< Play button rectangle
+    Rectangle bumperBtn;    ///< Bumper toggle button rectangle
+    Rectangle aimGuideBtn;  ///< Aim guide toggle button rectangle
+    Rectangle skinPrev;     ///< Previous skin button rectangle
+    Rectangle skinNext;     ///< Next skin button rectangle
 } TitleScreen_St;
 
-// 
-// Internal structs
-// 
+/**
+    @brief State of a single frame in the game.
+*/
 typedef struct {
-    int rolls[3];
-    int numRolls;
-    int score;
-    bool isStrike;
-    bool isSpare;
-    int pinsKnockedFirstRoll;
-    int cumulativeScore;
+    int rolls[3];            ///< Pins knocked down in each roll
+    int numRolls;            ///< Number of rolls played in this frame
+    int score;               ///< Total score for this frame
+    bool isStrike;           ///< Whether the frame was a strike
+    bool isSpare;            ///< Whether the frame was a spare
+    int pinsKnockedFirstRoll; ///< Pins knocked down in the first roll
+    int cumulativeScore;     ///< Cumulative score up to this frame
 } Frame_St;
 
+/**
+    @brief State of the 3D camera.
+*/
 typedef struct {
-    Camera3D camera;
-    Camera3D defaultCamera;
-    bool followingBall;
-    float cameraLerpSpeed;
-    Vector3 offset;
+    Camera3D camera;         ///< Current camera state
+    Camera3D defaultCamera;  ///< Default camera position and orientation
+    bool followingBall;      ///< Whether the camera is currently following the ball
+    float cameraLerpSpeed;   ///< Speed at which the camera interpolates
+    Vector3 offset;          ///< Offset from the ball when following
 } CameraState_St;
 
+/**
+    @brief Statistics for the current game session.
+*/
 typedef struct {
-    int totalStrikes;
-    int totalSpares;
-    int gutterBalls;
-    int totalPinsKnocked;
-    int perfectFrames;
-    float averagePinsPerFrame;
-    int framesCompleted;
+    int totalStrikes;        ///< Total number of strikes
+    int totalSpares;         ///< Total number of spares
+    int gutterBalls;         ///< Total number of gutter balls
+    int totalPinsKnocked;    ///< Total number of pins knocked down
+    int perfectFrames;       ///< Number of perfect frames (non-10th frame strikes)
+    float averagePinsPerFrame; ///< Average pins knocked down per frame
+    int framesCompleted;     ///< Number of frames completed
 } GameStats_St;
 
+/**
+    @brief State of the game over / results screen.
+*/
 typedef struct {
-    bool showEndScreen;
-    Rectangle playAgainBtn;
-    Rectangle quitBtn;
-    bool playAgainHovered;
-    bool quitHovered;
+    bool showEndScreen;      ///< Whether the end screen is currently shown
+    Rectangle playAgainBtn;  ///< Play again button rectangle
+    Rectangle quitBtn;       ///< Quit button rectangle
+    bool playAgainHovered;   ///< Whether the play again button is hovered
+    bool quitHovered;        ///< Whether the quit button is hovered
 } EndScreenState_St;
 
+/**
+    @brief State of a single confetti particle.
+*/
 typedef struct {
-    float x, y;          // screen position
-    float vx, vy;        // velocity
-    float rot, rotSpeed; // rotation angle (deg) + speed
-    float w, h;          // size
-    Color color;
-    float life, maxLife;
+    float x, y;          ///< Screen position
+    float vx, vy;        ///< Velocity
+    float rot, rotSpeed; ///< Rotation angle (deg) + speed
+    float w, h;          ///< Size
+    Color color;         ///< Particle color
+    float life, maxLife; ///< Current and maximum life
 } Confetti_St;
 
+/**
+    @brief State of a score event text animation.
+*/
 typedef struct {
-    bool  active;
-    char  text[32];
-    Color color;
-    float timer;
-    float maxTimer;
-    float scale;
-    float alpha;
-    float x, y;
+    bool  active;        ///< Whether the animation is active
+    char  text[32];      ///< Text to display
+    Color color;         ///< Text color
+    float timer;         ///< Current timer
+    float maxTimer;      ///< Maximum timer
+    float scale;         ///< Current scale
+    float alpha;         ///< Current alpha
+    float x, y;          ///< Screen position
 } ScoreAnim_St;
 
 // 
 // Pin dimensions (real proportions)
 // 
-#define PIN_BODY_HEIGHT  0.278f  // hauteur corps (38.1cm total)
-#define PIN_BASE_RADIUS  0.060f  // rayon base (diam.max 12cm)
-#define PIN_NECK_RADIUS  0.025f
-#define PIN_HEAD_RADIUS  0.044f
+#define PIN_BODY_HEIGHT  0.278f  ///< Hauteur corps (38.1cm total)
+#define PIN_BASE_RADIUS  0.060f  ///< Rayon base (diam.max 12cm)
+#define PIN_NECK_RADIUS  0.025f  ///< Rayon cou
+#define PIN_HEAD_RADIUS  0.044f  ///< Rayon tête
 
-// 
-// Main game struct (opaque outside this file)
-// 
+/**
+    @brief Main game structure for Bowling.
+*/
 struct BowlingGame_St {
-    BaseGame_St base;
+    BaseGame_St base;                    ///< Base game structure
 
-    CameraState_St  cameraState;
-    Ball_St         ball;
-    Pin_St          pins[NUM_PINS];
-    Frame_St        frames[BOWLING_MAX_FRAMES];
-    Particle_St     particles[MAX_PARTICLES];
-    int             particleCount;
+    CameraState_St  cameraState;        ///< Camera state
+    Ball_St         ball;               ///< Ball state
+    Pin_St          pins[NUM_PINS];     ///< Pins state
+    Frame_St        frames[BOWLING_MAX_FRAMES]; ///< Frames state
+    Particle_St     particles[MAX_PARTICLES];   ///< Particle system
+    int             particleCount;      ///< Number of active particles
 
-    int   currentFrame;
-    int   totalScore;
-    bool  isAiming;
-    Vector2 aimStart;
-    Vector2 aimCurrent;
-    float power;
-    float spin;
-    float aimAngle;
-    float resetTimer;
-    bool  waitingForReset;
+    int   currentFrame;                 ///< Current frame index
+    int   totalScore;                   ///< Total score
+    bool  isAiming;                     ///< Whether the player is currently aiming
+    Vector2 aimStart;                   ///< Mouse position when aiming started
+    Vector2 aimCurrent;                 ///< Current mouse position when aiming
+    float power;                        ///< Throw power (0 to 1)
+    float spin;                         ///< Ball spin (-1 to 1)
+    float aimAngle;                     ///< Aiming angle
+    float resetTimer;                   ///< Timer for resetting the ball/frame
+    bool  waitingForReset;              ///< Whether the game is waiting to reset
 
-    BowlingTextures_St textures;
-    int  currentBallTextureIndex;
+    BowlingTextures_St textures;        ///< Preloaded textures and models
+    int  currentBallTextureIndex;       ///< Current ball texture index
 
-    GameStats_St     stats;
-    EndScreenState_St endScreen;
+    GameStats_St     stats;             ///< Game statistics
+    EndScreenState_St endScreen;        ///< End screen state
 
-    // Confetti
-    Confetti_St confetti[MAX_CONFETTI];
-    int         confettiCount;
+    Confetti_St confetti[MAX_CONFETTI]; ///< Confetti particles
+    int         confettiCount;          ///< Number of active confetti
 
-    // Score event text animation
-    ScoreAnim_St scoreAnim;
+    ScoreAnim_St scoreAnim;             ///< Score animation state
 
-    // Results reveal animation
-    float resultsRevealTimer;
+    float resultsRevealTimer;           ///< Timer for revealing results on end screen
 
-    // Audience reaction
-    float audienceReactionTimer;
-    int   audienceReactionType;   // 0=none 1=strike 2=spare
+    float audienceReactionTimer;        ///< Timer for audience reaction
+    int   audienceReactionType;         ///< Type of audience reaction (0=none 1=strike 2=spare)
 
-    // Settings chosen on title screen
-    bool bumpers;
-    bool showAimGuide;
-    int  selectedSkin;
+    bool bumpers;                       ///< Whether bumpers are enabled
+    bool showAimGuide;                  ///< Whether the aim guide is shown
+    int  selectedSkin;                  ///< Selected ball skin index
 
-    TitleScreen_St titleScreen;
+    TitleScreen_St titleScreen;         ///< Title screen state
 
-    // Time accumulator for ball shimmer
-    float timeAccum;
+    float timeAccum;                    ///< Time accumulator for animations
 };
 
 // 
 // Forward declarations
 // 
-// 
-// Forward declarations
-// 
 static void bowling_initTitleScreen(TitleScreen_St* ts);
 
+/**
+    @brief Wrapper for freeGame that matches the BaseGame_St interface.
+    @param game Pointer to BowlingGame_St*
+    @return Error_Et status
+*/
 Error_Et bowling_freeGameWrapper(void* game) {
     /* game is actually a void** (BaseGame_St**) passed as void* by the lobby */
     return bowling_freeGame((BowlingGame_St**)game);
 }
 
-// 
-// Camera
-// 
+/**
+    @brief Initializes the 3D camera.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_initCamera(BowlingGame_St* game) {
     // Caméra derrière le joueur, vue sur toute la piste (18.29 m)
     game->cameraState.defaultCamera.position   = (Vector3){0.0f, 1.5f, 5.8f};
@@ -239,6 +265,11 @@ static void bowling_initCamera(BowlingGame_St* game) {
     game->cameraState.offset = (Vector3){0.0f, 0.6f, 1.5f};
 }
 
+/**
+    @brief Updates the camera position and target.
+    @param[in,out] game      Bowling game state
+    @param[in]     deltaTime Time since last frame
+*/
 static void bowling_updateCamera(BowlingGame_St* game, float deltaTime) {
     CameraState_St* cam = &game->cameraState;
     if (game->ball.isRolling) {
@@ -257,15 +288,21 @@ static void bowling_updateCamera(BowlingGame_St* game, float deltaTime) {
     }
 }
 
-// 
-// Scoring helpers
-// 
+/**
+    @brief Counts the number of knocked down pins.
+    @param[in] game Bowling game state
+    @return Number of knocked down pins
+*/
 static int bowling_countKnockedPins(BowlingGame_St* game) {
     int c = 0;
     for (int i = 0; i < NUM_PINS; i++) if (!game->pins[i].isStanding) c++;
     return c;
 }
 
+/**
+    @brief Updates the total score and cumulative frame scores.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_updateTotalScore(BowlingGame_St* game) {
     int total = 0;
     for (int i = 0; i < BOWLING_MAX_FRAMES; i++) {
@@ -301,15 +338,19 @@ static void bowling_updateTotalScore(BowlingGame_St* game) {
     game->totalScore = total;
 }
 
+/**
+    @brief Updates game statistics.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_updateGameStats(BowlingGame_St* game) {
     game->stats.framesCompleted = game->currentFrame + 1;
     if (game->stats.framesCompleted > 0)
         game->stats.averagePinsPerFrame = (float)game->stats.totalPinsKnocked / game->stats.framesCompleted;
 }
 
-// 
-// Confetti helpers
-// 
+/**
+    @brief Colors used for confetti particles.
+*/
 static const Color CONFETTI_COLORS[] = {
     {255,  50,  50, 255}, {255, 200,  50, 255}, { 50, 200,  50, 255},
     { 50, 150, 255, 255}, {200,  50, 255, 255}, {255, 120,  30, 255},
@@ -317,6 +358,11 @@ static const Color CONFETTI_COLORS[] = {
 };
 #define NUM_CONFETTI_COLORS 8
 
+/**
+    @brief Spawns confetti particles.
+    @param[in,out] game   Bowling game state
+    @param[in]     amount Number of particles to spawn
+*/
 static void bowling_spawnConfetti(BowlingGame_St* game, int amount) {
     for (int i = 0; i < amount && game->confettiCount < MAX_CONFETTI; i++) {
         Confetti_St* c = &game->confetti[game->confettiCount++];
@@ -334,6 +380,11 @@ static void bowling_spawnConfetti(BowlingGame_St* game, int amount) {
     }
 }
 
+/**
+    @brief Updates confetti particles.
+    @param[in,out] game Bowling game state
+    @param[in]     dt   Time since last frame
+*/
 static void bowling_updateConfetti(BowlingGame_St* game, float dt) {
     int w = 0;
     for (int i = 0; i < game->confettiCount; i++) {
@@ -351,6 +402,10 @@ static void bowling_updateConfetti(BowlingGame_St* game, float dt) {
     game->confettiCount = w;
 }
 
+/**
+    @brief Draws confetti particles.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawConfetti(BowlingGame_St* game) {
     for (int i = 0; i < game->confettiCount; i++) {
         Confetti_St* c = &game->confetti[i];
@@ -365,9 +420,12 @@ static void bowling_drawConfetti(BowlingGame_St* game) {
     }
 }
 
-// 
-// Score event animation
-// 
+/**
+    @brief Triggers a score event animation.
+    @param[in,out] game  Bowling game state
+    @param[in]     text  Text to display
+    @param[in]     color Text color
+*/
 static void bowling_triggerScoreAnim(BowlingGame_St* game, const char* text, Color color) {
     ScoreAnim_St* a = &game->scoreAnim;
     a->active   = true;
@@ -380,6 +438,11 @@ static void bowling_triggerScoreAnim(BowlingGame_St* game, const char* text, Col
     a->y        = (float)SCREEN_HEIGHT / 2.0f - 60.0f;
 }
 
+/**
+    @brief Updates the score event animation.
+    @param[in,out] game Bowling game state
+    @param[in]     dt   Time since last frame
+*/
 static void bowling_updateScoreAnim(BowlingGame_St* game, float dt) {
     ScoreAnim_St* a = &game->scoreAnim;
     if (!a->active) return;
@@ -391,6 +454,10 @@ static void bowling_updateScoreAnim(BowlingGame_St* game, float dt) {
     a->alpha = t > 0.2f ? 1.0f : t / 0.2f;
 }
 
+/**
+    @brief Draws the score event animation.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawScoreAnim(BowlingGame_St* game) {
     ScoreAnim_St* a = &game->scoreAnim;
     if (!a->active) return;
@@ -406,9 +473,10 @@ static void bowling_drawScoreAnim(BowlingGame_St* game) {
     DrawText(a->text, (int)a->x - tw/2,     (int)a->y,     fs, col);
 }
 
-// 
-// Frame logic
-// 
+/**
+    @brief Advances the game to the next frame.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_nextFrame(BowlingGame_St* game) {
     physics_setupPins(game->pins);
     physics_resetBall(&game->ball);
@@ -425,6 +493,10 @@ static void bowling_nextFrame(BowlingGame_St* game) {
     }
 }
 
+/**
+    @brief Resets the ball state for a new roll.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_resetBallState(BowlingGame_St* game) {
     physics_resetBall(&game->ball);
     game->waitingForReset = false;
@@ -434,6 +506,10 @@ static void bowling_resetBallState(BowlingGame_St* game) {
     game->aimAngle        = 0.0f;
 }
 
+/**
+    @brief Handles logic when the ball has stopped rolling.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_handleBallStopped(BowlingGame_St* game) {
     game->waitingForReset = true;
     game->resetTimer      = 1.8f;
@@ -528,6 +604,11 @@ static void bowling_handleBallStopped(BowlingGame_St* game) {
     bowling_updateGameStats(game);
 }
 
+/**
+    @brief Processes the timer for resetting the ball/frame.
+    @param[in,out] game      Bowling game state
+    @param[in]     deltaTime Time since last frame
+*/
 static void bowling_processResetTimer(BowlingGame_St* game, float deltaTime) {
     if (!game->waitingForReset) return;
     game->resetTimer -= deltaTime;
@@ -564,9 +645,10 @@ static void bowling_processResetTimer(BowlingGame_St* game, float deltaTime) {
     }
 }
 
-// 
-// Draw: Environment (audience, neon, decor)
-// 
+/**
+    @brief Draws the game environment (audience, decor, etc.).
+    @param[in,out] game Bowling game state
+*/
 static void bowling_drawEnvironment(BowlingGame_St* game) {
     // Echelle 1 unite = 1 metre. Piste : z=+4.57 -> z=-20.5
     float laneHalfLen = (LANE_LENGTH + APPROACH_LEN) * 0.5f;
@@ -644,8 +726,6 @@ static void bowling_drawEnvironment(BowlingGame_St* game) {
         DrawCylinder((Vector3){-2.5f, 3.2f, z}, 0.025f, 0.025f, 0.12f, 6, neonBlue);
         DrawCylinder((Vector3){ 2.5f, 3.2f, z}, 0.025f, 0.025f, 0.12f, 6, neonBlue);
     }
-    // Panneau d affichage central
-    // (panneau d'affichage central supprimé)
 
     //  Rails de délimitation piste / tribunes (le long de Z) 
     float hw = LANE_WIDTH / 2.0f + GUTTER_WIDTH + 0.04f;
@@ -659,9 +739,10 @@ static void bowling_drawEnvironment(BowlingGame_St* game) {
         0.018f, 0.018f, 4, (Color){100,82,65,255});
 }
 
-// 
-// Draw: Lane (thin, with separated pit)
-// 
+/**
+    @brief Draws the bowling lane.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawLane(BowlingGame_St* game) {
     float laneWidth = LANE_WIDTH;
     float gutterW   = GUTTER_WIDTH;
@@ -752,9 +833,10 @@ static void bowling_drawLane(BowlingGame_St* game) {
     }
 }
 
-// 
-// Draw: Shadows
-// 
+/**
+    @brief Draws the ball shadow.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawBallShadow(BowlingGame_St* game) {
     Ball_St* b = &game->ball;
     if (b->position.y > 0.8f) return;
@@ -764,16 +846,18 @@ static void bowling_drawBallShadow(BowlingGame_St* game) {
     float   spread   = 1.0f + height * 2.0f;  // s'étire quand la balle monte
     float   alpha    = fmaxf(0.0f, 1.0f - height * 3.0f) * 0.55f;
     float   rx       = b->radius * spread;
-    float   rz       = b->radius * spread * 0.55f; // un peu aplatie
     Vector3 center   = {b->position.x, 0.002f, b->position.z};
 
     // Dessin via 3 cercles concentriques pour simuler un dégradé
     DrawCircle3D(center, rx,        (Vector3){1,0,0}, 90.0f, (Color){0,0,0,(unsigned char)(alpha*120)});
     DrawCircle3D(center, rx*0.65f,  (Vector3){1,0,0}, 90.0f, (Color){0,0,0,(unsigned char)(alpha*160)});
     DrawCircle3D(center, rx*0.30f,  (Vector3){1,0,0}, 90.0f, (Color){0,0,0,(unsigned char)(alpha*200)});
-    (void)rz;
 }
 
+/**
+    @brief Draws the shadows for all pins.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawPinShadows(BowlingGame_St* game) {
     for (int i = 0; i < NUM_PINS; i++) {
         Pin_St* p = &game->pins[i];
@@ -791,9 +875,11 @@ static void bowling_drawPinShadows(BowlingGame_St* game) {
     }
 }
 
-// 
-// Draw: Pins (real 3D with fall rotation)
-// 
+/**
+    @brief Draws a single pin in 3D.
+    @param[in] pin   Pin state
+    @param[in] color Color to draw the pin with
+*/
 static void bowling_drawSinglePin(const Pin_St* pin, Color color) {
     Vector3 localUp = Vector3RotateByAxisAngle(
         (Vector3){0.0f, 1.0f, 0.0f},
@@ -815,6 +901,10 @@ static void bowling_drawSinglePin(const Pin_St* pin, Color color) {
     DrawSphere(headCenter, PIN_HEAD_RADIUS, color);
 }
 
+/**
+    @brief Draws all pins.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawPins(BowlingGame_St* game) {
     for (int i = 0; i < NUM_PINS; i++) {
         Pin_St* p = &game->pins[i];
@@ -834,9 +924,10 @@ static void bowling_drawPins(BowlingGame_St* game) {
     }
 }
 
-// 
-// Draw: Ball (real 3D + shine effect)
-// 
+/**
+    @brief Draws the bowling ball.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawBall(BowlingGame_St* game) {
     Ball_St* b    = &game->ball;
     float    r    = b->radius;
@@ -862,9 +953,10 @@ static void bowling_drawBall(BowlingGame_St* game) {
     DrawSphere(hlPos, r * 0.18f, (Color){255, 255, 255, (unsigned char)(45 + 35 * shimmer)});
 }
 
-// 
-// Draw: Particles
-// 
+/**
+    @brief Draws physics particles.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawParticles(BowlingGame_St* game) {
     for (int i = 0; i < game->particleCount; i++) {
         Particle_St* p     = &game->particles[i];
@@ -876,9 +968,10 @@ static void bowling_drawParticles(BowlingGame_St* game) {
     }
 }
 
-// 
-// Draw: Aim guide
-// 
+/**
+    @brief Draws the aiming guide.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawAimGuide(BowlingGame_St* game) {
     if (!game->showAimGuide) return;
     if (game->ball.isRolling || game->waitingForReset) return;
@@ -902,9 +995,10 @@ static void bowling_drawAimGuide(BowlingGame_St* game) {
     }
 }
 
-// 
-// Draw: HUD – Scoreboard
-// 
+/**
+    @brief Draws the full scoreboard HUD.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawFullScoreboard(BowlingGame_St* game) {
     int fw = 70, sx = 20, sy = 10, bh = 65;
     DrawRectangle(sx-5, sy-5, fw*10+15, bh+15, (Color){20,15,10,230});
@@ -963,9 +1057,10 @@ static void bowling_drawFullScoreboard(BowlingGame_St* game) {
     DrawText(TextFormat("Total: %d", game->totalScore), sx + fw*10 - 60, sy + bh + 5, 18, (Color){255,215,0,255});
 }
 
-// 
-// Draw: HUD – Power/Spin meters
-// 
+/**
+    @brief Draws the power meter HUD.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawPowerMeter(BowlingGame_St* game) {
     if (game->ball.isRolling || game->waitingForReset) return;
     int mx = SCREEN_WIDTH - 60, my = 150, mw = 30, mh = 200;
@@ -981,6 +1076,10 @@ static void bowling_drawPowerMeter(BowlingGame_St* game) {
     DrawText(TextFormat("%.0f%%", pr * 100), mx, my+mh+5, 12, WHITE);
 }
 
+/**
+    @brief Draws the spin meter HUD.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawSpinMeter(BowlingGame_St* game) {
     if (game->ball.isRolling || game->waitingForReset) return;
     int mx = SCREEN_WIDTH - 130, my = 150, mw = 60, mh = 25;
@@ -999,6 +1098,10 @@ static void bowling_drawSpinMeter(BowlingGame_St* game) {
     DrawText(st, mx, my+mh+25, 10, LIGHTGRAY);
 }
 
+/**
+    @brief Draws the statistics panel HUD.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawStatsPanel(BowlingGame_St* game) {
     int px = SCREEN_WIDTH - 150, py = 400, pw = 140, ph = 120;
     DrawRectangle(px, py, pw, ph, (Color){30,25,20,200});
@@ -1014,6 +1117,10 @@ static void bowling_drawStatsPanel(BowlingGame_St* game) {
     DrawText(TextFormat("Up: %d", standing), px+10, y, 12, standing == 0 ? (Color){100,255,100,255} : LIGHTGRAY);
 }
 
+/**
+    @brief Draws the controls hint HUD.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawControls(BowlingGame_St* game) {
     (void)game;
     int y = SCREEN_HEIGHT - 80;
@@ -1025,9 +1132,10 @@ static void bowling_drawControls(BowlingGame_St* game) {
     DrawText("R: Reset  |  ENTER/SPACE: Launch/Skip  |  ESC: Quit", 20, y, 12, (Color){180,160,140,255});
 }
 
-// 
-// Draw: End screen (animated results)
-// 
+/**
+    @brief Draws the game over / results screen.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_drawEndScreen(BowlingGame_St* game) {
     if (!game->endScreen.showEndScreen) return;
 
@@ -1124,9 +1232,10 @@ static void bowling_drawEndScreen(BowlingGame_St* game) {
     }
 }
 
-// 
-// Input
-// 
+/**
+    @brief Handles user input during normal gameplay.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_handleInput(BowlingGame_St* game) {
     if (game->ball.isRolling || game->waitingForReset) return;
 
@@ -1145,6 +1254,10 @@ static void bowling_handleInput(BowlingGame_St* game) {
     if (IsKeyPressed(KEY_R))  bowling_resetBallState(game);
 }
 
+/**
+    @brief Handles user input on the game over screen.
+    @param[in,out] game Bowling game state
+*/
 static void bowling_handleEndScreenInput(BowlingGame_St* game) {
     if (!game->endScreen.showEndScreen) return;
 
@@ -1187,12 +1300,10 @@ static void bowling_handleEndScreenInput(BowlingGame_St* game) {
     }
 }
 
-// 
-// Init / Free
-// 
-// 
-// Title screen
-// 
+/**
+    @brief Initializes the title screen state.
+    @param[out] ts Title screen state to initialize
+*/
 static void bowling_initTitleScreen(TitleScreen_St* ts) {
     ts->showTitle     = true;
     ts->bumpers       = false;
@@ -1209,6 +1320,10 @@ static void bowling_initTitleScreen(TitleScreen_St* ts) {
     ts->skinNext     = (Rectangle){ cx + 126, cy -  62, 44,  44 };
 }
 
+/**
+    @brief Draws the title screen.
+    @param[in] game Bowling game state
+*/
 static void bowling_drawTitleScreen(BowlingGame_St* game) {
     TitleScreen_St* ts = &game->titleScreen;
     int cx = SCREEN_WIDTH  / 2;
@@ -1232,22 +1347,16 @@ static void bowling_drawTitleScreen(BowlingGame_St* game) {
     //  Ball skin selector 
     DrawText("Skin de la balle", cx - MeasureText("Skin de la balle", 18)/2, cy - 100, 18, (Color){200, 180, 140, 255});
 
-    // Preview boule : texture dans un cercle découpé, sans fond coloré
+    // Preview boule
     int bx = cx, by = cy - 44, br = 36;
     DrawEllipse(bx, by + br + 4, br - 4, 5, (Color){0, 0, 0, 60}); // ombre
 
     int skin = ts->selectedSkin;
     if (skin < game->textures.ballTextureCount && IsTextureValid(game->textures.ballTextures[skin])) {
-        // Masque circulaire : dessiner la texture uniquement dans le cercle
-        // (DrawTexturePro sur un carré puis DrawCircle par-dessus avec la couleur de fond
-        //  pour donner l'illusion d'un clip — la bonne façon avec raylib sans shader)
         Texture2D tex  = game->textures.ballTextures[skin];
         Rectangle src  = {0, 0, (float)tex.width, (float)tex.height};
         Rectangle dest = {(float)(bx - br), (float)(by - br), (float)(br*2), (float)(br*2)};
         DrawTexturePro(tex, src, dest, (Vector2){0,0}, 0.0f, WHITE);
-        // Masque circulaire inversé (coins) pour simuler le clip — fond transparent
-        // DrawCircle serait opaque, on dessine des triangles coin → trop complexe
-        // On laisse la texture carrée mais elle est propre grâce au remplissage des pixels
     }
     DrawCircle(bx - 11, by - 11, 8, (Color){255, 255, 255, 40});
 
@@ -1304,6 +1413,11 @@ static void bowling_drawTitleScreen(BowlingGame_St* game) {
     DrawText("ESC: Quitter", 14, SCREEN_HEIGHT - 24, 14, (Color){100, 90, 70, 255});
 }
 
+/**
+    @brief Handles user input on the title screen.
+    @param[in,out] game Bowling game state
+    @return True if the play button was pressed, false otherwise
+*/
 static bool bowling_handleTitleScreenInput(BowlingGame_St* game) {
     TitleScreen_St* ts = &game->titleScreen;
     if (!IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) return false;
@@ -1339,7 +1453,12 @@ static bool bowling_handleTitleScreenInput(BowlingGame_St* game) {
     return false;
 }
 
-// 
+/**
+    @brief Initializes the full bowling game.
+    @param[out] game    Pointer to BowlingGame_St* to initialize
+    @param[in]  configs Initial game configurations
+    @return Error_Et status
+*/
 Error_Et bowling_initGame__full(BowlingGame_St** game, BowlingConfigs_St configs) {
     (void)configs;
     *game = malloc(sizeof(BowlingGame_St));
@@ -1403,9 +1522,11 @@ Error_Et bowling_initGame__full(BowlingGame_St** game, BowlingConfigs_St configs
     return OK;
 }
 
-// 
-// Game loop
-// 
+/**
+    @brief Main bowling game loop.
+    @param[in,out] game Bowling game state
+    @return Error_Et status
+*/
 Error_Et bowling_gameLoop(BowlingGame_St* const game) {
     if (!game) { log_error("NULL game in gameLoop"); return ERROR_NULL_POINTER; }
     if (!game->base.running) return OK;
@@ -1514,11 +1635,6 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
             Vector3 dir    = Vector3Normalize((Vector3){-sinf(angle), 0, -cosf(angle)});
             float launchPower = game->power * 10.0f + 4.0f;
             physics_launchBall(&game->ball, dir, launchPower, game->spin);
-        /* FIX: the "skip reset timer" branches were reachable while the ball was
-         * still rolling (ball.isRolling == true), causing the frame to advance
-         * without recording the roll through handleBallStopped. Guard with
-         * !game->ball.isRolling so they only apply once the ball has stopped
-         * and we are merely waiting out the reset countdown. */
         } else if (!game->ball.isRolling
                    && (f->isStrike || (f->numRolls >= 2 && !needs3rd))) {
             bowling_nextFrame(game);
@@ -1563,9 +1679,11 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
     return OK;
 }
 
-// 
-// Free
-// 
+/**
+    @brief Frees all resources associated with the bowling game.
+    @param[in,out] game Pointer to BowlingGame_St* to free
+    @return Error_Et status
+*/
 Error_Et bowling_freeGame(BowlingGame_St** game) {
     if (!game || !*game) return ERROR_NULL_POINTER;
     bowling_freeAudio();

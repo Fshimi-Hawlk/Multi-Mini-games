@@ -1,30 +1,10 @@
 /**
-    @file ui/game.h
-    @author Fshimi-Hawlk
+    @file game.h
+    @author Léandre BAUDET
     @date 2026-01-30
-    @date 2026-04-10
+    @date 2026-04-14
     @brief Public interface for low-level drawing functions used in the lobby scene.
-
-    This header declares the core rendering helpers responsible for visualizing
-    the main gameplay elements of the lobby (player character and platforms).
-
-    All functions:
-        - expect world-space coordinates
-        - must be called inside an active BeginMode2D() block
-        - perform no state changes beyond Raylib draw calls
-        - are intended as leaf-level primitives (no logic, no side-effects)
-
-    Typical usage pattern in the lobby render loop:
-    BeginMode2D(game->cam); {
-        drawPlatforms(platforms, platformCount);
-        drawPlayer(game, &game->player);
-        // other world-space elements (particles, effects, etc.)
-    } EndMode2D();
-
-    @see `ui/game.c`          for implementation
-    @see `utils/userTypes.h`  for LobbyGame_St, Player_St, Platform_St definitions
 */
-
 #ifndef UI_GAME_H
 #define UI_GAME_H
 
@@ -51,9 +31,20 @@ void lobby_drawPlayer(const PlayerVisuals_St* const visuals, const Player_St* co
 */
 void lobby_drawTerrains(void);
 
+/**
+    @brief Description for lobby_drawTree
+*/
 void lobby_drawTree(void);
+/**
+    @brief Description for lobby_drawWorldBoundaries
+    @param[in,out] player The player parameter
+*/
 void lobby_drawWorldBoundaries(const Player_St* const player);
 
+/**
+    @brief Description for lobby_drawGameZones
+    @param[in,out] player The player parameter
+*/
 void lobby_drawGameZones(const Player_St* const player);
 
 

@@ -18,14 +18,20 @@
 #include "logger.h"
 #include "APIs/generalAPI.h"
 
+/**
+    @brief Action codes for King-for-Four specific network messages.
+*/
 enum {
-    ACTION_CODE_KFF_PLAY_CARD = firstAvailableActionCode,
-    ACTION_CODE_KFF_DRAW_CARD,
-    ACTION_CODE_KFF_SYNC_HAND,
-    ACTION_CODE_KFF_SET_PLAYER_COUNT,
+    ACTION_CODE_KFF_PLAY_CARD = firstAvailableActionCode, ///< Play a card from hand
+    ACTION_CODE_KFF_DRAW_CARD,                            ///< Draw a card from the deck
+    ACTION_CODE_KFF_SYNC_HAND,                            ///< Synchronize the player's hand
+    ACTION_CODE_KFF_SET_PLAYER_COUNT,                     ///< Set the number of players (host only)
 };
 
 #pragma pack(push, 1)
+/**
+    @brief Payload for synchronizing game state from server to client.
+*/
 typedef struct {
     int currentPlayer;
     int activeColor;
@@ -39,8 +45,18 @@ typedef struct {
     int requestedPlayers;
 } GameSyncPayload;
 
+/**
+    @brief Payload for a player playing a card.
+*/
 typedef struct {
-    int cardIndex;
+/**
+    @brief Sends a game-specific action message to the server.
+
+    @param[in] action The action code.
+    @param[in] data   Pointer to the payload data.
+    @param[in] len    Length of the payload data.
+*/
+int cardIndex;
     int chosenColor; 
 } ActionPlayPayload_St;
 #pragma pack(pop)
@@ -75,6 +91,9 @@ static void send_toServer(u8 action, void* data, u16 len) {
     send(networkSocket, buffer, sizeof(h) + sizeof(tlv) + len, 0);
 }
 
+/**
+    @brief Initializes the client-side game state and assets.
+*/
 void kingClientInit(void) {
     if (!assets_loaded) {
         assets = kingForFour_loadAssets();
@@ -93,6 +112,14 @@ void kingClientInit(void) {
 
 static int selectedPlayers = 4;
 
+/**
+    @brief Callback for handling data received from the server.
+
+    @param[in] player_id ID of the sender (server is usually 0 or special).
+    @param[in] action    The action code of the message.
+    @param[in] data      Pointer to the received data.
+    @param[in] len       Length of the received data.
+*/
 void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
@@ -109,9 +136,9 @@ void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
             log_info("[KING] Mon ID interne: %d", myInternalId);
         }
     } else if (action == ACTION_CODE_SYNC_GAME) {
-        if (len >= (u16) sizeof(GameSyncPayload)) {
-            GameSyncPayload sync;
-            memcpy(&sync, data, sizeof(GameSyncPayload));
+        if (len >= (u16) sizeof(GameSyncPayload_St)) {
+            GameSyncPayload_St sync;
+            memcpy(&sync, data, sizeof(GameSyncPayload_St));
 
             selectedPlayers = sync.requestedPlayers;
 
@@ -159,6 +186,11 @@ void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
     }
 }
 
+/**
+    @brief Updates the client-side game logic and handles user input.
+
+    @param[in] dt Delta time since the last frame.
+*/
 void kingClient_update(float dt) {
     if (!assets_loaded) return;
     if (myInternalId == -1) {
@@ -231,6 +263,9 @@ void kingClient_update(float dt) {
     // removed local ESC handler to use lobby pause menu instead
 }
 
+/**
+    @brief Renders the game screen for the client.
+*/
 void kingClient_draw(void) {
     if (!assets_loaded) return;
     if (gameStatus == 0) {

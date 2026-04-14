@@ -1,3 +1,10 @@
+/**
+    @file paramsMenu.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief paramsMenu.c implementation/header file
+*/
 #include "paramsMenu.h"
 
 

@@ -1,14 +1,10 @@
 /**
-    @file utils/common.h
-    @author Multi Mini-Games Team
-    @date February 2026
+    @file common.h
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
     @brief Common includes and type definitions for the Suika mini-game.
-
-    This header brings in all standard library, Raylib, and project-wide
-    dependencies needed by Suika source files. Include this at the top
-    of any Suika .c file.
 */
-
 #ifndef SUIKA_UTILS_COMMON_H
 #define SUIKA_UTILS_COMMON_H
 
@@ -22,6 +18,9 @@
 
 #include "raylib.h"
 
+/**
+    @brief Alias for Raylib's Vector2 using project naming conventions.
+*/
 typedef Vector2 f32Vector2;
 #define f32Vector2_def
 

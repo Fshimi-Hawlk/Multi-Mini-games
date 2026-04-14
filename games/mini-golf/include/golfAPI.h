@@ -1,18 +1,10 @@
 /**
     @file golfAPI.h
-    @author sgit_v7
+    @author Maxime CHAUVEAU
     @date 2026-04-01
+    @date 2026-04-14
     @brief Public API for the Golf 3D mini-game.
-
-    Defines the opaque game handle and the minimal lifecycle functions
-    required to integrate Golf 3D into the lobby.
-
-    @note The internal structure `GolfGame_St` is opaque outside this module.
-          Direct field access from the lobby or other modules is forbidden.
-
-    @see generalAPI.h for the required `BaseGame_St` base structure and `Error_Et` codes
 */
-
 #ifndef GOLF_API_H
 #define GOLF_API_H
 
@@ -81,3 +73,4 @@ Error_Et golf_gameLoop(GolfGame_St* const game);
 Error_Et golf_freeGame(GolfGame_St** game);
 
 #endif /* GOLF_API_H */
+

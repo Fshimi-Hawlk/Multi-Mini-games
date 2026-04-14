@@ -1,3 +1,10 @@
+/**
+    @file ambiance.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief ambiance.c implementation/header file
+*/
 #include "utils/globals.h"
 
 #include "ui/ambiance.h"

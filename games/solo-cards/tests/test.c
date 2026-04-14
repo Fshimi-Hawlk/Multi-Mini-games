@@ -1,3 +1,10 @@
+/**
+    @file test.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief test.c implementation/header file
+*/
 #include "core/board.h"
 #include "core/shape.h"
 #include <assert.h>

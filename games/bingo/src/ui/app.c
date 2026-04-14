@@ -1,26 +1,21 @@
 /**
-    @file app.c (ui)
-    @author Fshimi-Hawlk
+    @file app.c
+    @author Kimi BERGE
     @date 2026-03-02
-    @date 2026-03-19
-    @brief One clear sentence that tells what this file is actually for.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Provided documentation start-up
-
-    If the file needs more context than fits in @brief, write 2-5 lines here.
-    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
-
-    // Try to align the `for` for better readability
-    // Try to keep the same order of the includes
-    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+    @date 2026-04-14
+    @brief High-level UI drawing for the Bingo game.
 */
-
 #include "ui/app.h"
 #include "utils/globals.h"
 #include "utils/userTypes.h"
 
+/**
+    @brief Draws the top-level UI elements (timer and called ball text).
+
+    @param[in]     layout       The current game layout.
+    @param[in]     balls        The ball system state.
+    @param[in]     currentCall  The current call state.
+*/
 void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const balls, const CallState_St* const currentCall) {
     // Timer during grace
     if (balls->showDelay <= currentCall->timer && currentCall->timer <= (balls->showDelay + balls->graceDelay)) {

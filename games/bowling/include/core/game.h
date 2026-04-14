@@ -2,17 +2,9 @@
     @file game.h
     @author Maxime CHAUVEAU
     @date 2026-02-25
+    @date 2026-04-14
     @brief Public API for the Bowling mini-game.
-
-    Defines the opaque game handle and the minimal lifecycle functions
-    required to integrate Bowling into the lobby.
-
-    @note The internal structure `BowlingGame_St` is **opaque** outside this module.
-          Direct field access from the lobby or other modules is forbidden.
-
-    @see generalAPI.h for the required `Game_St` base structure and `Error_Et` codes
 */
-
 #ifndef BOWLING_GAME_H
 #define BOWLING_GAME_H
 

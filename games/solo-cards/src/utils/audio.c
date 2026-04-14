@@ -1,10 +1,10 @@
 /**
- * @file audio.c
- * @brief Solitaire audio functions
- * @author Maxime CHAUVEAU
- * @date February 2026
- */
-
+    @file audio.c
+    @author Maxime CHAUVEAU
+    @date February 2026
+    @date 2026-04-14
+    @brief Solitaire audio functions
+*/
 #include "utils/audio.h"
 #include "assetPath.h"
 #include <stdio.h>

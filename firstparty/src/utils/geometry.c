@@ -1,17 +1,10 @@
 /**
-    @file firstparty/src/geometry/geometry.c
-    @author Fshimi-Hawlk
+    @file geometry.c
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Implementation of rectangle anchoring and anchored text drawing.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Extracted from utils.c/utils.h
-
-    @see geometry.h
 */
-
 #include "sharedUtils/geometry.h"
 #include "sharedUtils/debug.h"
 

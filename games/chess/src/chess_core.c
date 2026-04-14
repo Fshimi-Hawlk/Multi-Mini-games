@@ -1,14 +1,10 @@
 /**
- * @file main.c
- * @author Maxime CHAUVEAU
- * @brief Main entry point for the Echecs (Chess) game.
- * @version 1.0
- * @date 2024
- *
- * This file contains the main function which initializes the game
- * and starts the game loop.
- */
-
+    @file chess_core.c
+    @author Léandre BAUDET
+    @date 2024-01-01
+    @date 2026-04-14
+    @brief Main entry point for the Chess game.
+*/
 #include "types.h"
 #include "game.h"
 
@@ -17,11 +13,11 @@
 #endif
 
 /**
- * @brief Main entry point for the chess game.
- * @param argc Argument count
- * @param argv Argument vector
- * @return 0 on successful exit
- */
+    @brief Main entry point for the chess game.
+    @param[in] argc Argument count
+    @param[in] argv Argument vector
+    @return int 0 on successful exit, error code otherwise
+*/
 int main(int argc, char* argv[]) {
     int returnCode;
 

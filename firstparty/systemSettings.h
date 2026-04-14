@@ -1,21 +1,10 @@
 /**
     @file systemSettings.h
-    @author Maxime-CHAUVEAU
-    @author Fshimi-Hawlk
+    @author Multi Mini-Games Team
     @date 2026-02-23
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Settings structures for mini-games.
-
-    Provides video and audio settings options that can be passed
-    to game initialization functions. All fields have safe defaults
-    when zero-initialized.
-
-    Design principles:
-      - Settings is optional (NULL = use defaults)
-      - Sub-structures (video, audio) can be NULL individually
-      - Macros provide default values for convenience
 */
-
 #ifndef SYSTEM_SETTINGS_H
 #define SYSTEM_SETTINGS_H
 
@@ -121,8 +110,15 @@ typedef struct {
     .video = DEFAULT_VIDEO_SETTINGS \
 }
 
+/**
+    @brief Global variable systemSettings
+*/
 extern SystemSettings_St systemSettings;
 
+/**
+    @brief Description for applySystemSettings
+    @return Success/failure or the result of the function
+*/
 Error_Et applySystemSettings(void);
 
 #endif // SYSTEM_SETTINGS_H

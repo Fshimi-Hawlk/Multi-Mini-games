@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/textBox.h
-    @author Fshimi-Hawlk
+    @file textBox.h
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Single-line text input widget.
 */
-
 #ifndef WIDGETS_TEXT_BOX_H
 #define WIDGETS_TEXT_BOX_H
 

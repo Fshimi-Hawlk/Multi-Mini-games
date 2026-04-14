@@ -1,11 +1,10 @@
 /**
     @file globals.h
-    @author Fshimi-Hawlk
+    @author Kimi BERGE
     @date 2026-01-25
-    @date 2026-03-19
+    @date 2026-04-14
     @brief Central location for process-wide global variables and pre-loaded resources.
 */
-
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
@@ -22,6 +21,9 @@ extern Font bingo_fonts[__fontSizeCount];
 // Game's Globals
 // 
 
+/**
+    @brief Array of bingo column letters (B, I, N, G, O).
+*/
 extern const char* const LETTERS[5];
 
 #endif // UTILS_GLOBALS_H

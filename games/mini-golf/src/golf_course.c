@@ -1,9 +1,37 @@
+/**
+    @file golf_course.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Terrain generation and course layout for Golf 3D.
+*/
 #include "golf.h"
 
 /* ─── Bruit de Perlin 2D (simplifié, déterministe) ───────────────────────── */
+
+/**
+    @brief Fade function for Perlin noise (6t^5 - 15t^4 + 10t^3).
+    @param[in] t Input value.
+    @return Faded value.
+*/
 static float fade(float t) { return t*t*t*(t*(t*6.0f-15.0f)+10.0f); }
+
+/**
+    @brief Standard linear interpolation.
+    @param[in] a Start value.
+    @param[in] b End value.
+    @param[in] t Interpolation factor [0, 1].
+    @return Interpolated value.
+*/
 static float lerp_f(float a, float b, float t) { return a + t*(b-a); }
 
+/**
+    @brief 2D gradient function for Perlin noise.
+    @param[in] hash Hash value from permutation table.
+    @param[in] x    Relative X coordinate in cell.
+    @param[in] z    Relative Z coordinate in cell.
+    @return Gradient dot product.
+*/
 static float grad2(int hash, float x, float z) {
     int h = hash & 3;
     float u = (h < 2) ? x : z;
@@ -11,9 +39,13 @@ static float grad2(int hash, float x, float z) {
     return ((h&1) ? -u : u) + ((h&2) ? -v : v);
 }
 
-static unsigned char g_perm[512];
-static bool          g_perm_init = false;
+static unsigned char g_perm[512];      ///< Permutation table for noise.
+static bool          g_perm_init = false; ///< Initialization flag.
 
+/**
+    @brief Initializes the permutation table with a specific seed.
+    @param[in] seed Random seed.
+*/
 static void perm_init(unsigned int seed) {
     unsigned char p[256];
     int i;
@@ -29,6 +61,12 @@ static void perm_init(unsigned int seed) {
     g_perm_init = true;
 }
 
+/**
+    @brief Generates 2D Perlin noise at (x, z).
+    @param[in] x X coordinate.
+    @param[in] z Z coordinate.
+    @return Noise value in range [-1, 1].
+*/
 static float perlin2d(float x, float z) {
     int X = (int)floorf(x) & 255;
     int Z = (int)floorf(z) & 255;
@@ -42,6 +80,15 @@ static float perlin2d(float x, float z) {
         v);
 }
 
+/**
+    @brief Generates multi-octave fractal noise.
+    @param[in] x    X coordinate.
+    @param[in] z    Z coordinate.
+    @param[in] oct  Number of octaves.
+    @param[in] pers Persistence (amplitude multiplier).
+    @param[in] lac  Lacunarity (frequency multiplier).
+    @return Combined noise value.
+*/
 static float octave_noise(float x, float z, int oct, float pers, float lac) {
     float val = 0.0f, amp = 1.0f, freq = 1.0f, maxv = 0.0f;
     int i;
@@ -363,6 +410,13 @@ void Golf_DrawHoleCup(GolfGame *g) {
 }
 
 /* ─── Arbres ─────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Utility to darken a color by a factor.
+    @param[in] c Original color.
+    @param[in] f Factor [0, 1].
+    @return Darkened color.
+*/
 static Color col_darken(Color c, float f) {
     return (Color){
         (unsigned char)Clamp(c.r*f, 0, 255),
@@ -371,6 +425,13 @@ static Color col_darken(Color c, float f) {
         c.a
     };
 }
+
+/**
+    @brief Utility to lighten a color by adding an amount to RGB.
+    @param[in] c Original color.
+    @param[in] a Amount to add.
+    @return Lightened color.
+*/
 static Color col_lighten(Color c, float a) {
     return (Color){
         (unsigned char)Clamp(c.r + a*255, 0, 255),
@@ -380,6 +441,13 @@ static Color col_lighten(Color c, float a) {
     };
 }
 
+/**
+    @brief Renders a stylized tree at (x, z).
+    @param[in] x      World X coordinate.
+    @param[in] z      World Z coordinate.
+    @param[in] height Total height of the tree.
+    @param[in] leaf   Base color of the leaves.
+*/
 static void draw_tree(float x, float z, float height, Color leaf) {
     float th = height * 0.45f;
     float tr = height * 0.04f;
@@ -390,6 +458,14 @@ static void draw_tree(float x, float z, float height, Color leaf) {
     DrawSphere((Vector3){x-tr*2,    th+cr*0.15f, z+tr*1.5f }, cr*0.65f,  col_lighten(leaf, 0.05f));
 }
 
+/**
+    @brief Renders a group of trees around a center point.
+    @param[in] cx    Center X coordinate.
+    @param[in] cz    Center Z coordinate.
+    @param[in] seed  Random seed for variation.
+    @param[in] min_h Minimum tree height.
+    @param[in] max_h Maximum tree height.
+*/
 static void draw_grove(float cx, float cz, float seed, float min_h, float max_h) {
     static const float offX[5] = { 0.0f,  2.2f, -1.8f,  1.0f, -2.5f};
     static const float offZ[5] = { 0.0f,  1.5f,  2.4f, -2.0f, -1.2f};

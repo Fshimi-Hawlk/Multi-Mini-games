@@ -1,11 +1,10 @@
 /**
-    @file game.h (setups)
-    @author Fshimi Hawlk
+    @file game.h
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-07
+    @date 2026-04-14
     @brief Full game state initialization.
 */
-
 #ifndef SETUPS_GAME_H
 #define SETUPS_GAME_H
 
@@ -16,6 +15,11 @@
 */
 bool polyBlast_initBoard(Board_St* const board);
 
+/**
+    @brief Description for polyBlast_initPrefabManager
+    @param[in,out] manager The manager parameter
+    @return Success/failure or the result of the function
+*/
 bool polyBlast_initPrefabManager(PrefabManager_St* const manager);
 
 /**

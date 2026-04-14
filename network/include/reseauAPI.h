@@ -1,14 +1,10 @@
 /**
- * @file reseauAPI.h
- * @brief Interface d'abstraction pour l'API de réseau.
- * 
- * Permet au serveur de manipuler différents modules de jeu via 
- * une structure GameServerInterface_St générique.
- * 
- * @author i-Charlys
- * @date 2026-03-18
- */
-
+    @file reseauAPI.h
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Interface d'abstraction pour l'API de réseau.
+*/
 #ifndef RESEAU_API_H
 #define RESEAU_API_H
 

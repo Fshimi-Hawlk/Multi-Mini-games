@@ -1,10 +1,10 @@
 /**
-    @file board.h (ui)
-    @author Fshimi Hawlk
+    @file board.h
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Board rendering functions.
 */
-
 #ifndef UI_BOARD_H
 #define UI_BOARD_H
 
@@ -15,20 +15,20 @@
 
     Includes outline drawing.
 
-    @param pos The position vector for the block.
-    @param color The color of the block.
+    @param[in]     pos          The screen-space position vector for the block.
+    @param[in]     color        The color of the block.
 */
 void polyBlast_drawBlock(const f32Vector2 pos, const Color color);
 
 /**
-* @brief Renders the game board, including all blocks and empty tiles.
+    @brief Renders the game board, including all blocks and empty tiles.
 
     Iterates over the grid, choosing colors based on block state:
     - Empty (hitsLeft == 0): BOARD_EMPTY_TILE_COLOR
     - Removed (hitsLeft < 0): APP_BACKGROUND_COLOR (faded)
     - Active: From blockColors[], potentially brightness-adjusted by hitsLeft.
 
-    @param board The board structure to draw.
+    @param[in]     board        The board structure to draw.
 */
 void polyBlast_drawBoard(const Board_St board);
 

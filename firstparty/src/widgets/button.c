@@ -1,15 +1,10 @@
 /**
-    @file widgets/button.c
-    @author Fshimi-Hawlk
+    @file button.c
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Implementation of text and image button widgets.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Clean state machine for hover/active/click/disabled
-            - Consistent visual feedback
 */
-
 #include "sharedWidgets/button.h"
 
 // ─────────────────────────────────────────────────────────────────────────────

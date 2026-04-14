@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/checkBox.h
-    @author Fshimi-Hawlk
+    @file checkBox.h
+    @author Multi Mini-Games Team
     @date 2026-03-29
+    @date 2026-04-14
     @brief Checkbox widget for the reusable UI system.
 */
-
 #ifndef WIDGETS_CHECK_BOX_H
 #define WIDGETS_CHECK_BOX_H
 

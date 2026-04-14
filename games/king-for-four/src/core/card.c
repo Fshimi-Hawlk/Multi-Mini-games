@@ -1,14 +1,16 @@
 /**
- * @file card.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Implementation of card and deck management functions using O(1)/O(N) array operations.
- */
-
+    @file card.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Implementation of card and deck management functions using O(1)/O(N) array operations.
+*/
 #include "core/card.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+
+// --- Public Functions ---
 
 /**
  * @brief Adds a card to the "top" of the deck (end of the array).

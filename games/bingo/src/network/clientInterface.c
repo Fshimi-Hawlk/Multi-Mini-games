@@ -1,17 +1,10 @@
 /**
     @file clientInterface.c
-    @author Fshimi-Hawlk
+    @author Kimi BERGE
     @date 2026-03-31
-    @date 2026-03-31
+    @date 2026-04-14
     @brief Client-side network interface and local rendering/input for the Bingo mini-game.
-  
-    Contributors:
-        - Fshimi-Hawlk:
-            - Full network interface following project conventions
-            - Local rendering + input using bingo drawing functions
-            - Action sending + state synchronization via minimal payload
 */
-
 #include "core/game.h"
 
 #include "setups/app.h"
@@ -24,10 +17,10 @@
 
 #include "sharedUtils/random.h"
 
-// 
-// Action codes (must stay in sync with server)
-// 
-
+/**
+    @brief Action codes for network communication.
+           Must stay in sync with the server implementation.
+*/
 enum {
     ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
     ACTION_CODE_BINGO_DAUB_SQUARE,
@@ -47,8 +40,8 @@ typedef struct {
     @brief Payload for a daub attempt on the player’s 5×5 card.
 */
 typedef struct {
-    u8 row;
-    u8 col;
+    u8 row;         ///< Row index (0-4)
+    u8 col;         ///< Column index (0-4)
 } ActionDaubSquarePayload_St;
 #pragma pack(pop)
 
@@ -58,24 +51,28 @@ typedef struct {
 */
 #pragma pack(push, 1)
 typedef struct {
-    u32              remainingBalls;
-    CallState_St     currentCall;
-    GameScene_Et     scene;
-    u32              numPlayers;
-    u32              seed;
-    char             resultMessage[64];
-    PlayerCard_St    playerCards[MAX_PLAYER];
-    s32              playerNetworkIds[MAX_PLAYER];
+    u32              remainingBalls;        ///< Number of balls remaining in the hopper
+    CallState_St     currentCall;           ///< Current called number and column
+    GameScene_Et     scene;                 ///< Current game scene
+    u32              numPlayers;            ///< Number of connected players
+    u32              seed;                  ///< Random seed for card generation
+    char             resultMessage[64];     ///< Message to display at the end of the game
+    PlayerCard_St    playerCards[MAX_PLAYER]; ///< State of all players' cards
+    s32              playerNetworkIds[MAX_PLAYER]; ///< Network IDs of all players
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
-static BingoGame_St localGame;
-static bool         assetsLoaded = false;
-static f32          joinRetryTimer = 0.0f;
-static bool         cardsGenerated = false;
+static BingoGame_St localGame;              ///< Local game state
+static bool         assetsLoaded = false;   ///< Whether game-specific assets are loaded
+static f32          joinRetryTimer = 0.0f;  ///< Timer for retrying to join the game
+static bool         cardsGenerated = false; ///< Whether choice cards have been generated
 
 /**
     @brief Helper to send a game-specific action to the server.
+    @param[in]     action       The action code to send.
+    @param[in]     data         The payload data.
+    @param[in]     len          The length of the payload data.
+    @return                     void
 */
 static void sendToServer(u8 action, const void* data, u16 len) {
     GameTLVHeader_St tlv = {
@@ -102,6 +99,11 @@ static void sendToServer(u8 action, const void* data, u16 len) {
     send(networkSocket, buffer, offset, 0);
 }
 
+/**
+    @brief Initializes the Bingo client.
+    @param[in]     void
+    @return                     void
+*/
 void bingo_init(void) {
     if (!assetsLoaded) {
         bingo_initFonts();
@@ -129,6 +131,14 @@ void bingo_init(void) {
     log_info("Bingo client initialized");
 }
 
+/**
+    @brief Callback for when data is received from the server.
+    @param[in]     playerId     ID of the player who sent the data (or server).
+    @param[in]     action       The action code.
+    @param[in]     data         The payload data.
+    @param[in]     len          The length of the payload data.
+    @return                     void
+*/
 void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
@@ -227,7 +237,11 @@ void bingo_onData(s32 playerId, u8 action, const void* data, u16 len) {
     }
 }
 
-// Initialize the ball system for solo play (no server)
+/**
+    @brief Initializes the ball system for solo play (no server).
+    @param[in]     void
+    @return                     void
+*/
 static void bingo_initBallsSolo(void) {
     uint b = 0;
     for (uint n = 0; n < 100; ++n)
@@ -240,6 +254,11 @@ static void bingo_initBallsSolo(void) {
     localGame.balls.graceDelay     = 1.0f;
 }
 
+/**
+    @brief Updates the Bingo client state.
+    @param[in]     dt           Delta time since last frame.
+    @return                     void
+*/
 void bingo_update(f32 dt) {
     // Solo mode (no server): give ourselves a local ID and init balls
     if (localGame.clientID == -1 && networkSocket < 0) {
@@ -365,6 +384,11 @@ void bingo_update(f32 dt) {
     }
 }
 
+/**
+    @brief Draws the Bingo client UI.
+    @param[in]     void
+    @return                     void
+*/
 void bingo_draw(void) {
     if (!assetsLoaded) return;
 
@@ -409,6 +433,9 @@ void bingo_draw(void) {
     }
 }
 
+/**
+    @brief Client interface definition for the Bingo mini-game.
+*/
 GameClientInterface_St bingoClientInterface = {
     .id      = MINI_GAME_ID_BINGO,
     .name    = "Bingo",

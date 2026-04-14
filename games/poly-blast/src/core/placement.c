@@ -1,3 +1,10 @@
+/**
+    @file placement.c
+    @author Kimi BERGE
+    @date 2026-01-07
+    @date 2026-04-14
+    @brief Shape placement and simulation logic implementation.
+*/
 #include "core/placement.h"
 #include "core/prefab.h"
 #include "core/shape.h"
@@ -9,6 +16,14 @@
 #include "sharedUtils/random.h"
 #include "sharedUtils/container.h"
 
+/**
+    @brief Checks if a shape can be placed at a specific board position.
+
+    @param[in]     shape        Pointer to the shape.
+    @param[in]     pos          Board position.
+    @param[in]     board        Pointer to the board.
+    @return                     true if placeable, false otherwise.
+*/
 bool polyBlast_isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos, const Board_St* const board) {
     bool canBePlaced = polyBlast_isPrefabInBoundAt(shape->prefab, pos, board);
     // log_debug("is prefab in bound at (" vec2siStr "): %s",vec2Fmt(pos), boolStr(canBePlaced));
@@ -26,6 +41,13 @@ bool polyBlast_isShapePlaceable(const Shape_St *const shape, const s8Vector2 pos
     return canBePlaced;
 }
 
+/**
+    @brief Places a shape onto the board at the given position.
+
+    @param[in]     shape        Pointer to the shape.
+    @param[in]     pos          Target board coordinates.
+    @param[in,out] board        Pointer to the board.
+*/
 void polyBlast_placeShape(const Shape_St* const shape, const u8Vector2 pos, Board_St* const board) {
     for (u8 j = 0; j < shape->prefab->blockCount; ++j) {
         u8Vector2 blockPos = {
@@ -40,6 +62,14 @@ void polyBlast_placeShape(const Shape_St* const shape, const u8Vector2 pos, Boar
     polyBlast_updateBoardClearing(board);
 }
 
+/**
+    @brief Gets a random valid position for a shape on the board.
+
+    @param[in]     board        Pointer to the board.
+    @param[in]     shape        Pointer to the shape.
+    @param[out]    outPosition  The selected valid position.
+    @return                     true if a position was found, false otherwise.
+*/
 bool polyBlast_getRandomValidPosition(const Board_St* const board, const Shape_St* const shape, u8Vector2* const outPosition) {
     bool success = false;
 
@@ -60,6 +90,14 @@ bool polyBlast_getRandomValidPosition(const Board_St* const board, const Shape_S
     return success;
 }
 
+/**
+    @brief Attempts to place a shape greedily on the board.
+
+    @param[in,out] board        Pointer to the board.
+    @param[in]     shape        Pointer to the shape.
+    @param[in,out] scoring      Optional scoring state to update.
+    @return                     true if successfully placed, false otherwise.
+*/
 static bool tryGreedyPlaceShape(Board_St* const board, const Shape_St* const shape, ScoringState_St* const scoring) {
     u8Vector2 pos;
     if (!polyBlast_getRandomValidPosition(board, shape, &pos)) return false;
@@ -78,27 +116,13 @@ static bool tryGreedyPlaceShape(Board_St* const board, const Shape_St* const sha
 }
 
 /**
-    @brief Attempts to place the three slots onto a board copy in the exact
-           order defined by `order` in a iterative way.
-
-    For each slot:
-      - Scans `emptyCells` (in the order it was passed) for the first position
-        where `isShapePlaceable` succeeds.
-      - Places the shape, immediately runs `checkBoardForClearing` + `clearBoard`.
-      - If `scoring` is non-NULL, calls `manageScoreAndStreak` after each placement.
-
-    Stops at the first shape that cannot be placed anywhere.
+    @brief Attempts to place the three slots onto a board copy greedily.
 
     @param[in,out] board        Board copy mutated by placements and clears.
-    @param[in]     emptyCells   List of candidate anchor positions.
-    @param[in]     slots        The three active prefabs to place.
+    @param[in]     slots        The three active prefab slots.
     @param[in]     order        Permutation of {0,1,2} defining placement order.
-    @param[in,out] scoring      Optional scoring state updated after each
-                                successful placement and clear. Pass `NULL`
-                                when only feasibility matters.
-
-    @return     `true` if all three shapes were placed,
-                `false` otherwise.
+    @param[in,out] scoring      Optional scoring state updated after each placement.
+    @return                     true if all three shapes were placed, false otherwise.
 */
 static bool greedyPlaceAll(Board_St* const board, const ShapeSlots_t slots, const u8 order[3], ScoringState_St* const scoring) {
     for (u8 i = 0; i < 3; ++i) {
@@ -110,6 +134,15 @@ static bool greedyPlaceAll(Board_St* const board, const ShapeSlots_t slots, cons
     return true;
 }
 
+/**
+    @brief Recursively checks if all shapes in slots can be placed in a specific order.
+
+    @param[in,out] board        Pointer to the board (simulated state).
+    @param[in]     slots        The three active prefab slots.
+    @param[in]     order        Array of indices representing placement order.
+    @param[in]     idx          Current index in the order array.
+    @return                     true if all remaining shapes can be placed, false otherwise.
+*/
 bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 order[3], u8 idx) {
     if (idx == 3) return true;
 
@@ -131,6 +164,11 @@ bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 o
     return false;
 }
 
+/**
+    @brief Runs a brute-force simulation to pick the "best" set of three prefabs.
+
+    @param[in,out] game         Pointer to the current game state.
+*/
 void polyBlast_placementSimulation(GameState_St* const game) {
     f32 bestAttemptScore = 0;
     const Prefab_St* selectedPrefabs[3] = {0};
@@ -198,7 +236,13 @@ void polyBlast_placementSimulation(GameState_St* const game) {
     }
 }
 
+/**
+    @brief Releases a shape at a specific board position.
 
+    @param[in,out] shape        Pointer to the shape.
+    @param[in]     pos          Target board position.
+    @param[in,out] board        Pointer to the board.
+*/
 void polyBlast_releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *const board) {
     shape->dragging = false;
     polyBlast_dragging = false;
@@ -212,6 +256,12 @@ void polyBlast_releaseShapeAt(Shape_St *const shape, s8Vector2 pos, Board_St *co
     }
 }
 
+/**
+    @brief Releases a dragged shape, attempting to place it.
+
+    @param[in,out] shape        Pointer to the shape.
+    @param[in,out] board        Pointer to the board.
+*/
 void polyBlast_releaseShape(Shape_St* const shape, Board_St* const board) {
     polyBlast_releaseShapeAt(shape, polyBlast_mapShapeToBoardPos(shape, board), board);
 }

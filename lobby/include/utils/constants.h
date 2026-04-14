@@ -1,3 +1,10 @@
+/**
+    @file constants.h
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief constants.h implementation/header file
+*/
 #ifndef CONSTANT_H
 #define CONSTANT_H
 

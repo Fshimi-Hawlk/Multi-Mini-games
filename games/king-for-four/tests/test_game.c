@@ -1,10 +1,10 @@
 /**
- * @file test_game.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Unit tests and debug utilities for the King-for-Four game logic.
- */
-
+    @file test_game.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Unit tests and debug utilities for the King-for-Four game logic.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>

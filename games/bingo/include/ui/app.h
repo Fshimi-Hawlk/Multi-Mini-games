@@ -1,27 +1,21 @@
 /**
-    @file core/game.h
-    @author Fshimi-Hawlk
+    @file app.h
+    @author Kimi BERGE
     @date 2026-03-03
-    @date 2026-03-19
-    @brief One clear sentence that tells what this file is actually for.
-
-    If the file needs more context than fits in @brief, write 2-5 lines here.
-    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
-
-    // Try to align the `for` for better readability
-    // Try to keep the same order of the includes
-    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+    @date 2026-04-14
+    @brief Drawing functions for the game's UI and information panels.
 */
-
 #ifndef UI_APP_H
 #define UI_APP_H
 
 #include "utils/userTypes.h"
 
 /**
-    @brief Draws all UI elements.
+    @brief Draws the game's main UI elements, including ball status and current call.
 
-    TODO
+    @param[in]     layout       Visual/layout positions for UI elements.
+    @param[in]     balls        Ball pool state (remaining counts, etc.).
+    @param[in]     currentCall  Current active call information to display.
 */
 void bingo_drawUI(const Layout_St* const layout, const BallSystem_St* const balls, const CallState_St* const currentCall);
 

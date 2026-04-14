@@ -1,10 +1,10 @@
 /**
     @file shape.c
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Implementation of shape handling and manipulation.
 */
-
 #include "core/game.h"
 #include "core/board.h"
 #include "core/shape.h"
@@ -37,6 +37,10 @@ bool polyBlast_isShapeInBound(const Shape_St* const shape, const Board_St* const
     s8Vector2 shapeBoardPos = polyBlast_mapShapeToBoardPos(shape, board);
 
     return polyBlast_isPrefabInBoundAt(shape->prefab, shapeBoardPos, board);
+}
+
+f32Vector2 polyBlast_getShapeCenter(const Shape_St shape) {
+    return shape.center;
 }
 
 /**

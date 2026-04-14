@@ -1,3 +1,10 @@
+/**
+    @file logger.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief logger.c implementation/header file
+*/
 #include "logger.h"
 
 static FILE *logFile = NULL;  ///< Internal log file handle.

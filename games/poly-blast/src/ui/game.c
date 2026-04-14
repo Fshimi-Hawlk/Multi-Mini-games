@@ -1,11 +1,10 @@
 /**
-    @file game.c (ui)
-    @author Fshimi Hawlk
+    @file game.c
+    @author Kimi BERGE
     @date 2026-01-07
-    @date 2026-04-09
+    @date 2026-04-14
     @brief Main UI dispatch.
 */
-
 #include "ui/game.h"
 #include "ui/board.h"
 #include "ui/shape.h"

@@ -1,16 +1,10 @@
 /**
-    @file firstparty/utils/geometry.h
-    @author Fshimi-Hawlk
+    @file geometry.h
+    @author Multi Mini-Games Team
     @date 2026-04-03
-    @date 2026-04-03
+    @date 2026-04-14
     @brief Rectangle anchoring, creation helpers and high-level drawing utilities.
-
-    Provides consistent ways to position rectangles and text using anchor points
-    (useful for UI, HUD, menus, tooltips, etc.).
-
-    @see geometry.c for implementation of drawing functions
 */
-
 #ifndef FIRSTPARTY_UTILS_GEOMETRY_H
 #define FIRSTPARTY_UTILS_GEOMETRY_H
 
@@ -63,6 +57,12 @@ typedef enum {
     .height = (rect).height * scalor,        \
 }
 
+/**
+    @brief Description for getAnchoredRect
+    @param[in,out] rect The rect parameter
+    @param[in,out] anchor The anchor parameter
+    @return Success/failure or the result of the function
+*/
 Rectangle getAnchoredRect(Rectangle rect, Anchor_Et anchor);
 
 /**

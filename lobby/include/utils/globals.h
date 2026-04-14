@@ -1,23 +1,10 @@
 /**
-    @file utils/globals.h
-    @author Fshimi-Hawlk
+    @file globals.h
+    @author Léandre BAUDET
     @date 2026-01-07
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Central location for process-wide global variables and pre-loaded resources.
-
-    This header declares variables that are:
-        - initialized once during program startup (usually in main() or init function)
-        - read (and sometimes modified) from many different parts of the codebase
-        - representing fundamental state or resources shared across systems
-
-    Guidelines for usage:
-        - Prefer passing context structs (LobbyGame_St, etc.) through function parameters
-          whenever reasonable - reduce usage of these globals over time.
-        - Only declare truly global / singleton-like items here.
-        - Initialization order and thread-safety (currently single-threaded) must be
-          carefully managed in the startup sequence.
 */
-
 #ifndef UTILS_GLOBALS_H
 #define UTILS_GLOBALS_H
 
@@ -49,6 +36,9 @@ extern TerrainVec_St terrains; ///< List of terrains in the lobby.
 
 extern Texture2D terrainTextures[__terrainKindCount]; ///< Platform texture atlas entries.
 
+/**
+    @brief Global variable gameZones[__miniGameIdCount]
+*/
 extern GameInteractionZone_St gameZones[__miniGameIdCount];
 
 // ────────────────────────────────────────────────
@@ -81,6 +71,9 @@ extern ParamsMenu_St paramsMenu;
 // ────────────────────────────────────────────────
 
 extern Texture2D treeTexture;
+/**
+    @brief Global variable backgroundTexture
+*/
 extern Texture2D backgroundTexture;
 
 // ────────────────────────────────────────────────
@@ -88,6 +81,9 @@ extern Texture2D backgroundTexture;
 // ────────────────────────────────────────────────
 
 extern GrassBlade_St grassBlades[MAX_GRASS_BLADES];
+/**
+    @brief Global variable grassCount
+*/
 extern int grassCount;
 
 extern const Vector2 moonLightDir; ///< Shared moonlight direction vector (normalized). Used for shadows/glow.
@@ -97,8 +93,17 @@ extern const Vector2 moonLightDir; ///< Shared moonlight direction vector (norma
 // ────────────────────────────────────────────────
 
 extern Sound sound_jump;
+/**
+    @brief Global variable sound_doubleJump
+*/
 extern Sound sound_doubleJump;
+/**
+    @brief Global variable sound_gameLaunch
+*/
 extern Sound sound_gameLaunch;
+/**
+    @brief Global variable sound_doubleJumpMeme
+*/
 extern Sound sound_doubleJumpMeme;
 
 // ────────────────────────────────────────────────

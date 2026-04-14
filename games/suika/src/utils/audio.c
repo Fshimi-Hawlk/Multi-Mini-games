@@ -1,3 +1,10 @@
+/**
+    @file audio.c
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
+    @brief Audio management implementation for the Suika game.
+*/
 #include "utils/audio.h"
 #include "assetPath.h"
 #include "logger.h"
@@ -9,6 +16,13 @@ static char g_suikaSoundsPath[512] = {0};
 Sound sound_drop;
 Sound sound_merge;
 
+/**
+    @brief Get the path to Suika game sound assets.
+
+    Iterates through candidate paths to find where suika_drop.wav is located.
+
+    @return Pointer to the static path string
+*/
 static const char* suika_getSoundsPath(void) {
     if (g_suikaSoundsPath[0] != '\0') return g_suikaSoundsPath;
     static const char* candidates[] = {
@@ -22,6 +36,13 @@ static const char* suika_getSoundsPath(void) {
     return g_suikaSoundsPath;
 }
 
+/**
+    @brief Initialize audio resources for the Suika game.
+
+    Loads all required sound files from disk.
+
+    @return void
+*/
 void suika_initAudio(void) {
     if (audioInitialized) return;
 
@@ -33,6 +54,13 @@ void suika_initAudio(void) {
     log_info("Suika audio initialized (path: %s)", sp);
 }
 
+/**
+    @brief Free all audio resources used by the Suika game.
+
+    Unloads sounds and resets audio state.
+
+    @return void
+*/
 void suika_freeAudio(void) {
     if (!audioInitialized) return;
 

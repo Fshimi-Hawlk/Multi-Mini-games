@@ -1,10 +1,10 @@
 /**
     @file serverInterface.c
-    @author Fshimi-Hawlk
+    @author Kimi BERGE
     @date 2026-03-31
+    @date 2026-04-14
     @brief Server-side authoritative logic for the Bingo mini-game.
 */
-
 #include "core/game.h"
 
 #include "setups/game.h"
@@ -13,10 +13,10 @@
 
 #include "sharedUtils/random.h"
 
-// ────────────────────────────────────────────────
-// Action codes
-// ────────────────────────────────────────────────
-
+/**
+    @brief Action codes for network communication.
+           Must stay in sync with the client implementation.
+*/
 enum {
     ACTION_CODE_BINGO_CHOOSE_CARD = firstAvailableActionCode,
     ACTION_CODE_BINGO_DAUB_SQUARE,
@@ -25,13 +25,19 @@ enum {
 };
 
 #pragma pack(push, 1)
+/**
+    @brief Payload sent when client selects one of the 12 preview cards.
+*/
 typedef struct {
-    u8 cardIndex;   ///< 0..11
+    u8 cardIndex;   ///< 0..11 – index into layout.choiceCards
 } ActionChooseCardPayload_St;
 
+/**
+    @brief Payload for a daub attempt on the player’s 5×5 card.
+*/
 typedef struct {
-    u8 row;
-    u8 col;
+    u8 row;         ///< Row index (0-4)
+    u8 col;         ///< Column index (0-4)
 } ActionDaubSquarePayload_St;
 #pragma pack(pop)
 
@@ -40,25 +46,25 @@ typedef struct {
 */
 #pragma pack(push, 1)
 typedef struct {
-    u32              remainingBalls;
-    CallState_St     currentCall;
-    GameScene_Et     scene;
-    u32              numPlayers;
-    u32              seed;
-    char             resultMessage[64];
-    PlayerCard_St    playerCards[MAX_PLAYER];
-    s32              playerNetworkIds[MAX_PLAYER];
+    u32              remainingBalls;        ///< Number of balls remaining in the hopper
+    CallState_St     currentCall;           ///< Current called number and column
+    GameScene_Et     scene;                 ///< Current game scene
+    u32              numPlayers;            ///< Number of connected players
+    u32              seed;                  ///< Random seed for card generation
+    char             resultMessage[64];     ///< Message to display at the end of the game
+    PlayerCard_St    playerCards[MAX_PLAYER]; ///< State of all players' cards
+    s32              playerNetworkIds[MAX_PLAYER]; ///< Network IDs of all players
 } BingoSyncPayload_St;
 #pragma pack(pop)
 
 /**
-    @brief Game status for Bingo.
+    @brief Internal server-side game status for Bingo.
 */
 typedef enum {
-    BINGO_STATUS_WAITING_CARD_CHOICE,
-    BINGO_STATUS_LAUNCHING,
-    BINGO_STATUS_PLAYING,
-    BINGO_STATUS_ENDED
+    BINGO_STATUS_WAITING_CARD_CHOICE,        ///< Waiting for players to choose their cards
+    BINGO_STATUS_LAUNCHING,                 ///< Game is starting (countdown)
+    BINGO_STATUS_PLAYING,                   ///< Game is currently in progress
+    BINGO_STATUS_ENDED                      ///< Game has ended
 } BingoStatus_Et;
 
 /**
@@ -74,6 +80,12 @@ typedef struct {
     u32                 seed;                       ///< Common seed for card generation
 } BingoServerState_St;
 
+/**
+    @brief Helper to find the slot index corresponding to a network player_id.
+    @param[in]     srv          Pointer to the server state.
+    @param[in]     player_id    The network player ID to search for.
+    @return                     The slot index, or -1 if not found.
+*/
 // ────────────────────────────────────────────────
 // Helper to find slot from playerId
 // ────────────────────────────────────────────────
@@ -85,10 +97,11 @@ static s32 bingo_getSlot(BingoServerState_St* srv, s32 playerId) {
     return -1;
 }
 
-// ────────────────────────────────────────────────
-// Instance Management
-// ────────────────────────────────────────────────
-
+/**
+    @brief Creates a new server-side instance of the Bingo game.
+    @param[in]     void
+    @return                     Pointer to the new instance state.
+*/
 void* bingo_createInstance(void) {
     BingoServerState_St* srv = calloc(1, sizeof(BingoServerState_St));
     if (srv == NULL) return NULL;
@@ -131,6 +144,13 @@ void* bingo_createInstance(void) {
     return srv;
 }
 
+/**
+    @brief Broadcasts the current game state to all connected clients.
+    @param[in]     srv          Pointer to the server state.
+    @param[in]     room_id      The room ID to broadcast to.
+    @param[in]     broadcast    The broadcast function pointer.
+    @return                     void
+*/
 static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 roomId, BroadcastMessage_Ft broadcast) {
     if (!broadcast) return;
 
@@ -163,6 +183,17 @@ static void bingo_serverBroadcastSync(BingoServerState_St* srv, s32 roomId, Broa
     broadcast(roomId, -1, ACTION_CODE_GAME_DATA, buf, (u16)(sizeof(tlv) + sizeof(payload)));
 }
 
+/**
+    @brief Callback for when a client performs an action.
+    @param[in,out] state        Pointer to the instance state.
+    @param[in]     room_id      The room ID.
+    @param[in]     player_id    The network player ID.
+    @param[in]     action       The action code.
+    @param[in]     payload      The payload data.
+    @param[in]     len          The length of the payload data.
+    @param[in]     broadcast    The broadcast function pointer.
+    @return                     void
+*/
 void bingo_onAction(void* state, s32 roomId, s32 playerId, u8 action, const void* payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA || len < sizeof(GameTLVHeader_St)) return;
 
@@ -255,6 +286,11 @@ void bingo_onAction(void* state, s32 roomId, s32 playerId, u8 action, const void
     bingo_serverBroadcastSync(srv, roomId, broadcast);
 }
 
+/**
+    @brief Updates the server-side game state on each tick.
+    @param[in,out] state        Pointer to the instance state.
+    @return                     void
+*/
 void bingo_onTick(void* state) {
     BingoServerState_St* srv = (BingoServerState_St*)state;
     if (!srv->serverBroadcastCallback) return;
@@ -304,6 +340,12 @@ void bingo_onTick(void* state) {
     bingo_serverBroadcastSync(srv, game->roomId, srv->serverBroadcastCallback);
 }
 
+/**
+    @brief Callback for when a player leaves the room.
+    @param[in,out] state        Pointer to the instance state.
+    @param[in]     player_id    The network player ID who left.
+    @return                     void
+*/
 void bingo_onPlayerLeave(void* state, s32 playerId) {
     BingoServerState_St* srv = (BingoServerState_St*)state;
     s32 slot = bingo_getSlot(srv, playerId);
@@ -317,10 +359,18 @@ void bingo_onPlayerLeave(void* state, s32 playerId) {
     log_info("Player %d left (slot %d vacated)", playerId, slot);
 }
 
+/**
+    @brief Destroys a server-side instance of the Bingo game.
+    @param[in]     state        Pointer to the instance state.
+    @return                     void
+*/
 void bingo_destroyInstance(void* state) {
     if (state) free(state);
 }
 
+/**
+    @brief Server interface definition for the Bingo mini-game.
+*/
 GameServerInterface_St bingoServerInterface = {
     .gameName        = "Bingo",
     .createInstance  = bingo_createInstance,

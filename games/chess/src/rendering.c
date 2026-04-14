@@ -1,21 +1,17 @@
 /**
- * @file rendering.c
- * @author Maxime CHAUVEAU
- * @brief Rendering functions for Echecs.
- * @version 1.0
- * @date 2024
- *
- * This file contains all the rendering functions for drawing
- * the game board, pieces, and UI elements.
- */
-
+    @file rendering.c
+    @author Léandre BAUDET
+    @date 2024-01-01
+    @date 2026-04-14
+    @brief Rendering functions for chess.
+*/
 #include "rendering.h"
 #include "global.h"
 #include "algo.h"
 
 /**
- * @brief Draw all pieces on the board.
- */
+    @brief Draw all pieces on the board.
+*/
 void drawPieces(void) {
     for (int i = 0; i < PIECES_PER_PLAYER; i++) {
         drawPiece(blackPlayer->pieces[i]);
@@ -24,9 +20,9 @@ void drawPieces(void) {
 }
 
 /**
- * @brief Draw a single piece.
- * @param piece The piece to draw
- */
+    @brief Draw a single piece.
+    @param[in] piece  The piece to draw
+*/
 void drawPiece(Piece_st* piece) {
     if (!piece->isTaken) {
         Texture2D pieceTexture = (piece->color == COLOR_PIECE_BLACK ? black_piece_textures : white_piece_textures)[piece->name];
@@ -51,11 +47,11 @@ void drawPiece(Piece_st* piece) {
 }
 
 /**
- * @brief Draw a single cell.
- * @param x The x coordinate of the cell
- * @param y The y coordinate of the cell
- * @param c The color to fill the cell with
- */
+    @brief Draw a single cell.
+    @param[in] x  The x coordinate of the cell
+    @param[in] y  The y coordinate of the cell
+    @param[in] c  The color to fill the cell with
+*/
 void drawCell(int x, int y, Color c) {
     int posX = BOARD_OFFSET + x * CELL_PX_SIZE;
     int posY = BOARD_OFFSET + y * CELL_PX_SIZE;
@@ -64,8 +60,8 @@ void drawCell(int x, int y, Color c) {
 }
 
 /**
- * @brief Draw the checkerboard pattern.
- */
+    @brief Draw the checkerboard pattern.
+*/
 void drawCheckerboard(void) {
     for (int i = 0; i < BOARD_SIZE; i++)
         for (int j = 0; j < BOARD_SIZE; j++)
@@ -73,8 +69,8 @@ void drawCheckerboard(void) {
 }
 
 /**
- * @brief Draw the board border with coordinates.
- */
+    @brief Draw the board border with coordinates.
+*/
 void drawBorder(void) {
     Font font = GetFontDefault();
     int thickness = 3;
@@ -136,9 +132,9 @@ void drawBorder(void) {
 }
 
 /**
- * @brief Draw possible move positions for selected piece.
- * @param board The game board
- */
+    @brief Draw possible move positions for selected piece.
+    @param[in] board  The game board
+*/
 void drawPositionsPossibles(Board_t board) {
     IVec2_st pos;
 
@@ -176,8 +172,8 @@ void drawPositionsPossibles(Board_t board) {
 }
 
 /**
- * @brief Draw the pawn promotion menu.
- */
+    @brief Draw the pawn promotion menu.
+*/
 void printPromotion(void) {
     Player_st* joueur = !playerTurn ? blackPlayer : whitePlayer;
     Texture2D *textures = (joueur->color == COLOR_PIECE_BLACK) ? black_piece_textures : white_piece_textures;
@@ -208,9 +204,9 @@ void printPromotion(void) {
 }
 
 /**
- * @brief Render a complete frame (clear, draw, display).
- * @param board The game board
- */
+    @brief Render a complete frame (clear, draw, display).
+    @param[in] board  The game board
+*/
 void renderFrame(Board_t board) {
     ClearBackground(RAYWHITE);
 

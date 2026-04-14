@@ -1,15 +1,10 @@
 /**
-    @file widgets/scrollFrame.c
-    @author Fshimi-Hawlk
+    @file scrollFrame.c
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Implementation of the reusable ScrollFrame widget.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Full reusable scroll frame with proper clamping
-            - Clean integration point for all scrolling panels
 */
-
 #include "sharedWidgets/scrollFrame.h"
 
 #include "sharedUtils/mathUtils.h"

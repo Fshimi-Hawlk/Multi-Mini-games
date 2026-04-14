@@ -1,10 +1,10 @@
 /**
- * @file protocol.h
- * @author i-Charlys (CAILLON Charles)
- * @date 2026-03-18
- * @brief Common network structures for the King-for-Four (Uno) module.
- */
-
+    @file protocol.h
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Common network structures for the King-for-Four (Uno) module.
+*/
 #ifndef KING_PROTOCOL_H
 #define KING_PROTOCOL_H
 
@@ -13,7 +13,9 @@
 
 #pragma pack(push, 1)
 
-/** @brief Payload for synchronizing game state from server to client. */
+/**
+    @brief Payload for synchronizing game state from server to client.
+*/
 typedef struct {
     s32 current_player;     /**< Index of the current player (0-3) */
     s32 active_color;       /**< Current active color (-1:None, 0:Red, 1:Yellow, 2:Green, 3:Blue) */
@@ -24,10 +26,12 @@ typedef struct {
     s32 winner_id;          /**< ID of the winning player (-1 if none) */
 } GameSyncPayload;
 
-/** @brief Payload for an action to play a card. */
+/**
+    @brief Payload for an action to play a card.
+*/
 typedef struct {
-    s32 card_index;         /**< Index of the card in the player's hand */
-    s32 chosen_color;       /**< Color chosen if playing a black card */
+    s32 card_index;         ///< Index of the card in the player's hand
+    s32 chosen_color;       ///< Color chosen if playing a black card
 } ActionPlayPayload_St;
 
 #pragma pack(pop)

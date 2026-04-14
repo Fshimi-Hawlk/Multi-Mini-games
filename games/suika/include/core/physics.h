@@ -1,13 +1,10 @@
 /**
     @file physics.h
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
     @brief Physics simulation declarations for the Suika game.
-    @author Multi Mini-Games Team
-    @date February 2026
-
-    Declares physics functions for fruit collision detection, gravity,
-    and movement simulation.
 */
-
 #ifndef SUIKA_CORE_PHYSICS_H
 #define SUIKA_CORE_PHYSICS_H
 
@@ -19,8 +16,9 @@
     Updates velocities, positions, and handles collisions between fruits
     and with container walls.
 
-    @param game Pointer to the game state
-    @param deltaTime Time elapsed since last frame in seconds
+    @param[in,out] game      Pointer to the game state
+    @param[in]     deltaTime Time elapsed since last frame in seconds
+    @return                  void
 */
 void suika_updatePhysics(SuikaGame_St* game, float deltaTime);
 
@@ -30,7 +28,8 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime);
     Detects collisions between same-type fruits and merges them
     into the next larger fruit type.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_checkMerging(SuikaGame_St* game);
 
@@ -39,7 +38,8 @@ void suika_checkMerging(SuikaGame_St* game);
 
     Detects if fruits have been above the drop line for too long.
 
-    @param game Pointer to the game state
+    @param[in,out] game Pointer to the game state
+    @return            void
 */
 void suika_checkGameOver(SuikaGame_St* game);
 

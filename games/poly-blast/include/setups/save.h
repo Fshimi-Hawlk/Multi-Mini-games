@@ -1,18 +1,20 @@
 /**
     @file save.h
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-02-27
-    @date 2026-04-07
+    @date 2026-04-14
     @brief Game state serialization, file I/O, and save-list management.
-
-    @note Saves are stored in "./assets/saves/" (created automatically).
-          Each file is a binary blob with magic/version + minimal metadata for fast listing.
 */
 #ifndef SAVE_H
 #define SAVE_H
 
 #include "utils/userTypes.h"
 
+/**
+    @brief Description for polyBlast_getSerializedGameStateSize
+    @param[in,out] state The state parameter
+    @return Success/failure or the result of the function
+*/
 u64 polyBlast_getSerializedGameStateSize(const GameState_St* const state);
 
 /**
@@ -52,6 +54,12 @@ u64 polyBlast_serializeGameState(const GameState_St* const state, u8* buffer, co
 */
 bool polyBlast_deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init);
 
+/**
+    @brief Description for polyBlast_saveGameToFile
+    @param[in,out] state The state parameter
+    @param[in,out] filename The filename parameter
+    @return Success/failure or the result of the function
+*/
 bool polyBlast_saveGameToFile(const GameState_St* const state, const char* filename);
 
 #endif // SAVE_H

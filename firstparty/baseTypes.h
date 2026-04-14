@@ -1,27 +1,10 @@
 /**
- * @file baseTypes.h
- * @author Fshimi-Hawlk
- * @date 2026-01-07
- * @date 2026-02-20
- * @brief Fixed-size integer aliases, small vector types, and common shorthand aliases
- *        used as near-primitive types throughout the entire project (firstparty).
- *
- * This header defines:
- *   - unambiguous fixed-width integer types (u8, s32, u64, etc.)
- *   - matching small vector types (mostly 2D) with the same component types
- *   - convenient shorthand aliases (uint, uchar, iVector2, uVector2, ...) for cases
- *     where exact bit-width is not the primary concern
- *
- * Purpose:
- *   - Eliminate platform/size ambiguity when exact bit-width matters (networking, serialization, bitfields, etc.)
- *   - Provide lightweight named vector types that feel like built-ins
- *   - Offer readable short aliases so team members don't fall back to plain `int`/`float` everywhere
- *   - Keep all "primitive-feeling" typedefs in one shared place
- *
- * @note All types in this file are part of the shared firstparty layer and should be used consistently across
- *       the lobby and every sub-game.
- */
-
+    @file baseTypes.h
+    @author Multi Mini-Games Team
+    @date 2026-01-07
+    @date 2026-04-14
+    @brief Fixed-size integer aliases, small vector types, and common shorthand aliases
+*/
 #ifndef BASE_TYPES_H
 #define BASE_TYPES_H
 
@@ -57,7 +40,13 @@ typedef unsigned int        uint;    ///< Shorthand for unsigned int
 typedef unsigned long       ulong;   ///< Shorthand for unsigned long
 typedef unsigned long long  ullong;  ///< Shorthand for unsigned long long
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { int  x, y; } iVector2;   ///< Signed int 2D vector - convenient when exact 32-bit width is not required.
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { uint x, y; } uVector2;   ///< Unsigned int 2D vector - convenient when exact 32-bit width is not required.
 
 // ────────────────────────────────────────────────
@@ -65,15 +54,36 @@ typedef struct { uint x, y; } uVector2;   ///< Unsigned int 2D vector - convenie
 // ────────────────────────────────────────────────
 
 typedef struct { u8  x, y; } u8Vector2;   ///< 8-bit unsigned integer coordinates
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { s8  x, y; } s8Vector2;   ///< 8-bit signed integer coordinates
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { u16 x, y; } u16Vector2;  ///< 16-bit unsigned (common for texture dimensions, tile indices)
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { s16 x, y; } s16Vector2;  ///< 16-bit signed
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { u32 x, y; } u32Vector2;  ///< 32-bit unsigned
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { s32 x, y; } s32Vector2;  ///< 32-bit signed (common for large grid/world positions)
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { u64 x, y; } u64Vector2;  ///< 64-bit unsigned (rare - mostly for very large indices)
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct { s64 x, y; } s64Vector2;  ///< 64-bit signed
 
 // ────────────────────────────────────────────────

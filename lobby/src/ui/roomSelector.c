@@ -11,7 +11,6 @@
         - Fshimi-Hawlk:
             - Full widget migration, lobby_ prefix, CSC compliance, s32 usage
 */
-
 #include "ui/roomSelector.h"
 
 #include "raylib.h"

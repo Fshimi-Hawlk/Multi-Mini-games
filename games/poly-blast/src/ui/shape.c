@@ -1,14 +1,13 @@
 /**
-    @file shape.c (ui)
-    @author Fshimi Hawlk
+    @file shape.c
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Rendering of shapes and slots.
 */
-
 #include "core/shape.h"
 #include "ui/shape.h"
 #include "ui/board.h"
-// #include "utils/configs.h"
 #include "utils/globals.h"
 
 void polyBlast_drawShape(const Shape_St shape) {

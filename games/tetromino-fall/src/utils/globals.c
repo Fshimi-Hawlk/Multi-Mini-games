@@ -1,3 +1,10 @@
+/**
+    @file globals.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief globals.c implementation/header file
+*/
 #include "utils/globals.h"
 #include "core/shape.h"
 

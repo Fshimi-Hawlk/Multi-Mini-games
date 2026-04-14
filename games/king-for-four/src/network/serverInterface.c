@@ -1,10 +1,10 @@
 /**
- * @file serverInterface.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Server-side module for the King-for-Four (Uno) game.
- */
-
+    @file serverInterface.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Server-side module for the King-for-Four (Uno) game.
+*/
 #include "APIs/generalAPI.h"
 #include "core/game.h"
 #include "core/card.h"
@@ -20,18 +20,20 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+/**
+    @brief Action codes for King-for-Four specific network messages.
+*/
 enum {
-    ACTION_CODE_KFF_PLAY_CARD = firstAvailableActionCode,
-    ACTION_CODE_KFF_DRAW_CARD,
-    ACTION_CODE_KFF_SYNC_HAND,
-    ACTION_CODE_KFF_SET_PLAYER_COUNT,
+    ACTION_CODE_KFF_PLAY_CARD = firstAvailableActionCode, ///< Play a card from hand
+    ACTION_CODE_KFF_DRAW_CARD,                            ///< Draw a card from the deck
+    ACTION_CODE_KFF_SYNC_HAND,                            ///< Synchronize the player's hand
+    ACTION_CODE_KFF_SET_PLAYER_COUNT,                     ///< Set the number of players (host only)
 };
 
 #pragma pack(push, 1)
 /**
- * @struct GameSyncPayload
- * @brief Payload for synchronizing game state between server and clients.
- */
+    @brief Payload for synchronizing game state from server to client.
+*/
 typedef struct {
     int currentPlayer;     /**< Index of the current player */
     int activeColor;       /**< Current active color */
@@ -45,6 +47,9 @@ typedef struct {
     int requestedPlayers;  /**< Number of players requested by host */
 } GameSyncPayload;
 
+/**
+    @brief Payload for a player playing a card.
+*/
 typedef struct {
     int cardIndex;
     int chosenColor;
@@ -52,25 +57,26 @@ typedef struct {
 #pragma pack(pop)
 
 /**
- * @struct KingServerState
- * @brief Internal state maintained by the server for a game instance.
- */
+    @brief Internal state maintained by the server for a game instance.
+*/
 typedef struct {
-    KingForFourGameState_St state;    /**< Core game logic state */
-    s32 roomId;        /**< Current room ID */
-    int status;         /**< 0 = WAITING, 1 = PLAYING */
-    int requestedPlayers; /**< Number of players requested by host */
-    float botTimer;    /**< Timer for bot actions */
-    float botTargetTime; /**< Randomized thinking time */
+/**
+    @brief Initializes a game instance on the server.
+
+    @return A pointer to the newly created KingServerState_St.
+*/
+KingForFourGameState_St state;    
+    s32 roomId;        
+    int status;         
+    int requestedPlayers; 
+    float botTimer;    
+    float botTargetTime; 
     int lastPlayerId;
     int lastAction;
-    BroadcastMessage_Ft broadcast; /**< Last used broadcast function */
+    BroadcastMessage_Ft broadcast; 
 } KingServerState;
 
-/**
- * @brief Initializes a game instance on the server.
- * @return A pointer to the newly created KingServerState.
- */
+
 void* kingCreateInstance(void) {
     KingServerState* ks = calloc(1, sizeof(KingServerState));
     if (ks) {
@@ -88,6 +94,13 @@ void* kingCreateInstance(void) {
     return ks;
 }
 
+/**
+    @brief Broadcasts the current game state to all players in a room.
+
+    @param[in,out] ks        Pointer to the server state.
+    @param[in]     room_id   The ID of the room to sync.
+    @param[in]     broadcast The broadcast function to use.
+*/
 static void broadcast_sync(KingServerState* ks, s32 roomId, BroadcastMessage_Ft broadcast) {
     if (!broadcast) return;
     KingForFourGameState_St* g = &ks->state;
@@ -254,6 +267,11 @@ void king_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void 
     broadcast_sync(ks, roomId, broadcast);
 }
 
+/**
+    @brief Updates the game state periodically (handles bot logic).
+
+    @param[in,out] state Pointer to the KingServerState_St instance.
+*/
 void king_onTick(void* state) {
     KingServerState* ks = (KingServerState*)state;
     if (ks->status != 1 || !ks->broadcast) return;
@@ -312,6 +330,12 @@ void king_onTick(void* state) {
     }
 }
 
+/**
+    @brief Handles a player leaving the game.
+
+    @param[in,out] state     Pointer to the KingServerState_St instance.
+    @param[in]     player_id The ID of the player who left.
+*/
 void king_onPlayerLeave(void* state, s32 playerId) {
     KingServerState* ks = (KingServerState*)state;
     KingForFourGameState_St* g = &ks->state;
@@ -333,6 +357,11 @@ void king_onPlayerLeave(void* state, s32 playerId) {
     }
 }
 
+/**
+    @brief Destroys a game instance and frees memory.
+
+    @param[in,out] state Pointer to the KingServerState_St instance to destroy.
+*/
 void kingDestroyInstance(void *state) {
     KingServerState* ks = (KingServerState*)state;
     for (int i = 0; i < ks->state.numPlayers; i++) {

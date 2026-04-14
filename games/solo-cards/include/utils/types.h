@@ -1,14 +1,10 @@
 /**
- * @file types.h
- * @brief Type definitions for Solitaire game
- * 
- * Ce fichier contient les définitions de types de base
- * utilisés dans le jeu de Solitaire.
- * 
- * @author Multi Mini-Games Team
- * @date February 2026
- */
-
+    @file types.h
+    @author Maxime CHAUVEAU
+    @date February 2026
+    @date 2026-04-14
+    @brief Type definitions for Solitaire game
+*/
 #ifndef UTILS_TYPES_H
 #define UTILS_TYPES_H
 

@@ -1,12 +1,10 @@
 /**
     @file networkInterface.h
-    @author i-Charlys
-    @author Fshimi Hawlk
+    @author Multi Mini-Games Team
     @date 2025-03-20
+    @date 2026-04-14
     @brief Defines the network message format and per-game module interfaces for client and server sides
-    @note GameTLVHeader_St uses #pragma pack(1) — exact 4-byte layout is required for wire format
 */
-
 #ifndef NETWORK_INTERFACE_H
 #define NETWORK_INTERFACE_H
 
@@ -25,6 +23,9 @@ extern RUDPConnection_St serverConnection;
 
 #define UNICAST -1
 
+/**
+    @brief Definition of enum BaseActionCodes_e
+*/
 enum BaseActionCodes_e {
     ACTION_CODE_JOIN_ACK          = 0x01,    ///< Acknowledging a join request.
     ACTION_CODE_JOIN_GAME         = 0x02,    ///< Joining a game.
@@ -107,6 +108,9 @@ typedef void (*BroadcastMessage_Ft)(
     u8          action,
     const void* payload,
     u16         len
+/**
+    @brief Global variable )
+*/
 );
 
 /**

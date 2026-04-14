@@ -1,3 +1,10 @@
+/**
+    @file serverInterface.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief serverInterface.c implementation/header file
+*/
 #include "rubikAPI.h"
 
 #include "logger.h"

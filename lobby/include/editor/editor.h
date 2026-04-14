@@ -1,18 +1,10 @@
 /**
-    @file editor/editor.h
-    @author Fshimi-Hawlk
+    @file editor.h
+    @author Léandre BAUDET
     @date 2026-03-27
-    @date 2026-03-27
+    @date 2026-04-14
     @brief Public interface for the lobby level editor.
-
-    Provides high-level functions to toggle, update and draw the editor.
-    All editor-specific state and logic is kept inside the editor module.
-
-    @see editor/types.h
-    @see editor/input.c
-    @see editor/draw.c
 */
-
 #ifndef EDITOR_EDITOR_H
 #define EDITOR_EDITOR_H
 

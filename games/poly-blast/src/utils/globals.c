@@ -1,10 +1,10 @@
 /**
     @file globals.c
-    @author Fshimi Hawlk
+    @author Kimi BERGE
     @date 2026-01-07
+    @date 2026-04-14
     @brief Definitions of global variables.
 */
-
 #include "utils/globals.h"
 
 Font polyBlast_fonts[__fontSizeCount] = {0};
@@ -96,9 +96,10 @@ const Prefab_St polyBlast_prefabs[] = {
     { .blockCount = 6, .orientations = -1, .offsets = { {1, 0}, {1, 1}, {0, 2}, {1, 2}, {1, 3}, {2, 2} } },
 };
 
-const u32 prefabCount = sizeof(polyBlast_prefabs) / sizeof(*polyBlast_prefabs);
+const u32 polyBlast_prefabCount = sizeof(polyBlast_prefabs) / sizeof(*polyBlast_prefabs);
 
 PromptState_Et polyBlast_currentPrompt = PROMPT_START_LOAD;   ///< Modal state for save/load UI
+
 
 // Map_St maps[] = {
 //     {

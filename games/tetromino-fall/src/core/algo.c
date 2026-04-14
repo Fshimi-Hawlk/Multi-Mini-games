@@ -1,13 +1,33 @@
+/**
+    @file algo.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of AI algorithms for Tetris.
+*/
 #include "core/algo.h"
 #include "core/shape.h"
 #include "core/board.h"
 #include "utils/utils.h"
+#include <string.h>
+#include <stdlib.h>
 
-/* FIX: copyBoard — replaced double loop with memcpy. */
+/**
+    @brief Copies the content of one board to another.
+
+    @param[in]  src   Source board to copy from.
+    @param[out] dest  Destination board to copy to.
+*/
 void copyBoard(board_t src, board_t dest) {
     memcpy(dest, src, sizeof(board_t));
 }
 
+/**
+    @brief Evaluates the current state of the board and returns a score.
+
+    @param[in] board  The board to evaluate.
+    @return           The calculated score for the board state.
+*/
 int evaluateBoard(board_t board) {
     int holes = 0;
     int aggregateHeight = 0;
@@ -65,6 +85,14 @@ int evaluateBoard(board_t board) {
     return score;
 }
 
+/**
+    @brief Simulates dropping a piece in a specific column.
+
+    @param[in] board  The current board state.
+    @param[in] piece  The piece to drop.
+    @param[in] col    The column index to drop the piece in.
+    @return           The resulting Y position of the piece after dropping.
+*/
 int simulateDrop(board_t board, boardShape_st piece, int col) {
     piece.position = (iVector2){ col, 0 };
 
@@ -75,6 +103,14 @@ int simulateDrop(board_t board, boardShape_st piece, int col) {
     return --piece.position.y;
 }
 
+/**
+    @brief Finds the best move for the current and next shape.
+
+    @param[in] board      The current board state.
+    @param[in] shape      The current shape to place.
+    @param[in] nextShape   The next shape that will appear.
+    @return               A struct containing the best position and rotation.
+*/
 moveAlgoResult_st findBestMove(board_t board, boardShape_st shape, boardShape_st nextShape) {
     board_t temp;
     int bestScore = -100000;

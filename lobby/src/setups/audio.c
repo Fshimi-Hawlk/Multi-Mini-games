@@ -1,3 +1,10 @@
+/**
+    @file audio.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief audio.c implementation/header file
+*/
 #include "setups/audio.h"
 #include "utils/globals.h"
 

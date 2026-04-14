@@ -1,16 +1,18 @@
 /**
-    @file utils/userTypes.h
-    @author LeandreB8
+    @file userTypes.h
+    @author Léandre BAUDET
     @date 2026-01-12
-    @date 2026-04-10
+    @date 2026-04-14
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
 */
-
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
 
 #include "common.h"
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     Vector2 position;
     float height;
@@ -19,12 +21,18 @@ typedef struct {
     Color color;
 } GrassBlade_St;
 
+/**
+    @brief Definition of typedef enum
+*/
 typedef enum {
     FIREFLY_MODE_WANDER,
     FIREFLY_MODE_LOOP,
     FIREFLY_MODE_BOB
 } FireflyMode_Et;
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     Vector2 position;
     Vector2 velocity;
@@ -44,6 +52,9 @@ typedef struct {
     float          currentSpeed;
 } Firefly_St;
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     Vector2 position;
     Vector2 velocity;
@@ -59,6 +70,9 @@ typedef struct {
     Color   color;
 } FallingLeaf_St;
 
+/**
+    @brief Definition of typedef enum
+*/
 typedef enum {
     GAME_STATE_GAMEPLAY,
     GAME_STATE_CONNECTION,
@@ -70,6 +84,9 @@ typedef enum {
     GAME_STATE_INGAME,
 } GameState_Et;
 
+/**
+    @brief Definition of typedef enum
+*/
 typedef enum {
     PLAYER_TEXTURE_DEFAULT,
     PLAYER_TEXTURE_BINGO,
@@ -208,8 +225,15 @@ typedef struct {
     bool           isOnlyReceiverPortal;
 } LobbyTerrain_St;
 
+/**
+    @brief Description for typeDA
+    @return Success/failure or the result of the function
+*/
 typeDA(LobbyTerrain_St, TerrainVec_St);
 
+/**
+    @brief Definition of typedef struct
+*/
 typedef struct {
     Rectangle hitbox;
     const char *name;

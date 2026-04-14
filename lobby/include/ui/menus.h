@@ -12,6 +12,9 @@
 
 #include "utils/userTypes.h"
 
+/**
+    @brief Definition of typedef enum
+*/
 typedef enum {
     MENU_NONE,
     MENU_MAIN,
@@ -21,6 +24,42 @@ typedef enum {
     MENU_PLAY_CHOICE
 } MenuType_Et;
 
+/**
+    @brief Global variable g_currentMenu
+*/
+/**
+    @brief Description for InitMenus
+*/
+/**
+    @brief Description for UpdateMenu
+*/
+/**
+    @brief Description for DrawMenu
+*/
+/**
+    @brief Description for DrawPauseMenu
+*/
+/**
+    @brief Description for DrawSettingsMenu
+*/
+/**
+    @brief Description for DrawLeaderboardMenu
+*/
+/**
+    @brief Description for DrawPlayChoiceMenu
+*/
+/**
+    @brief Description for UpdatePauseMenu
+*/
+/**
+    @brief Description for UpdateSettingsMenu
+*/
+/**
+    @brief Description for UpdateLeaderboardMenu
+*/
+/**
+    @brief Description for UpdatePlayChoiceMenu
+*/
 extern MenuType_Et lobby_currentMenu;
 
 void lobby_initMenus(void);

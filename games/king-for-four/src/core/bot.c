@@ -1,21 +1,31 @@
 /**
- * @file bot.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Bot logic for King-for-Four (Uno).
- */
-
+    @file bot.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Bot logic for King-for-Four (Uno).
+*/
 #include "core/bot.h"
 #include "core/card.h"
 #include <limits.h>
 
+/**
+    @brief Scores used by the AI to evaluate moves and states.
+*/
 typedef enum {
-    SCORE_BASIC_CARD  = 10,
-    SCORE_ACTION_CARD = 30,
-    SCORE_WILD_CARD   = 50,
-    SCORE_WIN_BONUS   = 500
+    SCORE_BASIC_CARD  = 10,     ///< Base score for numerical cards
+    SCORE_ACTION_CARD = 30,     ///< Score for action cards (Skip, Reverse, etc.)
+    SCORE_WILD_CARD   = 50,     ///< Score for wild cards (Joker, Plus Four)
+    SCORE_WIN_BONUS   = 500     ///< Bonus for winning the game
 } AIScore_Et;
 
+/**
+    @brief Evaluates the game state for a specific player.
+
+    @param[in]     g            Pointer to the game state.
+    @param[in]     player_id    Index of the player.
+    @return                     The score of the state (higher is better).
+*/
 int kingForFour_evaluateState(KingForFourGameState_St* g, int playerId) {
     if (!g || playerId < 0 || playerId >= g->numPlayers) return -1000;
 
@@ -26,7 +36,7 @@ int kingForFour_evaluateState(KingForFourGameState_St* g, int playerId) {
     for (int i = 0; i < p->hand.size; i++) {
         Card_St c = p->hand.cards[i];
         if (c.value >= SKIP && c.value <= PLUS_TWO) score -= 20;
-        else if (c.value >= JOKER) score -= SCORE_WILD_CARD;
+        else if (c.value >= JOKER) score -= (int)SCORE_WILD_CARD;
         else score -= (int)c.value;
     }
 
@@ -38,11 +48,19 @@ int kingForFour_evaluateState(KingForFourGameState_St* g, int playerId) {
     }
 
     // Huge bonus if we have 0 cards
-    if (p->hand.size == 0) score += SCORE_WIN_BONUS;
+    if (p->hand.size == 0) score += (int)SCORE_WIN_BONUS;
 
     return score;
 }
 
+/**
+    @brief Calculates the best move for a bot using a simplified heuristic.
+
+    @param[in,out] g               Pointer to the game state.
+    @param[in]     player_id       Index of the bot player.
+    @param[out]    out_card_index  Pointer to store the index of the chosen card (-1 for draw).
+    @return                        The score of the chosen move.
+*/
 int kingForFour_calculateBestMove(KingForFourGameState_St* g, int playerId, int* outCardIndex) {
     if (!g || playerId < 0 || playerId >= g->numPlayers || !outCardIndex) return INT_MIN;
 

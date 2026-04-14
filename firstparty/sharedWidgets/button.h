@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/button.h
-    @author Fshimi-Hawlk
+    @file button.h
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Text and image button widgets.
 */
-
 #ifndef WIDGETS_BUTTON_H
 #define WIDGETS_BUTTON_H
 

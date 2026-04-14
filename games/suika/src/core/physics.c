@@ -1,10 +1,10 @@
 /**
- * @file physics.c
- * @brief Physics simulation implementation for Suika game
- * @author Multi Mini-Games Team
- * @date February 2026
- */
-
+    @file physics.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Physics simulation implementation for Suika game.
+*/
 #include "core/physics.h"
 #include "core/game.h"
 #include "utils/audio.h"
@@ -12,6 +12,13 @@
 #include <math.h>
 #include <stdlib.h>
 
+/**
+    @brief Spawns particles when two fruits merge.
+
+    @param[in,out] game     Pointer to the game state
+    @param[in]     position Position where to spawn particles
+    @param[in]     color    Color of the particles
+*/
 static void suika_spawnMergeParticles(SuikaGame_St* game, Vector2 position, Color color)
 {
     int count = 8 + (rand() % 5);
@@ -32,6 +39,12 @@ static void suika_spawnMergeParticles(SuikaGame_St* game, Vector2 position, Colo
     }
 }
 
+/**
+    @brief Updates the physics simulation for one frame.
+
+    @param[in,out] game      Pointer to the game state
+    @param[in]     deltaTime Time elapsed since last frame
+*/
 void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
 {
     (void)deltaTime;
@@ -158,15 +171,13 @@ void suika_updatePhysics(SuikaGame_St* game, float deltaTime)
             }
         }
     }
-    
-    for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
-    {
-        if (!game->fruits[i].isActive)
-        {
-        }
-    }
 }
 
+/**
+    @brief Checks for collisions between fruits of the same type and merges them.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_checkMerging(SuikaGame_St* game)
 {
     for (int i = 0; i < SUIKA_MAX_FRUITS; i++)
@@ -243,6 +254,11 @@ void suika_checkMerging(SuikaGame_St* game)
     }
 }
 
+/**
+    @brief Checks if any fruit has crossed the drop line for too long, triggering game over.
+
+    @param[in,out] game Pointer to the game state
+*/
 void suika_checkGameOver(SuikaGame_St* game)
 {
     for (int i = 0; i < SUIKA_MAX_FRUITS; i++)

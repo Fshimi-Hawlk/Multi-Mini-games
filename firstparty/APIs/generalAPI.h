@@ -1,34 +1,10 @@
 /**
     @file generalAPI.h
-    @author Fshimi Hawlk
-    @author i-Charlys
-    @author Maxime-CHAUVEAU
+    @author Multi Mini-Games Team
     @date 2026-01-08
-    @date 2026-03-23
+    @date 2026-04-14
     @brief Shared core types and error codes used across all games and the lobby.
-           Standardized interface for Client-side mini-games (Raylib Frontend).
-
-    This header defines:
-        - a standard set of error codes used across game subsystems
-        - the common base structure that every mini-game state must embed
-        - a function pointer type for game cleanup
-
-    Design goals:
-        - Allow the lobby to interact with any mini-game in a type-safe, generic way
-        - Enable uniform error handling across different game implementations
-        - Keep the common interface as small as possible (only what truly belongs to every game)
-
-    Important rules for mini-game implementations:
-        - The concrete game state struct **must** have `BaseGame_St base;` as its **first member**
-        - This guarantees that `BaseGame_St* base = (BaseGame_St*)specificGame;` is always valid
-        - The `freeGame` callback must free the entire game object (including the specific part)
-
-    Typical usage in the lobby:
-        - `BaseGame_St* current = miniGames[scene];`
-        - `if (current && current->running) { ... }`
-        - On exit: `if (current && current->freeGame) current->freeGame(current);`
- */
-
+*/
 #ifndef GENERAL_API_H
 #define GENERAL_API_H
 

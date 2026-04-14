@@ -1,10 +1,10 @@
 /**
- * @file physics.c
- * @author Maxime CHAUVEAU
- * @date March 2026
- * @brief Physics – mesures officielles World Bowling / USBC (1 unité = 1 mètre).
- */
-
+    @file physics.c
+    @author Maxime CHAUVEAU
+    @date 2026-03-01
+    @date 2026-04-14
+    @brief Physics – mesures officielles World Bowling / USBC (1 unité = 1 mètre).
+*/
 #include "core/physics.h"
 #include "utils/types.h"
 #include "utils/configs.h"
@@ -16,15 +16,15 @@
 
 //  Mesures officielles 
 // 1 unité = 1 mètre
-#define LANE_WIDTH    1.05f   // largeur piste
-#define LANE_LENGTH   18.29f  // ligne de faute → quille de tête
+#define LANE_WIDTH    1.05f   ///< Largeur piste
+#define LANE_LENGTH   18.29f  ///< Ligne de faute → quille de tête
 #define LANE_EDGE    (LANE_WIDTH / 2.0f)
-#define GUTTER_WIDTH 0.23f   // largeur d'une gouttière
-#define BALL_RADIUS   0.1092f // rayon max (diamètre 21.83 cm)
-#define PIN_BASE_R    0.060f  // rayon base quille (diamètre 12 cm)
-#define GRAVITY       9.8f
-#define NUM_PINS      10
-#define BALL_START_Z 4.0f
+#define GUTTER_WIDTH 0.23f   ///< Largeur d'une gouttière
+#define BALL_RADIUS   0.1092f ///< Rayon max (diamètre 21.83 cm)
+#define PIN_BASE_R    0.060f  ///< Rayon base quille (diamètre 12 cm)
+#define GRAVITY       9.8f    ///< Accélération de la pesanteur
+#define NUM_PINS      10      ///< Nombre de quilles
+#define BALL_START_Z  4.0f    ///< Position Z de départ de la balle
 
 //  Positions officielles des quilles 
 // Espacement centre-à-centre : 30,48 cm
@@ -37,6 +37,9 @@
 #define PIN_SPACING  0.3048f
 #define PIN1_Z      -18.29f
 
+/**
+    @brief Official positions for the 10 pins.
+*/
 static const Vector3 PIN_POSITIONS[NUM_PINS] = {
     // Rang 1
     { 0.0f,        0.0f, PIN1_Z                    },  // 1
@@ -58,11 +61,24 @@ static const Vector3 PIN_POSITIONS[NUM_PINS] = {
 // Hauteur totale 38.1 cm → centre à 19.05 cm du sol
 #define PIN_CENTER_Y  0.1905f
 
+/**
+    @brief Initializes the particle system.
+    @param[out] particles     Array of particles to initialize
+    @param[out] particleCount Pointer to particle counter
+*/
 void physics_initParticles(Particle_St* particles, int* particleCount) {
     *particleCount = 0;
     for (int i = 0; i < MAX_PARTICLES; i++) particles[i].life = 0.0f;
 }
 
+/**
+    @brief Spawns a burst of particles.
+    @param[in,out] particles     Array of particles
+    @param[in,out] particleCount Pointer to particle counter
+    @param[in]     position      Spawn position
+    @param[in]     count         Number of particles to spawn
+    @param[in]     baseColor     Base color for particles
+*/
 void physics_spawnParticles(Particle_St* particles, int* particleCount,
                              Vector3 position, int count, Color baseColor) {
     for (int i = 0; i < count && *particleCount < MAX_PARTICLES; i++) {
@@ -81,6 +97,12 @@ void physics_spawnParticles(Particle_St* particles, int* particleCount,
     }
 }
 
+/**
+    @brief Updates all active particles.
+    @param[in,out] particles     Array of particles
+    @param[in,out] particleCount Pointer to particle counter
+    @param[in]     deltaTime     Time since last frame
+*/
 void physics_updateParticles(Particle_St* particles, int* particleCount, float deltaTime) {
     int w = 0;
     for (int i = 0; i < *particleCount; i++) {
@@ -96,6 +118,10 @@ void physics_updateParticles(Particle_St* particles, int* particleCount, float d
     *particleCount = w;
 }
 
+/**
+    @brief Sets up the pins in their default positions.
+    @param[out] pins Array of pins to setup
+*/
 void physics_setupPins(Pin_St* pins) {
     for (int i = 0; i < NUM_PINS; i++) {
         pins[i].position        = PIN_POSITIONS[i];
@@ -111,6 +137,10 @@ void physics_setupPins(Pin_St* pins) {
     }
 }
 
+/**
+    @brief Resets the ball to its starting position.
+    @param[out] ball Ball state to reset
+*/
 void physics_resetBall(Ball_St* ball) {
     ball->position       = (Vector3){0.0f, BALL_RADIUS, BALL_START_Z}; // zone d'élan
     ball->velocity       = (Vector3){0,0,0};
@@ -121,6 +151,13 @@ void physics_resetBall(Ball_St* ball) {
     ball->rollAxis       = (Vector3){1,0,0};
 }
 
+/**
+    @brief Launches the ball in a given direction.
+    @param[in,out] ball       Ball state
+    @param[in]     direction  Launch direction
+    @param[in]     power      Launch power
+    @param[in]     spinAmount Spin amount (-1 to 1)
+*/
 void physics_launchBall(Ball_St* ball, Vector3 direction, float power, float spinAmount) {
     ball->velocity   = Vector3Scale(direction, power);
     ball->spinAmount = spinAmount;
@@ -130,6 +167,11 @@ void physics_launchBall(Ball_St* ball, Vector3 direction, float power, float spi
     PlaySound(sound_ballFall);
 }
 
+/**
+    @brief Updates the ball's spin and visual rotation.
+    @param[in,out] ball      Ball state
+    @param[in]     deltaTime Time since last frame
+*/
 void physics_updateBallSpin(Ball_St* ball, float deltaTime) {
     if (!ball->isRolling) return;
     if (fabsf(ball->spinAmount) > 0.005f) {
@@ -148,6 +190,13 @@ void physics_updateBallSpin(Ball_St* ball, float deltaTime) {
     }
 }
 
+/**
+    @brief Checks for collisions between the ball and pins, and pin-to-pin.
+    @param[in,out] ball          Ball state
+    @param[in,out] pins          Array of pins
+    @param[in,out] particles     Array of particles
+    @param[in,out] particleCount Pointer to particle counter
+*/
 void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
                               Particle_St* particles, int* particleCount) {
     float minDist = ball->radius + PIN_BASE_R;
@@ -215,16 +264,36 @@ void physics_checkCollisions(Ball_St* ball, Pin_St* pins,
     }
 }
 
+/**
+    @brief Checks if the ball has reached the pin area.
+    @param[in] ball Ball state
+    @return True if the ball reached the pins, false otherwise
+*/
 bool physics_hasBallReachedPins(Ball_St* ball) {
     return ball->position.z <= PIN1_Z + ball->radius;
 }
 
+/**
+    @brief Checks if the ball is in a gutter.
+    @param[in] ball        Ball state
+    @param[in] laneWidth   Width of the lane
+    @param[in] gutterWidth Width of the gutter
+    @return True if the ball is in a gutter, false otherwise
+*/
 bool physics_isGutterBall(Ball_St* ball, float laneWidth, float gutterWidth) {
     (void) laneWidth;
     float edge = LANE_EDGE - gutterWidth * 0.5f;
     return ball->position.x < -edge || ball->position.x > edge;
 }
 
+/**
+    @brief Updates the ball's position and velocity.
+    @param[in,out] ball        Ball state
+    @param[in]     deltaTime   Time since last frame
+    @param[in]     laneWidth   Width of the lane
+    @param[in]     gutterWidth Width of the gutter
+    @param[in]     bumpers     Whether bumpers are enabled
+*/
 void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
                          float gutterWidth, bool bumpers) {
     (void)gutterWidth;
@@ -252,6 +321,14 @@ void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
     if (ball->position.y < ball->radius) ball->position.y = ball->radius;
 }
 
+/**
+    @brief Updates all pins' positions, velocities, and rotations.
+    @param[in,out] pins       Array of pins
+    @param[in]     pinCount   Number of pins
+    @param[in]     deltaTime  Time since last frame
+    @param[in]     laneWidth  Width of the lane
+    @param[in]     laneLength Length of the lane
+*/
 void physics_updatePins(Pin_St* pins, int pinCount, float deltaTime,
                          float laneWidth, float laneLength) {
     const float MAX_FALL_ANGLE = PI / 2.0f;

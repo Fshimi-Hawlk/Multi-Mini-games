@@ -1,15 +1,10 @@
-/*
- * suika_atlas.h
- * Atlas de sprites pour le jeu Suika
- * Image source : assets_suika.png (864 x 486 px)
- *
- * Chaque entrée contient :
- *   name   – identifiant du fruit
- *   x, y   – coin supérieur gauche dans la texture (pixels)
- *   w, h   – largeur / hauteur du sprite (pixels)
- *   level  – niveau du fruit (1 = plus petit → 11 = plus grand)
- */
-
+/**
+    @file suika_atlas.h
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Sprite atlas definitions for Suika fruit textures.
+*/
 #ifndef SUIKA_ATLAS_H
 #define SUIKA_ATLAS_H
 
@@ -19,13 +14,16 @@
 /*  Types                                                               */
 /* ------------------------------------------------------------------ */
 
+/**
+    @brief Information about a single fruit sprite in the atlas.
+*/
 typedef struct {
-    const char *name;   /* nom du fruit            */
-    int         x;      /* origine X  (px)         */
-    int         y;      /* origine Y  (px)         */
-    int         w;      /* largeur    (px)         */
-    int         h;      /* hauteur    (px)         */
-    int         level;  /* niveau dans le jeu      */
+    const char *name;   ///< Name of the fruit
+    int         x;      ///< X coordinate of the top-left corner in the atlas (pixels)
+    int         y;      ///< Y coordinate of the top-left corner in the atlas (pixels)
+    int         w;      ///< Width of the sprite in the atlas (pixels)
+    int         h;      ///< Height of the sprite in the atlas (pixels)
+    int         level;  ///< Fruit level (1 = smallest -> 11 = largest)
 } SuikaSprite;
 
 /* ------------------------------------------------------------------ */
@@ -42,6 +40,9 @@ typedef struct {
 
 #define SUIKA_FRUIT_COUNT 11
 
+/**
+    @brief Static atlas containing definitions for all fruit sprites.
+*/
 static const SuikaSprite SUIKA_ATLAS[SUIKA_FRUIT_COUNT] = {
     /*  name             x    y    w    h   level  */
     { "cherry",         44, 130,  45,  70,   1 },
@@ -62,9 +63,11 @@ static const SuikaSprite SUIKA_ATLAS[SUIKA_FRUIT_COUNT] = {
 /* ------------------------------------------------------------------ */
 
 /**
- * suika_get_sprite – retrouve un sprite par nom.
- * Retourne NULL si non trouvé.
- */
+    @brief Finds a sprite by its name identifier.
+
+    @param[in]  name    The name of the fruit to find.
+    @return             Pointer to the SuikaSprite, or NULL if not found.
+*/
 static inline const SuikaSprite *
 suika_get_sprite(const char *name)
 {
@@ -80,9 +83,11 @@ suika_get_sprite(const char *name)
 }
 
 /**
- * suika_get_by_level – retrouve un sprite par niveau (1–11).
- * Retourne NULL si hors plage.
- */
+    @brief Finds a sprite by its fruit level (1-11).
+
+    @param[in]  level   The level of the fruit (1 = smallest).
+    @return             Pointer to the SuikaSprite, or NULL if out of range.
+*/
 static inline const SuikaSprite *
 suika_get_by_level(int level)
 {

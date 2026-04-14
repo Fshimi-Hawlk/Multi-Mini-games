@@ -1,8 +1,8 @@
 /**
-    @file core/game.h
-    @author Fshimi-Hawlk
+    @file game.h
+    @author Léandre BAUDET
     @date 2026-01-30
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Core logic and helper functions for the lobby gameplay (player update, collision, skin selection).
 
     This header declares the main functions that drive:
@@ -27,8 +27,7 @@
     @see `core/game.c`        for implementation details
     @see `utils/userTypes.h`  for Player_St, LobbyGame_St, Platform_St definitions
     @see `utils/globals.h`    for skinButtonRect (used in toggleSkinMenu)
- */
-
+*/
 #ifndef CORE_GAME_H
 #define CORE_GAME_H
 

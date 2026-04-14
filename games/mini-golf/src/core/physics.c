@@ -1,3 +1,10 @@
+/**
+    @file physics.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief physics.c implementation/header file
+*/
 #include "../../include/core/game.h"
 #include "core/physics.h"
 

@@ -1,33 +1,10 @@
 /**
-    @file utils/globals.c
-    @author LeandreB8
+    @file globals.c
+    @author Léandre BAUDET
     @date 2026-01-12
-    @date 2026-04-10
+    @date 2026-04-14
     @brief Definitions of program-wide global variables.
-
-    Contributors:
-        - LeandreB8:
-            - Provided the initial variables and harcoded platform
-        - Fshimi-Hawlk:
-            - Provided documentation
-            - Moved some of the variables to dedicated struct.
-
-    Contains shared state and constants used across the application:
-        - Window rectangle and UI button placement
-        - Font handles
-        - Mini-game instance pointers (games[])
-        - Lobby platform definitions (platforms[] + platformCount)
-        - Default player sprite rectangle
-        - Shared player texture array
-        - Skin menu toggle and button texture
-
-    The lobby level geometry (platforms) is hard-coded here.
-    Mini-game registration happens via the games[] array.
-    Skin menu visibility is controlled by isTextureMenuOpen.
-
-    @see `utils/globals.h` for type definitions and extern declarations
 */
-
 #include "utils/globals.h"
 
 // ────────────────────────────────────────────────

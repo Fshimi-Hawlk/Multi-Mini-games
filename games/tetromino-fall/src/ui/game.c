@@ -1,3 +1,10 @@
+/**
+    @file game.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of general UI elements for Tetris.
+*/
 #include "ui/game.h"
 
 void drawInformations(int score, int level, int lineNbTotal, int highScore) {

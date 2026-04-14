@@ -1,8 +1,10 @@
 /**
- * @file test_systems.c
- * @brief Unit tests for Network synchronization.
- */
-
+    @file test_systems.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for Network synchronization.
+*/
 #include <stdio.h>
 #include <assert.h>
 #include <math.h>

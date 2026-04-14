@@ -1,11 +1,10 @@
 /**
-    @file editor/codegen.c
-    @author Fshimi-Hawlk
+    @file codegen.c
+    @author Léandre BAUDET
     @date 2026-03-30
     @date 2026-04-13
     @brief Code generator that turns the current editor level into clean C source code.
 */
-
 #include "editor/codegen.h"
 
 #include "utils/globals.h"

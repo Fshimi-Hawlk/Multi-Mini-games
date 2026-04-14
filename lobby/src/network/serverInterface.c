@@ -1,11 +1,10 @@
 /**
- * @file network/serverInterface.c
- * @author i-Charlys (CAILLON Charles)
- * @author Fshimi-Hawlk
- * @date 2026-03-30
- * @brief Server-side implementation of the Lobby module.
- */
-
+    @file serverInterface.c
+    @author Léandre BAUDET
+    @date 2026-03-30
+    @date 2026-04-14
+    @brief Server-side implementation of the Lobby module.
+*/
 #include "utils/common.h"
 
 #include "sharedUtils/debug.h"

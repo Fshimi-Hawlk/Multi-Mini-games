@@ -1,59 +1,59 @@
 /**
-    @file utils/userTypes.h
-    @author LeandreB8
+    @file userTypes.h
+    @author Léandre BAUDET
     @date 2026-01-12
-    @date 2026-02-23
+    @date 2026-04-14
     @brief Core type definitions used throughout the game - especially lobby and mini-game integration.
-
-    Contributors:
-    - LeandreB8:
-        - Moved `Player_St` and `Platform_St` here
-    - Fshimi-Hawlk:
-        - Added documentation
-        - Added `MiniGameId_Et`, `PlayerTextureId_Et`, `PlayerVisuals_St`, 
-          `SubGameManager_St` and `LobbyGame_St` to centralize logic and 
-          previously global variables and make everything as straight forward.
-
-    This header contains the central enumerated types and data structures that describe:
-        - visual appearance and state of the player in the lobby
-        - platformer physics state of the lobby player
-        - currently active mini-game / sub-scene
-        - overall lobby game state
-
-    Most gameplay systems in the lobby directly or indirectly depend on types defined here.
 */
-
 #ifndef USER_TYPES_H
 #define USER_TYPES_H
 
 #include "common.h"
 
+/**
+    @brief Types of tiles on the snake game board.
+*/
 typedef enum {
-    GAME_TILE_GRASS,
-    GAME_TILE_HEAD,
-    GAME_TILE_BODY,
-    GAME_TILE_APPLE
+    GAME_TILE_GRASS,    ///< Empty tile with grass.
+    GAME_TILE_HEAD,     ///< Tile occupied by the snake's head.
+    GAME_TILE_BODY,     ///< Tile occupied by the snake's body.
+    GAME_TILE_APPLE     ///< Tile occupied by an apple.
 } GameTile_Et;
 
+/**
+    @brief Data for snake animations.
+*/
 typedef struct {
-    f32 timer;
-    f32 delay;
+    f32 timer;          ///< Current time elapsed in the animation.
+    f32 delay;          ///< Total delay between frames.
 } SnakeAnimationData_St;
 
+/**
+    @brief 2D array representing the game board.
+*/
 typedef int Board_t[SIZE_BOARD][SIZE_BOARD];
 
+/**
+    @brief Forward declaration for snake body part.
+*/
 typedef struct SnakeBodyPart_St SnakeBodyPart_St;
 
+/**
+    @brief Structure for a single part of the snake.
+*/
 struct SnakeBodyPart_St {
-    iVector2 coord;
-    Vector2 renderPos;
-    SnakeBodyPart_St* suivant;
+    iVector2 coord;             ///< Board coordinates of this part.
+    Vector2 renderPos;          ///< Actual rendering position (pixels).
+    SnakeBodyPart_St* suivant;  ///< Pointer to the next part.
 };
 
+/**
+    @brief Main structure for the snake.
+*/
 typedef struct {
-    SnakeBodyPart_St* head;
-    SnakeBodyPart_St* tail;
-    int bodyLength;
+    SnakeBodyPart_St* head;     ///< Pointer to the head part.
+    SnakeBodyPart_St* tail;     ///< Pointer to the tail part.
+    int bodyLength;             ///< Current length of the snake.
 } Snake_St;
 
 #endif // USER_TYPES_H

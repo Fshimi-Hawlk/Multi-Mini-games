@@ -1,10 +1,10 @@
 /**
- * @file player.c
- * @author i-Charlys
- * @date 2026-03-18
- * @brief Implementation of player management functions.
- */
-
+    @file player.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Implementation of player management functions.
+*/
 #include "core/player.h"
 #include <string.h>
 #include <stdio.h>

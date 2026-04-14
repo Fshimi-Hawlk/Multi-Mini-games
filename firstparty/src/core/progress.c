@@ -1,10 +1,10 @@
 /**
- * @file progress.c
- * @author i-Charlys
- * @date 2026-03-22
- * @brief Implementation of player progress saving/loading.
- */
-
+    @file progress.c
+    @author Multi Mini-Games Team
+    @date 2026-03-22
+    @date 2026-04-14
+    @brief Implementation of player progress saving/loading.
+*/
 #include "progress.h"
 #include <stdio.h>
 #include <string.h>

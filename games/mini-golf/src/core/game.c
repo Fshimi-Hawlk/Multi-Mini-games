@@ -1,3 +1,10 @@
+/**
+    @file game.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief game.c implementation/header file
+*/
 #include "../../include/core/game.h"
 
 extern const ClubSpec CLUBS[CLUB_COUNT];

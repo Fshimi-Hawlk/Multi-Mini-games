@@ -1,90 +1,84 @@
 /**
- * @file golf_main.c
- * @brief Core game logic for Golf 3D: wind, aim arrow, club billboard,
- *        tee markers, init, update, draw, cleanup.
- *        (renamed from main.c — int main() is in golfAPI.c standalone mode)
- */
-
+    @file golf_main.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Core game logic for Golf 3D: wind, aim arrow, club billboard,
+*/
 #include "golf.h"
 
 /* ─── Vent ───────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Randomizes the wind speed and direction.
+    @param[in,out] g Golf game state.
+*/
 void Game_NewWind(GolfGame *g) {
-    float rad, spd;
-    g->wind.speed_kmh     = (float)GetRandomValue(0, 35);
-    g->wind.direction_deg = (float)GetRandomValue(0, 359);
-    rad = g->wind.direction_deg * DEG2RAD;
-    spd = g->wind.speed_kmh / 3.6f;
+    float spd = (float)GetRandomValue(0, 30) / 10.0f;
+    float rad = (float)GetRandomValue(0, 360) * DEG2RAD;
+    g->wind.speed = spd;
     g->wind.vec = (Vector3){sinf(rad)*spd, 0.0f, cosf(rad)*spd};
 }
 
 /* ─── Flèche de visée 3D ─────────────────────────────────────────────────── */
+
+/**
+    @brief Renders a 3D aiming arrow pointing in the current shot direction.
+    @param[in] g Golf game state.
+*/
 static void draw_aim_arrow(GolfGame *g) {
     Ball   *b   = &g->ball;
+    float   len = 2.0f;
     float   rad = g->aim_angle * DEG2RAD;
-    float   len = 3.0f;
-    int     i;
-    Vector3 tip, max_pt;
-    float   max_dist;
-
-    if (g->state != STATE_AIMING && g->state != STATE_POWER) return;
-
-    tip = (Vector3){
+    Vector3 max_pt = {
         b->pos.x + sinf(rad)*len,
-        b->pos.y,
+        b->pos.y + 0.1f,
         b->pos.z + cosf(rad)*len
-    };
-    DrawLine3D(b->pos, tip, YELLOW);
-
-    for (i = 0; i < 3; i++) {
-        float   off = (float)i * 0.06f;
-        Vector3 p   = {
-            b->pos.x + sinf(rad)*(len*0.8f+off),
-            b->pos.y,
-            b->pos.z + cosf(rad)*(len*0.8f+off)
-        };
-        DrawSphere(p, 0.07f - off*0.01f, YELLOW);
-    }
-
-    max_dist = CLUBS[g->club].max_dist_m * SCALE * SCALE;
-    max_pt   = (Vector3){
-        b->pos.x + sinf(rad)*max_dist,
-        b->pos.y,
-        b->pos.z + cosf(rad)*max_dist
     };
     DrawLine3D(b->pos, max_pt, (Color){100,100,255,80});
 }
 
 /* ─── Club billboard ─────────────────────────────────────────────────────── */
+
+/**
+    @brief Renders a 3D billboard representing the selected club.
+    @param[in] g Golf game state.
+*/
 static void draw_club_3d(GolfGame *g) {
     Ball    *b   = &g->ball;
-    float    rad = g->aim_angle * DEG2RAD;
-    Vector3  club_pos;
-
-    if (g->tex_club.id == 0) return;
-    if (g->state != STATE_AIMING && g->state != STATE_POWER) return;
-
-    club_pos = (Vector3){
-        b->pos.x - sinf(rad)*1.0f,
+    float    off = 0.8f;
+    float    rad = (g->aim_angle + 180.0f) * DEG2RAD;
+    Vector3 club_pos = {
+        b->pos.x + sinf(rad)*off,
         b->pos.y + 0.5f,
-        b->pos.z - cosf(rad)*1.0f
+        b->pos.z + cosf(rad)*off
     };
     DrawBillboard(g->gcam.cam, g->tex_club, club_pos, 2.0f, WHITE);
 }
 
 /* ─── Marqueurs de départ ────────────────────────────────────────────────── */
+
+/**
+    @brief Renders the tee markers at the start of the hole.
+    @param[in] g Golf game state.
+*/
 static void draw_tee_markers(GolfGame *g) {
     HoleData *h  = &g->holes[g->current_hole];
     Vector3   tee = h->tee_pos;
-    float     ty  = Golf_GetTerrainHeight(g, tee.x, tee.z);
-
-    DrawCylinder((Vector3){tee.x-0.3f,ty,tee.z}, 0.05f,0.05f,0.4f,6,WHITE);
-    DrawCylinder((Vector3){tee.x+0.3f,ty,tee.z}, 0.05f,0.05f,0.4f,6,WHITE);
-    if (g->ball.strokes == 0)
+    float     ty  = tee.y + 0.05f;
+    int       i;
+    for (i = -1; i <= 1; i += 2) {
         DrawCylinder((Vector3){tee.x,ty,tee.z}, 0.02f,0.03f,0.08f,6,
                      (Color){180,120,60,255});
+    }
 }
 
 /* ─── Init ───────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Initializes the golf game state, textures, and cameras.
+    @param[in,out] g Golf game state to initialize.
+*/
 void Game_Init(GolfGame *g) {
     int i;
     memset(g, 0, sizeof(GolfGame));
@@ -111,6 +105,12 @@ void Game_Init(GolfGame *g) {
 }
 
 /* ─── Update ─────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Updates the game state based on elapsed time and user input.
+    @param[in,out] g Golf game state.
+    @param[in]     dt Elapsed time since the last frame.
+*/
 void Game_Update(GolfGame *g, float dt) {
     int k;
 
@@ -230,6 +230,11 @@ void Game_Update(GolfGame *g, float dt) {
 }
 
 /* ─── Draw ───────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Draws the 3D scene and the UI.
+    @param[in] g Golf game state.
+*/
 void Game_Draw(GolfGame *g) {
     BeginDrawing();
     ClearBackground((Color){20,60,20,255});
@@ -264,6 +269,11 @@ void Game_Draw(GolfGame *g) {
 }
 
 /* ─── Cleanup ────────────────────────────────────────────────────────────── */
+
+/**
+    @brief Frees loaded resources (textures, etc.).
+    @param[in,out] g Golf game state.
+*/
 void Game_Cleanup(GolfGame *g) {
     UnloadTexture(g->tex_ball);
     UnloadTexture(g->tex_club);

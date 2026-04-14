@@ -11,7 +11,6 @@
         - Fshimi-Hawlk: Two-layer architecture, player name, instance support,
                         full widget migration, textColor fix, lobby_ prefix
 */
-
 #include "ui/connectionScreen.h"
 
 #include "utils/globals.h"

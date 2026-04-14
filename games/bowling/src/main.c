@@ -1,10 +1,10 @@
 /**
- * @file main.c
- * @author Maxime CHAUVEAU
- * @date February 2026
- * @brief Main entry point for the Bowling mini-game.
- */
-
+    @file main.c
+    @author Maxime CHAUVEAU
+    @date 2026-02-01
+    @date 2026-04-14
+    @brief Main entry point for the Bowling mini-game.
+*/
 #include <stdlib.h>
 #include <time.h>
 #include "core/game.h"
@@ -12,6 +12,13 @@
 #include "logger.h"
 #include "utils/audio.h"
 
+/**
+    @brief Main entry point for the application.
+
+    @param[in] argc    Argument count
+    @param[in] argv    Argument vector
+    @return            Exit code
+*/
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;

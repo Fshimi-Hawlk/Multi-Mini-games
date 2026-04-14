@@ -1,15 +1,10 @@
 /**
- * @file algo.c
- * @author Maxime CHAUVEAU
- * @brief Game logic and algorithms for Echecs.
- * @version 1.0
- * @date 2024
- *
- * This file contains all the game logic functions including
- * piece movement, move validation, check/checkmate detection,
- * and promotion handling.
- */
-
+    @file algo.c
+    @author Léandre BAUDET
+    @date 2024-01-01
+    @date 2026-04-14
+    @brief Game logic and algorithms for Chess.
+*/
 #include "algo.h"
 #include "global.h"
 #include "utils.h"
@@ -19,22 +14,22 @@
 #include "audio.h"
 
 /**
- * @brief Select a piece on the board.
- * @param board The game board
- * @param targetPos The position of the piece to select
- */
+    @brief Select a piece on the board.
+    @param[in,out] board     The game board
+    @param[in]     targetPos The position of the piece to select
+*/
 void selectPiece(Board_t board, IVec2_st targetPos) {
     selectionnedPiece = board[targetPos.y][targetPos.x];
     updatePossibleMoves(board);
 } 
 
 /**
- * @brief Attempt to move a piece to a new position.
- * @param board The game board
- * @param selectionnedPiece The piece to move
- * @param boardPos The target position
- * @return true if the move was successful, false otherwise
- */
+    @brief Attempt to move a piece to a new position.
+    @param[in,out] board             The game board
+    @param[in,out] selectionnedPiece Pointer to the piece being moved
+    @param[in]     boardPos          The target coordinates
+    @return bool True if the move was successful, false otherwise
+*/
 bool movement(Board_t board, Piece_st* selectionnedPiece, IVec2_st boardPos) {
     IVec2_st posPIECE_NAME_ROOKDep, posPIECE_NAME_ROOKArr;
     Piece_st* tempPiece = NULL;
@@ -119,13 +114,13 @@ bool movement(Board_t board, Piece_st* selectionnedPiece, IVec2_st boardPos) {
 }
 
 /**
- * @brief Check if a piece can be placed at a specific position.
- * @param board The game board
- * @param selectionnedPiece The piece to check
- * @param col The target column
- * @param row The target row
- * @return true if the move is valid, false otherwise
- */
+    @brief Check if a piece can be placed at a specific position according to its movement rules.
+    @param[in] board             The game board
+    @param[in] selectionnedPiece Pointer to the piece to check
+    @param[in] col               The target column
+    @param[in] row               The target row
+    @return bool True if the move is valid, false otherwise
+*/
 bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
     int dx = col - selectionnedPiece->pos.x;
     int dy = row - selectionnedPiece->pos.y;
@@ -255,14 +250,14 @@ bool canBePlaced(Board_t board, Piece_st* selectionnedPiece, int col, int row) {
 }
 
 /**
- * @brief Check if a move would leave the king in check.
- * @param board The game board
- * @param selectionnedPiece The piece to move
- * @param targetColumn The target column
- * @param targetLine The target row
- * @param player The player whose turn it is (0 for white, 1 for black)
- * @return true if the move would result in check, false otherwise
- */
+    @brief Check if a move would leave the king in check.
+    @param[in,out] board             The game board
+    @param[in,out] selectionnedPiece Pointer to the piece to move
+    @param[in]     targetColumn      The target column
+    @param[in]     targetLine        The target row
+    @param[in]     player            The player whose turn it is (0 for white, 1 for black)
+    @return bool True if the move would result in check, false otherwise
+*/
 bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int targetLine, int player) {
     Player_st* targetPlayer = player ? blackPlayer : whitePlayer;
     Player_st* adversaryPlayer = player ? whitePlayer : blackPlayer;
@@ -318,10 +313,10 @@ bool isInCheck(Board_t board, Piece_st* selectionnedPiece, int targetColumn, int
 }
 
 /**
- * @brief Check if the current player is in checkmate.
- * @param board The game board
- * @return true if checkmate, false otherwise
- */
+    @brief Check if the current player is in checkmate.
+    @param[in,out] board The game board
+    @return bool True if checkmate, false otherwise
+*/
 bool isCheckmate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
 
@@ -348,10 +343,10 @@ bool isCheckmate(Board_t board) {
 }
 
 /**
- * @brief Check if the current player is in stalemate.
- * @param board The game board
- * @return true if stalemate, false otherwise
- */
+    @brief Check if the current player is in stalemate.
+    @param[in,out] board The game board
+    @return bool True if stalemate, false otherwise
+*/
 bool isStalemate(Board_t board) {
     Player_st* tempJoueur = !playerTurn ? whitePlayer : blackPlayer;
     
@@ -375,6 +370,14 @@ bool isStalemate(Board_t board) {
     return true;
 }
 
+/**
+    @brief Check if a square is threatened by any of the opponent's pieces.
+    @param[in,out] board   The game board
+    @param[in]     playerA The current player (0 for white, 1 for black)
+    @param[in]     xCase   The x-coordinate of the square to check
+    @param[in]     yCase   The y-coordinate of the square to check
+    @return bool True if the square is threatened, false otherwise
+*/
 bool isSquareThreatened(Board_t board, int playerA, int xCase, int yCase) {
     Player_st* playerAdverse = !playerA ? whitePlayer : blackPlayer;
 
@@ -396,6 +399,10 @@ bool isSquareThreatened(Board_t board, int playerA, int xCase, int yCase) {
     return false;
 }
 
+/**
+    @brief Update the list of possible moves for the currently selected piece.
+    @param[in] board The game board
+*/
 void updatePossibleMoves(Board_t board) {
     nbPositionsPossibles = 0;
 
@@ -408,6 +415,11 @@ void updatePossibleMoves(Board_t board) {
     }
 }
 
+/**
+    @brief Handle the selection of a piece for pawn promotion.
+    @param[in,out] board The game board
+    @return bool True if a promotion choice was made, false otherwise
+*/
 bool promotionChoice(Board_t board) {
     IVec2_st mousePos = GetMousePositionI();
 
@@ -469,6 +481,12 @@ bool promotionChoice(Board_t board) {
 
 }
 
+/**
+    @brief Apply a series of predefined moves to the board (simulating a game).
+    @param[in,out] board          The game board
+    @param[in]     coupPredefinis Array of strings representing moves in algebraic notation
+    @param[in]     nCoup          Number of moves in the array
+*/
 void applyPredifinedMoves(Board_t board, char *coupPredefinis[], int nCoup) {
     IVec2_st posSrc, posDest; 
     Piece_st* targetPiece = NULL;

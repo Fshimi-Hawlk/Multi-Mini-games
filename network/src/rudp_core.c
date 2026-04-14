@@ -1,17 +1,10 @@
 /**
- * @file rudp_core.c
- * @brief Cœur du protocole Reliable UDP (RUDP) simplifié.
- * 
- * Ce module gère la couche de transport fiable au-dessus de l'UDP standard.
- * Il assure le séquencement des paquets, la détection des doublons via une fenêtre
- * glissante et fournit les mécanismes d'acquittement cumulatif (ACK + Bitfield).
- * 
- * @note L'en-tête RUDP (RUDPHeader_St) occupe exactement 11 octets sur le réseau.
- * 
- * @author i-Charlys
- * @date 2026-03-18
- */
-
+    @file rudp_core.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Cœur du protocole Reliable UDP (RUDP) simplifié.
+*/
 #include "rudp_core.h"
 #include <arpa/inet.h>
 

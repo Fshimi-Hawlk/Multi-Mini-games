@@ -1,3 +1,10 @@
+/**
+    @file game.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of UI and rendering functions for the Snake mini-game.
+*/
 #include "ui/game.h"
 
 void snake_drawBoard(const Board_t board) {

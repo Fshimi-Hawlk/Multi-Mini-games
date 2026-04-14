@@ -1,26 +1,10 @@
 /**
     @file main.c
-    @author LeandreB8
+    @author Léandre BAUDET
     @date 2026-01-12
-    @date 2026-03-22
+    @date 2026-04-14
     @brief Program entry point – lobby main loop and game scene manager.
-
-    Contributors:
-        - LeandreB8:
-            - Implemented basic lobby's logic (initialization, game loop, ...)
-        - Fshimi-Hawlk:
-            - Moved & reworked lobby's init/loop/free in dedicated lobbyAPI files
-            - Implemented sub-game playability via API
-
-    Architecture
-    ────────────
-    Instead of a growing switch/case, games are registered in the `scenes[]` table.
-    Adding a new game requires only:
-      1. A new MINI_GAME_ID_XXX entry in MiniGameId_Et (userTypes.h)
-      2. A new row in scenes[] below
-    The main loop is generic and never changes.
 */
-
 // #include "APIs/lobbyAPI.h"
 // #include "APIs/tetrisAPI.h"
 // #include "APIs/solitaireAPI.h"

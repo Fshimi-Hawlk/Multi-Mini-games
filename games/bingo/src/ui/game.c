@@ -1,29 +1,20 @@
 /**
-    @file game.c (ui)
-    @author Fshimi-Hawlk
+    @file game.c
+    @author Kimi BERGE
     @date 2026-03-02
-    @date 2026-03-19
-    @brief Low-level drawing routines for <Game Name> gameplay elements.
-
-    Contributors:
-        - Fshimi-Hawlk:
-            - Provided documentation start-up
-        - <Name>:
-            - What you added / changed / fixed (keep it short)
-
-    If the file needs more context than fits in @brief, write 2-5 lines here.
-    @note Put warnings, important limitations, "we know it's ugly but...", or future plans here
-
-    // Try to align the `for` for better readability
-    // Try to keep the same order of the includes
-    Use @see `path/to/related/file.h` when this file depends heavily on another one.
+    @date 2026-04-14
+    @brief Low-level drawing routines for Bingo gameplay elements.
 */
-
 #include "ui/game.h"
 
 #include "utils/globals.h"
 #include "utils/userTypes.h"
 
+/**
+    @brief Draws the selection screen for choosing a Bingo card.
+
+    @param[in]     layout       The layout containing choice card definitions.
+*/
 void bingo_drawChoiceCards(const Layout_St* layout) {
     const char* title = "Choose your bingo card";
     uint titleSize = 32;
@@ -89,6 +80,12 @@ void bingo_drawChoiceCards(const Layout_St* layout) {
     }
 }
 
+/**
+    @brief Draws the main player Bingo card.
+
+    @param[in]     layout       The current game layout.
+    @param[in]     player       The player's card and marking state.
+*/
 void bingo_drawCard(const Layout_St* const layout, const PlayerCard_St* const player) {
     f32 roundness = 0.05f;
     DrawRectangleRounded(layout->cardRect, roundness, 16, WHITE);

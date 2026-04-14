@@ -1,11 +1,23 @@
+/**
+    @file golf_camera.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief 3D Camera management for Golf 3D.
+*/
 #include "golf.h"
 
-#define CAM_PITCH_MIN  5.0f
-#define CAM_PITCH_MAX  89.0f
-#define CAM_DIST_MIN   1.5f
-#define CAM_DIST_MAX   80.0f
-#define CAM_SMOOTH     0.08f
+#define CAM_PITCH_MIN  5.0f   ///< Minimum camera pitch in degrees
+#define CAM_PITCH_MAX  89.0f  ///< Maximum camera pitch in degrees
+#define CAM_DIST_MIN   1.5f   ///< Minimum camera distance from target
+#define CAM_DIST_MAX   80.0f  ///< Maximum camera distance from target
+#define CAM_SMOOTH     0.08f  ///< Camera smoothing factor
 
+/**
+    @brief Initializes the golf camera.
+    @param[out] c      Camera to initialize.
+    @param[in]  target Initial target position.
+*/
 void GCam_Init(GolfCamera *c, Vector3 target) {
     float yrad, prad;
 
@@ -30,6 +42,12 @@ void GCam_Init(GolfCamera *c, Vector3 target) {
     };
 }
 
+/**
+    @brief Updates the camera position and orientation based on current mode.
+    @param[in,out] c  Camera to update.
+    @param[in]     g  Game state.
+    @param[in]     dt Delta time.
+*/
 void GCam_Update(GolfCamera *c, GolfGame *g, float dt) {
     Ball    *b              = &g->ball;
     Vector3  desired_target = b->pos;
@@ -116,11 +134,25 @@ void GCam_Update(GolfCamera *c, GolfGame *g, float dt) {
     if (IsKeyPressed(KEY_F4)) GCam_SetMode(c, CAM_HOLE);
 }
 
+/**
+    @brief Changes the camera mode and sets default distance.
+    @param[in,out] c    Camera state.
+    @param[in]     mode New camera mode.
+*/
 void GCam_SetMode(GolfCamera *c, CamMode mode) {
     c->mode = mode;
     if (mode == CAM_FOLLOW) c->distance = 8.0f;
     if (mode == CAM_ORBIT)  c->distance = 12.0f;
 }
 
+/**
+    @brief Starts 3D rendering mode for the camera.
+    @param[in] c Camera state.
+*/
 void GCam_BeginMode3D(GolfCamera *c) { BeginMode3D(c->cam); }
+
+/**
+    @brief Ends 3D rendering mode.
+*/
 void GCam_EndMode3D(void)            { EndMode3D(); }
+

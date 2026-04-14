@@ -1,3 +1,10 @@
+/**
+    @file clientInterface.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Client-side network interface for Chess.
+*/
 #include "chessAPI.h"
 #include "networkInterface.h"
 #include "rudp_core.h"
@@ -15,26 +22,52 @@
 extern s32 networkSocket;
 extern RUDPConnection_St serverConnection;
 
+/**
+    @brief Local copy of the chess board for the client.
+*/
 static Board_t current_board;
-static s32 my_color = -1; // 0: White, 1: Black, -1: Spectator
+
+/**
+    @brief The player's assigned color (0: White, 1: Black, -1: Spectator).
+*/
+static s32 my_color = -1; 
+
+/**
+    @brief Flag indicating if the network game has started.
+*/
 static bool game_started = false;
 
-// Waiting room state
-static s32 game_status = 0; // 0: WAITING, 1: PLAYING
-static s32 selected_bot_level = 0; // 0: None, 1: Easy, 2: Normal, 3: Hard
+/**
+    @brief Current game status (0: WAITING, 1: PLAYING).
+*/
+static s32 game_status = 0; 
+
+/**
+    @brief Selected bot difficulty level (0: None, 1: Easy, 2: Normal, 3: Hard).
+*/
+static s32 selected_bot_level = 0; 
+
+/**
+    @brief The player's internal network ID.
+*/
 static s32 my_id_internal = -1;
 
-// Structures for networking
 #pragma pack(push, 1)
+/**
+    @brief Network payload for a chess move.
+*/
 typedef struct {
-    u8 from_x, from_y;
-    u8 to_x, to_y;
-    u8 promotion; // 0: None, 1: Queen, 2: Rook, 3: Bishop, 4: Knight
+    u8 from_x, from_y;  ///< Starting coordinates
+    u8 to_x, to_y;      ///< Ending coordinates
+    u8 promotion;       ///< Promotion choice (0: None, 1: Queen, 2: Rook, 3: Bishop, 4: Knight)
 } ChessMovePayload_St;
 #pragma pack(pop)
 
 extern void chess_initAudio(void);
 
+/**
+    @brief Initialize the chess client module.
+*/
 void chess_client_init(void) {
     chess_initAudio();
     initTextures();
@@ -51,6 +84,13 @@ void chess_client_init(void) {
     game_started = false;
 }
 
+/**
+    @brief Callback function called when data is received from the server.
+    @param[in] player_id ID of the player who sent the data
+    @param[in] action    Action code associated with the data
+    @param[in] data      Pointer to the received data
+    @param[in] len       Length of the received data
+*/
 void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
@@ -101,6 +141,10 @@ void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     }
 }
 
+/**
+    @brief Update the chess client state.
+    @param[in] dt Delta time since the last update
+*/
 void chess_client_update(float dt) {
     if (my_id_internal == -1) {
         // Send join request if not already done
@@ -213,6 +257,9 @@ void chess_client_update(float dt) {
     // removed local ESC handler to use lobby pause menu instead
 }
 
+/**
+    @brief Draw the chess client UI.
+*/
 void chess_client_draw(void) {
     if (game_status == 0) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
@@ -238,6 +285,9 @@ void chess_client_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, DARKGRAY);
 }
 
+/**
+    @brief Chess client module interface definition.
+*/
 GameClientInterface_St ChessClientModule = {
     .id = MINI_GAME_ID_CHESS,
     .name = "Echecs",
@@ -247,7 +297,11 @@ GameClientInterface_St ChessClientModule = {
     .draw = chess_client_draw
 };
 
-// API Implementation
+/**
+    @brief Initialize the chess game state.
+    @param[out] game Pointer to the pointer that will store the created game structure
+    @return Error_Et OK on success, error code otherwise
+*/
 Error_Et chess_initGame(ChessGame_St** game) {
     *game = malloc(sizeof(ChessGame_St));
     if (!*game) return ERROR_ALLOC;
@@ -259,6 +313,11 @@ Error_Et chess_initGame(ChessGame_St** game) {
     return OK;
 }
 
+/**
+    @brief Free the chess game resources.
+    @param[in,out] game Pointer to the pointer of the game structure to free
+    @return Error_Et OK on success
+*/
 Error_Et chess_freeGame(ChessGame_St** game) {
     if (game && *game) {
         freeTextures();

@@ -1,3 +1,10 @@
+/**
+    @file shape.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of shape rendering UI for Tetris.
+*/
 #include "ui/shape.h"
 
 void tetris_drawShape(boardShape_st boardShape) {

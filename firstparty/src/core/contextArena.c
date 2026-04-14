@@ -1,3 +1,10 @@
+/**
+    @file contextArena.c
+    @author Multi Mini-Games Team
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief contextArena.c implementation/header file
+*/
 #include "contextArena.h"
 
 Arena globalArena = {0};

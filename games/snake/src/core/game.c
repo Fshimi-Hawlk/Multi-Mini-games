@@ -1,3 +1,10 @@
+/**
+    @file game.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Implementation of core gameplay logic for the Snake mini-game.
+*/
 #include "core/game.h"
 #include "utils/common.h"
 

@@ -1,17 +1,10 @@
 /**
- * @file paramsMenu.h
- * @brief Shared parameters menu UI – gear button + settings panel
- * @author Multi Mini-Games Team
- * @date 2026-03-28
- *
- * Three sections: Resolution, Audio (master volume + mute), Display (FPS counter).
- *
- * Usage:
- *   1. Define PARAMS_MENU_IMPLEMENTATION in exactly one .c file before including
- *   2. Include raylib.h BEFORE this header when implementation is enabled
- *   3. Include this header normally in all other files
- */
-
+    @file paramsMenu.h
+    @author Multi Mini-Games Team
+    @date 2026-03-28
+    @date 2026-04-14
+    @brief Shared parameters menu UI – gear button + settings panel
+*/
 #ifndef PARAMS_MENU_H
 #define PARAMS_MENU_H
 

@@ -1,5 +1,17 @@
-#include "../../include/core/game.h"
+/**
+    @file main.c
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Entry point for the Golf 3D mini-game (standalone mode).
+*/
+#include "golf.h"
 
+/**
+    @brief Main entry point for the standalone Golf game.
+
+    @return 0 on successful exit.
+*/
 int main(void) {
     GolfGame game;
 

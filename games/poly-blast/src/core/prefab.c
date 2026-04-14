@@ -1,6 +1,20 @@
+/**
+    @file prefab.c
+    @author Kimi BERGE
+    @date 2026-01-07
+    @date 2026-04-14
+    @brief Prefab manipulation and variant generation logic implementation.
+*/
 #include "core/prefab.h"
 #include "core/board.h"
 
+/**
+    @brief Compares if two prefabs have the same block offsets.
+
+    @param[in]     prefab1      First prefab.
+    @param[in]     prefab2      Second prefab.
+    @return                     true if they have similar offsets, false otherwise.
+*/
 bool polyBlast_haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefab2) {
     bool hashmap[36] = {0};
     bool same = true;
@@ -18,6 +32,14 @@ bool polyBlast_haveSimilarOffsets(const Prefab_St prefab1, const Prefab_St prefa
     return same;
 }
 
+/**
+    @brief Checks if a prefab would be within board bounds if placed at pos.
+
+    @param[in]     prefab       Pointer to the prefab.
+    @param[in]     pos          Target position.
+    @param[in]     board        Pointer to the board.
+    @return                     true if in bounds, false otherwise.
+*/
 bool polyBlast_isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 pos, const Board_St* const board) {
     return polyBlast_isInBound(pos, board)
         && (pos.x + prefab->width <= board->width)
@@ -27,13 +49,10 @@ bool polyBlast_isPrefabInBoundAt(const Prefab_St* const prefab, const s8Vector2 
 /**
     @brief Finds the minimum and maximum coordinates among a prefab's block offsets.
 
-    Iterates through the provided offsets and computes the bounding box min/max values.
-    Used during rotation/mirroring to normalize offsets.
-
-    @param offsets       Array of block offsets.
-    @param blockCount    Number of blocks in the prefab.
-    @param outMin        Output: minimum x/y coordinates.
-    @param outMax        Output: maximum x/y coordinates.
+    @param[in]     offsets      Array of block offsets.
+    @param[in]     blockCount   Number of blocks.
+    @param[out]    min          Pointer to store minimum coordinates.
+    @param[out]    max          Pointer to store maximum coordinates.
 */
 static void findPrefabMinMax(const s8Vector2 *const offsets, const u8 blockCount, s8Vector2* const min, s8Vector2* const max) {
     min->x = offsets[0].x;
@@ -49,6 +68,11 @@ static void findPrefabMinMax(const s8Vector2 *const offsets, const u8 blockCount
     }
 }
 
+/**
+    @brief Calculates and sets the bounding box (width/height) of a prefab.
+
+    @param[in,out] prefab       Pointer to the prefab.
+*/
 void polyBlast_setPrefabBoundingBox(Prefab_St* const prefab) {
     s8Vector2 min, max;
     findPrefabMinMax((const s8Vector2 *const) prefab->offsets, prefab->blockCount, &min, &max);
@@ -58,11 +82,23 @@ void polyBlast_setPrefabBoundingBox(Prefab_St* const prefab) {
     prefab->height = (max.y - min.y + 1);
 }
 
+/**
+    @brief Gets the center point of the prefab's bounding box.
+
+    @param[in]     prefab       The prefab.
+    @return                     The center position vector.
+*/
 f32Vector2 polyBlast_getOffsetCenter(const Prefab_St prefab) {
     if (prefab.blockCount == 0) return (f32Vector2) {0};
     return (f32Vector2) { .x = prefab.width / 2.0f, .y = prefab.height / 2.0f };
 }
 
+/**
+    @brief Generates all rotations and mirrored variants of a prefab and adds them to a bag.
+
+    @param[in]     prefab       Base prefab.
+    @param[in,out] prefabsBag   Bag to add variants to.
+*/
 void polyBlast_addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const prefabsBag) {
     da_append(prefabsBag, prefab);
 
@@ -83,6 +119,12 @@ void polyBlast_addPrefabAndVariants(Prefab_St prefab, PrefabBagVec_St* const pre
     }
 }
 
+/**
+    @brief Rotates a prefab's block offsets clockwise.
+
+    @param[in,out] prefab       Pointer to the prefab.
+    @param[in]     rotateBy     Number of 90-degree rotations.
+*/
 void polyBlast_rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 
@@ -118,6 +160,11 @@ void polyBlast_rotatePrefab(Prefab_St* const prefab, u8 rotateBy) {
     memcpy(prefab->offsets, newOffsets, prefab->blockCount * sizeof(*prefab->offsets));
 }
 
+/**
+    @brief Mirrors a prefab's block offsets horizontally.
+
+    @param[in,out] prefab       Pointer to the prefab.
+*/
 void polyBlast_mirrorPrefab(Prefab_St* const prefab) {
     if (prefab == NULL || prefab->blockCount == 0) return;
 

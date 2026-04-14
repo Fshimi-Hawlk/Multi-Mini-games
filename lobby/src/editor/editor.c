@@ -1,11 +1,10 @@
 /**
-    @file editor/editor.c
-    @author Fshimi-Hawlk
+    @file editor.c
+    @author Léandre BAUDET
     @date 2026-03-28
     @date 2026-04-14
     @brief Central editor initialization and high-level orchestration.
 */
-
 #include "editor/editor.h"
 #include "editor/types.h"
 #include "editor/properties.h"

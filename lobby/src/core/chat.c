@@ -1,3 +1,10 @@
+/**
+    @file chat.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief chat.c implementation/header file
+*/
 #include "core/chat.h"
 
 #include "utils/globals.h"

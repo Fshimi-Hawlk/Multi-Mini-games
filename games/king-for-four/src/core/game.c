@@ -1,10 +1,14 @@
 /**
- * @file game.c
- * @brief Core game logic implementation for King for Four.
- */
-
+    @file game.c
+    @author Charles CAILLON
+    @date 2026-03-18
+    @date 2026-04-14
+    @brief Core game logic implementation for King for Four.
+*/
 #include "core/game.h"
 #include <stdio.h>
+
+// --- Public Functions ---
 
 /**
  * @brief Initializes the game logic and state.

@@ -1,10 +1,10 @@
 /**
-    @file sharedWidgets/scrollFrame.h
-    @author Fshimi-Hawlk
+    @file scrollFrame.h
+    @author Multi Mini-Games Team
     @date 2026-03-28
+    @date 2026-04-14
     @brief Reusable scrollable frame – replaces all the repeated scrollY + scissor logic.
 */
-
 #ifndef WIDGETS_SCROLL_FRAME_H
 #define WIDGETS_SCROLL_FRAME_H
 

@@ -1,3 +1,10 @@
+/**
+    @file grass.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief grass.c implementation/header file
+*/
 #include "ui/grass.h"
 
 #include "utils/globals.h"

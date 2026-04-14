@@ -1,3 +1,10 @@
+/**
+    @file background.c
+    @author Léandre BAUDET
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief background.c implementation/header file
+*/
 #include "ui/background.h"
 
 #include "utils/globals.h"

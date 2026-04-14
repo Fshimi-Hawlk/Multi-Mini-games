@@ -1,8 +1,10 @@
 /**
- * @file test_streak.c
- * @brief Unit tests for streak tracking and display.
- */
-
+    @file test_streak.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for streak tracking and display.
+*/
 #include "core/game.h"
 #include "core/board.h"
 

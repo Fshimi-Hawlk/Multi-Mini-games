@@ -1,8 +1,10 @@
 /**
- * @file test_font.c
- * @brief Unit tests for font loading and text utilities.
- */
-
+    @file test_font.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief Unit tests for font loading and text utilities.
+*/
 #include "utils/globals.h"
 
 #include "core/game.h"

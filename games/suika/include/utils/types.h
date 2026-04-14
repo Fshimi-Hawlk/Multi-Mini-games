@@ -1,13 +1,10 @@
 /**
-    @file utils/types.h
-    @author Multi Mini-Games Team
-    @date February 2026
+    @file types.h
+    @author Maxime CHAUVEAU
+    @date 2026-04-14
+    @date 2026-04-14
     @brief Type definitions for the Suika (Watermelon Game) mini-game.
-
-    Defines all fruit types, fruit properties, game structures and constants
-    used throughout the Suika game implementation.
 */
-
 #ifndef SUIKA_UTILS_TYPES_H
 #define SUIKA_UTILS_TYPES_H
 
@@ -26,18 +23,18 @@
 */
 typedef enum
 {
-    FRUIT_CHERRY = 0,       /**< Smallest fruit - radius 20px, 10 points */
-    FRUIT_GRAPE,            /**< Second smallest - radius 25px, 30 points */
-    FRUIT_STRAWBERRY,       /**< radius 30px, 20 points */
-    FRUIT_CLEMENTINE,       /**< radius 35px, 50 points */
-    FRUIT_ORANGE,           /**< radius 40px, 40 points */
-    FRUIT_APPLE,            /**< radius 45px, 60 points */
-    FRUIT_PEAR,             /**< radius 50px, 70 points */
-    FRUIT_PEACH,            /**< radius 55px, 80 points */
-    FRUIT_PINEAPPLE,        /**< radius 60px, 90 points */
-    FRUIT_MELON,            /**< radius 70px, 100 points */
-    FRUIT_WATERMELON,       /**< Largest fruit - radius 80px, 150 points */
-    FRUIT_TYPE_COUNT        /**< Total number of fruit types */
+    FRUIT_CHERRY = 0,       ///< Smallest fruit - radius 20px, 10 points
+    FRUIT_GRAPE,            ///< Second smallest - radius 25px, 30 points
+    FRUIT_STRAWBERRY,       ///< radius 30px, 20 points
+    FRUIT_CLEMENTINE,       ///< radius 35px, 50 points
+    FRUIT_ORANGE,           ///< radius 40px, 40 points
+    FRUIT_APPLE,            ///< radius 45px, 60 points
+    FRUIT_PEAR,             ///< radius 50px, 70 points
+    FRUIT_PEACH,            ///< radius 55px, 80 points
+    FRUIT_PINEAPPLE,        ///< radius 60px, 90 points
+    FRUIT_MELON,            ///< radius 70px, 100 points
+    FRUIT_WATERMELON,       ///< Largest fruit - radius 80px, 150 points
+    FRUIT_TYPE_COUNT        ///< Total number of fruit types
 } FruitType_Et;
 
 /**
@@ -47,11 +44,11 @@ typedef enum
 */
 typedef struct
 {
-    const char* name;       /**< Fruit name identifier */
-    int x;                  /**< X position in sprite atlas */
-    int y;                  /**< Y position in sprite atlas */
-    int w;                  /**< Width in sprite atlas */
-    int h;                  /**< Height in sprite atlas */
+    const char* name;       ///< Fruit name identifier
+    int x;                  ///< X position in sprite atlas
+    int y;                  ///< Y position in sprite atlas
+    int w;                  ///< Width in sprite atlas
+    int h;                  ///< Height in sprite atlas
 } FruitSprite_St;
 
 /**
@@ -62,10 +59,10 @@ typedef struct
 */
 typedef struct
 {
-    float radius;           /**< Collision radius in pixels */
-    Color color;            /**< Fallback color if sprite unavailable */
-    int points;             /**< Points awarded when this fruit is created */
-    Rectangle spriteRect;   /**< Source rectangle in the fruit atlas */
+    float radius;           ///< Collision radius in pixels
+    Color color;            ///< Fallback color if sprite unavailable
+    int points;             ///< Points awarded when this fruit is created
+    Rectangle spriteRect;   ///< Source rectangle in the fruit atlas
 } FruitProperties_St;
 
 /**
@@ -76,16 +73,16 @@ typedef struct
 */
 typedef struct
 {
-    Vector2 position;       /**< Current position in world coordinates */
-    Vector2 velocity;       /**< Current velocity in pixels/second */
-    FruitType_Et type;      /**< Fruit type determining size and merge behavior */
-    float radius;           /**< Current collision radius */
-    float rotation;         /**< Current rotation angle in radians */
-    float angularVelocity;  /**< Rotation speed in radians/second */
-    bool isActive;          /**< Whether this fruit is currently in play */
-    bool isMerging;         /**< Temporary flag during merge animation */
-    int id;                 /**< Unique identifier for this fruit instance */
-    float glowIntensity;   /**< Glow effect intensity for merge animation */
+    Vector2 position;       ///< Current position in world coordinates
+    Vector2 velocity;       ///< Current velocity in pixels/second
+    FruitType_Et type;      ///< Fruit type determining size and merge behavior
+    float radius;           ///< Current collision radius
+    float rotation;         ///< Current rotation angle in radians
+    float angularVelocity;  ///< Rotation speed in radians/second
+    bool isActive;          ///< Whether this fruit is currently in play
+    bool isMerging;         ///< Temporary flag during merge animation
+    int id;                 ///< Unique identifier for this fruit instance
+    float glowIntensity;    ///< Glow effect intensity for merge animation
 } Fruit_St;
 
 /**
@@ -93,13 +90,13 @@ typedef struct
 */
 typedef struct
 {
-    Vector2 position;
-    Vector2 velocity;
-    Color color;
-    float life;
-    float maxLife;
-    float size;
-    bool isActive;
+    Vector2 position;       ///< Current position of the particle
+    Vector2 velocity;       ///< Current velocity of the particle
+    Color color;            ///< Color of the particle
+    float life;             ///< Remaining lifetime of the particle
+    float maxLife;          ///< Maximum lifetime of the particle
+    float size;             ///< Current size of the particle
+    bool isActive;          ///< Whether the particle is currently active
 } Particle_St;
 
 #define SUIKA_MAX_PARTICLES 64
@@ -114,34 +111,37 @@ typedef struct
 */
 struct SuikaGame_St
 {
-    BaseGame_St base;               /**< Base game interface for lobby integration */
+    BaseGame_St base;                   ///< Base game interface for lobby integration
 
-    char assetPath[512];            /**< Resolved asset base directory (OPT: moved from static global) */
+    char assetPath[512];                ///< Resolved asset base directory (OPT: moved from static global)
 
-    Texture2D fruitAtlas;           /**< Sprite atlas containing all fruit images */
+    Texture2D fruitAtlas;               ///< Sprite atlas containing all fruit images
 
-    Fruit_St fruits[SUIKA_MAX_FRUITS];  /**< Pool of all fruit instances */
-    int nextFruitId;                /**< Counter for unique fruit IDs */
-    Fruit_St nextFruit;             /**< Preview of next fruit to drop */
-    float nextFruitX;               /**< X position for next fruit drop */
-    bool canDrop;                   /**< Whether player can drop a new fruit */
-    float dropTimer;                /**< Time since last drop (for cooldown) */
-    long score;                     /**< Current game score */
-    long highScore;                 /**< Best score this session */
-    bool isGameOver;                /**< Whether game has ended */
-    float gameOverTimer;            /**< Time since game over */
-    float gravity;                  /**< Gravity acceleration in pixels/second^2 */
+    Fruit_St fruits[SUIKA_MAX_FRUITS];  ///< Pool of all fruit instances
+    int nextFruitId;                    ///< Counter for unique fruit IDs
+    Fruit_St nextFruit;                 ///< Preview of next fruit to drop
+    float nextFruitX;                   ///< X position for next fruit drop
+    bool canDrop;                       ///< Whether player can drop a new fruit
+    float dropTimer;                    ///< Time since last drop (for cooldown)
+    long score;                         ///< Current game score
+    long highScore;                     ///< Best score this session
+    bool isGameOver;                    ///< Whether game has ended
+    float gameOverTimer;                ///< Time since game over
+    float gravity;                      ///< Gravity acceleration in pixels/second^2
     
     // Fonctionnalité capacité 'P' - Auto-drop avec score désactivé
-    bool autoDropEnabled;           /**< Mode dépôt automatique activé (touche P) */
-    bool scoreMultiplierEnabled;    /**< Multiplicateur de score actif (désactivé pendant auto-drop) */
-    float baseDropCooldown;         /**< Temps de base entre les dépôts (1 seconde) */
+    bool autoDropEnabled;               ///< Mode dépôt automatique activé (touche P)
+    bool scoreMultiplierEnabled;        ///< Multiplicateur de score actif (désactivé pendant auto-drop)
+    float baseDropCooldown;             ///< Temps de base entre les dépôts (1 seconde)
     
     // Système de particules pour les effets visuels
-    Particle_St particles[SUIKA_MAX_PARTICLES];
-    int particleCount;
+    Particle_St particles[SUIKA_MAX_PARTICLES]; ///< Pool of particles for visual effects
+    int particleCount;                          ///< Current number of active particles
 };
 
+/**
+    @brief Definition of typedef struct SuikaGame_St SuikaGame_St
+*/
 typedef struct SuikaGame_St SuikaGame_St;
 
 #endif

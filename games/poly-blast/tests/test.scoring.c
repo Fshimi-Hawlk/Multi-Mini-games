@@ -1,8 +1,10 @@
 /**
-    file test_scoring.c
-    brief Unit tests for scoring system.
+    @file test.scoring.c
+    @author Kimi BERGE
+    @date 2026-04-14
+    @date 2026-04-14
+    @brief test.scoring.c implementation/header file
 */
-
 #include "core/game.h"
 #include "core/board.h"
 #include "core/placement.h"
