@@ -1,6 +1,6 @@
 /**
     @file snakeAPI.c
-    @author Léandre BAUDET
+    @author Maxime CHAUVEAU
     @date 2026-02-07
     @date 2026-04-14
     @brief Implementation of the Snake mini-game.

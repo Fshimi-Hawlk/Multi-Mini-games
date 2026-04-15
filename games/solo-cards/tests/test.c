@@ -1,9 +1,9 @@
 /**
     @file test.c
-    @author Maxime CHAUVEAU
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief test.c implementation/header file
+    @brief Unit tests for core game mechanics including collision and rotation logic.
 */
 #include "core/board.h"
 #include "core/shape.h"

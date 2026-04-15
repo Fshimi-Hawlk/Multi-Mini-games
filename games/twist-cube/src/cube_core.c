@@ -1,9 +1,9 @@
 /**
     @file cube_core.c
     @author Léandre BAUDET
+    @date 2026-04-02
     @date 2026-04-14
-    @date 2026-04-14
-    @brief cube_core.c implementation/header file
+    @brief Core logic and rendering for the 3D Rubik's Cube game.
 */
 #include <stdio.h>
 #include <stdlib.h>

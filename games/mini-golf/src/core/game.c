@@ -1,9 +1,9 @@
 /**
     @file game.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief game.c implementation/header file
+    @brief Main game logic implementation for Mini Golf, including state management and main loop hooks.
 */
 #include "../../include/core/game.h"
 

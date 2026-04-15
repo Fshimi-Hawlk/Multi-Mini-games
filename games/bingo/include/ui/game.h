@@ -1,6 +1,6 @@
 /**
     @file game.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-03-03
     @date 2026-04-14
     @brief Drawing functions for bingo cards and game-specific UI components.

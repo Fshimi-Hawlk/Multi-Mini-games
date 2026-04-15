@@ -1,7 +1,7 @@
 /**
     @file ai.c
     @author Léandre BAUDET
-    @date 2026-04-14
+    @date 2026-04-02
     @date 2026-04-14
     @brief AI implementation for Chess using minimax with alpha-beta pruning.
 */

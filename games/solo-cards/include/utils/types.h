@@ -2,7 +2,7 @@
     @file types.h
     @author Maxime CHAUVEAU
     @date February 2026
-    @date 2026-04-14
+    @date 2026-04-07
     @brief Type definitions for Solitaire game
 */
 #ifndef UTILS_TYPES_H

@@ -1,5 +1,5 @@
 /**
- * @file kingClient_module.c
+ * @file clientInterface.c
  * @author i-Charlys
  * @author Fshimi-Hawlk
  * @date 2026-03-18

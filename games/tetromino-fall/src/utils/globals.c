@@ -1,9 +1,9 @@
 /**
     @file globals.c
-    @author Léandre BAUDET
+    @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief globals.c implementation/header file
+    @brief Global variable definitions including tetramino shapes, colors, and input repeat settings.
 */
 #include "utils/globals.h"
 #include "core/shape.h"

@@ -1,6 +1,6 @@
 /**
     @file globals.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-25
     @date 2026-04-14
     @brief Central location for process-wide global variables and pre-loaded resources.

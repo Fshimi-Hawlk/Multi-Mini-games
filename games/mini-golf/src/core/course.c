@@ -1,9 +1,9 @@
 /**
     @file course.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief course.c implementation/header file
+    @brief Course initialization, terrain generation using Perlin noise, and surface type detection.
 */
 #include "../../include/core/game.h"
 

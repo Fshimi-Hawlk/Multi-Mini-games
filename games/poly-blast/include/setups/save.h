@@ -1,6 +1,6 @@
 /**
     @file save.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-02-27
     @date 2026-04-14
     @brief Game state serialization, file I/O, and save-list management.
@@ -11,9 +11,9 @@
 #include "utils/userTypes.h"
 
 /**
-    @brief Description for polyBlast_getSerializedGameStateSize
-    @param[in,out] state The state parameter
-    @return Success/failure or the result of the function
+    @brief Calculates the total size in bytes required to serialize the game state.
+    @param[in]     state        Pointer to the game state to analyze.
+    @return                     Required size in bytes, or 0 on error.
 */
 u64 polyBlast_getSerializedGameStateSize(const PolyBlastGame_St* const state);
 
@@ -55,10 +55,10 @@ u64 polyBlast_serializeGameState(const PolyBlastGame_St* const state, u8* buffer
 bool polyBlast_deserializeGameState(PolyBlastGame_St* const state, const u8* buffer, const u64 bufferSize, bool init);
 
 /**
-    @brief Description for polyBlast_saveGameToFile
-    @param[in,out] state The state parameter
-    @param[in,out] filename The filename parameter
-    @return Success/failure or the result of the function
+    @brief Serializes the game state and writes it to a binary file.
+    @param[in]     state        Pointer to the game state to save.
+    @param[in]     filename     Path to the destination file.
+    @return                     true if saved successfully, false on error.
 */
 bool polyBlast_saveGameToFile(const PolyBlastGame_St* const state, const char* filename);
 

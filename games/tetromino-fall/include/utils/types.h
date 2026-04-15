@@ -1,9 +1,9 @@
 /**
     @file types.h
-    @author Léandre BAUDET
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief types.h implementation/header file
+    @brief Type definitions for the Tetromino Fall game, including shapes, board, and game state structures.
 */
 #ifndef UTILS_TYPES_H
 #define UTILS_TYPES_H
@@ -11,17 +11,17 @@
 #include "common.h"
 
 /**
-    @brief Global variable tetramino[4]
+    @brief Array of 4 2D vectors representing the relative positions of blocks in a tetramino.
 */
 typedef iVector2 tetramino[4];
 /**
-    @brief Global variable board_t[BOARD_HEIGHT][BOARD_WIDTH]
+    @brief 2D array of colors representing the game board state.
 */
 typedef Color board_t[BOARD_HEIGHT][BOARD_WIDTH];
 
 
 /**
-    @brief Definition of typedef enum
+    @brief Identifiers for each of the seven standard tetramino shapes.
 */
 typedef enum {
     I_SHAPE_ID, 
@@ -35,7 +35,7 @@ typedef enum {
 } shapeId;
 
 /**
-    @brief Definition of typedef struct
+    @brief State of an active tetramino on the board, including its shape, position, and orientation.
 */
 typedef struct {
     tetramino shape;
@@ -46,7 +46,7 @@ typedef struct {
 } boardShape_st;
 
 /**
-    @brief Definition of typedef struct
+    @brief Timing and speed parameters for the game's automatic drop mechanism.
 */
 typedef struct {
     float t;
@@ -55,7 +55,7 @@ typedef struct {
 } speed_st;
 
 /**
-    @brief Definition of typedef struct
+    @brief Configuration for input repeat delay and frequency (DAS - Delayed Auto Shift).
 */
 typedef struct {
     float leftTimer;
@@ -66,7 +66,7 @@ typedef struct {
 } inputRepeat_st;
 
 /**
-    @brief Definition of typedef struct
+    @brief Result of the move-finding algorithm, specifying target position and rotation.
 */
 typedef struct {
     iVector2 position;

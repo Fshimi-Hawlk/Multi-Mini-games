@@ -1,9 +1,9 @@
 /**
     @file camera.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief camera.c implementation/header file
+    @brief Implementation of the 3D orbit and follow camera system for Mini Golf.
 */
 #include "../../include/core/game.h"
 

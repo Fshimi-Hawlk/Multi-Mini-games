@@ -1,7 +1,7 @@
 /**
     @file snakeAPI.h
-    @author Léandre BAUDET
-    @date 2026-03-11
+    @author Fshimi-Hawlk
+    @date 2026-02-10
     @date 2026-04-14
     @brief Public API for the Snake mini-game.
 */

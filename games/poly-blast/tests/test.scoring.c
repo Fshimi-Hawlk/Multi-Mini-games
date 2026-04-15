@@ -1,9 +1,9 @@
 /**
     @file test.scoring.c
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
+    @date 2026-04-12
     @date 2026-04-14
-    @date 2026-04-14
-    @brief test.scoring.c implementation/header file
+    @brief Unit tests for the Poly Blast scoring system, verifying score calculations and streak management.
 */
 #include "core/game.h"
 #include "core/board.h"

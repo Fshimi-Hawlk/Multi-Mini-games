@@ -1,7 +1,7 @@
 /**
     @file solitaireAPI.c
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Solitaire public API — mirrors tetrisAPI pattern exactly.
 */

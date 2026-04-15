@@ -1,7 +1,7 @@
 /**
     @file game.c
-    @author Charles CAILLON
-    @date 2026-03-18
+    @author i-Charlys
+    @date 2026-03-11
     @date 2026-04-14
     @brief Core game logic implementation for King for Four.
 */

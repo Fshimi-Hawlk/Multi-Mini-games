@@ -1,6 +1,6 @@
 /**
     @file game.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-07
     @date 2026-04-14
     @brief Full game state initialization.
@@ -16,9 +16,9 @@
 bool polyBlast_initBoard(Board_St* const board);
 
 /**
-    @brief Description for polyBlast_initPrefabManager
-    @param[in,out] manager The manager parameter
-    @return Success/failure or the result of the function
+    @brief Initializes the prefab manager with default weights and empty bags.
+    @param[in,out] manager      Pointer to the prefab manager to initialize.
+    @return                     true on success, false on failure.
 */
 bool polyBlast_initPrefabManager(PrefabManager_St* const manager);
 

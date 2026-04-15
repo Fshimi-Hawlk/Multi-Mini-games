@@ -1,9 +1,9 @@
 /**
     @file clientInterface.c
-    @author Léandre BAUDET
+    @author i-Charlys
+    @date 2026-04-02
     @date 2026-04-14
-    @date 2026-04-14
-    @brief clientInterface.c implementation/header file
+    @brief Client-side implementation of the Twist Cube game interface managing local game state and server communication.
 */
 
 #include "raylib.h"

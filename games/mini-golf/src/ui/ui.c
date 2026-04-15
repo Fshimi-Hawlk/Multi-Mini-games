@@ -1,9 +1,9 @@
 /**
     @file ui.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief ui.c implementation/header file
+    @brief UI rendering implementation for HUD, menus, wind indicator, and scorecard.
 */
 #include "../../include/core/game.h"
 

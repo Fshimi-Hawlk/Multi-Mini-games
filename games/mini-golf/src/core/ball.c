@@ -1,9 +1,9 @@
 /**
     @file ball.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief ball.c implementation/header file
+    @brief Rendering logic for the golf ball and its projected trajectory.
 */
 #include "../../include/core/game.h"
 

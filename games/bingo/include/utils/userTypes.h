@@ -1,6 +1,6 @@
 /**
     @file userTypes.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-25
     @date 2026-04-14
     @brief Core type definitions used throughout the Bingo mini-game (networked).

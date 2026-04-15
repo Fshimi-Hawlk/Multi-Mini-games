@@ -1,6 +1,6 @@
 /**
     @file tetrisAPI.h
-    @author Léandre BAUDET
+    @author Fshimi-Hawlk
     @date 2026-02-07
     @date 2026-04-14
     @brief Public API for the Tetris mini-game.

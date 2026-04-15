@@ -1,7 +1,7 @@
 /**
     @file test_streak.c
-    @author Kimi BERGE
-    @date 2026-04-14
+    @author Fshimi-Hawlk
+    @date 2026-04-12
     @date 2026-04-14
     @brief Unit tests for streak tracking and display.
 */

@@ -1,7 +1,7 @@
 /**
     @file golf_camera.c
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief 3D Camera management for Golf 3D.
 */

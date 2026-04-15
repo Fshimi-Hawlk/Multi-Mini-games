@@ -1,6 +1,6 @@
 /**
     @file game.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-07
     @date 2026-04-14
     @brief Score management and high-level game logic functions.

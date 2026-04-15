@@ -1,7 +1,7 @@
 /**
     @file golf_data.c
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Official golf club data specifications.
 */

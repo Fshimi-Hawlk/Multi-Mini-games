@@ -1,6 +1,6 @@
 /**
     @file save.c
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-02-27
     @date 2026-04-14
     @brief Implementation of game state serialization and file I/O.

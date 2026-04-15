@@ -1,7 +1,7 @@
 /**
     @file serverInterface.c
-    @author Léandre BAUDET
-    @date 2026-04-14
+    @author i-Charlys
+    @date 2026-04-02
     @date 2026-04-14
     @brief Server-side implementation of the chess game.
 */

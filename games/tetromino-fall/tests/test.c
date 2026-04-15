@@ -1,9 +1,9 @@
 /**
     @file test.c
-    @author Léandre BAUDET
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief test.c implementation/header file
+    @brief Unit tests for the Tetromino Fall core logic, covering collision detection, board placement, and rotations.
 */
 #include "core/board.h"
 #include "core/shape.h"

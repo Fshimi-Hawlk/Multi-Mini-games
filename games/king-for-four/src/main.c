@@ -1,7 +1,7 @@
 /**
     @file main.c
-    @author Charles CAILLON
-    @date 2026-03-18
+    @author i-Charlys
+    @date 2026-03-11
     @date 2026-04-14
     @brief Standalone entry point for testing the King-for-Four game.
 */

@@ -1,7 +1,7 @@
 /**
     @file game.h
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Core game structures and constants for Golf 3D.
 */
@@ -99,7 +99,7 @@ typedef struct {
 } Hazard;
 
 /**
-    @brief Definition of a single golf hole.
+    @brief Data structure representing a single golf hole's properties and layout.
 */
 typedef struct {
     int       index;                    ///< Hole number (0 to MAX_HOLES-1)

@@ -1,6 +1,6 @@
 /**
     @file globals.c
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-25
     @date 2026-04-14
     @brief Global variable definitions for the Bingo game.

@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 /**
-    @brief Definition of typedef struct SolitaireGame_St SolitaireGame_St
+    @brief Forward declaration for the Solitaire game state structure.
 */
 typedef struct SolitaireGame_St SolitaireGame_St;
 

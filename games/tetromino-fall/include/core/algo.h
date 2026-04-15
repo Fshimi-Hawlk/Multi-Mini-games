@@ -1,7 +1,7 @@
 /**
     @file algo.h
-    @author Léandre BAUDET
-    @date 2026-04-14
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
     @brief AI algorithms for Tetris move optimization and board evaluation.
 */
