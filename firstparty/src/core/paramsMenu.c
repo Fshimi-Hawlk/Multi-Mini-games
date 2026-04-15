@@ -291,9 +291,10 @@ void paramsMenu_update(ParamsMenu_St* menu) {
             menu->selected = (menu->selected == 0)
                 ? (Resolution_Et)(RESOLUTION_COUNT - 1)
                 : (Resolution_Et)(menu->selected - 1);
-            SetWindowSize(paramsMenu_getWidth(menu->selected),
-                          paramsMenu_getHeight(menu->selected));
-            log_info("Resolution: %s", paramsMenu_getLabel(menu->selected));
+            systemSettings.video.width = paramsMenu_getWidth(menu->selected);
+            systemSettings.video.height = paramsMenu_getHeight(menu->selected);
+            applySystemSettings();
+            log_info("Resolution: %s (%dx%d)", paramsMenu_getLabel(menu->selected), systemSettings.video.width, systemSettings.video.height);
         }
 
         // Right arrow (>)
@@ -303,9 +304,10 @@ void paramsMenu_update(ParamsMenu_St* menu) {
         };
         if (clicked && pm_hit(mouse, rightArrow)) {
             menu->selected = (Resolution_Et)((menu->selected + 1) % RESOLUTION_COUNT);
-            SetWindowSize(paramsMenu_getWidth(menu->selected),
-                          paramsMenu_getHeight(menu->selected));
-            log_info("Resolution: %s", paramsMenu_getLabel(menu->selected));
+            systemSettings.video.width = paramsMenu_getWidth(menu->selected);
+            systemSettings.video.height = paramsMenu_getHeight(menu->selected);
+            applySystemSettings();
+            log_info("Resolution: %s (%dx%d)", paramsMenu_getLabel(menu->selected), systemSettings.video.width, systemSettings.video.height);
         }
     }
     y += PM_ROW_H;

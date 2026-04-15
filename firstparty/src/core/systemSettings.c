@@ -9,7 +9,7 @@
 #include "logger.h"
 #include "raylib.h"
 
-SystemSettings_St systemSettings = {0};
+SystemSettings_St systemSettings = DEFAULT_SYSTEM_SETTING;
 
 static Error_Et applyAudioSettings(AudioSettings_St settings) {
     Error_Et err = OK;
@@ -92,12 +92,13 @@ static Error_Et applyVideoSettings(VideoSettings_St settings) {
         settings.resizable = DEFAULT_VIDEO_SETTING_RESIZABLE;
     }
 
-    SetWindowState(
-           (settings.fullscreen ? FLAG_FULLSCREEN_MODE : 0)
-        |  (settings.vsync      ? FLAG_VSYNC_HINT : 0)
-        |  (settings.borderless ? FLAG_WINDOW_UNDECORATED : 0)
-        |  (settings.resizable  ? FLAG_WINDOW_RESIZABLE : 0)
-    );
+    // Clear all potentially set flags first to allow disabling them
+    ClearWindowState(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);
+
+    if (settings.fullscreen) SetWindowState(FLAG_FULLSCREEN_MODE);
+    if (settings.vsync)      SetWindowState(FLAG_VSYNC_HINT);
+    if (settings.borderless) SetWindowState(FLAG_WINDOW_UNDECORATED);
+    if (settings.resizable)  SetWindowState(FLAG_WINDOW_RESIZABLE);
 
     return err;
 }

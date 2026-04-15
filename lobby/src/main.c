@@ -330,7 +330,7 @@ int main(void) {
         
         receiveNetworkData();
 
-        if (IsWindowResized()) {
+        if (systemSettings.video.resizable && IsWindowResized()) {
             systemSettings.video.width  = GetScreenWidth();
             systemSettings.video.height = GetScreenHeight();
         }
