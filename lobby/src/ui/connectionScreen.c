@@ -70,10 +70,10 @@ void lobby_initConnectionScreen(void) {
     f32 titleY  = (f32)h * 0.09f;
 
     lobby_playerNameTextBox = (TextBox_St) {
-        .bounds      = {centerX - 185.0f, titleY + 80.0f, 370.0f, 46.0f},
+        .bounds      = {(f32)w - 220.0f, 20.0f, 200.0f, 36.0f},
         .state       = WIDGET_STATE_NORMAL,
         .roundness   = 0.4f,
-        .placeholder = "Enter your player name",
+        .placeholder = "Player name",
         .isValid     = true
     };
     strncpy(lobby_playerNameTextBox.buffer, "unnamed", 31);
@@ -184,7 +184,21 @@ void lobby_drawConnectionScreen(void) {
     }
 
     Font uiF = lobby_fonts[FONT24];
-    textBoxDraw(&lobby_playerNameTextBox, uiF, 24.0f);
+
+    // Draw player panel background
+    Rectangle playerPanel = { (f32)w - 270.0f, 10.0f, 260.0f, 56.0f };
+    DrawRectangleRounded(playerPanel, 0.4f, 8, (Color){35, 35, 45, 255});
+    DrawRectangleRoundedLinesEx(playerPanel, 0.4f, 8, 2.0f, (Color){75, 85, 115, 255});
+
+    // Draw little guy icon
+    DrawCircle((int)w - 245, 30, 8, LIGHTGRAY); // Head
+    DrawRectangleRounded((Rectangle){w - 255.0f, 40.0f, 20.0f, 12.0f}, 0.5f, 4, LIGHTGRAY); // Body
+
+    // Draw pencil icon (simple representation)
+    DrawLineEx((Vector2){w - 28.0f, 25.0f}, (Vector2){w - 38.0f, 35.0f}, 2.0f, GRAY);
+    DrawCircle((int)w - 38, 36, 1.5f, GRAY);
+
+    textBoxDraw(&lobby_playerNameTextBox, uiF, 20.0f);
     textBoxDraw(&lobby_ipTextBox, uiF, 24.0f);
     textButtonDraw(&lobby_refreshButton, uiF, 24.0f);
     textButtonDraw(&lobby_connectButton, uiF, 24.0f);

@@ -122,37 +122,28 @@ bool textBoxUpdate(TextBox_St* box, Vector2 mouseScreen) {
 }
 
 void textBoxDraw(const TextBox_St* box, Font font, f32 fontSize) {
-    // Background
-    Color bgColor = (box->state == WIDGET_STATE_ACTIVE) ? Fade(WHITE, 0.95f)
-                  : (box->state == WIDGET_STATE_HOVER) ? Fade(LIGHTGRAY, 0.9f)
-                  : LIGHTGRAY;
+    bool isActive = (box->state == WIDGET_STATE_ACTIVE);
+    bool isHovered = (box->state == WIDGET_STATE_HOVER);
 
+    Color bgColor = isActive ? RAYWHITE : (isHovered ? Fade(LIGHTGRAY, 0.5f) : Fade(LIGHTGRAY, 0.3f));
     DrawRectangleRounded(box->bounds, box->roundness, 8, bgColor);
 
-    // Border color logic
-    Color borderColor = DARKGRAY;
-    if (box->state == WIDGET_STATE_ACTIVE) {
-        borderColor = box->isValid ? GREEN : RED;   // validation feedback
-    } else if (box->state == WIDGET_STATE_HOVER) {
-        borderColor = SKYBLUE;
-    }
+    Color borderColor = isActive ? (box->isValid ? (Color){0, 150, 255, 255} : RED) : (isHovered ? GRAY : DARKGRAY);
+    float lineThick = isActive ? 2.0f : 1.0f;
+    DrawRectangleRoundedLinesEx(box->bounds, box->roundness, 8, lineThick, borderColor);
 
-    DrawRectangleRoundedLinesEx(box->bounds, box->roundness, 8, 2.0f, borderColor);
-
-    // Text or placeholder
     Vector2 textPos = {
-        box->bounds.x + 8.0f,
+        box->bounds.x + 12.0f,
         box->bounds.y + (box->bounds.height - fontSize) * 0.5f
     };
 
     if (box->buffer[0] != '\0') {
-        DrawTextEx(font, box->buffer, textPos, fontSize, 0.0f, BLACK);
-    } else if (box->placeholder && box->state != WIDGET_STATE_ACTIVE) {
+        DrawTextEx(font, box->buffer, textPos, fontSize, 0.0f, DARKGRAY);
+    } else if (box->placeholder && !isActive) {
         DrawTextEx(font, box->placeholder, textPos, fontSize, 0.0f, GRAY);
     }
 
-    // Blinking cursor when active
-    if (box->state == WIDGET_STATE_ACTIVE) {
+    if (isActive) {
         static f32 blinkTimer = 0.0f;
         blinkTimer += GetFrameTime();
 
@@ -163,13 +154,12 @@ void textBoxDraw(const TextBox_St* box, Font font, f32 fontSize) {
 
             Vector2 textSize = MeasureTextEx(font, temp, fontSize, 0.0f);
             Vector2 cursorPos = {
-                box->bounds.x + 8.0f + textSize.x,
-                box->bounds.y + (box->bounds.height - fontSize) * 0.5f
+                textPos.x + textSize.x + 1.0f,
+                textPos.y + 2.0f
             };
 
-            DrawRectangle((int)cursorPos.x, (int)cursorPos.y, 2, (int)fontSize, BLACK);
+            DrawRectangle((int)cursorPos.x, (int)cursorPos.y, 2, (int)fontSize - 4, (Color){0, 150, 255, 255});
         }
-
         if (blinkTimer > 1.0f) blinkTimer = 0.0f;
     }
 }

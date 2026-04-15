@@ -19,17 +19,12 @@ struct SolitaireGame_St {
 
 #include "utils/audio.h"
 #include "APIs/generalAPI.h"
+#include "paramsMenu.h"
 #include <stdlib.h>
 #include <string.h>
 
-// Global params menu state for solitaire (disabled)
-// static ParamsMenu_St solitaireParamsMenu = {0};
-#include "APIs/generalAPI.h"
-#include <stdlib.h>
-#include <string.h>
-
-// Global params menu state for solitaire (disabled)
-// static ParamsMenu_St solitaireParamsMenu = {0};
+// Global params menu state for solitaire
+static ParamsMenu_St solitaireParamsMenu = {0};
 
 /* ── Concrete state ───────────────────────────────────────────── */
 
@@ -58,8 +53,7 @@ Error_Et solitaire_initGame__full(SolitaireGame_St** game_ptr, const SoloCardsCo
     solitaire_init(&g->state);
     solitaire_initAudio();
 
-    // params menu disabled for now
-    // paramsMenu_init(&solitaireParamsMenu);
+    paramsMenu_init(&solitaireParamsMenu);
 
     return OK;
 }
@@ -72,8 +66,7 @@ void solitaire_gameLoop(SolitaireGame_St* const game) {
         return;
     }
 
-    // params menu disabled for now
-    // paramsMenu_update(&solitaireParamsMenu);
+    paramsMenu_update(&solitaireParamsMenu);
 
     float dt = GetFrameTime();
     solitaire_update(&game->state, dt);
@@ -82,8 +75,7 @@ void solitaire_gameLoop(SolitaireGame_St* const game) {
         ClearBackground((Color){34, 85, 51, 255});
         solitaire_draw(&game->state);
 
-        // params menu disabled for now
-        // paramsMenu_draw(&solitaireParamsMenu);
+        paramsMenu_draw(&solitaireParamsMenu);
     EndDrawing();
 }
 
@@ -93,8 +85,7 @@ Error_Et solitaire_freeGame(SolitaireGame_St** game_ptr) {
     solitaire_freeAudio();
     solitaire_cleanup(&(*game_ptr)->state);
 
-    // params menu disabled for now
-    // paramsMenu_free(&solitaireParamsMenu);
+    paramsMenu_free(&solitaireParamsMenu);
 
     free(*game_ptr);
     *game_ptr = NULL;

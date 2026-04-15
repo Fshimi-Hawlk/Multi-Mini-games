@@ -240,6 +240,7 @@ typedef struct {
     char      name[32];
     Color     color;
     bool      active;
+    bool      isRestricted;
 } GameInteractionZone_St;
 
 /**

@@ -8,113 +8,29 @@
 #ifndef GAME_NAME_API_H
 #define GAME_NAME_API_H
 
-/// @note: if you reading this file inside `firstparty/APIs` this following
-///        include may have siggly-lines, but there's actually no real issue.
-///        So, if any then just forget about it.
 #include "baseTypes.h"
-#include "APIs/generalAPI.h"
+#include "networkInterface.h"
 
 // ────────────────────────────────────────────────
-// Types
-// ────────────────────────────────────────────────
-
-/**
-    @brief Forward declaration - internal game state definition is private.
-*/
-typedef struct GameNameGame_St GameNameGame_St;
-
-/**
-    @brief Configuration parameters passed during initialization.
-
-    All fields have safe defaults when zero-initialized.
-*/
-typedef struct {
-    char _;         // make sure that using `gameName_initGame` doesn't cause any warning
-    // Difficulty level, etc. can be added here
-} GameNameConfigs_St;
-
-// ────────────────────────────────────────────────
-// Core lifecycle API
+// Interfaces
 // ────────────────────────────────────────────────
 
 /**
-    @brief Convenience macro for C99 compound literal initialization.
-
-    Example:
-        GameNameGame_St* game = NULL;
-        gameName_initGame(&game, .gameDifficulty = 144);
+    @brief Client-side interface for the GameName mini-game.
+    
+    This structure should be registered in the lobby to handle
+    initialization, rendering, updating, and network data reception
+    for the client side of the game.
 */
-#define gameName_initGame(game, ...) \
-    gameName_initGame__full((game), (GameNameConfigs_St){ ._ = 0, __VA_ARGS__ })
+extern GameClientInterface_St gameNameClientInterface;
 
 /**
-    @brief Allocates and initializes a new instance of the GameName mini-game.
-
-    @param[out] game     Double pointer to receive the new game handle.
-                             Set to NULL on failure.
-    @param[in]  configs      Video/Audio configuration (NULL = defaults)
-
-    @return OK on success
-    @return ERROR_ALLOC on memory allocation failure
-    @return ERROR_INVALID_CONFIG if configuration parameters are invalid
-    @return other Error_Et codes for initialization failures (e.g. resource loading)
-
-    @pre  *game == NULL
-    @post On success: *game points to a valid game object with base.running = true
-    @post On failure: *game remains NULL
-
-    @note Does **not** create or manage the Raylib window/context.
-          Caller (lobby) must handle InitWindow(), SetTargetFPS(), etc.
-
-    @note If configs is NULL, the game uses default settings from gameConfig.h.
-          Games should check configs->video and configs->audio pointers before accessing.
+    @brief Server-side interface for the GameName mini-game.
+    
+    This structure should be registered in the server to handle
+    room instance creation, game logic, and action processing
+    for the server side of the game.
 */
-Error_Et gameName_initGame__full(GameNameGame_St** game, const GameNameConfigs_St configs);
-
-/**
-    @brief Executes one full frame of the game: process input → update state → render.
-
-    Should be called once per frame inside the lobby's main loop when this game is active.
-
-    @param[in,out] game      Valid game instance handle
-
-    @return OK on success
-    @return ERROR_NULL_POINTER if game is NULL
-    @return other Error_Et codes on runtime failures (rare)
-
-    @pre  game != NULL and was successfully initialized
-    @pre  Raylib drawing context is active (BeginDrawing() called)
-
-    @note If the game reaches an end condition (win/lose/quit), it must set
-          `game.base->running = false;`
-*/
-Error_Et gameName_gameLoop(GameNameGame_St* const game);
-
-/**
-    @brief Releases all resources owned by the game and frees the handle.
-
-    @param[in,out] game  Pointer to the game handle. Set to NULL after cleanup.
-
-    @return OK on success
-    @return ERROR_NULL_POINTER if *game is invalid (but still sets to NULL)
-
-    @pre  game may be NULL or point to a valid game
-    @post *game == NULL
-    @post All game-owned resources (textures, sounds, internal arrays, etc.) are freed
-
-    @note Idempotent - safe to call multiple times.
-    @note Does **not** close the Raylib window or call CloseWindow().
-*/
-Error_Et gameName_freeGame(GameNameGame_St** game);
-
-/**
-    @brief Checks if the game is still running.
-
-    @param[in] game  Game instance handle (may be NULL)
-
-    @return true if game is valid and running
-    @return false if game is NULL or has stopped
-*/
-bool gameName_isRunning(const GameNameGame_St* game);
+extern GameServerInterface_St gameNameServerInterface;
 
 #endif // GAME_NAME_API_H

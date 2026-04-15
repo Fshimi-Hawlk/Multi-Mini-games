@@ -205,6 +205,18 @@ void lobby_drawGameZones(const Player_St* const player) {
         bool playerNear = CheckCollisionCircleRec(
             player->position, player->radius, gameZone.hitbox);
         
+        if (gameZone.isRestricted) {
+            DrawRectangleRoundedLinesEx(gameZone.hitbox, 0.3f, 8, 2.0f, GRAY);
+            const char* gameName = gameZone.name;
+            f32Vector2 nameSize = MeasureTextEx(lobby_fonts[FONT24], gameName, 22, 0);
+            f32Vector2 namePosition = {
+                .x = gameZone.hitbox.x + (gameZone.hitbox.width - nameSize.x) / 2.0f,
+                .y = gameZone.hitbox.y - 30.0f
+            };
+            DrawTextEx(lobby_fonts[FONT24], gameName, namePosition, nameSize.y, 0, GRAY);
+            continue;
+        }
+
         // Glowing effect for game zones
         float glow = (sinf(time(NULL) * 3.0f) + 1.0f) * 0.5f;
         Color edgeColor = playerNear ? GOLD : WHITE;

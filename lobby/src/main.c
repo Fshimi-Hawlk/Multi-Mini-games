@@ -191,7 +191,9 @@ void receiveNetworkData(void) {
                 u8 nextGame = payload[0];
                 u8 roomId = payload[1];
                 log_info("[NET] Server confirmed switch to Game %d, Room %d", nextGame, roomId);
-                
+
+                lobby_closeRoomSelector();
+
                 if (nextGame < __miniGameIdCount) {
                     if (currentMiniGame && currentMiniGame->destroy) {
                         currentMiniGame->destroy();
@@ -199,8 +201,6 @@ void receiveNetworkData(void) {
                     currentMiniGameID = (MiniGameId_Et) nextGame;
                     currentMiniGame = miniGameInterfaces[currentMiniGameID];
                     if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
-                    
-                    lobby_closeRoomSelector();
                     lobby_game.currentState = (nextGame == MINI_GAME_ID_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
                     if (nextGame == MINI_GAME_ID_LOBBY) lobby_initWaitingRoom();
                 }
@@ -364,6 +364,22 @@ int main(void) {
                 static MiniGameId_Et lastTriggerID = MINI_GAME_ID_LOBBY;
 
                 if (currentMiniGameID == MINI_GAME_ID_LOBBY && !lobby_game.editorMode && !selectorActive) {
+                    bool isConnected = networkSocket >= 0;
+                    for (int i = 1; i < __miniGameIdCount; i++) {
+                        gameZones[i].isRestricted = false;
+                        if (i == MINI_GAME_ID_EDITOR) {
+                            if (isConnected && !server_spawned) {
+                                gameZones[i].isRestricted = true;
+                            }
+                        } else {
+                            bool hasMulti = miniGameInterfaces[i] != NULL;
+                            bool hasAI = (i == MINI_GAME_ID_CHESS);
+                            if (hasMulti && !hasAI && !isConnected) {
+                                gameZones[i].isRestricted = true;
+                            }
+                        }
+                    }
+
                     MiniGameId_Et triggerID = MINI_GAME_ID_LOBBY;
                     for (int i = 1; i < __miniGameIdCount; i++) {
                         if (gameZones[i].hitbox.width > 0 &&
@@ -373,15 +389,15 @@ int main(void) {
                         }
                     }
 
-                    if (triggerID != MINI_GAME_ID_LOBBY) {
+                    if (triggerID != MINI_GAME_ID_LOBBY && !gameZones[triggerID].isRestricted) {
                         if (lastTriggerID != triggerID) {
                             // log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
                             lastTriggerID = triggerID;
                         }
 
                         const char* gname = gameZones[triggerID].name;
-                        DrawText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 
-                                GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 20)/2, 
+                        DrawText(TextFormat("APPUYEZ SUR 'E' POUR : %s", gname), 
+                                GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR 'E' POUR : %s", gname), 20)/2, 
                                 GetScreenHeight() - 100, 20, GREEN);
 
                         if (IsKeyPressed(KEY_E)) {

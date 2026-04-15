@@ -26,10 +26,15 @@ static s32  lobby_currentGameId = 0;
 
 static RoomInfo_St lobby_discoveredRooms[MAX_ROOMS_UI];
 static s32     lobby_roomsCount = 0;
+static bool    lobby_waitingForServer = false;
+static float   lobby_waitingTimer     = 0.0f;
+#define LOBBY_WAITING_TIMEOUT 5.0f
 
 void lobby_initRoomSelector(void) {
     lobby_roomSelectorOpen = false;
     lobby_roomsCount = 0;
+    lobby_waitingForServer = false;
+    lobby_waitingTimer = 0.0f;
 }
 
 void lobby_openRoomSelector(s32 gameId) {
@@ -37,6 +42,7 @@ void lobby_openRoomSelector(s32 gameId) {
     lobby_roomSelectorOpen = true;
     lobby_currentGameId = gameId;
     lobby_roomsCount = 0;
+    lobby_waitingForServer = false;
 
     // Send query to server
     RUDPHeader_St h;
@@ -54,6 +60,7 @@ void lobby_openRoomSelector(s32 gameId) {
 void lobby_closeRoomSelector(void) {
     if (lobby_roomSelectorOpen) printf("[UI] Closing Room Selector\n");
     lobby_roomSelectorOpen = false;
+    lobby_waitingForServer = false;
 }
 
 void lobby_handleRoomList(const void* data, s32 count) {
@@ -66,14 +73,26 @@ void lobby_handleRoomList(const void* data, s32 count) {
     for (s32 i = 0; i < lobby_roomsCount; i++) {
         lobby_discoveredRooms[i].id = ntohs(lobby_discoveredRooms[i].id);
         lobby_discoveredRooms[i].playerCount = ntohs(lobby_discoveredRooms[i].playerCount);
-        printf("[UI] Room %d: '%s' by %s (%d players)\n", 
-               lobby_discoveredRooms[i].id, lobby_discoveredRooms[i].name, 
+        printf("[UI] Room %d: '%s' by %s (%d players)\n",
+               lobby_discoveredRooms[i].id, lobby_discoveredRooms[i].name,
                lobby_discoveredRooms[i].creator, lobby_discoveredRooms[i].playerCount);
     }
+
+    lobby_waitingForServer = false;
 }
 
 bool lobby_updateRoomSelector(void) {
     if (!lobby_roomSelectorOpen) return false;
+
+    if (lobby_waitingForServer) {
+        lobby_waitingTimer += GetFrameTime();
+        if (lobby_waitingTimer >= LOBBY_WAITING_TIMEOUT) {
+            printf("[UI] Waiting for server timed out, resetting.\n");
+            lobby_waitingForServer = false;
+            lobby_waitingTimer = 0.0f;
+        }
+        return true;
+    }
 
     if (IsKeyPressed(KEY_ESCAPE) && lobby_currentGameId != -1) {
         lobby_closeRoomSelector();
@@ -106,7 +125,7 @@ bool lobby_updateRoomSelector(void) {
 
             send(networkSocket, buf, sizeof(h) + 2, 0);
         }
-        lobby_closeRoomSelector();
+        lobby_waitingForServer = true; lobby_waitingTimer = 0.0f;
         return true;
     }
 
@@ -124,7 +143,7 @@ bool lobby_updateRoomSelector(void) {
             buf[sizeof(h) + 1] = (s8)-1;
 
             send(networkSocket, buf, sizeof(h) + 2, 0);
-            lobby_closeRoomSelector();
+            lobby_waitingForServer = true; lobby_waitingTimer = 0.0f;
             return true;
         }
     }
@@ -143,7 +162,7 @@ bool lobby_updateRoomSelector(void) {
             buf[sizeof(h) + 1] = (s8)lobby_discoveredRooms[i].id;
 
             send(networkSocket, buf, sizeof(h) + 2, 0);
-            lobby_closeRoomSelector();
+            lobby_waitingForServer = true; lobby_waitingTimer = 0.0f;
             return true;
         }
     }
@@ -160,6 +179,12 @@ void lobby_drawRoomSelector(void) {
     DrawRectangleRec(panel, RAYWHITE);
     DrawRectangleLinesEx(panel, 2, DARKGRAY);
     
+    if (lobby_waitingForServer) {
+        DrawRectangleRec(panel, Fade(RAYWHITE, 0.8f));
+        DrawTextEx(lobby_fonts[FONT24], "Waiting for server...", (Vector2){panel.x + 100, panel.y + 200}, 24, 0, BLUE);
+        return;
+    }
+
     // Title
     const char* title = (lobby_currentGameId == -1) ? "AVAILABLE ROOMS" : "ROOM SELECTION";
     Vector2 titleSize = MeasureTextEx(lobby_fonts[FONT24], title, 24, 0);

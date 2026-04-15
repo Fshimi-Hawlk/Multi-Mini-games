@@ -36,6 +36,7 @@ Error_Et lobby_initApp(void) {
     SetTraceLogLevel(LOG_WARNING);
 
     InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
+    SetExitKey(KEY_NULL);
     InitAudioDevice();
     SetTargetFPS(60);
 

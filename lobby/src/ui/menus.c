@@ -174,6 +174,8 @@ void lobby_updatePlayChoiceMenu(void) {
         if (CheckCollisionPointRec(m, btnHost)) {
             extern void spawn_server(void);
             spawn_server();
+            lobby_game.currentState = GAME_STATE_CONNECTION;
+            lobby_currentMenu = MENU_NONE;
         }
         if (CheckCollisionPointRec(m, btnBack)) lobby_currentMenu = MENU_MAIN;
     }
