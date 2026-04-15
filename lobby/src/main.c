@@ -441,9 +441,6 @@ void spawn_server(void) {
     }
 }
 
-// Backup of lobby terrains before entering editor (so editor changes don't persist in lobby)
-static TerrainVec_St lobbyTerrainBackup = {0};
-
 void launchSoloGame(u8 gameId);
 void setCurrentMiniGame(GameClientInterface_St* iface);
 
@@ -451,7 +448,6 @@ void switchMinigame(u8 gameId) {
     if (gameId >= __miniGameIdCount) return;
 
     if (miniGameInterfaces[gameId]) {
-        // Jeu avec interface réseau existante (Bingo, Chess, KingForFour, etc.)
         // Notify server that we are leaving the current minigame room (if any)
         if (currentMiniGameID != MINI_GAME_ID_LOBBY && currentMiniGameID != MINI_GAME_ID_EDITOR && gameId == MINI_GAME_ID_LOBBY) {
             GameTLVHeader_St tlv = { .gameId = currentMiniGameID, .action = ACTION_CODE_QUIT_GAME, .length = 0 };
@@ -462,19 +458,6 @@ void switchMinigame(u8 gameId) {
             memcpy(buf, &h, sizeof(h));
             memcpy(buf + sizeof(h), &tlv, sizeof(tlv));
             send(networkSocket, buf, sizeof(h) + sizeof(tlv), 0);
-        }
-
-        // Leaving editor → restore lobby terrains
-        if (currentMiniGameID == MINI_GAME_ID_EDITOR && gameId != MINI_GAME_ID_EDITOR) {
-            da_clear(&terrains);
-            if (lobbyTerrainBackup.count > 0)
-                da_append_many(&terrains, lobbyTerrainBackup.items, lobbyTerrainBackup.count);
-        }
-        // Entering editor → backup lobby terrains
-        if (gameId == MINI_GAME_ID_EDITOR) {
-            da_clear(&lobbyTerrainBackup);
-            if (terrains.count > 0)
-                da_append_many(&lobbyTerrainBackup, terrains.items, terrains.count);
         }
 
         if (currentMiniGame && currentMiniGame->destroy) {

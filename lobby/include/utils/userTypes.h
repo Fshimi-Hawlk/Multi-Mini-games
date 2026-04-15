@@ -232,13 +232,14 @@ typedef struct {
 typeDA(LobbyTerrain_St, TerrainVec_St);
 
 /**
-    @brief Definition of typedef struct
+    @brief One clickable zone that leads to a mini-game from the lobby.
+           Name is a fixed buffer to make binary save/load trivial and allocation-free.
 */
 typedef struct {
     Rectangle hitbox;
-    const char *name;
-    Color color;
-    bool active;
+    char      name[32];
+    Color     color;
+    bool      active;
 } GameInteractionZone_St;
 
 /**

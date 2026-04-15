@@ -7,13 +7,11 @@
 */
 #include "core/game.h"
 
-#include "raylib.h"
 #include "ui/game.h"
 
 #include "utils/globals.h"
 
 #include "sharedUtils/geometry.h"
-#include "utils/userTypes.h"
 
 void lobby_drawPlayer(const PlayerVisuals_St* const visuals, const Player_St* const player) {
     float r = player->radius;
@@ -63,19 +61,10 @@ void lobby_drawTerrains(void) {
                 Texture2D tex = terrainTextures[TERRAIN_KIND_GRASS];
                 if (!IsTextureValid(tex)) break;
 
-                // ── Scale down the texture while keeping tiling ─────────────────────
-                const float textureScale = 0.0625f;
-                Rectangle source = {
-                    .x      = 0.0f,
-                    .y      = 0.0f,
-                    .width  = t->rect.width  / textureScale,
-                    .height = t->rect.height / textureScale
-                };
-
                 f32Vector2 pos = getRectPos(t->rect);
                 pos.y -= 20;
 
-                DrawTextureRec(tex, source, pos, WHITE);
+                DrawTextureRec(tex, getTextureRec(t->rect), pos, WHITE);
             } break;
 
             case TERRAIN_KIND_WOOD_PLANK: {
@@ -210,7 +199,7 @@ void lobby_drawGameZones(const Player_St* const player) {
         if (i == MINI_GAME_ID_LOBBY) continue;
 
         GameInteractionZone_St gameZone = gameZones[i];
-        if (gameZone.name == NULL) continue;
+        if (strlen(gameZone.name) == 0) continue;
         if (gameZone.hitbox.width == 0) continue; 
 
         bool playerNear = CheckCollisionCircleRec(

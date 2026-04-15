@@ -196,6 +196,7 @@ ParamsMenu_St paramsMenu;
 
 Texture2D treeTexture;
 Texture2D backgroundTexture;
+Texture2D leafTexture;
 
 GrassBlade_St grassBlades[MAX_GRASS_BLADES];
 int grassCount = 0;
@@ -211,10 +212,3 @@ Sound sound_doubleJump;
 Sound sound_gameLaunch;
 
 Sound sound_doubleJumpMeme;
-
-// ────────────────────────────────────────────────
-// Physics Debug Panel
-// ────────────────────────────────────────────────
-
-bool showPhysicsDebugPanel = false;
-f32 panelScrollY = 0.0f;

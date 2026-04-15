@@ -71,10 +71,8 @@ extern ParamsMenu_St paramsMenu;
 // ────────────────────────────────────────────────
 
 extern Texture2D treeTexture;
-/**
-    @brief Global variable backgroundTexture
-*/
 extern Texture2D backgroundTexture;
+extern Texture2D leafTexture;
 
 // ────────────────────────────────────────────────
 // Visual / atmospheric state

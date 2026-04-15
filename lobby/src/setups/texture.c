@@ -70,6 +70,11 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_BILINEAR);
     SetTextureFilter(backgroundTexture, TEXTURE_FILTER_TRILINEAR);
 
+    leafTexture = LoadTexture(TEXTURES_PATH "leaf.png");
+    GenTextureMipmaps(&leafTexture);
+    SetTextureFilter(leafTexture, TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(leafTexture, TEXTURE_FILTER_TRILINEAR);
+
     return error;
 }
 
@@ -89,4 +94,5 @@ void lobby_freeTextures(Texture2D playerTextures[__playerTextureCount]) {
 
     if (IsTextureValid(treeTexture))        UnloadTexture(treeTexture);
     if (IsTextureValid(backgroundTexture))  UnloadTexture(backgroundTexture);
+    if (IsTextureValid(leafTexture))        UnloadTexture(leafTexture);
 }

@@ -9,6 +9,8 @@
 
 #include "ui/ambiance.h"
 
+#include "sharedUtils/geometry.h"
+
 static Firefly_St fireflies[MAX_FIREFLIES] = {0};
 static FallingLeaf_St fallingLeaves[MAX_FALLING_LEAVES] = {0};
 
@@ -75,7 +77,7 @@ static void pushLeafByPlayer(FallingLeaf_St* leaf, const Player_St* player) {
     Side or bottom contacts are ignored. Landing is now softer (no hard snap).
 */
 static bool leafLandedOnPlatformTop(FallingLeaf_St* leaf) {
-    float leafRadius = 11.0f * leaf->scale;
+    float leafRadius = 5.0f * leaf->scale;
 
     da_foreach(LobbyTerrain_St, t, &terrains) {
         Rectangle r = t->rect;
@@ -384,23 +386,20 @@ void lobby_updateAtmosphericEffects(float dt, Player_St* player, Camera2D cam) {
                 l->onGround = true;
                 l->groundTimer = LEAF_GROUND_TIME + (float)(rand() % 650) / 100.0f;
                 l->rotationSpeed *= 0.35f;
-            }
-            // Fallback absolute ground
-            else if (l->position.y > GROUND_Y + 30.0f) {
+            } else if (l->position.y > GROUND_Y + 30.0f) {
+                // Fallback absolute ground
                 l->position.y = GROUND_Y;
                 l->velocity = Vector2Zero();
                 l->onGround = true;
                 l->groundTimer = LEAF_GROUND_TIME + (float)(rand() % 650) / 100.0f;
             }
-        }
-        else {
+        } else {
             // ── On ground / platform ───────────────────────────────────────
             l->groundTimer -= dt;
             l->velocity = Vector2Zero();
 
             // Player can knock it off the platform
-            if (CheckCollisionCircles(l->position, 9.2f * l->scale,
-                                      player->position, player->radius + 5.0f)) {
+            if (CheckCollisionCircles(l->position, 9.2f * l->scale, player->position, player->radius + 5.0f)) {
                 pushLeafByPlayer(l, player);
                 l->onGround = false;
                 l->groundTimer = 0.0f;
@@ -454,24 +453,32 @@ void lobby_drawAtmosphericEffects(void) {
         DrawCircleV(f->position, f->radius, glow);
     }
 
-    // Falling leaves (unchanged except active filter)
     for (int i = 0; i < MAX_FALLING_LEAVES; ++i) {
         FallingLeaf_St* l = &fallingLeaves[i];
         if (!l->active) continue;
 
         float finalAlpha = l->onGround ? l->currentAlpha : 1.0f;
+        
+        Rectangle dest = {
+            .x      = l->position.x,
+            .y      = l->position.y,
+            .width  = 20 * l->scale,
+            .height = 20 * l->scale
+        };
 
-        DrawRectanglePro(
-            (Rectangle){l->position.x, l->position.y, 18.0f * l->scale, 5.0f * l->scale},
-            (Vector2){9.0f * l->scale, 2.5f * l->scale},
+        Vector2 origin = {
+            dest.width  / 2.0f,
+            dest.height / 2.0f
+        };
+
+        DrawTexturePro(
+            leafTexture,
+            getTextureRec(leafTexture),
+            dest,
+            origin,
             l->rotation * RAD2DEG,
             Fade(l->color, finalAlpha)
         );
-
-        DrawLineEx(l->position,
-                   (Vector2){l->position.x + sinf(l->rotation) * 9.0f * l->scale,
-                             l->position.y - cosf(l->rotation) * 2.5f * l->scale},
-                   1.1f, Fade(WHITE, 0.18f * finalAlpha));
     }
 }
 
