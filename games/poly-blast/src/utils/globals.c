@@ -9,8 +9,6 @@
 
 Font polyBlast_fonts[__fontSizeCount] = {0};
 
-GameState_St polyBlast_mainGameState = {0};
-
 Shape_St *polyBlast_shapeBag = NULL;
 GamePrefabVariant_Et polyBlast_prefabVariant = GAME_PREFAB_VARIANT_DEFAULT;
 PrefabBagVec_St polyBlast_prefabsBag = {0};

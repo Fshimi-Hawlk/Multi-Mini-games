@@ -26,7 +26,7 @@ void polyBlast_drawText(const char *const text, Font font, f32 fontSize, f32Vect
     DrawTextEx(font, text, pos, fontSize, 1, tint);
 }
 
-void polyBlast_drawUI(const GameState_St* const game) {
+void polyBlast_drawUI(const PolyBlastGame_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
             static f32Vector2 scorePos = {

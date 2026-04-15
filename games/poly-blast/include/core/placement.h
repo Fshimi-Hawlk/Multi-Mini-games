@@ -53,7 +53,7 @@ bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 o
     @param[in,out] game         Game state whose slots will be replaced by the best
                                 simulated set.
 */
-void polyBlast_placementSimulation(GameState_St* const game);
+void polyBlast_placementSimulation(PolyBlastGame_St* const game);
 
 /**
     @brief Releases a shape at a precise position, placing it if valid or resetting position.

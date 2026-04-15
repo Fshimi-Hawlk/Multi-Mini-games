@@ -135,7 +135,7 @@ static u64 readF32(const u8* buffer, u64 bufferSize, u64 offset, f32* value) {
         }                                                                           \
     } while (0)
 
-u64 polyBlast_getSerializedGameStateSize(const GameState_St* const state) {
+u64 polyBlast_getSerializedGameStateSize(const PolyBlastGame_St* const state) {
     const PrefabManager_St* manager = &state->prefabManager;
     u64 size = 0;
 
@@ -176,7 +176,7 @@ u64 polyBlast_getSerializedGameStateSize(const GameState_St* const state) {
     return size;
 }
 
-u64 polyBlast_serializeGameState(const GameState_St* const state, u8* buffer, const u64 bufferSize) {
+u64 polyBlast_serializeGameState(const PolyBlastGame_St* const state, u8* buffer, const u64 bufferSize) {
     if (state == NULL || buffer == NULL) return 0;
 
     const PrefabManager_St* manager = &state->prefabManager;
@@ -235,7 +235,7 @@ u64 polyBlast_serializeGameState(const GameState_St* const state, u8* buffer, co
     return offset;
 }
 
-bool polyBlast_deserializeGameState(GameState_St* const state, const u8* buffer, const u64 bufferSize, bool init) {
+bool polyBlast_deserializeGameState(PolyBlastGame_St* const state, const u8* buffer, const u64 bufferSize, bool init) {
     if (state == NULL) {
         log_warn("Received NULL state");
         return false;
@@ -341,7 +341,7 @@ bool polyBlast_deserializeGameState(GameState_St* const state, const u8* buffer,
     return true;
 }
 
-bool polyBlast_saveGameToFile(const GameState_St* const state, const char* filename) {
+bool polyBlast_saveGameToFile(const PolyBlastGame_St* const state, const char* filename) {
     if (state == NULL || filename == NULL) return false;
 
     char path[256];

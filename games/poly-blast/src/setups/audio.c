@@ -29,6 +29,7 @@ void polyBlast_initAudio(void) {
 
 void polyBlast_freeAudio(void) {
     if (!audioInitialized) return;
+    audioInitialized = false;
 
     if (IsSoundValid(sound_shapePlacement)) UnloadSound(sound_shapePlacement);
     if (IsSoundValid(sound_combo)) UnloadSound(sound_combo);

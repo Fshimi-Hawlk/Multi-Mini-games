@@ -40,6 +40,6 @@ void polyBlast_drawText(const char* const text, Font font, f32 fontSize, f32Vect
 
     @param[in]     game         Pointer to the current game state.
 */
-void polyBlast_drawUI(const GameState_St* const game);
+void polyBlast_drawUI(const PolyBlastGame_St* const game);
 
 #endif // UI_GAME_H

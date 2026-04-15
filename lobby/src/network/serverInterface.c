@@ -13,7 +13,7 @@ typedef struct {
     int dummy;
 } LobbyServerState;
 
-void* lobby_create(void) {
+void* lobby_createInstance(void) {
     LobbyServerState* s = malloc(sizeof(LobbyServerState));
     if (s) s->dummy = 0;
     return s;
@@ -41,15 +41,15 @@ void lobby_onPlayerLeave(void* state, s32 player_id) {
     UNUSED(player_id);
 }
 
-void lobby_destroy(void* state) {
+void lobby_destroyInstance(void* state) {
     if (state) free(state);
 }
 
 GameServerInterface_St lobbyServerInterface = {
     .gameName = "lobby",
-    .createInstance = lobby_create,
+    .createInstance = lobby_createInstance,
     .onAction = lobby_onAction,
     .onTick = lobby_tick,
     .onPlayerLeave = lobby_onPlayerLeave,
-    .destroyInstance = lobby_destroy
+    .destroyInstance = lobby_destroyInstance
 };

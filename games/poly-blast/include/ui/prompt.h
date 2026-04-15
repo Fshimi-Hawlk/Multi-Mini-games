@@ -17,7 +17,7 @@
     @param[in]     mouse        The current mouse position.
     @return                     true if the window should close, false otherwise.
 */
-bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouse);
+bool polyBlast_promptUpdate(PolyBlastGame_St* const game, Vector2 mouse);
 
 /**
     @brief Draws the active prompt (if any).

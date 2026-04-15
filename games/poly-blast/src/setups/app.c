@@ -8,7 +8,6 @@
 #include "utils/globals.h"
 
 #include "setups/app.h"
-#include "setups/game.h"
 #include "setups/audio.h"
 
 #include "utils/globals.h"
@@ -55,8 +54,6 @@ bool initApp(void) {
     if (!polyBlast_initFonts()) {
         log_warn("Couldn't initialize every fonts");
     };
-
-    initGame(&polyBlast_mainGameState);
 
     return true;
 }

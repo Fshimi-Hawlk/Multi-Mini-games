@@ -169,7 +169,7 @@ bool polyBlast_canPlaceAll(Board_St* board, const ShapeSlots_t slots, const u8 o
 
     @param[in,out] game         Pointer to the current game state.
 */
-void polyBlast_placementSimulation(GameState_St* const game) {
+void polyBlast_placementSimulation(PolyBlastGame_St* const game) {
     f32 bestAttemptScore = 0;
     const Prefab_St* selectedPrefabs[3] = {0};
     bool success = false;
@@ -178,7 +178,7 @@ void polyBlast_placementSimulation(GameState_St* const game) {
     // deallocate everything that was allocated using `context_alloc`
     contextArena = &tempArena;
 
-    GameState_St algoGame = *game;
+    PolyBlastGame_St algoGame = *game;
 
     // Need specialized function because of `bags`,
     // because the vectors contain allocated array `items`

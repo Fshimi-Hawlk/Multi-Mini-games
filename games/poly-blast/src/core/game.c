@@ -163,7 +163,7 @@ void polyBlast_manageScoreAndStreak(ScoringState_St* const scoringState, const B
     @param[in,out] game         Pointer to the current game state.
     @param[in]     scoreDelta   The score gained this turn.
 */
-void polyBlast_adjustSizeWeights(GameState_St* const game, const f32 scoreDelta) {
+void polyBlast_adjustSizeWeights(PolyBlastGame_St* const game, const f32 scoreDelta) {
     // ─────────────────────────────────────────────────────────────
     // Tuning constants
 

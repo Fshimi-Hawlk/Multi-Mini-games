@@ -86,7 +86,7 @@ static void send_toServer(u8 action, void* data, u16 len) {
 /**
     @brief Initializes the client-side game state and assets.
 */
-void kingClientInit(void) {
+void kingForFour_init(void) {
     if (!assets_loaded) {
         assets = kingForFour_loadAssets();
         assets_loaded = true;
@@ -112,7 +112,7 @@ static int selectedPlayers = 4;
     @param[in] data      Pointer to the received data.
     @param[in] len       Length of the received data.
 */
-void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
+void kingForFour_onData(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
             log_warn("[KING] Data received from invalid player ID: %d", playerId);
@@ -183,7 +183,7 @@ void kingClient_on_data(s32 playerId, u8 action, const void* data, u16 len) {
 
     @param[in] dt Delta time since the last frame.
 */
-void kingClient_update(float dt) {
+void kingForFour_update(float dt) {
     if (!assets_loaded) return;
     if (myInternalId == -1) {
         join_retry_timer += dt;
@@ -258,7 +258,7 @@ void kingClient_update(float dt) {
 /**
     @brief Renders the game screen for the client.
 */
-void kingClient_draw(void) {
+void kingForFour_draw(void) {
     if (!assets_loaded) return;
     if (gameStatus == 0) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
@@ -346,8 +346,8 @@ void kingClient_draw(void) {
 GameClientInterface_St kingForFourClientInterface = {
     .id = MINI_GAME_ID_KING_FOR_FOUR,
     .name = "King For Four",
-    .init = kingClientInit,
-    .on_data = kingClient_on_data,
-    .update = kingClient_update,
-    .draw = kingClient_draw
+    .init = kingForFour_init,
+    .onData = kingForFour_onData,
+    .update = kingForFour_update,
+    .draw = kingForFour_draw
 };

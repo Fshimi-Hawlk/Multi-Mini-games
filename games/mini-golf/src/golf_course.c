@@ -7,6 +7,7 @@
 */
 #include "golf.h"
 #include "rlgl.h"
+#include "sharedUtils/debug.h"
 
 /* ─── Bruit de Perlin 2D (simplifié, déterministe) ───────────────────────── */
 
@@ -365,6 +366,7 @@ void Golf_DrawTerrain(GolfGame *g) {
             float y11 = Golf_GetTerrainHeight(g, x1, z1);
             float cx  = (x0+x1)*0.5f, cz = (z0+z1)*0.5f;
             float cy  = Golf_GetTerrainHeight(g, cx, cz);
+            UNUSED(cy);
             SurfaceType surf = Golf_GetSurface(g, cx, cz);
             
             Texture2D tex;

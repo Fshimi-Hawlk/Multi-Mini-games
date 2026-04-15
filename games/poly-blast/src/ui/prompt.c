@@ -137,7 +137,7 @@ static bool deleteSave(const char* filename) {
     return (remove(path) == 0);
 }
 
-bool polyBlast_loadGameFromFile(GameState_St* const state, const char* filename) {
+bool polyBlast_loadGameFromFile(PolyBlastGame_St* const state, const char* filename) {
     if (!state || !filename) return false;
 
     char path[256];
@@ -232,7 +232,7 @@ static void promptInitLoadList(void) {
 
 }
 
-bool polyBlast_promptUpdate(GameState_St* const game, Vector2 mouseScreen) {
+bool polyBlast_promptUpdate(PolyBlastGame_St* const game, Vector2 mouseScreen) {
     if (polyBlast_currentPrompt == PROMPT_NONE) return false;
 
     bool shouldCloseWindow = false;

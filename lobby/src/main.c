@@ -1,199 +1,3 @@
-/**
-    @file main.c
-    @author Léandre BAUDET
-    @date 2026-01-12
-    @date 2026-04-14
-    @brief Program entry point – lobby main loop and game scene manager.
-*/
-// #include "APIs/lobbyAPI.h"
-// #include "APIs/tetrisAPI.h"
-// #include "APIs/solitaireAPI.h"
-// #include "APIs/suikaAPI.h"
-// #include "APIs/bowlingAPI.h"
-// #include "APIs/golfAPI.h"
-// #include "APIs/snakeAPI.h"
-// #include "APIs/polyBlastAPI.h"
-
-// #include "APIs/generalAPI.h"
-
-// // ─────────────────────────────────────────────────────────────────
-// // Generic game dispatch table
-// // ─────────────────────────────────────────────────────────────────
-
-// /**
-//     @brief Function pointer types matching the generalAPI lifecycle contract.
-// */
-// typedef Error_Et (*InitFn)(BaseGame_St**);
-// typedef Error_Et (*LoopFn)(BaseGame_St*);
-// typedef Error_Et (*FreeFn)(BaseGame_St**);
-
-// /**
-//     @brief One entry per mini-game scene.
-
-//     width / height = 0 means "keep current window size".
-// */
-// typedef struct {
-//     const char* name;
-//     InitFn      init;
-//     LoopFn      loop;
-//     FreeFn      free;
-//     int         width;
-//     int         height;
-// } SceneDesc_St;
-
-// // ── Adapter shims ────────────────────────────────────────────────
-// // Each game has its own typed pointer; we cast through BaseGame_St** here.
-// // This is safe because BaseGame_St is the first member of every game struct.
-
-// static Error_Et tetris_init_shim(BaseGame_St** p)   { return tetris_initGame((TetrisGame_St**)p);       }
-// static Error_Et tetris_loop_shim(BaseGame_St*  p)   { return tetris_gameLoop((TetrisGame_St*)p);        }
-// static Error_Et tetris_free_shim(BaseGame_St** p)   { return tetris_freeGame((TetrisGame_St**)p);       }
-
-// static Error_Et solitaire_init_shim(BaseGame_St** p){ return solitaire_initGame((SolitaireGame_St**)p); }
-// static Error_Et solitaire_loop_shim(BaseGame_St*  p){ solitaire_gameLoop((SolitaireGame_St*)p); return OK; }
-// static Error_Et solitaire_free_shim(BaseGame_St** p){ return solitaire_freeGame((SolitaireGame_St**)p); }
-
-// static Error_Et suika_init_shim(BaseGame_St** p)    { return suika_initGame((SuikaGame_St**)p);         }
-// static Error_Et suika_loop_shim(BaseGame_St*  p)    { return suika_gameLoop((SuikaGame_St*)p);          }
-// static Error_Et suika_free_shim(BaseGame_St** p)    { return suika_freeGame((SuikaGame_St**)p);         }
-
-// static Error_Et bowling_init_shim(BaseGame_St** p)  { return bowling_initGame((BowlingGame_St**)p);     }
-// static Error_Et bowling_loop_shim(BaseGame_St*  p)  { return bowling_gameLoop((BowlingGame_St*)p);      }
-// static Error_Et bowling_free_shim(BaseGame_St** p)  { return bowling_freeGame((BowlingGame_St**)p);     }
-
-// static Error_Et golf_init_shim(BaseGame_St** p)     { return golf_initGame((GolfGame_St**)p);           }
-// static Error_Et golf_loop_shim(BaseGame_St*  p)     { return golf_gameLoop((GolfGame_St*)p);            }
-// static Error_Et golf_free_shim(BaseGame_St** p)     { return golf_freeGame((GolfGame_St**)p);           }
-
-// static Error_Et snake_init_shim(BaseGame_St** p)    { return snake_initGame((SnakeGame_St**)p);         }
-// static Error_Et snake_loop_shim(BaseGame_St*  p)    { return snake_gameLoop((SnakeGame_St*)p);          }
-// static Error_Et snake_free_shim(BaseGame_St** p)    { return snake_freeGame((SnakeGame_St**)p);         }
-
-// static Error_Et polyBlast_init_shim(BaseGame_St** p)    { return polyBlast_initGame((PolyBlastGame_St**)p);         }
-// static Error_Et polyBlast_loop_shim(BaseGame_St*  p)    { return polyBlast_gameLoop((PolyBlastGame_St*)p);          }
-// static Error_Et polyBlast_free_shim(BaseGame_St** p)    { return polyBlast_freeGame((PolyBlastGame_St**)p);         }
-
-// /**
-//     @brief Scene dispatch table.
-
-//     Index 0 = MINI_GAME_ID_LOBBY (handled separately — lobby is not a mini-game).
-//     Index i = MINI_GAME_ID_XXX.
-// */
-// static const SceneDesc_St scenes[__miniGameIdCount] = {
-//     [MINI_GAME_ID_LOBBY]        = { "Lobby",        NULL,                   NULL,                   NULL,                   800,  600 },
-//     [MINI_GAME_ID_TETRIS]       = { "Tetris",       tetris_init_shim,       tetris_loop_shim,       tetris_free_shim,       600,  800 },
-//     [MINI_GAME_ID_SOLITAIRE]    = { "Solitaire",    solitaire_init_shim,    solitaire_loop_shim,    solitaire_free_shim,    0,    0   },
-//     [MINI_GAME_ID_SUIKA]        = { "Suika",        suika_init_shim,        suika_loop_shim,        suika_free_shim,        800,  900 },
-//     [MINI_GAME_ID_BOWLING]      = { "Bowling",      bowling_init_shim,      bowling_loop_shim,      bowling_free_shim,      1200, 800 },
-//     [MINI_GAME_ID_GOLF]         = { "Golf 3D",      golf_init_shim,         golf_loop_shim,         golf_free_shim,         1280, 720 },
-//     [MINI_GAME_ID_SNAKE]        = { "Snake",        snake_init_shim,        snake_loop_shim,        snake_free_shim,        800,  600 },
-//     [MINI_GAME_ID_POLY_BLAST]   = { "Poly Blast",   polyBlast_init_shim,    polyBlast_loop_shim,    polyBlast_free_shim,    800,  600 },
-// };
-
-// // ─────────────────────────────────────────────────────────────────
-// // Helpers
-// // ─────────────────────────────────────────────────────────────────
-
-// static void returnToLobby(LobbyGame_St* game) {
-//     game->subGameManager.currentScene = MINI_GAME_ID_LOBBY;
-//     game->player.position = (Vector2){ PLAYER_SPAWN_X, PLAYER_SPAWN_Y };  // Teleport to center on lobby re-entry
-//     game->player.velocity = (Vector2){ 0, 0 };   // Reset velocity to prevent momentum carryover
-//     game->player.coyoteTimer = COYOTE_TIME;       // Reset jump states
-//     game->player.jumpBuffer = 0.0f;
-//     // Restore lobby window size (1200x800 is standard for lobby)
-//     systemSettings.video.width = 1200;
-//     systemSettings.video.height = 800;
-//     systemSettings.video.fps = 60;
-//     systemSettings.video.title = "Lobby";
-//     applySystemSettings();
-// }
-
-// static void applySceneWindowSize(const SceneDesc_St* desc) {
-//     if (desc->width > 0 && desc->height > 0) {
-//         systemSettings.video.width  = desc->width;
-//         systemSettings.video.height = desc->height;
-//         applySystemSettings();
-//     }
-// }
-
-// // ─────────────────────────────────────────────────────────────────
-// // Entry point
-// // ─────────────────────────────────────────────────────────────────
-
-// /**
-//     @brief Program entry point.
-//     @return 0 on clean exit, non-zero on early failure
-// */
-// s32 main(void) {
-//     LobbyGame_St* game = NULL;
-//     if (lobby_initGame(&game) == ERROR_ALLOC) {
-//         log_fatal("Couldn't load the lobby properly.");
-//         return 1;
-//     }
-
-//     // Disable ESC to close window by default - games handle ESC to return to lobby
-//     SetExitKey(KEY_NULL);
-
-//     bool skipWindowClose = false;
-//     while (!WindowShouldClose() || skipWindowClose) {
-//         // Reset skip flag at start of each iteration
-//         if (skipWindowClose) skipWindowClose = false;
-
-//         MiniGameId_Et scene = game->subGameManager.currentScene;
-
-//         // ── Lobby ────────────────────────────────────────────────
-//         if (scene == MINI_GAME_ID_LOBBY) {
-//             // In lobby, ESC closes the game
-//             if (IsKeyPressed(KEY_ESCAPE) && WindowShouldClose()) {
-//                 break;
-//             }
-//             lobby_gameLoop(game);
-//             continue;
-//         }
-
-//         // Re-disable ESC for games (in case we returned from lobby)
-//         SetExitKey(KEY_NULL);
-
-//         // ── Mini-game generic dispatch ───────────────────────────
-//         if (scene >= __miniGameIdCount || scenes[scene].init == NULL) {
-//             log_error("Invalid or unregistered MiniGameId_Et value: %d", scene);
-//             returnToLobby(game);
-//             continue;
-//         }
-
-//         const SceneDesc_St* desc    = &scenes[scene];
-//         BaseGame_St**       miniRef = &game->subGameManager.miniGames[scene];
-
-//         // Init (once)
-//         if (game->subGameManager.needGameInit) {
-//             Error_Et err = desc->init(miniRef);
-//             game->subGameManager.needGameInit = false;
-
-//             if (err != OK) {
-//                 log_fatal("%s initialization failed (error %d)", desc->name, err);
-//                 if (*miniRef) desc->free(miniRef);
-//                 returnToLobby(game);
-//                 continue;
-//             }
-//             applySceneWindowSize(desc);
-//         }
-
-//         // Loop frame
-//         if (*miniRef) desc->loop(*miniRef);
-
-//         // Detect end
-//         if (!*miniRef || !(*miniRef)->running) {
-//             if (*miniRef) desc->free(miniRef);
-//             game->subGameManager.needGameInit = true;  // Force reinit for next game
-//             returnToLobby(game);
-//             continue;
-//         }
-//     }
-
-//     lobby_freeGame(&game);
-//     return 0;
-// }
-
 /*
     @author Fshimi Hawlk
     @author LeandreB8
@@ -221,27 +25,28 @@ static GameClientInterface_St* currentMiniGame = NULL;
 extern GameClientInterface_St lobbyClientInterface;
 extern GameClientInterface_St kingForFourClientInterface;
 extern GameClientInterface_St bingoClientInterface;
-extern GameClientInterface_St ChessClientModule;
-extern GameClientInterface_St RubikClientModule;
+extern GameClientInterface_St chessClientInterface;
+extern GameClientInterface_St polyBlastClientInterface;
+extern GameClientInterface_St twistCubeClientInterface;
 extern GameClientInterface_St editorClientInterface;
 
 // Pointers to the mini-game client interfaces
 static GameClientInterface_St* miniGameInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_BINGO]          = &bingoClientInterface,
     [MINI_GAME_ID_BOWLING]        = NULL,
-    [MINI_GAME_ID_CHESS]          = &ChessClientModule,
+    [MINI_GAME_ID_CHESS]          = &chessClientInterface,
     [MINI_GAME_ID_DISC_REVERSAL]  = NULL,
     [MINI_GAME_ID_DROP_FOUR]      = NULL,
     [MINI_GAME_ID_EDITOR]         = &editorClientInterface,
     [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFourClientInterface,
     [MINI_GAME_ID_LOBBY]          = &lobbyClientInterface,
     [MINI_GAME_ID_MINI_GOLF]      = NULL,
-    [MINI_GAME_ID_POLY_BLAST]     = NULL,
+    [MINI_GAME_ID_POLY_BLAST]     = &polyBlastClientInterface,
     [MINI_GAME_ID_SNAKE]          = NULL,
     [MINI_GAME_ID_SOLO_CARDS]     = NULL,
     [MINI_GAME_ID_SUIKA]          = NULL,
     [MINI_GAME_ID_TETROMINO_FALL] = NULL,
-    [MINI_GAME_ID_TWIST_CUBE]     = &RubikClientModule,
+    [MINI_GAME_ID_TWIST_CUBE]     = &twistCubeClientInterface,
 };
 
 static bool server_spawned = false;
@@ -365,54 +170,57 @@ void receiveNetworkData(void) {
                 continue;
             }
 
-            if (rudpProcessIncoming(&serverConnection, &header)) {
-                u8* payload = buffer + sizeof(RUDPHeader_St);
-                u16 payloadLen = (u16) (bytesRead - sizeof(RUDPHeader_St));
-                u16 senderId = ntohs(header.senderId);
+            if (!rudpProcessIncoming(&serverConnection, &header)) return;
+        
+            u8* payload = buffer + sizeof(RUDPHeader_St);
+            u16 payloadLen = (u16) (bytesRead - sizeof(RUDPHeader_St));
+            u16 senderId = ntohs(header.senderId);
 
-                if (header.action == ACTION_CODE_JOIN_ERROR) {
-                    log_error("[NET] Join rejected by server: %s", (char*)payload);
-                    lobby_setConnectionError((char*)payload);
-                    lobby_game.currentState = GAME_STATE_CONNECTION;
-                    // Reset network state if needed
-                    rudpInitConnection(&serverConnection);
-                } else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
-                    lobby_handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
-                } else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
-                    if (payloadLen >= 2) {
-                        u8 nextGame = payload[0];
-                        u8 roomId = payload[1];
-                        log_info("[NET] Server confirmed switch to Game %d, Room %d", nextGame, roomId);
-                        
-                        if (nextGame < __miniGameIdCount) {
-                            if (currentMiniGame && currentMiniGame->destroy) {
-                                currentMiniGame->destroy();
-                            }
-                            currentMiniGameID = (MiniGameId_Et) nextGame;
-                            currentMiniGame = miniGameInterfaces[currentMiniGameID];
-                            if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
-                            
-                            lobby_closeRoomSelector();
-                            lobby_game.currentState = (nextGame == MINI_GAME_ID_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
-                            if (nextGame == MINI_GAME_ID_LOBBY) lobby_initWaitingRoom();
-                        }
+            if (header.action == ACTION_CODE_JOIN_ERROR) {
+                log_error("[NET] Join rejected by server: %s", (char*)payload);
+                lobby_setConnectionError((char*)payload);
+                lobby_game.currentState = GAME_STATE_CONNECTION;
+                // Reset network state if needed
+                rudpInitConnection(&serverConnection);
+
+            } else if (header.action == ACTION_CODE_LOBBY_ROOM_INFO) {
+                lobby_handleRoomList(payload, payloadLen / sizeof(RoomInfo_St));
+
+            } else if (header.action == ACTION_CODE_LOBBY_SWITCH_GAME) {
+                if (payloadLen < 2) return;
+                u8 nextGame = payload[0];
+                u8 roomId = payload[1];
+                log_info("[NET] Server confirmed switch to Game %d, Room %d", nextGame, roomId);
+                
+                if (nextGame < __miniGameIdCount) {
+                    if (currentMiniGame && currentMiniGame->destroy) {
+                        currentMiniGame->destroy();
                     }
-                } else if (header.action == ACTION_CODE_GAME_DATA) {
-                    if (payloadLen >= sizeof(GameTLVHeader_St)) {
-                        GameTLVHeader_St tlv;
-                        memcpy(&tlv, payload, sizeof(tlv));
-                        u16 tlv_data_len = ntohs(tlv.length);
-                        
-                        if (tlv_data_len <= payloadLen - sizeof(GameTLVHeader_St)) {
-                            if (tlv.gameId < __miniGameIdCount && miniGameInterfaces[tlv.gameId]) {
-                                miniGameInterfaces[tlv.gameId]->on_data(senderId, tlv.action, payload + sizeof(tlv), tlv_data_len);
-                            }
-                        }
+                    currentMiniGameID = (MiniGameId_Et) nextGame;
+                    currentMiniGame = miniGameInterfaces[currentMiniGameID];
+                    if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
+                    
+                    lobby_closeRoomSelector();
+                    lobby_game.currentState = (nextGame == MINI_GAME_ID_LOBBY) ? GAME_STATE_GAMEPLAY : GAME_STATE_INGAME;
+                    if (nextGame == MINI_GAME_ID_LOBBY) lobby_initWaitingRoom();
+                }
+
+            } else if (header.action == ACTION_CODE_GAME_DATA) {
+                if (payloadLen < sizeof(GameTLVHeader_St)) return;
+
+                GameTLVHeader_St tlv;
+                memcpy(&tlv, payload, sizeof(tlv));
+                u16 tlv_data_len = ntohs(tlv.length);
+                
+                if (tlv_data_len <= payloadLen - sizeof(GameTLVHeader_St)) {
+                    if (tlv.gameId < __miniGameIdCount && miniGameInterfaces[tlv.gameId]) {
+                        miniGameInterfaces[tlv.gameId]->onData(senderId, tlv.action, payload + sizeof(tlv), tlv_data_len);
                     }
-                } else if (currentMiniGame && currentMiniGame->on_data) {
-                    if (header.action < firstAvailableActionCode || header.action == ACTION_CODE_JOIN_ACK) {
-                        currentMiniGame->on_data(senderId, header.action, payload, payloadLen);
-                    }
+                }
+
+            } else if (currentMiniGame && currentMiniGame->onData) {
+                if (header.action < firstAvailableActionCode || header.action == ACTION_CODE_JOIN_ACK) {
+                    currentMiniGame->onData(senderId, header.action, payload, payloadLen);
                 }
             }
         }
@@ -531,83 +339,83 @@ int main(void) {
         // chaque module de jeu gère sa propre phase pré-partie.
         if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_updateWaitingRoom();
 
-        BeginDrawing();
-        ClearBackground(SKYBLUE);
+        BeginDrawing(); {
+            ClearBackground(WHITE);
 
-        if (lobby_currentMenu != MENU_NONE) {
-            lobby_drawMenu();
-        } else if (lobby_game.currentState == GAME_STATE_CONNECTION) {
-            static f32 disc_timer = 0;
-            disc_timer += dt;
-            if (disc_timer > 2.0f) { discoverServers(); disc_timer = 0; }
-            
-            if (lobby_updateConnectionScreen()) {
-                const char* pseudo = lobby_getEnteredPseudo();
-                initNetwork(lobby_getEnteredIP(), pseudo);
-                strncpy(lobby_game.player.name, pseudo, 31);
-                lobby_game.currentState = GAME_STATE_ROOM_LIST;
-                lobby_openRoomSelector(-1); // Open global room list
-            }
-            lobby_drawConnectionScreen();
-        } else if (lobby_game.currentState == GAME_STATE_ROOM_LIST) {
-            lobby_drawRoomSelector();
-        } else {
-            // Gameplay loop
-            static MiniGameId_Et lastTriggerID = MINI_GAME_ID_LOBBY;
-
-            if (currentMiniGameID == MINI_GAME_ID_LOBBY && !lobby_game.editorMode && !selectorActive) {
-                MiniGameId_Et triggerID = MINI_GAME_ID_LOBBY;
-                for (int i = 1; i < __miniGameIdCount; i++) {
-                    if (gameZones[i].hitbox.width > 0 &&
-                        CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameZones[i].hitbox)) {
-                        triggerID = i;
-                        break;
-                    }
+            if (lobby_currentMenu != MENU_NONE) {
+                lobby_drawMenu();
+            } else if (lobby_game.currentState == GAME_STATE_CONNECTION) {
+                static f32 disc_timer = 0;
+                disc_timer += dt;
+                if (disc_timer > 2.0f) { discoverServers(); disc_timer = 0; }
+                
+                if (lobby_updateConnectionScreen()) {
+                    const char* pseudo = lobby_getEnteredPseudo();
+                    initNetwork(lobby_getEnteredIP(), pseudo);
+                    strncpy(lobby_game.player.name, pseudo, 31);
+                    lobby_game.currentState = GAME_STATE_ROOM_LIST;
+                    lobby_openRoomSelector(-1); // Open global room list
                 }
+                lobby_drawConnectionScreen();
+            } else if (lobby_game.currentState == GAME_STATE_ROOM_LIST) {
+                lobby_drawRoomSelector();
+            } else {
+                // Gameplay loop
+                static MiniGameId_Et lastTriggerID = MINI_GAME_ID_LOBBY;
 
-                if (triggerID != MINI_GAME_ID_LOBBY) {
-                    if (lastTriggerID != triggerID) {
-                        // log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
-                        lastTriggerID = triggerID;
-                    }
-
-                    const char* gname = gameZones[triggerID].name;
-                    DrawText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 
-                             GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 20)/2, 
-                             GetScreenHeight() - 100, 20, GREEN);
-
-                    if (IsKeyPressed(KEY_E)) {
-                        // Logique solo/multi basée sur l'interface réseau du jeu
-                        // Si le jeu a une interface réseau ET qu'on est connecté → multi
-                        // Sinon → solo
-                        bool hasMulti = miniGameInterfaces[triggerID] != NULL;
-                        bool isConnected = networkSocket >= 0;
-                        
-                        if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
-                            lobby_openRoomSelector(triggerID);  // multi
-                        } else {
-                            switchMinigame(triggerID);          // solo
+                if (currentMiniGameID == MINI_GAME_ID_LOBBY && !lobby_game.editorMode && !selectorActive) {
+                    MiniGameId_Et triggerID = MINI_GAME_ID_LOBBY;
+                    for (int i = 1; i < __miniGameIdCount; i++) {
+                        if (gameZones[i].hitbox.width > 0 &&
+                            CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameZones[i].hitbox)) {
+                            triggerID = i;
+                            break;
                         }
                     }
-                } else {
-                    if (lastTriggerID != MINI_GAME_ID_LOBBY) {
-                        lobby_closeRoomSelector();
-                        lastTriggerID = MINI_GAME_ID_LOBBY;
+
+                    if (triggerID != MINI_GAME_ID_LOBBY) {
+                        if (lastTriggerID != triggerID) {
+                            // log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
+                            lastTriggerID = triggerID;
+                        }
+
+                        const char* gname = gameZones[triggerID].name;
+                        DrawText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 
+                                GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR ENTRÉE POUR : %s", gname), 20)/2, 
+                                GetScreenHeight() - 100, 20, GREEN);
+
+                        if (IsKeyPressed(KEY_E)) {
+                            // Logique solo/multi basée sur l'interface réseau du jeu
+                            // Si le jeu a une interface réseau ET qu'on est connecté → multi
+                            // Sinon → solo
+                            bool hasMulti = miniGameInterfaces[triggerID] != NULL;
+                            bool isConnected = networkSocket >= 0;
+                            
+                            if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
+                                lobby_openRoomSelector(triggerID);  // multi
+                            } else {
+                                switchMinigame(triggerID);          // solo
+                            }
+                        }
+                    } else {
+                        if (lastTriggerID != MINI_GAME_ID_LOBBY) {
+                            lobby_closeRoomSelector();
+                            lastTriggerID = MINI_GAME_ID_LOBBY;
+                        }
                     }
                 }
+
+                if (currentMiniGame) {
+                    currentMiniGame->update(dt);
+                    currentMiniGame->draw();
+                }
+                
+                lobby_drawRoomSelector();
+                if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_drawWaitingRoom();
             }
 
-            if (currentMiniGame) {
-                currentMiniGame->update(dt);
-                currentMiniGame->draw();
-            }
-            
-            lobby_drawRoomSelector();
-            if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_drawWaitingRoom();
-        }
-
-        DrawFPS(10, 10);
-        EndDrawing();
+            DrawFPS(10, 10);
+        } EndDrawing();
     }
 
     SaveProgress(&g_progress);

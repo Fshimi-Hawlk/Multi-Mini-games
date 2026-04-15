@@ -77,7 +77,7 @@ KingForFourGameState_St state;
 } KingServerState;
 
 
-void* kingCreateInstance(void) {
+void* king_createInstance(void) {
     KingServerState* ks = calloc(1, sizeof(KingServerState));
     if (ks) {
         kingForFour_initGameLogic(&ks->state);
@@ -362,7 +362,7 @@ void king_onPlayerLeave(void* state, s32 playerId) {
 
     @param[in,out] state Pointer to the KingServerState_St instance to destroy.
 */
-void kingDestroyInstance(void *state) {
+void king_destroyInstance(void *state) {
     KingServerState* ks = (KingServerState*)state;
     for (int i = 0; i < ks->state.numPlayers; i++) {
         kingForFour_clearDeck(&ks->state.players[i].hand);
@@ -374,9 +374,9 @@ void kingDestroyInstance(void *state) {
 
 GameServerInterface_St kingServerInterface = {
     .gameName          = "king-for-four",
-    .createInstance    = kingCreateInstance,
+    .createInstance    = king_createInstance,
     .onAction          = king_onAction,
     .onTick            = king_onTick, 
-    .onPlayerLeave    = king_onPlayerLeave,
-    .destroyInstance   = kingDestroyInstance
+    .onPlayerLeave     = king_onPlayerLeave,
+    .destroyInstance   = king_destroyInstance
 };

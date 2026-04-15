@@ -11,7 +11,7 @@
 /**
     @brief Path to the fonts directory.
 */
-#define FONT_PATH "../assets/fonts/"
+#define FONT_PATH "assets/fonts/"
 
 #ifndef ASSET_PATH
 /**

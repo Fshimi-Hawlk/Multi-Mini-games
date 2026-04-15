@@ -101,7 +101,7 @@ bool polyBlast_initPrefabManager(PrefabManager_St* const manager) {
     return true;
 }
 
-bool initGame(GameState_St* const game) {
+bool polyBlast_initGame(PolyBlastGame_St* const game) {
     switch (game->sceneState) {
         case SCENE_STATE_GAME: {
             polyBlast_initPrefabsAndVariants(&polyBlast_prefabsBag, polyBlast_prefabVariant);
@@ -139,7 +139,7 @@ bool initGame(GameState_St* const game) {
     }
 }
 
-void polyBlast_resetGame(GameState_St* const game) {
+void polyBlast_resetGame(PolyBlastGame_St* const game) {
     if (game == NULL) {
         log_warn("Received NULL game");
         return;

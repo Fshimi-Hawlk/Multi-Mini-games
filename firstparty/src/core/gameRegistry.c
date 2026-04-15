@@ -26,7 +26,7 @@ static const GameServerInterface_St* gameInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_SOLO_CARDS]       = NULL,
     [MINI_GAME_ID_SUIKA]            = NULL,
     [MINI_GAME_ID_TETROMINO_FALL]   = NULL,
-    [MINI_GAME_ID_TWIST_CUBE]       = &rubikServerInterface,
+    [MINI_GAME_ID_TWIST_CUBE]       = &twistCubeServerInterface,
 };
 
 const GameServerInterface_St* getGameServerInterface(MiniGameId_Et gameId) {

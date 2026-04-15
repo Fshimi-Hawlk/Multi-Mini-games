@@ -440,7 +440,7 @@ GameClientInterface_St bingoClientInterface = {
     .id      = MINI_GAME_ID_BINGO,
     .name    = "Bingo",
     .init    = bingo_init,
-    .on_data = bingo_onData,
+    .onData  = bingo_onData,
     .update  = bingo_update,
     .draw    = bingo_draw
 };

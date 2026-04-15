@@ -216,6 +216,8 @@ typedef enum {
 */
 typedef struct {
     u64  score;                 ///< Total score.
+    u64  prevScore;             ///< Previous score
+
     u8   streakCount;           ///< Current combo length.
     
     /**
@@ -258,6 +260,6 @@ typedef struct {
 
     bool hasBeenLost;                   ///< Anti-cheat: true if this save already reached gameOver once.
     const char *loadFilename;           ///< Filename to load game from.
-} GameState_St;
+} PolyBlastGame_St;
 
 #endif // USER_TYPES_H

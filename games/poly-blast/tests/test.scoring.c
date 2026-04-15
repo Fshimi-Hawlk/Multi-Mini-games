@@ -41,7 +41,7 @@ static void test_calculate_score(void) {
 }
 
 static void test_manage_score(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     testGame.board = (Board_St) {.width = 8, .height = 8};
     testGame.board.rowsToClear = context_alloc(testGame.board.height * sizeof(bool));
     testGame.board.columnsToClear = context_alloc(testGame.board.width * sizeof(bool));
@@ -66,7 +66,7 @@ static void test_manage_score(void) {
 }
 
 static void test_score_text(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     testGame.score = 500;
     buildScoreRelatedTexts(&testGame);
     assert(strcmp(testGame.scoreText, "Score: 500") == 0);

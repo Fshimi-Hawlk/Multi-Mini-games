@@ -68,7 +68,7 @@ extern void chess_initAudio(void);
 /**
     @brief Initialize the chess client module.
 */
-void chess_client_init(void) {
+void chess_init(void) {
     chess_initAudio();
     initTextures();
     initPlayers();
@@ -91,7 +91,7 @@ void chess_client_init(void) {
     @param[in] data      Pointer to the received data
     @param[in] len       Length of the received data
 */
-void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
+void chess_onData(s32 player_id, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (player_id < 0 || (player_id >= MAX_CLIENTS && player_id != 999)) {
             printf("[CHESS] Data received from invalid player ID: %d\n", (int)player_id);
@@ -145,7 +145,7 @@ void chess_client_on_data(s32 player_id, u8 action, const void* data, u16 len) {
     @brief Update the chess client state.
     @param[in] dt Delta time since the last update
 */
-void chess_client_update(float dt) {
+void chess_update(float dt) {
     if (my_id_internal == -1) {
         // Send join request if not already done
         static f32 join_timer = 0;
@@ -260,7 +260,7 @@ void chess_client_update(float dt) {
 /**
     @brief Draw the chess client UI.
 */
-void chess_client_draw(void) {
+void chess_draw(void) {
     if (game_status == 0) {
         DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.8f));
         DrawText("ÉCHECS - SALLE D'ATTENTE", GetScreenWidth()/2 - MeasureText("ÉCHECS - SALLE D'ATTENTE", 40)/2, 100, 40, GOLD);
@@ -288,47 +288,11 @@ void chess_client_draw(void) {
 /**
     @brief Chess client module interface definition.
 */
-GameClientInterface_St ChessClientModule = {
+GameClientInterface_St chessClientInterface = {
     .id = MINI_GAME_ID_CHESS,
     .name = "Echecs",
-    .init = chess_client_init,
-    .on_data = chess_client_on_data,
-    .update = chess_client_update,
-    .draw = chess_client_draw
+    .init = chess_init,
+    .onData = chess_onData,
+    .update = chess_update,
+    .draw = chess_draw
 };
-
-/**
-    @brief Initialize the chess game state.
-    @param[out] game Pointer to the pointer that will store the created game structure
-    @return Error_Et OK on success, error code otherwise
-*/
-Error_Et chess_initGame(ChessGame_St** game) {
-    *game = malloc(sizeof(ChessGame_St));
-    if (!*game) return ERROR_ALLOC;
-    (*game)->base.running = true;
-    (*game)->base.paused = false;
-    (*game)->base.freeGame = (FreeGame_Ft)chess_freeGame;
-    
-    // Global Raylib setup is already done by Lobby
-    return OK;
-}
-
-/**
-    @brief Free the chess game resources.
-    @param[in,out] game Pointer to the pointer of the game structure to free
-    @return Error_Et OK on success
-*/
-Error_Et chess_freeGame(ChessGame_St** game) {
-    if (game && *game) {
-        freeTextures();
-        freePlayer(blackPlayer);
-        freePlayer(whitePlayer);
-        if (moveMade) {
-            free(moveMade);
-            moveMade = NULL;
-        }
-        free(*game);
-        *game = NULL;
-    }
-    return OK;
-}

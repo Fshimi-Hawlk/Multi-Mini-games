@@ -5,7 +5,6 @@
     @date 2026-04-14
     @brief clientInterface.c implementation/header file
 */
-#include "rubikAPI.h"
 
 #include "raylib.h"
 
@@ -14,6 +13,25 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "APIs/generalAPI.h"
+#include "networkInterface.h"
+
+/**
+    @brief Definition of enum RubikActionCodes_e
+*/
+enum RubikActionCodes_e {
+    ACTION_CODE_RUBIK_SCRAMBLE = firstAvailableActionCode + 0x20,
+    ACTION_CODE_RUBIK_PROGRESS,
+    ACTION_CODE_RUBIK_ELIMINATE
+};
+
+/**
+    @brief Definition of typedef struct
+*/
+typedef struct {
+    BaseGame_St base;
+} RubikGame_St;
 
 // We'll include the original main.c content by refactoring it later or just using local copies
 // For now, let's define the necessary structures and functions based on the original main.c
@@ -56,7 +74,7 @@ static float angleX = 1.0f;
 static float angleY = 0.5f;
 static float radius = 8.0f;
 
-void rubik_clientInit(void) {
+void twistCube_init(void) {
     initCube(&my_cube);
     myIdInternal = -1;
     eliminated = false;
@@ -73,7 +91,7 @@ void rubik_clientInit(void) {
     camera.projection = CAMERA_PERSPECTIVE;
 }
 
-void rubik_client_on_data(s32 playerId, u8 action, const void* data, u16 len) {
+void twistCube_onData(s32 playerId, u8 action, const void* data, u16 len) {
     if (action != ACTION_CODE_JOIN_ACK) {
         if (playerId < 0 || (playerId >= MAX_CLIENTS && playerId != 999)) {
             printf("[RUBIK] Data received from invalid player ID: %d\n", (int)playerId);
@@ -135,7 +153,7 @@ static float calculate_progress(Cube* c) {
     return progress;
 }
 
-void rubik_client_update(float dt) {
+void twistCube_update(float dt) {
     if (myIdInternal == -1) {
         if (networkSocket < 0) {
             // Solo mode: no server, auto-assign ID so we can play immediately
@@ -223,7 +241,7 @@ void rubik_client_update(float dt) {
     // removed local ESC handler to use lobby pause menu instead
 }
 
-void rubik_client_draw(void) {
+void twistCube_draw(void) {
     if (eliminated) {
         DrawText("ELIMINÉ !", GetScreenWidth()/2 - 100, GetScreenHeight()/2, 40, RED);
         return;
@@ -247,28 +265,11 @@ void rubik_client_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 
-GameClientInterface_St RubikClientModule = {
+GameClientInterface_St twistCubeClientInterface = {
     .id = MINI_GAME_ID_TWIST_CUBE,
-    .name = "RubiksCube",
-    .init = rubik_clientInit,
-    .on_data = rubik_client_on_data,
-    .update = rubik_client_update,
-    .draw = rubik_client_draw
+    .name = "Twist Cube",
+    .init = twistCube_init,
+    .onData = twistCube_onData,
+    .update = twistCube_update,
+    .draw = twistCube_draw
 };
-
-Error_Et rubikInitGame(RubikGame_St** game) {
-    *game = malloc(sizeof(RubikGame_St));
-    if (!*game) return ERROR_ALLOC;
-    (*game)->base.running = true;
-    (*game)->base.paused = false;
-    (*game)->base.freeGame = (FreeGame_Ft)rubik_freeGame;
-    return OK;
-}
-
-Error_Et rubik_freeGame(RubikGame_St** game) {
-    if (game && *game) {
-        free(*game);
-        *game = NULL;
-    }
-    return OK;
-}

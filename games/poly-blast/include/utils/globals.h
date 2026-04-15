@@ -9,8 +9,6 @@
 #define UTILS_GLOBALS_H
 
 #include "utils/userTypes.h"
-#include "sharedWidgets/types.h"
-
 /**
     @brief Global application state and resources.
 
@@ -18,8 +16,6 @@
 */
 
 extern Font      polyBlast_fonts[__fontSizeCount]; ///< Array of loaded fonts in increasing sizes.
-
-extern GameState_St polyBlast_mainGameState;       ///< Main game state containing board, score, etc.
 
 extern GamePrefabVariant_Et polyBlast_prefabVariant;          ///< Which set of prefabs is active.
 extern u32 polyBlast_prefabsPerSizeOffsets[MAX_SHAPE_SIZE];   ///< Array recording the starting indices whenever the blockCount changes.

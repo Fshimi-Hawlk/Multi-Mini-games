@@ -25,7 +25,7 @@ static void test_font_loading(void) {
 }
 
 static void test_score_text_generation(void) {
-    GameState_St testGame = {
+    PolyBlastGame_St testGame = {
         .score = 1234,
     };
 

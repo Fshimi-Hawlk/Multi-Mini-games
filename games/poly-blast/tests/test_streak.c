@@ -10,7 +10,7 @@
 
 #include <assert.h>
 
-static void initSizeWeights(GameState_St* const game) {
+static void initSizeWeights(PolyBlastGame_St* const game) {
     f32 baseWeights[MAX_SHAPE_SIZE] = {
         [0] = 0.05f,    // size 1
         [1] = 0.20f,
@@ -29,7 +29,7 @@ static void initSizeWeights(GameState_St* const game) {
 }
 
 static void test_streak_increment_and_reset(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     testGame.board.width = testGame.board.height = 8;
     testGame.board.rowsToClear = context_alloc(testGame.board.height * sizeof(bool));
     testGame.board.columnsToClear = context_alloc(testGame.board.width * sizeof(bool));
@@ -82,7 +82,7 @@ static void test_streak_increment_and_reset(void) {
 }
 
 static void test_streak_text_formatting(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     testGame.streakCount = 5;
     buildScoreRelatedTexts(&testGame);
     assert(strcmp(testGame.streakText, "Streak: 5") == 0);

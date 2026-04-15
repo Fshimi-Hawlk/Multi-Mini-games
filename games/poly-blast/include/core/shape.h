@@ -61,7 +61,7 @@ s8Vector2 polyBlast_mapShapeToBoardPos(const Shape_St* const shape, const Board_
     @param[in,out] game         Pointer to the current game state.
     @param[in,out] shape        Pointer to the active shape.
 */
-void polyBlast_handleShape(GameState_St* const game, Shape_St* const shape);
+void polyBlast_handleShape(PolyBlastGame_St* const game, Shape_St* const shape);
 
 /**
     @brief Refills all three player slots with new random shapes and resets their state.

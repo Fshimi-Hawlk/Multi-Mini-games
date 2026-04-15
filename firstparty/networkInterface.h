@@ -79,19 +79,19 @@ typedef struct {
     @brief Contract that every client-side mini-game module must implement
 */
 typedef struct {
-    u8          id;             ///< Network identifier (matches GameTLVHeader_St.game_id)
+    u8          id;             ///< Network identifier (matches GameTLVHeader_St.gameId)
     const char* name;           ///< Human-readable name (for debug/UI)
 
     void (*init)(void);         ///< Load textures, models, sounds, initialize static data
 
     /**
         @brief Called when a network packet routed to this game is received
-        @param player_id    Sending player (client-local ID or network ID)
+        @param playerId    Sending player (client-local ID or network ID)
         @param action       Value from GameTLVHeader_St.action
         @param data         Pointer to the payload bytes (after header)
         @param len          Payload length
     */
-    void (*on_data)(s32 player_id, u8 action, const void* data, u16 len);
+    void (*onData)(s32 playerId, u8 action, const void* data, u16 len);
 
     void (*update)(float dt);   ///< Local simulation / animation update
     void (*draw)(void);         ///< Raylib rendering pass
@@ -103,8 +103,8 @@ typedef struct {
     Provided by the networking/server layer to each game instance.
 */
 typedef void (*BroadcastMessage_Ft)(
-    s32         room_id,
-    s32         exclude_id,
+    s32         roomId,
+    s32         excludeId,
     u8          action,
     const void* payload,
     u16         len
@@ -128,8 +128,8 @@ typedef struct {
     /**
         @brief Handles an incoming player action / event
         @param state        Game-specific instance state
-        @param room_id      The ID of the room where this action occurred
-        @param player_id    Player who sent this message
+        @param roomId      The ID of the room where this action occurred
+        @param playerId    Player who sent this message
         @param action       Action code from client
         @param payload      Decoded payload pointer
         @param len          Payload size in bytes
@@ -150,13 +150,13 @@ typedef struct {
     /**
         @brief Called when a player disconnects or leaves the room
         @param state        Game instance
-        @param player_id    ID of the player who left
+        @param playerId    ID of the player who left
     */
-    void (*onPlayerLeave)(void* state, s32 player_id);
+    void (*onPlayerLeave)(void* state, s32 playerId);
 
     /**
         @brief Destroys the game instance and frees all owned memory
-        @param state        Pointer previously returned by create_instance
+        @param state        Pointer previously returned by createInstance
     */
     void (*destroyInstance)(void* state);
 } GameServerInterface_St;

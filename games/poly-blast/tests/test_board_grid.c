@@ -11,7 +11,7 @@
 #include <assert.h>
 
 static void test_board_init(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     initGame(&testGame); // Sets board
     assert(testGame.board.width == 8);
     log_info("OK");

@@ -69,7 +69,7 @@ s8Vector2 polyBlast_mapShapeToBoardPos(const Shape_St* const shape, const Board_
     return vec2Scale(shapeBoardPos, 1.0f/BLOCK_PX_SIZE, s8Vector2);
 }
 
-void polyBlast_handleShape(GameState_St* const game, Shape_St* const shape) {
+void polyBlast_handleShape(PolyBlastGame_St* const game, Shape_St* const shape) {
     if (shape->placed) return;
 
     f32Vector2 mousePos = GetMousePosition();

@@ -5,13 +5,32 @@
     @date 2026-04-14
     @brief serverInterface.c implementation/header file
 */
-#include "rubikAPI.h"
 
 #include "logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 #include <arpa/inet.h>
+
+
+#include "APIs/generalAPI.h"
+#include "networkInterface.h"
+
+/**
+    @brief Definition of enum RubikActionCodes_e
+*/
+enum RubikActionCodes_e {
+    ACTION_CODE_RUBIK_SCRAMBLE = firstAvailableActionCode + 0x20,
+    ACTION_CODE_RUBIK_PROGRESS,
+    ACTION_CODE_RUBIK_ELIMINATE
+};
+
+/**
+    @brief Definition of typedef struct
+*/
+typedef struct {
+    BaseGame_St base;
+} RubikGame_St;
 
 typedef struct {
     int id;
@@ -27,7 +46,7 @@ typedef struct {
     int seed;
 } RubikServerState;
 
-void* rubik_createInstance(void) {
+void* twistCube_createInstance(void) {
     RubikServerState* rs = calloc(1, sizeof(RubikServerState));
     if (rs) {
         rs->status = 0;
@@ -37,7 +56,7 @@ void* rubik_createInstance(void) {
     return rs;
 }
 
-void rubik_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
+void twistCube_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void *payload, u16 len, BroadcastMessage_Ft broadcast) {
     if (action != ACTION_CODE_GAME_DATA) return;
     if (len < sizeof(GameTLVHeader_St)) return;
     
@@ -86,7 +105,7 @@ void rubik_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void
     }
 }
 
-void rubik_onTick(void* state) {
+void twistCube_onTick(void* state) {
     RubikServerState* rs = (RubikServerState*)state;
     if (rs->status != 1) return;
     
@@ -94,21 +113,21 @@ void rubik_onTick(void* state) {
     // Simplified for now: just a placeholder logic
 }
 
-void rubik_onPlayerLeave(void* state, s32 playerId) {
+void twistCube_onPlayerLeave(void* state, s32 playerId) {
     if (playerId < 0 || playerId >= MAX_CLIENTS) return;
     RubikServerState* rs = (RubikServerState*)state;
     rs->players[playerId].active = false;
 }
 
-void rubik_destroyInstance(void *state) {
+void twistCube_destroyInstance(void *state) {
     free(state);
 }
 
-GameServerInterface_St rubikServerInterface = {
-    .gameName = "rubik",
-    .createInstance = rubik_createInstance,
-    .onAction = rubik_onAction,
-    .onTick = rubik_onTick,
-    .onPlayerLeave = rubik_onPlayerLeave,
-    .destroyInstance = rubik_destroyInstance
+GameServerInterface_St twistCubeServerInterface = {
+    .gameName = "Twist Cube",
+    .createInstance = twistCube_createInstance,
+    .onAction = twistCube_onAction,
+    .onTick = twistCube_onTick,
+    .onPlayerLeave = twistCube_onPlayerLeave,
+    .destroyInstance = twistCube_destroyInstance
 };

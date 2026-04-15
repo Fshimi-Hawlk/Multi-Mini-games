@@ -28,7 +28,7 @@ extern GameServerInterface_St kingServerInterface;
 /**
     @brief Global variable rubikServerInterface
 */
-extern GameServerInterface_St rubikServerInterface;
+extern GameServerInterface_St twistCubeServerInterface;
 
 /**
  * @brief Get the server interface for a given game ID.

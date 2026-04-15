@@ -5,6 +5,7 @@
     @date 2026-04-14
     @brief Implementation of the Lobby mini-game module with Editor and Advanced Physics.
 */
+
 #include "core/game.h"
 #include "core/chat.h"
 
@@ -132,7 +133,7 @@ void lobby_init(void) {
     lobby_game.gridStep = 25.0f;
 }
 
-void lobby_on_data(s32 playerID, u8 action, const void* data, u16 len) {
+void lobby_onData(s32 playerID, u8 action, const void* data, u16 len) {
     if (playerID < 0 || (playerID >= MAX_CLIENTS && playerID != 999)) {
         // Handle JOIN_ACK specifically if it comes from the server (which might use ID 0 or 999 depending on logic)
         if (action == ACTION_CODE_JOIN_ACK && len >= sizeof(u16)) {
@@ -335,7 +336,7 @@ void lobby_draw(void) {
         drawChat();
 }
 
-void lobby_clientDestroy(void) {
+void lobby_destroy(void) {
     lobby_freeAudio();
 
     // Cleanup params menu
@@ -346,8 +347,8 @@ GameClientInterface_St lobbyClientInterface = {
     .id         = MINI_GAME_ID_LOBBY,
     .name       = "Lobby",
     .init       = lobby_init,
-    .on_data    = lobby_on_data,
+    .onData     = lobby_onData,
     .update     = lobby_update,
     .draw       = lobby_draw,
-    .destroy    = lobby_clientDestroy
+    .destroy    = lobby_destroy
 };

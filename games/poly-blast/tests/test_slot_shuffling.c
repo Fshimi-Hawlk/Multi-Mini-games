@@ -12,7 +12,7 @@
 #include <assert.h>
 
 static void test_shuffle_slots(void) {
-    GameState_St testGame = {0};
+    PolyBlastGame_St testGame = {0};
     initPrefabsAndVariants(&testGame.prefabManager);
     da_reserve(&testGame.prefabManager.prefabsBag, 200);
     initPrefabsAndVariants(&testGame.prefabManager);
