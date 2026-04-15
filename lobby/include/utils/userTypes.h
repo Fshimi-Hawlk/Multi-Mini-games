@@ -15,9 +15,9 @@
 */
 typedef struct {
     Vector2 position;
-    float height;
-    float angle;      // L'angle actuel du brin
-    float velocity;   // La vitesse de rotation (pour l'élasticité)
+    f32 height;
+    f32 angle;
+    f32 velocity;
     Color color;
 } GrassBlade_St;
 
@@ -36,20 +36,20 @@ typedef enum {
 typedef struct {
     Vector2 position;
     Vector2 velocity;
-    float   radius;
-    float   alpha;
-    float   phase;
+    f32   radius;
+    f32   alpha;
+    f32   phase;
     bool    active;
 
     // Enhanced behavior
     FireflyMode_Et mode;
-    float          modeTimer;
+    f32          modeTimer;
     Vector2        wanderTarget;
     Vector2        loopPoints[12];
     int            loopCount;
     int            currentLoopIndex;
-    float          facingAngle;
-    float          currentSpeed;
+    f32          facingAngle;
+    f32          currentSpeed;
 } Firefly_St;
 
 /**
@@ -58,15 +58,15 @@ typedef struct {
 typedef struct {
     Vector2 position;
     Vector2 velocity;
-    float   rotation;
-    float   rotationSpeed;
-    float   scale;
-    float   life;
-    float   currentAlpha;
+    f32   rotation;
+    f32   rotationSpeed;
+    f32   scale;
+    f32   life;
+    f32   currentAlpha;
     bool    active;
     bool    onGround;
-    float   groundTimer;
-    float   spinDampTimer;      ///< Time left to apply strong rotational drag after player push (0 = normal drag)
+    f32   groundTimer;
+    f32   spinDampTimer;      ///< Time left to apply strong rotational drag after player push (0 = normal drag)
     Color   color;
 } FallingLeaf_St;
 
@@ -238,6 +238,7 @@ typedef struct {
     Rectangle hitbox;
     const char *name;
     Color color;
+    bool active;
 } GameInteractionZone_St;
 
 /**

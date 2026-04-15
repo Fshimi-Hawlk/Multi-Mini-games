@@ -33,7 +33,7 @@
 
 #define X_LIMIT 1600.0f
 
-#define MAX_GRASS_BLADES 80000
+#define MAX_GRASS_BLADES 65000
 
 #define MAX_FIREFLIES 46
 

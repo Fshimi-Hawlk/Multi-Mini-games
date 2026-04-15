@@ -303,13 +303,13 @@ void lobby_draw(void) {
         lobby_drawTerrains();
         lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
 
-        for (s32 i   = 0;   i < MAX_CLIENTS; i++) {
+        for (s32 i = 0; i < MAX_CLIENTS; i++) {
             if (lobby_game.otherPlayers[i].active)
                 lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
         }
 
+        lobby_drawGrass(lobby_game.cam);
         lobby_drawWorldBoundaries(&lobby_game.player);
-        lobby_drawGrass(&lobby_game.player, lobby_game.cam);
         lobby_drawGameZones(&lobby_game.player);
         lobby_drawAtmosphericEffects();
     } EndMode2D();

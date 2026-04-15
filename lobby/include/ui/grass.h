@@ -18,11 +18,11 @@
     @param[in,out] camera The camera parameter
 */
 void lobby_updateGrass(const Player_St* const player, const float dt, const float time, const  Camera2D camera);
+
 /**
     @brief Description for lobby_drawGrass
-    @param[in,out] player The player parameter
     @param[in,out] camera The camera parameter
 */
-void lobby_drawGrass(const Player_St* const player, const Camera2D camera);
+void lobby_drawGrass(const Camera2D camera);
 
 #endif // UI_GRASS_H

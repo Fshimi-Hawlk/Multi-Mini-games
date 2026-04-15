@@ -7,6 +7,7 @@
 */
 #include "core/game.h"
 
+#include "raylib.h"
 #include "ui/game.h"
 
 #include "utils/globals.h"
@@ -57,13 +58,24 @@ void lobby_drawTerrains(void) {
     for (u32 i = 0; i < terrains.count; i++) {
         const LobbyTerrain_St* t = &terrains.items[i];
         
-        // Visibility check (basic culling)
-        // Note: For simplicity we assume they are somewhat near the player
-        
         switch (t->kind) {
             case TERRAIN_KIND_GRASS: {
                 Texture2D tex = terrainTextures[TERRAIN_KIND_GRASS];
-                DrawTextureRec(tex, getTextureRec(tex), getRectPos(t->rect), WHITE);
+                if (!IsTextureValid(tex)) break;
+
+                // ── Scale down the texture while keeping tiling ─────────────────────
+                const float textureScale = 0.0625f;
+                Rectangle source = {
+                    .x      = 0.0f,
+                    .y      = 0.0f,
+                    .width  = t->rect.width  / textureScale,
+                    .height = t->rect.height / textureScale
+                };
+
+                f32Vector2 pos = getRectPos(t->rect);
+                pos.y -= 20;
+
+                DrawTextureRec(tex, source, pos, WHITE);
             } break;
 
             case TERRAIN_KIND_WOOD_PLANK: {
