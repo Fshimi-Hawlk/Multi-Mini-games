@@ -1,6 +1,6 @@
 /**
     @file prompt.c
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-04-07
     @date 2026-04-14
     @brief Save/load modal UI implementation using widgets.

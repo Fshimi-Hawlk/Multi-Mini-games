@@ -1,7 +1,7 @@
 /**
     @file test_ui_logic.c
-    @author Charles CAILLON
-    @date 2026-04-14
+    @author i-Charlys
+    @date 2026-03-19
     @date 2026-04-14
     @brief TDD: Verification of card selection logic (topmost card picking).
 */

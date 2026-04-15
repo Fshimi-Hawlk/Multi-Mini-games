@@ -1,7 +1,7 @@
 /**
     @file card.c
-    @author Charles CAILLON
-    @date 2026-03-18
+    @author i-Charlys
+    @date 2026-03-11
     @date 2026-04-14
     @brief Implementation of card and deck management functions using O(1)/O(N) array operations.
 */

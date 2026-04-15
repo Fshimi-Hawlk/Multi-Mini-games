@@ -1,6 +1,6 @@
 /**
     @file bot.h
-    @author Charles CAILLON
+    @author i-Charlys
     @date 2026-03-18
     @date 2026-04-14
     @brief Bot logic for King-for-Four (Uno).

@@ -2,7 +2,7 @@
     @file globals.h
     @author Maxime CHAUVEAU
     @date February 2026
-    @date 2026-04-14
+    @date 2026-04-07
     @brief Global variables and constants for Solitaire
 */
 #ifndef UTILS_GLOBALS_H

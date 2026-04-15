@@ -11,7 +11,7 @@
 #include "APIs/generalAPI.h"
 
 /**
-    @brief Definition of typedef struct SuikaGame_St SuikaGame_St
+    @brief Forward declaration for the Suika game state structure.
 */
 typedef struct SuikaGame_St SuikaGame_St;
 

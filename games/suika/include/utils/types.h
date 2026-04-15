@@ -1,7 +1,7 @@
 /**
     @file types.h
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Type definitions for the Suika (Watermelon Game) mini-game.
 */
@@ -140,7 +140,7 @@ struct SuikaGame_St
 };
 
 /**
-    @brief Definition of typedef struct SuikaGame_St SuikaGame_St
+    @brief Forward declaration for the Suika game state structure.
 */
 typedef struct SuikaGame_St SuikaGame_St;
 

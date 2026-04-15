@@ -2,7 +2,7 @@
     @file utils.h
     @author Léandre BAUDET
     @date 2024
-    @date 2026-04-14
+    @date 2026-04-02
     @brief Utility functions for Echecs.
 */
 #ifndef UTILS_H

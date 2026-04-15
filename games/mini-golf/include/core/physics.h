@@ -1,7 +1,7 @@
 /**
     @file physics.h
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Physics simulation for the golf ball.
 */

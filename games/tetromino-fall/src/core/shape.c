@@ -1,7 +1,7 @@
 /**
     @file shape.c
-    @author Léandre BAUDET
-    @date 2026-04-14
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
     @brief Core implementation of tetromino shapes and their transformations.
 */

@@ -1,9 +1,9 @@
 /**
     @file utils.c
-    @author Léandre BAUDET
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief utils.c implementation/header file
+    @brief Utility function implementations for color comparison and other general tasks.
 */
 #include "utils/utils.h"
 

@@ -1,7 +1,7 @@
 /**
     @file game.h
     @author Léandre BAUDET
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief UI and rendering functions for the Snake mini-game.
 */

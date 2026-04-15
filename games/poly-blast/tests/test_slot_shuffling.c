@@ -1,7 +1,7 @@
 /**
     @file test_slot_shuffling.c
-    @author Kimi BERGE
-    @date 2026-04-14
+    @author Fshimi-Hawlk
+    @date 2026-04-10
     @date 2026-04-14
     @brief Unit tests for active slots and shuffling.
 */

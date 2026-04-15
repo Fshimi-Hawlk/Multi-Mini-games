@@ -1,9 +1,9 @@
 /**
     @file main.c
-    @author Léandre BAUDET
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief main.c implementation/header file
+    @brief Main entry point for the Tetromino Fall game, handling the game loop, input, and rendering.
 */
 #include "core/algo.h"
 #include "core/board.h"

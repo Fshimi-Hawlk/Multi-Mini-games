@@ -1,9 +1,9 @@
 /**
     @file audio.c
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
+    @date 2026-04-10
     @date 2026-04-14
-    @date 2026-04-14
-    @brief audio.c implementation/header file
+    @brief Implementation of audio resource loading and unloading for game sound effects.
 */
 #include "setups/audio.h"
 

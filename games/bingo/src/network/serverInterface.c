@@ -1,7 +1,7 @@
 /**
     @file serverInterface.c
-    @author Kimi BERGE
-    @date 2026-03-31
+    @author Fshimi-Hawlk
+    @date 2026-03-11
     @date 2026-04-14
     @brief Server-side authoritative logic for the Bingo mini-game.
 */

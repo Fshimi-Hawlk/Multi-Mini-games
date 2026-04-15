@@ -1,9 +1,9 @@
 /**
     @file utils.c
-    @author Maxime CHAUVEAU
+    @author Fshimi-Hawlk
+    @date 2026-02-06
     @date 2026-04-14
-    @date 2026-04-14
-    @brief utils.c implementation/header file
+    @brief Utility function implementations for color comparison within the Solo Cards game.
 */
 #include "utils/utils.h"
 

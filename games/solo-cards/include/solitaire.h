@@ -116,7 +116,7 @@ typedef struct {
 } DragState_St;
 
 /**
-    @brief Definition of typedef struct GameAssets_s GameAssets_St
+    @brief Forward declaration for the game assets structure.
 */
 typedef struct GameAssets_s GameAssets_St;
 

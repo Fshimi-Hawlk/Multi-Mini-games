@@ -1,9 +1,9 @@
 /**
     @file serverInterface.c
-    @author Léandre BAUDET
+    @author i-Charlys
+    @date 2026-04-02
     @date 2026-04-14
-    @date 2026-04-14
-    @brief serverInterface.c implementation/header file
+    @brief Server-side implementation of the Twist Cube game interface handling multiplayer logic.
 */
 
 #include "logger.h"

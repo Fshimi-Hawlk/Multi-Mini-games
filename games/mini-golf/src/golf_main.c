@@ -1,7 +1,7 @@
 /**
     @file golf_main.c
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Core game logic for Golf 3D: wind, aim arrow, club billboard,
 */

@@ -1,7 +1,7 @@
 /**
     @file clientInterface.c
-    @author Kimi BERGE
-    @date 2026-03-31
+    @author Fshimi-Hawlk
+    @date 2026-03-16
     @date 2026-04-14
     @brief Client-side network interface and local rendering/input for the Bingo mini-game.
 */

@@ -1,7 +1,7 @@
 /**
     @file test_board_grid.c
-    @author Kimi BERGE
-    @date 2026-04-14
+    @author Fshimi-Hawlk
+    @date 2026-04-12
     @date 2026-04-14
     @brief Unit tests for 8x8 grid and board data.
 */

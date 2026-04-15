@@ -1,7 +1,7 @@
 /**
     @file lobby_paths.h
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Asset path overrides when bowling is built as a library for the lobby.
 */

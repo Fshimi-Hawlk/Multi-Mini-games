@@ -1,9 +1,9 @@
 /**
     @file physics.c
     @author Maxime CHAUVEAU
+    @date 2026-04-07
     @date 2026-04-14
-    @date 2026-04-14
-    @brief physics.c implementation/header file
+    @brief Physics simulation for ball movement, including wind effects, collisions, and surface friction.
 */
 #include "../../include/core/game.h"
 #include "core/physics.h"

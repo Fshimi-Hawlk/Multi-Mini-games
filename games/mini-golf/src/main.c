@@ -1,7 +1,7 @@
 /**
     @file main.c
     @author Maxime CHAUVEAU
-    @date 2026-04-14
+    @date 2026-04-07
     @date 2026-04-14
     @brief Entry point for the Golf 3D mini-game (standalone mode).
 */

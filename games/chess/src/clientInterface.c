@@ -1,7 +1,7 @@
 /**
     @file clientInterface.c
-    @author Léandre BAUDET
-    @date 2026-04-14
+    @author i-Charlys
+    @date 2026-04-02
     @date 2026-04-14
     @brief Client-side network interface for Chess.
 */

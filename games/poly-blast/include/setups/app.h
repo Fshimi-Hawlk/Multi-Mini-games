@@ -1,6 +1,6 @@
 /**
     @file app.h
-    @author Kimi BERGE
+    @author Fshimi-Hawlk
     @date 2026-01-07
     @date 2026-04-14
     @brief Application initialization and cleanup.

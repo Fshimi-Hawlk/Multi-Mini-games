@@ -1,6 +1,6 @@
 /**
     @file configs.h
-    @author Maxime CHAUVEAU
+    @author Fshimi-Hawlk
     @date 2026-02-01
     @date 2026-04-14
     @brief Configuration constants for Solitaire

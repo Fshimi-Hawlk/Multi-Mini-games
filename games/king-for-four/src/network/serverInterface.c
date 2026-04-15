@@ -1,6 +1,6 @@
 /**
     @file serverInterface.c
-    @author Charles CAILLON
+    @author i-Charlys
     @date 2026-03-18
     @date 2026-04-14
     @brief Server-side module for the King-for-Four (Uno) game.

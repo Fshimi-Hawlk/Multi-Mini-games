@@ -1,7 +1,7 @@
 /**
     @file test_bot_ai.c
-    @author Charles CAILLON
-    @date 2026-04-14
+    @author i-Charlys
+    @date 2026-03-18
     @date 2026-04-14
     @brief Unit tests for Bot decision making in Uno.
 */
