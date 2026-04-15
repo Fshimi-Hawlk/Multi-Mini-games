@@ -98,21 +98,17 @@ static void listSaves(SaveEntryVec_St* outList) {
         }
         fclose(f);
 
-        u64 offset = sizeof(u32) + sizeof(u8) + sizeof(u8); // magic + version + variant
         SaveEntry_St entryData = {0};
         strncpy(entryData.filename, entry->d_name, 63);
 
-        u64 score; u8 streak; u8 lostFlag;
-        offset += 0; // skip scoring start
-        memcpy(&score, header + offset, sizeof(u64)); offset += sizeof(u64);
-        memcpy(&streak, header + offset, sizeof(u8)); offset += sizeof(u8) + sizeof(u8); // grace
-        offset += sizeof(u8) + sizeof(u8); // width/height
-        memcpy(&lostFlag, header + offset +  // skip board data (we don't need full board)
-               (sizeof(Block_St) * 8 * 8) + sizeof(f32) * MAX_SHAPE_SIZE, sizeof(u8));
+        memcpy(&entryData.score, header + 6, sizeof(u64));
+        memcpy(&entryData.streakCount, header + 14, sizeof(u8));
 
-        entryData.score = score;
-        entryData.streakCount = streak;
-        entryData.hasBeenLost = (lostFlag != 0);
+        fseek(f, -1, SEEK_END);
+        u8 lostFlag = 0;
+        if (fread(&lostFlag, 1, 1, f) == 1) {
+            entryData.hasBeenLost = (lostFlag != 0);
+        }
         entryData.timestamp = st.st_mtime;
 
         da_append(outList, entryData);
