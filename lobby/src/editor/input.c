@@ -315,8 +315,9 @@ void updateEditor(LobbyGame_St* const game, f32 dt) {
             dragPreviewRect.width = fabsf(mouseWorld.x - dragStartWorld.x);
             dragPreviewRect.height = fabsf(mouseWorld.y - dragStartWorld.y);
         } else if (editorDragMode == DRAG_MOVING_ZONE && selectedZoneIndex != -1) {
-            dragPreviewRect.x = gameZones[selectedZoneIndex].hitbox.x + offset.x;
-            dragPreviewRect.y = gameZones[selectedZoneIndex].hitbox.y + offset.y;
+            dragPreviewRect = gameZones[selectedZoneIndex].hitbox;
+            dragPreviewRect.x += offset.x;
+            dragPreviewRect.y += offset.y;
         } else if (editorDragMode == DRAG_MOVING) {
             if (selectedIndices.count > 1) {
                 dragPreviewRect.x = computeSelectedGroupBox().x + offset.x;

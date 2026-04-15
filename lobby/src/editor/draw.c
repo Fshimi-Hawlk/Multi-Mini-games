@@ -51,13 +51,13 @@ void drawEditor(const LobbyGame_St* const game) {
         lobby_drawTerrains();
         lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.player);
 
-        for (s32 i   = 0;   i < MAX_CLIENTS; i++) {
+        for (s32 i = 0; i < MAX_CLIENTS; i++) {
             if (lobby_game.otherPlayers[i].active)
                 lobby_drawPlayer(&lobby_game.playerVisuals, &lobby_game.otherPlayers[i]);
         }
 
         lobby_drawWorldBoundaries(&lobby_game.player);
-        lobby_drawGrass(&lobby_game.player, lobby_game.cam);
+        lobby_drawGrass(lobby_game.cam);
         lobby_drawGameZones(&lobby_game.player);
         lobby_drawAtmosphericEffects();
 
@@ -68,7 +68,7 @@ void drawEditor(const LobbyGame_St* const game) {
                     DrawRectangleRec(dragPreviewRect, Fade(LIME, 0.35f));
                     DrawRectangleLinesEx(dragPreviewRect, 3.0f, LIME);
                 } 
-            } else if (editorDragMode == DRAG_MOVING_ZONE) {
+            } else if (editorDragMode == DRAG_MOVING_ZONE && selectedZoneIndex != -1) {
                 if (dragPreviewRect.width > 0.0f || dragPreviewRect.height > 0.0f) {
                     DrawRectangleRec(dragPreviewRect, Fade(YELLOW, 0.35f));
                     DrawRectangleLinesEx(dragPreviewRect, 3.0f, YELLOW);

@@ -19,7 +19,7 @@ static void initGrass(void) {
     float stepX = 3.0f;
     float stepY = 5.0f;
 
-    for (float y = floor.y-20; y < floor.y + 500.0f; y += stepY) {
+    for (float y = floor.y - 20; y < floor.y + 500.0f; y += stepY) {
         for (float x = -X_LIMIT - 600; x < X_LIMIT + 600; x += stepX) {
             if (grassCount >= MAX_GRASS_BLADES) break;
 
