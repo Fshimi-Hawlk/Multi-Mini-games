@@ -5,30 +5,18 @@
     @date 2026-04-14
     @brief Header file for card and deck management in the King for Four game.
 */
+
 #ifndef CARD_H
 #define CARD_H
 
 /**
     @brief Maximum number of cards in a standard Uno game.
 */
+#define MAX_UNO_CARDS 108
+
 /**
     @brief Represents the possible colors of a card.
 */
-/**
-    @brief Represents the possible values or actions of a card.
-*/
-/**
-    @brief Represents a single playing card.
-*/
-/**
-    @brief Represents a collection of cards (a deck or a hand).
-
-    Uses a fixed-size array to ensure cache-locality, zero fragmentation,
-    and completely eliminate memory leaks.
-*/
-#define MAX_UNO_CARDS 108
-
-
 typedef enum { 
     CARD_RED = 0,    
     CARD_YELLOW,     
@@ -37,7 +25,9 @@ typedef enum {
     CARD_BLACK       
 } CardColor_Et;
 
-
+/**
+    @brief Represents the possible values or actions of a card.
+*/
 typedef enum {
     ZERO = 0, ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE,
     SKIP,      
@@ -47,13 +37,20 @@ typedef enum {
     PLUS_FOUR  
 } CardValue_Et;
 
-
+/**
+    @brief Represents a single playing card.
+*/
 typedef struct {
     CardColor_Et color; 
     CardValue_Et value; 
 } Card_St;
 
+/**
+    @brief Represents a collection of cards (a deck or a hand).
 
+    Uses a fixed-size array to ensure cache-locality, zero fragmentation,
+    and completely eliminate memory leaks.
+*/
 typedef struct {
     Card_St cards[MAX_UNO_CARDS]; 
     int size;                  

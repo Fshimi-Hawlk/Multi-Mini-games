@@ -1,7 +1,9 @@
 /**
     @file leaderboard.h
-    @author Charles CAILLON
+    @author I-Charlys
+    @author Fshimi-Hawlk
     @date 2026-04-13
+    @date 2026-04-14
     @brief Local highscore / leaderboard management using a dynamic array.
 
     Supports loading, saving, submitting scores, and creating filtered views

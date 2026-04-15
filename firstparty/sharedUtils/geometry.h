@@ -10,11 +10,13 @@
 
 #include "raylib.h"
 
+#ifndef f32Vector2_def
+#define f32Vector2_def      // marker to indicate the typedef is active
 /**
     @brief Shorthand alias for Raylib's Vector2 (used in many places for clarity).
  */
 typedef Vector2 f32Vector2;
-#define f32Vector2_def      // marker to indicate the typedef is active
+#endif
 
 /**
     @brief Nine-point anchor positions for rectangles and text.
