@@ -79,7 +79,9 @@ static void listSaves(SaveEntryVec_St* outList) {
     while ((entry = readdir(dir))) {
         if (strstr(entry->d_name, ".sav") == NULL) continue;
 
-        char fullPath[256];
+        char fullPath[512];
+        size_t fullPathLen = strlen(SAVES_PATH) + strlen(entry->d_name);
+        if (fullPathLen >= sizeof(fullPath)) continue;
         snprintf(fullPath, sizeof(fullPath), "%s%s", SAVES_PATH, entry->d_name);
 
         struct stat st;
@@ -90,7 +92,10 @@ static void listSaves(SaveEntryVec_St* outList) {
         if (!f) continue;
 
         u8 header[64] = {0};
-        fread(header, 1, 64, f);
+        if (fread(header, 1, 64, f) != 64) {
+            fclose(f);
+            continue;
+        }
         fclose(f);
 
         u64 offset = sizeof(u32) + sizeof(u8) + sizeof(u8); // magic + version + variant
@@ -161,7 +166,11 @@ bool polyBlast_loadGameFromFile(PolyBlastGame_St* const state, const char* filen
         return false;
     }
 
-    fread(buffer, 1, size, f);
+    if (fread(buffer, 1, size, f) != size) {
+        free(buffer);
+        fclose(f);
+        return false;
+    }
     fclose(f);
 
     bool ok = polyBlast_deserializeGameState(state, buffer, size, true);

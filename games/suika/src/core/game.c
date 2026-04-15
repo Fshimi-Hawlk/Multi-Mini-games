@@ -159,8 +159,13 @@ void suika_loadAssets(SuikaGame_St* game)
 {
     const char* assetPath = suika_resolveAssetPath(game);
     char fullPath[512];
-    snprintf(fullPath, sizeof(fullPath), "%sassets_suika.png", assetPath);
-    game->fruitAtlas = suika_loadTexture(fullPath);
+    size_t assetLen = strlen(assetPath);
+    if (assetLen + 17 < sizeof(fullPath)) {
+        snprintf(fullPath, sizeof(fullPath), "%sassets_suika.png", assetPath);
+        game->fruitAtlas = suika_loadTexture(fullPath);
+    } else {
+        game->fruitAtlas = (Texture2D){0};
+    }
 }
 
 /**

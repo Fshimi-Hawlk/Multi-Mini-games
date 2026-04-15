@@ -82,7 +82,9 @@ int snake_readRecord(void) {
         return highScore;
     }
 
-    fscanf(fd, "%d", &highScore);
+    if (fscanf(fd, "%d", &highScore) != 1) {
+        highScore = 0;
+    }
     fclose(fd);
 
     return highScore;

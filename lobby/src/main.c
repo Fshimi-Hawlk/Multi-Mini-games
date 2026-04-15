@@ -59,13 +59,15 @@ void kill_server(void) {
     if (server_spawned) {
         log_info("Arrêt du serveur local...");
 #ifdef _WIN32
-        system("taskkill /F /IM server.exe > nul 2>&1");
+        int ret = system("taskkill /F /IM server.exe > nul 2>&1");
+        (void)ret;
 #else
         if (server_pid > 0) {
             kill(server_pid, SIGTERM);
             server_pid = -1;
         } else {
-            system("killall server 2>/dev/null");
+            int ret = system("killall server 2>/dev/null");
+            (void)ret;
         }
 #endif
         server_spawned = false;
@@ -231,7 +233,7 @@ void spawn_server(void) {
     if (!server_spawned) {
         log_info("Lancement du serveur local...");
 #ifdef _WIN32
-        system("start /B server.exe");
+        (void)system("start /B server.exe");
         server_spawned = true;
 #else
         server_pid = fork();

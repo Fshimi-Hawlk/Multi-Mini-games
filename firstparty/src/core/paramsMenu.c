@@ -560,7 +560,7 @@ void paramsMenu_draw(ParamsMenu_St* menu) {
         pm_drawSlider(track, menu->masterVolume, menu->draggingVolume);
 
         // Percentage label
-        char pct[8];
+        char pct[16];
         int pctVal = (int)(menu->masterVolume * 100.0f + 0.5f);
         if (pctVal > 100) pctVal = 100;
         snprintf(pct, sizeof(pct), "%d%%", pctVal);

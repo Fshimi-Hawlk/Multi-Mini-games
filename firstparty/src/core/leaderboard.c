@@ -67,8 +67,11 @@ Leaderboard_St leaderboard_load(MiniGameId_Et gameId) {
         u32 count = 0;
         if (fread(&count, sizeof(u32), 1, f) == 1 && count > 0) {
             da_reserve(&lb, count);
-            fread(lb.items, sizeof(LeaderboardEntry_St), count, f);
-            lb.count = count;
+            if (fread(lb.items, sizeof(LeaderboardEntry_St), count, f) == count) {
+                lb.count = count;
+            } else {
+                lb.count = 0;
+            }
         }
         fclose(f);
     } else {

@@ -12,9 +12,11 @@ static bool soloGameRunning = false;
 
 static void soloGameInit(void) {
     #ifdef _WIN32
-    system("start games\\mini-golf\\build\\bin\\main.exe");
+    int ret = system("start games\\mini-golf\\build\\bin\\main.exe");
+    (void)ret;
     #else
-    system("./games/mini-golf/build/bin/main &");
+    int ret = system("./games/mini-golf/build/bin/main &");
+    (void)ret;
     #endif
     soloGameRunning = true;
 }

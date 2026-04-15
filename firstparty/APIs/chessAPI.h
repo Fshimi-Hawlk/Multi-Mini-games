@@ -1,6 +1,6 @@
 /**
     @file chessAPI.h
-    @author Léandre BAUDET
+    @author i-Charlys
     @date 2024-01-01
     @date 2026-04-14
     @brief Public interface for the chess mini-game.

@@ -185,7 +185,7 @@ int initGame(Board_t board) {
 
     chess_initAudio();
 
-    moveMade = calloc(7, sizeof(char));
+    moveMade = calloc(64, sizeof(char));
     if (!moveMade) {
         error("Couldn't allocate memory");
         return 1;
