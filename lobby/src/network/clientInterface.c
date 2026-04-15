@@ -11,7 +11,6 @@
 #include "setups/app.h"
 #include "setups/audio.h"
 #include "setups/game.h"
-#include "setups/texture.h"
 
 #include "ui/app.h"
 #include "ui/game.h"
@@ -232,6 +231,9 @@ void lobby_update(f32 dt) {
     }
 
     lobby_updatePlayer(&lobby_game.player, &lobby_game.physics[lobby_game.player.textureId], dt);
+    
+    if (IsKeyPressed(KEY_F2)) showPhysicsDebugPanel = !showPhysicsDebugPanel;
+    lobby_updatePhysicsDebugPanel(&lobby_game);
 
     Vector2 desiredTarget = lobby_game.player.position;
     if (lobby_game.player.onGround && lobby_game.player.position.y > GROUND_Y - 70.0f) {
@@ -249,7 +251,7 @@ void lobby_update(f32 dt) {
     paramsMenu_update(&paramsMenu);
 
     // Interpolate other players
-    for (s32 i   = 0;   i < MAX_CLIENTS; i++) {
+    for (s32 i = 0; i < MAX_CLIENTS; i++) {
         if (lobby_game.otherPlayers[i].active && i != lobby_game.clientId) {
             Player_St* p = &lobby_game.otherPlayers[i];
             // Simple lerp for smooth movement
@@ -315,6 +317,7 @@ void lobby_draw(void) {
     } EndMode2D();
     
     lobby_drawScreenEffects(&lobby_game.player);
+    lobby_drawPhysicsDebugPanel(&lobby_game);
 
     if (lobby_game.editorMode) {
         drawEditor(&lobby_game);
