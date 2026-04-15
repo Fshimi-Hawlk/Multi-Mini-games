@@ -52,7 +52,7 @@ void lobby_updateGrass(const Player_St* const player, const float dt, const floa
 
         if (distSq < 0.001f) continue;
 
-        const float interactionRadiusSq = 2200.0f;
+        const float interactionRadiusSq = 1000.0f;
 
         if (distSq < interactionRadiusSq) {
             Vector2 pushDir = Vector2Normalize(toBlade);

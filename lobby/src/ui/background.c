@@ -50,7 +50,7 @@ void lobby_initBackgroundScale(void) {
     f32 windowAspect = (f32) systemSettings.video.width / (f32) systemSettings.video.height;
     f32 bgAspect     = (f32) backgroundTexture.width / (f32) backgroundTexture.height;
 
-    const f32 targetCoverage = 1.5f;
+    const f32 targetCoverage = 1.75f;
 
     if (windowAspect > bgAspect) { // wider window -> fit to height
         backgroundBaseScale = (f32) systemSettings.video.height / (f32) backgroundTexture.height * targetCoverage;
