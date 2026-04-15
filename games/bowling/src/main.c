@@ -9,7 +9,6 @@
 #include <time.h>
 #include "core/game.h"
 #include "utils/types.h"
-#include "logger.h"
 #include "utils/audio.h"
 
 /**
@@ -47,6 +46,3 @@ int main(int argc, char* argv[]) {
 
     return 0;
 }
-
-#define PARAMS_MENU_IMPLEMENTATION
-#include "paramsMenu.h"

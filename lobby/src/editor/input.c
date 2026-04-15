@@ -87,7 +87,7 @@ void updateEditor(LobbyGame_St* const game, f32 dt) {
         }
     }
 
-    if (textButtonUpdate(&btnGenerate, mouseScreen)) {
+    if (textButtonUpdate(&btnGene, mouseScreen)) {
         char* selected = editorShowSaveDialog("generated-levelName", ".c");
         if (selected) {
             editorGenerateCode(game, selected);

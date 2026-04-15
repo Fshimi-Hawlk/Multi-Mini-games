@@ -109,10 +109,7 @@ typedef struct
 
     @note Must have BaseGame_St as first member for lobby compatibility.
 */
-struct SuikaGame_St
-{
-    BaseGame_St base;                   ///< Base game interface for lobby integration
-
+typedef struct {
     char assetPath[512];                ///< Resolved asset base directory (OPT: moved from static global)
 
     Texture2D fruitAtlas;               ///< Sprite atlas containing all fruit images
@@ -137,11 +134,6 @@ struct SuikaGame_St
     // Système de particules pour les effets visuels
     Particle_St particles[SUIKA_MAX_PARTICLES]; ///< Pool of particles for visual effects
     int particleCount;                          ///< Current number of active particles
-};
-
-/**
-    @brief Forward declaration for the Suika game state structure.
-*/
-typedef struct SuikaGame_St SuikaGame_St;
+} SuikaGame_St;
 
 #endif

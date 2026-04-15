@@ -19,7 +19,7 @@
     @param[in,out] game Pointer to the game state to initialize
     @return            void
 */
-void suika_init(SuikaGame_St* game);
+void suika_initGame(SuikaGame_St* game);
 
 /**
     @brief Update game state for one frame.
@@ -30,7 +30,7 @@ void suika_init(SuikaGame_St* game);
     @param[in]     deltaTime Time elapsed since last frame in seconds
     @return                  void
 */
-void suika_update(SuikaGame_St* game, float deltaTime);
+void suika_updateGame(SuikaGame_St* game, float deltaTime);
 
 /**
     @brief Render the current game state.
@@ -40,18 +40,7 @@ void suika_update(SuikaGame_St* game, float deltaTime);
     @param[in]     game Pointer to the game state (const - does not modify)
     @return             void
 */
-void suika_draw(const SuikaGame_St* game);
-
-/**
-    @brief Clean up game resources.
-
-    Releases any resources held by the game state.
-    Called before freeing the game structure.
-
-    @param[in,out] game Pointer to the game state
-    @return            void
-*/
-void suika_cleanup(SuikaGame_St* game);
+void suika_drawGame(const SuikaGame_St* game);
 
 /**
     @brief Get properties for a fruit type.

@@ -10,6 +10,9 @@
 #ifndef SETUPS_APP_H
 #define SETUPS_APP_H
 
+void lobby_initFonts(void);
+void lobby_freeFonts(void);
+
 /**
     @brief Initializes the app: RNG, window, fonts.
 

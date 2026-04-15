@@ -50,7 +50,9 @@ static void updateCameraOnWindowResize(LobbyGame_St* const game) {
 void lobby_init(void) {
     Error_Et error = OK;
 
-    log_debug("[LOBBY]: Initializing client lobby");
+    lobby_initAudio();
+    paramsMenu_init(&paramsMenu);
+
     firstFrame = true;
 
     s32 savedId = isFirstInit ? -1 : lobby_game.clientId;
@@ -60,7 +62,6 @@ void lobby_init(void) {
     char savedName[32] = {0};
     strncpy(savedName, lobby_game.player.name, 31);
 
-    memset(&lobby_game, 0, sizeof(lobby_game));
     lobby_game.clientId = savedId;
 
     // Video settings persist across lobby re-init.
@@ -102,7 +103,7 @@ void lobby_init(void) {
             .x = lobby_game.player.position.x, 
             .y = lobby_game.player.position.y - lobby_game.player.radius * 1.5f
         },
-        .zoom   = 1.0f,
+        .zoom  = 1.0f,
     };
     
     lobby_game.playerVisuals.defaultTextureRect = (Rectangle) {
@@ -112,9 +113,6 @@ void lobby_init(void) {
     lobby_gameInit();
     lobby_initBackgroundScale();
     updateCameraOnWindowResize(&lobby_game);
-
-    // Initialize parameters menu (settings button)
-    paramsMenu_init(&paramsMenu);
 
     // Physics constants for each skin
     for (s32 i = 0; i < __playerTextureCount; i++) {
@@ -339,11 +337,10 @@ void lobby_draw(void) {
 void lobby_destroy(void) {
     lobby_freeAudio();
 
-    // Cleanup params menu
     paramsMenu_free(&paramsMenu);
 }
 
-GameClientInterface_St lobbyClientInterface = {
+GameClientInterface_St lobby_clientInterface = {
     .id         = MINI_GAME_ID_LOBBY,
     .name       = "Lobby",
     .init       = lobby_init,

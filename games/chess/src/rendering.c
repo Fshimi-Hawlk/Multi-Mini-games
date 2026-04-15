@@ -6,7 +6,7 @@
     @brief Rendering functions for chess.
 */
 #include "rendering.h"
-#include "global.h"
+#include "globals.h"
 #include "algo.h"
 
 /**

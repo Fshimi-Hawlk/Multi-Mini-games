@@ -439,7 +439,7 @@ void bingo_draw(void) {
 /**
     @brief Client interface definition for the Bingo mini-game.
 */
-GameClientInterface_St bingoClientInterface = {
+GameClientInterface_St bingo_clientInterface = {
     .id      = MINI_GAME_ID_BINGO,
     .name    = "Bingo",
     .init    = bingo_init,

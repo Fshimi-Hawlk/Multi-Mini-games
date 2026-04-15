@@ -136,7 +136,7 @@ void chess_destroyInstance(void *state) {
 /**
     @brief Server interface definition for the chess game.
 */
-GameServerInterface_St chessServerInterface = {
+GameServerInterface_St chess_serverInterface = {
     .gameName = "chess",
     .createInstance = chess_createInstance,
     .onAction = chess_onAction,

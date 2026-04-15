@@ -18,6 +18,7 @@ Font lobby_fonts[__fontSizeCount] = {0};
 f32 gameTime = 0.0f;
 
 PlayerProgress_St g_progress = {0};
+bool g_shouldExit = false;
 
 // ────────────────────────────────────────────────
 // Platforms / Terrains

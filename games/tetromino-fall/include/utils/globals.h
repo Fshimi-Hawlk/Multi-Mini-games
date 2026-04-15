@@ -10,9 +10,9 @@
 
 #include "utils/types.h"
 
-extern inputRepeat_st inputRepeat;      ///< Global state for input key repetition timing.
+extern InputRepeat_St inputRepeat;      ///< Global state for input key repetition timing.
 
 extern Color tetraminosColors[];        ///< Predefined colors for each tetromino shape.
-extern tetramino tetraminosShapes[];    ///< Predefined shapes for each tetromino type.
+extern Tetromino_t tetraminosShapes[];    ///< Predefined shapes for each tetromino type.
 
 #endif

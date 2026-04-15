@@ -371,11 +371,11 @@ void bingo_destroyInstance(void* state) {
 /**
     @brief Server interface definition for the Bingo mini-game.
 */
-GameServerInterface_St bingoServerInterface = {
+GameServerInterface_St bingo_serverInterface = {
     .gameName        = "Bingo",
     .createInstance  = bingo_createInstance,
     .onAction        = bingo_onAction,
     .onTick          = bingo_onTick,
-    .onPlayerLeave  = bingo_onPlayerLeave,
+    .onPlayerLeave   = bingo_onPlayerLeave,
     .destroyInstance = bingo_destroyInstance
 };

@@ -22,7 +22,7 @@
 #include "networkInterface.h"
 #include "paramsMenu.h"
 
-static ParamsMenu_St polyblastParamsMenu = {0};
+static ParamsMenu_St polyblast_paramsMenu = {0};
 static PolyBlastGame_St polyBlast_game = {0};
 
 void polyBlast_init(void) {
@@ -43,7 +43,7 @@ void polyBlast_init(void) {
     polyBlast_initBoard(&polyBlast_game.board);
 
     // Initialize params menu (settings button)
-    paramsMenu_init(&polyblastParamsMenu);
+    paramsMenu_init(&polyblast_paramsMenu);
 }
 
 void polyBlast_update(f32 dt) {
@@ -57,7 +57,7 @@ void polyBlast_update(f32 dt) {
     }
 
     // Update params menu (settings button clicks)
-    paramsMenu_update(&polyblastParamsMenu);
+    paramsMenu_update(&polyblast_paramsMenu);
 
     Vector2 mouse = GetMousePosition();
 
@@ -112,7 +112,7 @@ void polyBlast_draw(void) {
 
 void polyBlast_destroy(void) {
     // Cleanup params menu
-    paramsMenu_free(&polyblastParamsMenu);
+    paramsMenu_free(&polyblast_paramsMenu);
 
     arena_free(&tempArena);
 
@@ -120,7 +120,7 @@ void polyBlast_destroy(void) {
     polyBlast_freeAudio();
 }
 
-GameClientInterface_St polyBlastClientInterface = {
+GameClientInterface_St polyBlast_clientInterface = {
     .id = MINI_GAME_ID_POLY_BLAST,
     .name = "Poly Blast",
     .init = polyBlast_init,

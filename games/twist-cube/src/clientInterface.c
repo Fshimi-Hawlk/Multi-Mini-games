@@ -265,7 +265,7 @@ void twistCube_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 
-GameClientInterface_St twistCubeClientInterface = {
+GameClientInterface_St twistCube_clientInterface = {
     .id = MINI_GAME_ID_TWIST_CUBE,
     .name = "Twist Cube",
     .init = twistCube_init,

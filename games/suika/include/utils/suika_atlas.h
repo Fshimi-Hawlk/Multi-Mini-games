@@ -69,8 +69,7 @@ static const SuikaSprite SUIKA_ATLAS[SUIKA_FRUIT_COUNT] = {
     @return             Pointer to the SuikaSprite, or NULL if not found.
 */
 static inline const SuikaSprite *
-suika_get_sprite(const char *name)
-{
+suika_get_sprite(const char *name) {
     for (size_t i = 0; i < SUIKA_FRUIT_COUNT; i++) {
         /* strcmp manuel pour éviter d'importer <string.h> si non voulu */
         const char *a = SUIKA_ATLAS[i].name;
@@ -89,8 +88,7 @@ suika_get_sprite(const char *name)
     @return             Pointer to the SuikaSprite, or NULL if out of range.
 */
 static inline const SuikaSprite *
-suika_get_by_level(int level)
-{
+suika_get_by_level(int level) {
     if (level < 1 || level > SUIKA_FRUIT_COUNT)
         return NULL;
     return &SUIKA_ATLAS[level - 1];

@@ -22,31 +22,39 @@ RUDPConnection_St serverConnection;
 static MiniGameId_Et currentMiniGameID = MINI_GAME_ID_LOBBY;
 static GameClientInterface_St* currentMiniGame = NULL;
 
-extern GameClientInterface_St lobbyClientInterface;
-extern GameClientInterface_St kingForFourClientInterface;
-extern GameClientInterface_St bingoClientInterface;
-extern GameClientInterface_St chessClientInterface;
-extern GameClientInterface_St polyBlastClientInterface;
-extern GameClientInterface_St twistCubeClientInterface;
-extern GameClientInterface_St editorClientInterface;
+extern GameClientInterface_St bingo_clientInterface;
+// extern GameClientInterface_St bowling_clientInterface;
+extern GameClientInterface_St chess_clientInterface;
+// extern GameClientInterface_St discReversal_clientInterface;
+// extern GameClientInterface_St dropFour_clientInterface;
+extern GameClientInterface_St editor_clientInterface;
+extern GameClientInterface_St kingForFour_clientInterface;
+extern GameClientInterface_St lobby_clientInterface;
+// extern GameClientInterface_St miniGolf_clientInterface;
+extern GameClientInterface_St polyBlast_clientInterface;
+extern GameClientInterface_St snake_clientInterface;
+extern GameClientInterface_St soloCards_clientInterface;
+extern GameClientInterface_St suika_clientInterface;
+extern GameClientInterface_St tetrominoFall_clientInterface;
+extern GameClientInterface_St twistCube_clientInterface;
 
 // Pointers to the mini-game client interfaces
 static GameClientInterface_St* miniGameInterfaces[__miniGameIdCount] = {
-    [MINI_GAME_ID_BINGO]          = &bingoClientInterface,
+    [MINI_GAME_ID_BINGO]          = &bingo_clientInterface,
     [MINI_GAME_ID_BOWLING]        = NULL,
-    [MINI_GAME_ID_CHESS]          = &chessClientInterface,
-    [MINI_GAME_ID_DISC_REVERSAL]  = NULL,
-    [MINI_GAME_ID_DROP_FOUR]      = NULL,
-    [MINI_GAME_ID_EDITOR]         = &editorClientInterface,
-    [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFourClientInterface,
-    [MINI_GAME_ID_LOBBY]          = &lobbyClientInterface,
+    [MINI_GAME_ID_CHESS]          = &chess_clientInterface,
+    [MINI_GAME_ID_DISC_REVERSAL]  = NULL, // TODO
+    [MINI_GAME_ID_DROP_FOUR]      = NULL, // TODO
+    [MINI_GAME_ID_EDITOR]         = &editor_clientInterface,
+    [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFour_clientInterface,
+    [MINI_GAME_ID_LOBBY]          = &lobby_clientInterface,
     [MINI_GAME_ID_MINI_GOLF]      = NULL,
-    [MINI_GAME_ID_POLY_BLAST]     = &polyBlastClientInterface,
+    [MINI_GAME_ID_POLY_BLAST]     = &polyBlast_clientInterface,
     [MINI_GAME_ID_SNAKE]          = NULL,
     [MINI_GAME_ID_SOLO_CARDS]     = NULL,
-    [MINI_GAME_ID_SUIKA]          = NULL,
-    [MINI_GAME_ID_TETROMINO_FALL] = NULL,
-    [MINI_GAME_ID_TWIST_CUBE]     = &twistCubeClientInterface,
+    [MINI_GAME_ID_SUIKA]          = &suika_clientInterface,
+    [MINI_GAME_ID_TETROMINO_FALL] = &tetrominoFall_clientInterface,
+    [MINI_GAME_ID_TWIST_CUBE]     = &twistCube_clientInterface,
 };
 
 static bool server_spawned = false;
@@ -251,9 +259,6 @@ void spawn_server(void) {
     }
 }
 
-void launchSoloGame(u8 gameId);
-void setCurrentMiniGame(GameClientInterface_St* iface);
-
 void switchMinigame(u8 gameId) {
     if (gameId >= __miniGameIdCount) return;
 
@@ -273,6 +278,7 @@ void switchMinigame(u8 gameId) {
         if (currentMiniGame && currentMiniGame->destroy) {
             currentMiniGame->destroy();
         }
+
         currentMiniGameID = (MiniGameId_Et) gameId;
         currentMiniGame = miniGameInterfaces[currentMiniGameID];
         if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
@@ -289,16 +295,10 @@ void switchMinigame(u8 gameId) {
             lobby_game.currentState = GAME_STATE_INGAME;
             if (gameId == MINI_GAME_ID_EDITOR) lobby_game.editorMode = true;
         }
+
         log_info("Switched to mini-game ID: %d", gameId);
     } else {
-        // Jeu solo sans interface réseau
-        if (currentMiniGame && currentMiniGame->destroy) {
-            currentMiniGame->destroy();
-        }
-        currentMiniGameID = (MiniGameId_Et) gameId;
-        lobby_game.currentState = GAME_STATE_INGAME;
-        lobby_closeRoomSelector();
-        launchSoloGame(gameId);
+        log_warn("Not Implemented Yet");
     }
 }
 
@@ -374,22 +374,18 @@ int main(void) {
                                 gameZones[i].isRestricted = true;
                             }
                         } else {
-                            bool hasMulti = miniGameInterfaces[i] != NULL;
-                            bool hasSolo = (i == MINI_GAME_ID_MINI_GOLF);
-                            bool hasAI = (i == MINI_GAME_ID_CHESS);
-                            
-                            if (!hasMulti && !hasSolo) {
-                                gameZones[i].isRestricted = true; // Not implemented at all
-                            } else if (hasMulti && !hasAI && !isConnected) {
-                                gameZones[i].isRestricted = true; // Requires network
+                            bool isImplemented = miniGameInterfaces[i] != NULL;
+                            bool hasAI = (i == MINI_GAME_ID_CHESS || i == MINI_GAME_ID_KING_FOR_FOUR);
+                            if (!isImplemented && !hasAI && !isConnected) {
+                                gameZones[i].isRestricted = true;
                             }
                         }
                     }
 
                     MiniGameId_Et triggerID = MINI_GAME_ID_LOBBY;
                     for (int i = 0; i < __miniGameIdCount; i++) {
-                        if (gameZones[i].hitbox.width > 0 &&
-                            CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameZones[i].hitbox)) {
+                        if (gameZones[i].hitbox.width <= 0 || gameZones[i].hitbox.height <= 0) continue;
+                        if (CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameZones[i].hitbox)) {
                             triggerID = i;
                             break;
                         }
@@ -400,11 +396,6 @@ int main(void) {
                             // log_info("[ZONE] Entered Zone for Game ID %d", triggerID);
                             lastTriggerID = triggerID;
                         }
-
-                        const char* gname = gameZones[triggerID].name;
-                        DrawText(TextFormat("APPUYEZ SUR 'E' POUR : %s", gname), 
-                                GetScreenWidth()/2 - MeasureText(TextFormat("APPUYEZ SUR 'E' POUR : %s", gname), 20)/2, 
-                                GetScreenHeight() - 100, 20, GREEN);
 
                         if (IsKeyPressed(KEY_E)) {
                             // Logique solo/multi basée sur l'interface réseau du jeu

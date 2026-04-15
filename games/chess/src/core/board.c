@@ -6,7 +6,7 @@
     @brief Board position utilities for Chess.
 */
 #include "board.h"
-#include "global.h"
+#include "globals.h"
 
 /**
     @brief Get the board position from mouse coordinates.

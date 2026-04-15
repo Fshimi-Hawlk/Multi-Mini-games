@@ -6,7 +6,7 @@
     @brief Game initialization and management functions for Echecs.
 */
 #include "game.h"
-#include "global.h"
+#include "globals.h"
 #include "error.h"
 #include "event.h"
 #include "algo.h"
@@ -185,7 +185,7 @@ int initGame(Board_t board) {
 
     chess_initAudio();
 
-    moveMade = calloc(64, sizeof(char));
+    moveMade = calloc(7, sizeof(char));
     if (!moveMade) {
         error("Couldn't allocate memory");
         return 1;

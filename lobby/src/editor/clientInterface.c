@@ -8,7 +8,6 @@
 #include "editor/editor.h"
 #include "utils/globals.h"
 
-
 static void editor_init(void) {
     initEditor(&lobby_game);
 }
@@ -21,7 +20,7 @@ static void editor_draw(void) {
     drawEditor(&lobby_game);
 }
 
-GameClientInterface_St editorClientInterface = {
+GameClientInterface_St editor_clientInterface = {
     .id      = MINI_GAME_ID_EDITOR,
     .name    = "Level Editor",
     .init    = editor_init,

@@ -5,9 +5,11 @@
     @date 2026-04-14
     @brief Implementation of general UI elements for Tetris.
 */
+
+#include "core/board.h"
 #include "ui/game.h"
 
-void drawInformations(int score, int level, int lineNbTotal, int highScore) {
+void tetrominoFall_drawInformations(int score, int level, int lineNbTotal, int highScore) {
     char scoreText[30];
     char levelText[30];
     char linesText[30];
@@ -24,12 +26,12 @@ void drawInformations(int score, int level, int lineNbTotal, int highScore) {
     DrawText(highScoreText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 120, 20, WHITE);
 }
 
-void drawPreview(board_t board, boardShape_st boardShape) {
+void tetrominoFall_drawPreview(Board_t board, BoardShape_St boardShape) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
 
-    for (; !isColliding(board, boardShape); (boardShape.position.y)++);
+    for (; !tetrominoFall_isColliding(board, boardShape); (boardShape.position.y)++);
     (boardShape.position.y)--;
 
     for (int i = 0; i < 4; i++) {

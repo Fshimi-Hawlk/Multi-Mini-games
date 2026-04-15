@@ -8,7 +8,7 @@
 #include "utils/globals.h"
 #include "core/shape.h"
 
-inputRepeat_st inputRepeat = {0, 0, 0, 0.2f, 0.05f};
+InputRepeat_St inputRepeat = {0, 0, 0, 0.2f, 0.05f};
 
 /* Using numeric values instead of macros to be C99 pedantic-compliant */
 Color tetraminosColors[] = {
@@ -20,4 +20,5 @@ Color tetraminosColors[] = {
     {0, 121, 241, 255},     /* BLUE */
     {255, 161, 0, 255}      /* ORANGE */
 };
-tetramino tetraminosShapes[] = {I_SHAPE, O_SHAPE, T_SHAPE, S_SHAPE, Z_SHAPE, J_SHAPE, L_SHAPE};
+
+Tetromino_t tetraminosShapes[] = {I_SHAPE, O_SHAPE, T_SHAPE, S_SHAPE, Z_SHAPE, J_SHAPE, L_SHAPE};

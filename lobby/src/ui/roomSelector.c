@@ -13,11 +13,9 @@
 */
 #include "ui/roomSelector.h"
 
-#include "raylib.h"
 #include "utils/globals.h"
 
 #include "sharedWidgets/button.h"
-#include "sharedWidgets/types.h"
 
 #define MAX_ROOMS_UI 16
 
@@ -38,7 +36,7 @@ void lobby_initRoomSelector(void) {
 }
 
 void lobby_openRoomSelector(s32 gameId) {
-    printf("[UI] Opening Room Selector for Game ID: %d\n", gameId);
+    log_info("[UI] Opening Room Selector for Game ID: %d", gameId);
     lobby_roomSelectorOpen = true;
     lobby_currentGameId = gameId;
     lobby_roomsCount = 0;
@@ -53,18 +51,18 @@ void lobby_openRoomSelector(s32 gameId) {
     memcpy(buf, &h, sizeof(h));
     buf[sizeof(h)] = (gameId == -1) ? (u8)MINI_GAME_ID_LOBBY : (u8)gameId;
 
-    printf("[NET] Sending ROOM_QUERY\n");
+    log_info("[NET] Sending ROOM_QUERY");
     send(networkSocket, buf, sizeof(h) + 1, 0);
 }
 
 void lobby_closeRoomSelector(void) {
-    if (lobby_roomSelectorOpen) printf("[UI] Closing Room Selector\n");
+    if (lobby_roomSelectorOpen) log_info("[UI] Closing Room Selector");
     lobby_roomSelectorOpen = false;
     lobby_waitingForServer = false;
 }
 
 void lobby_handleRoomList(const void* data, s32 count) {
-    printf("[UI] Received %d rooms from server\n", count);
+    log_info("[UI] Received %d rooms from server", count);
     if (count > MAX_ROOMS_UI) count = MAX_ROOMS_UI;
     memcpy(lobby_discoveredRooms, data, (size_t)count * sizeof(RoomInfo_St));
     lobby_roomsCount = count;
@@ -73,8 +71,8 @@ void lobby_handleRoomList(const void* data, s32 count) {
     for (s32 i = 0; i < lobby_roomsCount; i++) {
         lobby_discoveredRooms[i].id = ntohs(lobby_discoveredRooms[i].id);
         lobby_discoveredRooms[i].playerCount = ntohs(lobby_discoveredRooms[i].playerCount);
-        printf("[UI] Room %d: '%s' by %s (%d players)\n",
-               lobby_discoveredRooms[i].id, lobby_discoveredRooms[i].name,
+        log_info("[UI] Room %d: '%s' by %s (%d players)", 
+               lobby_discoveredRooms[i].id, lobby_discoveredRooms[i].name, 
                lobby_discoveredRooms[i].creator, lobby_discoveredRooms[i].playerCount);
     }
 
@@ -98,8 +96,6 @@ bool lobby_updateRoomSelector(void) {
         lobby_closeRoomSelector();
         return false;
     }
-
-    extern LobbyGame_St lobby_game;
 
     if (IsKeyPressed(KEY_ENTER)) {
         if (lobby_roomsCount > 0) {

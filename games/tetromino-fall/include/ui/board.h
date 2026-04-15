@@ -5,6 +5,7 @@
     @date 2026-04-14
     @brief UI functions for rendering the Tetris board.
 */
+
 #ifndef UI_BOARD_H
 #define UI_BOARD_H
 
@@ -18,6 +19,6 @@
 
     @param[in] board The Tetris board state to render.
 */
-void drawBoard(board_t board);
+void tetrominoFall_drawBoard(Board_t board);
 
 #endif

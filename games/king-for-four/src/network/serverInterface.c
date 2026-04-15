@@ -379,8 +379,8 @@ void king_destroyInstance(void *state) {
     free(ks);
 }
 
-GameServerInterface_St kingServerInterface = {
-    .gameName          = "king-for-four",
+GameServerInterface_St kingForFour_serverInterface = {
+    .gameName          = "King for Four",
     .createInstance    = king_createInstance,
     .onAction          = king_onAction,
     .onTick            = king_onTick, 

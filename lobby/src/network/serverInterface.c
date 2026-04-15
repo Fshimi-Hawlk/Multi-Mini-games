@@ -5,7 +5,9 @@
     @date 2026-04-14
     @brief Server-side implementation of the Lobby module.
 */
-#include "utils/common.h"
+
+#include "networkInterface.h"
+#include "APIs/generalAPI.h"
 
 #include "sharedUtils/debug.h"
 
@@ -45,7 +47,7 @@ void lobby_destroyInstance(void* state) {
     if (state) free(state);
 }
 
-GameServerInterface_St lobbyServerInterface = {
+GameServerInterface_St lobby_serverInterface = {
     .gameName = "lobby",
     .createInstance = lobby_createInstance,
     .onAction = lobby_onAction,

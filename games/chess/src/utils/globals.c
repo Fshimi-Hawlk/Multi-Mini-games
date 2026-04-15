@@ -93,7 +93,7 @@ int playerTurn = 0;              ///< Current player turn (0 for white, 1 for bl
 char movesPlayed[NB_MAX_MOVE][7];
 
 int nbMoves = 0;                 ///< Number of moves played so far
-char *moveMade = NULL;           ///< Buffer for the last move made (size 64)
+char *moveMade = NULL;           ///< Buffer for the last move made
 bool saveMove = false;           ///< Flag to indicate a move should be saved
 
 Player_st* whitePlayer = NULL;   ///< Pointer to the white player structure

@@ -9,6 +9,8 @@
 #include "editor/types.h"
 #include "editor/properties.h"
 
+#include "sharedUtils/geometry.h"
+
 #include "sharedWidgets/scrollFrame.h"
 
 // ── Editor initialization ───────────────────────────────────────────────────
@@ -49,9 +51,9 @@ Clipboard_St clipboard = {0};
 bool clipboardHasData = false;
 s32 pasteAnchorIndex = 4;   // default = center (index 4 in 3x3 grid)
 
-TextButton_St btnLoad  = { .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, .text = "Load", .textColor = WHITE, .baseColor = BLUE };
-TextButton_St btnSave  = { .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, .text = "Save", .textColor = WHITE, .baseColor = GREEN };
-TextButton_St btnGenerate  = { .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, .text = "Code", .textColor = WHITE, .baseColor = PURPLE };
+TextButton_St btnLoad = {0};
+TextButton_St btnSave = {0};
+TextButton_St btnGene = {0};
 
 s32 selectedZoneIndex = -1;
 
@@ -66,7 +68,7 @@ void initEditor(LobbyGame_St* const game) {
     da_clear(&selectedIndices);
     da_clear(&clipboard);
     clipboardHasData = false;
-    pasteAnchorIndex = 4;                     // center anchor
+    pasteAnchorIndex = ANCHOR_CENTER;
 
     game->selectedTerrainIndex = -1;
     selectedZoneIndex = -1;
@@ -95,6 +97,27 @@ void initEditor(LobbyGame_St* const game) {
         (f32Vector2) {300, 2000}, 
         60.0f, 0.1f
     );
+
+    btnLoad = (TextButton_St) { 
+        .bounds = {300.0f, 8.0f, 70.0f, 34.0f}, 
+        .text = "Load", 
+        .textColor = WHITE, 
+        .baseColor = BLUE 
+    };
+
+    btnSave = (TextButton_St) { 
+        .bounds = {380.0f, 8.0f, 70.0f, 34.0f}, 
+        .text = "Save", 
+        .textColor = WHITE, 
+        .baseColor = GREEN 
+    };
+
+    btnGene = (TextButton_St) { 
+        .bounds = {460.0f, 8.0f,  70.0f, 34.0f}, 
+        .text = "Code", 
+        .textColor = WHITE, 
+        .baseColor = PURPLE 
+    };
 
     propertiesInit();
 

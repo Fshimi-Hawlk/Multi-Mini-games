@@ -235,7 +235,7 @@ void drawEditor(const LobbyGame_St* const game) {
 
     textButtonDraw(&btnLoad, lobby_fonts[FONT24], 18);
     textButtonDraw(&btnSave, lobby_fonts[FONT24], 18);
-    textButtonDraw(&btnGenerate, lobby_fonts[FONT24], 18);
+    textButtonDraw(&btnGene, lobby_fonts[FONT24], 18);
 
     // Left palette
     if (game->showLeftPalette) {

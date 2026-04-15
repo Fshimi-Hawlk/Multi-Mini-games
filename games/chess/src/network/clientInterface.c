@@ -5,16 +5,15 @@
     @date 2026-04-14
     @brief Client-side network interface for Chess.
 */
+
 #include "chessAPI.h"
 #include "networkInterface.h"
-#include "rudp_core.h"
-#include "global.h"
+#include "globals.h"
 #include "game.h"
 #include "event.h"
 #include "rendering.h"
 #include "ai.h"
-#include <sys/socket.h>
-#include <arpa/inet.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -71,8 +70,6 @@ extern void chess_initAudio(void);
 void chess_init(void) {
     chess_initAudio();
     initTextures();
-    if (whitePlayer) freePlayer(whitePlayer);
-    if (blackPlayer) freePlayer(blackPlayer);
     initPlayers();
     initBoard(current_board);
     resetGame();
@@ -290,7 +287,7 @@ void chess_draw(void) {
 /**
     @brief Chess client module interface definition.
 */
-GameClientInterface_St chessClientInterface = {
+GameClientInterface_St chess_clientInterface = {
     .id = MINI_GAME_ID_CHESS,
     .name = "Echecs",
     .init = chess_init,

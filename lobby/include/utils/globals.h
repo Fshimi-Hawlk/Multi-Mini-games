@@ -27,6 +27,7 @@ extern Font lobby_fonts[__fontSizeCount];
 extern f32 gameTime; ///< Accumulated lobby time since launch (seconds). Used for animations.
 
 extern PlayerProgress_St g_progress; ///< Global player progress.
+extern bool g_shouldExit; ///< Flag to signal the application should exit cleanly.
 
 // ────────────────────────────────────────────────
 // Platforms / Terrains / Game Zones
@@ -111,7 +112,5 @@ extern Sound sound_doubleJumpMeme;
 extern bool showPhysicsDebugPanel; ///< Whether the physics debug panel is visible (toggle with F2).
 
 extern f32 panelScrollY; ///< Scroll position for panels.
-
-extern bool g_shouldExit; ///< Flag to signal the application should exit cleanly.
 
 #endif // UTILS_GLOBALS_H

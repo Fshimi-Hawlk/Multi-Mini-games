@@ -5,11 +5,11 @@
     @date 2026-04-14
     @brief UI functions for general game information and previews.
 */
+
 #ifndef UI_GAME_H
 #define UI_GAME_H
 
 #include "utils/types.h"
-#include "core/board.h"
 
 /**
     @brief Draws the game's UI information (score, level, etc.).
@@ -21,7 +21,7 @@
     @param[in] lineNbTotal     The total number of lines cleared.
     @param[in] highScore       The current session's high score.
 */
-void drawInformations(int score, int level, int lineNbTotal, int highScore);
+void tetrominoFall_drawInformations(int score, int level, int lineNbTotal, int highScore);
 
 /**
     @brief Draws a preview of the current shape's landing position (ghost piece).
@@ -31,6 +31,6 @@ void drawInformations(int score, int level, int lineNbTotal, int highScore);
     @param[in] board           The current board state.
     @param[in] boardShape      The current falling shape state.
 */
-void drawPreview(board_t board, boardShape_st boardShape);
+void tetrominoFall_drawPreview(Board_t board, BoardShape_St boardShape);
 
 #endif

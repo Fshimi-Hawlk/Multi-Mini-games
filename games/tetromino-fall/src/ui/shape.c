@@ -5,9 +5,10 @@
     @date 2026-04-14
     @brief Implementation of shape rendering UI for Tetris.
 */
+
 #include "ui/shape.h"
 
-void tetris_drawShape(boardShape_st boardShape) {
+void tetrominoFall_drawShape(BoardShape_St boardShape) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
@@ -24,17 +25,13 @@ void tetris_drawShape(boardShape_st boardShape) {
     }
 }
 
-void drawNextShape(boardShape_st boardShape) {
+void tetrominoFall_drawNextShape(BoardShape_St boardShape) {
     int offsetX = WINDOW_WIDTH * (2.0 / 3);
     int offsetY = WINDOW_HEIGHT * (1.0 / 3);
     int x, y;
 
     DrawText("Next shape:", offsetX + 60, offsetY - 60, 20, WHITE);
 
-    /* FIX: boardShape.position is {4, 0} (the spawn column) from randomShape().
-     * Drawing at offsetX + (shape[i].x + 4) * CELL_SIZE pushed I-piece cells
-     * (x up to 6) to pixel 266+150=416, outside WINDOW_WIDTH=400.
-     * Reset position to {0, 0} so cells render centered on offsetX. */
     boardShape.position = (iVector2){0, 0};
 
     for (int i = 0; i < 4; i++) {

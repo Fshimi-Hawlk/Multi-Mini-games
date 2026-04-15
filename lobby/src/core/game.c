@@ -307,6 +307,9 @@ void lobby_updatePlayer(Player_St* const player, const PhysicsConstants_St* cons
         bool inWaterJump = (player->isInWater && pc->waterInfiniteJump);
 
         if (canJump || inWaterJump) {
+            if (player->nbJumps == 0) PlaySound(sound_jump);
+            else PlaySound((rand() % 10000) == 0 ? sound_doubleJumpMeme : sound_doubleJump);
+
             player->velocity.y = -pc->jumpForce;
             player->onGround = false;
             player->coyoteTimer = 0;

@@ -51,28 +51,29 @@
 
     @param[out]    boardShape   The shape to initialize.
 */
-void randomShape(boardShape_st* boardShape);
+void tetrominoFall_randomShape(BoardShape_St* boardShape);
 
 /**
     @brief Rotates the given shape clockwise.
 
     @param[in,out] boardShape   The shape to rotate.
 */
-void rotationCW(boardShape_st* boardShape);
+void tetrominoFall_rotationCW(BoardShape_St* boardShape);
 
 /**
     @brief Rotates the given shape counter-clockwise.
 
     @param[in,out] boardShape   The shape to rotate.
 */
-void rotationCCW(boardShape_st* boardShape);
+void tetrominoFall_rotationCCW(BoardShape_St* boardShape);
 
 /**
     @brief Updates the shape position based on time for automatic dropping.
 
     @param[in,out] speed        The speed state controlling the drop interval.
     @param[in,out] boardShape   The shape to drop.
+    @param[in]     dt           The delta time between each frames.
 */
-void automaticDrop(speed_st* speed, boardShape_st* boardShape);
+void tetrominoFall_automaticDrop(Speed_St* speed, BoardShape_St* boardShape, float dt);
 
 #endif // CORE_SHAPE_H

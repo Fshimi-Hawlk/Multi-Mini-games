@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "logger.h"
+
 /**
     @brief Invalid pointer value used as a sentinel.
 */

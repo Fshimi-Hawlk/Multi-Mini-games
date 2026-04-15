@@ -5,6 +5,7 @@
     @date 2026-04-14
     @brief UI functions for rendering Tetris shapes.
 */
+
 #ifndef UI_SHAPE_H
 #define UI_SHAPE_H
 
@@ -17,7 +18,7 @@
 
     @param[in] boardShape The current shape state (type, position, rotation).
 */
-void tetris_drawShape(boardShape_st boardShape);
+void tetrominoFall_drawShape(BoardShape_St boardShape);
 
 /**
     @brief Draws the preview of the next shape to appear.
@@ -26,6 +27,6 @@ void tetris_drawShape(boardShape_st boardShape);
 
     @param[in] boardShape The next shape state to preview.
 */
-void drawNextShape(boardShape_st boardShape);
+void tetrominoFall_drawNextShape(BoardShape_St boardShape);
 
 #endif

@@ -343,9 +343,9 @@ void kingForFour_draw(void) {
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 
-GameClientInterface_St kingForFourClientInterface = {
+GameClientInterface_St kingForFour_clientInterface = {
     .id = MINI_GAME_ID_KING_FOR_FOUR,
-    .name = "King For Four",
+    .name = "King for Four",
     .init = kingForFour_init,
     .onData = kingForFour_onData,
     .update = kingForFour_update,

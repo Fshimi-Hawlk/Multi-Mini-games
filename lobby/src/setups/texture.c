@@ -33,6 +33,7 @@ Error_Et lobby_initTextures(Texture2D playerTextures[__playerTextureCount]) {
         if (playerTexturePaths[i] == NULL) continue;
         playerTextures[i] = LoadTexture(playerTexturePaths[i]);
         if (!IsTextureValid(playerTextures[i])) {
+            log_warn("%s couldn't be loaded proprely.", playerTexturePaths[i]);
             error = ERROR_TEXTURE_LOAD;
         }
     }

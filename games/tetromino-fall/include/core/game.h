@@ -5,11 +5,11 @@
     @date 2026-04-14
     @brief Game logic and movement functions for Tetris.
 */
+
 #ifndef CORE_GAME_H
 #define CORE_GAME_H
 
 #include "utils/types.h"
-#include "utils/globals.h"
 
 /**
     @brief Moves a shape automatically towards a target position and rotation.
@@ -20,22 +20,23 @@
     @param[in,out] boardShape   The shape to move.
     @param[in]     targetMove   The target position and rotation.
 */
-void automaticMovementTo(speed_st* speed, boardShape_st* boardShape, moveAlgoResult_st targetMove);
+void tetrominoFall_automaticMovementTo(Speed_St* speed, BoardShape_St* boardShape, MoveAlgoResult_St targetMove);
 
 /**
     @brief Handles manual player movement based on input.
 
     @param[in]     board       The current board state for collision checks.
     @param[in,out] boardShape  The shape to move.
+    @param[in]     dt          Delta time between frames.
 */
-void mouvement(board_t board, boardShape_st* boardShape);
+void tetrominoFall_mouvement(Board_t board, BoardShape_St* boardShape, float dt);
 
 /**
     @brief Reads the high score from a file.
 
     @param[out] highScore  Pointer to store the high score.
 */
-void readHighScore(int *highScore);
+void tetrominoFall_readHighScore(int *highScore);
 
 /**
     @brief Writes the score to the high score file if it's a new record.
@@ -43,6 +44,6 @@ void readHighScore(int *highScore);
     @param[in] highScore  Current high score.
     @param[in] score      Current game score.
 */
-void writeHighScore(int highScore, int score);
+void tetrominoFall_writeHighScore(int highScore, int score);
 
 #endif // CORE_GAME_H

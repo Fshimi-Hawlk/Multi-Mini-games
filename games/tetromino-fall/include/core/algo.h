@@ -5,6 +5,7 @@
     @date 2026-04-14
     @brief AI algorithms for Tetris move optimization and board evaluation.
 */
+
 #ifndef CORE_ALGO_H
 #define CORE_ALGO_H
 
@@ -16,7 +17,7 @@
     @param[in]  src   Source board to copy from.
     @param[out] dest  Destination board to copy to.
 */
-void copyBoard(board_t src, board_t dest);
+void tetrominoFall_copyBoard(Board_t src, Board_t dest);
 
 /**
     @brief Evaluates the current state of the board and returns a score.
@@ -27,7 +28,7 @@ void copyBoard(board_t src, board_t dest);
     @param[in] board  The board to evaluate.
     @return           The calculated score for the board state.
 */
-int evaluateBoard(board_t board);
+int tetrominoFall_evaluateBoard(Board_t board);
 
 /**
     @brief Simulates dropping a piece in a specific column.
@@ -37,7 +38,7 @@ int evaluateBoard(board_t board);
     @param[in] col    The column index to drop the piece in.
     @return           The resulting Y position of the piece after dropping.
 */
-int simulateDrop(board_t board, boardShape_st piece, int col);
+int tetrominoFall_simulateDrop(Board_t board, BoardShape_St piece, int col);
 
 /**
     @brief Finds the best move for the current and next shape.
@@ -49,6 +50,6 @@ int simulateDrop(board_t board, boardShape_st piece, int col);
     @param[in] nextShape   The next shape that will appear.
     @return               A struct containing the best position and rotation.
 */
-moveAlgoResult_st findBestMove(board_t board, boardShape_st shape, boardShape_st nextShape);
+MoveAlgoResult_St tetrominoFall_findBestMove(Board_t board, BoardShape_St shape, BoardShape_St nextShape);
 
 #endif // CORE_ALGO_H

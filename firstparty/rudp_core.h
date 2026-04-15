@@ -9,11 +9,15 @@
 #define RUDP_CORE_H
 
 #include "baseTypes.h"
-#include <arpa/inet.h>
+
 #include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <ctype.h>
+
+#include <arpa/inet.h>
+#include <sys/socket.h>
+
 
 #ifndef _WIN32
 #include <signal.h>

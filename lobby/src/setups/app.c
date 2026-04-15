@@ -6,7 +6,6 @@
     @brief app.c implementation/header file
 */
 #include "setups/app.h"
-#include "setups/audio.h"
 #include "setups/texture.h"
 
 #include "utils/globals.h"
@@ -33,19 +32,25 @@ Error_Et lobby_initApp(void) {
     Error_Et error = OK;
     srand(time(NULL));
 
-    SetTraceLogLevel(LOG_WARNING);
+    // SetTraceLogLevel(LOG_WARNING);
 
     InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
     SetExitKey(KEY_NULL);
     InitAudioDevice();
     SetTargetFPS(60);
 
-    lobby_initFonts();
-    lobby_initAudio();
+    initLogger();
 
+    lobby_initFonts();
     error = lobby_initTextures(lobby_game.playerVisuals.textures);
     if (error != OK) {
         log_warn("[Lobby] Textures didn't load properly.");
+    }
+
+    for (u32 i = 1; i < __playerTextureCount; ++i) {
+        if (!IsTextureValid(lobby_game.playerVisuals.textures[i])) {
+            log_warn("Player texture #%d wasn't load correctly", i);
+        }
     }
 
     paramsMenu_init(&paramsMenu);
@@ -54,14 +59,13 @@ Error_Et lobby_initApp(void) {
 }
 
 void lobby_freeApp(void) {
+    arena_free(&globalArena);
+    arena_free(&tempArena);
+
     if (IsWindowReady()) {
-        lobby_freeAudio();
         lobby_freeFonts();
         lobby_freeTextures(lobby_game.playerVisuals.textures);
         CloseAudioDevice();
         CloseWindow();
     }
-
-    arena_free(&globalArena);
-    arena_free(&tempArena);
 }

@@ -7,7 +7,6 @@
 */
 #include "systemSettings.h"
 #include "logger.h"
-#include "raylib.h"
 
 SystemSettings_St systemSettings = DEFAULT_SYSTEM_SETTING;
 
@@ -21,7 +20,7 @@ static Error_Et applyAudioSettings(AudioSettings_St settings) {
     }
 
     if (0.0f <= settings.masterVolume && settings.masterVolume <= 1.0f) {
-        SetMasterVolume(settings.mute * settings.masterVolume);
+        SetMasterVolume(settings.mute ? 0.0f : settings.masterVolume);
     } else {
         log_warn("Received `masterVolume` setting exceed value range [0; 1]");
         err = ERROR_INVALID_SETTING;

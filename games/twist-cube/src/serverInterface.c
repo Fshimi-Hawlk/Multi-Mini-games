@@ -123,7 +123,7 @@ void twistCube_destroyInstance(void *state) {
     free(state);
 }
 
-GameServerInterface_St twistCubeServerInterface = {
+GameServerInterface_St twistCube_serverInterface = {
     .gameName = "Twist Cube",
     .createInstance = twistCube_createInstance,
     .onAction = twistCube_onAction,

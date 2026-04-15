@@ -5,9 +5,10 @@
     @date 2026-04-14
     @brief Implementation of the Tetris board UI.
 */
+
 #include "ui/board.h"
 
-void drawBoard(board_t board) {
+void tetrominoFall_drawBoard(Board_t board) {
     int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
     int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2; 
 

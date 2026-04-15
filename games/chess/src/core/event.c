@@ -6,7 +6,7 @@
     @brief Event handling for Chess.
 */
 #include "event.h"
-#include "global.h"
+#include "globals.h"
 #include "algo.h"
 #include "utils.h"
 #include "board.h"

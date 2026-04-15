@@ -5,7 +5,8 @@
     @date 2026-04-14
     @brief Audio management implementation for the Suika game.
 */
-#include "utils/audio.h"
+#include "core/audio.h"
+
 #include "assetPath.h"
 #include "logger.h"
 #include <stdio.h>
@@ -26,13 +27,12 @@ Sound sound_merge;
 static const char* suika_getSoundsPath(void) {
     if (g_suikaSoundsPath[0] != '\0') return g_suikaSoundsPath;
     static const char* candidates[] = {
-        SOUNDS_PATH,                /* "jeux/suika/assets/sounds/" from project root */
-        "jeux/suika/assets/sounds/",
+        SOUNDS_PATH,
+        "games/suika/assets/sounds/",
         "assets/sounds/",
         NULL
     };
-    findAssetBase("suika_drop.wav", candidates,
-                  g_suikaSoundsPath, sizeof(g_suikaSoundsPath));
+    findAssetBase("suika_drop.wav", candidates, g_suikaSoundsPath, sizeof(g_suikaSoundsPath));
     return g_suikaSoundsPath;
 }
 
@@ -63,8 +63,8 @@ void suika_initAudio(void) {
 */
 void suika_freeAudio(void) {
     if (!audioInitialized) return;
+    audioInitialized = false;
 
     if (IsSoundValid(sound_drop))  UnloadSound(sound_drop);
     if (IsSoundValid(sound_merge)) UnloadSound(sound_merge);
-    audioInitialized = false;
 }

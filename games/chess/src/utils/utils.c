@@ -6,7 +6,7 @@
     @brief Utility functions for chess.
 */
 #include "utils.h"
-#include "global.h"
+#include "globals.h"
 
 /**
     @brief Print all moves made in the game to stdout.
