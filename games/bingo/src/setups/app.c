@@ -16,7 +16,7 @@
     @return                     True if the font was loaded successfully, false otherwise.
 */
 static bool loadFontIdForSize(u64 fontId, f32 fontSize) {
-    bingo_fonts[fontId] = LoadFontEx(ASSET_PATH "fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
+    bingo_fonts[fontId] = LoadFontEx("assets/fonts/Noto/static/NotoSansMono-Bold.ttf", fontSize, NULL, 0);
     if (!IsFontValid(bingo_fonts[fontId])) {
         log_warn("Font %zu (%f) wasn't proprely loaded", fontId, fontSize);
         return false;

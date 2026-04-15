@@ -367,7 +367,7 @@ int main(void) {
 
                 if (currentMiniGameID == MINI_GAME_ID_LOBBY && !lobby_game.editorMode && !selectorActive) {
                     bool isConnected = networkSocket >= 0;
-                    for (int i = 1; i < __miniGameIdCount; i++) {
+                    for (int i = 0; i < __miniGameIdCount; i++) {
                         gameZones[i].isRestricted = false;
                         if (i == MINI_GAME_ID_EDITOR) {
                             if (isConnected && !server_spawned) {
@@ -375,15 +375,19 @@ int main(void) {
                             }
                         } else {
                             bool hasMulti = miniGameInterfaces[i] != NULL;
+                            bool hasSolo = (i == MINI_GAME_ID_MINI_GOLF);
                             bool hasAI = (i == MINI_GAME_ID_CHESS);
-                            if (hasMulti && !hasAI && !isConnected) {
-                                gameZones[i].isRestricted = true;
+                            
+                            if (!hasMulti && !hasSolo) {
+                                gameZones[i].isRestricted = true; // Not implemented at all
+                            } else if (hasMulti && !hasAI && !isConnected) {
+                                gameZones[i].isRestricted = true; // Requires network
                             }
                         }
                     }
 
                     MiniGameId_Et triggerID = MINI_GAME_ID_LOBBY;
-                    for (int i = 1; i < __miniGameIdCount; i++) {
+                    for (int i = 0; i < __miniGameIdCount; i++) {
                         if (gameZones[i].hitbox.width > 0 &&
                             CheckCollisionCircleRec(lobby_game.player.position, lobby_game.player.radius, gameZones[i].hitbox)) {
                             triggerID = i;

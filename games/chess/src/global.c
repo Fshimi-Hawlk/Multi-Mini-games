@@ -45,31 +45,31 @@ const PieceName_et ORDER_NAME[] = {
     @brief File paths for white piece images.
 */
 const char *WHITE_IMAGES_PATHS[] = {NULL,
-    "chess/assets/images/pieces/pawn_w.bmp",
-    "chess/assets/images/pieces/poney_w.bmp",
-    "chess/assets/images/pieces/rook_w.bmp",
-    "chess/assets/images/pieces/bishop_w.bmp",
-    "chess/assets/images/pieces/queen_w.bmp",
-    "chess/assets/images/pieces/king_w.bmp"
+    "games/chess/assets/images/pieces/pawn_w.bmp",
+    "games/chess/assets/images/pieces/poney_w.bmp",
+    "games/chess/assets/images/pieces/rook_w.bmp",
+    "games/chess/assets/images/pieces/bishop_w.bmp",
+    "games/chess/assets/images/pieces/queen_w.bmp",
+    "games/chess/assets/images/pieces/king_w.bmp"
 };
 
 /**
     @brief File paths for black piece images.
 */
 const char *BLACK_IMAGES_PATHS[] = {NULL,
-    "chess/assets/images/pieces/pawn_b.bmp",
-    "chess/assets/images/pieces/poney_b.bmp",
-    "chess/assets/images/pieces/rook_b.bmp",
-    "chess/assets/images/pieces/bishop_b.bmp",
-    "chess/assets/images/pieces/queen_b.bmp",
-    "chess/assets/images/pieces/king_b.bmp",
+    "games/chess/assets/images/pieces/pawn_b.bmp",
+    "games/chess/assets/images/pieces/poney_b.bmp",
+    "games/chess/assets/images/pieces/rook_b.bmp",
+    "games/chess/assets/images/pieces/bishop_b.bmp",
+    "games/chess/assets/images/pieces/queen_b.bmp",
+    "games/chess/assets/images/pieces/king_b.bmp",
 };
 
 Texture2D white_piece_textures[7] = {0};   ///< Textures for white pieces
 Texture2D black_piece_textures[7] = {0};   ///< Textures for black pieces
 
-const char *DOT_IMAGE_PATH = "chess/assets/images/UI/dot.bmp";     ///< File path for the dot overlay texture
-const char *CIRCLE_IMAGE_PATH = "chess/assets/images/UI/circle.bmp"; ///< File path for the circle overlay texture
+const char *DOT_IMAGE_PATH = "games/chess/assets/images/UI/dot.bmp";     ///< File path for the dot overlay texture
+const char *CIRCLE_IMAGE_PATH = "games/chess/assets/images/UI/circle.bmp"; ///< File path for the circle overlay texture
 
 const Color BRIGHT_COLOR = {222, 184, 135, 255};      ///< Bright color for the checkerboard
 const Color DARK_COLOR = {139, 69, 19, 255};          ///< Dark color for the checkerboard

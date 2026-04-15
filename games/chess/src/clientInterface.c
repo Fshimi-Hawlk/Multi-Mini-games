@@ -71,6 +71,8 @@ extern void chess_initAudio(void);
 void chess_init(void) {
     chess_initAudio();
     initTextures();
+    if (whitePlayer) freePlayer(whitePlayer);
+    if (blackPlayer) freePlayer(blackPlayer);
     initPlayers();
     initBoard(current_board);
     resetGame();

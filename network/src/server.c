@@ -58,7 +58,7 @@ typedef struct {
     MiniGameId_Et                 gameId;     ///< Type of game (BINGO, CHESS, etc.)
     const GameServerInterface_St* module;     ///< Pointer to game logic interface
     void*                         state;      ///< Opaque pointer to game instance data
-    const char                   *name;       ///< Display name (e.g. "Room #1")
+    char                          name[32];       ///< Display name (e.g. "Room #1")
     char                          creatorName[32]; ///< Name of the player who created it
     int                           hostId;     ///< Client ID of the host
 } Room_St;
@@ -229,7 +229,7 @@ int main(int argc, char* argv[]) {
     rooms[0].gameId = MINI_GAME_ID_LOBBY;
     rooms[0].module = getGameServerInterface(MINI_GAME_ID_LOBBY);
     if (rooms[0].module) rooms[0].state = rooms[0].module->createInstance();
-    rooms[0].name = "Central Lobby";
+    strncpy(rooms[0].name, "Central Lobby", sizeof(rooms[0].name) - 1);
 
     signal(SIGINT, handle_sigint);
     long long next_tick = getTimeUs() + TICK_US;
@@ -310,7 +310,7 @@ int main(int argc, char* argv[]) {
                             s8 targetRoomId = (s8)buf[sizeof(RUDPHeader_St) + 1];
 
                             if (targetRoomId == -1) {
-                                if (targetGameId > MINI_GAME_ID_LOBBY && targetGameId < __miniGameIdCount) {
+                                if (targetGameId != MINI_GAME_ID_LOBBY && targetGameId < __miniGameIdCount) {
                                     for (int i = 1; i < MAX_ROOMS; i++) {
                                         if (!rooms[i].active) {
                                             rooms[i].active = true;
@@ -321,7 +321,7 @@ int main(int argc, char* argv[]) {
                                                 rooms[i].state = rooms[i].module->createInstance();
                                                 rooms[i].hostId = clientId;
                                                 strncpy(rooms[i].creatorName, clients[clientId].name, 31);
-                                                rooms[i].name = TextFormat("Room #%d", i);
+                                                snprintf(rooms[i].name, sizeof(rooms[i].name), "Room #%d", i);
                                                 clients[clientId].roomId = i;
                                                 u8 resp[2] = { (u8)targetGameId, (u8)i };
                                                 serverBroadcast(UNICAST, clientId, ACTION_CODE_LOBBY_SWITCH_GAME, resp, 2);

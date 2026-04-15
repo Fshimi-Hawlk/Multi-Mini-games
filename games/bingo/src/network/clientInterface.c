@@ -106,8 +106,11 @@ static void sendToServer(u8 action, const void* data, u16 len) {
 */
 void bingo_init(void) {
     if (!assetsLoaded) {
-        bingo_initFonts();
-        assetsLoaded = true;
+        assetsLoaded = bingo_initFonts();
+        if (!assetsLoaded) {
+            log_error("Bingo: Failed to load fonts");
+            return;
+        }
     }
 
     memset(&localGame, 0, sizeof(localGame));
