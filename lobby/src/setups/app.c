@@ -54,15 +54,14 @@ Error_Et lobby_initApp(void) {
 }
 
 void lobby_freeApp(void) {
+    if (IsWindowReady()) {
+        lobby_freeAudio();
+        lobby_freeFonts();
+        lobby_freeTextures(lobby_game.playerVisuals.textures);
+        CloseAudioDevice();
+        CloseWindow();
+    }
+
     arena_free(&globalArena);
     arena_free(&tempArena);
-
-    lobby_freeAudio();
-    lobby_freeFonts();
-
-    lobby_freeTextures(lobby_game.playerVisuals.textures);
-
-    CloseAudioDevice();
-
-    CloseWindow();
 }

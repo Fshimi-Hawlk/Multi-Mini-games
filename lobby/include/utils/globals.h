@@ -112,4 +112,6 @@ extern bool showPhysicsDebugPanel; ///< Whether the physics debug panel is visib
 
 extern f32 panelScrollY; ///< Scroll position for panels.
 
+extern bool g_shouldExit; ///< Flag to signal the application should exit cleanly.
+
 #endif // UTILS_GLOBALS_H

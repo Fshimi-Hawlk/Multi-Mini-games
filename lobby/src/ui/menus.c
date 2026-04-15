@@ -108,7 +108,7 @@ void lobby_updateMainMenu(void) {
         if (CheckCollisionPointRec(m, btnPlay)) lobby_currentMenu = MENU_PLAY_CHOICE;
         if (CheckCollisionPointRec(m, btnLB))   lobby_currentMenu = MENU_LEADERBOARD;
         if (CheckCollisionPointRec(m, btnSet))  { lobby_previousMenu = lobby_currentMenu; lobby_currentMenu = MENU_SETTINGS; }
-        if (CheckCollisionPointRec(m, btnExit)) CloseWindow();
+        if (CheckCollisionPointRec(m, btnExit)) g_shouldExit = true;
     }
 }
 
@@ -247,7 +247,7 @@ void lobby_updatePauseMenu(void) {
                 lobby_currentMenu = MENU_MAIN;
             }
         }
-        if (CheckCollisionPointRec(m, btnQuit)) CloseWindow();
+        if (CheckCollisionPointRec(m, btnQuit)) g_shouldExit = true;
     }
 }
 

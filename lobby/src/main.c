@@ -324,7 +324,7 @@ int main(void) {
     lobby_initRoomSelector();
     lobby_initWaitingRoom();
 
-    while (!WindowShouldClose()) {
+    while (!WindowShouldClose() && !g_shouldExit) {
         float dt = GetFrameTime();
         if (dt > 0.1f) dt = 0.1f;
         

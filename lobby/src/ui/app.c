@@ -85,6 +85,7 @@ static const char* textureNames[__playerTextureCount] = {
 
 bool showPhysicsDebugPanel = false;
 f32 panelScrollY = 0.0f;
+bool g_shouldExit = false;
 
 void lobby_drawPhysicsDebugPanel(LobbyGame_St* const game) {
     if (!showPhysicsDebugPanel) return;
