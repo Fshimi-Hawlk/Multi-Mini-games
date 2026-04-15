@@ -10,6 +10,8 @@
 
 #include "utils/globals.h"
 
+#include "sharedUtils/mathUtils.h"
+
 // Magic for our .dat files
 #define LEVEL_FILE_MAGIC 0x4C4F4242u   // "LOBB"
 
@@ -36,6 +38,48 @@ static bool readTerrainArray(FILE* f, TerrainVec_St* da) {
     da->count = count;
     return true;
 }
+/**
+    @brief Writes the game interaction zones array with proper string serialization
+*/
+static bool writeGIZArray(FILE* f) {
+    u32 count = __miniGameIdCount;
+    if (fwrite(&count, sizeof(u32), 1, f) != 1) return false;
+
+    for (u32 i = 0; i < count; ++i) {
+        const GameInteractionZone_St* z = &gameZones[i];
+
+        // All fields are now POD → can be written directly
+        if (fwrite(&z->hitbox, sizeof(Rectangle), 1, f) != 1) return false;
+        if (fwrite(&z->color,  sizeof(Color),     1, f) != 1) return false;
+        if (fwrite(&z->active, sizeof(bool),      1, f) != 1) return false;
+        if (fwrite(z->name,    sizeof(char),     32, f) != 32)   return false;
+    }
+    return true;
+}
+
+/**
+    @brief Reads the game interaction zones array.
+*/
+static bool readGIZArray(FILE* f) {
+    u32 count = 0;
+    if (fread(&count, sizeof(u32), 1, f) != 1) return false;
+
+    memset(gameZones, 0, sizeof(gameZones));
+
+    u32 toRead = min(count, (u32)__miniGameIdCount);
+    for (u32 i = 0; i < toRead; ++i) {
+        GameInteractionZone_St* z = &gameZones[i];
+
+        if (fread(&z->hitbox, sizeof(Rectangle), 1, f) != 1) return false;
+        if (fread(&z->color,  sizeof(Color),     1, f) != 1) return false;
+        if (fread(&z->active, sizeof(bool),      1, f) != 1) return false;
+        if (fread(z->name,    sizeof(char),     32, f) != 32)   return false;
+
+        // Ensure null-termination (defensive)
+        z->name[31] = '\0';
+    }
+    return true;
+}
 
 bool editorSaveLevel(const char* filename) {
     if (!filename) return false;
@@ -52,10 +96,14 @@ bool editorSaveLevel(const char* filename) {
     fwrite(&version, sizeof(u32), 1, f);
 
     bool ok = writeTerrainArray(f, &terrains);
+    if (ok) ok = writeGIZArray(f);
     fclose(f);
 
-    if (ok) log_info("Level saved: %s (%zu terrains)", filename, terrains.count);
-    else log_error("Write failed for %s", filename);
+    if (ok) {
+        log_info("Level saved: %s (%zu terrains)", filename, terrains.count);
+    } else {
+        log_error("Write failed for %s", filename);
+    }
 
     return ok;
 }
@@ -75,6 +123,7 @@ bool editorLoadLevel(const char* filename) {
                magic == LEVEL_FILE_MAGIC && version == 1);
 
     if (ok) ok = readTerrainArray(f, &terrains);
+    if (ok) ok = readGIZArray(f);
 
     fclose(f);
 

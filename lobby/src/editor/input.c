@@ -39,7 +39,6 @@
     @see `editor/properties.h`
 */
 
-#include "APIs/generalAPI.h"
 #include "editor/types.h"
 #include "editor/editor.h"
 #include "editor/utils.h"
@@ -47,14 +46,10 @@
 #include "editor/io.h"
 #include "editor/codegen.h"
 
-#include "raylib.h"
-#include "sharedUtils/geometry.h"
 #include "utils/globals.h"
 
 #include "sharedWidgets/scrollFrame.h"
 #include "sharedWidgets/button.h"
-
-// terrainKindNames
 
 #include "sharedUtils/mathUtils.h"
 
@@ -72,10 +67,6 @@ void updateEditor(LobbyGame_St* const game, f32 dt) {
     Vector2 mouseWorld = getMouseWorld(game);
 
     if (IsKeyPressed(KEY_F1)) {
-        for (u8 i = 0; i < __miniGameIdCount; ++i) {
-            log_info("%s" vec2fStr, gameZones[i].name, vec2Fmt(getRectPos(gameZones[i].hitbox)));
-        }
-
         extern void switchMinigame(u8 gameId);
         switchMinigame(MINI_GAME_ID_LOBBY);
     }
