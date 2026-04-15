@@ -238,7 +238,7 @@ void lobby_updatePauseMenu(void) {
             extern LobbyGame_St lobby_game;
             if (lobby_game.currentState == GAME_STATE_INGAME) {
                 extern void switchMinigame(u8 game_id);
-                switchMinigame(0);
+                switchMinigame(MINI_GAME_ID_LOBBY);
                 lobby_currentMenu = MENU_NONE;
             } else if (lobby_game.currentState == GAME_STATE_GAMEPLAY || lobby_game.currentState == GAME_STATE_ROOM_LIST) {
                 lobby_game.currentState = GAME_STATE_CONNECTION;

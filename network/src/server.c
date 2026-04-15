@@ -239,8 +239,29 @@ int main(int argc, char* argv[]) {
         if (now >= next_tick) {
             checkTimeouts();
             for (int i = 0; i < MAX_ROOMS; i++) {
-                if (rooms[i].active && rooms[i].module && rooms[i].module->onTick && rooms[i].state) {
-                    rooms[i].module->onTick(rooms[i].state);
+                if (rooms[i].active) {
+                    // Check if room is empty (excluding lobby)
+                    if (i > 0) {
+                        bool empty = true;
+                        for (int j = 0; j < MAX_CLIENTS; j++) {
+                            if (clients[j].active && clients[j].roomId == i) {
+                                empty = false;
+                                break;
+                            }
+                        }
+                        if (empty) {
+                            log_info("Destroying empty room %d (%s)", i, rooms[i].name);
+                            if (rooms[i].module && rooms[i].module->destroyInstance) {
+                                rooms[i].module->destroyInstance(rooms[i].state);
+                            }
+                            memset(&rooms[i], 0, sizeof(Room_St));
+                            continue;
+                        }
+                    }
+
+                    if (rooms[i].module && rooms[i].module->onTick && rooms[i].state) {
+                        rooms[i].module->onTick(rooms[i].state);
+                    }
                 }
             }
             next_tick += TICK_US;
@@ -271,11 +292,12 @@ int main(int argc, char* argv[]) {
 
                     if (h->action == ACTION_CODE_LOBBY_ROOM_QUERY) sendRoomList(clientId);
                     else if (h->action == ACTION_CODE_QUIT_GAME) {
-                        if (currentRoomId > 0 && rooms[currentRoomId].active && rooms[currentRoomId].module && rooms[currentRoomId].module->onPlayerLeave) {
-                            rooms[currentRoomId].module->onPlayerLeave(rooms[currentRoomId].state, clientId);
+                        int rId = clients[clientId].roomId;
+                        if (rId > 0 && rooms[rId].active && rooms[rId].module && rooms[rId].module->onPlayerLeave) {
+                            rooms[rId].module->onPlayerLeave(rooms[rId].state, clientId);
                         }
                         clients[clientId].roomId = 0;
-                        serverBroadcast(currentRoomId, clientId, ACTION_CODE_QUIT_GAME, NULL, 0);
+                        serverBroadcast(rId, clientId, ACTION_CODE_QUIT_GAME, NULL, 0);
                     }
                     else if (h->action == ACTION_CODE_JOIN_GAME) {
                         char proposedName[32] = {0};

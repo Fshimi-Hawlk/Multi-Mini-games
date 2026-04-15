@@ -274,7 +274,14 @@ void king_onAction(void *state, s32 roomId, s32 playerId, u8 action, const void 
 */
 void king_onTick(void* state) {
     KingServerState* ks = (KingServerState*)state;
-    if (ks->status != 1 || !ks->broadcast) return;
+    if (ks->status != 1) return; // Only if playing
+
+    // Check if humans are still present
+    bool humanFound = false;
+    for (int i = 0; i < ks->state.numPlayers; i++) {
+        if (ks->state.players[i].id >= 0) { humanFound = true; break; }
+    }
+    if (!humanFound) return;
 
     KingForFourGameState_St* g = &ks->state;
     int cp = g->currentPlayer;
