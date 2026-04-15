@@ -37,23 +37,47 @@ typedef struct {
 
 typeDA(SaveEntry_St, SaveEntryVec_St);
 
-/* Private static widgets */
-static TextButton_St btnNewGame     = { .bounds = {300, 300, 200, 50}, .text = "New Game",      .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
-static TextButton_St btnLoadSave    = { .bounds = {520, 300, 200, 50}, .text = "Load Save",     .textColor = WHITE, .baseColor = BLUE,   .roundness = 0.2f };
+/* Private static widgets — bounds recalculated at runtime via promptRepositionButtons() */
+static TextButton_St btnNewGame     = { .text = "New Game",    .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
+static TextButton_St btnLoadSave    = { .text = "Load Save",   .textColor = WHITE, .baseColor = BLUE,   .roundness = 0.2f };
 
-static TextButton_St btnYesSave     = { .bounds = {300, 300, 150, 50}, .text = "Yes",           .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
-static TextButton_St btnNoSave      = { .bounds = {470, 300, 150, 50}, .text = "No",            .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
+static TextButton_St btnYesSave     = { .text = "Yes",         .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
+static TextButton_St btnNoSave      = { .text = "No",          .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
 
-static TextButton_St btnSaveFile    = { .bounds = {300, 420, 150, 50}, .text = "Save",          .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
-static TextButton_St btnCancelFile  = { .bounds = {470, 420, 150, 50}, .text = "Cancel",        .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
+static TextButton_St btnSaveFile    = { .text = "Save",        .textColor = WHITE, .baseColor = GREEN,  .roundness = 0.2f };
+static TextButton_St btnCancelFile  = { .text = "Cancel",      .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
 
-static TextButton_St btnCancelLoad  = { .bounds = {300, 520, 150, 50}, .text = "Cancel",        .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
-static TextButton_St btnLoadChosen  = { .bounds = {550, 520, 150, 50}, .text = "Load",          .textColor = WHITE, .baseColor = BLUE,   .roundness = 0.2f };
+static TextButton_St btnCancelLoad  = { .text = "Cancel",      .textColor = WHITE, .baseColor = RED,    .roundness = 0.2f };
+static TextButton_St btnLoadChosen  = { .text = "Load",        .textColor = WHITE, .baseColor = BLUE,   .roundness = 0.2f };
 
-static TextButton_St btnYesDelete   = { .bounds = {340, 340, 140, 55}, .text = "Yes, Delete",   .textColor = WHITE, .baseColor = RED,    .roundness = 0.25f };
-static TextButton_St btnNoDelete    = { .bounds = {500, 340, 140, 55}, .text = "No, Cancel",    .textColor = WHITE, .baseColor = GRAY,   .roundness = 0.25f };
+static TextButton_St btnYesDelete   = { .text = "Yes, Delete", .textColor = WHITE, .baseColor = RED,    .roundness = 0.25f };
+static TextButton_St btnNoDelete    = { .text = "No, Cancel",  .textColor = WHITE, .baseColor = GRAY,   .roundness = 0.25f };
 
-static TextBox_St filenameBox       = { .bounds = {300, 300, 400, 50}, .roundness = 0.2f, .placeholder = "my_save_name" };
+static TextBox_St filenameBox       = { .roundness = 0.2f, .placeholder = "my_save_name" };
+
+/** Repositions all prompt buttons relative to the current screen size. */
+static void promptRepositionButtons(void) {
+    f32 sw = (f32)GetScreenWidth();
+    f32 sh = (f32)GetScreenHeight();
+    f32 cx = sw / 2.0f;
+    f32 cy = sh / 2.0f;
+
+    btnNewGame.bounds    = (Rectangle){cx - 210.0f, cy,         200, 50};
+    btnLoadSave.bounds   = (Rectangle){cx +  10.0f, cy,         200, 50};
+
+    btnYesSave.bounds    = (Rectangle){cx - 160.0f, cy,         150, 50};
+    btnNoSave.bounds     = (Rectangle){cx +  10.0f, cy,         150, 50};
+
+    btnSaveFile.bounds   = (Rectangle){cx - 160.0f, cy + 120.0f, 150, 50};
+    btnCancelFile.bounds = (Rectangle){cx +  10.0f, cy + 120.0f, 150, 50};
+    filenameBox.bounds   = (Rectangle){cx - 200.0f, cy +  55.0f, 400, 50};
+
+    btnCancelLoad.bounds = (Rectangle){cx - 160.0f, sh - 80.0f,  150, 50};
+    btnLoadChosen.bounds = (Rectangle){cx +  10.0f, sh - 80.0f,  150, 50};
+
+    btnYesDelete.bounds  = (Rectangle){cx - 150.0f, cy +  40.0f, 140, 55};
+    btnNoDelete.bounds   = (Rectangle){cx +  10.0f, cy +  40.0f, 140, 55};
+}
 
 static ScrollFrame_St saveListScroll = {0};
 static SaveEntryVec_St saveList = {0};
@@ -240,6 +264,8 @@ static void promptInitLoadList(void) {
 bool polyBlast_promptUpdate(PolyBlastGame_St* const game, Vector2 mouseScreen) {
     if (polyBlast_currentPrompt == PROMPT_NONE) return false;
 
+    promptRepositionButtons();
+
     bool shouldCloseWindow = false;
 
     switch (polyBlast_currentPrompt) {
@@ -358,7 +384,7 @@ bool polyBlast_promptUpdate(PolyBlastGame_St* const game, Vector2 mouseScreen) {
 void polyBlast_promptDraw(void) {
     if (polyBlast_currentPrompt == PROMPT_NONE) return;
 
-    DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, Fade(BLACK, 0.7f));
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(BLACK, 0.7f));
 
     switch (polyBlast_currentPrompt) {
         case PROMPT_START_LOAD: {

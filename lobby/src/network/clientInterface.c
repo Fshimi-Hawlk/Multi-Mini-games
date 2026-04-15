@@ -31,20 +31,13 @@ static bool firstFrame = true;
 static bool isFirstInit = true;
 
 static void updateCameraOnWindowResize(LobbyGame_St* const game) {
-    const f32 originalWidth  = 800;
-    const f32 originalHeight = 600;
-
-    // Always keep camera perfectly centered on the new window size
+    // Re-center the camera offset for the new window dimensions.
+    // Zoom is intentionally NOT changed: resizing should reveal more/less
+    // of the world, not magnify the existing view.
     game->cam.offset = (Vector2){
-        systemSettings.video.width  / 2.0f,
-        systemSettings.video.height / 2.0f
+        GetScreenWidth()  / 2.0f,
+        GetScreenHeight() / 2.0f
     };
-
-    // ── Zoom adaptation when width OR height changes ─────────────────────
-    f32 zoomX = (f32)systemSettings.video.width  / originalWidth;
-    f32 zoomY = (f32)systemSettings.video.height / originalHeight;
-
-    game->cam.zoom = min(zoomX, zoomY);
 }
 
 void lobby_init(void) {
@@ -227,6 +220,8 @@ void lobby_update(f32 dt) {
         };
 
         updateCameraOnWindowResize(&lobby_game);
+        lobby_initBackgroundScale();
+        lobby_recalcConnectionScreenLayout();
     }
 
     lobby_updatePlayer(&lobby_game.player, &lobby_game.physics[lobby_game.player.textureId], dt);

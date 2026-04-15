@@ -330,11 +330,6 @@ int main(void) {
         
         receiveNetworkData();
 
-        if (systemSettings.video.resizable && IsWindowResized()) {
-            systemSettings.video.width  = GetScreenWidth();
-            systemSettings.video.height = GetScreenHeight();
-        }
-
         lobby_updateMenu();
         bool selectorActive = lobby_updateRoomSelector();
         // L'overlay "salle d'attente" du lobby n'est actif qu'en lobby :
@@ -342,7 +337,7 @@ int main(void) {
         if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_updateWaitingRoom();
 
         BeginDrawing(); {
-            ClearBackground(WHITE);
+            ClearBackground((Color){25, 84, 157, 255}); // sky top colour — hides any uncovered edges
 
             if (lobby_currentMenu != MENU_NONE) {
                 lobby_drawMenu();

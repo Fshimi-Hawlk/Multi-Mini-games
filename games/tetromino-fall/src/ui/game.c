@@ -20,15 +20,17 @@ void tetrominoFall_drawInformations(int score, int level, int lineNbTotal, int h
     snprintf(linesText,     sizeof(linesText),      "Lines: %d",      lineNbTotal);
     snprintf(highScoreText, sizeof(highScoreText),  "High score: %d", highScore);
 
-    DrawText(scoreText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2, 20, WHITE);
-    DrawText(levelText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 30, 20, WHITE);
-    DrawText(linesText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 60, 20, WHITE);
-    DrawText(highScoreText, WINDOW_WIDTH / 40, WINDOW_HEIGHT / 2 + 120, 20, WHITE);
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    DrawText(scoreText, sw / 40, sh / 2, 20, WHITE);
+    DrawText(levelText, sw / 40, sh / 2 + 30, 20, WHITE);
+    DrawText(linesText, sw / 40, sh / 2 + 60, 20, WHITE);
+    DrawText(highScoreText, sw / 40, sh / 2 + 120, 20, WHITE);
 }
 
 void tetrominoFall_drawPreview(Board_t board, BoardShape_St boardShape) {
-    int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
-    int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
+    int offsetX = (GetScreenWidth()  - (CELL_SIZE * BOARD_WIDTH))  / 2;
+    int offsetY = (GetScreenHeight() - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
 
     for (; !tetrominoFall_isColliding(board, boardShape); (boardShape.position.y)++);

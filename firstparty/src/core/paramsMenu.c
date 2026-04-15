@@ -32,13 +32,13 @@
 #define PM_ARROW_W       28     ///< Cycle arrow button width
 
 // Total panel height (computed from sections above)
-//   Title + [res] header+row + sep + [audio] header+row+row + sep + [disp] header+row + bottom
+//   Title + [res] header+row + sep + [audio] header+row+row + sep + [disp] header+row+row + bottom
 #define PM_MENU_H  (PM_TITLE_H \
                   + PM_SECTION_H + PM_ROW_H \
                   + (PM_SEP * 2 + 1) \
                   + PM_SECTION_H + PM_ROW_H + PM_ROW_H \
                   + (PM_SEP * 2 + 1) \
-                  + PM_SECTION_H + PM_ROW_H \
+                  + PM_SECTION_H + PM_ROW_H + PM_ROW_H \
                   + PM_SEP)
 
 // Roundness value for DrawRectangleRounded (ratio of shortest side / 2)
@@ -216,7 +216,17 @@ void paramsMenu_init(ParamsMenu_St* menu) {
     if (!menu) return;
 
     menu->isOpen        = false;
-    menu->selected      = RESOLUTION_800x600;
+    menu->selected      = RESOLUTION_1280x720; // Default fallback
+    
+    // Dynamically select the matching resolution
+    for (int i = 0; i < RESOLUTION_COUNT; i++) {
+        if (paramsMenu_getWidth(i) == systemSettings.video.width &&
+            paramsMenu_getHeight(i) == systemSettings.video.height) {
+            menu->selected = i;
+            break;
+        }
+    }
+
     menu->textureLoaded = false;
     menu->masterVolume  = 1.0f;
     menu->muted         = false;
@@ -369,6 +379,21 @@ void paramsMenu_update(ParamsMenu_St* menu) {
 
     // ── Display section ──────────────────────────────────────────
     y += PM_SECTION_H;   // skip header
+
+    // Fullscreen toggle row
+    {
+        Rectangle toggleRect = {
+            px + pw - PM_PAD - PM_TOGGLE_W,
+            y + (PM_ROW_H - PM_TOGGLE_H) * 0.5f,
+            (float)PM_TOGGLE_W, (float)PM_TOGGLE_H
+        };
+        if (clicked && pm_hit(mouse, toggleRect)) {
+            systemSettings.video.fullscreen = !systemSettings.video.fullscreen;
+            applySystemSettings();
+            log_info("Fullscreen: %s", systemSettings.video.fullscreen ? "on" : "off");
+        }
+    }
+    y += PM_ROW_H;
 
     // FPS toggle row
     {
@@ -610,6 +635,35 @@ void paramsMenu_draw(ParamsMenu_St* menu) {
 
     // ── Display section ──────────────────────────────────────────
     y = pm_sectionHeader(panel, y, "  DISPLAY");
+
+    // Fullscreen toggle row
+    {
+        Rectangle rowRect = { px, y, pw, (float)PM_ROW_H };
+        Rectangle toggleRect = {
+            px + pw - PM_PAD - PM_TOGGLE_W,
+            y + (PM_ROW_H - PM_TOGGLE_H) * 0.5f,
+            (float)PM_TOGGLE_W, (float)PM_TOGGLE_H
+        };
+        bool togHov = pm_hit(mouse, toggleRect);
+        if (pm_hit(mouse, rowRect))
+            DrawRectangleRec(rowRect, PM_COL_ROW_HOVER);
+
+        DrawText("Fullscreen",
+                 (int)(px + PM_PAD),
+                 (int)(y + (PM_ROW_H - 14) * 0.5f),
+                 14, PM_COL_SUBTEXT);
+
+        pm_drawToggle(toggleRect, systemSettings.video.fullscreen, togHov);
+
+        // Status label
+        const char* fsLabel = systemSettings.video.fullscreen ? "On" : "Off";
+        int flw = MeasureText(fsLabel, 12);
+        DrawText(fsLabel,
+                 (int)(toggleRect.x - flw - 8),
+                 (int)(y + (PM_ROW_H - 12) * 0.5f),
+                 12, systemSettings.video.fullscreen ? PM_COL_ACCENT : PM_COL_SUBTEXT);
+    }
+    y += PM_ROW_H;
 
     // FPS toggle row
     {

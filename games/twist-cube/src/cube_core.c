@@ -227,21 +227,22 @@ int main(void) {
             if (startTime != 0) {
                 min = timer / 60;
                 sec = (int)timer % 60;
-                DrawText(TextFormat("%02d:%02d", min, sec), 10, WINDOW_HEIGHT - 30, 20, BLACK);
+                DrawText(TextFormat("%02d:%02d", min, sec), 10, GetScreenHeight() - 30, 20, BLACK);
             }
             DrawText(movesString, 150, 10, 20, BLACK);
             display3D(&cube, camera);
 
             if (printTimers) {
-                DrawRectangle(WINDOW_WIDTH - 200, WINDOW_HEIGHT - 200, 200, 200, (Color){0, 0, 0, 128});
+                int sw = GetScreenWidth(), sh = GetScreenHeight();
+                DrawRectangle(sw - 200, sh - 200, 200, 200, (Color){0, 0, 0, 128});
                 for (int i = 0; i < nTimers; i++) {
                     min = timersArray[i] / 60;
                     sec = (int)timersArray[i] % 60;
-                    DrawText(TextFormat("%d : %02d:%02d", i + 1, min, sec), WINDOW_WIDTH - 200, WINDOW_HEIGHT - 200 + 20 * i, 20, BLACK);
+                    DrawText(TextFormat("%d : %02d:%02d", i + 1, min, sec), sw - 200, sh - 200 + 20 * i, 20, BLACK);
                 }
                 min = bestTimer / 60;
                 sec = (int)bestTimer % 60;
-                DrawText(TextFormat("Meilleur temps :\n%02d:%02d", min, sec), WINDOW_WIDTH - 200, WINDOW_HEIGHT - 40, 20, BLACK);
+                DrawText(TextFormat("Meilleur temps :\n%02d:%02d", min, sec), sw - 200, sh - 40, 20, BLACK);
             }
         EndDrawing();
     }

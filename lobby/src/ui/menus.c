@@ -21,6 +21,7 @@
 #include "utils/globals.h"
 
 #include "leaderboard.h"
+#include "systemSettings.h"
 
 #include "sharedWidgets/button.h"
 #include "sharedWidgets/types.h"
@@ -58,8 +59,8 @@ void lobby_updateMenu(void) {
     }
 
     if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_F)) {
-        ToggleBorderlessWindowed();
         systemSettings.video.fullscreen = !systemSettings.video.fullscreen;
+        applySystemSettings();
     }
 
     switch (lobby_currentMenu) {

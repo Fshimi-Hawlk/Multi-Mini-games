@@ -391,7 +391,8 @@ void UI_DrawHoleResult(GolfGame *g) {
 
 void UI_DrawScorecard(GolfGame *g) {
     int  sw = g->screen_w, sh = g->screen_h;
-    int  tx = sw/2 - 400, ty = 100;
+    int  card_w = (sw < 820) ? sw - 20 : 800;
+    int  tx = sw/2 - card_w/2, ty = 100;
     int  i;
     int  total_strokes = 0, total_par = 0;
     char buf[48];
@@ -404,7 +405,7 @@ void UI_DrawScorecard(GolfGame *g) {
         int cw[] = {55,55,115,75,75,80};
         int cx   = tx;
         int j;
-        draw_panel(tx-10, ty-5, 800, 28, (Color){0,50,100,200}, (Color){100,150,255,100});
+        draw_panel(tx-10, ty-5, card_w, 28, (Color){0,50,100,200}, (Color){100,150,255,100});
         for (j = 0; j < 6; j++) {
             DrawText(hdrs[j], cx, ty, 13, (Color){200,220,255,220});
             cx += cw[j]+8;
@@ -419,7 +420,7 @@ void UI_DrawScorecard(GolfGame *g) {
         int       cx     = tx;
         int       cw[]   = {55,55,115,75,75,80};
 
-        DrawRectangle(tx-10, row_y-4, 800, 28,
+        DrawRectangle(tx-10, row_y-4, card_w, 28,
                       (i%2==0)?(Color){0,0,0,80}:(Color){255,255,255,20});
 
         snprintf(buf, sizeof(buf), "%d", h->index);
@@ -458,7 +459,7 @@ void UI_DrawScorecard(GolfGame *g) {
     {
         int tot_y = ty + 30 + MAX_HOLES*30 + 8;
         int d     = total_strokes - total_par;
-        draw_panel(tx-10, tot_y, 800, 34,
+        draw_panel(tx-10, tot_y, card_w, 34,
                    (Color){0,50,100,200}, (Color){255,215,0,180});
         DrawText("TOTAL", tx, tot_y+10, 17, WHITE);
         snprintf(buf, sizeof(buf), "%d / par %d", total_strokes, total_par);
@@ -466,7 +467,7 @@ void UI_DrawScorecard(GolfGame *g) {
         snprintf(buf, sizeof(buf), "%+d", d);
         {
             int bw = MeasureText(buf,21);
-            DrawText(buf, tx+800-bw-20, tot_y+7, 21, score_color(d));
+            DrawText(buf, tx+card_w-bw-20, tot_y+7, 21, score_color(d));
         }
     }
 

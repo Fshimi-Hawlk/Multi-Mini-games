@@ -17,6 +17,12 @@
 void lobby_initConnectionScreen(void);
 
 /**
+    @brief Recalculates widget positions after a window resize.
+    @note  Preserves text buffer contents.
+*/
+void lobby_recalcConnectionScreenLayout(void);
+
+/**
     @brief Updates connection screen logic.
     @return true if connect button was pressed and IP is valid.
 */

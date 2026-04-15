@@ -47,16 +47,15 @@ static f32 backgroundBaseScale = 0.35f;   // computed once
 void lobby_initBackgroundScale(void) {
     if (!IsTextureValid(backgroundTexture)) return;
 
-    f32 windowAspect = (f32) systemSettings.video.width / (f32) systemSettings.video.height;
-    f32 bgAspect     = (f32) backgroundTexture.width / (f32) backgroundTexture.height;
+    f32 scaleW = (f32)GetScreenWidth()  / (f32)backgroundTexture.width;
+    f32 scaleH = (f32)GetScreenHeight() / (f32)backgroundTexture.height;
 
+    // Use the LARGER of the two scales (cover semantics) so the texture fills
+    // the screen regardless of aspect ratio — portrait, landscape, or ultrawide.
+    // The 1.75x factor leaves room for the parallax offset to shift without
+    // exposing the clear colour at any edge.
     const f32 targetCoverage = 1.75f;
-
-    if (windowAspect > bgAspect) { // wider window -> fit to height
-        backgroundBaseScale = (f32) systemSettings.video.height / (f32) backgroundTexture.height * targetCoverage;
-    } else { // taller window -> fit to width
-        backgroundBaseScale = (f32) systemSettings.video.width / (f32) backgroundTexture.width * targetCoverage;
-    }
+    backgroundBaseScale = (scaleW > scaleH ? scaleW : scaleH) * targetCoverage;
 }
 
 void lobby_drawStarryBackground(const Vector2 playerPos, const Camera2D camera) {

@@ -60,9 +60,8 @@ static Error_Et applyVideoSettings(VideoSettings_St settings) {
         err = ERROR_INVALID_SETTING;
     }
 
-    if (settings.width > 0 && settings.height > 0) {
-        SetWindowSize(settings.width, settings.height);
-    } else {
+    // Validate dimensions
+    if (settings.width <= 0 || settings.height <= 0) {
         log_warn("Received `width` and/or `height` settings was set to zero");
         err = ERROR_INVALID_SETTING;
     }
@@ -91,13 +90,33 @@ static Error_Et applyVideoSettings(VideoSettings_St settings) {
         settings.resizable = DEFAULT_VIDEO_SETTING_RESIZABLE;
     }
 
-    // Clear all potentially set flags first to allow disabling them
-    ClearWindowState(FLAG_FULLSCREEN_MODE | FLAG_VSYNC_HINT | FLAG_WINDOW_UNDECORATED | FLAG_WINDOW_RESIZABLE);
+    // 1. Toggle fullscreen FIRST — SetWindowSize must come after so the windowed
+    //    size is applied in the correct mode.
+    // On Wayland, ToggleFullscreen() tries to change monitor resolution (X11 behaviour)
+    // and is silently ignored. ToggleBorderlessWindowed() uses the xdg-toplevel fullscreen
+    // protocol and works correctly on both Wayland and X11.
+    bool isFullscreenNow = IsWindowState(FLAG_BORDERLESS_WINDOWED_MODE) || IsWindowFullscreen();
+    if ((bool)settings.fullscreen != isFullscreenNow) {
+        ToggleBorderlessWindowed();
+    }
 
-    if (settings.fullscreen) SetWindowState(FLAG_FULLSCREEN_MODE);
-    if (settings.vsync)      SetWindowState(FLAG_VSYNC_HINT);
-    if (settings.borderless) SetWindowState(FLAG_WINDOW_UNDECORATED);
-    if (settings.resizable)  SetWindowState(FLAG_WINDOW_RESIZABLE);
+    // 2. Resize only when windowed and the stored size differs from current.
+    bool isFullscreenAfter = IsWindowState(FLAG_BORDERLESS_WINDOWED_MODE) || IsWindowFullscreen();
+    if (settings.width > 0 && settings.height > 0) {
+        if (!isFullscreenAfter && (GetScreenWidth() != settings.width || GetScreenHeight() != settings.height)) {
+            SetWindowSize(settings.width, settings.height);
+        }
+    }
+
+    // 3. Apply vsync regardless of fullscreen state.
+    if (settings.vsync) SetWindowState(FLAG_VSYNC_HINT); else ClearWindowState(FLAG_VSYNC_HINT);
+
+    // 4. Decoration and resize hints are irrelevant in fullscreen and can confuse
+    //    the compositor.
+    if (!isFullscreenAfter) {
+        if (settings.borderless) SetWindowState(FLAG_WINDOW_UNDECORATED); else ClearWindowState(FLAG_WINDOW_UNDECORATED);
+        if (settings.resizable)  SetWindowState(FLAG_WINDOW_RESIZABLE);   else ClearWindowState(FLAG_WINDOW_RESIZABLE);
+    }
 
     return err;
 }

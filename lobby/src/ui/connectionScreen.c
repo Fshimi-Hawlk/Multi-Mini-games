@@ -63,14 +63,34 @@ static bool isValidIPv4(const char* ip) {
     return (dots == 3 && hasDigit && octet <= 255);
 }
 
+void lobby_recalcConnectionScreenLayout(void) {
+    f32 w       = (f32)GetScreenWidth();
+    f32 h       = (f32)GetScreenHeight();
+    f32 centerX = w / 2.0f;
+    f32 titleY  = h * 0.09f;
+
+    lobby_playerNameTextBox.bounds = (Rectangle){w - 220.0f, 20.0f, 200.0f, 36.0f};
+    lobby_refreshButton.bounds     = (Rectangle){w - 90.0f - 135.0f, titleY + 220.0f, 170.0f, 46.0f};
+    lobby_ipTextBox.bounds         = (Rectangle){centerX - 185.0f, titleY + 145.0f, 370.0f, 50.0f};
+    lobby_connectButton.bounds     = (Rectangle){centerX - 105.0f, titleY + 210.0f, 210.0f, 50.0f};
+
+    f32 listStartY = titleY + 285.0f;
+    for (s32 i = 0; i < lobby_serversCount; ++i) {
+        if (!lobby_discoveredServers[i].active) continue;
+        lobby_discoveredServers[i].button.bounds = (Rectangle){
+            55.0f, listStartY + (i * 52.0f), w - 110.0f, 46.0f
+        };
+    }
+}
+
 void lobby_initConnectionScreen(void) {
-    s32 w = systemSettings.video.width;
-    s32 h = systemSettings.video.height;
-    f32 centerX = (f32)w / 2.0f;
-    f32 titleY  = (f32)h * 0.09f;
+    f32 w       = (f32)GetScreenWidth();
+    f32 h       = (f32)GetScreenHeight();
+    f32 centerX = w / 2.0f;
+    f32 titleY  = h * 0.09f;
 
     lobby_playerNameTextBox = (TextBox_St) {
-        .bounds      = {(f32)w - 220.0f, 20.0f, 200.0f, 36.0f},
+        .bounds      = {w - 220.0f, 20.0f, 200.0f, 36.0f},
         .state       = WIDGET_STATE_NORMAL,
         .roundness   = 0.4f,
         .placeholder = "Player name",

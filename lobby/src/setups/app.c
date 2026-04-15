@@ -34,6 +34,14 @@ Error_Et lobby_initApp(void) {
 
     // SetTraceLogLevel(LOG_WARNING);
 
+    // Set flags BEFORE InitWindow for better reliability with some Window Managers
+    unsigned int flags = 0;
+    if (systemSettings.video.fullscreen) flags |= FLAG_FULLSCREEN_MODE;
+    if (systemSettings.video.vsync)      flags |= FLAG_VSYNC_HINT;
+    if (systemSettings.video.borderless) flags |= FLAG_WINDOW_UNDECORATED;
+    if (systemSettings.video.resizable)  flags |= FLAG_WINDOW_RESIZABLE;
+    SetConfigFlags(flags);
+
     InitWindow(systemSettings.video.width, systemSettings.video.height, systemSettings.video.title);
     SetExitKey(KEY_NULL);
     InitAudioDevice();
