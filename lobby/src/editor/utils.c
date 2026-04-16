@@ -191,7 +191,7 @@ void drawPortalHighlight(s32 idx, Color color, const Camera2D* cam) {
 }
 
 s32 findZoneAtPoint(Vector2 point) {
-    for (u8 i = 1; i < __miniGameIdCount; ++i) {
+    for (u8 i = 0; i < __miniGameIdCount; ++i) {
         if (i == MINI_GAME_ID_LOBBY) continue;
         if (CheckCollisionPointRec(point, gameZones[i].hitbox)) {
             return (s32)i;

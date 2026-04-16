@@ -24,8 +24,6 @@
 
 #include "utils/globals.h"
 
-#include "sharedUtils/mathUtils.h"
-
 static f32Vector2 lastSentPos = {0};
 static bool firstFrame = true;
 static bool isFirstInit = true;
@@ -321,14 +319,16 @@ void lobby_draw(void) {
     }
 
     f32 lobbyTextXPos = (systemSettings.video.width - MeasureText("Multi-Mini-Games", 20)) / 2.0f;
-        DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
+    DrawText("Multi-Mini-Games", lobbyTextXPos, 20, 20, PURPLE);
 
-        lobby_drawSkinButton();
-        if (lobby_game.playerVisuals.isTextureMenuOpen) {
-            lobby_drawMenuTextures(&lobby_game);
-        }
-        
-        drawChat();
+    lobby_drawSkinButton();
+    if (lobby_game.playerVisuals.isTextureMenuOpen) {
+        lobby_drawMenuTextures(&lobby_game);
+    }
+    
+    drawChat();
+
+    paramsMenu_draw(&paramsMenu);
 }
 
 void lobby_destroy(void) {

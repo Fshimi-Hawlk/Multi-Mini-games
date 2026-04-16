@@ -195,7 +195,7 @@ void lobby_drawWorldBoundaries(const Player_St* const player) {
 }
 
 void lobby_drawGameZones(const Player_St* const player) {
-    for (u8 i = 1; i < __miniGameIdCount; ++i) {
+    for (u8 i = 0; i < __miniGameIdCount; ++i) {
         if (i == MINI_GAME_ID_LOBBY) continue;
 
         GameInteractionZone_St gameZone = gameZones[i];
