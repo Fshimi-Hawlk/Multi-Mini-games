@@ -9,11 +9,13 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
+#include "logger.h"
 
 static GolfGame_St* golf_game = NULL;
 
 void golf_lobbyInit(void) {
     if (golf_initGame__full(&golf_game, (GolfConfigs_St){0}) != OK) {
+        log_error("[MINI-GOLF] Failed to initialize game");
     }
 }
 

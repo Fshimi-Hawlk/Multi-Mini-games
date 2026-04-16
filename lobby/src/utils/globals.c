@@ -40,9 +40,9 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     },
 
     [MINI_GAME_ID_CHESS] = {
-        .hitbox = { 
+        .hitbox = {
             .x      = 651.67,
-            .y      = -803.00,
+            .y      = -775.00,   // platform P13 top=-700; zone.y = -700 - 75
             .width  = 75,
             .height = 75
         },
@@ -52,28 +52,28 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_DROP_FOUR]  = {
         .hitbox = {
             .x      = -594.00,
-            .y      = -771.67,
+            .y      = -755.00,   // platform P10 top=-680; zone.y = -680 - 75
             .width  = 75,
             .height = 75
         },
-        .name = "Drop Four" 
+        .name = "Drop Four"
     },
 
     [MINI_GAME_ID_TETROMINO_FALL] = {
         .hitbox = {
             .x      = -85.00,
-            .y      = -271.67,
+            .y      = -275.00,   // platform P6 top=-200; zone.y = -200 - 75
             .width  = 75,
             .height = 75
         },
         .name = "Tetromino Fall",
         .color = {0, 120, 220, 200},
     },
-    
+
     [MINI_GAME_ID_EDITOR] = {
         .hitbox = {
             .x      = -161.67,
-            .y      = -731.67,
+            .y      = -715.00,   // platform P12 top=-640; zone.y = -640 - 75
             .width  = 75,
             .height = 75
         },
@@ -84,7 +84,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_SUIKA] = {
         .hitbox = {
             .x      = 379.00,
-            .y      = -1206.30,
+            .y      = -1175.00,  // platform P17 top=-1100; zone.y = -1100 - 75
             .width  = 75,
             .height = 75
         },
@@ -95,7 +95,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_BOWLING] = {
         .hitbox = {
             .x      = -416.33,
-            .y      = -943.00,
+            .y      = -925.00,   // platform P14 top=-850; zone.y = -850 - 75
             .width  = 75,
             .height = 75
         },
@@ -106,7 +106,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_MINI_GOLF] = {
         .hitbox = {
             .x      = -506.67,
-            .y      = -258.33,
+            .y      = -225.00,   // platform P5 top=-150; zone.y = -150 - 75
             .width  = 75,
             .height = 75
         },
@@ -117,7 +117,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_SNAKE] = {
         .hitbox = {
             .x      = -60.00,
-            .y      = -545.00,
+            .y      = -535.00,   // platform P9 top=-460; zone.y = -460 - 75
             .width  = 75,
             .height = 75
         },
@@ -128,7 +128,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_POLY_BLAST] = {
         .hitbox = {
             .x      = 311.67,
-            .y      = -631.00,
+            .y      = -625.00,   // platform P11 top=-550; zone.y = -550 - 75
             .width  = 75,
             .height = 75
         },
@@ -139,17 +139,17 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_DISC_REVERSAL]    = {
         .hitbox = {
             .x      = -23.33,
-            .y      = -1081.6,
+            .y      = -1055.00,  // platform P16 top=-980; zone.y = -980 - 75
             .width  = 75,
             .height = 75
         },
-        .name = "Disc Reversal" 
+        .name = "Disc Reversal"
     },
 
     [MINI_GAME_ID_KING_FOR_FOUR] = {
         .hitbox = {
             .x      =  63.33,
-            .y      = -78.33,
+            .y      = -75.00,    // platform P4 top=0; zone.y = 0 - 75
             .width  = 75,
             .height = 75
         },
@@ -157,9 +157,9 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     },
 
     [MINI_GAME_ID_TWIST_CUBE] = {
-        .hitbox = { 
+        .hitbox = {
             .x      = -870.00,
-            .y      = -538.33,
+            .y      = -515.00,   // platform P8 top=-440; zone.y = -440 - 75
             .width  = 75,
             .height = 75
         },
@@ -169,7 +169,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
     [MINI_GAME_ID_SOLO_CARDS] = {
         .hitbox = {
             .x      =  218.33,
-            .y      = -871.67,
+            .y      = -855.00,   // platform P15 top=-780; zone.y = -780 - 75
             .width  = 75,
             .height = 75
         },

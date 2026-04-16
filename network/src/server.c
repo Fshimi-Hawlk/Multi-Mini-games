@@ -26,9 +26,9 @@
 // Configuration constants
 // 
 
-#define MACROSECONDS_IN_A_SECOND 1000000LL
+#define MICROSECONDS_IN_A_SECOND 1000000LL
 #define TICK_US                 16666                                   /**< Fréquence de mise à jour (60 Hz). */
-#define CLIENT_TIMEOUT_US       (60 * MACROSECONDS_IN_A_SECOND)         /**< Délai de déconnexion automatique (60 secondes). */
+#define CLIENT_TIMEOUT_US       (60 * MICROSECONDS_IN_A_SECOND)         /**< Délai de déconnexion automatique (60 secondes). */
 #define SERVER_DISPLAY_NAME     "Multi-Mini-Games Server"
 #define MAX_PAYLOAD_SIZE        (2048 - sizeof(RUDPHeader_St))          /**< Taille maximale de la charge utile. */
 #define ACTION_CODE_ACK_ONLY    0x00                                    /**< RUDP-level acknowledgment only. */
@@ -89,7 +89,7 @@ static void handle_sigint(int sig) {
 static long long getTimeUs(void) {
     struct timeval tv;
     gettimeofday(&tv, NULL);
-    return (long long)tv.tv_sec * MACROSECONDS_IN_A_SECOND + tv.tv_usec;
+    return (long long)tv.tv_sec * MICROSECONDS_IN_A_SECOND + tv.tv_usec;
 }
 
 /**
@@ -174,7 +174,7 @@ static void checkTimeouts(void) {
     gettimeofday(&now, NULL);
     for (int i = 0; i < MAX_CLIENTS; i++) {
         if (clients[i].active) {
-            long long diff = (long long)(now.tv_sec - clients[i].lastSeen.tv_sec) * MACROSECONDS_IN_A_SECOND + (now.tv_usec - clients[i].lastSeen.tv_usec);
+            long long diff = (long long)(now.tv_sec - clients[i].lastSeen.tv_sec) * MICROSECONDS_IN_A_SECOND + (now.tv_usec - clients[i].lastSeen.tv_usec);
             if (diff > CLIENT_TIMEOUT_US) {
                 log_info("Client %d timed out", i);
                 int rId = clients[i].roomId;

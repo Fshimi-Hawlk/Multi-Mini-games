@@ -8,7 +8,24 @@
 #include "systemSettings.h"
 #include "logger.h"
 
-SystemSettings_St systemSettings = DEFAULT_SYSTEM_SETTING;
+SystemSettings_St systemSettings = {
+    .audio = {
+        .masterVolume = DEFAULT_AUDIO_SETTING_VOLUME,
+        .musicVolume  = DEFAULT_AUDIO_SETTING_VOLUME,
+        .sfxVolume    = DEFAULT_AUDIO_SETTING_VOLUME,
+        .mute         = DEFAULT_AUDIO_SETTING_MUTE
+    },
+    .video = {
+        .fps         = DEFAULT_VIDEO_SETTING_FPS,
+        .width       = DEFAULT_VIDEO_SETTING_WIDTH,
+        .height      = DEFAULT_VIDEO_SETTING_HEIGHT,
+        .fullscreen  = DEFAULT_VIDEO_SETTING_FULLSCREEN,
+        .vsync       = DEFAULT_VIDEO_SETTING_VSYNC,
+        .borderless  = DEFAULT_VIDEO_SETTING_BORDERLESS,
+        .resizable   = DEFAULT_VIDEO_SETTING_RESIZABLE,
+        .title       = NULL
+    }
+};
 
 static Error_Et applyAudioSettings(AudioSettings_St settings) {
     Error_Et err = OK;

@@ -8,11 +8,13 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
+#include "logger.h"
 
 static SnakeGame_St* snake_game = NULL;
 
 void snake_lobbyInit(void) {
     if (snake_initGame__full(&snake_game, (SnakeConfigs_St){0}) != OK) {
+        log_error("[SNAKE] Failed to initialize game");
     }
 }
 

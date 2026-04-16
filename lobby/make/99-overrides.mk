@@ -1,5 +1,4 @@
-# Extra libs for solo games (without network interface)
-EXTRA_LDFLAGS += ../games/mini-golf/build/lib/libminigolf.a
-EXTRA_LDFLAGS += ../games/bowling/build/lib/libbowling.a
-EXTRA_LDFLAGS += ../games/snake/build/lib/libsnake.a
-EXTRA_LDFLAGS += ../games/solo-cards/build/lib/libsolocards.a
+# NOTE: Solo game libs (mini-golf, bowling, snake, solo-cards) are provided by the
+# root Makefile via EXTRA_LDFLAGS when building from the project root.
+# Adding them here again would cause duplicate symbols at link time.
+# Do NOT add EXTRA_LDFLAGS here — use the root Makefile to build.

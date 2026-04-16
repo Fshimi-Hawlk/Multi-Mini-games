@@ -472,8 +472,7 @@ bool promotionChoice(Board_t board) {
     strncpy(temp, moveMade, sizeof(temp)-1);
     temp[sizeof(temp)-1] = '\0';
 
-    snprintf(moveMade, 7, "%s+%c", temp, names[promotionVers]);
-    moveMade[6] = '\0';
+    snprintf(moveMade, 12, "%s+%c", temp, names[promotionVers]);
 
     saveMove = true;
 

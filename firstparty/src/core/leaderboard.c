@@ -8,7 +8,7 @@
 #include "contextArena.h"
 
 #define REALLOC context_realloc     // arena-aware realloc (3-arg)
-#define FREE                        // future arena-aware free (disabled for now)
+#define FREE(x) free(x)             // arena-aware free (stub: uses standard free)
 #include "leaderboard.h"
 #include "APIs/generalAPI.h"
 #include "logger.h"

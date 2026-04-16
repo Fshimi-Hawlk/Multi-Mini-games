@@ -16,7 +16,7 @@
 
 static u64 writeU8(u8* buffer, u64 bufferSize, u64 offset, u8 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_fatal("Excess writing detected")
+        log_fatal("Excess writing detected");
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(value));
@@ -25,7 +25,7 @@ static u64 writeU8(u8* buffer, u64 bufferSize, u64 offset, u8 value) {
 
 static u64 writeS8(u8* buffer, u64 bufferSize, u64 offset, s8 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_fatal("Excess writing detected")
+        log_fatal("Excess writing detected");
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(s8));
@@ -34,7 +34,7 @@ static u64 writeS8(u8* buffer, u64 bufferSize, u64 offset, s8 value) {
 
 static u64 writeU32(u8* buffer, u64 bufferSize, u64 offset, u32 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_fatal("Excess writing detected")
+        log_fatal("Excess writing detected");
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(u32));
@@ -43,7 +43,7 @@ static u64 writeU32(u8* buffer, u64 bufferSize, u64 offset, u32 value) {
 
 static u64 writeU64(u8* buffer, u64 bufferSize, u64 offset, u64 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_fatal("Excess writing detected")
+        log_fatal("Excess writing detected");
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(u64));
@@ -52,7 +52,7 @@ static u64 writeU64(u8* buffer, u64 bufferSize, u64 offset, u64 value) {
 
 static u64 writeF32(u8* buffer, u64 bufferSize, u64 offset, f32 value) {
     if (offset + sizeof(value) > bufferSize) {
-        log_fatal("Excess writing detected")
+        log_fatal("Excess writing detected");
         return 0;
     }
     if (buffer) memcpy(buffer + offset, &value, sizeof(f32));
@@ -63,7 +63,7 @@ static u64 writeF32(u8* buffer, u64 bufferSize, u64 offset, f32 value) {
 static u64 readU8(const u8* buffer, u64 bufferSize, u64 offset, u8* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_fatal("Excess reading detected")
+        log_fatal("Excess reading detected");
         return 0;
     }
 
@@ -74,7 +74,7 @@ static u64 readU8(const u8* buffer, u64 bufferSize, u64 offset, u8* value) {
 static u64 readS8(const u8* buffer, u64 bufferSize, u64 offset, s8* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_fatal("Excess reading detected")
+        log_fatal("Excess reading detected");
         return 0;
     }
 
@@ -85,7 +85,7 @@ static u64 readS8(const u8* buffer, u64 bufferSize, u64 offset, s8* value) {
 static u64 readU32(const u8* buffer, u64 bufferSize, u64 offset, u32* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_fatal("Excess reading detected")
+        log_fatal("Excess reading detected");
         return 0;
     }
 
@@ -96,7 +96,7 @@ static u64 readU32(const u8* buffer, u64 bufferSize, u64 offset, u32* value) {
 static u64 readU64(const u8* buffer, u64 bufferSize, u64 offset, u64* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_fatal("Excess reading detected")
+        log_fatal("Excess reading detected");
         return 0;
     }
 
@@ -107,7 +107,7 @@ static u64 readU64(const u8* buffer, u64 bufferSize, u64 offset, u64* value) {
 static u64 readF32(const u8* buffer, u64 bufferSize, u64 offset, f32* value) {
     if (value == NULL || buffer == NULL || bufferSize == 0) return 0;
     if (offset + sizeof(*value) > bufferSize) {
-        log_fatal("Excess reading detected")
+        log_fatal("Excess reading detected");
         return 0;
     }
 
@@ -257,13 +257,13 @@ bool polyBlast_deserializeGameState(PolyBlastGame_St* const state, const u8* buf
 
     offset += readU32(buffer, bufferSize, offset, &magic);
     if (magic != SERIAL_MAGIC) {
-        log_fatal("Data corruption detected: \"SERIAL_MAGIC\" doesn't correspond.")
+        log_fatal("Data corruption detected: \"SERIAL_MAGIC\" doesn't correspond.");
         return false;
     }
 
     offset += readU8(buffer, bufferSize, offset, &version);
     if (version != SERIAL_VERSION) {
-        log_fatal("Data corruption detected: \"SERIAL_VERSION\" doesn't correspond: got %zu, expected: %zu", version, SERIAL_VERSION)
+        log_fatal("Data corruption detected: \"SERIAL_VERSION\" doesn't correspond: got %zu, expected: %zu", version, SERIAL_VERSION);
         return false;
     }
 

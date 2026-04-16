@@ -8,11 +8,13 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
+#include "logger.h"
 
 static BowlingGame_St* bowling_game = NULL;
 
 void bowling_lobbyInit(void) {
     if (bowling_initGame__full(&bowling_game, (BowlingConfigs_St){0}) != OK) {
+        log_error("[BOWLING] Failed to initialize game");
     }
 }
 

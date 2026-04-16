@@ -62,7 +62,7 @@ start_libretranslate() {
 
     stop_libretranslate
 
-    libretranslate --load-only en,"${lang}" > /tmp/libretranslate.log 2>&1 &
+    libretranslate --load-only en,"${lang}" --no-api-keys > /tmp/libretranslate.log 2>&1 &
     local lt_pid=$!
 
     local waited=0

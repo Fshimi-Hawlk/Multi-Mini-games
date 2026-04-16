@@ -96,7 +96,7 @@ extern LogExtraInfoOpt_St _logExtraInfoOptions;  ///< Global logging options.
 #define logger_log(fmt, ...) logMessage(LOGGING_LEVEL_LOG, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)    ///< Macro for generic log message.
 #define log_info(fmt, ...)   logMessage(LOGGING_LEVEL_INFO,  __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)  ///< Macro for INFO log message.
 #define log_warn(fmt, ...)   logMessage(LOGGING_LEVEL_WARN,  __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)  ///< Macro for WARN log message.
-#define log_fatal(fmt, ...)  logMessage(LOGGING_LEVEL_FATAL, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); abort();  ///< Macro for FATAL log message.
+#define log_fatal(fmt, ...)  do { logMessage(LOGGING_LEVEL_FATAL, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); abort(); } while(0)  ///< Macro for FATAL log message.
 
 
 #ifdef _DEBUG  ///< Macro for DEBUG log message (enabled in _DEBUG builds).
@@ -107,7 +107,7 @@ extern LogExtraInfoOpt_St _logExtraInfoOptions;  ///< Global logging options.
 
 
 #ifdef _STACK_TRACE  ///< Macro for ERROR log message. Triggers stack trace if _STACK_TRACE is defined.
-#define log_error(fmt, ...) logMessage(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); printStackTrace(MAX_TRACE_BACK_FRAMES)
+#define log_error(fmt, ...) do { logMessage(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__); printStackTrace(MAX_TRACE_BACK_FRAMES); } while(0)
 #else
 #define log_error(fmt, ...) logMessage(LOGGING_LEVEL_ERROR, __FILE__, __LINE__, __func__, fmt, ##__VA_ARGS__)
 #endif

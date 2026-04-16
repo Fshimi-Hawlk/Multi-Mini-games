@@ -42,6 +42,6 @@ Fichier .H                                 Fichier .C
  * @brief Instance externe du module lobby.
  * * Cette variable est définie dans lobby.c et liée lors de la compilation.
  */
-extern GameServerInterface_St lobby_module; 
+extern GameServerInterface_St lobby_serverInterface;
 
 #endif

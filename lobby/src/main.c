@@ -188,7 +188,7 @@ void receiveNetworkData(void) {
                 continue;
             }
 
-            if (!rudpProcessIncoming(&serverConnection, &header)) return;
+            if (!rudpProcessIncoming(&serverConnection, &header)) continue;
         
             u8* payload = buffer + sizeof(RUDPHeader_St);
             u16 payloadLen = (u16) (bytesRead - sizeof(RUDPHeader_St));
@@ -350,8 +350,19 @@ int main(void) {
         // chaque module de jeu gère sa propre phase pré-partie.
         if (currentMiniGameID == MINI_GAME_ID_LOBBY) lobby_updateWaitingRoom();
 
+        // Update mini-game BEFORE BeginDrawing: solo games call BeginDrawing/EndDrawing
+        // themselves inside their update — calling them from within the lobby's BeginDrawing
+        // would produce a nested BeginDrawing. The lobby module itself is safe to update inside.
+        if (currentMiniGame && currentMiniGameID != MINI_GAME_ID_LOBBY) {
+            currentMiniGame->update(dt);
+        }
+
         BeginDrawing(); {
-            ClearBackground((Color){25, 84, 157, 255}); // sky top colour — hides any uncovered edges
+            // Mini-games in GAME_STATE_INGAME draw their own frame (ClearBackground included).
+            // Clearing here would erase what they just drew.
+            if (lobby_game.currentState != GAME_STATE_INGAME || !currentMiniGame) {
+                ClearBackground((Color){25, 84, 157, 255}); // sky top colour
+            }
 
             if (lobby_currentMenu != MENU_NONE) {
                 lobby_drawMenu();
@@ -437,7 +448,11 @@ int main(void) {
                 }
 
                 if (currentMiniGame) {
-                    currentMiniGame->update(dt);
+                    // Lobby module update is safe inside BeginDrawing (no nested BeginDrawing).
+                    // Other games already had their update() called above.
+                    if (currentMiniGameID == MINI_GAME_ID_LOBBY) {
+                        currentMiniGame->update(dt);
+                    }
                     currentMiniGame->draw();
                 }
                 

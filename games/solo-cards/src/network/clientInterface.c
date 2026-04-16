@@ -8,11 +8,13 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
+#include "logger.h"
 
 static SolitaireGame_St* solitaire_game = NULL;
 
 void solitaire_lobbyInit(void) {
     if (solitaire_initGame__full(&solitaire_game, (SoloCardsConfig_St){0}) != OK) {
+        log_error("[SOLO-CARDS] Failed to initialize game");
     }
 }
 

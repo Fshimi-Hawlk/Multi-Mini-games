@@ -7,7 +7,6 @@ $(BIN): $(LIB_OBJECTS) $(MAIN_OBJECT) $(filter %.a, $(EXTRA_LDFLAGS))
 	@# --start-group/--end-group: linker does multiple passes so circular
 	@# static deps (e.g. game libs <-> raylib 3D) are all resolved.
 	$(SILENT_PREFIX)$(CC) $^ -Wl,--start-group $(LDFLAGS) -Wl,--end-group -o $@
-	$(SILENT_PREFIX)$(CC) $^ $(LDFLAGS) -o $@
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	$(SILENT_PREFIX)mkdir -p $(@D)

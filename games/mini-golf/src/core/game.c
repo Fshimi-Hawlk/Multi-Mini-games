@@ -96,10 +96,20 @@ void Game_Init(GolfGame *g) {
     Ball_Init(&g->ball, (Vector3){0,0,0});
     GCam_Init(&g->gcam, (Vector3){0,0,0});
 
-    g->tex_ball = LoadTexture(ASSET_PATH "balle.png");
-    g->tex_club = LoadTexture(ASSET_PATH "club.png");
-    SetTextureFilter(g->tex_ball, TEXTURE_FILTER_BILINEAR);
-    SetTextureFilter(g->tex_club, TEXTURE_FILTER_BILINEAR);
+    g->tex_ball    = LoadTexture(ASSET_PATH "balle.png");
+    g->tex_club    = LoadTexture(ASSET_PATH "club.png");
+    g->tex_fairway = LoadTexture(ASSET_PATH "pelouse.jpg");
+    g->tex_rough   = LoadTexture(ASSET_PATH "pelouse.jpg");
+    g->tex_green   = LoadTexture(ASSET_PATH "pelouse.jpg");
+    g->tex_sand    = LoadTexture(ASSET_PATH "sable.jpg");
+    g->tex_water   = LoadTexture(ASSET_PATH "eau.jpg");
+    SetTextureFilter(g->tex_ball,    TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(g->tex_club,    TEXTURE_FILTER_BILINEAR);
+    SetTextureFilter(g->tex_fairway, TEXTURE_FILTER_TRILINEAR);
+    SetTextureFilter(g->tex_rough,   TEXTURE_FILTER_TRILINEAR);
+    SetTextureFilter(g->tex_green,   TEXTURE_FILTER_TRILINEAR);
+    SetTextureFilter(g->tex_sand,    TEXTURE_FILTER_TRILINEAR);
+    SetTextureFilter(g->tex_water,   TEXTURE_FILTER_TRILINEAR);
 
     g->show_trajectory = true;
     g->power           = 0.0f;
@@ -259,4 +269,9 @@ void Game_Draw(GolfGame *g) {
 void Game_Cleanup(GolfGame *g) {
     UnloadTexture(g->tex_ball);
     UnloadTexture(g->tex_club);
+    UnloadTexture(g->tex_fairway);
+    UnloadTexture(g->tex_rough);
+    UnloadTexture(g->tex_green);
+    UnloadTexture(g->tex_sand);
+    UnloadTexture(g->tex_water);
 }

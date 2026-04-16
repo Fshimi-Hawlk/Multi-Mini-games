@@ -220,6 +220,11 @@ typedef struct {
 
     Texture2D  tex_ball;        ///< Ball texture
     Texture2D  tex_club;        ///< Club texture/model
+    Texture2D  tex_fairway;     ///< Fairway terrain texture
+    Texture2D  tex_rough;       ///< Rough terrain texture
+    Texture2D  tex_green;       ///< Green terrain texture
+    Texture2D  tex_sand;        ///< Sand terrain texture
+    Texture2D  tex_water;       ///< Water terrain texture
 
     ScoreCard  score;           ///< Current score
 

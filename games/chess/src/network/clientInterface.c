@@ -74,7 +74,7 @@ void chess_init(void) {
     initBoard(current_board);
     resetGame();
     if (moveMade == NULL) {
-        moveMade = calloc(7, sizeof(char));
+        moveMade = calloc(12, sizeof(char));
     }
     my_color = -1;
     my_id_internal = -1;
