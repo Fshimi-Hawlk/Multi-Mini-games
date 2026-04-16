@@ -29,6 +29,7 @@ extern GameClientInterface_St chess_clientInterface;
 // extern GameClientInterface_St dropFour_clientInterface;
 extern GameClientInterface_St editor_clientInterface;
 extern GameClientInterface_St kingForFour_clientInterface;
+extern GameClientInterface_St kingForFour_soloClientInterface;
 extern GameClientInterface_St lobby_clientInterface;
 extern GameClientInterface_St miniGolf_clientInterface;
 extern GameClientInterface_St polyBlast_clientInterface;
@@ -55,6 +56,12 @@ static GameClientInterface_St* miniGameInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_SUIKA]          = &suika_clientInterface,
     [MINI_GAME_ID_TETROMINO_FALL] = &tetrominoFall_clientInterface,
     [MINI_GAME_ID_TWIST_CUBE]     = &twistCube_clientInterface,
+};
+
+// Solo mode interfaces (for games that support local play with bots)
+static GameClientInterface_St* soloInterfaces[__miniGameIdCount] = {
+    [MINI_GAME_ID_CHESS]          = &chess_clientInterface,  // Chess has built-in AI
+    [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFour_soloClientInterface,
 };
 
 static bool server_spawned = false;
@@ -402,12 +409,20 @@ int main(void) {
                         if (IsKeyPressed(KEY_E)) {
                             // Logique solo/multi basée sur l'interface réseau du jeu
                             // Si le jeu a une interface réseau ET qu'on est connecté → multi
-                            // Sinon → solo
+                            // Sinon → solo (utilise l'interface solo si disponible)
                             bool hasMulti = miniGameInterfaces[triggerID] != NULL;
                             bool isConnected = networkSocket >= 0;
+                            bool hasSolo = (soloInterfaces[triggerID] != NULL);
                             
                             if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
                                 lobby_openRoomSelector(triggerID);  // multi
+                            } else if (hasSolo) {
+                                // Use solo interface with bots
+                                currentMiniGame = soloInterfaces[triggerID];
+                                if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
+                                currentMiniGameID = triggerID;
+                                lobby_game.currentState = GAME_STATE_INGAME;
+                                lastGameZoneIndex = triggerID;
                             } else {
                                 lastGameZoneIndex = triggerID;
                                 switchMinigame(triggerID);          // solo
