@@ -4,6 +4,11 @@ BASE_CFLAGS := \
     -Iinclude \
     -I../thirdparty \
     -I../firstparty \
+    -I../games/snake \
+    -I../games/suika \
+    -I../games/solo-cards \
+    -I../games/mini-golf \
+    -I../games/bowling \
     -DPLATFORM_DESKTOP   # raylib sometimes needs this on Windows
 
 BASE_LDFLAGS := \

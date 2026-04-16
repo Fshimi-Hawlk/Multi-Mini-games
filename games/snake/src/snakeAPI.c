@@ -196,3 +196,80 @@ Error_Et snake_freeGame(SnakeGame_St** game) {
 bool snake_isRunning(const SnakeGame_St* game) {
     return (game != NULL && game->base.running);
 }
+
+/**
+    @brief Updates the game state (input processing, logic).
+    Does NOT call BeginDrawing/EndDrawing - caller handles that.
+
+    @param[in,out] game  Valid game instance handle
+    @param[in] dt        Delta time in seconds
+*/
+void snake_update(SnakeGame_St* game, float dt) {
+    (void)dt;
+
+    if (game == NULL || !game->base.running) return;
+
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        game->base.running = false;
+        return;
+    }
+
+    iVector2 previousTailPos;
+
+    if (!game->move) {
+        game->move = snake_mouvement(&game->nextDirection);
+    }
+    
+    iVector2 nextPos = {
+        .x = game->snake.tail->coord.x + game->direction.x, 
+        .y = game->snake.tail->coord.y + game->direction.y
+    };
+    
+    if (snake_selfCollision(&game->snake, nextPos) || snake_isOOB(nextPos)) {
+        if (game->nbApple > game->highScore) {
+            snake_writeRecord(game->nbApple);
+        }
+        game->base.running = false;
+        return;
+    }
+
+    game->anim.timer += GetFrameTime();
+    
+    if (game->anim.timer >= game->anim.delay) {
+        game->direction = game->nextDirection;
+        snake_snakeAppend(&game->snake, nextPos);
+
+        if (game->board[nextPos.y][nextPos.x] == GAME_TILE_APPLE) {
+            snake_spawnApple(game->board);
+            game->nbApple++;
+        } else {
+            snake_snakeRemove(&game->snake, &previousTailPos);
+            game->board[previousTailPos.y][previousTailPos.x] = GAME_TILE_GRASS;
+        }
+
+        game->board[game->snake.tail->coord.y][game->snake.tail->coord.x] = GAME_TILE_HEAD;
+        snake_updateBoard(game->board, &game->snake);
+
+        game->anim.timer = 0;
+        game->move = false;
+    }
+}
+
+/**
+    @brief Renders the game (draw calls).
+    Does NOT call BeginDrawing/EndDrawing - caller handles that.
+
+    @param[in] game  Valid game instance handle
+*/
+void snake_draw(const SnakeGame_St* game) {
+    if (game == NULL) return;
+
+    f32 interpolation = game->anim.timer / game->anim.delay;
+    if (interpolation > 1.0f) interpolation = 1.0f;
+
+    ClearBackground(APP_BACKGROUND_COLOR);
+    snake_drawBoard(game->board);
+    snake_drawSnake(&game->snake, interpolation, game->direction);
+    DrawText(TextFormat("Score : %d", game->nbApple), CELL_SIZE * SIZE_BOARD + 10, 50, 20, BLACK);
+    DrawText(TextFormat("High Score : %d", game->highScore), CELL_SIZE * SIZE_BOARD + 10, 100, 20, BLACK);
+}

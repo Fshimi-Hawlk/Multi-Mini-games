@@ -5,6 +5,11 @@ BASE_CFLAGS := \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
+	-I../games/snake \
+	-I../games/suika \
+	-I../games/solo-cards \
+	-I../games/mini-golf \
+	-I../games/bowling \
 	-DPLATFORM_WSL
 
 # Linker base (WSL = Linux + explicit pthread + libdl)

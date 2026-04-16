@@ -117,4 +117,19 @@ Error_Et snake_freeGame(SnakeGame_St** game);
 */
 bool snake_isRunning(const SnakeGame_St* game);
 
+/**
+    @brief Updates the game state (input processing, logic).
+
+    @param[in,out] game  Valid game instance handle
+    @param[in] dt        Delta time in seconds
+*/
+void snake_update(SnakeGame_St* game, float dt);
+
+/**
+    @brief Renders the game (draw calls).
+
+    @param[in] game  Valid game instance handle
+*/
+void snake_draw(const SnakeGame_St* game);
+
 #endif // SNAKE_API_H

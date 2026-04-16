@@ -8,6 +8,26 @@
 #include "golf.h"
 
 
+/* ─── Initialisation ─────────────────────────────────────────────────────── */
+
+/**
+    @brief Initializes the ball at a given position.
+    @param[out] b    Pointer to the ball.
+    @param[in]  pos  Initial position.
+*/
+void Ball_Init(Ball *b, Vector3 pos) {
+    b->pos       = pos;
+    b->pos.y    += BALL_R;
+    b->vel       = Vector3Zero();
+    b->state     = BALL_IDLE;
+    b->surface   = SURF_FAIRWAY;
+    b->spin      = 0.0f;
+    b->rot_angle = 0.0f;
+    b->strokes   = 0;
+    b->penalty   = 0;
+    b->last_valid = pos;
+}
+
 /* ─── Tir ────────────────────────────────────────────────────────────────── */
 
 /**

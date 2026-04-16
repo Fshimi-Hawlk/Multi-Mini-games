@@ -5,6 +5,11 @@ BASE_CFLAGS := \
 	-Iinclude \
 	-I../thirdparty \
 	-I../firstparty \
+	-I../games/snake \
+	-I../games/suika \
+	-I../games/solo-cards \
+	-I../games/mini-golf \
+	-I../games/bowling
 
 # Linker base
 # -l:libraylib.a  : bundled raylib 5.5 static (avoids system version conflicts)

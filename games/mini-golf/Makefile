@@ -104,7 +104,8 @@ LIB_SOURCES := $(SRC_DIR)/golf_data.c  \
                $(SRC_DIR)/golf_camera.c \
                $(SRC_DIR)/golf_ui.c     \
                $(SRC_DIR)/golf_main.c   \
-               $(SRC_DIR)/golfAPI.c
+               $(SRC_DIR)/golfAPI.c    \
+               $(SRC_DIR)/network/clientInterface.c
 
 LIB_OBJECTS := $(LIB_SOURCES:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
 

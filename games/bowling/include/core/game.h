@@ -97,4 +97,19 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game);
 */
 Error_Et bowling_freeGame(BowlingGame_St** game);
 
+/**
+    @brief Updates the game state (input processing, logic).
+
+    @param[in,out] game      Valid game instance handle
+    @param[in] dt             Delta time in seconds
+*/
+void bowling_update(BowlingGame_St* game, float dt);
+
+/**
+    @brief Renders the game (draw calls).
+
+    @param[in] game  Valid game instance handle
+*/
+void bowling_draw(BowlingGame_St* game);
+
 #endif // BOWLING_GAME_H

@@ -23,14 +23,14 @@ static MiniGameId_Et currentMiniGameID = MINI_GAME_ID_LOBBY;
 static GameClientInterface_St* currentMiniGame = NULL;
 
 extern GameClientInterface_St bingo_clientInterface;
-// extern GameClientInterface_St bowling_clientInterface;
+extern GameClientInterface_St bowling_clientInterface;
 extern GameClientInterface_St chess_clientInterface;
 // extern GameClientInterface_St discReversal_clientInterface;
 // extern GameClientInterface_St dropFour_clientInterface;
 extern GameClientInterface_St editor_clientInterface;
 extern GameClientInterface_St kingForFour_clientInterface;
 extern GameClientInterface_St lobby_clientInterface;
-// extern GameClientInterface_St miniGolf_clientInterface;
+extern GameClientInterface_St miniGolf_clientInterface;
 extern GameClientInterface_St polyBlast_clientInterface;
 extern GameClientInterface_St snake_clientInterface;
 extern GameClientInterface_St soloCards_clientInterface;
@@ -41,23 +41,24 @@ extern GameClientInterface_St twistCube_clientInterface;
 // Pointers to the mini-game client interfaces
 static GameClientInterface_St* miniGameInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_BINGO]          = &bingo_clientInterface,
-    [MINI_GAME_ID_BOWLING]        = NULL,
+    [MINI_GAME_ID_BOWLING]        = &bowling_clientInterface,
     [MINI_GAME_ID_CHESS]          = &chess_clientInterface,
     [MINI_GAME_ID_DISC_REVERSAL]  = NULL, // TODO
     [MINI_GAME_ID_DROP_FOUR]      = NULL, // TODO
     [MINI_GAME_ID_EDITOR]         = &editor_clientInterface,
     [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFour_clientInterface,
     [MINI_GAME_ID_LOBBY]          = &lobby_clientInterface,
-    [MINI_GAME_ID_MINI_GOLF]      = NULL,
+    [MINI_GAME_ID_MINI_GOLF]      = &miniGolf_clientInterface,
     [MINI_GAME_ID_POLY_BLAST]     = &polyBlast_clientInterface,
-    [MINI_GAME_ID_SNAKE]          = NULL,
-    [MINI_GAME_ID_SOLO_CARDS]     = NULL,
+    [MINI_GAME_ID_SNAKE]          = &snake_clientInterface,
+    [MINI_GAME_ID_SOLO_CARDS]     = &soloCards_clientInterface,
     [MINI_GAME_ID_SUIKA]          = &suika_clientInterface,
     [MINI_GAME_ID_TETROMINO_FALL] = &tetrominoFall_clientInterface,
     [MINI_GAME_ID_TWIST_CUBE]     = &twistCube_clientInterface,
 };
 
 static bool server_spawned = false;
+static s32 lastGameZoneIndex = -1;
 
 #ifndef _WIN32
 static pid_t server_pid = -1;
@@ -290,7 +291,13 @@ void switchMinigame(u8 gameId) {
         if (gameId == MINI_GAME_ID_LOBBY) {
             lobby_game.currentState = GAME_STATE_GAMEPLAY;
             lobby_game.editorMode = false;
-            lobby_initWaitingRoom(); // Réinitialise l'overlay pour éviter qu'il reste visible au retour lobby
+            lobby_initWaitingRoom();
+            if (lastGameZoneIndex >= 0 && lastGameZoneIndex < __miniGameIdCount) {
+                Rectangle zone = gameZones[lastGameZoneIndex].hitbox;
+                lobby_game.player.position.x = zone.x + zone.width / 2.0f;
+                lobby_game.player.position.y = zone.y + zone.height + lobby_game.player.radius + 10.0f;
+                lobby_game.player.velocity = (Vector2){0, 0};
+            }
         } else {
             lobby_game.currentState = GAME_STATE_INGAME;
             if (gameId == MINI_GAME_ID_EDITOR) lobby_game.editorMode = true;
@@ -402,6 +409,7 @@ int main(void) {
                             if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
                                 lobby_openRoomSelector(triggerID);  // multi
                             } else {
+                                lastGameZoneIndex = triggerID;
                                 switchMinigame(triggerID);          // solo
                             }
                         }
