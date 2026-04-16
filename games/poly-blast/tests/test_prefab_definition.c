@@ -1,12 +1,12 @@
 /**
     @file test_prefab_definition.c
     @author Fshimi-Hawlk
-    @date 2026-04-12
-    @date 2026-04-14
+    @date 2026-04-10
     @brief Unit tests for prefab shapes and variants.
 */
+
+#include "core/prefab.h"
 #include "setups/shape.h"
-#include "core/shape.h"
 #include "utils/globals.h"
 
 #include <assert.h>
@@ -48,17 +48,17 @@ static void test_have_similar_offsets(void) {
 }
 
 static void test_init_variants(void) {
-    PrefabManager_St testManager = {0};
-    initPrefabsAndVariants(&testManager);
-    assert(testManager.prefabsBag.count > 0);
+    PrefabBagVec_St testManagerBag = {0}; // renamed to avoid confusion with PrefabManager_St
+    initPrefabsAndVariants(&testManagerBag, GAME_PREFAB_VARIANT_DEFAULT);
+    assert(testManagerBag.count > 0);
     log_info("OK");
 
     // Check duplicates avoided
-    for (u32 i = 0; i < testManager.prefabsBag.count; ++i) {
-        for (u32 j = i+1; j < testManager.prefabsBag.count; ++j) {
+    for (u32 i = 0; i < testManagerBag.count; ++i) {
+        for (u32 j = i+1; j < testManagerBag.count; ++j) {
             assert(
-                !haveSimilarOffsets(testManager.prefabsBag.items[i], testManager.prefabsBag.items[j]) 
-               || testManager.prefabsBag.items[i].orientations != testManager.prefabsBag.items[j].orientations
+                !haveSimilarOffsets(testManagerBag.items[i], testManagerBag.items[j]) 
+               || testManagerBag.items[i].orientations != testManagerBag.items[j].orientations
             );
         }
     }
@@ -74,12 +74,3 @@ int main(void) {
     log_info("Prefab definition tests passed");
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"

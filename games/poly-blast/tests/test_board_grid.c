@@ -1,17 +1,17 @@
 /**
     @file test_board_grid.c
     @author Fshimi-Hawlk
-    @date 2026-04-12
-    @date 2026-04-14
+    @date 2026-04-10
     @brief Unit tests for 8x8 grid and board data.
 */
+
 #include "core/board.h"
 #include "setups/game.h"
 
 #include <assert.h>
 
 static void test_board_init(void) {
-    PolyBlastGame_St testGame = {0};
+    GameState_St testGame = {0};
     initGame(&testGame); // Sets board
     assert(testGame.board.width == 8);
     log_info("OK");
@@ -65,12 +65,3 @@ int main(void) {
     log_info("Board grid tests passed");
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"

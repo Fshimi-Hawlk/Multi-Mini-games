@@ -2,31 +2,25 @@
     @file test_slot_shuffling.c
     @author Fshimi-Hawlk
     @date 2026-04-10
-    @date 2026-04-14
     @brief Unit tests for active slots and shuffling.
 */
+
+#include "setups/game.h"
 #include "setups/shape.h"
+
 #include "core/shape.h"
-#include "utils/utils.h"
+
+#include "utils/globals.h"
+
+#include "utils/random.h"
 
 #include <assert.h>
+#include <stdlib.h>
 
 static void test_shuffle_slots(void) {
-    PolyBlastGame_St testGame = {0};
-    initPrefabsAndVariants(&testGame.prefabManager);
-    da_reserve(&testGame.prefabManager.prefabsBag, 200);
-    initPrefabsAndVariants(&testGame.prefabManager);
-
-    for (u32 i = 0; i < testGame.prefabManager.prefabsBag.count; ++i) {
-        u8 size_idx = testGame.prefabManager.prefabsBag.items[i].blockCount - 1;
-        da_append(&testGame.prefabManager.bags[size_idx], i);
-    }
-
-    for (u8 s = 0; s < MAX_SHAPE_SIZE; ++s) {
-        PrefabIndexBagVec_St* bag = &testGame.prefabManager.bags[s];
-        if (bag->count == 0) continue;
-        da_shuffle(bag);
-    }
+    GameState_St testGame = {0};
+    initPrefabsAndVariants(&prefabsBag, GAME_PREFAB_VARIANT_DEFAULT);
+    initPrefabManager(&testGame.prefabManager);
 
     shuffleSlots(&testGame.prefabManager);
 
@@ -44,7 +38,7 @@ static void test_shuffle_bag(void) {
         da_append(&testBag, i);
     }
 
-    da_shuffle(&testBag);
+    da_shuffleT(u32, &testBag, rand);
     // Statistical: check not sorted (probabilistic)
     bool sorted = true;
     for (u32 i = 1; i < testBag.count; ++i) {

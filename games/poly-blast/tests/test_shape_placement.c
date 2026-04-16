@@ -1,11 +1,13 @@
 /**
     @file test_shape_placement.c
     @author Fshimi-Hawlk
-    @date 2026-04-12
-    @date 2026-04-14
+    @date 2026-04-10
     @brief Unit tests for shape validation and placement.
 */
+
 #include "core/shape.h"
+#include "core/placement.h"
+#include "setups/game.h"
 #include "utils/globals.h"
 
 #include <assert.h>
@@ -59,10 +61,12 @@ static void test_can_place_at(void) {
 }
 
 static void test_place_shape(void) {
-    Board_St testBoard = {.width = 8, .height = 8};
+    Board_St testBoard = { .width = 8, .height = 8 };
+    testBoard.rowsToClear = context_alloc(testBoard.height * sizeof(bool));
+    testBoard.columnsToClear = context_alloc(testBoard.width * sizeof(bool));
+
     Shape_St mockShape = {
         .prefab = &prefabs[PREFAB_1x2],
-        .colorIndex = 0
     };
 
     u8Vector2 pos = {0, 0};
@@ -84,12 +88,3 @@ int main(void) {
     log_info("Shape placement tests passed");
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"

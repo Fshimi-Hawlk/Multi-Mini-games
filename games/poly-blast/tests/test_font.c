@@ -1,14 +1,12 @@
 /**
     @file test_font.c
     @author Fshimi-Hawlk
-    @date 2026-04-12
-    @date 2026-04-14
+    @date 2026-04-10
     @brief Unit tests for font loading and text utilities.
 */
+
 #include "utils/globals.h"
-
 #include "core/game.h"
-
 #include "setups/app.h"
 
 #include <assert.h>
@@ -17,20 +15,20 @@ static void test_font_loading(void) {
     assert(initFonts() == true);
     log_info("OK");
 
-    for (FontSize_Et fs = FONT8; fs < _fontSizeCount; ++fs) {
-        assert(IsFontValid(fonts[fs]));
+    for (FontSize_Et fs = FONT16; fs < __fontSizeCount; ++fs) {
+        assert(IsFontValid(polyBlast_fonts[fs]));
     }
+
     log_info("OK");
     freeFonts();
 }
 
 static void test_score_text_generation(void) {
-    PolyBlastGame_St testGame = {
-        .score = 1234,
-    };
+    GameState_St testGame = {0};
+    testGame.scoring.score = 1234;
 
-    buildScoreRelatedTexts(&testGame);
-    assert(strcmp(testGame.scoreText, "Score: 1234") == 0);
+    buildScoreRelatedTexts(&testGame.scoring);
+    assert(strcmp(testGame.scoring.scoreText, "Score: 1234") == 0);
     log_info("OK");
 }
 
@@ -41,12 +39,3 @@ int main(void) {
     log_info("Font tests passed");
     return 0;
 }
-
-#define LOGGER_IMPLEMENTATION
-#include "logger.h"
-
-#define CONTEXT_ARENA_IMPLEMENTATION
-#include "contextArena.h"
-
-#define RAND_IMPLEMENTATION
-#include "rand.h"
