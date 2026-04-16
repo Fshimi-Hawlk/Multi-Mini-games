@@ -90,9 +90,9 @@ From the repository root:
 
 ```bash
 make help               # see all targets
-make bin                # build libraries (if needed) + lobby executable
-make rebuild-exe        # force rebuild lobby executable only
-make run-exe            # run the lobby
+make rebuild            # force rebuild of everything
+make rebuild-client     # force rebuild lobby executable only
+make run-client         # run the lobby
 make run-tests          # run all tests across modules
 ```
 
