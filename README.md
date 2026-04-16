@@ -16,10 +16,10 @@ Development period: January 2026 – April 2026
 
 Create several small independent mini-games in C using **raylib**.  
 Later, connect them inside one program through a common **lobby** (a simple platformer-style menu world).  
-Players walk to a door/zone -> the corresponding mini-game starts in the same window (no new executable).
+Players walk to a zone -> the corresponding mini-game starts in the same window (no new executable).
 
-- Single-player mode (for now)
-- Multiplayer mode (planned later)
+- Single-player mode
+- Multiplayer mode 
 
 ## Project Workflow
 
@@ -133,6 +133,6 @@ make docs
 ## Credits
 
 **Created: December 16, 2025**  
-**Last updated: March 17, 2026**  
+**Last updated: April 16, 2026**  
 **Authors:**
 - [Fshimi Hawlk](https://github.com/Fshimi-Hawlk)
