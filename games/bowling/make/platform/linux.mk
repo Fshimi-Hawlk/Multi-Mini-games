@@ -10,7 +10,9 @@ BASE_CFLAGS := \
 # Linker base
 BASE_LDFLAGS := \
 	-L$(RAYLIB_LIB_DIR) \
+	-L../../firstparty/build/lib \
 	-l:libraylib.a \
+	-lfirstparty \
 	-lGL \
 	-lm \
 	-lpthread \

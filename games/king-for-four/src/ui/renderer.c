@@ -48,9 +48,12 @@ GameAssets_St kingForFour_loadAssets(void) {
     assets.cardSheet = LoadTexture( TEXTURES_PATH "playingCards.png");
     assets.cardBack = LoadTexture( TEXTURES_PATH "cardBack_blue5.png");
     
+    // On initialise la police (par défaut pour l'instant)
+    assets.gameFont = GetFontDefault();
+
     // Vérifications de sécurité
-    if (!IsTextureValid(assets.cardSheet)) log_error("Texture playingCards.png introuvable à king-for-four/assets/textures/");
-    if (!IsTextureValid(assets.cardBack))  log_error("Texture cardBack_blue5.png introuvable à king-for-four/assets/textures/");
+    if (!IsTextureValid(assets.cardSheet)) log_error("Texture playingCards.png introuvable à %s", TEXTURES_PATH);
+    if (!IsTextureValid(assets.cardBack))  log_error("Texture cardBack_blue5.png introuvable à %s", TEXTURES_PATH);
 
     return assets;
 }

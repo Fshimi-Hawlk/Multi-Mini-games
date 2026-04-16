@@ -59,7 +59,7 @@ static GameClientInterface_St* miniGameInterfaces[__miniGameIdCount] = {
 };
 
 // Solo mode interfaces (for games that support local play with bots)
-static GameClientInterface_St* soloInterfaces[__miniGameIdCount] = {
+GameClientInterface_St* soloInterfaces[__miniGameIdCount] = {
     [MINI_GAME_ID_CHESS]          = &chess_clientInterface,  // Chess has built-in AI
     [MINI_GAME_ID_KING_FOR_FOUR]  = &kingForFour_soloClientInterface,
 };
@@ -288,7 +288,14 @@ void switchMinigame(u8 gameId) {
         }
 
         currentMiniGameID = (MiniGameId_Et) gameId;
-        currentMiniGame = miniGameInterfaces[currentMiniGameID];
+        
+        // Use solo interface if available and not connected to a server
+        if (networkSocket < 0 && soloInterfaces[currentMiniGameID] != NULL) {
+            currentMiniGame = soloInterfaces[currentMiniGameID];
+        } else {
+            currentMiniGame = miniGameInterfaces[currentMiniGameID];
+        }
+
         if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
 
         // Ensure UI state is cleared when switching
@@ -358,9 +365,9 @@ int main(void) {
         }
 
         BeginDrawing(); {
-            // Mini-games in GAME_STATE_INGAME draw their own frame (ClearBackground included).
-            // Clearing here would erase what they just drew.
-            if (lobby_game.currentState != GAME_STATE_INGAME || !currentMiniGame) {
+            // Only clear background if we are in the lobby itself.
+            // Mini-games manage their own background clearing.
+            if (currentMiniGameID == MINI_GAME_ID_LOBBY || !currentMiniGame) {
                 ClearBackground((Color){25, 84, 157, 255}); // sky top colour
             }
 
@@ -422,18 +429,10 @@ int main(void) {
                             // Si le jeu a une interface réseau ET qu'on est connecté → multi
                             // Sinon → solo (utilise l'interface solo si disponible)
                             bool hasMulti = miniGameInterfaces[triggerID] != NULL;
-                            bool isConnected = networkSocket >= 0;
-                            bool hasSolo = (soloInterfaces[triggerID] != NULL);
+                            bool isConnected = lobby_game.clientId != -1;
                             
                             if (hasMulti && isConnected && triggerID != MINI_GAME_ID_EDITOR) {
                                 lobby_openRoomSelector(triggerID);  // multi
-                            } else if (hasSolo) {
-                                // Use solo interface with bots
-                                currentMiniGame = soloInterfaces[triggerID];
-                                if (currentMiniGame && currentMiniGame->init) currentMiniGame->init();
-                                currentMiniGameID = triggerID;
-                                lobby_game.currentState = GAME_STATE_INGAME;
-                                lastGameZoneIndex = triggerID;
                             } else {
                                 lastGameZoneIndex = triggerID;
                                 switchMinigame(triggerID);          // solo

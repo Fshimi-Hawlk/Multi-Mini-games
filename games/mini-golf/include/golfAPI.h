@@ -48,15 +48,35 @@ Error_Et golf_initGame__full(GolfGame_St** game, GolfConfigs_St configs);
 
 /**
     @brief Runs one complete frame: input → logic → rendering.
+    @deprecated Use golf_gameUpdate and golf_gameDraw separately for lobby integration.
 
     @param[in,out] game  Valid game instance handle
 
     @return OK on success
     @return ERROR_NULL_POINTER if game is NULL
-
-    @note Sets base.running = false when the player exits the scorecard (ESC/SPACE).
 */
 Error_Et golf_gameLoop(GolfGame_St* const game);
+
+/**
+    @brief Updates the game logic.
+
+    @param[in,out] game  Valid game instance handle
+    @param[in]     dt    Delta time
+
+    @return OK on success
+    @return ERROR_NULL_POINTER if game is NULL
+*/
+Error_Et golf_gameUpdate(GolfGame_St* const game, float dt);
+
+/**
+    @brief Draws the game scene.
+
+    @param[in,out] game  Valid game instance handle
+
+    @return OK on success
+    @return ERROR_NULL_POINTER if game is NULL
+*/
+Error_Et golf_gameDraw(GolfGame_St* const game);
 
 /**
     @brief Frees all resources and releases the handle.

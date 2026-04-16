@@ -1527,24 +1527,19 @@ Error_Et bowling_initGame__full(BowlingGame_St** game, BowlingConfigs_St configs
     @param[in,out] game Bowling game state
     @return Error_Et status
 */
-Error_Et bowling_gameLoop(BowlingGame_St* const game) {
-    if (!game) { log_error("NULL game in gameLoop"); return ERROR_NULL_POINTER; }
-    if (!game->base.running) return OK;
+void bowling_update(BowlingGame_St* game, float dt) {
+    if (!game || !game->base.running) return;
 
-    float dt = GetFrameTime();
     game->timeAccum += dt;
 
     // Update params menu (settings button clicks)
     paramsMenu_update(&bowlingParamsMenu);
 
-    //  Title screen 
+    // Title screen 
     if (game->titleScreen.showTitle) {
-        if (IsKeyPressed(KEY_ESCAPE)) { game->base.running = false; return OK; }
+        if (IsKeyPressed(KEY_ESCAPE)) { game->base.running = false; return; }
         bowling_handleTitleScreenInput(game);
-        BeginDrawing();
-            bowling_drawTitleScreen(game);
-        EndDrawing();
-        return OK;
+        return;
     }
 
     // Update audience reaction
@@ -1558,13 +1553,7 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
     if (game->endScreen.showEndScreen) {
         game->resultsRevealTimer += dt;
         bowling_updateConfetti(game, dt);
-
-        BeginDrawing();
-            ClearBackground((Color){40,30,20,255});
-            bowling_drawEndScreen(game);
-            bowling_drawConfetti(game);
-        EndDrawing();
-        return OK;
+        return;
     }
 
     bowling_handleInput(game);
@@ -1585,8 +1574,6 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
             game->isAiming = false;
             float angle    = game->aimAngle * DEG2RAD;
             Vector3 dir    = Vector3Normalize((Vector3){-sinf(angle), 0, -cosf(angle)});
-            // Vitesse officielle : amateur 20-25 km/h, pro 25-35 km/h
-            // = 5.5 à 9.7 m/s. On offre 4 à 14 m/s pour couvrir tous niveaux.
             float launchPower = game->power * 10.0f + 4.0f;
             physics_launchBall(&game->ball, dir, launchPower, game->spin);
         }
@@ -1601,7 +1588,7 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
 
         float speed = Vector3Length(game->ball.velocity);
 
-        // Back wall: balle arrêtée → fin du lancer immédiate
+        // Back wall
         if (game->ball.position.z <= BOWLING_WALL_Z + game->ball.radius) {
             game->ball.position.z = BOWLING_WALL_Z + game->ball.radius;
             game->ball.velocity   = (Vector3){0, 0, 0};
@@ -1630,7 +1617,6 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
         bool needs3rd = is10th && (f->isStrike || f->isSpare) && f->numRolls < 3;
 
         if (!game->ball.isRolling && !game->waitingForReset) {
-            // Launch ball with Enter or Space
             float angle    = game->aimAngle * DEG2RAD;
             Vector3 dir    = Vector3Normalize((Vector3){-sinf(angle), 0, -cosf(angle)});
             float launchPower = game->power * 10.0f + 4.0f;
@@ -1643,37 +1629,61 @@ Error_Et bowling_gameLoop(BowlingGame_St* const game) {
         }
     }
     if (IsKeyPressed(KEY_ESCAPE)) game->base.running = false;
+}
 
-    //  Render 
-    BeginDrawing();
-        ClearBackground((Color){40,30,20,255});
+void bowling_draw(BowlingGame_St* game) {
+    if (!game || !game->base.running) return;
 
-        BeginMode3D(game->cameraState.camera);
-            bowling_drawEnvironment(game);
-            bowling_drawLane(game);
-            bowling_drawBallShadow(game);
-            bowling_drawPinShadows(game);
-            bowling_drawPins(game);
-            bowling_drawBall(game);
-            bowling_drawAimGuide(game);
-            bowling_drawParticles(game);
-        EndMode3D();
+    if (game->titleScreen.showTitle) {
+        bowling_drawTitleScreen(game);
+        return;
+    }
 
-        bowling_drawFullScoreboard(game);
-        bowling_drawPowerMeter(game);
-        bowling_drawSpinMeter(game);
-        bowling_drawStatsPanel(game);
-        bowling_drawControls(game);
-        bowling_drawScoreAnim(game);
-        bowling_drawConfetti(game);
+    ClearBackground((Color){40,30,20,255});
+
+    if (game->endScreen.showEndScreen) {
         bowling_drawEndScreen(game);
+        bowling_drawConfetti(game);
+        return;
+    }
 
-        // Draw params menu (settings button)
-        paramsMenu_draw(&bowlingParamsMenu);
+    BeginMode3D(game->cameraState.camera);
+        bowling_drawEnvironment(game);
+        bowling_drawLane(game);
+        bowling_drawBallShadow(game);
+        bowling_drawPinShadows(game);
+        bowling_drawPins(game);
+        bowling_drawBall(game);
+        bowling_drawAimGuide(game);
+        bowling_drawParticles(game);
+    EndMode3D();
 
-        if (game->waitingForReset && !game->endScreen.showEndScreen)
-            DrawText(TextFormat("Reset in %.1f...", game->resetTimer),
-                     SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, (Color){255,200,50,255});
+    bowling_drawFullScoreboard(game);
+    bowling_drawPowerMeter(game);
+    bowling_drawSpinMeter(game);
+    bowling_drawStatsPanel(game);
+    bowling_drawControls(game);
+    bowling_drawScoreAnim(game);
+    bowling_drawConfetti(game);
+    bowling_drawEndScreen(game);
+
+    // Draw params menu (settings button)
+    paramsMenu_draw(&bowlingParamsMenu);
+
+    if (game->waitingForReset && !game->endScreen.showEndScreen)
+        DrawText(TextFormat("Reset in %.1f...", game->resetTimer),
+                 SCREEN_WIDTH/2 - 80, SCREEN_HEIGHT/2, 20, (Color){255,200,50,255});
+}
+
+Error_Et bowling_gameLoop(BowlingGame_St* const game) {
+    if (!game) { log_error("NULL game in gameLoop"); return ERROR_NULL_POINTER; }
+    if (!game->base.running) return OK;
+
+    float dt = GetFrameTime();
+    bowling_update(game, dt);
+
+    BeginDrawing();
+        bowling_draw(game);
     EndDrawing();
 
     return OK;

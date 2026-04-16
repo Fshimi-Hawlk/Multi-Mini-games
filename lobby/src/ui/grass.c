@@ -25,10 +25,10 @@
 #include "rlgl.h"
 
 void lobby_updateGrass(const Player_St* const player, const float dt, const float time, const Camera2D camera) {
-    const float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
-    const float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
-    const float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
-    const float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
+    const float viewL = camera.target.x - (GetScreenWidth() / (2.0f * camera.zoom)) - 100.0f;
+    const float viewR = camera.target.x + (GetScreenWidth() / (2.0f * camera.zoom)) + 100.0f;
+    const float viewT = camera.target.y - (GetScreenHeight() / (2.0f * camera.zoom)) - 100.0f;
+    const float viewB = camera.target.y + (GetScreenHeight() / (2.0f * camera.zoom)) + 100.0f;
 
     for (int i = 0; i < grassCount; ++i) {
         GrassBlade_St* b = &grassBlades[i];
@@ -76,10 +76,10 @@ void lobby_updateGrass(const Player_St* const player, const float dt, const floa
 }
 
 void lobby_drawGrass(const Camera2D camera) {
-    const float viewL = camera.target.x - (WINDOW_WIDTH / 2.0f) - 100.0f;
-    const float viewR = camera.target.x + (WINDOW_WIDTH / 2.0f) + 100.0f;
-    const float viewT = camera.target.y - (WINDOW_HEIGHT / 2.0f) - 100.0f;
-    const float viewB = camera.target.y + (WINDOW_HEIGHT / 2.0f) + 100.0f;
+    const float viewL = camera.target.x - (GetScreenWidth() / (2.0f * camera.zoom)) - 100.0f;
+    const float viewR = camera.target.x + (GetScreenWidth() / (2.0f * camera.zoom)) + 100.0f;
+    const float viewT = camera.target.y - (GetScreenHeight() / (2.0f * camera.zoom)) - 100.0f;
+    const float viewB = camera.target.y + (GetScreenHeight() / (2.0f * camera.zoom)) + 100.0f;
 
     rlBegin(RL_LINES);
 

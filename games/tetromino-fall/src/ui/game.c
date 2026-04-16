@@ -22,10 +22,15 @@ void tetrominoFall_drawInformations(int score, int level, int lineNbTotal, int h
 
     int sw = GetScreenWidth();
     int sh = GetScreenHeight();
-    DrawText(scoreText, sw / 40, sh / 2, 20, WHITE);
-    DrawText(levelText, sw / 40, sh / 2 + 30, 20, WHITE);
-    DrawText(linesText, sw / 40, sh / 2 + 60, 20, WHITE);
-    DrawText(highScoreText, sw / 40, sh / 2 + 120, 20, WHITE);
+    int offsetX = (sw - (CELL_SIZE * BOARD_WIDTH)) / 2;
+    int offsetY = (sh - (CELL_SIZE * BOARD_HEIGHT)) / 2;
+
+    DrawText(scoreText, offsetX - 150, offsetY + 50, 20, WHITE);
+    DrawText(levelText, offsetX - 150, offsetY + 80, 20, WHITE);
+    DrawText(linesText, offsetX - 150, offsetY + 110, 20, WHITE);
+    
+    DrawText("HIGH SCORE:", offsetX - 150, offsetY + 170, 15, GOLD);
+    DrawText(highScoreText, offsetX - 150, offsetY + 190, 20, GOLD);
 }
 
 void tetrominoFall_drawPreview(Board_t board, BoardShape_St boardShape) {

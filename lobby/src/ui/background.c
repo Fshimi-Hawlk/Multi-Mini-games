@@ -21,12 +21,12 @@ void lobby_drawSceneBackground(f32 time, Vector2 playerPos) {
     Color skyMid = (Color){ 125, 195, 230, 255 };
     Color skyLow = (Color){ 210, 240, 255, 255 };
 
-    f32 skyLeft = (playerPos.x - SKY_WIDTH / 2.0f) + pX;
+    f32 skyLeft = (playerPos.x - SKY_WIDTH) + pX;
 
     DrawRectangleGradientV(
         skyLeft,
         -SKY_HEIGHT + pY,
-        SKY_WIDTH,
+        SKY_WIDTH * 2.0f,
         SKY_HEIGHT,
         skyTop,
         skyMid
@@ -35,8 +35,8 @@ void lobby_drawSceneBackground(f32 time, Vector2 playerPos) {
     DrawRectangleGradientV(
         skyLeft,
         0 + pY,
-        SKY_WIDTH,
-        GROUND_Y + 1000,
+        SKY_WIDTH * 2.0f,
+        GROUND_Y + 5000.0f,
         skyMid,
         skyLow
     );

@@ -98,6 +98,8 @@ void lobby_init(void) {
         },
         .zoom  = 1.0f,
     };
+
+    lobby_game.clientId = -1; // -1 means not connected to a server instance
     
     lobby_game.playerVisuals.defaultTextureRect = (Rectangle) {
         .x = 20, .y = 60, .width = 50, .height = 50

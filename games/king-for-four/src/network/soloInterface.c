@@ -29,6 +29,29 @@ static Card_St lastSeen_topCard = {CARD_BLACK, ZERO};
 
 static bool isChoosingColor = false;
 static int pendingCardIndex = -1;
+static bool showInfo_window = false;
+
+static void applySoloCardEffect(Card_St card) {
+    if (card.value == SKIP) {
+        soloState.currentPlayer = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
+        turn_overlay_timer = 2.0f; // For visual feedback
+    } else if (card.value == REVERSE) {
+        if (soloState.numPlayers == 2) {
+            soloState.currentPlayer = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
+        } else {
+            soloState.gameDirection *= -1;
+        }
+    } else if (card.value == PLUS_TWO) {
+        int victim = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
+        kingForFour_playerDrawCard(&soloState, victim);
+        kingForFour_playerDrawCard(&soloState, victim);
+        soloState.currentPlayer = victim; // Skip victim's turn
+    } else if (card.value == PLUS_FOUR) {
+        int victim = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
+        for (int i = 0; i < 4; i++) kingForFour_playerDrawCard(&soloState, victim);
+        soloState.currentPlayer = victim; // Skip victim's turn
+    }
+}
 
 static void initPlayers(void) {
     for (int i = 0; i < selectedPlayers; i++) {
@@ -86,32 +109,38 @@ static void handleBotTurn(int playerId, float dt) {
     if (cardIndex >= 0) {
         Card_St card = soloState.players[playerId].hand.cards[cardIndex];
         if (card.color == CARD_BLACK) {
-            int colors[4] = {0, 1, 2, 3};
-            int chosen = colors[GetRandomValue(0, 3)];
+            // Simple bot color choice: pick color they have most of
+            int counts[4] = {0,0,0,0};
+            for(int i=0; i<soloState.players[playerId].hand.size; i++) {
+                if (soloState.players[playerId].hand.cards[i].color != CARD_BLACK)
+                    counts[soloState.players[playerId].hand.cards[i].color]++;
+            }
+            int chosen = 0;
+            for(int i=1; i<4; i++) if (counts[i] > counts[chosen]) chosen = i;
             soloState.activeColor = chosen;
         }
         kingForFour_tryPlayCard(&soloState, playerId, cardIndex);
         lastPlayer_who_moved = playerId;
         last_action_type = 0;
+        
+        applySoloCardEffect(card);
     } else {
         kingForFour_playerDrawCard(&soloState, playerId);
+        lastPlayer_who_moved = playerId;
+        last_action_type = 1;
+        
+        // Bot tries to play the drawn card
         int newCardIndex = soloState.players[playerId].hand.size - 1;
         if (newCardIndex >= 0) {
             Card_St newCard = soloState.players[playerId].hand.cards[newCardIndex];
             Card_St top = soloState.discardPile.cards[soloState.discardPile.size - 1];
             if (kingForFour_isMoveValid(soloState.activeColor, newCard, top)) {
-                if (newCard.color == CARD_BLACK) {
-                    int colors[4] = {0, 1, 2, 3};
-                    int chosen = colors[GetRandomValue(0, 3)];
-                    soloState.activeColor = chosen;
-                }
+                if (newCard.color == CARD_BLACK) soloState.activeColor = GetRandomValue(0, 3);
                 kingForFour_tryPlayCard(&soloState, playerId, newCardIndex);
-                lastPlayer_who_moved = playerId;
                 last_action_type = 0;
+                applySoloCardEffect(newCard);
             }
         }
-        lastPlayer_who_moved = playerId;
-        last_action_type = 1;
     }
     
     last_move_timer = 1.5f;
@@ -121,11 +150,8 @@ static void handleBotTurn(int playerId, float dt) {
         lastSeen_topCard = top;
     }
     
-    // Advance to next player
+    // Normal advance
     soloState.currentPlayer = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
-    
-    // Skip logic for SKIP and REVERSE cards would be handled here
-    // For now, just advance
     
     for (int i = 0; i < soloState.numPlayers; i++) {
         if (soloState.players[i].hand.size == 0) {
@@ -139,6 +165,16 @@ static void handleBotTurn(int playerId, float dt) {
 void kingForFour_soloUpdate(float dt) {
     if (!assets_loaded) return;
     
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        Vector2 m = GetMousePosition();
+        Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+        if (CheckCollisionPointRec(m, infoIconRect)) {
+            showInfo_window = !showInfo_window;
+        } else if (showInfo_window) {
+            showInfo_window = false;
+        }
+    }
+
     // Menu state - player selection
     if (gameStatus == 0) {
         if (IsKeyPressed(KEY_UP) && selectedPlayers < 4) {
@@ -183,11 +219,15 @@ void kingForFour_soloUpdate(float dt) {
                     if (CheckCollisionPointRec(m, colors[i])) {
                         soloState.activeColor = i;
                         if (pendingCardIndex >= 0) {
+                            Card_St card = soloState.players[solo_localPlayerId].hand.cards[pendingCardIndex];
                             kingForFour_tryPlayCard(&soloState, solo_localPlayerId, pendingCardIndex);
                             lastPlayer_who_moved = solo_localPlayerId;
                             last_action_type = 0;
                             last_move_timer = 1.5f;
-                            // Advance to next player
+                            
+                            applySoloCardEffect(card);
+                            
+                            // Advance
                             soloState.currentPlayer = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
                         }
                         isChoosingColor = false;
@@ -213,8 +253,12 @@ void kingForFour_soloUpdate(float dt) {
                             cardPop_timer = 0.5f;
                             lastSeen_topCard = top;
                         }
-                        // Advance to next player
+                        
+                        applySoloCardEffect(card);
+                        
+                        // Advance
                         soloState.currentPlayer = (soloState.currentPlayer + soloState.gameDirection + soloState.numPlayers) % soloState.numPlayers;
+                        
                         for (int i = 0; i < soloState.numPlayers; i++) {
                             if (soloState.players[i].hand.size == 0) {
                                 gameStatus = 0;
@@ -243,13 +287,16 @@ void kingForFour_soloUpdate(float dt) {
     if (soloState.currentPlayer != solo_localPlayerId) {
         turn_overlay_timer = 0.0f;
     } else {
-        turn_overlay_timer = 2.0f;
+        if (turn_overlay_timer <= 0) turn_overlay_timer = 2.0f;
     }
 }
 
 void kingForFour_soloDraw(void) {
     if (!assets_loaded) return;
     
+    // FIX: Clear background since lobby doesn't do it for us anymore to prevent flashing
+    ClearBackground((Color){20, 40, 20, 255});
+
     // Draw menu when not playing
     if (gameStatus == 0) {
         int sw = GetScreenWidth();
@@ -323,6 +370,29 @@ void kingForFour_soloDraw(void) {
         }
     }
     
+    // Info Icon
+    Rectangle infoIconRect = { (float)GetScreenWidth() - 40, 40, 30, 30 };
+    bool hoverInfo = CheckCollisionPointRec(GetMousePosition(), infoIconRect);
+    DrawCircleV((Vector2){infoIconRect.x + 15, infoIconRect.y + 15}, 15, hoverInfo ? SKYBLUE : BLUE);
+    DrawText("i", (int)infoIconRect.x + 11, (int)infoIconRect.y + 5, 25, WHITE);
+
+    if (showInfo_window) {
+        int sw = GetScreenWidth(); int sh = GetScreenHeight();
+        Rectangle win = { sw/2.0f - 250, sh/2.0f - 200, 500, 400 };
+        DrawRectangleRec(win, Fade(DARKGRAY, 0.95f));
+        DrawRectangleLinesEx(win, 2, GOLD);
+        DrawText("POUVOIRS DES CARTES", (int)win.x + 120, (int)win.y + 20, 25, GOLD);
+        
+        int ty = (int)win.y + 70;
+        DrawText("- VALET (Jack) : Passe le tour du suivant", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- DAME (Queen) : Inverse le sens de jeu", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- 10 : Le suivant pioche 2 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- ROI (King) : Change la couleur demandée", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- ROI NOIR : Le suivant pioche 4 cartes !", (int)win.x + 30, ty, 18, WHITE); ty += 60;
+        
+        DrawText("Cliquez n'importe où pour fermer", (int)win.x + 100, (int)win.y + 360, 18, GRAY);
+    }
+
     DrawText("ESC pour quitter", GetScreenWidth() - 150, 10, 15, GRAY);
 }
 

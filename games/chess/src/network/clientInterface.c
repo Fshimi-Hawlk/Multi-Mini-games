@@ -145,6 +145,13 @@ void chess_onData(s32 player_id, u8 action, const void* data, u16 len) {
     @param[in] dt Delta time since the last update
 */
 void chess_update(float dt) {
+    // Solo mode support: if not connected, assign local ID and color
+    if (my_id_internal == -1 && networkSocket < 0) {
+        my_id_internal = 0;
+        my_color = 0; // Local player plays White
+        printf("[CHESS] Solo mode: Assigned local ID 0, color White\n");
+    }
+
     if (my_id_internal == -1) {
         // Send join request if not already done
         static f32 join_timer = 0;

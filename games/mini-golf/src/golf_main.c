@@ -246,15 +246,14 @@ void Game_Update(GolfGame *g, float dt) {
     @param[in] g Golf game state.
 */
 void Game_Draw(GolfGame *g) {
-    BeginDrawing();
     ClearBackground((Color){20,60,20,255});
 
-    if (g->state == STATE_MENU)      { UI_DrawMenu(g);      EndDrawing(); return; }
-    if (g->state == STATE_SCORECARD) { UI_DrawScorecard(g); EndDrawing(); return; }
+    if (g->state == STATE_MENU)      { UI_DrawMenu(g);      return; }
+    if (g->state == STATE_SCORECARD) { UI_DrawScorecard(g); return; }
 
     GCam_BeginMode3D(&g->gcam);
         DrawPlane(
-            (Vector3){0, -0.5f, g->holes[g->current_hole].distance_m * SCALE / 2.0f},
+            (Vector3){0, -1.5f, g->holes[g->current_hole].distance_m * SCALE / 2.0f},
             (Vector2){100, g->holes[g->current_hole].distance_m * SCALE + 40},
             (Color){30,80,30,255}
         );
@@ -274,8 +273,6 @@ void Game_Draw(GolfGame *g) {
     if (g->state == STATE_HOLE_INTRO)  UI_DrawHoleIntro(g);
     if (g->state == STATE_HOLE_RESULT) UI_DrawHoleResult(g);
     if (g->state == STATE_PAUSED)      UI_DrawPaused(g);
-
-    EndDrawing();
 }
 
 /* ─── Cleanup ────────────────────────────────────────────────────────────── */

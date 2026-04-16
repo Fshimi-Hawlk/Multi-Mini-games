@@ -46,8 +46,8 @@
 
 Rectangle lobby_getPlayerCollisionBox(const Player_St* const player) {
     return (Rectangle) {
-        player->position.x, //  - player->radius
-        player->position.y, //  - player->radius
+        player->position.x - player->radius,
+        player->position.y - player->radius,
         player->radius * 2,
         player->radius * 2
     };

@@ -260,6 +260,10 @@ void kingForFour_update(float dt) {
 */
 void kingForFour_draw(void) {
     if (!assets_loaded) return;
+    
+    // FIX: Clear background since lobby doesn't do it for us anymore to prevent flashing
+    ClearBackground((Color){20, 40, 20, 255});
+
     if (gameStatus == 0) {
         DrawText("KING FOR FOUR - SALLE D'ATTENTE", 100, 100, 40, GOLD);
         if (myInternalId != -1) {
@@ -331,11 +335,11 @@ void kingForFour_draw(void) {
         DrawText("POUVOIRS DES CARTES", (int)win.x + 120, (int)win.y + 20, 25, GOLD);
         
         int ty = (int)win.y + 70;
-        DrawText("- SKIP (Symbole barré) : Passe le tour du suivant", (int)win.x + 30, ty, 18, WHITE); ty += 40;
-        DrawText("- REVERSE (Flèches) : Inverse le sens de jeu", (int)win.x + 30, ty, 18, WHITE); ty += 40;
-        DrawText("- +2 : Le suivant pioche 2 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 40;
-        DrawText("- JOKER (Couleur changeante) : Change la couleur", (int)win.x + 30, ty, 18, WHITE); ty += 40;
-        DrawText("- +4 : Le suivant pioche 4 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 60;
+        DrawText("- VALET (Jack) : Passe le tour du suivant", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- DAME (Queen) : Inverse le sens de jeu", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- 10 : Le suivant pioche 2 cartes et passe son tour", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- ROI (King) : Change la couleur demandée", (int)win.x + 30, ty, 18, WHITE); ty += 40;
+        DrawText("- ROI NOIR : Le suivant pioche 4 cartes !", (int)win.x + 30, ty, 18, WHITE); ty += 60;
         
         DrawText("Cliquez n'importe où pour fermer", (int)win.x + 100, (int)win.y + 360, 18, GRAY);
     }

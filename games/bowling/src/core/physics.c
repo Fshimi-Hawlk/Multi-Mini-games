@@ -305,16 +305,13 @@ void physics_updateBall(Ball_St* ball, float deltaTime, float laneWidth,
     Vector3 friction = Vector3Scale(ball->velocity, -0.4f);
     ball->velocity   = Vector3Add(ball->velocity, Vector3Scale(friction, deltaTime));
 
-    // Invisible barrier along gutter edges - always active (prevents ball leaving lane)
+    // Invisible barrier along gutter edges - active only if bumpers enabled
     float edge = LANE_EDGE;
     if (ball->position.x < -edge || ball->position.x > edge) {
-        // Only apply bumper bounce if bumpers enabled, otherwise just block
         if (bumpers) {
             ball->velocity.x *= -0.55f;
-        } else {
-            ball->velocity.x *= -0.3f; // Simple bounce back
+            ball->position.x = (ball->position.x < 0) ? -edge + ball->radius : edge - ball->radius;
         }
-        ball->position.x = (ball->position.x < 0) ? -edge + ball->radius : edge - ball->radius;
     }
 
     ball->position = Vector3Add(ball->position, Vector3Scale(ball->velocity, deltaTime));

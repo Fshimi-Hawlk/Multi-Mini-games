@@ -127,7 +127,19 @@ bool lobby_updateRoomSelector(void) {
 
     // New Room button (only when selecting a specific mini-game)
     if (lobby_currentGameId != -1) {
-        Rectangle btnNew = { (float)GetScreenWidth()/2 - 100, (float)GetScreenHeight()/2 + 150, 200, 40 };
+        // Solo button (if supported)
+        extern GameClientInterface_St* soloInterfaces[];
+        if (soloInterfaces[lobby_currentGameId] != NULL) {
+            Rectangle btnSolo = { (float)GetScreenWidth()/2 - 210, (float)GetScreenHeight()/2 + 150, 200, 40 };
+            if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnSolo)) {
+                extern void switchMinigame(u8 gameId);
+                switchMinigame((u8)lobby_currentGameId);
+                lobby_closeRoomSelector();
+                return true;
+            }
+        }
+
+        Rectangle btnNew = { (float)GetScreenWidth()/2 + 10, (float)GetScreenHeight()/2 + 150, 200, 40 };
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), btnNew)) {
             RUDPHeader_St h;
             rudpGenerateHeader(&serverConnection, ACTION_CODE_LOBBY_SWITCH_GAME, &h);
@@ -244,18 +256,48 @@ void lobby_drawRoomSelector(void) {
 
     // Create new room button (only for specific mini-games)
     if (lobby_currentGameId != -1) {
-        Rectangle btnNew = { panel.x + 100, panel.y + 360, 200, 40 };
-        bool hoverNew = CheckCollisionPointRec(GetMousePosition(), btnNew);
+        extern GameClientInterface_St* soloInterfaces[];
+        bool hasSolo = soloInterfaces[lobby_currentGameId] != NULL;
 
-        TextButton_St btn = {
-            .bounds    = btnNew,
-            .state     = hoverNew ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
-            .baseColor = hoverNew ? LIME : GREEN,
-            .roundness = 0.2f,
-            .text      = "CREATE ROOM (+)",
-            .textColor = WHITE
-        };
-        textButtonDraw(&btn, lobby_fonts[FONT24], 18.0f);
+        if (hasSolo) {
+            // Solo button
+            Rectangle btnSolo = { panel.x - 10, panel.y + 360, 200, 40 };
+            bool hoverSolo = CheckCollisionPointRec(GetMousePosition(), btnSolo);
+            TextButton_St btnS = {
+                .bounds    = btnSolo,
+                .state     = hoverSolo ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+                .baseColor = hoverSolo ? SKYBLUE : BLUE,
+                .roundness = 0.2f,
+                .text      = "PLAY SOLO",
+                .textColor = WHITE
+            };
+            textButtonDraw(&btnS, lobby_fonts[FONT24], 18.0f);
+
+            // New Room button (right side)
+            Rectangle btnNew = { panel.x + 210, panel.y + 360, 200, 40 };
+            bool hoverNew = CheckCollisionPointRec(GetMousePosition(), btnNew);
+            TextButton_St btnN = {
+                .bounds    = btnNew,
+                .state     = hoverNew ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+                .baseColor = hoverNew ? LIME : GREEN,
+                .roundness = 0.2f,
+                .text      = "CREATE ROOM (+)",
+                .textColor = WHITE
+            };
+            textButtonDraw(&btnN, lobby_fonts[FONT24], 18.0f);
+        } else {
+            Rectangle btnNew = { panel.x + 100, panel.y + 360, 200, 40 };
+            bool hoverNew = CheckCollisionPointRec(GetMousePosition(), btnNew);
+            TextButton_St btnN = {
+                .bounds    = btnNew,
+                .state     = hoverNew ? WIDGET_STATE_HOVER : WIDGET_STATE_NORMAL,
+                .baseColor = hoverNew ? LIME : GREEN,
+                .roundness = 0.2f,
+                .text      = "CREATE ROOM (+)",
+                .textColor = WHITE
+            };
+            textButtonDraw(&btnN, lobby_fonts[FONT24], 18.0f);
+        }
     }
     
     if (lobby_currentGameId != -1)

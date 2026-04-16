@@ -17,9 +17,9 @@ static void initGrass(void) {
     grassCount = 0;
 
     float stepX = 3.0f;
-    float stepY = 5.0f;
+    float stepY = 10.0f; // Increased stepY slightly for performance with more depth
 
-    for (float y = floor.y - 20; y < floor.y + 500.0f; y += stepY) {
+    for (float y = floor.y - 20; y < floor.y + 1000.0f; y += stepY) {
         for (float x = -X_LIMIT - 600; x < X_LIMIT + 600; x += stepX) {
             if (grassCount >= MAX_GRASS_BLADES) break;
 
@@ -56,7 +56,7 @@ static void initGrass(void) {
 */
 static LobbyTerrain_St __fallbackTerrainContent[] =  {
     // --- SOL ---
-    { .rect = {-X_LIMIT - 600, GROUND_Y, (X_LIMIT + 600) * 2, 1000}, .kind = TERRAIN_KIND_GRASS, .color = {45, 35, 25, 255}},
+    { .rect = {-X_LIMIT - 600, GROUND_Y, (X_LIMIT + 600) * 2, 1000}, .kind = TERRAIN_KIND_GRASS, .color = {210, 240, 255, 255}},
 
     // --- BAS DU TRONC (Fini l'escalier droit, on zigzag) ---
     { .rect = { -100, GROUND_Y -  100, 200, PLAT_H}, .kind = TERRAIN_KIND_WOOD_PLANK}, // Centre

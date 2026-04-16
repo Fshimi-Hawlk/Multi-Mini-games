@@ -69,18 +69,10 @@ Error_Et golf_initGame__full(GolfGame_St **out, GolfConfigs_St configs) {
 }
 
 /**
-    @brief Runs one complete frame: input → logic → rendering.
-
-    @param[in,out] g  Valid game instance handle.
-    @return           OK on success, ERROR_NULL_POINTER if g is NULL.
+    @brief Updates the game logic.
 */
-Error_Et golf_gameLoop(GolfGame_St *const g) {
-    float dt;
-
+Error_Et golf_gameUpdate(GolfGame_St* const g, float dt) {
     if (!g) return ERROR_NULL_POINTER;
-
-    dt = GetFrameTime();
-    if (dt > 0.05f) dt = 0.05f;
 
     /* Scorecard visible: ESC ou SPACE → fin de partie, retour lobby */
     if (g->game.state == STATE_SCORECARD) {
@@ -92,7 +84,34 @@ Error_Et golf_gameLoop(GolfGame_St *const g) {
     }
 
     Game_Update(&g->game, dt);
+    return OK;
+}
+
+/**
+    @brief Draws the game scene.
+*/
+Error_Et golf_gameDraw(GolfGame_St* const g) {
+    if (!g) return ERROR_NULL_POINTER;
     Game_Draw(&g->game);
+    return OK;
+}
+
+/**
+    @brief Runs one complete frame: input → logic → rendering.
+*/
+Error_Et golf_gameLoop(GolfGame_St *const g) {
+    float dt;
+
+    if (!g) return ERROR_NULL_POINTER;
+
+    dt = GetFrameTime();
+    if (dt > 0.05f) dt = 0.05f;
+
+    golf_gameUpdate(g, dt);
+
+    BeginDrawing();
+    golf_gameDraw(g);
+    EndDrawing();
 
     return OK;
 }

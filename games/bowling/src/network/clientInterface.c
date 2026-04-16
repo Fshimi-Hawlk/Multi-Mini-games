@@ -8,25 +8,26 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
-#include "logger.h"
+#include <stdio.h>
 
 static BowlingGame_St* bowling_game = NULL;
 
 void bowling_lobbyInit(void) {
     if (bowling_initGame__full(&bowling_game, (BowlingConfigs_St){0}) != OK) {
-        log_error("[BOWLING] Failed to initialize game");
+        fprintf(stderr, "[BOWLING] Failed to initialize game\n");
     }
 }
 
 void bowling_lobbyUpdate(float dt) {
-    (void)dt;
-
     if (bowling_game) {
-        bowling_gameLoop(bowling_game);
+        bowling_update(bowling_game, dt);
     }
 }
 
 void bowling_lobbyDraw(void) {
+    if (bowling_game) {
+        bowling_draw(bowling_game);
+    }
 }
 
 void bowling_lobbyDestroy(void) {

@@ -24,7 +24,10 @@ int main(void) {
         float dt = GetFrameTime();
         if (dt > 0.05f) dt = 0.05f;
         Game_Update(&game, dt);
+        
+        BeginDrawing();
         Game_Draw(&game);
+        EndDrawing();
     }
 
     Game_Cleanup(&game);

@@ -9,8 +9,8 @@
 #include "ui/shape.h"
 
 void tetrominoFall_drawShape(BoardShape_St boardShape) {
-    int offsetX = (WINDOW_WIDTH - (CELL_SIZE * BOARD_WIDTH)) / 2;
-    int offsetY = (WINDOW_HEIGHT - (CELL_SIZE * BOARD_HEIGHT)) / 2;
+    int offsetX = (GetScreenWidth()  - (CELL_SIZE * BOARD_WIDTH))  / 2;
+    int offsetY = (GetScreenHeight() - (CELL_SIZE * BOARD_HEIGHT)) / 2;
     int x, y;
 
     for (int i = 0; i < 4; i++) {
@@ -26,19 +26,30 @@ void tetrominoFall_drawShape(BoardShape_St boardShape) {
 }
 
 void tetrominoFall_drawNextShape(BoardShape_St boardShape) {
-    int offsetX = WINDOW_WIDTH * (2.0 / 3);
-    int offsetY = WINDOW_HEIGHT * (1.0 / 3);
+    int sw = GetScreenWidth();
+    int sh = GetScreenHeight();
+    int boardOffsetX = (sw - (CELL_SIZE * BOARD_WIDTH)) / 2;
+    int boardOffsetY = (sh - (CELL_SIZE * BOARD_HEIGHT)) / 2;
+
+    int offsetX = boardOffsetX + (BOARD_WIDTH * CELL_SIZE) + 50;
+    int offsetY = boardOffsetY + 50;
     int x, y;
 
-    DrawText("Next shape:", offsetX + 60, offsetY - 60, 20, WHITE);
+    // Draw a box for the next shape
+    DrawRectangleLines(offsetX - 10, offsetY - 10, CELL_SIZE * 5, CELL_SIZE * 5, WHITE);
+    DrawText("NEXT", offsetX + 10, offsetY - 35, 20, GOLD);
 
     boardShape.position = (iVector2){0, 0};
 
-    for (int i = 0; i < 4; i++) {
-        x = boardShape.shape[i].x + boardShape.position.x;
-        y = boardShape.shape[i].y + boardShape.position.y;
+    // Center adjustment for better look in the box
+    int centerAdjX = (CELL_SIZE * 4 - 4 * CELL_SIZE) / 2 + 10;
+    int centerAdjY = 10;
 
-        DrawRectangle     (offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE - 2, CELL_SIZE - 2, boardShape.color);
-        DrawRectangleLines(offsetX + x * CELL_SIZE, offsetY + y * CELL_SIZE, CELL_SIZE, CELL_SIZE, BOARD_GRID_COLOR);
+    for (int i = 0; i < 4; i++) {
+        x = boardShape.shape[i].x;
+        y = boardShape.shape[i].y;
+
+        DrawRectangle     (offsetX + centerAdjX + x * CELL_SIZE, offsetY + centerAdjY + y * CELL_SIZE, CELL_SIZE - 2, CELL_SIZE - 2, boardShape.color);
+        DrawRectangleLines(offsetX + centerAdjX + x * CELL_SIZE, offsetY + centerAdjY + y * CELL_SIZE, CELL_SIZE, CELL_SIZE, BOARD_GRID_COLOR);
     }
 }

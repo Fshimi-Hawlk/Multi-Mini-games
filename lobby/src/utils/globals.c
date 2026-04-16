@@ -41,7 +41,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_CHESS] = {
         .hitbox = {
-            .x      = 651.67,
+            .x      = 682.50,
             .y      = -775.00,   // platform P13 top=-700; zone.y = -700 - 75
             .width  = 75,
             .height = 75
@@ -51,7 +51,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_DROP_FOUR]  = {
         .hitbox = {
-            .x      = -594.00,
+            .x      = -587.50,
             .y      = -755.00,   // platform P10 top=-680; zone.y = -680 - 75
             .width  = 75,
             .height = 75
@@ -61,7 +61,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_TETROMINO_FALL] = {
         .hitbox = {
-            .x      = -85.00,
+            .x      = -87.50,
             .y      = -275.00,   // platform P6 top=-200; zone.y = -200 - 75
             .width  = 75,
             .height = 75
@@ -72,7 +72,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_EDITOR] = {
         .hitbox = {
-            .x      = -161.67,
+            .x      = -157.50,
             .y      = -715.00,   // platform P12 top=-640; zone.y = -640 - 75
             .width  = 75,
             .height = 75
@@ -83,7 +83,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_SUIKA] = {
         .hitbox = {
-            .x      = 379.00,
+            .x      = 402.50,
             .y      = -1175.00,  // platform P17 top=-1100; zone.y = -1100 - 75
             .width  = 75,
             .height = 75
@@ -94,7 +94,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_BOWLING] = {
         .hitbox = {
-            .x      = -416.33,
+            .x      = -427.50,
             .y      = -925.00,   // platform P14 top=-850; zone.y = -850 - 75
             .width  = 75,
             .height = 75
@@ -105,7 +105,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_MINI_GOLF] = {
         .hitbox = {
-            .x      = -506.67,
+            .x      = -537.50,
             .y      = -225.00,   // platform P5 top=-150; zone.y = -150 - 75
             .width  = 75,
             .height = 75
@@ -116,7 +116,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_SNAKE] = {
         .hitbox = {
-            .x      = -60.00,
+            .x      = -37.50,
             .y      = -535.00,   // platform P9 top=-460; zone.y = -460 - 75
             .width  = 75,
             .height = 75
@@ -127,7 +127,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_POLY_BLAST] = {
         .hitbox = {
-            .x      = 311.67,
+            .x      = 312.50,
             .y      = -625.00,   // platform P11 top=-550; zone.y = -550 - 75
             .width  = 75,
             .height = 75
@@ -138,7 +138,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_DISC_REVERSAL]    = {
         .hitbox = {
-            .x      = -23.33,
+            .x      = -37.50,
             .y      = -1055.00,  // platform P16 top=-980; zone.y = -980 - 75
             .width  = 75,
             .height = 75
@@ -148,7 +148,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_KING_FOR_FOUR] = {
         .hitbox = {
-            .x      =  63.33,
+            .x      =  62.50,
             .y      = -75.00,    // platform P4 top=0; zone.y = 0 - 75
             .width  = 75,
             .height = 75
@@ -158,7 +158,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_TWIST_CUBE] = {
         .hitbox = {
-            .x      = -870.00,
+            .x      = -857.50,
             .y      = -515.00,   // platform P8 top=-440; zone.y = -440 - 75
             .width  = 75,
             .height = 75
@@ -168,7 +168,7 @@ GameInteractionZone_St gameZones[__miniGameIdCount] = {
 
     [MINI_GAME_ID_SOLO_CARDS] = {
         .hitbox = {
-            .x      =  218.33,
+            .x      =  242.50,
             .y      = -855.00,   // platform P15 top=-780; zone.y = -780 - 75
             .width  = 75,
             .height = 75

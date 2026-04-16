@@ -237,12 +237,17 @@ void lobby_updatePauseMenu(void) {
         if (CheckCollisionPointRec(m, btnSet))    { lobby_previousMenu = lobby_currentMenu; lobby_currentMenu = MENU_SETTINGS; }
         if (CheckCollisionPointRec(m, btnAbandon)) {
             extern LobbyGame_St lobby_game;
+            extern s32 networkSocket;
             if (lobby_game.currentState == GAME_STATE_INGAME) {
                 extern void switchMinigame(u8 game_id);
                 switchMinigame(MINI_GAME_ID_LOBBY);
                 lobby_currentMenu = MENU_NONE;
             } else if (lobby_game.currentState == GAME_STATE_GAMEPLAY || lobby_game.currentState == GAME_STATE_ROOM_LIST) {
-                lobby_game.currentState = GAME_STATE_CONNECTION;
+                if (networkSocket < 0) {
+                    lobby_game.currentState = GAME_STATE_GAMEPLAY;
+                } else {
+                    lobby_game.currentState = GAME_STATE_CONNECTION;
+                }
                 lobby_currentMenu = MENU_NONE;
             } else {
                 lobby_currentMenu = MENU_MAIN;

@@ -9,25 +9,26 @@
 
 #include "APIs/generalAPI.h"
 #include "networkInterface.h"
-#include "logger.h"
+#include <stdio.h>
 
 static GolfGame_St* golf_game = NULL;
 
 void golf_lobbyInit(void) {
     if (golf_initGame__full(&golf_game, (GolfConfigs_St){0}) != OK) {
-        log_error("[MINI-GOLF] Failed to initialize game");
+        fprintf(stderr, "[MINI-GOLF] Failed to initialize game\n");
     }
 }
 
 void golf_lobbyUpdate(float dt) {
-    (void)dt;
-
     if (golf_game) {
-        golf_gameLoop(golf_game);
+        golf_gameUpdate(golf_game, dt);
     }
 }
 
 void golf_lobbyDraw(void) {
+    if (golf_game) {
+        golf_gameDraw(golf_game);
+    }
 }
 
 void golf_lobbyDestroy(void) {
